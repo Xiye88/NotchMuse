@@ -60,6 +60,14 @@ final class MenuBarController: NSObject {
         }
     }
 
+    func reveal() {
+        setDisplay("MenuBarLyrics is running")
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1))
+            await pollSpotify()
+        }
+    }
+
     private func setupButton() {
         statusItem.length = 28
         statusItem.button?.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .medium)

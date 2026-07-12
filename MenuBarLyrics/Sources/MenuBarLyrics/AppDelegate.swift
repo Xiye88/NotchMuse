@@ -7,4 +7,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         controller = MenuBarController()
         controller?.start()
     }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        controller?.reveal()
+        return true
+    }
 }

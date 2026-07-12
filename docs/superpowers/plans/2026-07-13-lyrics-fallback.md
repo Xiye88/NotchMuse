@@ -26,22 +26,22 @@
 - Consumes: `SpotifyTrack`, `LyricLine`, `LyricParser.parse(_:)`
 - Produces: `NetEaseLyricsSource.syncedLyrics(for:) async throws -> [LyricLine]`
 
-- [ ] **Step 1: Write the failing self-test**
+- [x] **Step 1: Write the failing self-test**
 
 Add assertions that exact title/artist/duration candidates match, wrong artists fail, and a candidate 13 seconds away fails.
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 Run `swift run MenuBarLyrics --self-test`; expect compilation failure because `NetEaseLyricsSource` does not exist.
 
-- [ ] **Step 3: Implement minimal source and fallback**
+- [x] **Step 3: Implement minimal source and fallback**
 
 POST title and artist to `https://music.163.com/api/search/get/web`, decode the first valid candidate, GET `https://music.163.com/api/song/lyric?id=<id>&lv=-1`, parse `lrc.lyric`, and call it only when LRCLIB fails or returns no lines.
 
-- [ ] **Step 4: Verify GREEN and live behavior**
+- [x] **Step 4: Verify GREEN and live behavior**
 
 Run `swift run MenuBarLyrics --self-test`, then request `成都` by `赵雷`; expect non-empty timed lines.
 
-- [ ] **Step 5: Build and install**
+- [x] **Step 5: Build and install**
 
 Run `./scripts/build_app.sh`, replace `/Applications/MenuBarLyrics.app`, launch it, and verify the process remains running.

@@ -24,6 +24,11 @@ enum SelfTests {
         }
         assert(scroll.visibleText("abcdefghij", maxCharacters: 4) == "bcde")
 
+        let track = SpotifyTrack(name: "成都", artist: "赵雷", album: "无法长大", duration: 328)
+        assert(NetEaseLyricsSource.matches(track, title: "成都", artists: ["赵雷"], durationMs: 328_020))
+        assert(!NetEaseLyricsSource.matches(track, title: "成都", artists: ["其他歌手"], durationMs: 328_020))
+        assert(!NetEaseLyricsSource.matches(track, title: "成都", artists: ["赵雷"], durationMs: 341_000))
+
         print("Self-tests passed")
     }
 }

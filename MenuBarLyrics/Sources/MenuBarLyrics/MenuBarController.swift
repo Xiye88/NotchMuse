@@ -10,24 +10,25 @@ final class MenuBarController: NSObject {
 
         var pixels: CGFloat {
             switch self {
-            case .small: return 220
-            case .medium: return 320
-            case .large: return 460
+            case .small: return 420
+            case .medium: return 720
+            case .large: return 980
             }
         }
 
         var characters: Int {
             switch self {
-            case .small: return 26
-            case .medium: return 38
-            case .large: return 56
+            case .small: return 46
+            case .medium: return 80
+            case .large: return 110
             }
         }
     }
 
-    private let statusItem = NSStatusBar.system.statusItem(withLength: 320)
+    private let statusItem = NSStatusBar.system.statusItem(withLength: 28)
+    private let overlay = OverlayLyricsWindow()
     private let lyricsClient = LyricsClient()
-    private var width: Width = .medium
+    private var width: Width = .small
     private var isPaused = false
     private var displaySource = "Open Spotify"
     private var currentTrack: SpotifyTrack?
@@ -60,11 +61,13 @@ final class MenuBarController: NSObject {
     }
 
     private func setupButton() {
-        statusItem.length = width.pixels
+        statusItem.length = 28
         statusItem.button?.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .medium)
         statusItem.button?.alignment = .center
         statusItem.button?.lineBreakMode = .byClipping
         statusItem.button?.toolTip = "Menu Bar Lyrics"
+        statusItem.button?.title = "♪"
+        overlay.show(width: width.pixels)
     }
 
     private func setupMenu() {
@@ -101,7 +104,7 @@ final class MenuBarController: NSObject {
             setDisplay("Spotify unavailable")
         case let .paused(track, position):
             await updateTrackIfNeeded(track, force: forceLyricsRefresh)
-            let text = LyricClock.currentLine(at: position, in: currentLines) ?? displaySource
+            let text = LyricClock.currentLine(at: position, in: currentLines) ?? unpausedFallbackText()
             setDisplay("Paused: \(text)")
         case let .playing(track, position):
             await updateTrackIfNeeded(track, force: forceLyricsRefresh)
@@ -128,6 +131,13 @@ final class MenuBarController: NSObject {
         currentLines.isEmpty ? "No synced lyrics" : displaySource
     }
 
+    private func unpausedFallbackText() -> String {
+        if displaySource.hasPrefix("Paused: ") {
+            return String(displaySource.dropFirst("Paused: ".count))
+        }
+        return fallbackText()
+    }
+
     private func setDisplay(_ text: String) {
         if text != displaySource {
             scroll.reset()
@@ -137,9 +147,11 @@ final class MenuBarController: NSObject {
     }
 
     private func updateDisplay() {
-        statusItem.length = width.pixels
+        statusItem.length = 28
         let visible = scroll.visibleText(displaySource, maxCharacters: width.characters)
-        statusItem.button?.title = visible.isEmpty ? " " : visible
+        statusItem.button?.title = "♪"
+        overlay.show(width: width.pixels)
+        overlay.setText(visible.isEmpty ? " " : "♪ \(visible)")
     }
 
     @objc private func togglePause(_ sender: NSMenuItem) {

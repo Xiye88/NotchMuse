@@ -2,11 +2,11 @@
 
 ## Goal
 
-Build a small native macOS app that shows the current Spotify lyric line in the menu bar. Short lyrics stay still. Long lyrics scroll inside a fixed-width menu bar item.
+Build a small native macOS app that shows the current Spotify lyric line across the top menu bar area. Short lyrics stay still. Long lyrics scroll inside a fixed-width overlay.
 
 ## MVP Scope
 
-- Show one menu bar item with the current lyric line.
+- Show a small menu bar item for controls and a top menu bar overlay for the current lyric line.
 - Read Spotify's current track, artist, playback state, and playback position from the local Spotify macOS app.
 - Fetch synced lyrics from LRCLIB by track name, artist name, album name when available, and duration when available.
 - Update the displayed lyric line while Spotify plays.
@@ -35,7 +35,7 @@ Build a small native macOS app that shows the current Spotify lyric line in the 
 
 ## Architecture
 
-The app is a menu bar only app. It has no Dock icon and no main window.
+The app is a menu bar/accessory app. It has no Dock icon and no main window.
 
 Components:
 
@@ -44,6 +44,7 @@ Components:
 - `LyricParser`: parses LRC timestamp lines into timed lyric entries.
 - `LyricClock`: maps Spotify playback position to the current lyric line.
 - `MenuBarController`: owns the menu bar item, menu actions, width setting, and scrolling display.
+- `OverlayLyricsWindow`: shows the lyric in the top menu bar area.
 
 ## Data Flow
 
@@ -61,9 +62,9 @@ Components:
 - Default text when no synced lyrics are found: `No synced lyrics`
 - Default text while loading: `Loading lyrics...`
 - Width choices:
-  - Small: 220 px
-  - Medium: 320 px
-  - Large: 460 px
+  - Small: 420 px
+  - Medium: 720 px
+  - Large: 980 px
 - Long lyric scrolling:
   - Wait briefly at the start.
   - Scroll left at a steady speed.
@@ -111,6 +112,7 @@ MenuBarLyrics/
     LyricParser.swift
     LyricClock.swift
     MenuBarController.swift
+    OverlayLyricsWindow.swift
   Tests/MenuBarLyricsTests/
     LyricParserTests.swift
     LyricClockTests.swift

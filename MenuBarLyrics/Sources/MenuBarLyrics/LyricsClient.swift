@@ -2,9 +2,18 @@ import Foundation
 
 @MainActor
 final class LyricsClient {
-    typealias Source = @Sendable () async throws -> [LyricLine]
+    typealias Source = @Sendable (SpotifyTrack) async throws -> [LyricLine]
 
     private var cache = LyricsCache(capacity: 100)
+    private let sources: [Source]
+
+    init(sources: [Source]? = nil) {
+        self.sources = sources ?? [
+            { try await Self.lrclibLyrics(for: $0) },
+            { try await NetEaseLyricsSource().syncedLyrics(for: $0) },
+            { try await LRCMuxLyricsSource().syncedLyrics(for: $0) }
+        ]
+    }
 
     func syncedLyrics(for track: SpotifyTrack, bypassCache: Bool = false) async throws -> [LyricLine] {
         let key = "\(track.name)\u{1F}\(track.artist)\u{1F}\(track.album)\u{1F}\(track.duration)"
@@ -12,19 +21,15 @@ final class LyricsClient {
             return cached
         }
 
-        let lines = await Self.firstNonEmpty([
-            { try await Self.lrclibLyrics(for: track) },
-            { try await NetEaseLyricsSource().syncedLyrics(for: track) },
-            { try await LRCMuxLyricsSource().syncedLyrics(for: track) }
-        ])
+        let lines = await Self.firstNonEmpty(sources, for: track)
         cache.insert(lines, for: key)
         return lines
     }
 
-    nonisolated static func firstNonEmpty(_ sources: [Source]) async -> [LyricLine] {
+    nonisolated static func firstNonEmpty(_ sources: [Source], for track: SpotifyTrack) async -> [LyricLine] {
         await withTaskGroup(of: [LyricLine]?.self) { group in
             for source in sources {
-                group.addTask { try? await source() }
+                group.addTask { try? await source(track) }
             }
             for await lines in group {
                 if let lines, !lines.isEmpty {

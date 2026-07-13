@@ -33,7 +33,16 @@ enum SelfTests {
 
         testTrackMatcher()
         testLyricsCache()
-        testLyricsRace()
+        testLRCMuxRequest()
+
+        let semaphore = DispatchSemaphore(value: 0)
+        Task.detached {
+            await testLyricsClient()
+            semaphore.signal()
+        }
+        while semaphore.wait(timeout: .now()) != .success {
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.01))
+        }
 
         print("Self-tests passed")
     }
@@ -53,32 +62,53 @@ enum SelfTests {
         check(cache.value(for: "track-100", bypass: true) == nil, "bypasses cached results on refresh")
     }
 
-    private static func testLyricsRace() {
-        let expected = [LyricLine(time: 1, text: "winner")]
-        let semaphore = DispatchSemaphore(value: 0)
-        let result = AsyncResultBox()
-        Task.detached {
-            result.value = await LyricsClient.firstNonEmpty([
-                { throw NSError(domain: "SelfTests", code: 1) },
-                {
-                    do {
-                        try await Task.sleep(for: .seconds(10))
-                        return []
-                    } catch is CancellationError {
-                        result.wasCancelled = true
-                        return []
-                    }
-                },
-                {
-                    try await Task.sleep(for: .milliseconds(10))
-                    return expected
-                }
-            ])
-            semaphore.signal()
-        }
-        semaphore.wait()
-        check(result.value == expected, "returns the first non-empty result despite source failures")
-        check(result.wasCancelled, "cancels remaining sources after finding lyrics")
+    private static func testLRCMuxRequest() {
+        let track = SpotifyTrack(name: "Song", artist: "Artist", album: "The Album", duration: 201.6)
+        let items = URLComponents(url: LRCMuxLyricsSource().request(for: track).url!, resolvingAgainstBaseURL: false)?.queryItems
+        check(items?.contains(URLQueryItem(name: "album", value: "The Album")) == true, "sends album to lrcmux")
+        check(items?.contains(URLQueryItem(name: "duration", value: "202")) == true, "sends duration to lrcmux in seconds")
+    }
+
+    @MainActor
+    private static func testLyricsClient() async {
+        let track = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
+        let calls = SourceCalls()
+        let first = [LyricLine(time: 1, text: "first")]
+        let refreshed = [LyricLine(time: 2, text: "refreshed")]
+        let client = LyricsClient(sources: [
+            { _ in
+                _ = await calls.record(0)
+                throw NSError(domain: "SelfTests", code: 1)
+            },
+            { _ in
+                _ = await calls.record(1)
+                return []
+            },
+            { _ in
+                let count = await calls.record(2)
+                return count == 1 ? first : refreshed
+            }
+        ])
+
+        let fetched = try! await client.syncedLyrics(for: track)
+        check(fetched == first, "returns the first non-empty result despite one source failure")
+        var counts = await calls.snapshot()
+        check(counts == [1, 1, 1], "calls all three configured sources")
+
+        let cached = try! await client.syncedLyrics(for: track)
+        check(cached == first, "returns cached lyrics")
+        counts = await calls.snapshot()
+        check(counts == [1, 1, 1], "cache hit does not call sources")
+
+        let refresh = try! await client.syncedLyrics(for: track, bypassCache: true)
+        check(refresh == refreshed, "bypassCache refreshes and updates lyrics")
+        counts = await calls.snapshot()
+        check(counts == [2, 2, 2], "bypassCache calls all sources again")
+
+        let refreshedCache = try! await client.syncedLyrics(for: track)
+        check(refreshedCache == refreshed, "caches refreshed lyrics")
+        counts = await calls.snapshot()
+        check(counts == [2, 2, 2], "refreshed cache does not call sources")
     }
 
     private static func testTrackMatcher() {
@@ -146,7 +176,15 @@ enum SelfTests {
     }
 }
 
-private final class AsyncResultBox: @unchecked Sendable {
-    var value: [LyricLine] = []
-    var wasCancelled = false
+private actor SourceCalls {
+    private(set) var counts = [0, 0, 0]
+
+    func record(_ source: Int) -> Int {
+        counts[source] += 1
+        return counts[source]
+    }
+
+    func snapshot() -> [Int] {
+        counts
+    }
 }

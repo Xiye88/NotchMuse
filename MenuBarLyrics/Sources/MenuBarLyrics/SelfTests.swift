@@ -224,7 +224,6 @@ enum SelfTests {
             (track("Song - 2011 Remaster"), candidate("Song (Remastered 2011)")),
             (track("Song", "Artist & Guest"), candidate("Song", ["Artist", "Guest"])),
             (track("Song", "Artist & Guest"), candidate("Song", ["Guest", "Artist"])),
-            (track("Song", "Artist, Guest"), candidate("Song", ["Guest"])),
             (track("Cancion", "Jose"), candidate("Canción", ["José"])),
             (track("Song"), candidate("Song", ["Artist"], 212_000))
         ]
@@ -236,6 +235,8 @@ enum SelfTests {
             (track("Song", "AB, C"), candidate("Song", ["A", "BC"])),
             (track("Song", "AC/DC"), candidate("Song", ["DC"])),
             (track("Song", "Earth, Wind & Fire"), candidate("Song", ["Fire"])),
+            (track("Song", "Artist, Guest"), candidate("Song", ["Guest"])),
+            (track("Song", "Artist, Guest"), candidate("Song", ["Guest", "Other"])),
             (track("成都", "赵雷", 328), candidate("成都", ["其他歌手"], 328_020)),
             (track("成都", "赵雷", 328), candidate("成都", ["赵雷"], 340_001)),
             (track("Hello"), candidate("Hello World")),

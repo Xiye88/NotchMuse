@@ -20,8 +20,8 @@ enum TrackMatcher {
 
         let sourceArtists = artistKeys([track.artist])
         let candidateArtists = artistKeys(candidate.artists)
-        let artistsMatch = !sourceArtists.members.isDisjoint(with: candidateArtists.members)
-            || sourceArtists.group == candidateArtists.group
+        let artistsMatch = artistsMatch(source: sourceArtists.members, candidate: candidateArtists.members, primary: sourceArtists.primary)
+            || artistsMatch(source: sourceArtists.group, candidate: candidateArtists.group, primary: sourceArtists.primary)
         let artistScore = artistsMatch ? 30 : 0
         let durationScore: Int
         switch durationDifference {
@@ -63,21 +63,25 @@ enum TrackMatcher {
         return (normalize(name), versions.subtracting(["remaster"]))
     }
 
-    private static func artistKeys(_ artists: [String]) -> (members: Set<String>, group: Set<String>) {
+    private static func artistKeys(_ artists: [String]) -> (primary: String, members: Set<String>, group: Set<String>) {
         let cleaned = artists.map {
             $0.replacingOccurrences(of: #"\b(feat\.?|ft\.?|featuring)\b"#, with: ",", options: [.regularExpression, .caseInsensitive])
         }
-        let members = Set(cleaned.flatMap {
+        let members = cleaned.flatMap {
             $0.components(separatedBy: CharacterSet(charactersIn: ",;"))
                 .map(normalize)
                 .filter { !$0.isEmpty }
-        })
+        }
         let group = Set(cleaned.flatMap {
             $0.components(separatedBy: CharacterSet(charactersIn: ",&;"))
                 .map(normalize)
                 .filter { !$0.isEmpty }
         })
-        return (members, group)
+        return (members.first ?? "", Set(members), group)
+    }
+
+    private static func artistsMatch(source: Set<String>, candidate: Set<String>, primary: String) -> Bool {
+        source == candidate || (candidate.isStrictSubset(of: source) && candidate.contains(primary))
     }
 
     private static func normalize(_ text: String) -> String {

@@ -96,9 +96,9 @@ struct KugouLyricsSource {
     func matchingSong(in data: Data, for track: SpotifyTrack) throws -> Song? {
         let response = try JSONDecoder().decode(SongSearchResponse.self, from: data)
         guard response.status == 1 else { return nil }
-        let songs = response.data.info.flatMap { [$0] + ($0.group ?? []) }.map {
+        let songs = deduplicated(response.data.info.flatMap { [$0] + ($0.group ?? []) }.map {
             Song(hash: $0.hash, title: $0.title, artist: $0.artist, duration: $0.duration)
-        }
+        }, signature: { signature(title: $0.title, artist: $0.artist, durationMs: $0.duration * 1000) })
         let candidates = songs.map {
             TrackMatcher.Candidate(title: $0.title, artists: [$0.artist], durationMs: $0.duration * 1000)
         }
@@ -109,9 +109,9 @@ struct KugouLyricsSource {
     func matchingLyrics(in data: Data, for track: SpotifyTrack) throws -> LyricsCandidate? {
         let response = try JSONDecoder().decode(LyricsSearchResponse.self, from: data)
         guard response.status == 200 else { return nil }
-        let candidates = response.candidates.map {
+        let candidates = deduplicated(response.candidates.map {
             LyricsCandidate(id: $0.id, accessKey: $0.accessKey, title: $0.title, artist: $0.artist, durationMs: $0.durationMs)
-        }
+        }, signature: { signature(title: $0.title, artist: $0.artist, durationMs: $0.durationMs) })
         let matches = candidates.map {
             TrackMatcher.Candidate(title: $0.title, artists: [$0.artist], durationMs: $0.durationMs)
         }
@@ -177,6 +177,19 @@ struct KugouLyricsSource {
         request.setValue("MenuBarLyrics/0.2 (macOS)", forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 8
         return request
+    }
+
+    private func deduplicated<T>(_ values: [T], signature: (T) -> String) -> [T] {
+        var seen = Set<String>()
+        return values.filter { seen.insert(signature($0)).inserted }
+    }
+
+    private func signature(title: String, artist: String, durationMs: Int) -> String {
+        let metadata = "\(title)\u{1F}\(artist)"
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
+            .map(String.init).joined()
+        return "\(metadata)\u{1F}\((durationMs + 500) / 1000)"
     }
 
     private enum KugouError: Error {

@@ -440,10 +440,11 @@ enum SelfTests {
             "status": 200,
             "candidates": [
                 ["id": "wrong", "accesskey": "wrong", "singer": "其他歌手", "song": "大鱼", "duration": 313_000],
-                ["id": "right", "accesskey": "key", "singer": "周深", "song": "大鱼", "duration": 313_000]
+                ["id": "right", "accesskey": "key", "singer": "周深", "song": "大鱼", "duration": 313_000],
+                ["id": "duplicate", "accesskey": "other", "singer": "周深", "song": "大鱼", "duration": 313_100]
             ]
         ])
-        check((try! source.matchingLyrics(in: lyricSearch, for: track))?.id == "right", "selects the matching Kugou lyric candidate")
+        check((try! source.matchingLyrics(in: lyricSearch, for: track))?.id == "right", "deduplicates equivalent Kugou lyric uploads")
 
         let encrypted = "a3JjMTjbGsglTQAlwOOCgBP9uCbNoutBagJEl2A0I5z41FTPAPHgqs2PfysRGjnCJwDTNZGBQSLYlGQSt5BRePV0t+kYV7+E9w8oR7sMLx0="
         let krc = try! source.decryptKRC(encrypted)

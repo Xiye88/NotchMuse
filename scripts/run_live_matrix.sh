@@ -16,6 +16,7 @@ swiftc -parse-as-library -O -o "$BINARY" \
   "$PROJECT/Sources/MenuBarLyrics/LRCLIBLyricsSource.swift" \
   "$PROJECT/Sources/MenuBarLyrics/NetEaseLyricsSource.swift" \
   "$PROJECT/Sources/MenuBarLyrics/LRCMuxLyricsSource.swift" \
-  "$PROJECT/Sources/MenuBarLyrics/QQMusicLyricsSource.swift"
+  "$PROJECT/Sources/MenuBarLyrics/QQMusicLyricsSource.swift" \
+  "$PROJECT/Sources/MenuBarLyrics/KugouLyricsSource.swift"
 
 "$BINARY" "$FIXTURE" "$RESULTS"

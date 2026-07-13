@@ -21,8 +21,7 @@ struct LRCMuxLyricsSource {
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
         let request = request(for: track)
         let (data, response) = try await URLSession.shared.data(for: request)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { return [] }
-        return try parse(data, for: track)
+        return try parse(LyricsHTTP.validate(data: data, response: response), for: track)
     }
 
     func parse(_ data: Data, for track: SpotifyTrack) throws -> [LyricLine] {

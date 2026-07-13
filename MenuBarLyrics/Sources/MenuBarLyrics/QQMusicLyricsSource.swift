@@ -2,34 +2,37 @@ import Foundation
 
 struct QQMusicLyricsSource {
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
-        do {
-            return try await withThrowingTaskGroup(of: [LyricLine].self) { group in
-                group.addTask { try await fetchLyrics(for: track) }
-                group.addTask {
-                    try await Task.sleep(for: .seconds(8))
-                    throw URLError(.timedOut)
-                }
-                defer { group.cancelAll() }
-                return try await group.next() ?? []
+        try await withThrowingTaskGroup(of: [LyricLine].self) { group in
+            group.addTask { try await fetchLyrics(for: track) }
+            group.addTask {
+                try await Task.sleep(for: .seconds(8))
+                throw URLError(.timedOut)
             }
-        } catch {
-            return []
+            defer { group.cancelAll() }
+            return try await group.next() ?? []
         }
     }
 
     private func fetchLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
+        var lastError: Error?
         var songMID: String?
         for query in searchQueries(for: track) {
-            if let match = await search(query, for: track) {
-                songMID = match
-                break
+            do {
+                if let match = try await search(query, for: track) {
+                    songMID = match
+                    break
+                }
+            } catch {
+                lastError = error
             }
         }
-        guard let songMID else { return [] }
+        guard let songMID else {
+            if let lastError { throw lastError }
+            return []
+        }
 
         let (data, response) = try await URLSession.shared.data(for: lyricRequest(songMID: songMID))
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { return [] }
-        return try parseLyrics(data)
+        return try parseLyrics(LyricsHTTP.validate(data: data, response: response))
     }
 
     func searchQueries(for track: SpotifyTrack) -> [String] {
@@ -169,29 +172,24 @@ struct QQMusicLyricsSource {
         return LyricParser.parse(lrc)
     }
 
-    private func search(_ query: String, for track: SpotifyTrack) async -> String? {
+    private func search(_ query: String, for track: SpotifyTrack) async throws -> String? {
         do {
             let (data, response) = try await URLSession.shared.data(for: searchRequest(query: query))
-            guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-                return try? await searchSmartbox(query, for: track)
-            }
-            if let songMID = try matchingSongMID(in: data, for: track) {
+            if let songMID = try matchingSongMID(in: LyricsHTTP.validate(data: data, response: response), for: track) {
                 return songMID
             }
-            return try? await searchSmartbox(query, for: track)
         } catch {
-            return try? await searchSmartbox(query, for: track)
+            // Fall through to Smartbox when the primary QQ endpoint fails.
         }
+        return try await searchSmartbox(query, for: track)
     }
 
     private func searchSmartbox(_ query: String, for track: SpotifyTrack) async throws -> String? {
         let (data, response) = try await URLSession.shared.data(for: smartboxRequest(query: query))
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
-        guard let songMID = try matchingSmartboxSongMID(in: data, for: track) else { return nil }
+        guard let songMID = try matchingSmartboxSongMID(in: LyricsHTTP.validate(data: data, response: response), for: track) else { return nil }
 
         let (details, detailsResponse) = try await URLSession.shared.data(for: songDetailsRequest(songMID: songMID))
-        guard (detailsResponse as? HTTPURLResponse)?.statusCode == 200 else { return nil }
-        return try validatedSongMID(in: details, for: track)
+        return try validatedSongMID(in: LyricsHTTP.validate(data: details, response: detailsResponse), for: track)
     }
 }
 

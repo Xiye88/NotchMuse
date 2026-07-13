@@ -42,6 +42,7 @@ enum SelfTests {
         check(OverlayLaneGeometry.centeredTextY(laneHeight: 32, lineHeight: 16) == 8, "centers lyrics vertically in the menu bar")
 
         testTrackMatcher()
+        testLyricsHTTP()
         testLyricsCache()
         testLRCLIBRequest()
         testLRCLIBFixtures()
@@ -104,6 +105,18 @@ enum SelfTests {
         check(cache.value(for: "track-0") == nil, "evicts the oldest result over capacity")
         check(cache.value(for: "track-100") == line, "keeps the newest cached result")
         check(cache.value(for: "track-100", bypass: true) == nil, "bypasses cached results on refresh")
+    }
+
+    private static func testLyricsHTTP() {
+        let response = HTTPURLResponse(url: URL(string: "https://example.com")!, statusCode: 429, httpVersion: nil, headerFields: nil)!
+        do {
+            _ = try LyricsHTTP.validate(data: Data(), response: response)
+            check(false, "rejects a 429 lyrics response")
+        } catch let error as URLError {
+            check(error.code == .badServerResponse, "reports a 429 lyrics response as badServerResponse")
+        } catch {
+            check(false, "reports a 429 lyrics response as badServerResponse")
+        }
     }
 
     private static func testSmoothScroll() {
@@ -530,6 +543,7 @@ enum SelfTests {
             (track("Song - 2011 Remaster"), candidate("Song (Remastered 2011)")),
             (track("Song", "Artist & Guest"), candidate("Song", ["Artist", "Guest"])),
             (track("Song", "Artist & Guest"), candidate("Song", ["Guest", "Artist"])),
+            (track("打上花火", "DAOKO × 米津玄師", 289), candidate("打上花火", ["DAOKO", "米津玄師"], 289_000)),
             (track("Cancion", "Jose"), candidate("Canción", ["José"])),
             (track("夜に駆ける", "YOASOBI", 262), candidate("夜に駆ける", ["YOASOBI"], 262_000)),
             (track("봄날", "BTS", 274), candidate("봄날", ["BTS"], 274_000)),

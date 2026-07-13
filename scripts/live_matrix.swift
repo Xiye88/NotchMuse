@@ -11,6 +11,12 @@ private struct MatrixResult {
     }
 }
 
+private enum SourceResult {
+    case hit(String, [LyricLine])
+    case empty
+    case error
+}
+
 @main enum LiveMatrix {
     static func main() async {
         guard CommandLine.arguments.count == 3 else { exit(2) }
@@ -22,7 +28,7 @@ private struct MatrixResult {
             try report.write(to: URL(fileURLWithPath: CommandLine.arguments[2]), atomically: true, encoding: .utf8)
             printSummary(for: results)
 
-            guard results.filter({ $0.source != "MISS" }).count >= 90 else { exit(1) }
+            guard results.filter({ $0.source != "MISS" && $0.source != "ERROR" }).count >= 90 else { exit(1) }
         } catch {
             fputs("Live matrix failed: \(error)\n", stderr)
             exit(2)
@@ -47,45 +53,52 @@ private struct MatrixResult {
     }
 
     private static func runMatrix(for tracks: [SpotifyTrack]) async -> [MatrixResult] {
-        await withTaskGroup(of: (Int, MatrixResult).self, returning: [MatrixResult].self) { group in
-            var pending = tracks.enumerated().makeIterator()
-            var results = Array<MatrixResult?>(repeating: nil, count: tracks.count)
-
-            for _ in 0..<min(5, tracks.count) {
-                guard let (index, track) = pending.next() else { break }
-                group.addTask { (index, await fetchLyrics(for: track)) }
-            }
-
-            while let (index, result) = await group.next() {
-                results[index] = result
-                if let (nextIndex, track) = pending.next() {
-                    group.addTask { (nextIndex, await fetchLyrics(for: track)) }
-                }
-            }
-            return results.compactMap { $0 }
+        var results = [MatrixResult]()
+        for track in tracks {
+            results.append(await fetchLyrics(for: track))
         }
+        return results
     }
 
     private static func fetchLyrics(for track: SpotifyTrack) async -> MatrixResult {
         let start = ContinuousClock.now
-        let result = await withTaskGroup(of: (String, [LyricLine]?).self, returning: (String, [LyricLine]?).self) { group in
-            group.addTask { ("LRCLIB", try? await LRCLIBLyricsSource().syncedLyrics(for: track)) }
-            group.addTask { ("NetEase", try? await NetEaseLyricsSource().syncedLyrics(for: track)) }
-            group.addTask { ("LRCMux", try? await LRCMuxLyricsSource().syncedLyrics(for: track)) }
-            group.addTask { ("QQ", try? await QQMusicLyricsSource().syncedLyrics(for: track)) }
-            for await result in group where !(result.1?.isEmpty ?? true) {
-                group.cancelAll()
-                return result
+        let result = await withTaskGroup(of: SourceResult.self, returning: (String, [LyricLine]?).self) { group in
+            group.addTask { await sourceResult("LRCLIB") { try await LRCLIBLyricsSource().syncedLyrics(for: track) } }
+            group.addTask { await sourceResult("NetEase") { try await NetEaseLyricsSource().syncedLyrics(for: track) } }
+            group.addTask { await sourceResult("LRCMux") { try await LRCMuxLyricsSource().syncedLyrics(for: track) } }
+            group.addTask { await sourceResult("QQ") { try await QQMusicLyricsSource().syncedLyrics(for: track) } }
+            var hadError = false
+            for await result in group {
+                switch result {
+                case let .hit(source, lines):
+                    group.cancelAll()
+                    return (source, lines)
+                case .empty:
+                    break
+                case .error:
+                    hadError = true
+                }
             }
-            return ("MISS", nil)
+            return (hadError ? "ERROR" : "MISS", nil)
         }
         let components = start.duration(to: .now).components
         let milliseconds = Int(components.seconds) * 1_000 + Int(components.attoseconds / 1_000_000_000_000_000)
         return MatrixResult(track: track, source: result.0, lineCount: result.1?.count ?? 0, latencyMilliseconds: milliseconds)
     }
 
+    private static func sourceResult(_ source: String, fetch: @escaping @Sendable () async throws -> [LyricLine]) async -> SourceResult {
+        do {
+            let lines = try await fetch()
+            return lines.isEmpty ? .empty : .hit(source, lines)
+        } catch {
+            return .error
+        }
+    }
+
     private static func printSummary(for results: [MatrixResult]) {
-        let hits = results.filter { $0.source != "MISS" }
+        let hits = results.filter { $0.source != "MISS" && $0.source != "ERROR" }
+        let errors = results.count { $0.source == "ERROR" }
+        let misses = results.count { $0.source == "MISS" }
         let sourceCounts = ["LRCLIB", "NetEase", "LRCMux", "QQ"].map { source in
             "\(source)=\(hits.count { $0.source == source })"
         }.joined(separator: ", ")
@@ -95,6 +108,7 @@ private struct MatrixResult {
 
         print("Coverage: \(hits.count)/\(results.count)")
         print("Sources: \(sourceCounts)")
+        print("ERROR: \(errors), MISS: \(misses)")
         print("Latency: median \(median) ms, p95 \(p95) ms")
         print(hits.count >= 90 ? "Live matrix passed: \(hits.count)/\(results.count) songs matched" : "Live matrix failed: \(hits.count)/\(results.count) songs matched")
     }

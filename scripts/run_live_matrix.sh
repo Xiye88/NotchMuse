@@ -12,6 +12,7 @@ swiftc -parse-as-library -O -o "$BINARY" \
   "$PROJECT/Sources/MenuBarLyrics/LyricParser.swift" \
   "$PROJECT/Sources/MenuBarLyrics/SpotifyReader.swift" \
   "$PROJECT/Sources/MenuBarLyrics/TrackMatcher.swift" \
+  "$PROJECT/Sources/MenuBarLyrics/LyricsHTTP.swift" \
   "$PROJECT/Sources/MenuBarLyrics/LRCLIBLyricsSource.swift" \
   "$PROJECT/Sources/MenuBarLyrics/NetEaseLyricsSource.swift" \
   "$PROJECT/Sources/MenuBarLyrics/LRCMuxLyricsSource.swift" \

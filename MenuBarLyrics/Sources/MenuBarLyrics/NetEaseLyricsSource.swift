@@ -15,8 +15,7 @@ struct NetEaseLyricsSource {
             URLQueryItem(name: "lv", value: "-1")
         ]
         let (data, response) = try await URLSession.shared.data(for: request(components.url!))
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { return [] }
-        let lyric = try JSONDecoder().decode(LyricResponse.self, from: data).lrc?.lyric ?? ""
+        let lyric = try JSONDecoder().decode(LyricResponse.self, from: LyricsHTTP.validate(data: data, response: response)).lrc?.lyric ?? ""
         return LyricParser.parse(lyric)
     }
 
@@ -33,8 +32,7 @@ struct NetEaseLyricsSource {
         searchRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         searchRequest.httpBody = form.percentEncodedQuery?.data(using: .utf8)
         let (data, response) = try await URLSession.shared.data(for: searchRequest)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else { return [] }
-        return try JSONDecoder().decode(SearchResponse.self, from: data).result?.songs ?? []
+        return try JSONDecoder().decode(SearchResponse.self, from: LyricsHTTP.validate(data: data, response: response)).result?.songs ?? []
     }
 
     private func request(_ url: URL) -> URLRequest {

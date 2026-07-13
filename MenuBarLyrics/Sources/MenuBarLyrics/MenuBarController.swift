@@ -3,7 +3,14 @@ import Foundation
 
 @MainActor
 final class MenuBarController: NSObject {
-    private let statusItem = NSStatusBar.system.statusItem(withLength: 28)
+    private let statusItem: NSStatusItem = {
+        let autosaveName = "MenuBarLyricsStatusItem"
+        UserDefaults.standard.register(defaults: ["NSStatusItem Preferred Position \(autosaveName)": 250])
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        item.autosaveName = autosaveName
+        item.isVisible = true
+        return item
+    }()
     private let overlay = OverlayLyricsWindow()
     private let lyricsClient = LyricsClient()
     private var position = LyricsPosition(
@@ -43,7 +50,6 @@ final class MenuBarController: NSObject {
     }
 
     private func setupButton() {
-        statusItem.length = NSStatusItem.squareLength
         statusItem.button?.toolTip = "Menu Bar Lyrics"
         statusItem.button?.image = BrandStyle.noteImage()
         statusItem.button?.imagePosition = .imageOnly

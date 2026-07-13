@@ -16,6 +16,7 @@ swift build -c release
 rm -rf "$APP"
 mkdir -p "$MACOS" "$RESOURCES"
 cp "$PROJECT/.build/release/MenuBarLyrics" "$MACOS/MenuBarLyrics"
+cp "$PROJECT/Resources/AppIcon.icns" "$RESOURCES/AppIcon.icns"
 cp "$ROOT/THIRD_PARTY_NOTICES.md" "$RESOURCES/THIRD_PARTY_NOTICES.md"
 mkdir -p "$RESOURCES/LICENSES"
 cp "$ROOT/LICENSES/Apache-2.0.txt" "$RESOURCES/LICENSES/Apache-2.0.txt"
@@ -30,6 +31,8 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
   <string>en</string>
   <key>CFBundleExecutable</key>
   <string>MenuBarLyrics</string>
+  <key>CFBundleIconFile</key>
+  <string>AppIcon</string>
   <key>CFBundleIdentifier</key>
   <string>local.menubarlyrics.app</string>
   <key>CFBundleInfoDictionaryVersion</key>

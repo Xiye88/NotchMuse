@@ -1,40 +1,44 @@
 # MenuBarLyrics
 
-A small native macOS menu bar app that shows synced Spotify lyrics. It reads
-the current song metadata from the local Spotify app using Apple Events.
+MenuBarLyrics 是一款原生 macOS 菜单栏应用，可读取本机 Spotify 的当前歌曲信息并显示同步歌词。
 
-## Use
+## 使用
 
-1. Open Spotify and play a song.
-2. Run `./scripts/build_app.sh`.
-3. Open `dist/MenuBarLyrics.app`, or run `./scripts/run_app.sh`.
-4. When macOS asks, allow the app to control Spotify.
+1. 打开 Spotify 并播放歌曲。
+2. 运行 `./scripts/build_app.sh`。
+3. 打开 `dist/MenuBarLyrics.app`，或运行 `./scripts/run_app.sh`。
+4. 按 macOS 提示，允许应用控制 Spotify。
 
-The menu bar item shows the current lyric line in the macOS menu font. Long
-lines scroll smoothly, and Both mode uses the safe areas on both sides of a
-MacBook display notch.
+点击状态栏中的原生渐变橙色音符，可暂停或继续歌词、刷新歌词、选择布局或退出应用。
 
-Click the music-note button beside the lyrics to open settings.
+## 现有功能
 
-Menu options:
+- 支持左侧、右侧和两边三种菜单栏歌词布局；长歌词会平滑滚动，两边模式会避开 MacBook 刘海区域。
+- 左侧和两边模式会读取当前前台应用的菜单位置，让左侧歌词避开已有菜单项。
+- 当前歌词行会按播放进度显示橙色渐变；这是行级进度，不代表逐字时间。
 
-- Pause/Resume Lyrics
-- Left, Right, or Both lyric position
-- Refresh Lyrics
-- Quit
+## 歌词来源与测试
 
-## Notes
+应用会从以下来源查找同步歌词：
 
-- Lyrics are fetched over the network from LRCLIB and may also use the
-  experimental NetEase Cloud Music, lrcmux, and QQ Music interfaces. QQ Music
-  requests go to `u.y.qq.com` and `c.y.qq.com`; its search and line-LRC protocol
-  was independently implemented with reference to the Apache-2.0
-  [WXRIW/Lyricify-Lyrics-Helper](https://github.com/WXRIW/Lyricify-Lyrics-Helper)
-  project. Availability and accuracy vary by service.
-- The app does not upload audio, require an account, write a persistent cache,
-  or collect telemetry.
-- Third-party services and lyric copyrights are subject to their respective
-  terms and rights holders.
-- The current app bundle is ad-hoc signed for personal testing, not distributed
-  with a Developer ID or through the Mac App Store.
-- This is a local Mac app. A VPS cannot display lyrics inside your Mac menu bar.
+- LRCLIB
+- 网易云音乐
+- LRCMux
+- QQ 音乐
+- 酷狗音乐
+
+各来源的可用性和准确性可能变化。仓库包含 100 首真实歌曲的在线覆盖矩阵，可运行：
+
+```sh
+./scripts/run_live_matrix.sh
+```
+
+矩阵仍在运行和校准中，本文档暂不宣称具体覆盖率。
+
+## 权限与限制
+
+- 只有左侧或两边模式需要“辅助功能”权限，用于避让前台应用菜单；仅使用右侧模式时不需要该权限。
+- 当前歌词源主要提供逐行时间。精确逐字时间与逐字高亮暂未承诺。
+- 应用不会上传音频，不要求账户，不写入持久缓存，也不收集遥测数据。
+- 第三方服务及歌词版权受各自条款和权利人约束。QQ 音乐与酷狗音乐的协议实现参考了 Apache-2.0 项目 [WXRIW/Lyricify-Lyrics-Helper](https://github.com/WXRIW/Lyricify-Lyrics-Helper)。
+- 当前应用包使用临时签名，仅供个人测试，尚未通过 Developer ID 或 Mac App Store 分发。

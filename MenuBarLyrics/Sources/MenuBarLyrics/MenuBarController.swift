@@ -13,9 +13,13 @@ final class MenuBarController: NSObject {
     private var displaySource = "Open Spotify"
     private var currentTrack: SpotifyTrack?
     private var currentLines: [LyricLine] = []
+    private var latestSpotifyPosition: TimeInterval?
+    private var latestSpotifyUptime: TimeInterval?
+    private var displayProgress: CGFloat = 0
     private var scroll = ScrollState()
     private var pollTimer: Timer?
     private var scrollTimer: Timer?
+    private var progressTimer: Timer?
 
     func start() {
         setupButton()
@@ -74,16 +78,23 @@ final class MenuBarController: NSObject {
         case .closed:
             currentTrack = nil
             currentLines = []
+            stopProgressTimer()
             setDisplay("Open Spotify")
         case .unavailable:
+            stopProgressTimer()
             setDisplay("Spotify unavailable")
         case let .paused(track, position):
             await updateTrackIfNeeded(track, force: forceLyricsRefresh)
-            let text = LyricClock.currentLine(at: position, in: currentLines) ?? unpausedFallbackText()
+            latestSpotifyPosition = position
+            latestSpotifyUptime = nil
+            stopProgressTimer()
+            let text = LyricClock.moment(at: position, in: currentLines)?.text ?? unpausedFallbackText()
             setDisplay("Paused: \(text)")
         case let .playing(track, position):
             await updateTrackIfNeeded(track, force: forceLyricsRefresh)
-            setDisplay(LyricClock.currentLine(at: position, in: currentLines) ?? fallbackText())
+            latestSpotifyPosition = position
+            latestSpotifyUptime = ProcessInfo.processInfo.systemUptime
+            updatePlayingDisplay()
         }
     }
 
@@ -113,17 +124,19 @@ final class MenuBarController: NSObject {
         return fallbackText()
     }
 
-    private func setDisplay(_ text: String) {
+    private func setDisplay(_ text: String, progress: CGFloat = 0) {
         if text != displaySource {
             scroll.reset()
         }
         displaySource = text
+        displayProgress = progress
         updateDisplay()
     }
 
     private func updateDisplay() {
         let overflows = overlay.show(
             text: displaySource.isEmpty ? " " : "♪ \(displaySource)",
+            progress: displayProgress,
             position: position,
             statusItem: statusItem,
             scroll: scroll
@@ -155,10 +168,49 @@ final class MenuBarController: NSObject {
         }
     }
 
+    private func updatePlayingDisplay() {
+        guard let position = currentPlaybackPosition() else {
+            stopProgressTimer()
+            return
+        }
+        if let moment = LyricClock.moment(at: position, in: currentLines) {
+            setDisplay(moment.text, progress: moment.progress)
+        } else {
+            setDisplay(fallbackText())
+        }
+        updateProgressTimer()
+    }
+
+    private func currentPlaybackPosition() -> TimeInterval? {
+        guard let latestSpotifyPosition, let latestSpotifyUptime else { return latestSpotifyPosition }
+        return latestSpotifyPosition + ProcessInfo.processInfo.systemUptime - latestSpotifyUptime
+    }
+
+    private func updateProgressTimer() {
+        guard !isPaused, latestSpotifyUptime != nil, !currentLines.isEmpty else {
+            stopProgressTimer()
+            return
+        }
+        guard progressTimer == nil else { return }
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.updatePlayingDisplay()
+            }
+        }
+    }
+
+    private func stopProgressTimer() {
+        progressTimer?.invalidate()
+        progressTimer = nil
+    }
+
     @objc private func togglePause(_ sender: NSMenuItem) {
         isPaused.toggle()
         sender.title = isPaused ? "Resume Lyrics" : "Pause Lyrics"
         if isPaused {
+            latestSpotifyPosition = currentPlaybackPosition()
+            latestSpotifyUptime = nil
+            stopProgressTimer()
             setDisplay("Lyrics paused")
         } else {
             Task { @MainActor in

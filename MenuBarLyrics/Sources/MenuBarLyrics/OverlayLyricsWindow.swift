@@ -60,8 +60,33 @@ enum OverlayLaneGeometry {
 @MainActor
 final class OverlayLyricsWindow: NSObject {
     @MainActor
+    private final class GradientLyricView: NSView {
+        var text = "" {
+            didSet { needsDisplay = true }
+        }
+        var progress: CGFloat = 0 {
+            didSet { needsDisplay = true }
+        }
+
+        let font = NSFont.menuBarFont(ofSize: 0)
+
+        override func draw(_ dirtyRect: NSRect) {
+            let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.labelColor]
+            (text as NSString).draw(in: bounds, withAttributes: attributes)
+
+            guard progress > 0, let gradient = NSGradient(colors: BrandStyle.gradientColors) else { return }
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(rect: NSRect(x: 0, y: 0, width: bounds.width * min(progress, 1), height: bounds.height)).addClip()
+            (text as NSString).draw(in: bounds, withAttributes: attributes)
+            NSGraphicsContext.current?.compositingOperation = .sourceIn
+            gradient.draw(in: bounds, angle: 0)
+            NSGraphicsContext.restoreGraphicsState()
+        }
+    }
+
+    @MainActor
     private final class Lane {
-        let label = NSTextField(labelWithString: "")
+        let label = GradientLyricView()
         let window: NSWindow
 
         init(level: NSWindow.Level) {
@@ -83,17 +108,10 @@ final class OverlayLyricsWindow: NSObject {
             window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
             window.contentView = contentView
 
-            label.font = .menuBarFont(ofSize: 0)
-            label.textColor = .labelColor
-            label.lineBreakMode = .byClipping
-            label.drawsBackground = false
-            label.isBezeled = false
-            label.isEditable = false
-            label.isSelectable = false
             contentView.addSubview(label)
         }
 
-        func show(frame: NSRect, text: String, textX: CGFloat, textWidth: CGFloat) {
+        func show(frame: NSRect, text: String, progress: CGFloat, textX: CGFloat, textWidth: CGFloat) {
             guard frame.width > 0 else {
                 hide()
                 return
@@ -102,10 +120,13 @@ final class OverlayLyricsWindow: NSObject {
             if window.frame != frame {
                 window.setFrame(frame, display: true)
             }
-            if label.stringValue != text {
-                label.stringValue = text
+            if label.text != text {
+                label.text = text
             }
-            let font = label.font ?? .menuBarFont(ofSize: 0)
+            if label.progress != progress {
+                label.progress = progress
+            }
+            let font = label.font
             let lineHeight = ceil(font.ascender - font.descender + font.leading)
             let labelFrame = NSRect(
                 x: textX,
@@ -125,7 +146,7 @@ final class OverlayLyricsWindow: NSObject {
             guard window.appearance !== appearance else { return }
             window.appearance = appearance
             label.appearance = appearance
-            label.textColor = .labelColor
+            label.needsDisplay = true
         }
 
         func hide() {
@@ -141,6 +162,7 @@ final class OverlayLyricsWindow: NSObject {
 
     func show(
         text: String,
+        progress: CGFloat,
         position: LyricsPosition,
         statusItem: NSStatusItem,
         scroll: ScrollState
@@ -161,12 +183,12 @@ final class OverlayLyricsWindow: NSObject {
         switch position {
         case .left:
             rightLane.hide()
-            return showSingle(text: text, textWidth: textWidth, frame: frames.left, lane: leftLane, scroll: scroll)
+            return showSingle(text: text, progress: progress, textWidth: textWidth, frame: frames.left, lane: leftLane, scroll: scroll)
         case .right:
             leftLane.hide()
-            return showSingle(text: text, textWidth: textWidth, frame: frames.right, lane: rightLane, scroll: scroll)
+            return showSingle(text: text, progress: progress, textWidth: textWidth, frame: frames.right, lane: rightLane, scroll: scroll)
         case .both:
-            return showBoth(text: text, textWidth: textWidth, frames: frames, scroll: scroll)
+            return showBoth(text: text, progress: progress, textWidth: textWidth, frames: frames, scroll: scroll)
         }
     }
 
@@ -178,6 +200,7 @@ final class OverlayLyricsWindow: NSObject {
 
     private func showSingle(
         text: String,
+        progress: CGFloat,
         textWidth: CGFloat,
         frame: NSRect,
         lane: Lane,
@@ -186,12 +209,13 @@ final class OverlayLyricsWindow: NSObject {
         let overflows = frame.width > 0 && textWidth > frame.width
         let offset = overflows ? scroll.offset(contentWidth: textWidth, viewportWidth: frame.width) : 0
         let x = overflows ? -offset : (frame.width - textWidth) / 2
-        lane.show(frame: frame, text: text, textX: x, textWidth: textWidth)
+        lane.show(frame: frame, text: text, progress: progress, textX: x, textWidth: textWidth)
         return overflows
     }
 
     private func showBoth(
         text: String,
+        progress: CGFloat,
         textWidth: CGFloat,
         frames: (left: NSRect, right: NSRect),
         scroll: ScrollState
@@ -200,12 +224,14 @@ final class OverlayLyricsWindow: NSObject {
             leftLane.show(
                 frame: frames.left,
                 text: text,
+                progress: progress,
                 textX: textWidth <= frames.left.width ? (frames.left.width - textWidth) / 2 : 0,
                 textWidth: textWidth
             )
             rightLane.show(
                 frame: frames.right,
                 text: text,
+                progress: progress,
                 textX: textWidth <= frames.right.width ? (frames.right.width - textWidth) / 2 : 0,
                 textWidth: textWidth
             )
@@ -215,10 +241,11 @@ final class OverlayLyricsWindow: NSObject {
         let viewportWidth = frames.left.width + frames.right.width
         let overflows = viewportWidth > 0 && textWidth > viewportWidth
         let offset = overflows ? scroll.offset(contentWidth: textWidth, viewportWidth: viewportWidth) : 0
-        leftLane.show(frame: frames.left, text: text, textX: -offset, textWidth: textWidth)
+        leftLane.show(frame: frames.left, text: text, progress: progress, textX: -offset, textWidth: textWidth)
         rightLane.show(
             frame: frames.right,
             text: text,
+            progress: progress,
             textX: -frames.left.width - offset,
             textWidth: textWidth
         )

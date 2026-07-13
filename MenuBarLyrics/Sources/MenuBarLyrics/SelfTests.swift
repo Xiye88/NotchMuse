@@ -34,6 +34,7 @@ enum SelfTests {
         testTrackMatcher()
         testLyricsCache()
         testLRCLIBRequest()
+        testLRCLIBFixtures()
         testLRCMuxRequest()
         testLRCMuxResponse()
         testLRCMuxLanguageConflict()
@@ -41,6 +42,9 @@ enum SelfTests {
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
             await testLyricsClient()
+            if ProcessInfo.processInfo.environment["LRCLIB_LIVE_TESTS"] == "1" {
+                await testLRCLIBLive()
+            }
             if ProcessInfo.processInfo.environment["LIVE_LYRICS_TESTS"] == "1" {
                 await testLRCMuxLive()
             }
@@ -78,9 +82,54 @@ enum SelfTests {
 
     private static func testLRCLIBRequest() {
         let track = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
-        let request = LyricsClient.lrclibRequest(for: track)
+        let request = LRCLIBLyricsSource().request(for: track)
+        let components = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)
+        check(components?.path == "/api/search", "uses LRCLIB search")
+        check(components?.queryItems?.contains(URLQueryItem(name: "q", value: "Song Artist")) == true, "searches LRCLIB by title and artist")
+        check(components?.queryItems?.contains(URLQueryItem(name: "track_name", value: "Song")) == true, "searches LRCLIB by title")
+        check(components?.queryItems?.contains(URLQueryItem(name: "artist_name", value: "Artist")) == true, "searches LRCLIB by artist")
+        check(components?.queryItems?.contains(where: { $0.name == "album_name" }) == false, "does not let album formatting filter LRCLIB results")
+        check(components?.queryItems?.contains(URLQueryItem(name: "duration", value: "200")) == true, "keeps duration in LRCLIB search")
         check(request.timeoutInterval == 6, "uses a six-second LRCLIB timeout")
         check(request.value(forHTTPHeaderField: "User-Agent") == "MenuBarLyrics/0.1 (macOS)", "sets the LRCLIB user agent")
+    }
+
+    private static func testLRCLIBFixtures() {
+        let source = LRCLIBLyricsSource()
+        let loveScenario = SpotifyTrack(name: "LOVE SCENARIO", artist: "iKON", album: "Return", duration: 209)
+        let conflicting = lrclibJSON([
+            ("LOVE SCENARIO", "iKON", "Return", 209, "[00:01.00]사랑을 했다 우리가 만나"),
+            ("LOVE SCENARIO", "iKON", "RETURN -KR EDITION-", 217, "[00:01.00]恋に落ちた僕たちは")
+        ])
+        check((try! source.parse(conflicting, for: loveScenario)).isEmpty, "rejects ambiguous Kana/Hangul LRCLIB versions")
+
+        let fairyTale = SpotifyTrack(name: "童话", artist: "光良", album: "童话", duration: 241)
+        let fairyTaleSearch = lrclibJSON([
+            ("童话镇", "陈一发儿", "童话镇", 241, "[00:01.00]错误歌词"),
+            ("童话", "光良", "童话", 241, "[00:01.00]忘了有多久")
+        ])
+        check((try! source.parse(fairyTaleSearch, for: fairyTale)) == [LyricLine(time: 1, text: "忘了有多久")], "selects the matching 童话 synced lyrics")
+
+        let gangnam = SpotifyTrack(name: "Gangnam Style", artist: "PSY", album: "Psy 6 (Six Rules), Pt. 1", duration: 219)
+        let gangnamSearch = lrclibJSON([
+            ("Gangnam Style (Live)", "PSY", "Live", 219, "[00:01.00]Everybody dance"),
+            ("Gangnam Style", "PSY", "Psy 6 (Six Rules), Pt. 1", 219, "[00:01.00]오빤 강남스타일")
+        ])
+        check((try! source.parse(gangnamSearch, for: gangnam)) == [LyricLine(time: 1, text: "오빤 강남스타일")], "selects the matching Gangnam Style synced lyrics")
+
+        let japanese = SpotifyTrack(name: "Lemon", artist: "Kenshi Yonezu", album: "BOOTLEG", duration: 256)
+        let japaneseOnly = lrclibJSON([("Lemon", "Kenshi Yonezu", "BOOTLEG", 256, "[00:01.00]夢ならばどれほどよかったでしょう")])
+        check(!(try! source.parse(japaneseOnly, for: japanese)).isEmpty, "keeps a single Japanese LRCLIB candidate")
+
+        let koreanOnly = lrclibJSON([("Gangnam Style", "PSY", "Psy 6", 219, "[00:01.00]오빤 강남스타일")])
+        check(!(try! source.parse(koreanOnly, for: gangnam)).isEmpty, "keeps a single Korean LRCLIB candidate")
+    }
+
+    private static func lrclibJSON(_ rows: [(String, String, String, Double, String)]) -> Data {
+        try! JSONSerialization.data(withJSONObject: rows.enumerated().map {
+            ["id": $0.offset + 1, "trackName": $0.element.0, "artistName": $0.element.1,
+             "albumName": $0.element.2, "duration": $0.element.3, "syncedLyrics": $0.element.4]
+        })
     }
 
     private static func testLRCMuxResponse() {
@@ -202,6 +251,25 @@ enum SelfTests {
         for track in representatives {
             let lines = try! await source.syncedLyrics(for: track)
             check(!lines.isEmpty, "keeps live LRC for \(track.name)")
+        }
+    }
+
+    private static func testLRCLIBLive() async {
+        let source = LRCLIBLyricsSource()
+        let loveScenario = SpotifyTrack(name: "LOVE SCENARIO", artist: "iKON", album: "Return", duration: 209)
+        var rejectedConflict = false
+        for _ in 0..<3 where !rejectedConflict {
+            rejectedConflict = (try! await source.syncedLyrics(for: loveScenario)).isEmpty
+        }
+        check(rejectedConflict, "rejects a live LRCLIB LOVE SCENARIO conflict window")
+
+        let expected = [
+            SpotifyTrack(name: "童话", artist: "光良", album: "童话", duration: 242),
+            SpotifyTrack(name: "Gangnam Style", artist: "PSY", album: "Psy 6 (Six Rules), Pt. 1", duration: 219)
+        ]
+        for track in expected {
+            let lines = try! await source.syncedLyrics(for: track)
+            check(!lines.isEmpty, "selects live LRCLIB lyrics for \(track.name)")
         }
     }
 

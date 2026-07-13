@@ -1,0 +1,73 @@
+import Foundation
+
+enum TrackMatcher {
+    static let acceptanceThreshold = 82
+
+    struct Candidate {
+        let title: String
+        let artists: [String]
+        let durationMs: Int
+    }
+
+    static func score(_ track: SpotifyTrack, candidate: Candidate) -> Int {
+        let sourceTitle = parsedTitle(track.name)
+        let candidateTitle = parsedTitle(candidate.title)
+        let durationDifference = abs(track.duration - Double(candidate.durationMs) / 1000)
+
+        guard sourceTitle.name == candidateTitle.name,
+              sourceTitle.versions == candidateTitle.versions,
+              durationDifference <= 12 else { return 0 }
+
+        let sourceArtists = artistSet([track.artist])
+        let candidateArtists = artistSet(candidate.artists)
+        let artistScore = sourceArtists.isDisjoint(with: candidateArtists) ? 0 : 30
+        let durationScore: Int
+        switch durationDifference {
+        case ...2: durationScore = 15
+        case ...5: durationScore = 11
+        case ...8: durationScore = 7
+        default: durationScore = 3
+        }
+        return 55 + artistScore + durationScore
+    }
+
+    static func bestMatchIndex(for track: SpotifyTrack, candidates: [Candidate]) -> Int? {
+        let ranked = candidates.enumerated()
+            .map { (index: $0.offset, score: score(track, candidate: $0.element)) }
+            .sorted { $0.score > $1.score }
+        guard let best = ranked.first, best.score >= acceptanceThreshold else { return nil }
+        guard ranked.count < 2 || best.score - ranked[1].score >= 6 else { return nil }
+        return best.index
+    }
+
+    private static func parsedTitle(_ title: String) -> (name: String, versions: Set<String>) {
+        let folded = title.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+        let versions = Set(["live", "remix", "acoustic", "instrumental"].filter {
+            folded.range(of: "\\b\($0)\\b", options: .regularExpression) != nil
+        })
+        var name = folded
+        for pattern in [
+            #"[\(\[].*?\b(feat\.?|ft\.?|featuring|remaster(ed)?|live|remix|acoustic|instrumental)\b.*?[\)\]]"#,
+            #"\s+-\s+.*\b(remaster(ed)?|live|remix|acoustic|instrumental)\b.*$"#,
+            #"\s+\b(feat\.?|ft\.?|featuring)\b.*$"#
+        ] {
+            name = name.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        }
+        return (normalize(name), versions.subtracting(["remaster"]))
+    }
+
+    private static func artistSet(_ artists: [String]) -> Set<String> {
+        Set(artists.flatMap {
+            $0.replacingOccurrences(of: #"\b(feat\.?|ft\.?|featuring)\b"#, with: ",", options: [.regularExpression, .caseInsensitive])
+                .components(separatedBy: CharacterSet(charactersIn: ",&/;"))
+                .map(normalize)
+                .filter { !$0.isEmpty }
+        })
+    }
+
+    private static func normalize(_ text: String) -> String {
+        text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
+            .map(String.init).joined()
+    }
+}

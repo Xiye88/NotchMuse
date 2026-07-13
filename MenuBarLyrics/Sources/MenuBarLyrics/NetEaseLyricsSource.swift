@@ -2,9 +2,12 @@ import Foundation
 
 struct NetEaseLyricsSource {
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
-        guard let song = try await search(track).first(where: {
-            Self.matches(track, title: $0.name, artists: $0.artists.map(\.name), durationMs: $0.duration)
-        }) else { return [] }
+        let songs = try await search(track)
+        let candidates = songs.map {
+            TrackMatcher.Candidate(title: $0.name, artists: $0.artists.map(\.name), durationMs: $0.duration)
+        }
+        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates) else { return [] }
+        let song = songs[index]
 
         var components = URLComponents(string: "https://music.163.com/api/song/lyric")!
         components.queryItems = [
@@ -15,15 +18,6 @@ struct NetEaseLyricsSource {
         guard (response as? HTTPURLResponse)?.statusCode == 200 else { return [] }
         let lyric = try JSONDecoder().decode(LyricResponse.self, from: data).lrc?.lyric ?? ""
         return LyricParser.parse(lyric)
-    }
-
-    static func matches(_ track: SpotifyTrack, title: String, artists: [String], durationMs: Int) -> Bool {
-        let trackTitle = normalize(track.name)
-        let candidateTitle = normalize(title)
-        let titleMatches = trackTitle == candidateTitle || trackTitle.contains(candidateTitle) || candidateTitle.contains(trackTitle)
-        let trackArtist = normalize(track.artist)
-        let artistMatches = artists.map(normalize).contains { trackArtist.contains($0) || $0.contains(trackArtist) }
-        return titleMatches && artistMatches && abs(track.duration - Double(durationMs) / 1000) <= 12
     }
 
     private func search(_ track: SpotifyTrack) async throws -> [Song] {
@@ -51,11 +45,6 @@ struct NetEaseLyricsSource {
         return request
     }
 
-    private static func normalize(_ text: String) -> String {
-        text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-            .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
-            .map(String.init).joined()
-    }
 }
 
 private struct SearchResponse: Decodable {

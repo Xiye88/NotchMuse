@@ -98,20 +98,33 @@ enum SelfTests {
             auxiliaryTopLeftArea: leftSafeArea,
             auxiliaryTopRightArea: rightSafeArea,
             statusItemX: 1300,
+            foregroundMenuMaxX: 600,
             menuBarHeight: 32
         )
         check(leftSafeArea.contains(frames.left), "keeps the left lyric lane inside the notch-safe area")
         check(rightSafeArea.contains(frames.right), "keeps the right lyric lane inside the notch-safe area")
         check(frames.left.maxX <= 646 && frames.right.minX >= 825, "keeps both lyric lanes out of the notch")
+        check(frames.left.minX >= 608, "keeps the left lyric lane eight points after foreground menus")
         check(frames.right.maxX <= 1102, "reserves space before status items")
-        check(frames.right.maxX + 24 <= 1102, "keeps the settings button before status items")
+        check(frames.right.maxX == 1102, "does not reserve space for the deleted settings button")
         check(frames.left.width > 0 && frames.right.width > 0, "keeps usable lyric lanes on a notched MacBook")
+
+        let coveredLeftLane = OverlayLaneGeometry.frames(
+            screenFrame: NSRect(x: 0, y: 0, width: 1470, height: 956),
+            auxiliaryTopLeftArea: leftSafeArea,
+            auxiliaryTopRightArea: rightSafeArea,
+            statusItemX: 1300,
+            foregroundMenuMaxX: 700,
+            menuBarHeight: 32
+        )
+        check(coveredLeftLane.left.width == 0, "hides the left lyric lane when foreground menus fill its safe area")
 
         let hiddenStatusItem = OverlayLaneGeometry.frames(
             screenFrame: NSRect(x: 0, y: 0, width: 1470, height: 956),
             auxiliaryTopLeftArea: leftSafeArea,
             auxiliaryTopRightArea: rightSafeArea,
             statusItemX: 8,
+            foregroundMenuMaxX: nil,
             menuBarHeight: 32
         )
         check(hiddenStatusItem.right.width == frames.right.width, "ignores a culled off-screen status item coordinate")
@@ -121,6 +134,7 @@ enum SelfTests {
             auxiliaryTopLeftArea: nil,
             auxiliaryTopRightArea: nil,
             statusItemX: 1200,
+            foregroundMenuMaxX: nil,
             menuBarHeight: 24
         )
         check(fallback.left.maxX <= 720 && fallback.right.minX >= 720, "separates fallback lanes on a non-notched display")

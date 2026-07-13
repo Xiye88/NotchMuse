@@ -20,7 +20,7 @@ final class MenuBarController: NSObject {
     func start() {
         setupButton()
         setupMenu()
-        overlay.onSettings = { [weak self] in self?.showMenu() }
+        requestMenuBarAccessIfNeeded()
         updateDisplay()
 
         pollTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -39,12 +39,10 @@ final class MenuBarController: NSObject {
     }
 
     private func setupButton() {
-        statusItem.length = 20
-        statusItem.button?.font = .menuBarFont(ofSize: 0)
-        statusItem.button?.alignment = .center
-        statusItem.button?.lineBreakMode = .byClipping
+        statusItem.length = NSStatusItem.squareLength
         statusItem.button?.toolTip = "Menu Bar Lyrics"
-        statusItem.button?.title = "♪"
+        statusItem.button?.image = BrandStyle.noteImage()
+        statusItem.button?.imagePosition = .imageOnly
     }
 
     private func setupMenu() {
@@ -124,8 +122,6 @@ final class MenuBarController: NSObject {
     }
 
     private func updateDisplay() {
-        statusItem.length = 20
-        statusItem.button?.title = "♪"
         let overflows = overlay.show(
             text: displaySource.isEmpty ? " " : "♪ \(displaySource)",
             position: position,
@@ -133,6 +129,12 @@ final class MenuBarController: NSObject {
             scroll: scroll
         )
         updateScrollTimer(overflows: overflows)
+    }
+
+    private func requestMenuBarAccessIfNeeded() {
+        if position == .left || position == .both {
+            MenuBarSafety.requestAccess()
+        }
     }
 
     private func showMenu() {
@@ -172,6 +174,7 @@ final class MenuBarController: NSObject {
         }
         position = newPosition
         UserDefaults.standard.set(newPosition.rawValue, forKey: "LyricsPosition")
+        requestMenuBarAccessIfNeeded()
         for item in statusItem.menu?.items ?? [] where item.action == #selector(setPosition(_:)) {
             item.state = item === sender ? .on : .off
         }

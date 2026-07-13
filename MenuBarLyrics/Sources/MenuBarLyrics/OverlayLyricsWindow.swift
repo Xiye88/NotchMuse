@@ -24,6 +24,7 @@ enum OverlayLaneGeometry {
         auxiliaryTopLeftArea: NSRect?,
         auxiliaryTopRightArea: NSRect?,
         statusItemX: CGFloat?,
+        foregroundMenuMaxX: CGFloat?,
         menuBarHeight: CGFloat
     ) -> (left: NSRect, right: NSRect) {
         let menuBar = NSRect(
@@ -38,8 +39,8 @@ enum OverlayLaneGeometry {
             ?? NSRect(x: menuBar.midX, y: menuBar.minY, width: menuBar.width / 2, height: menuBarHeight)
         let inset: CGFloat = 8
 
-        // AppKit does not expose the foreground app's command widths without Accessibility.
-        let menuBoundary = max(screenFrame.minX + 520, leftArea.minX + leftArea.width * 0.82)
+        let conservativeMenuBoundary = max(screenFrame.minX + 520, leftArea.minX + leftArea.width * 0.82)
+        let menuBoundary = max(conservativeMenuBoundary, foregroundMenuMaxX ?? conservativeMenuBoundary)
         let reservedStatusBoundary = max(rightArea.minX, rightArea.maxX - 360)
         let visibleStatusItemX = statusItemX.flatMap {
             $0 >= rightArea.minX && $0 <= rightArea.maxX ? $0 : nil
@@ -47,7 +48,7 @@ enum OverlayLaneGeometry {
         let statusBoundary = min(reservedStatusBoundary, visibleStatusItemX ?? reservedStatusBoundary)
         let leftMinX = min(leftArea.maxX, max(leftArea.minX, menuBoundary + inset))
         let rightMinX = min(rightArea.maxX, rightArea.minX + inset)
-        let rightMaxX = max(rightMinX, statusBoundary - inset - 24)
+        let rightMaxX = max(rightMinX, statusBoundary - inset)
 
         return (
             NSRect(x: leftMinX, y: leftArea.minY, width: leftArea.maxX - leftMinX, height: leftArea.height),
@@ -58,8 +59,6 @@ enum OverlayLaneGeometry {
 
 @MainActor
 final class OverlayLyricsWindow: NSObject {
-    var onSettings: (() -> Void)?
-
     @MainActor
     private final class Lane {
         let label = NSTextField(labelWithString: "")
@@ -139,30 +138,6 @@ final class OverlayLyricsWindow: NSObject {
     private let leftLane = Lane(level: .mainMenu)
     private let rightLane = Lane(level: NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1))
     private let font = NSFont.menuBarFont(ofSize: 0)
-    private let settingsButton = NSButton()
-    private lazy var settingsWindow: NSPanel = {
-        let panel = NSPanel(
-            contentRect: .zero,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
-        )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false
-        panel.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1)
-        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
-        panel.becomesKeyOnlyIfNeeded = true
-
-        settingsButton.isBordered = false
-        settingsButton.image = NSImage(systemSymbolName: "music.note", accessibilityDescription: "歌词设置")
-        settingsButton.image?.isTemplate = true
-        settingsButton.toolTip = "歌词设置"
-        settingsButton.target = self
-        settingsButton.action = #selector(openSettings)
-        panel.contentView = settingsButton
-        return panel
-    }()
 
     func show(
         text: String,
@@ -178,10 +153,10 @@ final class OverlayLyricsWindow: NSObject {
             auxiliaryTopLeftArea: screen.auxiliaryTopLeftArea,
             auxiliaryTopRightArea: screen.auxiliaryTopRightArea,
             statusItemX: statusItemScreenMinX(statusItem),
+            foregroundMenuMaxX: position == .right ? nil : MenuBarSafety.foregroundMenuMaxX(),
             menuBarHeight: NSStatusBar.system.thickness
         )
         let textWidth = ceil((text as NSString).size(withAttributes: [.font: font]).width)
-        showSettingsButton(after: frames.right, appearance: statusItem.button?.effectiveAppearance)
 
         switch position {
         case .left:
@@ -193,20 +168,6 @@ final class OverlayLyricsWindow: NSObject {
         case .both:
             return showBoth(text: text, textWidth: textWidth, frames: frames, scroll: scroll)
         }
-    }
-
-    private func showSettingsButton(after rightFrame: NSRect, appearance: NSAppearance?) {
-        let frame = NSRect(x: rightFrame.maxX + 4, y: rightFrame.minY, width: 20, height: rightFrame.height)
-        settingsWindow.appearance = appearance
-        settingsButton.frame = NSRect(origin: .zero, size: frame.size)
-        settingsWindow.setFrame(frame, display: true)
-        if !settingsWindow.isVisible {
-            settingsWindow.orderFrontRegardless()
-        }
-    }
-
-    @objc private func openSettings() {
-        onSettings?()
     }
 
     private func statusItemScreenMinX(_ statusItem: NSStatusItem) -> CGFloat? {

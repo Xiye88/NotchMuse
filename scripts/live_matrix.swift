@@ -67,6 +67,7 @@ private enum SourceResult {
             group.addTask { await sourceResult("NetEase") { try await NetEaseLyricsSource().syncedLyrics(for: track) } }
             group.addTask { await sourceResult("LRCMux") { try await LRCMuxLyricsSource().syncedLyrics(for: track) } }
             group.addTask { await sourceResult("QQ") { try await QQMusicLyricsSource().syncedLyrics(for: track) } }
+            group.addTask { await sourceResult("Kugou") { try await KugouLyricsSource().syncedLyrics(for: track) } }
             var hadError = false
             for await result in group {
                 switch result {
@@ -99,7 +100,7 @@ private enum SourceResult {
         let hits = results.filter { $0.source != "MISS" && $0.source != "ERROR" }
         let errors = results.count { $0.source == "ERROR" }
         let misses = results.count { $0.source == "MISS" }
-        let sourceCounts = ["LRCLIB", "NetEase", "LRCMux", "QQ"].map { source in
+        let sourceCounts = ["LRCLIB", "NetEase", "LRCMux", "QQ", "Kugou"].map { source in
             "\(source)=\(hits.count { $0.source == source })"
         }.joined(separator: ", ")
         let latencies = results.map(\.latencyMilliseconds).sorted()

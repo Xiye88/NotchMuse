@@ -51,6 +51,8 @@ enum SelfTests {
         testLRCMuxLanguageConflict()
         testQQMusicRequests()
         testQQMusicFixtures()
+        testKugouRequests()
+        testKugouFixtures()
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
@@ -393,6 +395,67 @@ enum SelfTests {
         check((try! source.parseLyrics(Data("not jsonp".utf8))).isEmpty, "rejects malformed QQ Music lyric responses")
     }
 
+    private static func testKugouRequests() {
+        let source = KugouLyricsSource()
+        let track = SpotifyTrack(name: "大鱼", artist: "周深", album: "大鱼", duration: 313)
+        let search = source.songSearchRequest(for: track)
+        let searchItems = URLComponents(url: search.url!, resolvingAgainstBaseURL: false)?.queryItems
+        check(search.url?.host == "mobilecdn.kugou.com", "uses the Kugou song search host")
+        check(searchItems?.contains(URLQueryItem(name: "keyword", value: "大鱼 周深")) == true, "sends title and artist to Kugou search")
+        check(search.timeoutInterval == 8, "uses an eight-second Kugou search timeout")
+
+        let lyrics = source.lyricsSearchRequest(keyword: "大鱼 周深", duration: 313, hash: "hash")
+        let lyricItems = URLComponents(url: lyrics.url!, resolvingAgainstBaseURL: false)?.queryItems
+        check(lyricItems?.contains(URLQueryItem(name: "duration", value: "313000")) == true, "sends milliseconds to Kugou lyric search")
+        check(lyricItems?.contains(URLQueryItem(name: "hash", value: "hash")) == true, "sends the Kugou song hash")
+
+        let download = source.downloadRequest(id: "123", accessKey: "key")
+        let downloadItems = URLComponents(url: download.url!, resolvingAgainstBaseURL: false)?.queryItems
+        check(downloadItems?.contains(URLQueryItem(name: "id", value: "123")) == true, "sends the Kugou lyric id")
+        check(downloadItems?.contains(URLQueryItem(name: "accesskey", value: "key")) == true, "sends the Kugou lyric access key")
+    }
+
+    private static func testKugouFixtures() {
+        let source = KugouLyricsSource()
+        let track = SpotifyTrack(name: "大鱼", artist: "周深", album: "大鱼", duration: 313)
+        let songSearch = try! JSONSerialization.data(withJSONObject: [
+            "status": 1,
+            "data": ["info": [
+                ["hash": "cover", "songname": "大鱼", "singername": "其他歌手", "duration": 313],
+                ["hash": "parent", "songname": "大鱼 (Live)", "singername": "周深", "duration": 313, "group": [
+                    ["hash": "correct", "songname": "大鱼", "singername": "周深", "duration": 313]
+                ]]
+            ]]
+        ])
+        check((try! source.matchingSong(in: songSearch, for: track))?.hash == "correct", "selects a matching nested Kugou song")
+
+        let duet = SpotifyTrack(name: "打上花火", artist: "DAOKO × 米津玄師", album: "打上花火", duration: 289)
+        let duetSearch = try! JSONSerialization.data(withJSONObject: [
+            "status": 1,
+            "data": ["info": [["hash": "duet", "songname": "打上花火", "singername": "DAOKO、米津玄師", "duration": 289]]]
+        ])
+        check((try! source.matchingSong(in: duetSearch, for: duet))?.hash == "duet", "matches Kugou ideographic artist separators")
+
+        let lyricSearch = try! JSONSerialization.data(withJSONObject: [
+            "status": 200,
+            "candidates": [
+                ["id": "wrong", "accesskey": "wrong", "singer": "其他歌手", "song": "大鱼", "duration": 313_000],
+                ["id": "right", "accesskey": "key", "singer": "周深", "song": "大鱼", "duration": 313_000]
+            ]
+        ])
+        check((try! source.matchingLyrics(in: lyricSearch, for: track))?.id == "right", "selects the matching Kugou lyric candidate")
+
+        let encrypted = "a3JjMTjbGsglTQAlwOOCgBP9uCbNoutBagJEl2A0I5z41FTPAPHgqs2PfysRGjnCJwDTNZGBQSLYlGQSt5BRePV0t+kYV7+E9w8oR7sMLx0="
+        let krc = try! source.decryptKRC(encrypted)
+        check(source.parseKRC(krc) == [
+            LyricLine(time: 1, text: "你好"),
+            LyricLine(time: 3, text: "世界")
+        ], "decrypts and parses Kugou KRC line lyrics")
+        check((try? source.decryptKRC("not base64")) == nil, "rejects malformed Kugou KRC content")
+        check((try? source.decryptKRC(Data("nopepayload".utf8).base64EncodedString())) == nil, "rejects a malformed Kugou KRC header")
+        check((try? source.decryptKRC(Data("krc1truncated".utf8).base64EncodedString())) == nil, "rejects truncated Kugou KRC data")
+    }
+
     private static func lrcMuxJSON(title: String, artist: String, album: String, duration: Int, isrc: String, texts: [String]) -> Data {
         let lines = texts.enumerated().map { ["text": $0.element, "start": ($0.offset + 1) * 1000, "end": ($0.offset + 2) * 1000] as [String: Any] }
         return try! JSONSerialization.data(withJSONObject: [
@@ -544,6 +607,7 @@ enum SelfTests {
             (track("Song", "Artist & Guest"), candidate("Song", ["Artist", "Guest"])),
             (track("Song", "Artist & Guest"), candidate("Song", ["Guest", "Artist"])),
             (track("打上花火", "DAOKO × 米津玄師", 289), candidate("打上花火", ["DAOKO", "米津玄師"], 289_000)),
+            (track("打上花火", "DAOKO × 米津玄師", 289), candidate("打上花火", ["DAOKO、米津玄師"], 289_000)),
             (track("Cancion", "Jose"), candidate("Canción", ["José"])),
             (track("夜に駆ける", "YOASOBI", 262), candidate("夜に駆ける", ["YOASOBI"], 262_000)),
             (track("봄날", "BTS", 274), candidate("봄날", ["BTS"], 274_000)),

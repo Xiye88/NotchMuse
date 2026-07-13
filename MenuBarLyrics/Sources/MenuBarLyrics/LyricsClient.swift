@@ -12,7 +12,8 @@ final class LyricsClient {
             { try await LRCLIBLyricsSource().syncedLyrics(for: $0) },
             { try await NetEaseLyricsSource().syncedLyrics(for: $0) },
             { try await LRCMuxLyricsSource().syncedLyrics(for: $0) },
-            { try await QQMusicLyricsSource().syncedLyrics(for: $0) }
+            { try await QQMusicLyricsSource().syncedLyrics(for: $0) },
+            { try await KugouLyricsSource().syncedLyrics(for: $0) }
         ]
     }
 

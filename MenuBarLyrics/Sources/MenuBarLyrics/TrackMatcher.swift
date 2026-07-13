@@ -69,12 +69,12 @@ enum TrackMatcher {
                 .replacingOccurrences(of: #"\b(feat\.?|ft\.?|featuring)\b"#, with: ",", options: [.regularExpression, .caseInsensitive])
         }
         let members = cleaned.flatMap {
-            $0.components(separatedBy: CharacterSet(charactersIn: ",;×"))
+            $0.components(separatedBy: CharacterSet(charactersIn: ",;×、"))
                 .map(normalize)
                 .filter { !$0.isEmpty }
         }
         let group = Set(cleaned.flatMap {
-            $0.components(separatedBy: CharacterSet(charactersIn: ",&;×"))
+            $0.components(separatedBy: CharacterSet(charactersIn: ",&;×、"))
                 .map(normalize)
                 .filter { !$0.isEmpty }
         })

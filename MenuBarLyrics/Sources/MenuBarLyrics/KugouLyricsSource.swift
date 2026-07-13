@@ -102,7 +102,7 @@ struct KugouLyricsSource {
         let candidates = songs.map {
             TrackMatcher.Candidate(title: $0.title, artists: [$0.artist], durationMs: $0.duration * 1000)
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates) else { return nil }
+        guard let index = closestAcceptedIndex(for: track, candidates: candidates) else { return nil }
         return songs[index]
     }
 
@@ -115,8 +115,18 @@ struct KugouLyricsSource {
         let matches = candidates.map {
             TrackMatcher.Candidate(title: $0.title, artists: [$0.artist], durationMs: $0.durationMs)
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: matches) else { return nil }
+        guard let index = closestAcceptedIndex(for: track, candidates: matches) else { return nil }
         return candidates[index]
+    }
+
+    private func closestAcceptedIndex(for track: SpotifyTrack, candidates: [TrackMatcher.Candidate]) -> Int? {
+        let ranked = candidates.enumerated().compactMap { index, candidate -> (Int, Double)? in
+            guard TrackMatcher.score(track, candidate: candidate) >= TrackMatcher.acceptanceThreshold else { return nil }
+            return (index, abs(track.duration - Double(candidate.durationMs) / 1000))
+        }.sorted { $0.1 < $1.1 }
+        guard let best = ranked.first else { return nil }
+        guard ranked.count < 2 || best.1 < ranked[1].1 else { return nil }
+        return best.0
     }
 
     func decryptKRC(_ encoded: String) throws -> String {
@@ -185,11 +195,13 @@ struct KugouLyricsSource {
     }
 
     private func signature(title: String, artist: String, durationMs: Int) -> String {
-        let metadata = "\(title)\u{1F}\(artist)"
+        func normalized(_ value: String) -> String {
+            value
             .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
             .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
             .map(String.init).joined()
-        return "\(metadata)\u{1F}\((durationMs + 500) / 1000)"
+        }
+        return "\(normalized(title))\u{1F}\(normalized(artist))\u{1F}\((durationMs + 500) / 1000)"
     }
 
     private enum KugouError: Error {

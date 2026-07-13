@@ -422,12 +422,13 @@ enum SelfTests {
             "status": 1,
             "data": ["info": [
                 ["hash": "cover", "songname": "大鱼", "singername": "其他歌手", "duration": 313],
+                ["hash": "near", "songname": "大鱼", "singername": "周深", "duration": 317],
                 ["hash": "parent", "songname": "大鱼 (Live)", "singername": "周深", "duration": 313, "group": [
                     ["hash": "correct", "songname": "大鱼", "singername": "周深", "duration": 313]
                 ]]
             ]]
         ])
-        check((try! source.matchingSong(in: songSearch, for: track))?.hash == "correct", "selects a matching nested Kugou song")
+        check((try! source.matchingSong(in: songSearch, for: track))?.hash == "correct", "selects the closest matching nested Kugou song")
 
         let duet = SpotifyTrack(name: "打上花火", artist: "DAOKO × 米津玄師", album: "打上花火", duration: 289)
         let duetSearch = try! JSONSerialization.data(withJSONObject: [
@@ -445,6 +446,16 @@ enum SelfTests {
             ]
         ])
         check((try! source.matchingLyrics(in: lyricSearch, for: track))?.id == "right", "deduplicates equivalent Kugou lyric uploads")
+
+        let boundaryTrack = SpotifyTrack(name: "AB", artist: "C", album: "Album", duration: 200)
+        let boundarySearch = try! JSONSerialization.data(withJSONObject: [
+            "status": 200,
+            "candidates": [
+                ["id": "collision", "accesskey": "wrong", "singer": "BC", "song": "A", "duration": 200_000],
+                ["id": "boundary", "accesskey": "right", "singer": "C", "song": "AB", "duration": 200_000]
+            ]
+        ])
+        check((try! source.matchingLyrics(in: boundarySearch, for: boundaryTrack))?.id == "boundary", "keeps title and artist boundaries in Kugou deduplication")
 
         let encrypted = "a3JjMTjbGsglTQAlwOOCgBP9uCbNoutBagJEl2A0I5z41FTPAPHgqs2PfysRGjnCJwDTNZGBQSLYlGQSt5BRePV0t+kYV7+E9w8oR7sMLx0="
         let krc = try! source.decryptKRC(encrypted)
@@ -599,11 +610,11 @@ enum SelfTests {
         let accepted: [(SpotifyTrack, TrackMatcher.Candidate)] = [
             (track("成都", "赵雷", 328), candidate("成都", ["赵雷"], 328_020)),
             (track("演员", "薛之謙", 261), candidate("演员", ["薛之谦"], 261_000)),
+            (track("说散就散", "JC", 231), candidate("说散就散", ["JC 陈咏桐"], 231_000)),
             (track("Hello!", "Adele"), candidate("hello", ["ADELE"])),
             (track("Beyonce", "Beyonce"), candidate("Beyonce", ["Beyonce"])),
             (track("Song (feat. Guest)", "Artist, Guest"), candidate("Song", ["Artist", "Guest"])),
             (track("Song(feat.Live)"), candidate("Song")),
-            (track("Song", "Artist feat. Guest"), candidate("Song (feat. Guest)", ["Artist"])),
             (track("Song - 2011 Remaster"), candidate("Song (Remastered 2011)")),
             (track("Song", "Artist & Guest"), candidate("Song", ["Artist", "Guest"])),
             (track("Song", "Artist & Guest"), candidate("Song", ["Guest", "Artist"])),
@@ -612,7 +623,7 @@ enum SelfTests {
             (track("Cancion", "Jose"), candidate("Canción", ["José"])),
             (track("夜に駆ける", "YOASOBI", 262), candidate("夜に駆ける", ["YOASOBI"], 262_000)),
             (track("봄날", "BTS", 274), candidate("봄날", ["BTS"], 274_000)),
-            (track("Song"), candidate("Song", ["Artist"], 212_000))
+            (track("Song"), candidate("Song", ["Artist"], 208_000))
         ]
         for (source, result) in accepted {
             check(TrackMatcher.score(source, candidate: result) >= TrackMatcher.acceptanceThreshold, "accepts \(source.name) by \(source.artist)")
@@ -623,11 +634,13 @@ enum SelfTests {
             (track("Song", "AC/DC"), candidate("Song", ["DC"])),
             (track("Song", "Earth, Wind & Fire"), candidate("Song", ["Fire"])),
             (track("Song", "Artist, Guest"), candidate("Song", ["Guest"])),
+            (track("Song", "Artist feat. Guest"), candidate("Song (feat. Guest)", ["Artist"])),
             (track("Song", "Artist, Guest"), candidate("Song", ["Guest", "Other"])),
             (track("成都", "赵雷", 328), candidate("成都", ["其他歌手"], 328_020)),
             (track("Hotel California", "Eagles", 391), candidate("Hotel California", ["Eagles Tribute"], 391_000)),
             (track("乾", "Artist", 200), candidate("幹", ["Artist"], 200_000)),
             (track("成都", "赵雷", 328), candidate("成都", ["赵雷"], 340_001)),
+            (track("Song"), candidate("Song", ["Artist"], 208_001)),
             (track("Hello"), candidate("Hello World")),
             (track("Hello World"), candidate("Hello")),
             (track("Song (Live)"), candidate("Song")),

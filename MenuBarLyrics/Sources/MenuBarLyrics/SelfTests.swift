@@ -54,6 +54,7 @@ enum SelfTests {
             (track("Song", "Artist feat. Guest"), candidate("Song (feat. Guest)", ["Artist"])),
             (track("Song - 2011 Remaster"), candidate("Song (Remastered 2011)")),
             (track("Song", "Artist & Guest"), candidate("Song", ["Artist", "Guest"])),
+            (track("Song", "Artist & Guest"), candidate("Song", ["Guest", "Artist"])),
             (track("Song", "Artist, Guest"), candidate("Song", ["Guest"])),
             (track("Cancion", "Jose"), candidate("Canción", ["José"])),
             (track("Song"), candidate("Song", ["Artist"], 212_000))

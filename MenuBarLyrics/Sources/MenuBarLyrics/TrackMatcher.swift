@@ -63,7 +63,7 @@ enum TrackMatcher {
         return (normalize(name), versions.subtracting(["remaster"]))
     }
 
-    private static func artistKeys(_ artists: [String]) -> (members: Set<String>, group: [String]) {
+    private static func artistKeys(_ artists: [String]) -> (members: Set<String>, group: Set<String>) {
         let cleaned = artists.map {
             $0.replacingOccurrences(of: #"\b(feat\.?|ft\.?|featuring)\b"#, with: ",", options: [.regularExpression, .caseInsensitive])
         }
@@ -72,11 +72,11 @@ enum TrackMatcher {
                 .map(normalize)
                 .filter { !$0.isEmpty }
         })
-        let group = cleaned.flatMap {
+        let group = Set(cleaned.flatMap {
             $0.components(separatedBy: CharacterSet(charactersIn: ",&;"))
                 .map(normalize)
                 .filter { !$0.isEmpty }
-        }
+        })
         return (members, group)
     }
 

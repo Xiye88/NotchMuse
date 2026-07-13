@@ -11,7 +11,8 @@ final class LyricsClient {
         self.sources = sources ?? [
             { try await LRCLIBLyricsSource().syncedLyrics(for: $0) },
             { try await NetEaseLyricsSource().syncedLyrics(for: $0) },
-            { try await LRCMuxLyricsSource().syncedLyrics(for: $0) }
+            { try await LRCMuxLyricsSource().syncedLyrics(for: $0) },
+            { try await QQMusicLyricsSource().syncedLyrics(for: $0) }
         ]
     }
 

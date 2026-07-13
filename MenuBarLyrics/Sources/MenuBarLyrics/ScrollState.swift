@@ -1,36 +1,35 @@
 import Foundation
 
 struct ScrollState {
-    private(set) var tick = 0
+    private var startedAt = ProcessInfo.processInfo.systemUptime
 
-    mutating func reset() {
-        tick = 0
+    mutating func reset(at time: TimeInterval = ProcessInfo.processInfo.systemUptime) {
+        startedAt = time
     }
 
-    mutating func advance() {
-        tick += 1
-    }
+    func offset(
+        contentWidth: CGFloat,
+        viewportWidth: CGFloat,
+        at time: TimeInterval = ProcessInfo.processInfo.systemUptime
+    ) -> CGFloat {
+        let distance = max(0, contentWidth - viewportWidth)
+        guard distance > 0 else { return 0 }
 
-    func visibleText(_ text: String, maxCharacters: Int) -> String {
-        guard maxCharacters > 0 else { return "" }
-        let characters = Array(text)
-        guard characters.count > maxCharacters else { return text }
+        let speed: CGFloat = 28
+        let pause: TimeInterval = 0.9
+        let travelTime = TimeInterval(distance / speed)
+        let cycle = 2 * (pause + travelTime)
+        let phase = max(0, time - startedAt).truncatingRemainder(dividingBy: cycle)
 
-        let pause = 6
-        let span = characters.count - maxCharacters
-        let cycle = pause + span + pause
-        let phase = tick % max(cycle, 1)
-
-        let start: Int
         if phase < pause {
-            start = 0
-        } else if phase < pause + span {
-            start = phase - pause
-        } else {
-            start = span
+            return 0
         }
-
-        let end = min(start + maxCharacters, characters.count)
-        return String(characters[start..<end])
+        if phase < pause + travelTime {
+            return CGFloat(phase - pause) * speed
+        }
+        if phase < 2 * pause + travelTime {
+            return distance
+        }
+        return distance - CGFloat(phase - 2 * pause - travelTime) * speed
     }
 }

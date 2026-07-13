@@ -24,12 +24,8 @@ enum SelfTests {
         check(LyricClock.currentLine(at: 0.5, in: parsed) == nil, "has no lyric before the first line")
         check(LyricClock.currentLine(at: 3.2, in: parsed) == "World", "selects the current lyric")
 
-        var scroll = ScrollState()
-        check(scroll.visibleText("short", maxCharacters: 10) == "short", "does not scroll short text")
-        for _ in 0..<7 {
-            scroll.advance()
-        }
-        check(scroll.visibleText("abcdefghij", maxCharacters: 4) == "bcde", "scrolls long text")
+        testSmoothScroll()
+        testOverlayGeometry()
 
         testTrackMatcher()
         testLyricsCache()
@@ -38,6 +34,8 @@ enum SelfTests {
         testLRCMuxRequest()
         testLRCMuxResponse()
         testLRCMuxLanguageConflict()
+        testQQMusicRequests()
+        testQQMusicFixtures()
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
@@ -47,6 +45,9 @@ enum SelfTests {
             }
             if ProcessInfo.processInfo.environment["LIVE_LYRICS_TESTS"] == "1" {
                 await testLRCMuxLive()
+            }
+            if ProcessInfo.processInfo.environment["QQ_LIVE_TESTS"] == "1" {
+                await testQQMusicLive()
             }
             semaphore.signal()
         }
@@ -70,6 +71,57 @@ enum SelfTests {
         check(cache.value(for: "track-0") == nil, "evicts the oldest result over capacity")
         check(cache.value(for: "track-100") == line, "keeps the newest cached result")
         check(cache.value(for: "track-100", bypass: true) == nil, "bypasses cached results on refresh")
+    }
+
+    private static func testSmoothScroll() {
+        var scroll = ScrollState()
+        scroll.reset(at: 100)
+
+        check(scroll.offset(contentWidth: 80, viewportWidth: 100, at: 200) == 0, "does not scroll fitting text")
+        check(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 100.8) == 0, "pauses at the scroll start")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 101.9) - 28) < 0.01, "scrolls forward at 28 points per second")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 102.9) - 56) < 0.01, "reaches the scroll endpoint")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 103.5) - 56) < 0.01, "pauses at the scroll endpoint")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 104.8) - 28) < 0.01, "scrolls back smoothly")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 105.8)) < 0.01, "returns to the scroll start")
+
+        scroll.reset(at: 300)
+        check(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 300.8) == 0, "reset restarts the initial pause")
+    }
+
+    private static func testOverlayGeometry() {
+        let leftSafeArea = NSRect(x: 0, y: 924, width: 646, height: 32)
+        let rightSafeArea = NSRect(x: 825, y: 924, width: 645, height: 32)
+        let frames = OverlayLaneGeometry.frames(
+            screenFrame: NSRect(x: 0, y: 0, width: 1470, height: 956),
+            auxiliaryTopLeftArea: leftSafeArea,
+            auxiliaryTopRightArea: rightSafeArea,
+            statusItemX: 1300,
+            menuBarHeight: 32
+        )
+        check(leftSafeArea.contains(frames.left), "keeps the left lyric lane inside the notch-safe area")
+        check(rightSafeArea.contains(frames.right), "keeps the right lyric lane inside the notch-safe area")
+        check(frames.left.maxX <= 646 && frames.right.minX >= 825, "keeps both lyric lanes out of the notch")
+        check(frames.right.maxX <= 1102, "reserves space before status items")
+        check(frames.left.width > 0 && frames.right.width > 0, "keeps usable lyric lanes on a notched MacBook")
+
+        let hiddenStatusItem = OverlayLaneGeometry.frames(
+            screenFrame: NSRect(x: 0, y: 0, width: 1470, height: 956),
+            auxiliaryTopLeftArea: leftSafeArea,
+            auxiliaryTopRightArea: rightSafeArea,
+            statusItemX: 8,
+            menuBarHeight: 32
+        )
+        check(hiddenStatusItem.right.width == frames.right.width, "ignores a culled off-screen status item coordinate")
+
+        let fallback = OverlayLaneGeometry.frames(
+            screenFrame: NSRect(x: 0, y: 0, width: 1440, height: 900),
+            auxiliaryTopLeftArea: nil,
+            auxiliaryTopRightArea: nil,
+            statusItemX: 1200,
+            menuBarHeight: 24
+        )
+        check(fallback.left.maxX <= 720 && fallback.right.minX >= 720, "separates fallback lanes on a non-notched display")
     }
 
     private static func testLRCMuxRequest() {
@@ -203,6 +255,83 @@ enum SelfTests {
         check(!(try! LRCMuxLyricsSource().parse(validJapanese, for: japanese)).isEmpty, "keeps explicitly marked Japanese lyrics")
     }
 
+    private static func testQQMusicRequests() {
+        let source = QQMusicLyricsSource()
+        let track = SpotifyTrack(name: "稻香", artist: "周杰伦", album: "魔杰座", duration: 223)
+        check(source.searchQueries(for: track) == ["稻香 周杰伦", "稻香"], "falls back from title and artist to title-only QQ search")
+        let search = try! source.searchRequest(query: "稻香 周杰伦")
+        check(search.httpMethod == "POST", "uses POST for QQ Music search")
+        check(search.timeoutInterval == 8, "uses an eight-second QQ Music timeout")
+        check(search.value(forHTTPHeaderField: "Referer") == "https://c.y.qq.com/", "sets the QQ Music referer")
+
+        let body = try! JSONSerialization.jsonObject(with: search.httpBody!) as! [String: Any]
+        let request = body["req_1"] as! [String: Any]
+        check(request["module"] as? String == "music.search.SearchCgiService", "uses the QQ Music search service")
+        check(request["method"] as? String == "DoSearchForQQMusicDesktop", "uses the QQ Music desktop search method")
+
+        let lyric = source.lyricRequest(songMID: "003aAYrm3GE0Ac")
+        let items = URLComponents(url: lyric.url!, resolvingAgainstBaseURL: false)?.queryItems
+        check(items?.contains(URLQueryItem(name: "songmid", value: "003aAYrm3GE0Ac")) == true, "sends the QQ Music song MID")
+        check(lyric.timeoutInterval == 8, "uses an eight-second QQ lyric timeout")
+
+        let smartbox = source.smartboxRequest(query: "稻香 周杰伦")
+        let smartboxItems = URLComponents(url: smartbox.url!, resolvingAgainstBaseURL: false)?.queryItems
+        check(smartboxItems?.contains(URLQueryItem(name: "key", value: "稻香 周杰伦")) == true, "sends the QQ Smartbox query")
+
+        let details = source.songDetailsRequest(songMID: "003aAYrm3GE0Ac")
+        let detailsItems = URLComponents(url: details.url!, resolvingAgainstBaseURL: false)?.queryItems
+        check(detailsItems?.contains(URLQueryItem(name: "songmid", value: "003aAYrm3GE0Ac")) == true, "requests QQ song details by MID")
+    }
+
+    private static func testQQMusicFixtures() {
+        let source = QQMusicLyricsSource()
+        let track = SpotifyTrack(name: "稻香", artist: "周杰伦", album: "魔杰座", duration: 223)
+        let search = try! JSONSerialization.data(withJSONObject: [
+            "req_1": ["data": ["body": ["song": ["list": [
+                ["id": "string-id", "mid": "wrong", "title": "稻香 (Live)", "singer": [["name": "其他歌手"]], "interval": 223],
+                ["mid": "correct", "title": "稻香", "singer": [["name": "周杰伦"]], "interval": 223]
+            ]]]]]
+        ])
+        check((try! source.matchingSongMID(in: search, for: track)) == "correct", "selects the matching QQ Music candidate")
+
+        let wrongArtist = try! JSONSerialization.data(withJSONObject: [
+            "req_1": ["data": ["body": ["song": ["list": [
+                ["id": 1, "mid": "wrong", "title": "稻香", "singer": [["name": "其他歌手"]], "interval": 223]
+            ]]]]]
+        ])
+        check((try! source.matchingSongMID(in: wrongArtist, for: track)) == nil, "rejects a QQ Music cover by another artist")
+
+        let smartbox = try! JSONSerialization.data(withJSONObject: [
+            "data": ["song": ["itemlist": [
+                ["mid": "correct", "name": "稻香", "singer": "周杰伦"],
+                ["mid": "cover", "name": "稻香", "singer": "其他歌手"]
+            ]]]
+        ])
+        check((try! source.matchingSmartboxSongMID(in: smartbox, for: track)) == "correct", "selects the matching QQ Smartbox candidate")
+
+        func details(interval: Int) -> Data {
+            let payload = try! JSONSerialization.data(withJSONObject: [
+                "code": 0,
+                "data": [["mid": "correct", "title": "稻香", "singer": [["name": "周杰伦"]], "interval": interval]]
+            ])
+            return Data("getOneSongInfoCallback(\(String(decoding: payload, as: UTF8.self)))".utf8)
+        }
+        check((try! source.validatedSongMID(in: details(interval: 223), for: track)) == "correct", "validates QQ Smartbox results with real duration")
+        check((try! source.validatedSongMID(in: details(interval: 260), for: track)) == nil, "rejects a same-title QQ recording with a different duration")
+
+        let lrc = "[00:01.00]对这个世界如果你有太多的抱怨\n[00:03.00]跌倒了就不敢继续往前走"
+        let payload = try! JSONSerialization.data(withJSONObject: [
+            "code": 0,
+            "lyric": Data(lrc.utf8).base64EncodedString()
+        ])
+        let jsonp = Data("MusicJsonCallback_lrc(\(String(decoding: payload, as: UTF8.self)))".utf8)
+        check((try! source.parseLyrics(jsonp)) == [
+            LyricLine(time: 1, text: "对这个世界如果你有太多的抱怨"),
+            LyricLine(time: 3, text: "跌倒了就不敢继续往前走")
+        ], "decodes QQ Music JSONP and Base64 line lyrics")
+        check((try! source.parseLyrics(Data("not jsonp".utf8))).isEmpty, "rejects malformed QQ Music lyric responses")
+    }
+
     private static func lrcMuxJSON(title: String, artist: String, album: String, duration: Int, isrc: String, texts: [String]) -> Data {
         let lines = texts.enumerated().map { ["text": $0.element, "start": ($0.offset + 1) * 1000, "end": ($0.offset + 2) * 1000] as [String: Any] }
         return try! JSONSerialization.data(withJSONObject: [
@@ -290,6 +419,20 @@ enum SelfTests {
         for track in representatives {
             let lines = try! await source.syncedLyrics(for: track)
             check(!lines.isEmpty, "keeps live LRC for \(track.name)")
+        }
+    }
+
+    private static func testQQMusicLive() async {
+        let source = QQMusicLyricsSource()
+        let representatives = [
+            SpotifyTrack(name: "稻香", artist: "周杰伦", album: "魔杰座", duration: 223),
+            SpotifyTrack(name: "如愿", artist: "王菲", album: "如愿", duration: 265),
+            SpotifyTrack(name: "光年之外", artist: "G.E.M.邓紫棋", album: "光年之外", duration: 235)
+        ]
+        for track in representatives {
+            let lines = try! await source.syncedLyrics(for: track)
+            print("QQ Music live \(track.name): \(lines.count) lines")
+            check(!lines.isEmpty, "fetches live QQ Music lyrics for \(track.name)")
         }
     }
 

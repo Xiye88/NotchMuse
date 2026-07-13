@@ -7,14 +7,16 @@ DIST="$ROOT/dist"
 APP="$DIST/MenuBarLyrics.app"
 CONTENTS="$APP/Contents"
 MACOS="$CONTENTS/MacOS"
+RESOURCES="$CONTENTS/Resources"
 
 cd "$PROJECT"
 swift build -c release
 "$PROJECT/.build/release/MenuBarLyrics" --self-test
 
 rm -rf "$APP"
-mkdir -p "$MACOS"
+mkdir -p "$MACOS" "$RESOURCES"
 cp "$PROJECT/.build/release/MenuBarLyrics" "$MACOS/MenuBarLyrics"
+cp "$ROOT/THIRD_PARTY_NOTICES.md" "$RESOURCES/THIRD_PARTY_NOTICES.md"
 
 cat > "$CONTENTS/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>

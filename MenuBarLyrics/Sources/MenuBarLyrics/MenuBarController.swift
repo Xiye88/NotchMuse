@@ -3,32 +3,10 @@ import Foundation
 
 @MainActor
 final class MenuBarController: NSObject {
-    private enum Width: String, CaseIterable {
-        case small = "Small"
-        case medium = "Medium"
-        case large = "Large"
-
-        var pixels: CGFloat {
-            switch self {
-            case .small: return 420
-            case .medium: return 720
-            case .large: return 980
-            }
-        }
-
-        var characters: Int {
-            switch self {
-            case .small: return 46
-            case .medium: return 80
-            case .large: return 110
-            }
-        }
-    }
-
     private let statusItem = NSStatusBar.system.statusItem(withLength: 28)
     private let overlay = OverlayLyricsWindow()
     private let lyricsClient = LyricsClient()
-    private var width: Width = .small
+    private var position: LyricsPosition = .both
     private var isPaused = false
     private var displaySource = "Open Spotify"
     private var currentTrack: SpotifyTrack?
@@ -48,13 +26,6 @@ final class MenuBarController: NSObject {
             }
         }
 
-        scrollTimer = Timer.scheduledTimer(withTimeInterval: 0.18, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.scroll.advance()
-                self?.updateDisplay()
-            }
-        }
-
         Task { @MainActor in
             await pollSpotify(forceLyricsRefresh: true)
         }
@@ -70,12 +41,11 @@ final class MenuBarController: NSObject {
 
     private func setupButton() {
         statusItem.length = 28
-        statusItem.button?.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .medium)
+        statusItem.button?.font = .menuBarFont(ofSize: 0)
         statusItem.button?.alignment = .center
         statusItem.button?.lineBreakMode = .byClipping
         statusItem.button?.toolTip = "Menu Bar Lyrics"
         statusItem.button?.title = "♪"
-        overlay.show(width: width.pixels)
     }
 
     private func setupMenu() {
@@ -83,9 +53,10 @@ final class MenuBarController: NSObject {
         menu.addItem(NSMenuItem(title: "Pause Lyrics", action: #selector(togglePause), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
 
-        for itemWidth in Width.allCases {
-            let item = NSMenuItem(title: "Width: \(itemWidth.rawValue)", action: #selector(setWidth(_:)), keyEquivalent: "")
-            item.representedObject = itemWidth.rawValue
+        for itemPosition in LyricsPosition.allCases {
+            let item = NSMenuItem(title: itemPosition.rawValue, action: #selector(setPosition(_:)), keyEquivalent: "")
+            item.representedObject = itemPosition.rawValue
+            item.state = itemPosition == position ? .on : .off
             menu.addItem(item)
         }
 
@@ -96,7 +67,6 @@ final class MenuBarController: NSObject {
         for item in menu.items {
             item.target = self
         }
-
         statusItem.menu = menu
     }
 
@@ -156,10 +126,28 @@ final class MenuBarController: NSObject {
 
     private func updateDisplay() {
         statusItem.length = 28
-        let visible = scroll.visibleText(displaySource, maxCharacters: width.characters)
         statusItem.button?.title = "♪"
-        overlay.show(width: width.pixels)
-        overlay.setText(visible.isEmpty ? " " : "♪ \(visible)")
+        let overflows = overlay.show(
+            text: displaySource.isEmpty ? " " : "♪ \(displaySource)",
+            position: position,
+            statusItem: statusItem,
+            scroll: scroll
+        )
+        updateScrollTimer(overflows: overflows)
+    }
+
+    private func updateScrollTimer(overflows: Bool) {
+        if overflows {
+            guard scrollTimer == nil else { return }
+            scrollTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+                Task { @MainActor in
+                    self?.updateDisplay()
+                }
+            }
+        } else {
+            scrollTimer?.invalidate()
+            scrollTimer = nil
+        }
     }
 
     @objc private func togglePause(_ sender: NSMenuItem) {
@@ -174,12 +162,15 @@ final class MenuBarController: NSObject {
         }
     }
 
-    @objc private func setWidth(_ sender: NSMenuItem) {
+    @objc private func setPosition(_ sender: NSMenuItem) {
         guard let rawValue = sender.representedObject as? String,
-              let newWidth = Width(rawValue: rawValue) else {
+              let newPosition = LyricsPosition(rawValue: rawValue) else {
             return
         }
-        width = newWidth
+        position = newPosition
+        for item in statusItem.menu?.items ?? [] where item.action == #selector(setPosition(_:)) {
+            item.state = item === sender ? .on : .off
+        }
         scroll.reset()
         updateDisplay()
     }

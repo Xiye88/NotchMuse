@@ -1,36 +1,74 @@
 import Foundation
 
-private let tracks = [
-    SpotifyTrack(name: "成都", artist: "赵雷", album: "无法长大", duration: 328),
-    SpotifyTrack(name: "七里香", artist: "周杰伦", album: "七里香", duration: 299),
-    SpotifyTrack(name: "演员", artist: "薛之谦", album: "绅士", duration: 261),
-    SpotifyTrack(name: "光年之外", artist: "G.E.M. 邓紫棋", album: "光年之外", duration: 235),
-    SpotifyTrack(name: "童话", artist: "光良", album: "童话", duration: 241),
-    SpotifyTrack(name: "平凡之路", artist: "朴树", album: "猎户星座", duration: 301),
-    SpotifyTrack(name: "Blinding Lights", artist: "The Weeknd", album: "After Hours", duration: 200),
-    SpotifyTrack(name: "Shape of You", artist: "Ed Sheeran", album: "÷", duration: 234),
-    SpotifyTrack(name: "Someone Like You", artist: "Adele", album: "21", duration: 285),
-    SpotifyTrack(name: "Bohemian Rhapsody", artist: "Queen", album: "A Night at the Opera", duration: 354),
-    SpotifyTrack(name: "Anti-Hero", artist: "Taylor Swift", album: "Midnights", duration: 201),
-    SpotifyTrack(name: "Hotel California", artist: "Eagles", album: "Hotel California", duration: 391),
-    SpotifyTrack(name: "Lemon", artist: "Kenshi Yonezu", album: "STRAY SHEEP", duration: 255),
-    SpotifyTrack(name: "Pretender", artist: "Official HIGE DANdism", album: "Traveler", duration: 327),
-    SpotifyTrack(name: "夜に駆ける", artist: "YOASOBI", album: "THE BOOK", duration: 262),
-    SpotifyTrack(name: "First Love", artist: "Hikaru Utada", album: "First Love", duration: 257),
-    SpotifyTrack(name: "Dynamite", artist: "BTS", album: "BE", duration: 199),
-    SpotifyTrack(name: "Ditto", artist: "NewJeans", album: "OMG", duration: 186),
-    SpotifyTrack(name: "Gangnam Style", artist: "PSY", album: "PSY 6 (Six Rules), Pt. 1", duration: 219),
-    SpotifyTrack(name: "LOVE SCENARIO", artist: "iKON", album: "Return", duration: 209),
-]
+private struct MatrixResult {
+    let track: SpotifyTrack
+    let source: String
+    let lineCount: Int
+    let latencyMilliseconds: Int
+
+    var tsv: String {
+        [track.name, track.artist, source, String(lineCount), String(latencyMilliseconds)].joined(separator: "\t")
+    }
+}
 
 @main enum LiveMatrix {
     static func main() async {
-        guard CommandLine.arguments.count == 2,
-              let index = Int(CommandLine.arguments[1]),
-              tracks.indices.contains(index) else { exit(2) }
-        let track = tracks[index]
+        guard CommandLine.arguments.count == 3 else { exit(2) }
+
+        do {
+            let tracks = try loadTracks(from: URL(fileURLWithPath: CommandLine.arguments[1]))
+            let results = await runMatrix(for: tracks)
+            let report = (["title\tartist\tsource\tline_count\tlatency_ms"] + results.map(\.tsv)).joined(separator: "\n") + "\n"
+            try report.write(to: URL(fileURLWithPath: CommandLine.arguments[2]), atomically: true, encoding: .utf8)
+            printSummary(for: results)
+
+            guard results.filter({ $0.source != "MISS" }).count >= 90 else { exit(1) }
+        } catch {
+            fputs("Live matrix failed: \(error)\n", stderr)
+            exit(2)
+        }
+    }
+
+    private static func loadTracks(from url: URL) throws -> [SpotifyTrack] {
+        let rows = try String(contentsOf: url, encoding: .utf8).split(whereSeparator: \.isNewline)
+        guard rows.first == "title\tartist\talbum\tduration_seconds" else {
+            throw MatrixError.invalidFixture
+        }
+
+        let tracks = try rows.dropFirst().map { row -> SpotifyTrack in
+            let fields = row.split(separator: "\t", omittingEmptySubsequences: false)
+            guard fields.count == 4, let duration = Double(fields[3]), duration > 0 else {
+                throw MatrixError.invalidFixture
+            }
+            return SpotifyTrack(name: String(fields[0]), artist: String(fields[1]), album: String(fields[2]), duration: duration)
+        }
+        guard tracks.count == 100 else { throw MatrixError.invalidFixture }
+        return tracks
+    }
+
+    private static func runMatrix(for tracks: [SpotifyTrack]) async -> [MatrixResult] {
+        await withTaskGroup(of: (Int, MatrixResult).self, returning: [MatrixResult].self) { group in
+            var pending = tracks.enumerated().makeIterator()
+            var results = Array<MatrixResult?>(repeating: nil, count: tracks.count)
+
+            for _ in 0..<min(5, tracks.count) {
+                guard let (index, track) = pending.next() else { break }
+                group.addTask { (index, await fetchLyrics(for: track)) }
+            }
+
+            while let (index, result) = await group.next() {
+                results[index] = result
+                if let (nextIndex, track) = pending.next() {
+                    group.addTask { (nextIndex, await fetchLyrics(for: track)) }
+                }
+            }
+            return results.compactMap { $0 }
+        }
+    }
+
+    private static func fetchLyrics(for track: SpotifyTrack) async -> MatrixResult {
         let start = ContinuousClock.now
-        let result = await withTaskGroup(of: (String, [LyricLine]?).self) { group in
+        let result = await withTaskGroup(of: (String, [LyricLine]?).self, returning: (String, [LyricLine]?).self) { group in
             group.addTask { ("LRCLIB", try? await LRCLIBLyricsSource().syncedLyrics(for: track)) }
             group.addTask { ("NetEase", try? await NetEaseLyricsSource().syncedLyrics(for: track)) }
             group.addTask { ("LRCMux", try? await LRCMuxLyricsSource().syncedLyrics(for: track)) }
@@ -41,8 +79,27 @@ private let tracks = [
             }
             return ("MISS", nil)
         }
-        let duration = start.duration(to: .now).components
-        let milliseconds = Int(duration.seconds) * 1000 + Int(duration.attoseconds / 1_000_000_000_000_000)
-        print([track.name, track.artist, result.0, String(result.1?.count ?? 0), String(milliseconds)].joined(separator: "\t"))
+        let components = start.duration(to: .now).components
+        let milliseconds = Int(components.seconds) * 1_000 + Int(components.attoseconds / 1_000_000_000_000_000)
+        return MatrixResult(track: track, source: result.0, lineCount: result.1?.count ?? 0, latencyMilliseconds: milliseconds)
+    }
+
+    private static func printSummary(for results: [MatrixResult]) {
+        let hits = results.filter { $0.source != "MISS" }
+        let sourceCounts = ["LRCLIB", "NetEase", "LRCMux", "QQ"].map { source in
+            "\(source)=\(hits.count { $0.source == source })"
+        }.joined(separator: ", ")
+        let latencies = results.map(\.latencyMilliseconds).sorted()
+        let median = (latencies[(latencies.count - 1) / 2] + latencies[latencies.count / 2]) / 2
+        let p95 = latencies[Int(ceil(Double(latencies.count) * 0.95)) - 1]
+
+        print("Coverage: \(hits.count)/\(results.count)")
+        print("Sources: \(sourceCounts)")
+        print("Latency: median \(median) ms, p95 \(p95) ms")
+        print(hits.count >= 90 ? "Live matrix passed: \(hits.count)/\(results.count) songs matched" : "Live matrix failed: \(hits.count)/\(results.count) songs matched")
+    }
+
+    private enum MatrixError: Error {
+        case invalidFixture
     }
 }

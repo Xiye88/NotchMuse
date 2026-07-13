@@ -531,6 +531,8 @@ enum SelfTests {
             (track("Song", "Artist & Guest"), candidate("Song", ["Artist", "Guest"])),
             (track("Song", "Artist & Guest"), candidate("Song", ["Guest", "Artist"])),
             (track("Cancion", "Jose"), candidate("Canción", ["José"])),
+            (track("夜に駆ける", "YOASOBI", 262), candidate("夜に駆ける", ["YOASOBI"], 262_000)),
+            (track("봄날", "BTS", 274), candidate("봄날", ["BTS"], 274_000)),
             (track("Song"), candidate("Song", ["Artist"], 212_000))
         ]
         for (source, result) in accepted {
@@ -544,6 +546,7 @@ enum SelfTests {
             (track("Song", "Artist, Guest"), candidate("Song", ["Guest"])),
             (track("Song", "Artist, Guest"), candidate("Song", ["Guest", "Other"])),
             (track("成都", "赵雷", 328), candidate("成都", ["其他歌手"], 328_020)),
+            (track("Hotel California", "Eagles", 391), candidate("Hotel California", ["Eagles Tribute"], 391_000)),
             (track("乾", "Artist", 200), candidate("幹", ["Artist"], 200_000)),
             (track("成都", "赵雷", 328), candidate("成都", ["赵雷"], 340_001)),
             (track("Hello"), candidate("Hello World")),

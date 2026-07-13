@@ -1,6 +1,7 @@
 # MenuBarLyrics
 
-A small native macOS menu bar app that shows synced Spotify lyrics.
+A small native macOS menu bar app that shows synced Spotify lyrics. It reads
+the current song metadata from the local Spotify app using Apple Events.
 
 ## Use
 
@@ -20,5 +21,13 @@ Menu options:
 
 ## Notes
 
-- Lyrics come from LRCLIB, so some songs may not have synced lyrics.
+- Lyrics are fetched over the network from LRCLIB and may also use the
+  experimental NetEase Cloud Music and lrcmux interfaces. Availability and
+  accuracy vary by service.
+- The app does not upload audio, require an account, write a persistent cache,
+  or collect telemetry.
+- Third-party services and lyric copyrights are subject to their respective
+  terms and rights holders.
+- The current app bundle is ad-hoc signed for personal testing, not distributed
+  with a Developer ID or through the Mac App Store.
 - This is a local Mac app. A VPS cannot display lyrics inside your Mac menu bar.

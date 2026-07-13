@@ -42,14 +42,19 @@ enum TrackMatcher {
 
     private static func parsedTitle(_ title: String) -> (name: String, versions: Set<String>) {
         let folded = title.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        let versions = Set(["live", "remix", "acoustic", "instrumental"].filter {
-            folded.range(of: "\\b\($0)\\b", options: .regularExpression) != nil
-        })
         var name = folded
         for pattern in [
-            #"[\(\[].*?\b(feat\.?|ft\.?|featuring|remaster(ed)?|live|remix|acoustic|instrumental)\b.*?[\)\]]"#,
-            #"\s+-\s+.*\b(remaster(ed)?|live|remix|acoustic|instrumental)\b.*$"#,
+            #"[\(\[].*?\b(feat\.?|ft\.?|featuring)\b.*?[\)\]]"#,
             #"\s+\b(feat\.?|ft\.?|featuring)\b.*$"#
+        ] {
+            name = name.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        }
+        let versions = Set(["live", "remix", "acoustic", "instrumental"].filter {
+            name.range(of: "\\b\($0)\\b", options: .regularExpression) != nil
+        })
+        for pattern in [
+            #"[\(\[].*?\b(remaster(ed)?|live|remix|acoustic|instrumental)\b.*?[\)\]]"#,
+            #"\s+-\s+.*\b(remaster(ed)?|live|remix|acoustic|instrumental)\b.*$"#
         ] {
             name = name.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
         }
@@ -57,9 +62,9 @@ enum TrackMatcher {
     }
 
     private static func artistSet(_ artists: [String]) -> Set<String> {
-        Set(artists.flatMap {
+        Set([normalize(artists.joined())] + artists.flatMap {
             $0.replacingOccurrences(of: #"\b(feat\.?|ft\.?|featuring)\b"#, with: ",", options: [.regularExpression, .caseInsensitive])
-                .components(separatedBy: CharacterSet(charactersIn: ",&/;"))
+                .components(separatedBy: CharacterSet(charactersIn: ",;"))
                 .map(normalize)
                 .filter { !$0.isEmpty }
         })

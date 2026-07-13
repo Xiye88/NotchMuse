@@ -33,11 +33,17 @@ enum SelfTests {
 
         testTrackMatcher()
         testLyricsCache()
+        testLRCLIBRequest()
         testLRCMuxRequest()
+        testLRCMuxResponse()
+        testLRCMuxLanguageConflict()
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
             await testLyricsClient()
+            if ProcessInfo.processInfo.environment["LIVE_LYRICS_TESTS"] == "1" {
+                await testLRCMuxLive()
+            }
             semaphore.signal()
         }
         while semaphore.wait(timeout: .now()) != .success {
@@ -67,6 +73,55 @@ enum SelfTests {
         let items = URLComponents(url: LRCMuxLyricsSource().request(for: track).url!, resolvingAgainstBaseURL: false)?.queryItems
         check(items?.contains(URLQueryItem(name: "album", value: "The Album")) == true, "sends album to lrcmux")
         check(items?.contains(URLQueryItem(name: "duration", value: "202")) == true, "sends duration to lrcmux in seconds")
+        check(items?.contains(URLQueryItem(name: "format", value: "json")) == true, "requests JSON from lrcmux")
+    }
+
+    private static func testLRCLIBRequest() {
+        let track = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
+        let request = LyricsClient.lrclibRequest(for: track)
+        check(request.timeoutInterval == 6, "uses a six-second LRCLIB timeout")
+        check(request.value(forHTTPHeaderField: "User-Agent") == "MenuBarLyrics/0.1 (macOS)", "sets the LRCLIB user agent")
+    }
+
+    private static func testLRCMuxResponse() {
+        let track = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
+        let data = lrcMuxJSON(title: "Song", artist: "Artist", album: "Album", duration: 200, isrc: "USABC1234567", texts: ["Hello", "World"])
+        let lines = try! LRCMuxLyricsSource().parse(data, for: track)
+        check(lines == [LyricLine(time: 1, text: "Hello"), LyricLine(time: 2, text: "World")], "parses official lrcmux track/meta/lines JSON")
+
+        let wrongTrack = SpotifyTrack(name: "Different", artist: "Artist", album: "Album", duration: 200)
+        check((try! LRCMuxLyricsSource().parse(data, for: wrongTrack)).isEmpty, "reuses track matching for lrcmux metadata")
+    }
+
+    private static func testLRCMuxLanguageConflict() {
+        let korean = SpotifyTrack(name: "LOVE SCENARIO", artist: "iKON", album: "Return", duration: 209)
+        let wrongJapanese = lrcMuxJSON(
+            title: "LOVE SCENARIO", artist: "Ikon", album: "Return", duration: 209,
+            isrc: "KRA401800015", texts: ["恋に落ちた僕たちは", "消えはしない思い出になる"]
+        )
+        check((try! LRCMuxLyricsSource().parse(wrongJapanese, for: korean)).isEmpty, "rejects the LOVE SCENARIO Japanese conflict")
+
+        let normalKorean = lrcMuxJSON(
+            title: "LOVE SCENARIO", artist: "Ikon", album: "Return", duration: 209,
+            isrc: "KRA401800015", texts: ["사랑을 했다 우리가 만나", "지우지 못할 추억이 됐다"]
+        )
+        check(!(try! LRCMuxLyricsSource().parse(normalKorean, for: korean)).isEmpty, "keeps normal Korean lyrics")
+
+        let japanese = SpotifyTrack(name: "LOVE SCENARIO Japanese ver.", artist: "iKON", album: "JP Edition", duration: 209)
+        let validJapanese = lrcMuxJSON(
+            title: "LOVE SCENARIO Japanese ver.", artist: "Ikon", album: "JP Edition", duration: 209,
+            isrc: "KRA401800015", texts: ["恋に落ちた僕たちは", "消えはしない思い出になる"]
+        )
+        check(!(try! LRCMuxLyricsSource().parse(validJapanese, for: japanese)).isEmpty, "keeps explicitly marked Japanese lyrics")
+    }
+
+    private static func lrcMuxJSON(title: String, artist: String, album: String, duration: Int, isrc: String, texts: [String]) -> Data {
+        let lines = texts.enumerated().map { ["text": $0.element, "start": ($0.offset + 1) * 1000, "end": ($0.offset + 2) * 1000] as [String: Any] }
+        return try! JSONSerialization.data(withJSONObject: [
+            "track": ["isrc": isrc, "title": title, "artist": artist, "album": album, "duration": duration],
+            "meta": ["source": ["id": "test", "name": "Test", "url": "https://example.com"], "level": "line"],
+            "lines": lines
+        ])
     }
 
     @MainActor
@@ -109,6 +164,22 @@ enum SelfTests {
         check(refreshedCache == refreshed, "caches refreshed lyrics")
         counts = await calls.snapshot()
         check(counts == [2, 2, 2], "refreshed cache does not call sources")
+    }
+
+    private static func testLRCMuxLive() async {
+        let source = LRCMuxLyricsSource()
+        let conflict = SpotifyTrack(name: "LOVE SCENARIO", artist: "iKON", album: "Return", duration: 209)
+        let conflictLines = try! await source.syncedLyrics(for: conflict)
+        check(conflictLines.isEmpty, "rejects the live LOVE SCENARIO conflict")
+
+        let representatives = [
+            SpotifyTrack(name: "成都", artist: "赵雷", album: "无法长大", duration: 328),
+            SpotifyTrack(name: "Shape of You", artist: "Ed Sheeran", album: "÷", duration: 234)
+        ]
+        for track in representatives {
+            let lines = try! await source.syncedLyrics(for: track)
+            check(!lines.isEmpty, "keeps live LRC for \(track.name)")
+        }
     }
 
     private static func testTrackMatcher() {

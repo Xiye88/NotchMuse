@@ -41,7 +41,7 @@ final class LyricsClient {
         }
     }
 
-    nonisolated private static func lrclibLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
+    nonisolated static func lrclibRequest(for track: SpotifyTrack) -> URLRequest {
         var components = URLComponents(string: "https://lrclib.net/api/get")!
         components.queryItems = [
             URLQueryItem(name: "artist_name", value: track.artist),
@@ -52,8 +52,12 @@ final class LyricsClient {
 
         var request = URLRequest(url: components.url!)
         request.setValue("MenuBarLyrics/0.1 (macOS)", forHTTPHeaderField: "User-Agent")
-        request.timeoutInterval = 3
+        request.timeoutInterval = 6
+        return request
+    }
 
+    nonisolated private static func lrclibLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
+        let request = lrclibRequest(for: track)
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw NSError(domain: "LyricsClient", code: 1)

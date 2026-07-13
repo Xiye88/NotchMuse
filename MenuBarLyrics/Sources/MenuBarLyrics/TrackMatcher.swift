@@ -18,9 +18,11 @@ enum TrackMatcher {
               sourceTitle.versions == candidateTitle.versions,
               durationDifference <= 12 else { return 0 }
 
-        let sourceArtists = artistSet([track.artist])
-        let candidateArtists = artistSet(candidate.artists)
-        let artistScore = sourceArtists.isDisjoint(with: candidateArtists) ? 0 : 30
+        let sourceArtists = artistKeys([track.artist])
+        let candidateArtists = artistKeys(candidate.artists)
+        let artistsMatch = !sourceArtists.members.isDisjoint(with: candidateArtists.members)
+            || sourceArtists.group == candidateArtists.group
+        let artistScore = artistsMatch ? 30 : 0
         let durationScore: Int
         switch durationDifference {
         case ...2: durationScore = 15
@@ -61,13 +63,21 @@ enum TrackMatcher {
         return (normalize(name), versions.subtracting(["remaster"]))
     }
 
-    private static func artistSet(_ artists: [String]) -> Set<String> {
-        Set([normalize(artists.joined())] + artists.flatMap {
+    private static func artistKeys(_ artists: [String]) -> (members: Set<String>, group: [String]) {
+        let cleaned = artists.map {
             $0.replacingOccurrences(of: #"\b(feat\.?|ft\.?|featuring)\b"#, with: ",", options: [.regularExpression, .caseInsensitive])
-                .components(separatedBy: CharacterSet(charactersIn: ",;"))
+        }
+        let members = Set(cleaned.flatMap {
+            $0.components(separatedBy: CharacterSet(charactersIn: ",;"))
                 .map(normalize)
                 .filter { !$0.isEmpty }
         })
+        let group = cleaned.flatMap {
+            $0.components(separatedBy: CharacterSet(charactersIn: ",&;"))
+                .map(normalize)
+                .filter { !$0.isEmpty }
+        }
+        return (members, group)
     }
 
     private static func normalize(_ text: String) -> String {

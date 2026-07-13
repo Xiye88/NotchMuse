@@ -63,6 +63,7 @@ enum SelfTests {
         }
 
         let rejected: [(SpotifyTrack, TrackMatcher.Candidate)] = [
+            (track("Song", "AB, C"), candidate("Song", ["A", "BC"])),
             (track("Song", "AC/DC"), candidate("Song", ["DC"])),
             (track("Song", "Earth, Wind & Fire"), candidate("Song", ["Fire"])),
             (track("成都", "赵雷", 328), candidate("成都", ["其他歌手"], 328_020)),

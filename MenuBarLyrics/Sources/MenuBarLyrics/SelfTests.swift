@@ -85,12 +85,11 @@ enum SelfTests {
         let request = LRCLIBLyricsSource().request(for: track)
         let components = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)
         check(components?.path == "/api/search", "uses LRCLIB search")
-        check(components?.queryItems?.contains(URLQueryItem(name: "q", value: "Song Artist")) == true, "searches LRCLIB by title and artist")
-        check(components?.queryItems?.contains(URLQueryItem(name: "track_name", value: "Song")) == true, "searches LRCLIB by title")
-        check(components?.queryItems?.contains(URLQueryItem(name: "artist_name", value: "Artist")) == true, "searches LRCLIB by artist")
-        check(components?.queryItems?.contains(where: { $0.name == "album_name" }) == false, "does not let album formatting filter LRCLIB results")
-        check(components?.queryItems?.contains(URLQueryItem(name: "duration", value: "200")) == true, "keeps duration in LRCLIB search")
-        check(request.timeoutInterval == 6, "uses a six-second LRCLIB timeout")
+        check(components?.queryItems == [
+            URLQueryItem(name: "track_name", value: "Song"),
+            URLQueryItem(name: "artist_name", value: "Artist")
+        ], "sends only official LRCLIB search parameters")
+        check(request.timeoutInterval == 8, "uses an eight-second LRCLIB timeout")
         check(request.value(forHTTPHeaderField: "User-Agent") == "MenuBarLyrics/0.1 (macOS)", "sets the LRCLIB user agent")
     }
 
@@ -102,6 +101,12 @@ enum SelfTests {
             ("LOVE SCENARIO", "iKON", "RETURN -KR EDITION-", 217, "[00:01.00]恋に落ちた僕たちは")
         ])
         check((try! source.parse(conflicting, for: loveScenario)).isEmpty, "rejects ambiguous Kana/Hangul LRCLIB versions")
+
+        let conflictOutsideMatching = lrclibJSON([
+            ("LOVE SCENARIO", "iKON", "Return", 209, "[00:01.00]사랑을 했다 우리가 만나"),
+            ("Unrelated", "Someone Else", "Elsewhere", 180, "[00:01.00]恋に落ちた僕たちは")
+        ])
+        check((try! source.parse(conflictOutsideMatching, for: loveScenario)).isEmpty, "checks script conflicts across every usable LRCLIB candidate")
 
         let fairyTale = SpotifyTrack(name: "童话", artist: "光良", album: "童话", duration: 241)
         let fairyTaleSearch = lrclibJSON([
@@ -117,12 +122,46 @@ enum SelfTests {
         ])
         check((try! source.parse(gangnamSearch, for: gangnam)) == [LyricLine(time: 1, text: "오빤 강남스타일")], "selects the matching Gangnam Style synced lyrics")
 
-        let japanese = SpotifyTrack(name: "Lemon", artist: "Kenshi Yonezu", album: "BOOTLEG", duration: 256)
-        let japaneseOnly = lrclibJSON([("Lemon", "Kenshi Yonezu", "BOOTLEG", 256, "[00:01.00]夢ならばどれほどよかったでしょう")])
-        check(!(try! source.parse(japaneseOnly, for: japanese)).isEmpty, "keeps a single Japanese LRCLIB candidate")
+        let japanese = SpotifyTrack(name: "Lemon Japanese ver.", artist: "Kenshi Yonezu", album: "BOOTLEG", duration: 256)
+        let japaneseOnly = lrclibJSON([("Lemon Japanese ver.", "Kenshi Yonezu", "BOOTLEG", 256, "[00:01.00]夢ならばどれほどよかったでしょう")])
+        check(!(try! source.parse(japaneseOnly, for: japanese)).isEmpty, "keeps explicitly marked Japanese LRCLIB lyrics")
+
+        let romanizedJapanese = lrclibJSON([
+            ("Lemon Japanese ver.", "Kenshi Yonezu", "BOOTLEG", 256, "[00:01.00]夢ならばどれほどよかったでしょう"),
+            ("Unrelated", "Someone Else", "Elsewhere", 180, "[00:01.00]This is romanized text")
+        ])
+        check(!(try! source.parse(romanizedJapanese, for: japanese)).isEmpty, "does not treat Kana plus romanized lyrics as a script conflict")
+
+        let unmarkedJapanese = SpotifyTrack(name: "Lemon", artist: "Kenshi Yonezu", album: "BOOTLEG", duration: 256)
+        let unmarkedJapaneseOnly = lrclibJSON([("Lemon", "Kenshi Yonezu", "BOOTLEG", 256, "[00:01.00]夢ならばどれほどよかったでしょう")])
+        check((try! source.parse(unmarkedJapaneseOnly, for: unmarkedJapanese)).isEmpty, "rejects Kana-dominant lyrics for unmarked Latin Spotify metadata")
 
         let koreanOnly = lrclibJSON([("Gangnam Style", "PSY", "Psy 6", 219, "[00:01.00]오빤 강남스타일")])
         check(!(try! source.parse(koreanOnly, for: gangnam)).isEmpty, "keeps a single Korean LRCLIB candidate")
+
+        let latin = SpotifyTrack(name: "Hello", artist: "Adele", album: "25", duration: 200)
+        let latinOnly = lrclibJSON([("Hello", "Adele", "25", 200, "[00:01.00]Hello from the other side")])
+        check(!(try! source.parse(latinOnly, for: latin)).isEmpty, "keeps normal Latin lyrics")
+
+        let tied = lrclibJSON([
+            ("Song", "Artist", "Album", 198, "[00:01.00]First"),
+            ("Song (feat. Guest)", "Artist", "Other Album", 202, "[00:01.00]Second")
+        ])
+        let tiedTrack = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
+        check((try! source.parse(tied, for: tiedTrack)).isEmpty, "rejects distinct equal-scoring LRCLIB candidates")
+
+        let duplicate = lrclibJSON([
+            ("Hello!", "ADELE", "25", 200, "[00:01.00]Hello from the other side"),
+            ("hello", "Adele", "Deluxe", 201, "[00:01.00]Hello from the other side")
+        ])
+        check(!(try! source.parse(duplicate, for: latin)).isEmpty, "deduplicates candidates with equivalent normalized metadata")
+
+        let duplicateConflict = lrclibJSON([
+            ("LOVE SCENARIO Japanese ver.", "iKON", "Return", 209, "[00:01.00]사랑을 했다 우리가 만나"),
+            ("love scenario japanese ver", "IKON", "Return JP", 209, "[00:01.00]恋に落ちた僕たちは")
+        ])
+        let markedDuplicate = SpotifyTrack(name: "LOVE SCENARIO Japanese ver.", artist: "iKON", album: "Return JP", duration: 209)
+        check((try! source.parse(duplicateConflict, for: markedDuplicate)).isEmpty, "checks duplicate metadata for Kana/Hangul conflict before deduplication")
     }
 
     private static func lrclibJSON(_ rows: [(String, String, String, Double, String)]) -> Data {
@@ -256,20 +295,27 @@ enum SelfTests {
 
     private static func testLRCLIBLive() async {
         let source = LRCLIBLyricsSource()
-        let loveScenario = SpotifyTrack(name: "LOVE SCENARIO", artist: "iKON", album: "Return", duration: 209)
-        var rejectedConflict = false
-        for _ in 0..<3 where !rejectedConflict {
-            rejectedConflict = (try! await source.syncedLyrics(for: loveScenario)).isEmpty
+        do {
+            let loveScenario = SpotifyTrack(name: "LOVE SCENARIO", artist: "iKON", album: "Return", duration: 209)
+            let conflictLines = try await source.syncedLyrics(for: loveScenario)
+            print("LRCLIB live LOVE SCENARIO: \(conflictLines.count) lines")
+            check(conflictLines.isEmpty, "rejects a live LRCLIB LOVE SCENARIO conflict window")
+        } catch {
+            fputs("LRCLIB live LOVE SCENARIO skipped after network failure: \(error)\n", stderr)
         }
-        check(rejectedConflict, "rejects a live LRCLIB LOVE SCENARIO conflict window")
 
         let expected = [
             SpotifyTrack(name: "童话", artist: "光良", album: "童话", duration: 242),
             SpotifyTrack(name: "Gangnam Style", artist: "PSY", album: "Psy 6 (Six Rules), Pt. 1", duration: 219)
         ]
         for track in expected {
-            let lines = try! await source.syncedLyrics(for: track)
-            check(!lines.isEmpty, "selects live LRCLIB lyrics for \(track.name)")
+            do {
+                let lines = try await source.syncedLyrics(for: track)
+                print("LRCLIB live \(track.name): \(lines.count) lines")
+                check(!lines.isEmpty, "selects live LRCLIB lyrics for \(track.name)")
+            } catch {
+                fputs("LRCLIB live \(track.name) skipped after network failure: \(error)\n", stderr)
+            }
         }
     }
 

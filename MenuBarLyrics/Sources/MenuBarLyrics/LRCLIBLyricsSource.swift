@@ -4,14 +4,12 @@ struct LRCLIBLyricsSource {
     func request(for track: SpotifyTrack) -> URLRequest {
         var components = URLComponents(string: "https://lrclib.net/api/search")!
         components.queryItems = [
-            URLQueryItem(name: "q", value: "\(track.name) \(track.artist)"),
             URLQueryItem(name: "track_name", value: track.name),
-            URLQueryItem(name: "artist_name", value: track.artist),
-            URLQueryItem(name: "duration", value: String(Int(track.duration.rounded())))
+            URLQueryItem(name: "artist_name", value: track.artist)
         ]
         var request = URLRequest(url: components.url!)
         request.setValue("MenuBarLyrics/0.1 (macOS)", forHTTPHeaderField: "User-Agent")
-        request.timeoutInterval = 6
+        request.timeoutInterval = 8
         return request
     }
 
@@ -24,18 +22,77 @@ struct LRCLIBLyricsSource {
     func parse(_ data: Data, for track: SpotifyTrack) throws -> [LyricLine] {
         let results = try JSONDecoder().decode([Result].self, from: data)
         let usable = results.filter { $0.syncedLyrics?.isEmpty == false }
-        let matching = usable.map { ($0, TrackMatcher.score(track, candidate: $0.candidate)) }
-            .filter { $0.1 >= TrackMatcher.acceptanceThreshold }
-            .sorted { $0.1 > $1.1 }
-        guard !hasUnmarkedScriptConflict(matching.map(\.0), track: track),
-              let lyrics = matching.first?.0.syncedLyrics else { return [] }
+        guard !hasUnmarkedScriptConflict(usable, track: track),
+              !hasDuplicateScriptConflict(usable) else { return [] }
+
+        var indices = [MetadataKey: Int]()
+        var unique = [Result]()
+        for result in usable {
+            let key = metadataKey(for: result)
+            if let index = indices[key] {
+                if TrackMatcher.score(track, candidate: result.candidate) > TrackMatcher.score(track, candidate: unique[index].candidate) {
+                    unique[index] = result
+                }
+            } else {
+                indices[key] = unique.count
+                unique.append(result)
+            }
+        }
+        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: unique.map(\.candidate)),
+              let lyrics = unique[index].syncedLyrics,
+              !hasSuspiciousKana(lyrics, for: track) else { return [] }
         return LyricParser.parse(lyrics)
     }
 
     private func hasUnmarkedScriptConflict(_ results: [Result], track: SpotifyTrack) -> Bool {
-        guard !hasVersionMarker(track.name), !hasVersionMarker(track.album) else { return false }
+        guard ![track.name, track.artist, track.album].contains(where: hasVersionMarker) else { return false }
         let scripts = Set(results.compactMap { script(of: $0.syncedLyrics ?? "") })
         return scripts.contains(.kana) && scripts.contains(.hangul)
+    }
+
+    private func hasDuplicateScriptConflict(_ results: [Result]) -> Bool {
+        Dictionary(grouping: results, by: metadataKey).values.contains {
+            let scripts = Set($0.compactMap { script(of: $0.syncedLyrics ?? "") })
+            return scripts.contains(.kana) && scripts.contains(.hangul)
+        }
+    }
+
+    private func metadataKey(for result: Result) -> MetadataKey {
+        MetadataKey(
+            title: normalize(result.trackName),
+            artist: normalize(result.artistName)
+        )
+    }
+
+    private func normalize(_ text: String) -> String {
+        text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
+            .map(String.init).joined()
+    }
+
+    private func hasSuspiciousKana(_ lyrics: String, for track: SpotifyTrack) -> Bool {
+        let metadata = [track.name, track.artist, track.album]
+        return metadata.allSatisfy(isLatin)
+            && !metadata.contains(where: isMarkedJapanese)
+            && script(of: lyrics) == .kana
+    }
+
+    private func isLatin(_ text: String) -> Bool {
+        text.unicodeScalars.allSatisfy {
+            !CharacterSet.letters.contains($0) || isLatinLetter($0.value)
+        }
+    }
+
+    private func isLatinLetter(_ value: UInt32) -> Bool {
+        (0x0041...0x007A).contains(value)
+            || (0x00C0...0x024F).contains(value)
+            || (0x1E00...0x1EFF).contains(value)
+            || (0xFF21...0xFF5A).contains(value)
+    }
+
+    private func isMarkedJapanese(_ text: String) -> Bool {
+        let words = text.lowercased().components(separatedBy: CharacterSet.alphanumerics.inverted)
+        return words.contains("jp") || words.contains("japanese")
     }
 
     private func hasVersionMarker(_ text: String) -> Bool {
@@ -55,6 +112,11 @@ struct LRCLIBLyricsSource {
 
 private enum Script {
     case kana, hangul
+}
+
+private struct MetadataKey: Hashable {
+    let title: String
+    let artist: String
 }
 
 private struct Result: Decodable {

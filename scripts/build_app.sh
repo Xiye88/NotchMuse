@@ -10,7 +10,7 @@ MACOS="$CONTENTS/MacOS"
 
 cd "$PROJECT"
 swift build -c release
-swift run MenuBarLyrics --self-test
+"$PROJECT/.build/release/MenuBarLyrics" --self-test
 
 rm -rf "$APP"
 mkdir -p "$MACOS"

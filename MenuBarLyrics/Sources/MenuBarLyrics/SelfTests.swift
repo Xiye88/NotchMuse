@@ -164,6 +164,29 @@ enum SelfTests {
         check(refreshedCache == refreshed, "caches refreshed lyrics")
         counts = await calls.snapshot()
         check(counts == [2, 2, 2], "refreshed cache does not call sources")
+
+        let cancellation = CancellationProbe()
+        let raced = await LyricsClient.firstNonEmpty([
+            { _ in
+                await cancellation.recordStarted()
+                do {
+                    try await Task.sleep(for: .seconds(30))
+                } catch is CancellationError {
+                    await cancellation.recordCancelled()
+                } catch {}
+                if Task.isCancelled {
+                    await cancellation.recordCancelled()
+                }
+                return []
+            },
+            { _ in
+                await cancellation.waitUntilStarted()
+                return first
+            }
+        ], for: track)
+        check(raced == first, "returns the first non-empty raced result")
+        let wasCancelled = await cancellation.wasCancelled()
+        check(wasCancelled, "cancels pending lyric sources after finding lyrics")
     }
 
     private static func testLRCMuxLive() async {
@@ -257,5 +280,28 @@ private actor SourceCalls {
 
     func snapshot() -> [Int] {
         counts
+    }
+}
+
+private actor CancellationProbe {
+    private var started = false
+    private var cancelled = false
+
+    func recordStarted() {
+        started = true
+    }
+
+    func waitUntilStarted() async {
+        while !started {
+            await Task.yield()
+        }
+    }
+
+    func recordCancelled() {
+        cancelled = true
+    }
+
+    func wasCancelled() -> Bool {
+        cancelled
     }
 }

@@ -184,7 +184,7 @@ struct KugouLyricsSource {
 
     private func request(url: URL) -> URLRequest {
         var request = URLRequest(url: url)
-        request.setValue("MenuBarLyrics/0.2 (macOS)", forHTTPHeaderField: "User-Agent")
+        request.setValue("NotchMuse/0.3 (macOS)", forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 8
         return request
     }

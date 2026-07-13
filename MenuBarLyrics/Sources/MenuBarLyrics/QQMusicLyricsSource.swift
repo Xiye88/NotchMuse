@@ -59,7 +59,7 @@ struct QQMusicLyricsSource {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("https://c.y.qq.com/", forHTTPHeaderField: "Referer")
-        request.setValue("MenuBarLyrics/0.2 (macOS)", forHTTPHeaderField: "User-Agent")
+        request.setValue("NotchMuse/0.3 (macOS)", forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 8
         return request
     }
@@ -91,7 +91,7 @@ struct QQMusicLyricsSource {
         ]
         var request = URLRequest(url: components.url!)
         request.setValue("https://c.y.qq.com/", forHTTPHeaderField: "Referer")
-        request.setValue("MenuBarLyrics/0.2 (macOS)", forHTTPHeaderField: "User-Agent")
+        request.setValue("NotchMuse/0.3 (macOS)", forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 8
         return request
     }
@@ -104,7 +104,7 @@ struct QQMusicLyricsSource {
         ]
         var request = URLRequest(url: components.url!)
         request.setValue("https://y.qq.com/", forHTTPHeaderField: "Referer")
-        request.setValue("MenuBarLyrics/0.2 (macOS)", forHTTPHeaderField: "User-Agent")
+        request.setValue("NotchMuse/0.3 (macOS)", forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 8
         return request
     }
@@ -141,7 +141,7 @@ struct QQMusicLyricsSource {
         ]
         var request = URLRequest(url: components.url!)
         request.setValue("https://c.y.qq.com/", forHTTPHeaderField: "Referer")
-        request.setValue("MenuBarLyrics/0.2 (macOS)", forHTTPHeaderField: "User-Agent")
+        request.setValue("NotchMuse/0.3 (macOS)", forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 8
         return request
     }

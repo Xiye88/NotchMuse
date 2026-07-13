@@ -205,7 +205,7 @@ enum SelfTests {
             URLQueryItem(name: "artist_name", value: "Artist")
         ], "sends only official LRCLIB search parameters")
         check(request.timeoutInterval == 8, "uses an eight-second LRCLIB timeout")
-        check(request.value(forHTTPHeaderField: "User-Agent") == "MenuBarLyrics/0.1 (macOS)", "sets the LRCLIB user agent")
+        check(request.value(forHTTPHeaderField: "User-Agent") == "NotchMuse/0.3 (macOS)", "sets the LRCLIB user agent")
     }
 
     private static func testLRCLIBFixtures() {

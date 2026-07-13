@@ -2,10 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "MenuBarLyrics",
+    name: "NotchMuse",
     platforms: [.macOS(.v14)],
     products: [
-        .executable(name: "MenuBarLyrics", targets: ["MenuBarLyrics"])
+        .executable(name: "NotchMuse", targets: ["MenuBarLyrics"])
     ],
     targets: [
         .executableTarget(name: "MenuBarLyrics")

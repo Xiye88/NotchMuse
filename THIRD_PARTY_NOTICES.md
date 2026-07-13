@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-MenuBarLyrics independently implements public network request formats used by
+NotchMuse independently implements public network request formats used by
 QQ Music and Kugou Music. Protocol investigation and the KRC decoding format
 referenced the following project:
 
@@ -11,6 +11,6 @@ referenced the following project:
   - Licensed under the Apache License 2.0
 
 The Apache License 2.0 text is distributed in `LICENSES/Apache-2.0.txt`.
-No binary dependency from that project is included in MenuBarLyrics. Lyrics
+No binary dependency from that project is included in NotchMuse. Lyrics
 and service content remain subject to their respective rights holders and
 service terms.

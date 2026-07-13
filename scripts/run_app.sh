@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP="$ROOT/dist/MenuBarLyrics.app"
+APP="$ROOT/dist/NotchMuse.app"
 
-if [ ! -x "$APP/Contents/MacOS/MenuBarLyrics" ]; then
+if [ ! -x "$APP/Contents/MacOS/NotchMuse" ]; then
   "$ROOT/scripts/build_app.sh" >/dev/null
 fi
 

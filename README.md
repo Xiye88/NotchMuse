@@ -1,12 +1,12 @@
-# MenuBarLyrics
+# NotchMuse
 
-MenuBarLyrics 是一款原生 macOS 菜单栏应用，可读取本机 Spotify 的当前歌曲信息并显示同步歌词。
+NotchMuse 是一款原生 macOS 菜单栏应用，可读取本机 Spotify 的当前歌曲信息并显示同步歌词。
 
 ## 使用
 
 1. 打开 Spotify 并播放歌曲。
 2. 运行 `./scripts/build_app.sh`。
-3. 打开 `dist/MenuBarLyrics.app`，或运行 `./scripts/run_app.sh`。
+3. 打开 `dist/NotchMuse.app`，或运行 `./scripts/run_app.sh`。
 4. 按 macOS 提示，允许应用控制 Spotify。
 
 点击状态栏中的原生渐变橙色音符，可暂停或继续歌词、刷新歌词、选择布局或退出应用。

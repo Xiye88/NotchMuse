@@ -4,18 +4,18 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT="$ROOT/MenuBarLyrics"
 DIST="$ROOT/dist"
-APP="$DIST/MenuBarLyrics.app"
+APP="$DIST/NotchMuse.app"
 CONTENTS="$APP/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
 
 cd "$PROJECT"
 swift build -c release
-"$PROJECT/.build/release/MenuBarLyrics" --self-test
+"$PROJECT/.build/release/NotchMuse" --self-test
 
 rm -rf "$APP"
 mkdir -p "$MACOS" "$RESOURCES"
-cp "$PROJECT/.build/release/MenuBarLyrics" "$MACOS/MenuBarLyrics"
+cp "$PROJECT/.build/release/NotchMuse" "$MACOS/NotchMuse"
 cp "$PROJECT/Resources/AppIcon.icns" "$RESOURCES/AppIcon.icns"
 cp "$ROOT/THIRD_PARTY_NOTICES.md" "$RESOURCES/THIRD_PARTY_NOTICES.md"
 mkdir -p "$RESOURCES/LICENSES"
@@ -30,19 +30,21 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleExecutable</key>
-  <string>MenuBarLyrics</string>
+  <string>NotchMuse</string>
   <key>CFBundleIconFile</key>
   <string>AppIcon</string>
   <key>CFBundleIdentifier</key>
-  <string>local.menubarlyrics.app</string>
+  <string>app.notchmuse.mac</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>MenuBarLyrics</string>
+  <string>NotchMuse</string>
+  <key>CFBundleDisplayName</key>
+  <string>NotchMuse</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>0.2.0</string>
+  <string>0.3.0</string>
   <key>CFBundleVersion</key>
   <string>1</string>
   <key>LSMinimumSystemVersion</key>
@@ -61,7 +63,7 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
     </dict>
   </dict>
   <key>NSAppleEventsUsageDescription</key>
-  <string>MenuBarLyrics reads the current Spotify track to show synced lyrics in the menu bar.</string>
+  <string>NotchMuse reads the current Spotify track to show synced lyrics in the menu bar.</string>
 </dict>
 </plist>
 PLIST

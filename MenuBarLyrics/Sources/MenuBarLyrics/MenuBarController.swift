@@ -4,8 +4,7 @@ import Foundation
 @MainActor
 final class MenuBarController: NSObject {
     private let statusItem: NSStatusItem = {
-        let autosaveName = "MenuBarLyricsStatusItem"
-        UserDefaults.standard.register(defaults: ["NSStatusItem Preferred Position \(autosaveName)": 250])
+        let autosaveName = "NotchMuseStatusItem"
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.autosaveName = autosaveName
         item.isVisible = true
@@ -14,7 +13,9 @@ final class MenuBarController: NSObject {
     private let overlay = OverlayLyricsWindow()
     private let lyricsClient = LyricsClient()
     private var position = LyricsPosition(
-        rawValue: UserDefaults.standard.string(forKey: "LyricsPosition") ?? ""
+        rawValue: UserDefaults.standard.string(forKey: "LyricsPosition")
+            ?? UserDefaults(suiteName: "local.menubarlyrics.app")?.string(forKey: "LyricsPosition")
+            ?? ""
     ) ?? .both
     private var isPaused = false
     private var displaySource = "Open Spotify"
@@ -50,7 +51,7 @@ final class MenuBarController: NSObject {
     }
 
     private func setupButton() {
-        statusItem.button?.toolTip = "Menu Bar Lyrics"
+        statusItem.button?.toolTip = "NotchMuse"
         statusItem.button?.image = BrandStyle.noteImage()
         statusItem.button?.imagePosition = .imageOnly
     }

@@ -10,7 +10,7 @@ enum BrandStyle {
     static func noteImage() -> NSImage {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size)
-        guard let symbol = NSImage(systemSymbolName: "music.note", accessibilityDescription: "Menu Bar Lyrics"),
+        guard let symbol = NSImage(systemSymbolName: "music.note", accessibilityDescription: "NotchMuse"),
               let gradient = NSGradient(colors: gradientColors) else {
             return image
         }

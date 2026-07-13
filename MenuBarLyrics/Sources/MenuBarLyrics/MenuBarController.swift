@@ -6,7 +6,9 @@ final class MenuBarController: NSObject {
     private let statusItem = NSStatusBar.system.statusItem(withLength: 28)
     private let overlay = OverlayLyricsWindow()
     private let lyricsClient = LyricsClient()
-    private var position: LyricsPosition = .both
+    private var position = LyricsPosition(
+        rawValue: UserDefaults.standard.string(forKey: "LyricsPosition") ?? ""
+    ) ?? .both
     private var isPaused = false
     private var displaySource = "Open Spotify"
     private var currentTrack: SpotifyTrack?
@@ -18,6 +20,7 @@ final class MenuBarController: NSObject {
     func start() {
         setupButton()
         setupMenu()
+        overlay.onSettings = { [weak self] in self?.showMenu() }
         updateDisplay()
 
         pollTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -32,15 +35,11 @@ final class MenuBarController: NSObject {
     }
 
     func reveal() {
-        setDisplay("MenuBarLyrics is running")
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1))
-            await pollSpotify()
-        }
+        showMenu()
     }
 
     private func setupButton() {
-        statusItem.length = 28
+        statusItem.length = 20
         statusItem.button?.font = .menuBarFont(ofSize: 0)
         statusItem.button?.alignment = .center
         statusItem.button?.lineBreakMode = .byClipping
@@ -54,7 +53,7 @@ final class MenuBarController: NSObject {
         menu.addItem(NSMenuItem.separator())
 
         for itemPosition in LyricsPosition.allCases {
-            let item = NSMenuItem(title: itemPosition.rawValue, action: #selector(setPosition(_:)), keyEquivalent: "")
+            let item = NSMenuItem(title: itemPosition.menuTitle, action: #selector(setPosition(_:)), keyEquivalent: "")
             item.representedObject = itemPosition.rawValue
             item.state = itemPosition == position ? .on : .off
             menu.addItem(item)
@@ -125,7 +124,7 @@ final class MenuBarController: NSObject {
     }
 
     private func updateDisplay() {
-        statusItem.length = 28
+        statusItem.length = 20
         statusItem.button?.title = "♪"
         let overflows = overlay.show(
             text: displaySource.isEmpty ? " " : "♪ \(displaySource)",
@@ -134,6 +133,10 @@ final class MenuBarController: NSObject {
             scroll: scroll
         )
         updateScrollTimer(overflows: overflows)
+    }
+
+    private func showMenu() {
+        statusItem.menu?.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
     }
 
     private func updateScrollTimer(overflows: Bool) {
@@ -168,6 +171,7 @@ final class MenuBarController: NSObject {
             return
         }
         position = newPosition
+        UserDefaults.standard.set(newPosition.rawValue, forKey: "LyricsPosition")
         for item in statusItem.menu?.items ?? [] where item.action == #selector(setPosition(_:)) {
             item.state = item === sender ? .on : .off
         }

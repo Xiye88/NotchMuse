@@ -14,6 +14,8 @@ The menu bar item shows the current lyric line in the macOS menu font. Long
 lines scroll smoothly, and Both mode uses the safe areas on both sides of a
 MacBook display notch.
 
+Click the music-note button beside the lyrics to open settings.
+
 Menu options:
 
 - Pause/Resume Lyrics

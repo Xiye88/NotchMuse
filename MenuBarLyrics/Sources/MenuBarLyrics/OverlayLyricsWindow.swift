@@ -4,9 +4,21 @@ enum LyricsPosition: String, CaseIterable {
     case left = "Left"
     case right = "Right"
     case both = "Both"
+
+    var menuTitle: String {
+        switch self {
+        case .left: return "歌词显示在左侧"
+        case .right: return "歌词显示在右侧"
+        case .both: return "歌词显示在双侧"
+        }
+    }
 }
 
 enum OverlayLaneGeometry {
+    static func centeredTextY(laneHeight: CGFloat, lineHeight: CGFloat) -> CGFloat {
+        floor((laneHeight - lineHeight) / 2)
+    }
+
     static func frames(
         screenFrame: NSRect,
         auxiliaryTopLeftArea: NSRect?,
@@ -35,7 +47,7 @@ enum OverlayLaneGeometry {
         let statusBoundary = min(reservedStatusBoundary, visibleStatusItemX ?? reservedStatusBoundary)
         let leftMinX = min(leftArea.maxX, max(leftArea.minX, menuBoundary + inset))
         let rightMinX = min(rightArea.maxX, rightArea.minX + inset)
-        let rightMaxX = max(rightMinX, statusBoundary - inset)
+        let rightMaxX = max(rightMinX, statusBoundary - inset - 24)
 
         return (
             NSRect(x: leftMinX, y: leftArea.minY, width: leftArea.maxX - leftMinX, height: leftArea.height),
@@ -45,7 +57,9 @@ enum OverlayLaneGeometry {
 }
 
 @MainActor
-final class OverlayLyricsWindow {
+final class OverlayLyricsWindow: NSObject {
+    var onSettings: (() -> Void)?
+
     @MainActor
     private final class Lane {
         let label = NSTextField(labelWithString: "")
@@ -92,7 +106,14 @@ final class OverlayLyricsWindow {
             if label.stringValue != text {
                 label.stringValue = text
             }
-            let labelFrame = NSRect(x: textX, y: 0, width: textWidth, height: frame.height)
+            let font = label.font ?? .menuBarFont(ofSize: 0)
+            let lineHeight = ceil(font.ascender - font.descender + font.leading)
+            let labelFrame = NSRect(
+                x: textX,
+                y: OverlayLaneGeometry.centeredTextY(laneHeight: frame.height, lineHeight: lineHeight),
+                width: textWidth,
+                height: lineHeight
+            )
             if label.frame != labelFrame {
                 label.frame = labelFrame
             }
@@ -118,6 +139,30 @@ final class OverlayLyricsWindow {
     private let leftLane = Lane(level: .mainMenu)
     private let rightLane = Lane(level: NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1))
     private let font = NSFont.menuBarFont(ofSize: 0)
+    private let settingsButton = NSButton()
+    private lazy var settingsWindow: NSPanel = {
+        let panel = NSPanel(
+            contentRect: .zero,
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = false
+        panel.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1)
+        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+        panel.becomesKeyOnlyIfNeeded = true
+
+        settingsButton.isBordered = false
+        settingsButton.image = NSImage(systemSymbolName: "music.note", accessibilityDescription: "歌词设置")
+        settingsButton.image?.isTemplate = true
+        settingsButton.toolTip = "歌词设置"
+        settingsButton.target = self
+        settingsButton.action = #selector(openSettings)
+        panel.contentView = settingsButton
+        return panel
+    }()
 
     func show(
         text: String,
@@ -136,6 +181,7 @@ final class OverlayLyricsWindow {
             menuBarHeight: NSStatusBar.system.thickness
         )
         let textWidth = ceil((text as NSString).size(withAttributes: [.font: font]).width)
+        showSettingsButton(after: frames.right, appearance: statusItem.button?.effectiveAppearance)
 
         switch position {
         case .left:
@@ -147,6 +193,20 @@ final class OverlayLyricsWindow {
         case .both:
             return showBoth(text: text, textWidth: textWidth, frames: frames, scroll: scroll)
         }
+    }
+
+    private func showSettingsButton(after rightFrame: NSRect, appearance: NSAppearance?) {
+        let frame = NSRect(x: rightFrame.maxX + 4, y: rightFrame.minY, width: 20, height: rightFrame.height)
+        settingsWindow.appearance = appearance
+        settingsButton.frame = NSRect(origin: .zero, size: frame.size)
+        settingsWindow.setFrame(frame, display: true)
+        if !settingsWindow.isVisible {
+            settingsWindow.orderFrontRegardless()
+        }
+    }
+
+    @objc private func openSettings() {
+        onSettings?()
     }
 
     private func statusItemScreenMinX(_ statusItem: NSStatusItem) -> CGFloat? {
@@ -175,22 +235,18 @@ final class OverlayLyricsWindow {
         frames: (left: NSRect, right: NSRect),
         scroll: ScrollState
     ) -> Bool {
-        let widerIsLeft = frames.left.width >= frames.right.width
-        let widerFrame = widerIsLeft ? frames.left : frames.right
-
-        if textWidth <= widerFrame.width {
-            let x = (widerFrame.width - textWidth) / 2
+        if textWidth <= min(frames.left.width, frames.right.width) {
             leftLane.show(
                 frame: frames.left,
-                text: widerIsLeft ? text : "",
-                textX: widerIsLeft ? x : 0,
-                textWidth: widerIsLeft ? textWidth : 0
+                text: text,
+                textX: textWidth <= frames.left.width ? (frames.left.width - textWidth) / 2 : 0,
+                textWidth: textWidth
             )
             rightLane.show(
                 frame: frames.right,
-                text: widerIsLeft ? "" : text,
-                textX: widerIsLeft ? 0 : x,
-                textWidth: widerIsLeft ? 0 : textWidth
+                text: text,
+                textX: textWidth <= frames.right.width ? (frames.right.width - textWidth) / 2 : 0,
+                textWidth: textWidth
             )
             return false
         }

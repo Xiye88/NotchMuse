@@ -26,6 +26,7 @@ enum SelfTests {
 
         testSmoothScroll()
         testOverlayGeometry()
+        check(OverlayLaneGeometry.centeredTextY(laneHeight: 32, lineHeight: 16) == 8, "centers lyrics vertically in the menu bar")
 
         testTrackMatcher()
         testLyricsCache()
@@ -103,6 +104,7 @@ enum SelfTests {
         check(rightSafeArea.contains(frames.right), "keeps the right lyric lane inside the notch-safe area")
         check(frames.left.maxX <= 646 && frames.right.minX >= 825, "keeps both lyric lanes out of the notch")
         check(frames.right.maxX <= 1102, "reserves space before status items")
+        check(frames.right.maxX + 24 <= 1102, "keeps the settings button before status items")
         check(frames.left.width > 0 && frames.right.width > 0, "keeps usable lyric lanes on a notched MacBook")
 
         let hiddenStatusItem = OverlayLaneGeometry.frames(
@@ -473,6 +475,7 @@ enum SelfTests {
 
         let accepted: [(SpotifyTrack, TrackMatcher.Candidate)] = [
             (track("成都", "赵雷", 328), candidate("成都", ["赵雷"], 328_020)),
+            (track("演员", "薛之謙", 261), candidate("演员", ["薛之谦"], 261_000)),
             (track("Hello!", "Adele"), candidate("hello", ["ADELE"])),
             (track("Beyonce", "Beyonce"), candidate("Beyonce", ["Beyonce"])),
             (track("Song (feat. Guest)", "Artist, Guest"), candidate("Song", ["Artist", "Guest"])),
@@ -495,6 +498,7 @@ enum SelfTests {
             (track("Song", "Artist, Guest"), candidate("Song", ["Guest"])),
             (track("Song", "Artist, Guest"), candidate("Song", ["Guest", "Other"])),
             (track("成都", "赵雷", 328), candidate("成都", ["其他歌手"], 328_020)),
+            (track("乾", "Artist", 200), candidate("幹", ["Artist"], 200_000)),
             (track("成都", "赵雷", 328), candidate("成都", ["赵雷"], 340_001)),
             (track("Hello"), candidate("Hello World")),
             (track("Hello World"), candidate("Hello")),

@@ -65,7 +65,8 @@ enum TrackMatcher {
 
     private static func artistKeys(_ artists: [String]) -> (primary: String, members: Set<String>, group: Set<String>) {
         let cleaned = artists.map {
-            $0.replacingOccurrences(of: #"\b(feat\.?|ft\.?|featuring)\b"#, with: ",", options: [.regularExpression, .caseInsensitive])
+            $0.replacingOccurrences(of: "薛之謙", with: "薛之谦")
+                .replacingOccurrences(of: #"\b(feat\.?|ft\.?|featuring)\b"#, with: ",", options: [.regularExpression, .caseInsensitive])
         }
         let members = cleaned.flatMap {
             $0.components(separatedBy: CharacterSet(charactersIn: ",;"))

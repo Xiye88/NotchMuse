@@ -3,6 +3,10 @@ import ApplicationServices
 
 @MainActor
 enum MenuBarSafety {
+    static func isExplicitlyHidden(_ value: CFTypeRef?) -> Bool {
+        value as? Bool == true
+    }
+
     static func requestAccess() {
         _ = AXIsProcessTrustedWithOptions([
             "AXTrustedCheckOptionPrompt": true
@@ -33,11 +37,10 @@ enum MenuBarSafety {
         var maxX: CGFloat?
         for child in children {
             var hiddenValue: CFTypeRef?
-            guard AXUIElementCopyAttributeValue(child, kAXHiddenAttribute as CFString, &hiddenValue) == .success,
-                  let isHidden = hiddenValue as? Bool else {
-                return nil
+            if AXUIElementCopyAttributeValue(child, kAXHiddenAttribute as CFString, &hiddenValue) == .success,
+               isExplicitlyHidden(hiddenValue) {
+                continue
             }
-            guard !isHidden else { continue }
 
             var positionValue: CFTypeRef?
             var sizeValue: CFTypeRef?

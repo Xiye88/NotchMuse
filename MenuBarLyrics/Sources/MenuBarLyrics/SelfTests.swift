@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 
 enum SelfTests {
     private static func check(_ condition: @autoclosure () -> Bool, _ message: String) {
@@ -8,7 +9,10 @@ enum SelfTests {
         }
     }
 
-    static func run() {
+    @MainActor static func run() {
+        testBrandStyle()
+        testMenuBarSafety()
+
         let parsed = LyricParser.parse("[00:01.50]Hello\n[00:03.00]World")
         check(parsed == [
             LyricLine(time: 1.5, text: "Hello"),
@@ -57,6 +61,25 @@ enum SelfTests {
         }
 
         print("Self-tests passed")
+    }
+
+    private static func testBrandStyle() {
+        check(BrandStyle.gradientColors.count == 3, "uses three brand gradient colors")
+        for (color, expected) in zip(BrandStyle.gradientColors, [(232, 121, 36), (200, 90, 18), (150, 58, 8)]) {
+            var red = CGFloat.zero
+            var green = CGFloat.zero
+            var blue = CGFloat.zero
+            var alpha = CGFloat.zero
+            color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+            check((red, green, blue) == (CGFloat(expected.0) / 255, CGFloat(expected.1) / 255, CGFloat(expected.2) / 255), "uses exact brand gradient RGB values")
+        }
+    }
+
+    @MainActor private static func testMenuBarSafety() {
+        check(!MenuBarSafety.isExplicitlyHidden(nil), "treats a missing AXHidden attribute as visible")
+        check(!MenuBarSafety.isExplicitlyHidden("unexpected" as CFString), "treats an invalid AXHidden value as visible")
+        check(!MenuBarSafety.isExplicitlyHidden(false as NSNumber), "treats AXHidden false as visible")
+        check(MenuBarSafety.isExplicitlyHidden(true as NSNumber), "skips explicitly hidden AX elements")
     }
 
     private static func testLyricsCache() {

@@ -10,7 +10,7 @@ Make the menu-bar app easier to operate, prevent left-side lyrics from covering 
 
 - Remove the separate floating settings button.
 - Use the existing `NSStatusItem` as the only settings button so macOS owns its layout and click target.
-- Render the music-note symbol in a dark orange brand color that remains legible on light and dark menu bars.
+- Render the music-note symbol with the dark-orange brand gradient `#E87924` -> `#C85A12` -> `#963A08`, preserving contrast on light and dark menu bars.
 - Keep the existing menu and left/right/both selection behavior.
 
 ### Left-side avoidance
@@ -32,7 +32,7 @@ Make the menu-bar app easier to operate, prevent left-side lyrics from covering 
 ### Lyric progress color
 
 - Keep the current line-level LRC model.
-- Draw each active line in the normal menu-bar color with a dark-orange foreground clipped from left to right according to elapsed time between the current line and the next line.
+- Draw each active line in the normal menu-bar color with the same dark-orange gradient clipped from left to right according to elapsed time between the current line and the next line.
 - Reset progress on pause, seek, track change, or lyric refresh.
 - Use a lightweight display timer only while Spotify is playing and lyrics are visible.
 - Exact word-level highlighting is out of scope until a provider supplies verified word timestamps such as TTML spans.

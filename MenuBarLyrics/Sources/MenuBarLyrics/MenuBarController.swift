@@ -127,7 +127,7 @@ final class MenuBarController: NSObject {
         setDisplay("Loading lyrics...")
 
         do {
-            let lines = try await lyricsClient.syncedLyrics(for: track)
+            let lines = try await lyricsClient.syncedLyrics(for: track, bypassCache: force)
             currentLines = lines
             setDisplay(lines.isEmpty ? "No synced lyrics" : track.name)
         } catch {

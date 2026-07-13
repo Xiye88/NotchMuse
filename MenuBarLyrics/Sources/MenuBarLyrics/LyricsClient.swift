@@ -1,15 +1,42 @@
 import Foundation
 
-struct LyricsClient {
-    func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
-        let primary = try? await lrclibLyrics(for: track)
-        if let primary, !primary.isEmpty {
-            return primary
+@MainActor
+final class LyricsClient {
+    typealias Source = @Sendable () async throws -> [LyricLine]
+
+    private var cache = LyricsCache(capacity: 100)
+
+    func syncedLyrics(for track: SpotifyTrack, bypassCache: Bool = false) async throws -> [LyricLine] {
+        let key = "\(track.name)\u{1F}\(track.artist)\u{1F}\(track.album)\u{1F}\(track.duration)"
+        if let cached = cache.value(for: key, bypass: bypassCache) {
+            return cached
         }
-        return try await NetEaseLyricsSource().syncedLyrics(for: track)
+
+        let lines = await Self.firstNonEmpty([
+            { try await Self.lrclibLyrics(for: track) },
+            { try await NetEaseLyricsSource().syncedLyrics(for: track) },
+            { try await LRCMuxLyricsSource().syncedLyrics(for: track) }
+        ])
+        cache.insert(lines, for: key)
+        return lines
     }
 
-    private func lrclibLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
+    nonisolated static func firstNonEmpty(_ sources: [Source]) async -> [LyricLine] {
+        await withTaskGroup(of: [LyricLine]?.self) { group in
+            for source in sources {
+                group.addTask { try? await source() }
+            }
+            for await lines in group {
+                if let lines, !lines.isEmpty {
+                    group.cancelAll()
+                    return lines
+                }
+            }
+            return []
+        }
+    }
+
+    nonisolated private static func lrclibLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
         var components = URLComponents(string: "https://lrclib.net/api/get")!
         components.queryItems = [
             URLQueryItem(name: "artist_name", value: track.artist),
@@ -33,6 +60,30 @@ struct LyricsClient {
         }
 
         return LyricParser.parse(synced)
+    }
+}
+
+struct LyricsCache {
+    private let capacity: Int
+    private var values: [String: [LyricLine]] = [:]
+    private var keys: [String] = []
+
+    init(capacity: Int) {
+        self.capacity = capacity
+    }
+
+    func value(for key: String, bypass: Bool = false) -> [LyricLine]? {
+        bypass ? nil : values[key]
+    }
+
+    mutating func insert(_ lines: [LyricLine], for key: String) {
+        guard !lines.isEmpty else { return }
+        if values.updateValue(lines, forKey: key) == nil {
+            keys.append(key)
+        }
+        if keys.count > capacity {
+            values.removeValue(forKey: keys.removeFirst())
+        }
     }
 }
 

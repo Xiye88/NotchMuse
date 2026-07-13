@@ -32,8 +32,53 @@ enum SelfTests {
         check(scroll.visibleText("abcdefghij", maxCharacters: 4) == "bcde", "scrolls long text")
 
         testTrackMatcher()
+        testLyricsCache()
+        testLyricsRace()
 
         print("Self-tests passed")
+    }
+
+    private static func testLyricsCache() {
+        var cache = LyricsCache(capacity: 100)
+        let line = [LyricLine(time: 1, text: "cached")]
+
+        cache.insert([], for: "empty")
+        check(cache.value(for: "empty") == nil, "does not cache empty results")
+
+        for index in 0...100 {
+            cache.insert(line, for: "track-\(index)")
+        }
+        check(cache.value(for: "track-0") == nil, "evicts the oldest result over capacity")
+        check(cache.value(for: "track-100") == line, "keeps the newest cached result")
+        check(cache.value(for: "track-100", bypass: true) == nil, "bypasses cached results on refresh")
+    }
+
+    private static func testLyricsRace() {
+        let expected = [LyricLine(time: 1, text: "winner")]
+        let semaphore = DispatchSemaphore(value: 0)
+        let result = AsyncResultBox()
+        Task.detached {
+            result.value = await LyricsClient.firstNonEmpty([
+                { throw NSError(domain: "SelfTests", code: 1) },
+                {
+                    do {
+                        try await Task.sleep(for: .seconds(10))
+                        return []
+                    } catch is CancellationError {
+                        result.wasCancelled = true
+                        return []
+                    }
+                },
+                {
+                    try await Task.sleep(for: .milliseconds(10))
+                    return expected
+                }
+            ])
+            semaphore.signal()
+        }
+        semaphore.wait()
+        check(result.value == expected, "returns the first non-empty result despite source failures")
+        check(result.wasCancelled, "cancels remaining sources after finding lyrics")
     }
 
     private static func testTrackMatcher() {
@@ -99,4 +144,9 @@ enum SelfTests {
 
         check(TrackMatcher.bestMatchIndex(for: source, candidates: [candidate("Wrong")]) == nil, "rejects a non-match")
     }
+}
+
+private final class AsyncResultBox: @unchecked Sendable {
+    var value: [LyricLine] = []
+    var wasCancelled = false
 }

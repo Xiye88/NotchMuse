@@ -1,3 +1,5 @@
 .DS_Store
 .build/
 MenuBarLyrics/.build/
+dist/
+dist.noindex/

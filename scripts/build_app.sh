@@ -3,11 +3,18 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT="$ROOT/MenuBarLyrics"
-DIST="$ROOT/dist"
+DIST="$ROOT/dist.noindex"
 APP="$DIST/NotchMuse.app"
 CONTENTS="$APP/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
+ENTITLEMENTS="$PROJECT/Resources/NotchMuse.entitlements"
+VERSION="${NOTCHMUSE_VERSION:-0.3.0-beta}"
+BUILD_NUMBER="${NOTCHMUSE_BUILD_NUMBER:-3}"
+BUNDLE_ID="app.notchmuse.mac"
+SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
+
+mkdir -p "$DIST"
 
 cd "$PROJECT"
 swift build -c release
@@ -17,11 +24,12 @@ rm -rf "$APP"
 mkdir -p "$MACOS" "$RESOURCES"
 cp "$PROJECT/.build/release/NotchMuse" "$MACOS/NotchMuse"
 cp "$PROJECT/Resources/AppIcon.icns" "$RESOURCES/AppIcon.icns"
+cp -R "$PROJECT/Resources/en.lproj" "$PROJECT/Resources/zh-Hans.lproj" "$RESOURCES/"
 cp "$ROOT/THIRD_PARTY_NOTICES.md" "$RESOURCES/THIRD_PARTY_NOTICES.md"
 mkdir -p "$RESOURCES/LICENSES"
 cp "$ROOT/LICENSES/Apache-2.0.txt" "$RESOURCES/LICENSES/Apache-2.0.txt"
 
-cat > "$CONTENTS/Info.plist" <<'PLIST'
+cat > "$CONTENTS/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
   "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -34,7 +42,7 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
   <key>CFBundleIconFile</key>
   <string>AppIcon</string>
   <key>CFBundleIdentifier</key>
-  <string>app.notchmuse.mac</string>
+  <string>$BUNDLE_ID</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
@@ -44,9 +52,9 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>0.3.0</string>
+  <string>$VERSION</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>$BUILD_NUMBER</string>
   <key>LSMinimumSystemVersion</key>
   <string>14.0</string>
   <key>LSUIElement</key>
@@ -68,5 +76,11 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
-codesign --force --deep --sign - "$APP" >/dev/null
+plutil -lint "$CONTENTS/Info.plist" >/dev/null
+if [[ "$SIGN_IDENTITY" == "-" ]]; then
+  codesign --force --entitlements "$ENTITLEMENTS" --sign - "$APP" >/dev/null
+else
+  codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --sign "$SIGN_IDENTITY" "$APP" >/dev/null
+fi
+codesign --verify --deep --strict "$APP"
 echo "$APP"

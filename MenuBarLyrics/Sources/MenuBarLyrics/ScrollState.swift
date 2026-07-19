@@ -10,12 +10,13 @@ struct ScrollState {
     func offset(
         contentWidth: CGFloat,
         viewportWidth: CGFloat,
+        speedMultiplier: CGFloat = 1,
         at time: TimeInterval = ProcessInfo.processInfo.systemUptime
     ) -> CGFloat {
         let distance = max(0, contentWidth - viewportWidth)
         guard distance > 0 else { return 0 }
 
-        let speed: CGFloat = 28
+        let speed: CGFloat = 28 * max(0.1, speedMultiplier)
         let pause: TimeInterval = 0.9
         let travelTime = TimeInterval(distance / speed)
         let cycle = 2 * (pause + travelTime)

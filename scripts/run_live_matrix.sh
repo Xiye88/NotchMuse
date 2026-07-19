@@ -9,6 +9,7 @@ FIXTURE="$ROOT/scripts/fixtures/live_tracks.tsv"
 
 swiftc -parse-as-library -O -o "$BINARY" \
   "$ROOT/scripts/live_matrix.swift" \
+  "$PROJECT/Sources/MenuBarLyrics/DebugLog.swift" \
   "$PROJECT/Sources/MenuBarLyrics/LyricParser.swift" \
   "$PROJECT/Sources/MenuBarLyrics/SpotifyReader.swift" \
   "$PROJECT/Sources/MenuBarLyrics/TrackMatcher.swift" \
@@ -17,6 +18,7 @@ swiftc -parse-as-library -O -o "$BINARY" \
   "$PROJECT/Sources/MenuBarLyrics/NetEaseLyricsSource.swift" \
   "$PROJECT/Sources/MenuBarLyrics/LRCMuxLyricsSource.swift" \
   "$PROJECT/Sources/MenuBarLyrics/QQMusicLyricsSource.swift" \
-  "$PROJECT/Sources/MenuBarLyrics/KugouLyricsSource.swift"
+  "$PROJECT/Sources/MenuBarLyrics/KugouLyricsSource.swift" \
+  "$PROJECT/Sources/MenuBarLyrics/SodaMusicLyricsSource.swift"
 
 "$BINARY" "$FIXTURE" "$RESULTS"

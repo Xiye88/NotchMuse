@@ -12,6 +12,9 @@ enum SelfTests {
     @MainActor static func run() {
         testBrandStyle()
         testMenuBarSafety()
+        testStatusFeedback()
+        testLocalization()
+        testSingleInstanceLock()
 
         let parsed = LyricParser.parse("[00:01.50]Hello\n[00:03.00]World")
         check(parsed == [
@@ -39,6 +42,8 @@ enum SelfTests {
 
         testSmoothScroll()
         testOverlayGeometry()
+        testNotchGeometry()
+        testDisplaySelection()
         check(OverlayLaneGeometry.centeredTextY(laneHeight: 32, lineHeight: 16) == 8, "centers lyrics vertically in the menu bar")
 
         testTrackMatcher()
@@ -53,6 +58,7 @@ enum SelfTests {
         testQQMusicFixtures()
         testKugouRequests()
         testKugouFixtures()
+        testSodaMusicProvider()
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
@@ -65,6 +71,9 @@ enum SelfTests {
             }
             if ProcessInfo.processInfo.environment["QQ_LIVE_TESTS"] == "1" {
                 await testQQMusicLive()
+            }
+            if ProcessInfo.processInfo.environment["SODA_LIVE_TESTS"] == "1" {
+                await testSodaMusicLive()
             }
             semaphore.signal()
         }
@@ -87,11 +96,47 @@ enum SelfTests {
         }
     }
 
+    private static func testStatusFeedback() {
+        check(SpotifyFeedback.notRunning.menuTitle == L10n.text("Spotify: Not Running"), "explains when Spotify is not running")
+        check(SpotifyFeedback.connected.menuTitle == L10n.text("Spotify: Connected"), "shows a connected Spotify state")
+        check(LyricsFeedback.searching.displayText == L10n.text("Changing song..."), "explains song changes")
+        check(LyricsFeedback.notFound.displayText == L10n.text("No lyrics found"), "explains missing lyrics")
+        check(LyricsFeedback.networkFailure.displayText == L10n.text("Lyrics network unavailable"), "explains lyric network failures")
+    }
+
+    private static func testLocalization() {
+        check(L10n.text("Settings…", language: .english) == "Settings…", "loads English localization")
+        check(L10n.text("Settings…", language: .simplifiedChinese) == "设置…", "loads Simplified Chinese localization")
+        check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
+    }
+
+    private static func testSingleInstanceLock() {
+        let path = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("notchmuse-self-test-\(UUID().uuidString).lock").path
+        var first: SingleInstanceLock? = SingleInstanceLock(path: path)
+        check(first != nil, "acquires the first app instance lock")
+        check(SingleInstanceLock(path: path) == nil, "rejects a second app instance lock")
+        first = nil
+        check(SingleInstanceLock(path: path) != nil, "releases the app instance lock on exit")
+        try? FileManager.default.removeItem(atPath: path)
+    }
+
     @MainActor private static func testMenuBarSafety() {
+        check(AccessibilityManager.requiresAccess(mode: .statusBar, position: .left), "requires accessibility only for the left status bar layout")
+        check(!AccessibilityManager.requiresAccess(mode: .statusBar, position: .right), "does not require accessibility for the right status bar layout")
+        check(!AccessibilityManager.requiresAccess(mode: .notch, position: .left), "does not require accessibility for Notch Mode")
         check(!MenuBarSafety.isExplicitlyHidden(nil), "treats a missing AXHidden attribute as visible")
         check(!MenuBarSafety.isExplicitlyHidden("unexpected" as CFString), "treats an invalid AXHidden value as visible")
+        check(!AccessibilityManager.shouldPrompt(isTrusted: true, hasPrompted: false), "does not prompt after accessibility access is granted")
+        check(AccessibilityManager.shouldPrompt(isTrusted: false, hasPrompted: false), "prompts once when accessibility access is required")
+        check(!AccessibilityManager.shouldPrompt(isTrusted: false, hasPrompted: true), "does not repeat the accessibility prompt in one launch")
         check(!MenuBarSafety.isExplicitlyHidden(false as NSNumber), "treats AXHidden false as visible")
         check(MenuBarSafety.isExplicitlyHidden(true as NSNumber), "skips explicitly hidden AX elements")
+        check(MenuBarSafety.shouldUseCachedMenuGeometry(processID: 1, cachedProcessID: 1, age: 0.49), "reuses recent menu geometry for the same app")
+        check(!MenuBarSafety.shouldUseCachedMenuGeometry(processID: 2, cachedProcessID: 1, age: 0.1), "refreshes menu geometry when the frontmost app changes")
+        check(!MenuBarSafety.shouldUseCachedMenuGeometry(processID: 1, cachedProcessID: 1, age: 0.5), "refreshes expired menu geometry")
+        check(LyricsPosition.allCases == [.left, .right], "exposes only Left and Right status bar positions")
+        check(AppPreferences.normalizedPosition("Both") == .right, "migrates the removed Both position to Right")
     }
 
     private static func testLyricsCache() {
@@ -128,6 +173,7 @@ enum SelfTests {
         check(scroll.offset(contentWidth: 80, viewportWidth: 100, at: 200) == 0, "does not scroll fitting text")
         check(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 100.8) == 0, "pauses at the scroll start")
         check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 101.9) - 28) < 0.01, "scrolls forward at 28 points per second")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, speedMultiplier: 0.5, at: 101.9) - 14) < 0.01, "applies the configured animation speed")
         check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 102.9) - 56) < 0.01, "reaches the scroll endpoint")
         check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 103.5) - 56) < 0.01, "pauses at the scroll endpoint")
         check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 104.8) - 28) < 0.01, "scrolls back smoothly")
@@ -150,7 +196,7 @@ enum SelfTests {
         )
         check(leftSafeArea.contains(frames.left), "keeps the left lyric lane inside the notch-safe area")
         check(rightSafeArea.contains(frames.right), "keeps the right lyric lane inside the notch-safe area")
-        check(frames.left.maxX <= 646 && frames.right.minX >= 825, "keeps both lyric lanes out of the notch")
+        check(frames.left.maxX <= 646 && frames.right.minX >= 825, "keeps status bar lanes out of the notch")
         check(frames.left.minX >= 608, "keeps the left lyric lane eight points after foreground menus")
         check(frames.right.maxX <= 1102, "reserves space before status items")
         check(frames.right.maxX == 1102, "does not reserve space for the deleted settings button")
@@ -185,6 +231,52 @@ enum SelfTests {
             menuBarHeight: 24
         )
         check(fallback.left.maxX <= 720 && fallback.right.minX >= 720, "separates fallback lanes on a non-notched display")
+        check(fallback.left.width > 150, "uses available menu bar space on a non-notched display")
+    }
+
+    private static func testNotchGeometry() {
+        let screen = NSRect(x: 0, y: 0, width: 1470, height: 956)
+        let visible = NSRect(x: 0, y: 0, width: 1470, height: 924)
+        let compactWidth = WidthGeometry.notchWidth(mode: .compact, availableWidth: visible.width, style: .lyricOnly, customWidth: 500)
+        let normalWidth = WidthGeometry.notchWidth(mode: .normal, availableWidth: visible.width, style: .lyricOnly, customWidth: 500)
+        let wideWidth = WidthGeometry.notchWidth(mode: .wide, availableWidth: visible.width, style: .lyricOnly, customWidth: 500)
+        let compact = NotchGeometry.frame(screenFrame: screen, visibleFrame: visible, style: .lyricOnly, fontSize: 13, width: compactWidth)
+        let expanded = NotchGeometry.frame(screenFrame: screen, visibleFrame: visible, style: .expanded, fontSize: 13, width: wideWidth)
+
+        check(compact.midX == screen.midX, "centers Notch Mode on screen")
+        check(compact.maxY <= visible.maxY, "keeps Notch Mode below the menu bar")
+        check(visible.contains(compact), "keeps Notch Mode inside the visible screen")
+        check(expanded.height > compact.height, "gives Expanded style room for song details")
+        check(compactWidth < normalWidth && normalWidth < wideWidth, "makes Notch width presets visibly different")
+        check(WidthGeometry.notchWidth(mode: .custom, availableWidth: 600, style: .lyricOnly, customWidth: 900) == 600, "clips custom Notch width to the selected screen")
+        check(WidthGeometry.statusBarWidth(mode: .compact, availableWidth: 400, customWidth: 300) < WidthGeometry.statusBarWidth(mode: .wide, availableWidth: 400, customWidth: 300), "makes status bar width presets visibly different")
+        check(LyricsColorPreset.allCases.count == 5, "offers five shared lyric color presets")
+    }
+
+    private static func testDisplaySelection() {
+        let builtIn = [true, false, false]
+        check(ScreenSelection.index(target: .builtIn, builtIn: builtIn, containsPointer: [false, true, false]) == 0, "selects the built-in display")
+        check(ScreenSelection.index(target: .external, builtIn: builtIn, containsPointer: [true, false, false]) == 1, "selects an external display")
+        check(ScreenSelection.index(target: .auto, builtIn: builtIn, containsPointer: [false, false, true]) == 2, "automatically follows the active display")
+        check(ScreenSelection.index(target: .external, builtIn: [true], containsPointer: [true]) == 0, "falls back when no external display is connected")
+    }
+
+    private static func testSodaMusicProvider() {
+        let source = SodaMusicLyricsSource(deviceID: "7381234567812345678", installID: "7391234567812345678")
+        let track = SpotifyTrack(name: "演员", artist: "薛之谦", album: "初学者", duration: 261.3)
+        let search = source.searchRequest(for: track)
+        check(search.url?.host == "api.qishui.com", "uses the Soda Music API host")
+        check(search.url?.path == "/luna/pc/search/track", "uses the Soda Music track search endpoint")
+        check(URLComponents(url: search.url!, resolvingAgainstBaseURL: false)?.queryItems?.contains(URLQueryItem(name: "q", value: "演员 薛之谦")) == true, "searches Soda Music by track and artist")
+
+        let searchFixture = Data(#"{"result_groups":[{"data":[{"meta":{"item_type":"track"},"entity":{"track":{"id":"cover","name":"演员 (Cover)","duration":261300,"artists":[{"name":"Other"}],"album":{"name":"Cover"}}}},{"meta":{"item_type":"track"},"entity":{"track":{"id":"6778775241108752385","name":"演员","duration":261277,"artists":[{"name":"薛之谦"}],"album":{"name":"初学者"}}}}]}]}"#.utf8)
+        check((try! source.matchingTrackID(in: searchFixture, for: track)) == "6778775241108752385", "strictly matches the correct Soda Music track")
+
+        let detailFixture = Data(#"{"lyric":{"content":"[1000,500]<0,500,0>简单点\n[2000,500]<0,500,0>说话","type":"krc"},"track":{"id":"6778775241108752385","name":"演员","duration":261277,"artists":[{"name":"薛之谦"}]}}"#.utf8)
+        check((try! source.parseDetail(detailFixture, for: track)) == [
+            LyricLine(time: 1, text: "简单点"),
+            LyricLine(time: 2, text: "说话")
+        ], "parses matched Soda Music KRC lyrics")
     }
 
     private static func testLRCMuxRequest() {
@@ -540,6 +632,19 @@ enum SelfTests {
         check(raced == first, "returns the first non-empty raced result")
         let wasCancelled = await cancellation.wasCancelled()
         check(wasCancelled, "cancels pending lyric sources after finding lyrics")
+
+        let offlineClient = LyricsClient(sources: [
+            { _ in throw URLError(.notConnectedToInternet) },
+            { _ in throw URLError(.timedOut) }
+        ])
+        do {
+            _ = try await offlineClient.syncedLyrics(for: track)
+            check(false, "reports a network failure when every lyric source fails")
+        } catch let error as LyricsClientError {
+            check(error == .networkFailure, "reports a network failure when every lyric source fails")
+        } catch {
+            check(false, "uses the lyrics client network error")
+        }
     }
 
     private static func testLRCMuxLive() async {
@@ -569,6 +674,17 @@ enum SelfTests {
             let lines = try! await source.syncedLyrics(for: track)
             print("QQ Music live \(track.name): \(lines.count) lines")
             check(!lines.isEmpty, "fetches live QQ Music lyrics for \(track.name)")
+        }
+    }
+
+    private static func testSodaMusicLive() async {
+        let track = SpotifyTrack(name: "演员", artist: "薛之谦", album: "初学者", duration: 261.3)
+        do {
+            let lines = try await SodaMusicLyricsSource().syncedLyrics(for: track)
+            print("Soda Music live \(track.name): \(lines.count) lines")
+            check(!lines.isEmpty, "fetches live Soda Music lyrics")
+        } catch {
+            check(false, "fetches live Soda Music lyrics: \(error)")
         }
     }
 

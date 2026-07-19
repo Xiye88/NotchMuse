@@ -1,45 +1,156 @@
 # NotchMuse
 
-NotchMuse 是一款原生 macOS 菜单栏应用，可读取本机 Spotify 的当前歌曲信息并显示同步歌词。
+NotchMuse is a lightweight native macOS lyrics companion for Spotify. It shows synchronized lyrics in the menu bar or near the MacBook notch, with a small settings panel for display mode, width, color, font size, animation speed, opacity, and startup behavior.
 
-## 使用
+This repository is currently preparing an unsigned GitHub Open Source Beta Release.
 
-1. 打开 Spotify 并播放歌曲。
-2. 运行 `./scripts/build_app.sh`。
-3. 打开 `dist/NotchMuse.app`，或运行 `./scripts/run_app.sh`。
-4. 按 macOS 提示，允许应用控制 Spotify。
+## Features
 
-点击状态栏中的原生渐变橙色音符，可暂停或继续歌词、刷新歌词、选择布局或退出应用。
+- Spotify now-playing detection through macOS automation
+- Status Bar lyrics on the left or right side of the menu bar
+- Notch Mode lyrics with Lyric Only, Song + Lyric, and Expanded styles
+- Auto, Compact, Normal, Wide, and Custom lyrics width
+- Built-in display, external display, and auto display targeting
+- Long-line scrolling, synchronized lyric progress, and color presets
+- Manual refresh, pause/resume handling, and single-instance launch behavior
+- English and Simplified Chinese app interface
+- Lyrics providers: LRCLIB, NetEase, LRCMux, QQ Music, Kugou, and Soda Music
 
-## 现有功能
+## Screenshots
 
-- 支持左侧、右侧和两边三种菜单栏歌词布局；长歌词会平滑滚动，两边模式会避开 MacBook 刘海区域。
-- 左侧和两边模式会读取当前前台应用的菜单位置，让左侧歌词避开已有菜单项。
-- 当前歌词行会按播放进度显示橙色渐变；这是行级进度，不代表逐字时间。
+![Status Bar Mode](docs/assets/screenshots/status-bar-mode.png)
 
-## 歌词来源与测试
+![Notch Mode](docs/assets/screenshots/notch-mode-crop.png)
 
-应用会从以下来源查找同步歌词：
+![Settings](docs/assets/screenshots/settings-window.png)
 
-- LRCLIB
-- 网易云音乐
-- LRCMux
-- QQ 音乐
-- 酷狗音乐
+Demo GIF plan:
 
-各来源的可用性和准确性可能变化。仓库包含 100 首真实歌曲的在线覆盖矩阵，可运行：
+- `docs/assets/notchmuse-demo.gif`
+- 10-15 seconds
+- Show Spotify playback, live lyrics, switching display mode, and opening Settings
+
+## Requirements
+
+- macOS 14.0 or later
+- Apple Silicon Mac
+- Spotify desktop app for macOS
+
+The current beta build is `arm64` only. Intel Mac and Universal Binary support are planned for a later phase.
+
+## Installation
+
+1. Download `NotchMuse.dmg` from GitHub Releases.
+2. Open the DMG.
+3. Drag `NotchMuse.app` into `Applications`.
+4. Open NotchMuse from `Applications`.
+5. When macOS asks for permission to control Spotify, allow it.
+
+### Unsigned Beta Notice
+
+The GitHub beta is unsigned. macOS may block the first launch because the app is not signed with Apple Developer ID and is not notarized.
+
+To open it:
+
+1. In Finder, open `Applications`.
+2. Control-click `NotchMuse.app`.
+3. Choose `Open`.
+4. Confirm `Open` again.
+
+If macOS still blocks it, go to `System Settings > Privacy & Security` and choose `Open Anyway` for NotchMuse.
+
+Developer ID signing and Apple notarization are deferred to a future Distribution Phase.
+
+## Usage
+
+1. Open Spotify and play a song.
+2. Open NotchMuse.
+3. Lyrics appear in the menu bar or notch area.
+4. Use the menu bar note icon to open the control menu.
+5. Open Settings to change display mode, position, color, width, font size, animation speed, opacity, and launch behavior.
+
+If a menu bar organizer hides the NotchMuse icon, expand hidden menu bar items or open NotchMuse again to bring the menu back.
+
+## Permissions
+
+- Automation / Spotify: reads current track, playback state, and playback position.
+- Accessibility: only needed for the left Status Bar layout so NotchMuse can avoid active app menu items.
+- Network: queries public lyrics providers for the current song.
+
+## Architecture
+
+NotchMuse is a native Swift macOS menu bar app.
+
+- `AppDelegate` owns app startup, single-instance behavior, Settings, and lifecycle coordination.
+- `SpotifyReader` reads current Spotify playback through macOS automation.
+- `LyricsClient` queries lyrics providers and returns synchronized lyrics.
+- `MenuBarController` renders Status Bar lyrics.
+- `OverlayLyricsWindow` renders Notch Mode lyrics.
+- `SettingsWindowController` manages user preferences.
+- `lyrics-provider-benchmark/` is an external benchmark lab used to measure provider coverage and matching quality.
+
+The benchmark lab does not run inside the app. Its role is to identify provider and matching issues for future optimization.
+
+## Lyrics Quality
+
+The current benchmark lab tests a 1,000-track dataset against multiple lyrics providers.
+
+Latest available snapshot:
+
+- Dataset: `extended_1000`
+- Successful matches: `636/1000`
+- Coverage: `63.6%`
+- Providers tested: LRCMux, LRCLIB, QQ Music, Soda Music, Kugou, NetEase
+
+Known failure categories include network errors, artist mismatch, title mismatch, and version mismatch. Coverage depends on third-party services and should be treated as a quality snapshot, not a guarantee for every song.
+
+## Build From Source
 
 ```sh
+./scripts/build_app.sh
+./scripts/build_dmg.sh
+./scripts/build_release.sh 0.3.0-beta 3
+```
+
+Build output:
+
+```text
+dist.noindex/NotchMuse.app
+dist.noindex/NotchMuse.dmg
+```
+
+The default GitHub beta build is unsigned/ad-hoc signed. A future Developer ID build can be generated with:
+
+```sh
+NOTCHMUSE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build_dmg.sh
+```
+
+Manual release steps are tracked in [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
+
+## Test
+
+```sh
+swift run --package-path MenuBarLyrics NotchMuse --self-test
 ./scripts/run_live_matrix.sh
 ```
 
-2026-07-14 的严格匹配实测为 94/100；其余 6 首为网络请求错误，
-没有曲库 MISS。第三方服务状态会变化，因此每次运行结果可能略有波动。
+## Known Issues
 
-## 权限与限制
+- The beta is unsigned, so macOS Gatekeeper warnings are expected.
+- Lyrics coverage depends on third-party providers.
+- Word-by-word lyrics are not guaranteed; most providers return line-level timing.
+- Left Status Bar mode requires Accessibility permission.
+- Other menu bar management tools may hide the NotchMuse icon.
+- Intel Mac is not supported in the current beta.
 
-- 只有左侧或两边模式需要“辅助功能”权限，用于避让前台应用菜单；仅使用右侧模式时不需要该权限。
-- 当前歌词源主要提供逐行时间。精确逐字时间与逐字高亮暂未承诺。
-- 应用不会上传音频，不要求账户，不写入持久缓存，也不收集遥测数据。
-- 第三方服务及歌词版权受各自条款和权利人约束。QQ 音乐与酷狗音乐的协议实现参考了 Apache-2.0 项目 [WXRIW/Lyricify-Lyrics-Helper](https://github.com/WXRIW/Lyricify-Lyrics-Helper)。
-- 当前应用包使用临时签名，仅供个人测试，尚未通过 Developer ID 或 Mac App Store 分发。
+## Privacy
+
+- No NotchMuse account is required.
+- NotchMuse does not read or upload Spotify audio.
+- NotchMuse does not collect telemetry, usage analytics, or personal profiles.
+- Track title, artist, album, and duration may be sent to third-party lyrics providers for matching.
+- Settings are stored locally with `UserDefaults`.
+
+## License
+
+NotchMuse is released under the MIT License. Third-party notices are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

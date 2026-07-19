@@ -33,6 +33,7 @@ enum SpotifyReader {
         do {
             output = try runOSAScript(script)
         } catch {
+            DebugLog.spotify("Spotify read failed: \(error.localizedDescription)")
             return .unavailable
         }
 
@@ -44,6 +45,7 @@ enum SpotifyReader {
         guard fields.count == 6,
               let durationMs = Double(fields[4]),
               let position = Double(fields[5]) else {
+            DebugLog.spotify("Spotify returned an unreadable response")
             return .unavailable
         }
 

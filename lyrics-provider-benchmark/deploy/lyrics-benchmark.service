@@ -1,0 +1,9 @@
+[Unit]
+Description=Lyrics Provider Benchmark
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/lyrics-provider-benchmark
+ExecStart=/usr/bin/python3 -m benchmark.cli --db /var/lib/lyrics-provider-benchmark/benchmark.sqlite3 run --dataset /opt/lyrics-provider-benchmark/datasets/extended_1000.tsv --dataset-name extended_1000 --sample-size 1000 --reports /opt/lyrics-provider-benchmark/reports
+StandardOutput=append:/var/log/lyrics-provider-benchmark/run.log
+StandardError=append:/var/log/lyrics-provider-benchmark/run.log

@@ -1,0 +1,131 @@
+# NotchMuse Project Status
+
+Last Updated: 2026-07-19
+
+## Current Phase
+
+Phase 1: Beta Release Preparation
+
+## Current Goal
+
+GitHub Open Source Beta Release without expanding product scope.
+
+## Release Status
+
+Status: In Progress
+
+Readiness Score: `86/100`
+
+Current candidate:
+- Version: `0.3.0-beta`
+- Build Number: `3`
+- Bundle Identifier: `app.notchmuse.mac`
+- Architecture: Apple Silicon / `arm64`
+
+Verified:
+- Release build completed.
+- DMG generated at `dist.noindex/NotchMuse.dmg`.
+- DMG verification passed.
+- App self-tests passed.
+- Runtime single-instance behavior passed in QA.
+- 100-song live matrix passed at `98/100`.
+- DMG install layout is correct: `NotchMuse.app` plus `Applications` symlink.
+- Existing `/Applications/NotchMuse.app` matches the DMG app hash in UX QA.
+- NotchMuse launches as a single menu bar process.
+- Spotify was readable in the QA environment.
+- Menu bar lyrics display was visually confirmed in the QA environment.
+- Settings opened and showed core controls.
+- Latest VPS 1000-song Benchmark report is available: run `6`, `636/1000`, coverage `63.6%`.
+- Clean User Journey Checklist is prepared for the final unsigned GitHub beta DMG.
+- GitHub Release package and Release Notes are prepared.
+- Current working tree debug self-test passed on 2026-07-19.
+- Current working tree unsigned release DMG build passed on 2026-07-19.
+- `build_release.sh` now produces an unsigned/ad-hoc GitHub beta DMG and warns that Gatekeeper warning is expected.
+- `build_app.sh` completed successfully on 2026-07-19.
+- `build_dmg.sh` completed successfully on 2026-07-19.
+- DMG SHA-256 checksum generated: `54b9901a0cdbd4d3ff2971cd19fe2449044cf33176aab3ad4b3e81b85a67f027`.
+- README now includes GitHub beta installation, unsigned Gatekeeper warning, Architecture, Lyrics Quality, and Known Issues.
+- Release Notes created at `RELEASE_NOTES_0.3.0-beta.md`.
+
+Not release-ready:
+- GitHub Release package still needs real screenshots.
+- Clean build verification passed only for the current working tree, not a fresh GitHub clone.
+- Clean first-install flow from the GitHub beta DMG is not verified.
+- README screenshot and Demo GIF asset paths are planned, but files are not present.
+- The full beta source state is not yet committed/tracked; a fresh clone may not reproduce the current app.
+
+## Blocking Issues
+
+Critical:
+- Create a release commit containing all intended beta source, scripts, resources, docs, benchmark, and reports.
+- Re-run clean build verification from the release commit or fresh clone.
+- Add release screenshots or approve publishing with documented screenshot placeholders.
+
+High:
+- Verify clean install from the GitHub beta DMG on a clean user account or test machine.
+- Verify first-launch Spotify Apple Events permission flow.
+- Verify Accessibility permission flow for Status Bar Left.
+- Visually verify lyrics display in Status Bar and Notch Mode.
+- Run the prepared clean user journey checklist after the final GitHub beta DMG is generated.
+- Add SHA-256 checksum to GitHub Release if Product Owner approves.
+
+Medium:
+- Add release screenshots for Status Bar, Notch Mode, and Settings.
+- Normalize public CHANGELOG headings before release.
+- Decide whether README should continue to show the exact VPS benchmark coverage `63.6%`.
+- Developer ID signing and Apple notarization are moved to a future Distribution Phase.
+
+## Completed Tasks
+
+- Created NotchMuse Release Candidate QA thread.
+- Created GitHub Release Preparation thread.
+- Created Lyrics Matching Architecture Review thread.
+- Confirmed Release build, DMG generation, metadata, and single-instance behavior.
+- Confirmed GitHub release documentation is mostly ready, with screenshots/GIFs missing.
+- Confirmed Benchmark/App matcher roadmap belongs to Phase 2, not Phase 1.
+- Created project control files and reports directories.
+- Completed Release Sprint reports:
+  - `reports/release/release-blocker-report.md`
+  - `reports/github/github-release-package-report.md`
+  - `reports/ux/user-journey-qa-report.md`
+  - `reports/benchmark/lyrics-quality-dashboard.md`
+- Completed Thread Architecture Audit.
+- Created `THREAD_REGISTRY.md`.
+- Renamed long-term threads into the `00_PM` through `06_DOCS` structure.
+- Archived duplicate one-time audit threads.
+- Completed Beta Release Execution Phase reports:
+  - `reports/release/02-release-execution-report.md`
+  - `reports/github/06-docs-release-package-report.md`
+  - `reports/ux/04-ux-clean-journey-checklist.md`
+  - `reports/benchmark/03-lab-lyrics-quality-snapshot.md`
+- Completed GitHub Open Source Release Sprint reports:
+  - `reports/github/06-docs-release-ready-report.md`
+  - `reports/release/01-app-build-verification-report.md`
+  - `reports/release/02-release-artifact-report.md`
+  - `reports/benchmark/03-lab-quality-showcase-report.md`
+- Completed Final Beta Release Preparation reports:
+  - `reports/release/01-app-final-build-verification-report.md`
+  - `reports/github/06-docs-final-package-report.md`
+  - `reports/github/github-release-final-package.md`
+  - `reports/release/02-release-final-artifact-report.md`
+  - `reports/benchmark/03-lab-benchmark-disclosure-recommendation.md`
+  - `reports/benchmark/03-lab-final-disclosure-recommendation.md`
+
+## In Progress Tasks
+
+- Clean install QA planning.
+- Screenshot and demo asset planning.
+- Release commit/source tracking cleanup.
+- Long-term thread coordination through `THREAD_REGISTRY.md`.
+
+## Next Decisions
+
+- Confirm unsigned GitHub beta release wording and macOS security warning.
+- Decide whether first public beta can ship with screenshots only, or whether Demo GIFs are required.
+- Decide where VPS Benchmark reports should be synced in `reports/benchmark/`.
+- Decide whether Phase 2 starts only after GitHub beta is published.
+- Decide screenshot language: English only, Simplified Chinese only, or both.
+- Decide whether README should display `63.6%` VPS benchmark coverage or describe it as an internal quality benchmark.
+- Decide final GitHub tag and build number.
+- Decide whether all current untracked beta files should be included in the release commit.
+- Decide whether SHA-256 checksum is required in the GitHub Release body.

@@ -1,5 +1,9 @@
 import Foundation
 
+enum LyricsClientError: Error, Equatable {
+    case networkFailure
+}
+
 @MainActor
 final class LyricsClient {
     typealias Source = @Sendable (SpotifyTrack) async throws -> [LyricLine]
@@ -13,7 +17,8 @@ final class LyricsClient {
             { try await NetEaseLyricsSource().syncedLyrics(for: $0) },
             { try await LRCMuxLyricsSource().syncedLyrics(for: $0) },
             { try await QQMusicLyricsSource().syncedLyrics(for: $0) },
-            { try await KugouLyricsSource().syncedLyrics(for: $0) }
+            { try await KugouLyricsSource().syncedLyrics(for: $0) },
+            { try await SodaMusicLyricsSource().syncedLyrics(for: $0) }
         ]
     }
 
@@ -23,26 +28,55 @@ final class LyricsClient {
             return cached
         }
 
-        let lines = await Self.firstNonEmpty(sources, for: track)
+        let result = await Self.firstNonEmptyResult(sources, for: track)
+        guard result.hadSuccessfulSource else {
+            DebugLog.lyrics("Lyrics search failed for \(track.name): all sources failed")
+            throw LyricsClientError.networkFailure
+        }
+        let lines = result.lines
+        if lines.isEmpty {
+            DebugLog.lyrics("Lyrics search found no match for \(track.name) by \(track.artist)")
+        }
         cache.insert(lines, for: key)
         return lines
     }
 
     nonisolated static func firstNonEmpty(_ sources: [Source], for track: SpotifyTrack) async -> [LyricLine] {
-        await withTaskGroup(of: [LyricLine]?.self) { group in
-            for source in sources {
-                group.addTask { try? await source(track) }
-            }
-            for await lines in group {
-                if let lines, !lines.isEmpty {
-                    group.cancelAll()
-                    return lines
-                }
-            }
-            return []
-        }
+        await firstNonEmptyResult(sources, for: track).lines
     }
 
+    nonisolated private static func firstNonEmptyResult(
+        _ sources: [Source],
+        for track: SpotifyTrack
+    ) async -> (lines: [LyricLine], hadSuccessfulSource: Bool) {
+        await withTaskGroup(of: (lines: [LyricLine]?, succeeded: Bool).self) { group in
+            for (index, source) in sources.enumerated() {
+                group.addTask {
+                    do {
+                        return (try await source(track), true)
+                    } catch let error as DecodingError {
+                        DebugLog.lyrics("Lyrics source \(index + 1) parsing failed: \(error.localizedDescription)")
+                        return (nil, false)
+                    } catch let error as URLError {
+                        DebugLog.lyrics("Lyrics source \(index + 1) network failed: \(error.localizedDescription)")
+                        return (nil, false)
+                    } catch {
+                        DebugLog.lyrics("Lyrics source \(index + 1) search failed: \(error.localizedDescription)")
+                        return (nil, false)
+                    }
+                }
+            }
+            var hadSuccessfulSource = false
+            for await result in group {
+                hadSuccessfulSource = hadSuccessfulSource || result.succeeded
+                if let lines = result.lines, !lines.isEmpty {
+                    group.cancelAll()
+                    return (lines, true)
+                }
+            }
+            return ([], hadSuccessfulSource)
+        }
+    }
 }
 
 struct LyricsCache {

@@ -43,7 +43,7 @@ Verified:
 - `build_release.sh` now produces an unsigned/ad-hoc GitHub beta DMG and warns that Gatekeeper warning is expected.
 - `build_app.sh` completed successfully on 2026-07-19.
 - `build_dmg.sh` completed successfully on 2026-07-19.
-- DMG SHA-256 checksum generated: `54b9901a0cdbd4d3ff2971cd19fe2449044cf33176aab3ad4b3e81b85a67f027`.
+- DMG SHA-256 checksum generated: `f956eb31915ea8c69431c93542e6a34797d3e081c4f493872faa254c79664c99`.
 - README now includes GitHub beta installation, unsigned Gatekeeper warning, Architecture, Lyrics Quality, and Known Issues.
 - Release Notes created at `RELEASE_NOTES_0.3.0-beta.md`.
 - Release commit created: `f60d927`.

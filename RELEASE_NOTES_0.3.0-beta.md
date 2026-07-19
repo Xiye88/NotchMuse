@@ -34,4 +34,4 @@ This beta is unsigned. If macOS blocks launch, Control-click `NotchMuse.app`, ch
 ## Artifact
 
 - `NotchMuse.dmg`
-- SHA-256: `54b9901a0cdbd4d3ff2971cd19fe2449044cf33176aab3ad4b3e81b85a67f027`
+- SHA-256: `f956eb31915ea8c69431c93542e6a34797d3e081c4f493872faa254c79664c99`

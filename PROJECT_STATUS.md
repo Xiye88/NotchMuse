@@ -14,7 +14,7 @@ GitHub Open Source Beta Release without expanding product scope.
 
 Status: In Progress
 
-Readiness Score: `86/100`
+Readiness Score: `94/100`
 
 Current candidate:
 - Version: `0.3.0-beta`
@@ -46,32 +46,34 @@ Verified:
 - DMG SHA-256 checksum generated: `54b9901a0cdbd4d3ff2971cd19fe2449044cf33176aab3ad4b3e81b85a67f027`.
 - README now includes GitHub beta installation, unsigned Gatekeeper warning, Architecture, Lyrics Quality, and Known Issues.
 - Release Notes created at `RELEASE_NOTES_0.3.0-beta.md`.
+- Release commit created: `f60d927`.
+- Fresh clone from release commit completed.
+- Fresh clone `build_app.sh` completed successfully.
+- Fresh clone self-test passed.
+- Fresh clone `build_dmg.sh` completed successfully.
+- Fresh clone DMG verification passed.
+- Minimum screenshots added to `docs/assets/screenshots/`.
+- DMG install simulation completed from mounted DMG to a temporary Applications folder.
+- Copied app launched successfully from the simulated install path.
 
 Not release-ready:
-- GitHub Release package still needs real screenshots.
-- Clean build verification passed only for the current working tree, not a fresh GitHub clone.
-- Clean first-install flow from the GitHub beta DMG is not verified.
-- README screenshot and Demo GIF asset paths are planned, but files are not present.
-- The full beta source state is not yet committed/tracked; a fresh clone may not reproduce the current app.
+- Gatekeeper quarantine flow from an actual GitHub-downloaded DMG is not manually verified.
+- Demo GIF is not present.
+- Settings screenshot is acceptable for beta but should be recaptured cleaner for a polished showcase.
 
 ## Blocking Issues
 
 Critical:
-- Create a release commit containing all intended beta source, scripts, resources, docs, benchmark, and reports.
-- Re-run clean build verification from the release commit or fresh clone.
-- Add release screenshots or approve publishing with documented screenshot placeholders.
+- No current P0 blocker.
 
 High:
-- Verify clean install from the GitHub beta DMG on a clean user account or test machine.
-- Verify first-launch Spotify Apple Events permission flow.
-- Verify Accessibility permission flow for Status Bar Left.
-- Visually verify lyrics display in Status Bar and Notch Mode.
-- Run the prepared clean user journey checklist after the final GitHub beta DMG is generated.
-- Add SHA-256 checksum to GitHub Release if Product Owner approves.
+- Verify Gatekeeper `Control-click Open` / `Open Anyway` flow from the uploaded GitHub DMG.
+- Verify first-launch Spotify Apple Events permission flow on a clean user account if Product Owner requires stricter QA.
+- Add SHA-256 checksum to GitHub Release.
 
 Medium:
-- Add release screenshots for Status Bar, Notch Mode, and Settings.
-- Normalize public CHANGELOG headings before release.
+- Recapture cleaner Settings screenshot before a polished public showcase.
+- Normalize older public CHANGELOG headings after beta if desired.
 - Decide whether README should continue to show the exact VPS benchmark coverage `63.6%`.
 - Developer ID signing and Apple notarization are moved to a future Distribution Phase.
 
@@ -110,22 +112,23 @@ Medium:
   - `reports/release/02-release-final-artifact-report.md`
   - `reports/benchmark/03-lab-benchmark-disclosure-recommendation.md`
   - `reports/benchmark/03-lab-final-disclosure-recommendation.md`
+- Completed Release Candidate Freeze reports:
+  - `reports/release/01-app-final-build-verification-report.md`
+  - `reports/github/final-documentation-ready-report.md`
+  - `reports/ux/final-ux-release-report.md`
 
 ## In Progress Tasks
 
-- Clean install QA planning.
-- Screenshot and demo asset planning.
-- Release commit/source tracking cleanup.
+- GitHub Release upload preparation.
 - Long-term thread coordination through `THREAD_REGISTRY.md`.
 
 ## Next Decisions
 
 - Confirm unsigned GitHub beta release wording and macOS security warning.
-- Decide whether first public beta can ship with screenshots only, or whether Demo GIFs are required.
+- Decide whether first public beta can ship without Demo GIF.
 - Decide where VPS Benchmark reports should be synced in `reports/benchmark/`.
 - Decide whether Phase 2 starts only after GitHub beta is published.
 - Decide screenshot language: English only, Simplified Chinese only, or both.
 - Decide whether README should display `63.6%` VPS benchmark coverage or describe it as an internal quality benchmark.
-- Decide final GitHub tag and build number.
-- Decide whether all current untracked beta files should be included in the release commit.
-- Decide whether SHA-256 checksum is required in the GitHub Release body.
+- Confirm final GitHub tag `v0.3.0-beta` and build number `3`.
+- Decide whether SHA-256 checksum is required as separate asset or release body text only.

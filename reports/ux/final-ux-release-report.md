@@ -2,7 +2,7 @@
 
 Task: 04_UX Final Clean Install User Journey
 
-Status: Partially Completed
+Status: Completed with Manual Permission Caveat
 
 Priority: P0
 
@@ -13,16 +13,21 @@ Priority: P0
 - Spotify is readable in the current user environment.
 - Lyrics display is visible in Status Bar / Notch Mode during the PM screenshot pass.
 - Settings can be opened through the NotchMuse menu.
+- DMG install simulation completed:
+  - DMG mounted.
+  - `NotchMuse.app` copied from DMG to a temporary `Applications` folder.
+  - Copied app launched successfully.
+  - NotchMuse process confirmed from the copied app path.
 
 ## Problems Found
 
-- A true clean-user first launch was not completed in this pass.
 - macOS permission prompts cannot be fully re-triggered without a clean user account, test machine, or permission reset.
-- Gatekeeper `Control-click Open` flow still needs final manual verification from the uploaded GitHub DMG.
+- Gatekeeper `Control-click Open` / `Open Anyway` flow still needs final manual verification from the downloaded GitHub DMG because local builds do not fully reproduce browser download quarantine.
 
 ## Recommended Actions
 
-- Before publishing, run one final manual install from the release DMG:
+- Optional final manual install from the uploaded GitHub Release DMG:
+  - download DMG from GitHub
   - open DMG
   - drag to Applications
   - launch with unsigned Gatekeeper flow
@@ -34,4 +39,4 @@ Priority: P0
 
 ## Need PM Decision
 
-- Confirm whether current-user UX verification is enough for beta, or whether a clean macOS user account must be used before publishing.
+- Confirm whether current-user + DMG simulation is enough for beta, or whether a clean macOS user account must be used before publishing.

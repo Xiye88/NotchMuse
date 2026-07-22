@@ -1,20 +1,20 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-07-19
+Last Updated: 2026-07-22
 
 ## Current Phase
 
-Phase 1: Beta Release Preparation
+Phase 2: Post Beta Optimization
 
 ## Current Goal
 
-GitHub Open Source Beta Release without expanding product scope.
+Benchmark-driven lyrics quality optimization after the GitHub beta release.
 
 ## Release Status
 
-Status: Ready for GitHub Pre-release
+Status: Released
 
-Readiness Score: `96/100`
+Readiness Score: `100/100`
 
 Current candidate:
 - Version: `0.3.0-beta`
@@ -59,11 +59,20 @@ Verified:
 - GitHub release requirement audit completed.
 - Final release publish checklist completed.
 - Local Git tag created: `v0.3.0-beta`.
+- GitHub repository created: `https://github.com/Xiye88/NotchMuse`.
+- `main` pushed to GitHub.
+- `v0.3.0-beta` tag pushed to GitHub.
+- GitHub Pre-release published: `https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.0-beta`.
+- GitHub Release asset uploaded: `NotchMuse.dmg`.
+- GitHub Release asset digest matches SHA-256: `f956eb31915ea8c69431c93542e6a34797d3e081c4f493872faa254c79664c99`.
+- GitHub-downloaded DMG checksum verified locally.
+- GitHub-downloaded DMG mounted and installed to `/Applications`.
+- Installed app launched successfully from `/Applications/NotchMuse.app`.
 
 Not release-ready:
-- Gatekeeper quarantine flow from an actual GitHub-downloaded DMG is not manually verified.
-- Demo GIF is not present.
-- Settings screenshot is acceptable for beta but should be recaptured cleaner for a polished showcase.
+- Phase 1 Beta Release is complete.
+- Gatekeeper `Open Anyway` and clean first-launch permission prompts still need optional clean-machine verification.
+- Demo GIF is deferred.
 
 ## Blocking Issues
 
@@ -71,10 +80,8 @@ Critical:
 - No current P0 blocker.
 
 High:
-- Verify Gatekeeper `Control-click Open` / `Open Anyway` flow from the uploaded GitHub DMG.
-- Verify first-launch Spotify Apple Events permission flow on a clean user account if Product Owner requires stricter QA.
-- Add SHA-256 checksum to GitHub Release body.
-- Configure GitHub remote before push/publish.
+- Start Phase 2 Benchmark -> App optimization loop.
+- Verify Gatekeeper `Control-click Open` / `Open Anyway` flow on a clean machine if Product Owner requires stricter QA.
 
 Medium:
 - Recapture cleaner Settings screenshot before a polished public showcase.
@@ -128,7 +135,7 @@ Medium:
 
 ## In Progress Tasks
 
-- GitHub Release upload preparation.
+- Phase 2 planning: lyrics quality optimization loop.
 - Long-term thread coordination through `THREAD_REGISTRY.md`.
 
 ## Next Decisions

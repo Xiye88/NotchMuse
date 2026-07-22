@@ -58,6 +58,7 @@ Verified:
 - Repository safety audit completed with no API keys, tokens, private keys, or credentials found.
 - GitHub release requirement audit completed.
 - Final release publish checklist completed.
+- Local Git tag created: `v0.3.0-beta`.
 
 Not release-ready:
 - Gatekeeper quarantine flow from an actual GitHub-downloaded DMG is not manually verified.
@@ -138,6 +139,6 @@ Medium:
 - Decide whether Phase 2 starts only after GitHub beta is published.
 - Decide screenshot language: English only, Simplified Chinese only, or both.
 - Decide whether README should display `63.6%` VPS benchmark coverage or describe it as an internal quality benchmark.
-- Confirm final GitHub tag `v0.3.0-beta` and build number `3`.
+- Confirm final GitHub tag `v0.3.0-beta` and build number `3` for remote publication.
 - Decide whether SHA-256 checksum is required as separate asset or release body text only.
 - Add GitHub remote URL.

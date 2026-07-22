@@ -29,6 +29,7 @@ Demo GIF plan:
 - `docs/assets/notchmuse-demo.gif`
 - 10-15 seconds
 - Show Spotify playback, live lyrics, switching display mode, and opening Settings
+- Deferred for the beta freeze if capture cost is high.
 
 ## Requirements
 

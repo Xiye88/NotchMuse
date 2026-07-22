@@ -12,9 +12,9 @@ GitHub Open Source Beta Release without expanding product scope.
 
 ## Release Status
 
-Status: In Progress
+Status: Ready for GitHub Pre-release
 
-Readiness Score: `94/100`
+Readiness Score: `96/100`
 
 Current candidate:
 - Version: `0.3.0-beta`
@@ -55,6 +55,9 @@ Verified:
 - Minimum screenshots added to `docs/assets/screenshots/`.
 - DMG install simulation completed from mounted DMG to a temporary Applications folder.
 - Copied app launched successfully from the simulated install path.
+- Repository safety audit completed with no API keys, tokens, private keys, or credentials found.
+- GitHub release requirement audit completed.
+- Final release publish checklist completed.
 
 Not release-ready:
 - Gatekeeper quarantine flow from an actual GitHub-downloaded DMG is not manually verified.
@@ -69,7 +72,8 @@ Critical:
 High:
 - Verify Gatekeeper `Control-click Open` / `Open Anyway` flow from the uploaded GitHub DMG.
 - Verify first-launch Spotify Apple Events permission flow on a clean user account if Product Owner requires stricter QA.
-- Add SHA-256 checksum to GitHub Release.
+- Add SHA-256 checksum to GitHub Release body.
+- Configure GitHub remote before push/publish.
 
 Medium:
 - Recapture cleaner Settings screenshot before a polished public showcase.
@@ -116,6 +120,10 @@ Medium:
   - `reports/release/01-app-final-build-verification-report.md`
   - `reports/github/final-documentation-ready-report.md`
   - `reports/ux/final-ux-release-report.md`
+- Completed Final GitHub Beta Release Checklist reports:
+  - `reports/release/repository-safety-report.md`
+  - `reports/github/github-documentation-ready-report.md`
+  - `reports/release/release-publish-checklist.md`
 
 ## In Progress Tasks
 
@@ -132,3 +140,4 @@ Medium:
 - Decide whether README should display `63.6%` VPS benchmark coverage or describe it as an internal quality benchmark.
 - Confirm final GitHub tag `v0.3.0-beta` and build number `3`.
 - Decide whether SHA-256 checksum is required as separate asset or release body text only.
+- Add GitHub remote URL.

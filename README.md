@@ -2,7 +2,15 @@
 
 NotchMuse is a lightweight native macOS lyrics companion for Spotify. It shows synchronized lyrics in the menu bar or near the MacBook notch, with a small settings panel for display mode, width, color, font size, animation speed, opacity, and startup behavior.
 
-This repository is currently preparing an unsigned GitHub Open Source Beta Release.
+NotchMuse is built for people who want lyrics to stay visible without opening a separate lyrics window.
+
+## Demo
+
+![Status Bar Mode](docs/assets/screenshots/status-bar-mode.png)
+
+![Notch Mode](docs/assets/screenshots/notch-mode-crop.png)
+
+![Settings](docs/assets/screenshots/settings-window.png)
 
 ## Features
 
@@ -16,13 +24,9 @@ This repository is currently preparing an unsigned GitHub Open Source Beta Relea
 - English and Simplified Chinese app interface
 - Lyrics providers: LRCLIB, NetEase, LRCMux, QQ Music, Kugou, and Soda Music
 
-## Screenshots
+## Recommended Setup
 
-![Status Bar Mode](docs/assets/screenshots/status-bar-mode.png)
-
-![Notch Mode](docs/assets/screenshots/notch-mode-crop.png)
-
-![Settings](docs/assets/screenshots/settings-window.png)
+For the cleanest Status Bar Mode experience, keep enough menu bar space available for lyrics. A menu bar organizer such as Thaw, Ice, Bartender, or a similar tool can help keep the right side of the menu bar uncluttered.
 
 Demo GIF plan:
 
@@ -47,9 +51,9 @@ The current beta build is `arm64` only. Intel Mac and Universal Binary support a
 4. Open NotchMuse from `Applications`.
 5. When macOS asks for permission to control Spotify, allow it.
 
-### Unsigned Beta Notice
+### Beta Release Notice
 
-The GitHub beta is unsigned. macOS may block the first launch because the app is not signed with Apple Developer ID and is not notarized.
+This GitHub beta is distributed as an unsigned macOS build. macOS may ask you to confirm the first launch because the app is not signed with Apple Developer ID yet.
 
 To open it:
 

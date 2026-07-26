@@ -27,6 +27,6 @@ Expected result:
 
 Actual result:
 
-## Logs / screenshots
+## Logs / screenshots / screen recordings
 
-Attach screenshots or logs if they help. Please remove private information such as account names, personal files, message contents, access tokens, or unrelated menu bar details.
+Attach screenshots, screen recordings, or logs if they help. Please remove private information such as account names, personal files, message contents, access tokens, or unrelated desktop and menu bar details.

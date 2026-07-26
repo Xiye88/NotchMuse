@@ -1,38 +1,77 @@
-# NotchMuse
+<h1 align="center">NotchMuse</h1>
 
-NotchMuse is a lightweight native macOS lyrics companion for Spotify. It shows synchronized lyrics in the menu bar or near the MacBook notch, with a small settings panel for display mode, width, color, font size, animation speed, opacity, and startup behavior.
+<p align="center">
+  <strong>A native macOS app that brings synced lyrics to your menu bar and notch.</strong>
+  <br>
+  Lyrics where you need them, without interrupting your workflow.
+</p>
 
-NotchMuse is built for people who want lyrics to stay visible without opening a separate lyrics window.
+<p align="center">
+  <a href="https://github.com/Xiye88/NotchMuse/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Xiye88/NotchMuse?include_prereleases&label=release"></a>
+  <img alt="macOS 14 or later" src="https://img.shields.io/badge/macOS-14.0%2B-black?logo=apple&logoColor=white">
+  <img alt="Swift" src="https://img.shields.io/badge/Swift-native-F05138?logo=swift&logoColor=white">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/Xiye88/NotchMuse"></a>
+</p>
 
-## Demo Video
+<p align="center">
+  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1"><strong>Download the latest beta</strong></a>
+  ·
+  <a href="https://github.com/Xiye88/NotchMuse/issues">Report an issue</a>
+</p>
+
+## Demo
 
 ### Status Bar Mode
 
-[Watch the Status Bar Mode demo](docs/assets/demos/notchmuse-status-bar-demo.mp4)
+Lyrics stay visible in the macOS menu bar while you use other apps.
+
+[![Status Bar Mode demo](docs/assets/demos/notchmuse-status-bar-demo.gif)](docs/assets/demos/notchmuse-status-bar-demo.mp4)
+
+### Notch Mode
+
+Song information and synchronized lyrics appear below the MacBook notch.
+
+[![Notch Mode demo](docs/assets/demos/notchmuse-notch-mode-demo.gif)](docs/assets/demos/notchmuse-notch-mode-demo.mp4)
+
+## Why NotchMuse?
+
+- Keep synchronized lyrics visible while working in other apps.
+- Choose a compact menu bar display or a MacBook notch layout.
+- Stay native and lightweight, with no NotchMuse account or telemetry.
+
+## Features
+
+| **Menu Bar lyrics** | **Notch-native display** |
+| --- | --- |
+| Keep Spotify-synchronized lyrics on the left or right side of the menu bar. | Choose Lyric Only, Song + Lyric, or Expanded layouts near the notch. |
+| **Native and private** | **Fits your workspace** |
+| No account, telemetry, or audio upload. English and Simplified Chinese are built in. | Target built-in or external displays and adjust width, color, type size, animation, and opacity. |
+
+## Screenshots
+
+### Full Mac Context
+
+NotchMuse stays visible in a real macOS workspace while Spotify is playing.
+
+![NotchMuse in a macOS workspace](docs/assets/screenshots/full-mac-context.png)
+
+### Status Bar Mode
+
+Synced lyrics stay visible in the macOS menu bar while you work in other apps.
 
 ![Status Bar Mode](docs/assets/screenshots/status-bar-mode.png)
 
 ### Notch Mode
 
-[Watch the Notch Mode demo](docs/assets/demos/notchmuse-notch-mode-demo.mp4)
+Lyrics appear near the MacBook notch in a compact, glanceable layout.
 
 ![Notch Mode](docs/assets/screenshots/notch-mode-crop.png)
 
 ### Settings
 
+Choose the display mode and adjust width, color, font size, animation speed, opacity, and startup behavior.
+
 ![Settings](docs/assets/screenshots/settings-window.png)
-
-## Features
-
-- Spotify now-playing detection through macOS automation
-- Status Bar lyrics on the left or right side of the menu bar
-- Notch Mode lyrics with Lyric Only, Song + Lyric, and Expanded styles
-- Auto, Compact, Normal, Wide, and Custom lyrics width
-- Built-in display, external display, and auto display targeting
-- Long-line scrolling, synchronized lyric progress, and color presets
-- Manual refresh, pause/resume handling, and single-instance launch behavior
-- English and Simplified Chinese app interface
-- Lyrics providers: LRCLIB, NetEase, LRCMux, QQ Music, Kugou, and Soda Music
 
 ## Installation
 
@@ -50,7 +89,7 @@ The current beta build is `arm64` only. Intel Mac and Universal Binary support a
 4. Open NotchMuse from `Applications`.
 5. When macOS asks for permission to control Spotify, allow it.
 
-### Beta Release Notice
+### Unsigned Beta Notice
 
 This GitHub beta is distributed as an unsigned macOS build. macOS may ask you to confirm the first launch because the app is not signed with Apple Developer ID yet.
 
@@ -65,6 +104,10 @@ If macOS still blocks it, go to `System Settings > Privacy & Security` and choos
 
 Developer ID signing and Apple notarization are deferred to a future Distribution Phase.
 
+## Optional Menu Bar Setup
+
+NotchMuse does not require a menu bar organizer. If your menu bar is already crowded, an optional tool such as Ice, Thaw, or Bartender can free up space for Status Bar Mode.
+
 ## Known Issues
 
 - The beta is unsigned, so macOS Gatekeeper warnings are expected.
@@ -74,9 +117,10 @@ Developer ID signing and Apple notarization are deferred to a future Distributio
 - Other menu bar management tools may hide the NotchMuse icon.
 - Intel Mac is not supported in the current beta.
 
-## Recommended Setup
+## Roadmap
 
-For the cleanest Status Bar Mode experience, keep enough menu bar space available for lyrics. A menu bar organizer such as Thaw, Ice, Bartender, or a similar tool can help keep the right side of the menu bar uncluttered.
+- v0.4: lyrics matching quality and provider health
+- Later: signed distribution and broader Mac compatibility
 
 ## Usage
 
@@ -115,8 +159,8 @@ The current benchmark lab tests a 1,000-track dataset against multiple lyrics pr
 Latest available snapshot:
 
 - Dataset: `extended_1000`
-- Successful matches: `636/1000`
-- Coverage: `63.6%`
+- Successful matches: `689/1000`
+- Coverage: `68.9%`
 - Providers tested: LRCMux, LRCLIB, QQ Music, Soda Music, Kugou, NetEase
 
 Known failure categories include network errors, artist mismatch, title mismatch, and version mismatch. Coverage depends on third-party services and should be treated as a quality snapshot, not a guarantee for every song.

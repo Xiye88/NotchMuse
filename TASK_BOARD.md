@@ -6,7 +6,7 @@ Last Updated: 2026-07-26
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| Collect rejected candidate samples | 03_LAB / 05_MATCHER | P1 | After logging exists |
+| Align 50-100 failed tracks with DEBUG evidence | 03_LAB / 05_MATCHER | P0 | Candidate, score, reject reason, final decision |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
 | Investigate NetEase response/parser failure | 03_LAB | P1 | Keep separate from matcher |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
@@ -23,6 +23,7 @@ Last Updated: 2026-07-26
 | v0.4 Evidence Gate | 03_LAB / 05_MATCHER | P0 | Candidate evidence before matcher changes |
 | Provider Health Classification | 03_LAB | P0 | NetEase, LRCMux 404, LRCLIB transient |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
+| Failure taxonomy split | 03_LAB | P0 | Separate no-result, unavailable, parser, transient |
 
 ## BLOCKED
 
@@ -31,6 +32,7 @@ Last Updated: 2026-07-26
 | Title normalization implementation | 05_MATCHER | P1 | Rejected candidate evidence missing |
 | LRCLIB App retry | 01_APP / 03_LAB | P1 | Second retry success `0/25` |
 | Universal Binary and new platforms | 01_APP / 04_UX | P2 | Deferred by Phase 2 scope |
+| Broad public promotion | 00_PM / 06_DOCS | P1 | Clean-user journey and first issue triage missing |
 
 ## DONE
 
@@ -73,3 +75,9 @@ Last Updated: 2026-07-26
 | Localization final review | 01_APP / 04_UX | P1 | English default; manual Chinese selection PASS |
 | Platform expansion decision | 01_APP | P2 | Apple Music first future candidate; implementation deferred |
 | Beta promotion package | 00_PM / 06_DOCS | P1 | X, Reddit, and GitHub early-beta drafts ready |
+| Beta User Journey final audit | 04_UX | P0 | PASS WITH RISKS; clean Mac still required |
+| 60-case Failure Taxonomy sample | 03_LAB | P0 | 15 samples in each requested class |
+| v0.4 Provider Health analysis | 03_LAB | P0 | LRCMux/LRCLIB/NetEase root boundaries set |
+| Matcher Evidence readiness | 05_MATCHER | P0 | GO without code changes |
+| Beta Support Package | 06_DOCS | P1 | `SUPPORT.md` and README links ready |
+| v0.5 priority review | 01_APP | P1 | Apple Music first conditional candidate |

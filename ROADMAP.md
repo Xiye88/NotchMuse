@@ -106,13 +106,16 @@ Candidates:
 - Confidence-scoring experiments in Benchmark only.
 - Confirmed UX and display compatibility bug fixes.
 - Release hardening based on real GitHub feedback.
+- Apple Music Music.app AppleScript evidence spike, only after v0.4 gates.
+- Universal Binary decision, only with demonstrated demand and Intel QA
+  hardware.
 
 Deferred:
 
 - Windows.
-- Intel Mac.
-- Universal Binary.
-- Apple Music and all other new music platforms.
+- QQ Music and NetEase Cloud Music.
+- Intel Mac / Universal Binary without hardware and demand evidence.
+- Apple Music production integration before a stable now-playing spike.
 - App Store distribution.
 
 ## Product Guardrails

@@ -8,8 +8,8 @@ Phase 2: Post Beta Optimization
 
 ## Current Goal
 
-Validate the public beta with real users while starting the `v0.4` Evidence
-Gate without changing production matching behavior.
+Run a candidate-backed `v0.4` Evidence Gate while keeping production matching
+behavior and the Spotify + Apple Silicon scope unchanged.
 
 ## Release Status
 
@@ -60,6 +60,8 @@ Gate without changing production matching behavior.
   beta risk, not an RC blocker.
 - A genuinely clean Mac/user-account Gatekeeper, TCC, Spotify, and lyrics
   journey has not yet been completed end to end.
+- The current `network_error` bucket mixes HTTP 404, timeout, DNS, and parser
+  failures and cannot directly justify Matcher changes.
 
 ## Completed Tasks
 
@@ -111,6 +113,13 @@ Gate without changing production matching behavior.
 - Prepared targeted X, Reddit, and GitHub early-beta announcement drafts.
 - Confirmed English-default and manually selectable Simplified Chinese UI
   coverage without creating a second localization system.
+- Completed a 60-case Failure Taxonomy sample from verified runs `8-14`.
+- Classified LRCMux as healthy with unresolved 404/no-result semantics,
+  LRCLIB as mixed Network/Parser/Matcher, and NetEase as unhealthy.
+- Confirmed the Matcher Evidence Gate can run without new code changes.
+- Added `SUPPORT.md` and prepared the v0.4 Early Beta promotion package.
+- Completed the v0.5 priority review; Apple Music is the first conditional
+  candidate, while Universal Binary requires demand and Intel QA hardware.
 
 ## In Progress Tasks
 
@@ -124,6 +133,9 @@ Gate without changing production matching behavior.
 - Continue collecting structured GitHub beta feedback.
 - Complete one real clean-Mac installation journey.
 - Run the first weekly issue triage after targeted beta promotion.
+- Align 50-100 failed tracks with DEBUG candidate logs and Benchmark rows.
+- Split provider no-result, provider unavailable, parser failure, and network
+  transient in Benchmark analysis.
 
 ## Next Decisions
 
@@ -138,3 +150,6 @@ Gate without changing production matching behavior.
   expansion out of the current roadmap.
 - Approve targeted early-beta promotion now; keep broad promotion gated on a
   clean-user journey pass and initial issue triage.
+- Keep v0.4 scoped to Spotify + Apple Silicon.
+- Treat Apple Music as a v0.5 candidate only after a Music.app AppleScript
+  evidence spike proves stable playback metadata and position.

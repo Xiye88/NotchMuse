@@ -104,6 +104,8 @@ If macOS still blocks it, go to `System Settings > Privacy & Security` and choos
 
 Developer ID signing and Apple notarization are deferred to a future Distribution Phase.
 
+If installation, Gatekeeper, Spotify permission, or lyrics lookup fails, see [SUPPORT.md](SUPPORT.md).
+
 ## Optional Menu Bar Setup
 
 NotchMuse does not require a menu bar organizer. If your menu bar is already crowded, an optional tool such as Ice, Thaw, or Bartender can free up space for Status Bar Mode.
@@ -197,7 +199,7 @@ swift run --package-path MenuBarLyrics NotchMuse --self-test
 
 ## Feedback
 
-Please read [FEEDBACK.md](FEEDBACK.md), then use [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues). Choose **Bug report** for reproducible problems and **Feature request** for focused use cases or improvements.
+For setup help, read [SUPPORT.md](SUPPORT.md). For feedback, read [FEEDBACK.md](FEEDBACK.md), then use [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues). Choose **Bug report** for reproducible problems and **Feature request** for focused use cases or improvements.
 
 ## Privacy
 

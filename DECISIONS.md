@@ -1,5 +1,19 @@
 # NotchMuse Decisions
 
+## 2026-07-26 - v0.3.1 Release and v0.4 Entry Gate
+
+- Publish `v0.3.1` as an unsigned GitHub Pre-release for macOS 14+ on Apple
+  Silicon.
+- Keep the transient Notch pause/resume layout switch as a beta known issue,
+  not a release blocker.
+- Keep internal Task Completion Reports containing local paths or VPS
+  endpoints out of the public release commit.
+- Start v0.4 with an Evidence Gate and Provider Health Classification.
+- Do not implement title or artist normalization until candidate-backed
+  Benchmark simulation shows zero confirmed false positives.
+- Do not change provider order, matching thresholds, duration tolerance, or
+  App retry based only on aggregate Coverage.
+
 Last Updated: 2026-07-24
 
 ## Decision Log

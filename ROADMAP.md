@@ -1,6 +1,6 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-07-25
+Last Updated: 2026-07-26
 
 ## Phase 1: GitHub Open Source Beta Release
 
@@ -13,7 +13,7 @@ Status: Completed
 
 ### v0.3.1 - Lyrics Quality Improvement + UX Polish
 
-Status: Release Candidate validated; repository freeze pending.
+Status: Released as GitHub Pre-release on 2026-07-26.
 
 Goal: Add safe matcher observability and complete the targeted lyrics UX fix.
 
@@ -36,15 +36,17 @@ Completed:
 - Designed the minimum Benchmark Failure Analysis Pipeline.
 - Added GitHub Bug Report and Feature Request templates.
 - Added a README Feedback entry point.
+- Published release commit `3666710` and tag `v0.3.1`.
+- Published and re-downloaded the final DMG; SHA-256 and `hdiutil verify`
+  passed.
+- Added official Status Bar and Notch Mode MP4 demos.
 
-Remaining:
+Post-release:
 
-- Freeze the repository and create the v0.3.1 release commit.
-- Rebuild the DMG from the frozen commit and publish the checksum.
-- Record the transient Notch resume layout switch as a beta known issue.
-- Use bounded local candidate metadata sampling to obtain evidence for future
-  title normalization.
-- Classify LRCMux HTTP 404 semantics.
+- Keep the transient Notch resume layout switch as a beta known issue.
+- Replace Demo links with native GitHub attachments when upload permission is
+  available.
+- Re-capture the Status Bar screenshot without left-edge lyric cropping.
 - Keep collecting real beta issues and environment data.
 
 Exit Criteria:
@@ -64,12 +66,14 @@ increasing false positives.
 
 Order:
 
-1. Parse and import DEBUG matcher logs into the existing Benchmark SQLite.
-2. Run a controlled 50-100 track audit and establish the failure taxonomy.
-3. Use the captured evidence to audit rejected candidates.
-4. Add title or artist normalization only when logs prove a safe gap.
-5. Continue provider-specific experiments in Benchmark.
-6. Reconsider App retry only after a stratified experiment shows second
+1. Complete the Evidence Gate using DEBUG-only candidate decision logs.
+2. Separate Provider Health failures from matcher failures.
+3. Parse and import DEBUG matcher logs into the existing Benchmark SQLite.
+4. Run a controlled 50-100 track audit and establish the failure taxonomy.
+5. Use the captured evidence to audit rejected candidates.
+6. Add title or artist normalization only when logs prove a safe gap.
+7. Continue provider-specific experiments in Benchmark.
+8. Reconsider App retry only after a stratified experiment shows second
    attempt recovery greater than zero.
 
 Validation Gate:

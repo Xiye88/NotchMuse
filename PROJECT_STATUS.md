@@ -8,18 +8,21 @@ Phase 2: Post Beta Optimization
 
 ## Current Goal
 
-Complete the final repository freeze and release artifact rebuild for
-`v0.3.1` after the P0 UX fixes passed real-device validation.
+Start the `v0.4` Evidence Gate and Provider Health Classification without
+changing production matching behavior.
 
 ## Release Status
 
 - `v0.3.0-beta` is published as a GitHub Pre-release.
-- `v0.3.1` source identifies as build `4`.
-- The previous local RC DMG and SHA-256 are superseded by the P0 UX fixes and
-  must not be published.
-- Final RC DMG rebuild and checksum are pending the release commit.
+- `v0.3.1` build `4` is published as a GitHub Pre-release.
+- Release commit: `3666710`.
+- Release tag: `v0.3.1`.
+- DMG SHA-256:
+  `f8b0efe34ebb361509c0c6e861edd754e4c64a8eb1f0b24ddb7bf22474fcedb0`.
+- The DMG was downloaded again from GitHub; SHA-256 matched and
+  `hdiutil verify` passed.
 - Repository: https://github.com/Xiye88/NotchMuse
-- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.0-beta
+- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1
 - Current support: macOS 14+, Apple Silicon, Spotify desktop app.
 - Developer ID signing and notarization remain deferred.
 
@@ -29,20 +32,16 @@ Complete the final repository freeze and release artifact rebuild for
 - Password authentication remains unavailable but is not required for current
   operations.
 - `lyrics-benchmark.timer` is enabled and active.
-- Runs `6-12` completed successfully on seven consecutive days.
-- Seven-day average Coverage: `66.09%`.
-- Latest run: `12`, completed 2026-07-24, Coverage `68.3%`.
-- Next scheduled trigger: 2026-07-25 00:00 UTC.
+- Runs `8-14` completed successfully on seven consecutive days.
+- Seven-run average Coverage: `67.16%`.
+- Latest run: `14`, completed 2026-07-26, Coverage `68.9%`.
+- Next scheduled trigger: 2026-07-27 00:00 UTC.
 
 ## Blocking Issues
 
 ### P0 Publish Gates
 
-- The Git worktree is not frozen; implementation, documentation, templates,
-  and reports still need one final scope review.
-- No `v0.3.1` release commit or tag exists yet.
-- The final DMG must be rebuilt from the release commit and pass clean install
-  verification.
+- None for `v0.3.1`; release completed and the downloaded artifact verified.
 
 ### P1 Analysis Gates
 
@@ -96,28 +95,32 @@ Complete the final repository freeze and release artifact rebuild for
 - Added a README Feedback section.
 - Added official Status Bar and Notch Mode MP4 demos, reorganized the README
   presentation flow, and retained screenshots as visual fallback.
+- Published `v0.3.1` from release commit `3666710` with DMG and checksum
+  assets.
+- Re-downloaded and verified the GitHub release DMG.
+- Completed the Phase 2 Benchmark health check: latest Coverage `68.9%`,
+  seven-run average `67.16%`.
+- Completed the v0.4 Matcher roadmap with an Evidence Gate and zero
+  false-positive requirement.
 - Confirmed Windows, Intel, Universal Binary, and new music platforms remain
   deferred.
 
 ## In Progress Tasks
 
-- Review and freeze the complete v0.3.1 Git diff.
-- Prepare the v0.3.1 release commit and tag after repository safety review.
-- Rebuild and clean-install the final DMG after the release commit.
 - Replace repository video links with GitHub native attachment URLs when
   browser upload permission is available.
+- Re-capture the Status Bar screenshot without left-edge lyric cropping.
 - Collect bounded local evidence through the new DEBUG matcher decision logs.
+- Classify NetEase response/parser failure separately from matcher failures.
 - Classify LRCMux HTTP 404 semantics.
 - Continue Benchmark-only stratified LRCLIB experiments if needed.
 - Continue collecting structured GitHub beta feedback.
 
 ## Next Decisions
 
-- Confirm acceptance of the transient Notch resume layout switch as a known
-  beta risk.
-- Confirm the final release commit scope, including which internal reports
-  should be tracked publicly.
-- Confirm the final RC release commit, DMG rebuild, checksum, and tag sequence.
+- Keep the transient Notch resume layout switch as a known beta risk.
+- Approve Evidence Gate and Provider Health Classification as the first v0.4
+  work, before title or artist normalization.
 - Decide when to run a DEBUG-only, local, bounded plaintext candidate sampling
   session for manual title mismatch audits.
 - Keep Title normalization, Provider priority changes, and App retry out of

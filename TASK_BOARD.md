@@ -6,20 +6,20 @@ Last Updated: 2026-07-26
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| Freeze v0.3.1 repository diff | 00_PM / 01_APP | P0 | Include validated P0 UX fixes |
-| Prepare v0.3.1 release commit and tag | 00_PM / 01_APP | P0 | After safety audit |
-| Rebuild DMG from release commit | 01_APP | P0 | Previous artifact superseded; verify new checksum |
 | Collect rejected candidate samples | 03_LAB / 05_MATCHER | P1 | After logging exists |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
+| Investigate NetEase response/parser failure | 03_LAB | P1 | Keep separate from matcher |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
 | Replace Demo links with GitHub native attachments | 06_DOCS | P2 | Requires browser local-file access |
+| Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
 
 ## IN PROGRESS
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
-| v0.3.1 Release Candidate freeze | 00_PM / 01_APP | P0 | Critical UX validation PASS; Git freeze pending |
+| v0.4 Evidence Gate | 03_LAB / 05_MATCHER | P0 | Candidate evidence before matcher changes |
+| Provider Health Classification | 03_LAB | P0 | NetEase, LRCMux 404, LRCLIB transient |
 
 ## BLOCKED
 
@@ -34,6 +34,10 @@ Last Updated: 2026-07-26
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
 | GitHub `v0.3.0-beta` release | Project | P0 | Published and verified |
+| GitHub `v0.3.1` release | Project | P0 | Pre-release published; downloaded DMG verified |
+| Freeze v0.3.1 repository diff | 00_PM / 01_APP | P0 | Release commit `3666710` |
+| Rebuild v0.3.1 DMG | 01_APP / 02_RELEASE | P0 | SHA-256 `f8b0efe3...fcedb0` |
+| Push v0.3.1 tag and Release | 02_RELEASE / 00_PM | P0 | DMG and checksum uploaded |
 | Restore VPS access | 03_LAB | P0 | Existing SSH key works |
 | Verify 7-day Benchmark baseline | 03_LAB | P0 | Average Coverage `66.09%` |
 | Verify Daily Benchmark Pipeline | 03_LAB | P0 | Timer enabled/active; 7 runs healthy |
@@ -59,3 +63,5 @@ Last Updated: 2026-07-26
 | Benchmark next-step review | 03_LAB | P1 | Minimum Failure Analysis Pipeline defined |
 | Matcher Release boundary review | 05_MATCHER | P0 | PASS; no production behavior change |
 | Local v0.3.1 RC artifact | 01_APP | P0 | Build 4 DMG verified |
+| Phase 2 Benchmark health check | 03_LAB | P1 | Latest `68.9%`; 7-run average `67.16%` |
+| v0.4 Matcher roadmap | 05_MATCHER | P1 | Evidence Gate first; false positives must remain `0` |

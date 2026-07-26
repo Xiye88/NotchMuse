@@ -1,6 +1,6 @@
 # NotchMuse Decisions
 
-Last Updated: 2026-07-18
+Last Updated: 2026-07-24
 
 ## Decision Log
 
@@ -63,3 +63,41 @@ Reason:
 - Chat threads are useful for execution, but not reliable as the only project memory.
 - Code remains the source of implementation truth.
 - Project documents remain the source of management truth.
+
+### 2026-07-22: Publish an unsigned GitHub Open Source Beta
+
+Decision: Developer ID signing and notarization are not blockers for the
+GitHub Open Source Beta when the unsigned-app installation path is documented.
+
+Reason:
+- The release target is GitHub Pre-release, not App Store distribution.
+- The DMG, checksum, installation, and macOS security-warning path were
+  verified.
+- Signing and notarization remain future distribution work.
+
+### 2026-07-24: Keep Phase 2 focused on Lyrics Quality
+
+Decision: `v0.3.1`, `v0.4`, and `v0.5` prioritize Benchmark evidence,
+matching safety, provider health, and confirmed beta issues.
+
+Reason:
+- Seven-day data shows failure categories change over time and require better
+  attribution before production changes.
+- Windows, Intel, Universal Binary, and new music platforms add scope without
+  improving the current core lyrics experience.
+- Platform expansion remains deferred until a future roadmap decision.
+
+### 2026-07-24: Approve logging-only v0.3.1 code entry
+
+Decision: The next code sprint may implement Matcher Decision Logging only.
+Title normalization, Provider priority changes, and LRCLIB App retry remain
+out of scope.
+
+Reason:
+- `128/216` audited title mismatches are provider response or classification
+  drift, and rejected candidate metadata is missing.
+- LRCLIB's immediate second retry recovered `0/25` replay failures.
+- App providers already run concurrently, so Benchmark ranking is not an App
+  priority strategy.
+- DEBUG-only decision logs are the smallest change that closes the evidence
+  gap without altering matching results.

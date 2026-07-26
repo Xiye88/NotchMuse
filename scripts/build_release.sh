@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="${1:-${NOTCHMUSE_VERSION:-0.3.0-beta}}"
-BUILD_NUMBER="${2:-${NOTCHMUSE_BUILD_NUMBER:-3}}"
+VERSION="${1:-${NOTCHMUSE_VERSION:-0.3.1}}"
+BUILD_NUMBER="${2:-${NOTCHMUSE_BUILD_NUMBER:-4}}"
 SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
 APP="$ROOT/dist.noindex/NotchMuse.app"
 DMG="$ROOT/dist.noindex/NotchMuse.dmg"

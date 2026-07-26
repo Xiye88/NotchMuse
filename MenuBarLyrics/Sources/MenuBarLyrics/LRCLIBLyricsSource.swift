@@ -37,7 +37,7 @@ struct LRCLIBLyricsSource {
                 unique.append(result)
             }
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: unique.map(\.candidate)),
+        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: unique.map(\.candidate), provider: "LRCLIB"),
               let lyrics = unique[index].syncedLyrics,
               !hasSuspiciousKana(lyrics, for: track) else { return [] }
         return LyricParser.parse(lyrics)

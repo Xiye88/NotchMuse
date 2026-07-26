@@ -59,7 +59,7 @@ struct SodaMusicLyricsSource {
         let candidates = tracks.map {
             TrackMatcher.Candidate(title: $0.name, artists: $0.artists.map(\.name), durationMs: $0.duration)
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates) else { return nil }
+        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "Soda") else { return nil }
         return tracks[index].id
     }
 
@@ -70,7 +70,7 @@ struct SodaMusicLyricsSource {
             artists: response.track.artists.map(\.name),
             durationMs: response.track.duration
         )
-        guard TrackMatcher.bestMatchIndex(for: track, candidates: [candidate]) == 0,
+        guard TrackMatcher.bestMatchIndex(for: track, candidates: [candidate], provider: "Soda") == 0,
               let lyric = response.lyric else { return [] }
         return lyric.type.lowercased() == "krc"
             ? KugouLyricsSource().parseKRC(lyric.content)

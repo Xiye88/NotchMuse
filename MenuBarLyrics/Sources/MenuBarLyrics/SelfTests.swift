@@ -47,6 +47,7 @@ enum SelfTests {
         check(OverlayLaneGeometry.centeredTextY(laneHeight: 32, lineHeight: 16) == 8, "centers lyrics vertically in the menu bar")
 
         testTrackMatcher()
+        testTrackMatcherDiagnostics()
         testLyricsHTTP()
         testLyricsCache()
         testLRCLIBRequest()
@@ -107,6 +108,8 @@ enum SelfTests {
     private static func testLocalization() {
         check(L10n.text("Settings…", language: .english) == "Settings…", "loads English localization")
         check(L10n.text("Settings…", language: .simplifiedChinese) == "设置…", "loads Simplified Chinese localization")
+        check(L10n.text("Hide Lyrics", language: .simplifiedChinese) == "隐藏歌词", "localizes the hide lyrics menu item")
+        check(L10n.text("Show Lyrics", language: .simplifiedChinese) == "显示歌词", "localizes the show lyrics menu item")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
     }
 
@@ -171,16 +174,27 @@ enum SelfTests {
         scroll.reset(at: 100)
 
         check(scroll.offset(contentWidth: 80, viewportWidth: 100, at: 200) == 0, "does not scroll fitting text")
-        check(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 100.8) == 0, "pauses at the scroll start")
-        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 101.9) - 28) < 0.01, "scrolls forward at 28 points per second")
-        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, speedMultiplier: 0.5, at: 101.9) - 14) < 0.01, "applies the configured animation speed")
-        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 102.9) - 56) < 0.01, "reaches the scroll endpoint")
-        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 103.5) - 56) < 0.01, "pauses at the scroll endpoint")
-        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 104.8) - 28) < 0.01, "scrolls back smoothly")
-        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 105.8)) < 0.01, "returns to the scroll start")
+        check(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 101.1) == 0, "pauses for 1.2 seconds before scrolling")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 102.2) - 28) < 0.01, "scrolls forward at 28 points per second")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, speedMultiplier: 0.5, at: 102.2) - 14) < 0.01, "applies the configured animation speed")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 103.2) - 56) < 0.01, "reaches the scroll endpoint")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 120) - 56) < 0.01, "stays clamped at the endpoint")
+        check(scroll.isFinished(contentWidth: 156, viewportWidth: 100, at: 103.2), "reports completion at the endpoint")
+        check(!scroll.isFinished(contentWidth: 156, viewportWidth: 100, at: 102.2), "reports unfinished while scrolling")
+        check(scroll.isFinished(contentWidth: 80, viewportWidth: 100, at: 200), "fitting text is already complete")
 
         scroll.reset(at: 300)
-        check(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 300.8) == 0, "reset restarts the initial pause")
+        check(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 301.1) == 0, "reset restarts the initial pause")
+        check(abs(scroll.offset(contentWidth: 156, viewportWidth: 100, at: 302.2) - 28) < 0.01, "reset restarts forward scrolling")
+
+        let repeated = [
+            LyricLine(time: 1, text: "Again"),
+            LyricLine(time: 2, text: "Again")
+        ]
+        let first = LyricClock.moment(at: 1.5, in: repeated)
+        let second = LyricClock.moment(at: 2.1, in: repeated)
+        check(first?.text == second?.text, "keeps repeated lyric text unchanged")
+        check(first?.identity != second?.identity, "distinguishes repeated lyric lines by identity")
     }
 
     private static func testOverlayGeometry() {
@@ -201,6 +215,7 @@ enum SelfTests {
         check(frames.right.maxX <= 1102, "reserves space before status items")
         check(frames.right.maxX == 1102, "does not reserve space for the deleted settings button")
         check(frames.left.width > 0 && frames.right.width > 0, "keeps usable lyric lanes on a notched MacBook")
+        check(OverlayMousePolicy.ignoresMouseEvents, "keeps Notch overlays click-through during normal display")
 
         let coveredLeftLane = OverlayLaneGeometry.frames(
             screenFrame: NSRect(x: 0, y: 0, width: 1470, height: 956),
@@ -645,6 +660,28 @@ enum SelfTests {
         } catch {
             check(false, "uses the lyrics client network error")
         }
+
+        let aggregateHit = await LyricsClient.firstNonEmptyResult([
+            { _ in [] },
+            { _ in first }
+        ], for: track)
+        check(aggregateHit.lines == first, "diagnostics preserves first non-empty behavior")
+        check(aggregateHit.aggregateReason == "hit", "diagnostics records final hit")
+        check(aggregateHit.selectedProvider == "source_2", "diagnostics records selected provider label")
+
+        let aggregateEmpty = await LyricsClient.firstNonEmptyResult([
+            { _ in [] },
+            { _ in [] }
+        ], for: track)
+        check(aggregateEmpty.lines.isEmpty, "diagnostics preserves all-empty behavior")
+        check(aggregateEmpty.aggregateReason == "empty", "diagnostics records all-empty aggregate")
+
+        let aggregateFailed = await LyricsClient.firstNonEmptyResult([
+            { _ in throw URLError(.timedOut) },
+            { _ in throw URLError(.notConnectedToInternet) }
+        ], for: track)
+        check(aggregateFailed.lines.isEmpty, "diagnostics preserves all-failed behavior")
+        check(aggregateFailed.aggregateReason == "all_failed", "diagnostics records all-failed aggregate")
     }
 
     private static func testLRCMuxLive() async {
@@ -786,6 +823,37 @@ enum SelfTests {
         check(TrackMatcher.bestMatchIndex(for: source, candidates: ambiguous) == nil, "rejects ambiguous matches")
 
         check(TrackMatcher.bestMatchIndex(for: source, candidates: [candidate("Wrong")]) == nil, "rejects a non-match")
+    }
+
+    private static func testTrackMatcherDiagnostics() {
+        func track(_ name: String, _ artist: String = "Artist", _ duration: Double = 200) -> SpotifyTrack {
+            SpotifyTrack(name: name, artist: artist, album: "Album", duration: duration)
+        }
+
+        func candidate(_ title: String, _ artists: [String] = ["Artist"], _ durationMs: Int = 200_000) -> TrackMatcher.Candidate {
+            TrackMatcher.Candidate(title: title, artists: artists, durationMs: durationMs)
+        }
+
+        let source = track("Song")
+        let selected = TrackMatcher.diagnostics(for: source, candidates: [
+            candidate("Wrong"),
+            candidate("Song")
+        ])
+        check(selected.selectedIndex == 1, "diagnostics records selected candidate")
+        check(selected.rejectReason == "selected", "diagnostics records selected reason")
+        check(selected.topScore >= TrackMatcher.acceptanceThreshold, "diagnostics records top score")
+
+        let belowThreshold = TrackMatcher.diagnostics(for: source, candidates: [candidate("Wrong")])
+        check(belowThreshold.selectedIndex == nil, "diagnostics records no selection below threshold")
+        check(belowThreshold.rejectReason == "below_threshold", "diagnostics records below threshold")
+
+        let ambiguous = TrackMatcher.diagnostics(for: source, candidates: [
+            candidate("Song", ["Artist"], 200_000),
+            candidate("Song", ["Artist"], 204_000)
+        ])
+        check(ambiguous.selectedIndex == nil, "diagnostics records ambiguous no selection")
+        check(ambiguous.rejectReason == "ambiguous_gap", "diagnostics records ambiguity")
+        check(ambiguous.ambiguityGap < 6, "diagnostics records ambiguity gap")
     }
 }
 

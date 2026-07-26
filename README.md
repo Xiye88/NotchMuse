@@ -4,11 +4,21 @@ NotchMuse is a lightweight native macOS lyrics companion for Spotify. It shows s
 
 NotchMuse is built for people who want lyrics to stay visible without opening a separate lyrics window.
 
-## Demo
+## Demo Video
+
+### Status Bar Mode
+
+[Watch the Status Bar Mode demo](docs/assets/demos/notchmuse-status-bar-demo.mp4)
 
 ![Status Bar Mode](docs/assets/screenshots/status-bar-mode.png)
 
+### Notch Mode
+
+[Watch the Notch Mode demo](docs/assets/demos/notchmuse-notch-mode-demo.mp4)
+
 ![Notch Mode](docs/assets/screenshots/notch-mode-crop.png)
+
+### Settings
 
 ![Settings](docs/assets/screenshots/settings-window.png)
 
@@ -24,26 +34,15 @@ NotchMuse is built for people who want lyrics to stay visible without opening a 
 - English and Simplified Chinese app interface
 - Lyrics providers: LRCLIB, NetEase, LRCMux, QQ Music, Kugou, and Soda Music
 
-## Recommended Setup
+## Installation
 
-For the cleanest Status Bar Mode experience, keep enough menu bar space available for lyrics. A menu bar organizer such as Thaw, Ice, Bartender, or a similar tool can help keep the right side of the menu bar uncluttered.
-
-Demo GIF plan:
-
-- `docs/assets/notchmuse-demo.gif`
-- 10-15 seconds
-- Show Spotify playback, live lyrics, switching display mode, and opening Settings
-- Deferred for the beta freeze if capture cost is high.
-
-## Requirements
+### Requirements
 
 - macOS 14.0 or later
 - Apple Silicon Mac
 - Spotify desktop app for macOS
 
 The current beta build is `arm64` only. Intel Mac and Universal Binary support are planned for a later phase.
-
-## Installation
 
 1. Download `NotchMuse.dmg` from GitHub Releases.
 2. Open the DMG.
@@ -65,6 +64,19 @@ To open it:
 If macOS still blocks it, go to `System Settings > Privacy & Security` and choose `Open Anyway` for NotchMuse.
 
 Developer ID signing and Apple notarization are deferred to a future Distribution Phase.
+
+## Known Issues
+
+- The beta is unsigned, so macOS Gatekeeper warnings are expected.
+- Lyrics coverage depends on third-party providers.
+- Word-by-word lyrics are not guaranteed; most providers return line-level timing.
+- Left Status Bar mode requires Accessibility permission.
+- Other menu bar management tools may hide the NotchMuse icon.
+- Intel Mac is not supported in the current beta.
+
+## Recommended Setup
+
+For the cleanest Status Bar Mode experience, keep enough menu bar space available for lyrics. A menu bar organizer such as Thaw, Ice, Bartender, or a similar tool can help keep the right side of the menu bar uncluttered.
 
 ## Usage
 
@@ -114,7 +126,7 @@ Known failure categories include network errors, artist mismatch, title mismatch
 ```sh
 ./scripts/build_app.sh
 ./scripts/build_dmg.sh
-./scripts/build_release.sh 0.3.0-beta 3
+./scripts/build_release.sh 0.3.1 4
 ```
 
 Build output:
@@ -139,14 +151,9 @@ swift run --package-path MenuBarLyrics NotchMuse --self-test
 ./scripts/run_live_matrix.sh
 ```
 
-## Known Issues
+## Feedback
 
-- The beta is unsigned, so macOS Gatekeeper warnings are expected.
-- Lyrics coverage depends on third-party providers.
-- Word-by-word lyrics are not guaranteed; most providers return line-level timing.
-- Left Status Bar mode requires Accessibility permission.
-- Other menu bar management tools may hide the NotchMuse icon.
-- Intel Mac is not supported in the current beta.
+Please use [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues) for feedback. Choose **Bug report** for reproducible problems and **Feature request** for focused use cases or improvements.
 
 ## Privacy
 

@@ -16,11 +16,10 @@
 "Spotify is not running" = "Spotify 未运行";
 "Cannot connect to Spotify" = "无法连接 Spotify";
 "Paused: %@" = "已暂停：%@";
-"Lyrics paused" = "歌词已暂停";
 "Song: %@" = "歌曲：%@";
 "Artist: %@" = "歌手：%@";
-"Pause Lyrics" = "暂停歌词";
-"Resume Lyrics" = "继续歌词";
+"Hide Lyrics" = "隐藏歌词";
+"Show Lyrics" = "显示歌词";
 "Status Bar Position" = "状态栏位置";
 "Refresh Lyrics" = "刷新歌词";
 "Settings…" = "设置…";
@@ -61,7 +60,6 @@
 "Font Size" = "字体大小";
 "Animation Speed" = "动画速度";
 "Opacity" = "不透明度";
-"Hide on Hover" = "鼠标悬停时隐藏";
 "General" = "通用";
 "Language" = "语言";
 "Launch at Login" = "登录时启动";

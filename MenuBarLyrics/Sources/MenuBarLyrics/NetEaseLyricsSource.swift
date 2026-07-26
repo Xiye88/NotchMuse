@@ -6,7 +6,7 @@ struct NetEaseLyricsSource {
         let candidates = songs.map {
             TrackMatcher.Candidate(title: $0.name, artists: $0.artists.map(\.name), durationMs: $0.duration)
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates) else { return [] }
+        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "NetEase") else { return [] }
         let song = songs[index]
 
         var components = URLComponents(string: "https://music.163.com/api/song/lyric")!

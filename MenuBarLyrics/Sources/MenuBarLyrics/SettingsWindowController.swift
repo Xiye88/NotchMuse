@@ -12,7 +12,6 @@ enum AppPreferences {
     static let displayTargetKey = "DisplayTarget"
     static let displayWidthKey = "DisplayWidth"
     static let customWidthKey = "CustomWidth"
-    static let hideOnHoverKey = "HideOnHover"
     static let hasShownFirstLaunchGuideKey = "HasShownFirstLaunchGuide"
     static let languageKey = "AppLanguage"
 
@@ -75,9 +74,6 @@ enum AppPreferences {
         return stored == 0 ? 500 : min(1000, max(180, stored))
     }
 
-    static var hideOnHover: Bool {
-        UserDefaults.standard.bool(forKey: hideOnHoverKey)
-    }
 }
 
 @MainActor
@@ -96,14 +92,12 @@ final class SettingsWindowController: NSWindowController {
     private let animationSpeedValue = NSTextField(labelWithString: "")
     private let opacityValue = NSTextField(labelWithString: "")
     private let customWidthValue = NSTextField(labelWithString: "")
-    private let hideOnHoverSwitch = NSSwitch()
     private let launchAtLoginSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let contentStack = NSStackView()
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
     private var customWidthRow: NSGridRow?
-    private var hideOnHoverRow: NSGridRow?
     private let onSettingsChange: () -> Void
 
     init(onSettingsChange: @escaping () -> Void) {
@@ -166,8 +160,6 @@ final class SettingsWindowController: NSWindowController {
         animationSpeedSlider.action = #selector(animationSpeedChanged)
         opacitySlider.target = self
         opacitySlider.action = #selector(opacityChanged)
-        hideOnHoverSwitch.target = self
-        hideOnHoverSwitch.action = #selector(hideOnHoverChanged)
         launchAtLoginSwitch.target = self
         launchAtLoginSwitch.action = #selector(launchAtLoginChanged)
         for language in AppLanguage.allCases {
@@ -199,10 +191,8 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Lyrics Color")), colorPopUp],
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue)],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue)],
-            [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue)],
-            [label(L10n.text("Hide on Hover")), hideOnHoverSwitch]
+            [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue)]
         ])
-        hideOnHoverRow = appearanceGrid.row(at: 4)
         contentStack.addArrangedSubview(appearanceGrid)
         contentStack.addArrangedSubview(separator())
         contentStack.addArrangedSubview(sectionTitle(L10n.text("General")))
@@ -290,7 +280,6 @@ final class SettingsWindowController: NSWindowController {
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
         animationSpeedSlider.doubleValue = Double(AppPreferences.animationSpeed)
         opacitySlider.doubleValue = Double(AppPreferences.opacity)
-        hideOnHoverSwitch.state = AppPreferences.hideOnHover ? .on : .off
         fontSizeValue.stringValue = "\(Int(fontSizeSlider.doubleValue)) pt"
         animationSpeedValue.stringValue = String(format: "%.1fx", animationSpeedSlider.doubleValue)
         opacityValue.stringValue = "\(Int(opacitySlider.doubleValue * 100))%"
@@ -309,7 +298,6 @@ final class SettingsWindowController: NSWindowController {
         let statusBarMode = AppPreferences.displayMode == .statusBar
         positionRow?.isHidden = !statusBarMode
         notchStyleRow?.isHidden = statusBarMode
-        hideOnHoverRow?.isHidden = statusBarMode
         customWidthRow?.isHidden = AppPreferences.displayWidth != .custom
         resizeWindowToFit()
     }
@@ -385,11 +373,6 @@ final class SettingsWindowController: NSWindowController {
     @objc private func opacityChanged() {
         UserDefaults.standard.set(opacitySlider.doubleValue, forKey: AppPreferences.opacityKey)
         opacityValue.stringValue = "\(Int(opacitySlider.doubleValue * 100))%"
-        onSettingsChange()
-    }
-
-    @objc private func hideOnHoverChanged() {
-        UserDefaults.standard.set(hideOnHoverSwitch.state == .on, forKey: AppPreferences.hideOnHoverKey)
         onSettingsChange()
     }
 

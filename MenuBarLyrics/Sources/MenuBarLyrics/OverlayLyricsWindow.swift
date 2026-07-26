@@ -98,6 +98,10 @@ enum WidthGeometry {
     }
 }
 
+enum OverlayMousePolicy {
+    static let ignoresMouseEvents = true
+}
+
 enum OverlayLaneGeometry {
     static func centeredTextY(laneHeight: CGFloat, lineHeight: CGFloat) -> CGFloat {
         floor((laneHeight - lineHeight) / 2)
@@ -315,8 +319,6 @@ final class OverlayLyricsWindow: NSObject {
 
     @MainActor
     private final class NotchLyricsView: NSView {
-        var onHoverChanged: ((Bool) -> Void)?
-        private var trackingArea: NSTrackingArea?
         var lyric = "" {
             didSet {
                 if !oldValue.isEmpty, oldValue != lyric {
@@ -336,29 +338,6 @@ final class OverlayLyricsWindow: NSObject {
         var lyricViewport = NSRect.zero
         var lyricTextRect = NSRect.zero
         var lyricWraps = false
-
-        override func updateTrackingAreas() {
-            if let trackingArea {
-                removeTrackingArea(trackingArea)
-            }
-            let area = NSTrackingArea(
-                rect: bounds,
-                options: [.mouseEnteredAndExited, .activeAlways],
-                owner: self,
-                userInfo: nil
-            )
-            addTrackingArea(area)
-            trackingArea = area
-            super.updateTrackingAreas()
-        }
-
-        override func mouseEntered(with event: NSEvent) {
-            onHoverChanged?(true)
-        }
-
-        override func mouseExited(with event: NSEvent) {
-            onHoverChanged?(false)
-        }
 
         override func draw(_ dirtyRect: NSRect) {
             let cornerRadius = style == .lyricOnly ? bounds.height / 2 : min(16, bounds.height * 0.28)
@@ -452,8 +431,6 @@ final class OverlayLyricsWindow: NSObject {
         let window: NSWindow
         private let materialView = NSVisualEffectView()
         private let tintView = NSView()
-        private var isHovered = false
-        private var configuredOpacity: CGFloat = 1
 
         init() {
             window = NSWindow(
@@ -466,7 +443,7 @@ final class OverlayLyricsWindow: NSObject {
             window.backgroundColor = .clear
             window.hasShadow = true
             window.level = .floating
-            window.ignoresMouseEvents = true
+            window.ignoresMouseEvents = OverlayMousePolicy.ignoresMouseEvents
             window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
             window.appearance = NSAppearance(named: .darkAqua)
             materialView.material = .hudWindow
@@ -478,9 +455,6 @@ final class OverlayLyricsWindow: NSObject {
             materialView.addSubview(view)
             window.contentView = materialView
             view.wantsLayer = true
-            view.onHoverChanged = { [weak self] hovering in
-                self?.setHovered(hovering)
-            }
         }
 
         func show(
@@ -494,8 +468,7 @@ final class OverlayLyricsWindow: NSObject {
             colors: [NSColor],
             opacity: CGFloat,
             scroll: ScrollState,
-            animationSpeed: CGFloat,
-            hideOnHover: Bool
+            animationSpeed: CGFloat
         ) -> Bool {
             let style: NotchStyle = song.isEmpty ? .lyricOnly : requestedStyle
             let displayLyric = lyric
@@ -514,6 +487,7 @@ final class OverlayLyricsWindow: NSObject {
             let textWidth = lyricWraps ? viewport.width : measuredWidth
             let overflows = !lyricWraps && textWidth > viewport.width
             let offset = overflows ? scroll.offset(contentWidth: textWidth, viewportWidth: viewport.width, speedMultiplier: animationSpeed) : 0
+            let needsScrolling = overflows && !scroll.isFinished(contentWidth: textWidth, viewportWidth: viewport.width, speedMultiplier: animationSpeed)
             let textX = lyricWraps ? viewport.minX : overflows ? viewport.minX - offset : viewport.midX - textWidth / 2
 
             if window.frame != frame {
@@ -536,21 +510,14 @@ final class OverlayLyricsWindow: NSObject {
             view.lyricTextRect = NSRect(x: textX, y: lyricY, width: textWidth, height: viewport.height)
             view.lyricWraps = lyricWraps
             view.needsDisplay = true
-            window.ignoresMouseEvents = !hideOnHover
-            if !hideOnHover, isHovered {
-                isHovered = false
-            }
-            if configuredOpacity != opacity {
-                configuredOpacity = opacity
-            }
-            let targetOpacity = isHovered ? 0.06 : configuredOpacity
+            window.ignoresMouseEvents = OverlayMousePolicy.ignoresMouseEvents
             if !window.isVisible {
-                window.alphaValue = targetOpacity
+                window.alphaValue = opacity
                 window.orderFrontRegardless()
-            } else if abs(window.alphaValue - targetOpacity) > 0.01 {
-                window.animator().alphaValue = targetOpacity
+            } else if abs(window.alphaValue - opacity) > 0.01 {
+                window.alphaValue = opacity
             }
-            return overflows
+            return needsScrolling
         }
 
         func applyAppearance(_ appearance: NSAppearance?) {
@@ -562,15 +529,6 @@ final class OverlayLyricsWindow: NSObject {
         func hide() {
             if window.isVisible {
                 window.orderOut(nil)
-            }
-        }
-
-        private func setHovered(_ hovering: Bool) {
-            guard !window.ignoresMouseEvents, isHovered != hovering else { return }
-            isHovered = hovering
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.16
-                window.animator().alphaValue = hovering ? 0.06 : configuredOpacity
             }
         }
     }
@@ -601,8 +559,7 @@ final class OverlayLyricsWindow: NSObject {
         opacity: CGFloat,
         displayTarget: DisplayTarget,
         displayWidth: DisplayWidth,
-        customWidth: CGFloat,
-        hideOnHover: Bool
+        customWidth: CGFloat
     ) -> Bool {
         guard let screen = selectedScreen(target: displayTarget, statusItem: statusItem) else { return false }
         let colors = BrandStyle.gradientColors(for: colorPreset)
@@ -637,8 +594,7 @@ final class OverlayLyricsWindow: NSObject {
                 colors: colors,
                 opacity: opacity,
                 scroll: scroll,
-                animationSpeed: animationSpeed,
-                hideOnHover: hideOnHover
+                animationSpeed: animationSpeed
             )
         }
 
@@ -719,9 +675,10 @@ final class OverlayLyricsWindow: NSObject {
     ) -> Bool {
         let overflows = frame.width > 0 && textWidth > frame.width
         let offset = overflows ? scroll.offset(contentWidth: textWidth, viewportWidth: frame.width, speedMultiplier: animationSpeed) : 0
+        let needsScrolling = overflows && !scroll.isFinished(contentWidth: textWidth, viewportWidth: frame.width, speedMultiplier: animationSpeed)
         let x = overflows ? -offset : (frame.width - textWidth) / 2
         lane.show(frame: frame, text: text, progress: progress, font: font, colors: colors, opacity: opacity, textX: x, textWidth: textWidth)
-        return overflows
+        return needsScrolling
     }
 
 }

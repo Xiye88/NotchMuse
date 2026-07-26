@@ -69,7 +69,7 @@ struct QQMusicLyricsSource {
         let candidates = songs.map {
             TrackMatcher.Candidate(title: $0.title, artists: $0.singer.map(\.name), durationMs: $0.interval * 1000)
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates) else { return nil }
+        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "QQ") else { return nil }
         return songs[index].mid
     }
 
@@ -118,7 +118,7 @@ struct QQMusicLyricsSource {
                 durationMs: Int(track.duration * 1000)
             )
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates) else { return nil }
+        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "QQ") else { return nil }
         return songs[index].mid
     }
 
@@ -155,7 +155,7 @@ struct QQMusicLyricsSource {
         let candidates = songs.map {
             TrackMatcher.Candidate(title: $0.title, artists: $0.singer.map(\.name), durationMs: $0.interval * 1000)
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates) else { return nil }
+        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "QQ") else { return nil }
         return songs[index].mid
     }
 

@@ -3,6 +3,7 @@ import Foundation
 struct LyricMoment: Equatable {
     let text: String
     let progress: CGFloat
+    let identity: Int
 }
 
 enum LyricClock {
@@ -27,7 +28,7 @@ enum LyricClock {
         let progress = index + 1 < lines.count
             ? CGFloat(max(0, min(1, (position - lines[index].time) / (lines[index + 1].time - lines[index].time))))
             : 1
-        return LyricMoment(text: lines[index].text, progress: progress)
+        return LyricMoment(text: lines[index].text, progress: progress, identity: index)
     }
 
     static func currentLine(at position: TimeInterval, in lines: [LyricLine]) -> String? {

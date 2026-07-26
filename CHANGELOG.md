@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.1 - 2026-07-26
+
+### Added
+
+- Added DEBUG-only matcher decision logging for local failure analysis
+- Added official Status Bar Mode and Notch Mode demo videos
+
+### Changed
+
+- Long lyrics now scroll left once, stop at the maximum offset, and reset for
+  the next line
+- Replaced Pause Lyrics with clearer Hide Lyrics and Show Lyrics actions
+- Kept Spotify polling active while lyrics are hidden so showing lyrics resumes
+  at the current song position
+
+### Fixed
+
+- Made the Notch and overlay lyrics window click-through during normal use
+- Removed the incompatible Hide on Hover setting
+
+### Notes
+
+- Production matching scores, thresholds, provider order, and retry behavior
+  are unchanged
+- The release remains an unsigned Apple Silicon beta for macOS 14 or later
+
 ## 0.3.0-beta - 2026-07-18
 
 ### Changed

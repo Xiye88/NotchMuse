@@ -16,11 +16,10 @@
 "Spotify is not running" = "Spotify is not running";
 "Cannot connect to Spotify" = "Cannot connect to Spotify";
 "Paused: %@" = "Paused: %@";
-"Lyrics paused" = "Lyrics paused";
 "Song: %@" = "Song: %@";
 "Artist: %@" = "Artist: %@";
-"Pause Lyrics" = "Pause Lyrics";
-"Resume Lyrics" = "Resume Lyrics";
+"Hide Lyrics" = "Hide Lyrics";
+"Show Lyrics" = "Show Lyrics";
 "Status Bar Position" = "Status Bar Position";
 "Refresh Lyrics" = "Refresh Lyrics";
 "Settings…" = "Settings…";
@@ -61,7 +60,6 @@
 "Font Size" = "Font Size";
 "Animation Speed" = "Animation Speed";
 "Opacity" = "Opacity";
-"Hide on Hover" = "Hide on Hover";
 "General" = "General";
 "Language" = "Language";
 "Launch at Login" = "Launch at Login";

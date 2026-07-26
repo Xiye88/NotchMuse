@@ -66,13 +66,14 @@ final class MenuBarController: NSObject {
     private let lyricsStatusItem = NSMenuItem(title: LyricsFeedback.waiting.menuTitle, action: nil, keyEquivalent: "")
     private let songItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let artistItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
-    private var isPaused = false
+    private var isLyricsHidden = false
     private var displaySource = L10n.text("Checking Spotify...")
     private var currentTrack: SpotifyTrack?
     private var currentLines: [LyricLine] = []
     private var latestSpotifyPosition: TimeInterval?
     private var latestSpotifyUptime: TimeInterval?
     private var displayProgress: CGFloat = 0
+    private var displayIdentity: Int?
     private var scroll = ScrollState()
     private var pollTimer: Timer?
     private var scrollTimer: Timer?
@@ -130,7 +131,7 @@ final class MenuBarController: NSObject {
         menu.addItem(songItem)
         menu.addItem(artistItem)
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: L10n.text("Pause Lyrics"), action: #selector(togglePause), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: L10n.text("Hide Lyrics"), action: #selector(toggleLyricsVisibility(_:)), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
 
         for itemPosition in LyricsPosition.allCases {
@@ -168,7 +169,7 @@ final class MenuBarController: NSObject {
     }
 
     private func pollSpotify(forceLyricsRefresh: Bool = false) async {
-        guard !isPaused, !Task.isCancelled else { return }
+        guard !Task.isCancelled else { return }
 
         switch await SpotifyReader.read() {
         case .closed:
@@ -237,16 +238,22 @@ final class MenuBarController: NSObject {
         return fallbackText()
     }
 
-    private func setDisplay(_ text: String, progress: CGFloat = 0) {
-        if text != displaySource {
+    private func setDisplay(_ text: String, progress: CGFloat = 0, identity: Int? = nil) {
+        if text != displaySource || identity != displayIdentity {
             scroll.reset()
         }
         displaySource = text
         displayProgress = progress
+        displayIdentity = identity
         updateDisplay()
     }
 
     private func updateDisplay() {
+        guard !isLyricsHidden else {
+            overlay.hide()
+            updateScrollTimer(overflows: false)
+            return
+        }
         let overflows = overlay.show(
             text: displaySource.isEmpty ? " " : displaySource,
             progress: displayProgress,
@@ -263,8 +270,7 @@ final class MenuBarController: NSObject {
             opacity: AppPreferences.opacity,
             displayTarget: AppPreferences.displayTarget,
             displayWidth: AppPreferences.displayWidth,
-            customWidth: AppPreferences.customWidth,
-            hideOnHover: AppPreferences.hideOnHover
+            customWidth: AppPreferences.customWidth
         )
         updateScrollTimer(overflows: overflows)
     }
@@ -311,9 +317,13 @@ final class MenuBarController: NSObject {
                 }
             }
         } else {
-            scrollTimer?.invalidate()
-            scrollTimer = nil
+            stopScrollTimer()
         }
+    }
+
+    private func stopScrollTimer() {
+        scrollTimer?.invalidate()
+        scrollTimer = nil
     }
 
     private func updatePlayingDisplay() {
@@ -322,7 +332,7 @@ final class MenuBarController: NSObject {
             return
         }
         if let moment = LyricClock.moment(at: position, in: currentLines) {
-            setDisplay(moment.text, progress: moment.progress)
+            setDisplay(moment.text, progress: moment.progress, identity: moment.identity)
         } else {
             setDisplay(fallbackText())
         }
@@ -335,7 +345,7 @@ final class MenuBarController: NSObject {
     }
 
     private func updateProgressTimer() {
-        guard !isPaused, latestSpotifyUptime != nil, !currentLines.isEmpty else {
+        guard !isLyricsHidden, latestSpotifyUptime != nil, !currentLines.isEmpty else {
             stopProgressTimer()
             return
         }
@@ -352,16 +362,18 @@ final class MenuBarController: NSObject {
         progressTimer = nil
     }
 
-    @objc private func togglePause(_ sender: NSMenuItem) {
-        isPaused.toggle()
-        sender.title = isPaused ? L10n.text("Resume Lyrics") : L10n.text("Pause Lyrics")
-        if isPaused {
-            latestSpotifyPosition = currentPlaybackPosition()
-            latestSpotifyUptime = nil
+    @objc private func toggleLyricsVisibility(_ sender: NSMenuItem) {
+        isLyricsHidden.toggle()
+        sender.title = isLyricsHidden ? L10n.text("Show Lyrics") : L10n.text("Hide Lyrics")
+        if isLyricsHidden {
             stopProgressTimer()
-            setDisplay(L10n.text("Lyrics paused"))
+            stopScrollTimer()
+            overlay.hide()
         } else {
-            startPoll(forceLyricsRefresh: true)
+            scroll.reset()
+            displayIdentity = nil
+            updatePlayingDisplay()
+            startPoll()
         }
     }
 

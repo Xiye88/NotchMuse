@@ -12,6 +12,8 @@ Last Updated: 2026-07-26
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
 | Replace Demo links with GitHub native attachments | 06_DOCS | P2 | Requires browser local-file access |
 | Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
+| Complete real clean-Mac user journey | 04_UX | P0 | Gatekeeper, TCC, Spotify, lyrics recovery |
+| Run first weekly beta issue triage | 00_PM / 06_DOCS | P1 | After targeted promotion |
 
 ## IN PROGRESS
 
@@ -20,6 +22,7 @@ Last Updated: 2026-07-26
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
 | v0.4 Evidence Gate | 03_LAB / 05_MATCHER | P0 | Candidate evidence before matcher changes |
 | Provider Health Classification | 03_LAB | P0 | NetEase, LRCMux 404, LRCLIB transient |
+| Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 
 ## BLOCKED
 
@@ -65,3 +68,8 @@ Last Updated: 2026-07-26
 | Local v0.3.1 RC artifact | 01_APP | P0 | Build 4 DMG verified |
 | Phase 2 Benchmark health check | 03_LAB | P1 | Latest `68.9%`; 7-run average `67.16%` |
 | v0.4 Matcher roadmap | 05_MATCHER | P1 | Evidence Gate first; false positives must remain `0` |
+| Public Beta feedback guide | 06_DOCS | P1 | `FEEDBACK.md` linked from README |
+| GitHub growth audit | 06_DOCS | P1 | Presentation and issue intake PASS |
+| Localization final review | 01_APP / 04_UX | P1 | English default; manual Chinese selection PASS |
+| Platform expansion decision | 01_APP | P2 | Apple Music first future candidate; implementation deferred |
+| Beta promotion package | 00_PM / 06_DOCS | P1 | X, Reddit, and GitHub early-beta drafts ready |

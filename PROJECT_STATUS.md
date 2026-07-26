@@ -8,8 +8,8 @@ Phase 2: Post Beta Optimization
 
 ## Current Goal
 
-Start the `v0.4` Evidence Gate and Provider Health Classification without
-changing production matching behavior.
+Validate the public beta with real users while starting the `v0.4` Evidence
+Gate without changing production matching behavior.
 
 ## Release Status
 
@@ -58,6 +58,8 @@ changing production matching behavior.
 - Notch Mode can briefly switch to lyric-only height for about 1-2 seconds
   after Spotify resumes, then returns to Song + Lyric. This is a transient P1
   beta risk, not an RC blocker.
+- A genuinely clean Mac/user-account Gatekeeper, TCC, Spotify, and lyrics
+  journey has not yet been completed end to end.
 
 ## Completed Tasks
 
@@ -104,6 +106,11 @@ changing production matching behavior.
   false-positive requirement.
 - Confirmed Windows, Intel, Universal Binary, and new music platforms remain
   deferred.
+- Completed the Public Beta GitHub growth and feedback audits.
+- Added `FEEDBACK.md` and linked it from README.
+- Prepared targeted X, Reddit, and GitHub early-beta announcement drafts.
+- Confirmed English-default and manually selectable Simplified Chinese UI
+  coverage without creating a second localization system.
 
 ## In Progress Tasks
 
@@ -115,6 +122,8 @@ changing production matching behavior.
 - Classify LRCMux HTTP 404 semantics.
 - Continue Benchmark-only stratified LRCLIB experiments if needed.
 - Continue collecting structured GitHub beta feedback.
+- Complete one real clean-Mac installation journey.
+- Run the first weekly issue triage after targeted beta promotion.
 
 ## Next Decisions
 
@@ -127,3 +136,5 @@ changing production matching behavior.
   the current release until evidence review is complete.
 - Keep fuzzy title, partial artist, `12s` duration tolerance, and platform
   expansion out of the current roadmap.
+- Approve targeted early-beta promotion now; keep broad promotion gated on a
+  clean-user journey pass and initial issue triage.

@@ -197,7 +197,7 @@ swift run --package-path MenuBarLyrics NotchMuse --self-test
 
 ## Feedback
 
-Please use [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues) for feedback. Choose **Bug report** for reproducible problems and **Feature request** for focused use cases or improvements.
+Please read [FEEDBACK.md](FEEDBACK.md), then use [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues). Choose **Bug report** for reproducible problems and **Feature request** for focused use cases or improvements.
 
 ## Privacy
 

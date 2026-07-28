@@ -1,3 +1,7 @@
+<p align="center">
+  English | <a href="README.zh-CN.md">简体中文</a>
+</p>
+
 <h1 align="center">NotchMuse</h1>
 
 <p align="center">
@@ -18,6 +22,22 @@
   ·
   <a href="https://github.com/Xiye88/NotchMuse/issues">Report an issue</a>
 </p>
+
+<p align="center">
+  macOS 14+ · Apple Silicon · Spotify desktop app required
+</p>
+
+## Quick Start
+
+Before you start: NotchMuse currently requires macOS 14 or later, an Apple Silicon Mac, and the Spotify desktop app.
+
+1. Download `NotchMuse.dmg` from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1).
+2. Open the DMG and drag `NotchMuse.app` to `Applications`.
+3. Because this is an unsigned beta, Control-click `NotchMuse.app`, choose `Open`, then confirm `Open`.
+4. Open Spotify and play a song.
+5. Allow macOS Automation when NotchMuse asks to control Spotify.
+6. Look for the orange note icon in the menu bar.
+7. Use Settings to choose Status Bar Mode or Notch Mode.
 
 ## Demo
 
@@ -161,8 +181,8 @@ The current benchmark lab tests a 1,000-track dataset against multiple lyrics pr
 Latest available snapshot:
 
 - Dataset: `extended_1000`
-- Successful matches: `689/1000`
-- Coverage: `68.9%`
+- Successful matches: `684/1000`
+- Coverage: `68.4%`
 - Providers tested: LRCMux, LRCLIB, QQ Music, Soda Music, Kugou, NetEase
 
 Known failure categories include network errors, artist mismatch, title mismatch, and version mismatch. Coverage depends on third-party services and should be treated as a quality snapshot, not a guarantee for every song.

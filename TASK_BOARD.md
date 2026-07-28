@@ -1,6 +1,6 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-07-26
+Last Updated: 2026-07-28
 
 ## TODO
 
@@ -81,3 +81,7 @@ Last Updated: 2026-07-26
 | Matcher Evidence readiness | 05_MATCHER | P0 | GO without code changes |
 | Beta Support Package | 06_DOCS | P1 | `SUPPORT.md` and README links ready |
 | v0.5 priority review | 01_APP | P1 | Apple Music first conditional candidate |
+| Bilingual GitHub README | 06_DOCS | P1 | Full Simplified Chinese README and language switch |
+| Bilingual Quick Start | 06_DOCS / 04_UX | P1 | Requirements, install, permission, menu bar entry |
+| Latest VPS evidence check | 03_LAB | P0 | Runs 15-16 healthy; latest Coverage `68.4%` |
+| Next Matcher Evidence Gate | 05_MATCHER | P0 | Normalization NO-GO; candidate alignment defined |

@@ -1,6 +1,6 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-07-26
+Last Updated: 2026-07-28
 
 ## Current Phase
 
@@ -32,10 +32,10 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Password authentication remains unavailable but is not required for current
   operations.
 - `lyrics-benchmark.timer` is enabled and active.
-- Runs `8-14` completed successfully on seven consecutive days.
-- Seven-run average Coverage: `67.16%`.
-- Latest run: `14`, completed 2026-07-26, Coverage `68.9%`.
-- Next scheduled trigger: 2026-07-27 00:00 UTC.
+- Runs `15-16` completed successfully after the earlier seven-run baseline.
+- Latest seven-run window `10-16` average Coverage: `67.76%`.
+- Latest run: `16`, completed 2026-07-28, Coverage `68.4%`.
+- Next scheduled trigger: 2026-07-29 00:00 UTC.
 
 ## Blocking Issues
 
@@ -120,6 +120,12 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Added `SUPPORT.md` and prepared the v0.4 Early Beta promotion package.
 - Completed the v0.5 priority review; Apple Music is the first conditional
   candidate, while Universal Binary requires demand and Intel QA hardware.
+- Added a full Simplified Chinese README with an English/Chinese switch.
+- Added bilingual Quick Start instructions and first-screen support
+  requirements.
+- Verified live VPS runs `15-16`; the latest Coverage is `68.4%`.
+- Confirmed title and artist normalization remain No-Go until candidate-backed
+  evidence exists.
 
 ## In Progress Tasks
 
@@ -136,6 +142,7 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Align 50-100 failed tracks with DEBUG candidate logs and Benchmark rows.
 - Split provider no-result, provider unavailable, parser failure, and network
   transient in Benchmark analysis.
+- Align 30-50 `title_mismatch` cases with DEBUG candidate logs.
 
 ## Next Decisions
 
@@ -153,3 +160,5 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Keep v0.4 scoped to Spotify + Apple Silicon.
 - Treat Apple Music as a v0.5 candidate only after a Music.app AppleScript
   evidence spike proves stable playback metadata and position.
+- Keep Chinese Support/Feedback translation deferred until user demand proves
+  the maintenance cost is justified.

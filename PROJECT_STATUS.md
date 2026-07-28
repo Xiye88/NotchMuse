@@ -135,6 +135,8 @@ behavior and the Spotify + Apple Silicon scope unchanged.
   systemd timer configuration.
 - Added English, Simplified Chinese, and Support links plus the menu bar entry
   point to the v0.3.1 Release Notes.
+- Added structured rejected-candidate evidence aggregation to Benchmark
+  `latest.json` and `latest.md`, excluding non-Matcher provider failures.
 
 ## In Progress Tasks
 

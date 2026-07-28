@@ -92,6 +92,7 @@ def build_summary(db: sqlite3.Connection, run_id: int) -> dict:
             (run_id,),
         )
     ]
+    matcher_evidence = _matcher_evidence(db, run_id)
     seven_day_average = _seven_day_average(db, run_id, run["finished_at"] or run["started_at"]) if run else 0
     return {
         "run_id": run_id,
@@ -114,6 +115,7 @@ def build_summary(db: sqlite3.Connection, run_id: int) -> dict:
         "failure_reasons": failures,
         "provider_ranking": provider_ranking,
         "failed_songs_detail": failed_songs,
+        "matcher_evidence": matcher_evidence,
         "seven_day_average_coverage_rate": seven_day_average,
     }
 
@@ -151,6 +153,21 @@ def write_reports(summary: dict, directory: Path) -> None:
     for provider, values in summary["providers"].items():
         lines.append(
             f"| {provider} | {values['success']} | {values['failed']} | {values['unique_success']} | {values['avg_latency_ms']} |"
+        )
+    evidence = summary["matcher_evidence"]
+    lines.extend([
+        "",
+        "## Matcher Evidence",
+        "",
+        f"Evidence Coverage Rate: {evidence['evidence_coverage_rate']}%",
+        "",
+        "| Provider | Matching Failed | Candidate Backed | No Candidates | Below Threshold | Ambiguous Gap | Evidence Coverage |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        f"| Overall | {evidence['total_matching_failed']} | {evidence['candidate_backed']} | {evidence['no_candidates']} | {evidence['below_threshold']} | {evidence['ambiguous_gap']} | {evidence['evidence_coverage_rate']}% |",
+    ])
+    for provider, values in evidence["providers"].items():
+        lines.append(
+            f"| {provider} | {values['total_matching_failed']} | {values['candidate_backed']} | {values['no_candidates']} | {values['below_threshold']} | {values['ambiguous_gap']} | {values['evidence_coverage_rate']}% |"
         )
     lines.extend(["", "## Failed Songs", ""])
     if summary["failed_songs_detail"]:
@@ -216,3 +233,49 @@ def _single_run_rate(db: sqlite3.Connection, run_id: int) -> float:
         (run_id,),
     ).fetchone()[0]
     return round(successful / total * 100, 2) if total else 0
+
+
+def _matcher_evidence(db: sqlite3.Connection, run_id: int) -> dict:
+    rows = db.execute(
+        """
+        select provider,
+               count(*) as total_matching_failed,
+               sum(case when matched_title is not null and top_score is not null then 1 else 0 end) as candidate_backed,
+               sum(case when reject_reason='no_candidates' then 1 else 0 end) as no_candidates,
+               sum(case when reject_reason='below_threshold' then 1 else 0 end) as below_threshold,
+               sum(case when reject_reason='ambiguous_gap' then 1 else 0 end) as ambiguous_gap
+        from provider_results
+        where run_id=? and failure_reason='matching_failed'
+        group by provider
+        order by provider
+        """,
+        (run_id,),
+    ).fetchall()
+    providers = {row["provider"]: _evidence_row(row) for row in rows}
+    overall = {
+        "total_matching_failed": sum(values["total_matching_failed"] for values in providers.values()),
+        "candidate_backed": sum(values["candidate_backed"] for values in providers.values()),
+        "no_candidates": sum(values["no_candidates"] for values in providers.values()),
+        "below_threshold": sum(values["below_threshold"] for values in providers.values()),
+        "ambiguous_gap": sum(values["ambiguous_gap"] for values in providers.values()),
+        "providers": providers,
+    }
+    overall["evidence_coverage_rate"] = _rate(overall["candidate_backed"], overall["total_matching_failed"])
+    return overall
+
+
+def _evidence_row(row: sqlite3.Row) -> dict:
+    total = int(row["total_matching_failed"] or 0)
+    backed = int(row["candidate_backed"] or 0)
+    return {
+        "total_matching_failed": total,
+        "candidate_backed": backed,
+        "no_candidates": int(row["no_candidates"] or 0),
+        "below_threshold": int(row["below_threshold"] or 0),
+        "ambiguous_gap": int(row["ambiguous_gap"] or 0),
+        "evidence_coverage_rate": _rate(backed, total),
+    }
+
+
+def _rate(count: int, total: int) -> float:
+    return round(count / total * 100, 2) if total else 0

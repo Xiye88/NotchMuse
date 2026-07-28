@@ -1,4 +1,5 @@
 import asyncio
+import json
 import sqlite3
 import tempfile
 import time
@@ -214,6 +215,48 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(summary["failed_songs_detail"][0]["title"], "B")
         self.assertIn("Trend", latest)
         self.assertEqual(len(history), 1)
+
+    def test_matcher_evidence_counts_only_matching_failed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            db = connect(root / "bench.sqlite3")
+            init_db(db)
+            db.execute(
+                "insert into songs(id, spotify_track_id, title, artist, album, duration_seconds, category, source_dataset) values(1, 'a', 'A', 'Artist', '', 100, 'pop', 'unit')"
+            )
+            db.execute("insert into benchmark_runs(id, started_at, dataset_name, status) values(1, 'now', 'unit', 'finished')")
+            db.executemany(
+                """
+                insert into provider_results(
+                  run_id, song_id, provider, status, lyrics_available, line_count, latency_ms,
+                  failure_reason, matched_title, top_score, second_score, reject_reason
+                ) values(?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                [
+                    (1, 1, "A", "failed", 0, 0, 10, "matching_failed", "Candidate A", 70, None, "below_threshold"),
+                    (1, 1, "A", "failed", 0, 0, 10, "matching_failed", None, None, None, "no_candidates"),
+                    (1, 1, "B", "failed", 0, 0, 10, "matching_failed", "Candidate B", 90, 88, "ambiguous_gap"),
+                    (1, 1, "B", "failed", 0, 0, 10, "api_unavailable", "Ignored", 99, None, "below_threshold"),
+                    (1, 1, "B", "failed", 0, 0, 10, "no_lyrics_found", "Ignored", 99, None, "below_threshold"),
+                ],
+            )
+            db.commit()
+
+            summary = build_summary(db, 1)
+            write_reports(summary, root / "reports")
+            latest = (root / "reports" / "latest.md").read_text(encoding="utf-8")
+            latest_json = json.loads((root / "reports" / "latest.json").read_text(encoding="utf-8"))
+
+        evidence = latest_json["matcher_evidence"]
+        self.assertEqual(evidence["total_matching_failed"], 3)
+        self.assertEqual(evidence["candidate_backed"], 2)
+        self.assertEqual(evidence["no_candidates"], 1)
+        self.assertEqual(evidence["below_threshold"], 1)
+        self.assertEqual(evidence["ambiguous_gap"], 1)
+        self.assertEqual(evidence["providers"]["A"]["total_matching_failed"], 2)
+        self.assertEqual(evidence["providers"]["B"]["total_matching_failed"], 1)
+        self.assertIn("Matcher Evidence", latest)
+        self.assertIn("| Overall | 3 | 2 | 1 | 1 | 1 | 66.67% |", latest)
 
     def test_failed_tracks_records_attempted_providers_and_analysis(self):
         with tempfile.TemporaryDirectory() as tmp:

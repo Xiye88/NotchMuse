@@ -27,18 +27,6 @@
   macOS 14+ · Apple Silicon · 需要 Spotify 桌面应用
 </p>
 
-## 快速开始
-
-开始前请确认：NotchMuse 当前需要 macOS 14 或更高版本、Apple Silicon Mac，以及 Spotify 桌面应用。
-
-1. 从 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1) 下载 `NotchMuse.dmg`。
-2. 打开 DMG，把 `NotchMuse.app` 拖到 `Applications`。
-3. 这是 unsigned beta：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
-4. 打开 Spotify 并播放一首歌。
-5. 当 macOS 询问 NotchMuse 是否可以控制 Spotify 时，选择允许 Automation。
-6. 在菜单栏里找到橙色音符图标。
-7. 打开 Settings，选择 Status Bar Mode 或 Notch Mode。
-
 ## 演示
 
 ### Status Bar Mode
@@ -61,10 +49,10 @@
 
 ## 功能
 
-| **菜单栏歌词** | **刘海原生显示** |
+| **菜单栏歌词** | **刘海歌词** |
 | --- | --- |
 | 在菜单栏左侧或右侧保持显示 Spotify 同步歌词。 | 在刘海附近选择 Lyric Only、Song + Lyric 或 Expanded 布局。 |
-| **原生与隐私** | **适配你的工作区** |
+| **重视隐私** | **适配你的工作区** |
 | 不需要账号，不收集遥测数据，不上传音频。内置 English 和简体中文。 | 可选择内建或外接显示器，并调整宽度、颜色、字号、动画和透明度。 |
 
 ## 截图
@@ -92,6 +80,18 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 选择显示模式，并调整宽度、颜色、字号、动画速度、透明度和开机启动行为。
 
 ![Settings](docs/assets/screenshots/settings-window.png)
+
+## 快速开始
+
+开始前请确认：NotchMuse 当前需要 macOS 14 或更高版本、Apple Silicon Mac，以及 Spotify 桌面应用。
+
+1. 从 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1) 下载 `NotchMuse.dmg`。
+2. 打开 DMG，把 `NotchMuse.app` 拖到 `Applications`。
+3. 这是 unsigned beta：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
+4. 打开 Spotify 并播放一首歌。
+5. 当 macOS 询问 NotchMuse 是否可以控制 Spotify 时，选择允许 Automation。
+6. 在菜单栏里找到橙色音符图标。
+7. 打开 Settings，选择 Status Bar Mode 或 Notch Mode。
 
 ## 安装
 
@@ -160,63 +160,6 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 - Accessibility：仅 Left Status Bar 布局需要，用于避开当前应用的菜单项。
 - Network：为当前歌曲查询公开歌词 provider。
 
-## 架构
-
-NotchMuse 是一个原生 Swift macOS 菜单栏应用。
-
-- `AppDelegate` 负责应用启动、单实例行为、Settings 和生命周期协调。
-- `SpotifyReader` 通过 macOS automation 读取当前 Spotify 播放状态。
-- `LyricsClient` 查询歌词 provider，并返回同步歌词。
-- `MenuBarController` 渲染 Status Bar 歌词。
-- `OverlayLyricsWindow` 渲染 Notch Mode 歌词。
-- `SettingsWindowController` 管理用户偏好设置。
-- `lyrics-provider-benchmark/` 是外部 benchmark lab，用于衡量 provider 覆盖率和匹配质量。
-
-benchmark lab 不在 app 内运行。它的作用是识别 provider 和匹配问题，为后续优化提供依据。
-
-## 歌词质量
-
-当前 benchmark lab 使用 1,000 首歌曲数据集测试多个歌词 provider。
-
-最新可用快照：
-
-- Dataset：`extended_1000`
-- 成功匹配：`684/1000`
-- 覆盖率：`68.4%`
-- Providers tested：LRCMux、LRCLIB、QQ Music、Soda Music、Kugou、NetEase
-
-已知失败类别包括网络错误、artist mismatch、title mismatch 和 version mismatch。覆盖率依赖第三方服务，应视为质量快照，而不是每首歌都可用的保证。
-
-## 从源码构建
-
-```sh
-./scripts/build_app.sh
-./scripts/build_dmg.sh
-./scripts/build_release.sh 0.3.1 4
-```
-
-构建产物：
-
-```text
-dist.noindex/NotchMuse.app
-dist.noindex/NotchMuse.dmg
-```
-
-默认 GitHub beta build 是 unsigned/ad-hoc signed。未来 Developer ID build 可通过以下方式生成：
-
-```sh
-NOTCHMUSE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build_dmg.sh
-```
-
-手动 release 步骤记录在 [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)。
-
-## 测试
-
-```sh
-swift run --package-path MenuBarLyrics NotchMuse --self-test
-./scripts/run_live_matrix.sh
-```
-
 ## 反馈
 
 安装和使用问题请先查看 [SUPPORT.md](SUPPORT.md)。反馈请阅读 [FEEDBACK.md](FEEDBACK.md)，然后使用 [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues)。可复现问题请选择 **Bug report**，具体使用场景或改进建议请选择 **Feature request**。
@@ -228,6 +171,10 @@ swift run --package-path MenuBarLyrics NotchMuse --self-test
 - NotchMuse 不收集遥测数据、使用分析或个人资料。
 - 曲名、artist、album 和时长可能会发送给第三方歌词 provider 用于匹配。
 - 设置使用 `UserDefaults` 保存在本地。
+
+## 开发者文档
+
+架构、构建与测试、Lyrics Quality Benchmark、Evidence Gate、Matcher 设计和 Provider 分析统一收录在 [Developer Documentation](docs/README.md)。
 
 ## 许可证
 

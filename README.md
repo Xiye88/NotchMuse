@@ -27,18 +27,6 @@
   macOS 14+ · Apple Silicon · Spotify desktop app required
 </p>
 
-## Quick Start
-
-Before you start: NotchMuse currently requires macOS 14 or later, an Apple Silicon Mac, and the Spotify desktop app.
-
-1. Download `NotchMuse.dmg` from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1).
-2. Open the DMG and drag `NotchMuse.app` to `Applications`.
-3. Because this is an unsigned beta, Control-click `NotchMuse.app`, choose `Open`, then confirm `Open`.
-4. Open Spotify and play a song.
-5. Allow macOS Automation when NotchMuse asks to control Spotify.
-6. Look for the orange note icon in the menu bar.
-7. Use Settings to choose Status Bar Mode or Notch Mode.
-
 ## Demo
 
 ### Status Bar Mode
@@ -61,10 +49,10 @@ Song information and synchronized lyrics appear below the MacBook notch.
 
 ## Features
 
-| **Menu Bar lyrics** | **Notch-native display** |
+| **Menu Bar lyrics** | **Notch Mode** |
 | --- | --- |
 | Keep Spotify-synchronized lyrics on the left or right side of the menu bar. | Choose Lyric Only, Song + Lyric, or Expanded layouts near the notch. |
-| **Native and private** | **Fits your workspace** |
+| **Private by design** | **Fits your workspace** |
 | No account, telemetry, or audio upload. English and Simplified Chinese are built in. | Target built-in or external displays and adjust width, color, type size, animation, and opacity. |
 
 ## Screenshots
@@ -92,6 +80,18 @@ Lyrics appear near the MacBook notch in a compact, glanceable layout.
 Choose the display mode and adjust width, color, font size, animation speed, opacity, and startup behavior.
 
 ![Settings](docs/assets/screenshots/settings-window.png)
+
+## Quick Start
+
+Before you start: NotchMuse currently requires macOS 14 or later, an Apple Silicon Mac, and the Spotify desktop app.
+
+1. Download `NotchMuse.dmg` from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1).
+2. Open the DMG and drag `NotchMuse.app` to `Applications`.
+3. Because this is an unsigned beta, Control-click `NotchMuse.app`, choose `Open`, then confirm `Open`.
+4. Open Spotify and play a song.
+5. Allow macOS Automation when NotchMuse asks to control Spotify.
+6. Look for the orange note icon in the menu bar.
+7. Use Settings to choose Status Bar Mode or Notch Mode.
 
 ## Installation
 
@@ -160,63 +160,6 @@ If a menu bar organizer hides the NotchMuse icon, expand hidden menu bar items o
 - Accessibility: only needed for the left Status Bar layout so NotchMuse can avoid active app menu items.
 - Network: queries public lyrics providers for the current song.
 
-## Architecture
-
-NotchMuse is a native Swift macOS menu bar app.
-
-- `AppDelegate` owns app startup, single-instance behavior, Settings, and lifecycle coordination.
-- `SpotifyReader` reads current Spotify playback through macOS automation.
-- `LyricsClient` queries lyrics providers and returns synchronized lyrics.
-- `MenuBarController` renders Status Bar lyrics.
-- `OverlayLyricsWindow` renders Notch Mode lyrics.
-- `SettingsWindowController` manages user preferences.
-- `lyrics-provider-benchmark/` is an external benchmark lab used to measure provider coverage and matching quality.
-
-The benchmark lab does not run inside the app. Its role is to identify provider and matching issues for future optimization.
-
-## Lyrics Quality
-
-The current benchmark lab tests a 1,000-track dataset against multiple lyrics providers.
-
-Latest available snapshot:
-
-- Dataset: `extended_1000`
-- Successful matches: `684/1000`
-- Coverage: `68.4%`
-- Providers tested: LRCMux, LRCLIB, QQ Music, Soda Music, Kugou, NetEase
-
-Known failure categories include network errors, artist mismatch, title mismatch, and version mismatch. Coverage depends on third-party services and should be treated as a quality snapshot, not a guarantee for every song.
-
-## Build From Source
-
-```sh
-./scripts/build_app.sh
-./scripts/build_dmg.sh
-./scripts/build_release.sh 0.3.1 4
-```
-
-Build output:
-
-```text
-dist.noindex/NotchMuse.app
-dist.noindex/NotchMuse.dmg
-```
-
-The default GitHub beta build is unsigned/ad-hoc signed. A future Developer ID build can be generated with:
-
-```sh
-NOTCHMUSE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/build_dmg.sh
-```
-
-Manual release steps are tracked in [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
-
-## Test
-
-```sh
-swift run --package-path MenuBarLyrics NotchMuse --self-test
-./scripts/run_live_matrix.sh
-```
-
 ## Feedback
 
 For setup help, read [SUPPORT.md](SUPPORT.md). For feedback, read [FEEDBACK.md](FEEDBACK.md), then use [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues). Choose **Bug report** for reproducible problems and **Feature request** for focused use cases or improvements.
@@ -228,6 +171,10 @@ For setup help, read [SUPPORT.md](SUPPORT.md). For feedback, read [FEEDBACK.md](
 - NotchMuse does not collect telemetry, usage analytics, or personal profiles.
 - Track title, artist, album, and duration may be sent to third-party lyrics providers for matching.
 - Settings are stored locally with `UserDefaults`.
+
+## For Developers
+
+Architecture, build and test instructions, Lyrics Quality Benchmark, Evidence Gate, Matcher design, and provider analysis are collected in [Developer Documentation](docs/README.md).
 
 ## License
 

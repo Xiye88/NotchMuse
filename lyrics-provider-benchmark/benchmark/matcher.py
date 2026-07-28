@@ -27,6 +27,15 @@ class Candidate:
     album: str = ""
 
 
+@dataclass(frozen=True)
+class MatchDecision:
+    index: int | None
+    reject_reason: str | None
+    top_score: int | None
+    second_score: int | None
+    top_candidate: Candidate | None
+
+
 def score(track: Track, candidate: Candidate) -> int:
     source_title = _parsed_title(track.title)
     candidate_title = _parsed_title(candidate.title)
@@ -59,12 +68,20 @@ def score(track: Track, candidate: Candidate) -> int:
 
 
 def best_match_index(track: Track, candidates: list[Candidate]) -> int | None:
-    ranked = sorted(enumerate(candidates), key=lambda item: score(track, item[1]), reverse=True)
-    if not ranked or score(track, ranked[0][1]) < ACCEPTANCE_THRESHOLD:
-        return None
-    if len(ranked) >= 2 and score(track, ranked[0][1]) - score(track, ranked[1][1]) < 6:
-        return None
-    return ranked[0][0]
+    return match_decision(track, candidates).index
+
+
+def match_decision(track: Track, candidates: list[Candidate]) -> MatchDecision:
+    ranked = sorted(((index, candidate, score(track, candidate)) for index, candidate in enumerate(candidates)), key=lambda item: item[2], reverse=True)
+    if not ranked:
+        return MatchDecision(None, "no_candidates", None, None, None)
+    top_index, top_candidate, top_score = ranked[0]
+    second_score = ranked[1][2] if len(ranked) >= 2 else None
+    if top_score < ACCEPTANCE_THRESHOLD:
+        return MatchDecision(None, "below_threshold", top_score, second_score, top_candidate)
+    if second_score is not None and top_score - second_score < 6:
+        return MatchDecision(None, "ambiguous_gap", top_score, second_score, top_candidate)
+    return MatchDecision(top_index, None, top_score, second_score, top_candidate)
 
 
 def _parsed_title(title: str) -> tuple[str, set[str]]:

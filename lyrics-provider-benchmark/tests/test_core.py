@@ -1,14 +1,16 @@
 import asyncio
 import sqlite3
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
 from benchmark.analysis import analyze_matching_issue, refresh_failed_tracks
-from benchmark.db import connect, init_db
+from benchmark.db import connect, init_db, insert_result
 from benchmark.dataset import sample_tracks
 from benchmark.dataset import load_tracks
-from benchmark.matcher import Candidate, Track, best_match_index, score
+from benchmark.matcher import Candidate, Track, best_match_index, match_decision, score
+from benchmark.providers import _matching_failed
 from benchmark.report import build_summary, write_reports
 from benchmark.runner import ProviderResult, run_track
 
@@ -62,6 +64,46 @@ class MatcherTests(unittest.TestCase):
 
         self.assertLess(score(track, candidate), 82)
         self.assertIsNone(best_match_index(track, [candidate]))
+
+    def test_saves_below_threshold_rejected_candidate_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db = connect(Path(tmp) / "bench.sqlite3")
+            init_db(db)
+            track = Track("t1", "Love Story", "Taylor Swift", "", 235)
+            candidate = Candidate("Love Song", ["Taylor Swift"], 235_000)
+
+            result = _matching_failed("Unit", time.monotonic(), match_decision(track, [candidate]))
+            db.execute("insert into benchmark_runs(id, started_at, dataset_name, status) values(1, 'now', 'unit', 'finished')")
+            db.execute("insert into songs(id, spotify_track_id, title, artist, album, duration_seconds, category, source_dataset) values(1, 't1', 'Love Story', 'Taylor Swift', '', 235, '', 'unit')")
+            insert_result(db, 1, 1, result)
+            row = db.execute("select * from provider_results").fetchone()
+
+        self.assertEqual(row["failure_reason"], "matching_failed")
+        self.assertEqual(row["reject_reason"], "below_threshold")
+        self.assertEqual(row["matched_title"], "Love Song")
+        self.assertEqual(row["top_score"], row["match_score"])
+
+    def test_saves_ambiguous_rejected_candidate_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db = connect(Path(tmp) / "bench.sqlite3")
+            init_db(db)
+            track = Track("t1", "Song", "Artist", "", 200)
+            candidates = [
+                Candidate("Song", ["Artist"], 200_000),
+                Candidate("Song", ["Artist"], 201_000),
+            ]
+
+            result = _matching_failed("Unit", time.monotonic(), match_decision(track, candidates))
+            db.execute("insert into benchmark_runs(id, started_at, dataset_name, status) values(1, 'now', 'unit', 'finished')")
+            db.execute("insert into songs(id, spotify_track_id, title, artist, album, duration_seconds, category, source_dataset) values(1, 't1', 'Song', 'Artist', '', 200, '', 'unit')")
+            insert_result(db, 1, 1, result)
+            row = db.execute("select * from provider_results").fetchone()
+
+        self.assertEqual(row["failure_reason"], "matching_failed")
+        self.assertEqual(row["reject_reason"], "ambiguous_gap")
+        self.assertEqual(row["matched_title"], "Song")
+        self.assertIsNotNone(row["top_score"])
+        self.assertIsNotNone(row["second_score"])
 
 
 class RunnerTests(unittest.IsolatedAsyncioTestCase):

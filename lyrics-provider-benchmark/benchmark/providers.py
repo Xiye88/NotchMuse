@@ -11,7 +11,7 @@ import urllib.request
 import zlib
 from dataclasses import dataclass
 
-from .matcher import ACCEPTANCE_THRESHOLD, Candidate, Track, best_match_index, score
+from .matcher import ACCEPTANCE_THRESHOLD, Candidate, MatchDecision, Track, match_decision, score
 from .parser import parse_krc, parse_lrc
 from .runner import ProviderResult
 
@@ -53,6 +53,26 @@ async def call_provider(name: str, provider: object, track: Track) -> ProviderRe
 
 def _failed(provider: str, started: float, reason: str, error: str | None = None) -> ProviderResult:
     return ProviderResult(provider, "failed", False, reason, 0, int((time.monotonic() - started) * 1000), raw_error=error)
+
+
+def _matching_failed(provider: str, started: float, decision: MatchDecision) -> ProviderResult:
+    candidate = decision.top_candidate
+    return ProviderResult(
+        provider,
+        "failed",
+        False,
+        "matching_failed",
+        0,
+        int((time.monotonic() - started) * 1000),
+        decision.top_score,
+        candidate.title if candidate else None,
+        " / ".join(candidate.artists) if candidate else None,
+        candidate.duration_ms / 1000 if candidate else None,
+        None,
+        decision.top_score,
+        decision.second_score,
+        decision.reject_reason,
+    )
 
 
 def _success(provider: str, started: float, line_count: int, candidate: Candidate | None = None, match_score: int | None = None) -> ProviderResult:
@@ -102,9 +122,10 @@ class LRCLIBProvider:
         if not usable:
             return _failed(self.name, started, "no_lyrics_found")
         candidates = [Candidate(row["trackName"], [row["artistName"]], int(float(row["duration"]) * 1000)) for row in usable]
-        index = best_match_index(track, candidates)
-        if index is None:
-            return _failed(self.name, started, "matching_failed")
+        decision = match_decision(track, candidates)
+        if decision.index is None:
+            return _matching_failed(self.name, started, decision)
+        index = decision.index
         lines = parse_lrc(usable[index]["syncedLyrics"])
         return _success(self.name, started, len(lines), candidates[index], score(track, candidates[index])) if lines else _failed(self.name, started, "invalid_response")
 
@@ -124,9 +145,10 @@ class NetEaseProvider:
         )
         songs = (search.get("result") or {}).get("songs") or []
         candidates = [Candidate(song["name"], [artist["name"] for artist in song.get("artists", [])], int(song["duration"])) for song in songs]
-        index = best_match_index(track, candidates)
-        if index is None:
-            return _failed(self.name, started, "matching_failed" if songs else "no_lyrics_found")
+        decision = match_decision(track, candidates)
+        if decision.index is None:
+            return _matching_failed(self.name, started, decision) if songs else _failed(self.name, started, "no_lyrics_found")
+        index = decision.index
         song_id = songs[index]["id"]
         lyric = _json(_request(f"https://music.163.com/api/song/lyric?id={song_id}&lv=-1", headers={"Referer": "https://music.163.com/"}))
         lines = parse_lrc((lyric.get("lrc") or {}).get("lyric") or "")
@@ -150,9 +172,10 @@ class LRCMuxProvider:
         )
         payload = _json(_request(f"https://api.lrcmux.dev/get?{query}"))
         candidate = Candidate(payload["track"]["title"], [payload["track"]["artist"]], int(payload["track"]["duration"]) * 1000)
-        match_score = score(track, candidate)
+        decision = match_decision(track, [candidate])
+        match_score = decision.top_score or 0
         if match_score < ACCEPTANCE_THRESHOLD:
-            return _failed(self.name, started, "matching_failed")
+            return _matching_failed(self.name, started, decision)
         lines = payload.get("lines") or []
         return _success(self.name, started, len(lines), candidate, match_score) if lines else _failed(self.name, started, "no_lyrics_found")
 
@@ -161,8 +184,10 @@ class QQProvider:
     name = "QQ"
 
     def fetch(self, track: Track, started: float) -> ProviderResult:
+        best_reject: MatchDecision | None = None
         for query in (f"{track.title} {track.artist}", track.title):
-            mid, candidate, match_score = self._search(query, track)
+            mid, candidate, match_score, reject = self._search(query, track)
+            best_reject = _better_reject(best_reject, reject)
             if mid:
                 lyric = _jsonp(_request(self._lyric_url(mid), headers={"Referer": "https://c.y.qq.com/"}).body, "MusicJsonCallback_lrc")
                 if not lyric or lyric.get("code") != 0:
@@ -170,9 +195,9 @@ class QQProvider:
                 decoded = base64.b64decode(lyric.get("lyric") or "").decode("utf-8", errors="replace")
                 lines = parse_lrc(decoded)
                 return _success(self.name, started, len(lines), candidate, match_score) if lines else _failed(self.name, started, "invalid_response")
-        return _failed(self.name, started, "matching_failed")
+        return _matching_failed(self.name, started, best_reject or match_decision(track, []))
 
-    def _search(self, query: str, track: Track) -> tuple[str | None, Candidate | None, int | None]:
+    def _search(self, query: str, track: Track) -> tuple[str | None, Candidate | None, int | None, MatchDecision | None]:
         body = json.dumps(
             {
                 "comm": {"ct": 19, "cv": "1859", "uin": "0"},
@@ -186,10 +211,11 @@ class QQProvider:
         payload = _json(_request("https://u.y.qq.com/cgi-bin/musicu.fcg", "POST", body, {"Content-Type": "application/json", "Referer": "https://c.y.qq.com/"}))
         songs = payload["req_1"]["data"]["body"]["song"]["list"]
         candidates = [Candidate(song["title"], [singer["name"] for singer in song.get("singer", [])], int(song["interval"]) * 1000) for song in songs]
-        index = best_match_index(track, candidates)
-        if index is None:
-            return None, None, None
-        return songs[index]["mid"], candidates[index], score(track, candidates[index])
+        decision = match_decision(track, candidates)
+        if decision.index is None:
+            return None, None, None, decision
+        index = decision.index
+        return songs[index]["mid"], candidates[index], score(track, candidates[index]), None
 
     def _lyric_url(self, mid: str) -> str:
         query = urllib.parse.urlencode(
@@ -215,18 +241,19 @@ class KugouProvider:
     name = "Kugou"
 
     def fetch(self, track: Track, started: float) -> ProviderResult:
-        song, candidate, match_score = self._song(track)
+        song, candidate, match_score, reject = self._song(track)
         if not song:
-            return _failed(self.name, started, "matching_failed")
+            return _matching_failed(self.name, started, reject or match_decision(track, []))
         query = urllib.parse.urlencode({"ver": "1", "man": "yes", "client": "pc", "keyword": f"{song['title']} {song['artist']}", "duration": str(song["duration"] * 1000), "hash": song["hash"]})
         payload = _json(_request(f"https://lyrics.kugou.com/search?{query}"))
         candidates = [
             Candidate(item["song"], [item["singer"]], int(item["duration"]))
             for item in payload.get("candidates", [])
         ]
-        index = best_match_index(track, candidates)
-        if index is None:
-            return _failed(self.name, started, "matching_failed")
+        decision = match_decision(track, candidates)
+        if decision.index is None:
+            return _matching_failed(self.name, started, decision)
+        index = decision.index
         lyric_meta = payload["candidates"][index]
         download_query = urllib.parse.urlencode({"ver": "1", "client": "pc", "id": lyric_meta["id"], "accesskey": lyric_meta["accesskey"], "fmt": "krc", "charset": "utf8"})
         download = _json(_request(f"https://lyrics.kugou.com/download?{download_query}"))
@@ -235,7 +262,7 @@ class KugouProvider:
         lines = parse_krc(_decrypt_krc(download["content"]))
         return _success(self.name, started, len(lines), candidate, match_score) if lines else _failed(self.name, started, "invalid_response")
 
-    def _song(self, track: Track) -> tuple[dict | None, Candidate | None, int | None]:
+    def _song(self, track: Track) -> tuple[dict | None, Candidate | None, int | None, MatchDecision | None]:
         query = urllib.parse.urlencode({"format": "json", "keyword": f"{track.title} {track.artist}", "page": "1", "pagesize": "20", "showtype": "1"})
         payload = _json(_request(f"http://mobilecdn.kugou.com/api/v3/search/song?{query}"))
         songs = []
@@ -243,11 +270,12 @@ class KugouProvider:
             songs.append(item)
             songs.extend(item.get("group") or [])
         candidates = [Candidate(song["songname"], [song["singername"]], int(song["duration"]) * 1000) for song in songs]
-        index = best_match_index(track, candidates)
-        if index is None:
-            return None, None, None
+        decision = match_decision(track, candidates)
+        if decision.index is None:
+            return None, None, None, decision
+        index = decision.index
         song = {"hash": songs[index]["hash"], "title": songs[index]["songname"], "artist": songs[index]["singername"], "duration": int(songs[index]["duration"])}
-        return song, candidates[index], score(track, candidates[index])
+        return song, candidates[index], score(track, candidates[index]), None
 
 
 class SodaProvider:
@@ -268,9 +296,10 @@ class SodaProvider:
             if item.get("meta", {}).get("item_type") == "track" and item.get("entity", {}).get("track")
         ]
         candidates = [Candidate(item["name"], [artist["name"] for artist in item.get("artists", [])], int(item["duration"])) for item in tracks]
-        index = best_match_index(track, candidates)
-        if index is None:
-            return _failed(self.name, started, "matching_failed" if tracks else "no_lyrics_found")
+        decision = match_decision(track, candidates)
+        if decision.index is None:
+            return _matching_failed(self.name, started, decision) if tracks else _failed(self.name, started, "no_lyrics_found")
+        index = decision.index
         body = urllib.parse.urlencode({"track_id": tracks[index]["id"], "media_type": "track", "queue_type": ""}).encode()
         detail_query = urllib.parse.urlencode(common)
         detail = _json(_request(f"https://api.qishui.com/luna/pc/track_v2?{detail_query}", "POST", body, {"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "LunaPC/2.1.0(12292405)", "Referer": "https://api.qishui.com/"}))
@@ -302,3 +331,11 @@ def _decrypt_krc(encoded: str) -> str:
     key = bytes([0x40, 0x47, 0x61, 0x77, 0x5E, 0x32, 0x74, 0x47, 0x51, 0x36, 0x31, 0x2D, 0xCE, 0xD2, 0x6E, 0x69])
     compressed = bytes(value ^ key[index % len(key)] for index, value in enumerate(encrypted[4:]))
     return zlib.decompress(compressed).decode("utf-8-sig")
+
+
+def _better_reject(current: MatchDecision | None, candidate: MatchDecision | None) -> MatchDecision | None:
+    if candidate is None:
+        return current
+    if current is None:
+        return candidate
+    return candidate if (candidate.top_score or -1) > (current.top_score or -1) else current

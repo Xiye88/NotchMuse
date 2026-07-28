@@ -24,6 +24,9 @@ class ProviderResult:
     matched_artist: str | None = None
     matched_duration_seconds: float | None = None
     raw_error: str | None = None
+    top_score: int | None = None
+    second_score: int | None = None
+    reject_reason: str | None = None
 
 
 async def run_track(track: Track, providers: list[tuple[str, Provider]]) -> list[ProviderResult]:

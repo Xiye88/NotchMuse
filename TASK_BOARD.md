@@ -85,3 +85,4 @@ Last Updated: 2026-07-28
 | Bilingual Quick Start | 06_DOCS / 04_UX | P1 | Requirements, install, permission, menu bar entry |
 | Latest VPS evidence check | 03_LAB | P0 | Runs 15-16 healthy; latest Coverage `68.4%` |
 | Next Matcher Evidence Gate | 05_MATCHER | P0 | Normalization NO-GO; candidate alignment defined |
+| Rejected candidate evidence capture | 03_LAB / 05_MATCHER | P0 | Benchmark-only implementation verified locally |

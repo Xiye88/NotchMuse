@@ -126,6 +126,10 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Verified live VPS runs `15-16`; the latest Coverage is `68.4%`.
 - Confirmed title and artist normalization remain No-Go until candidate-backed
   evidence exists.
+- Implemented Benchmark-only rejected candidate evidence capture without
+  changing App or Benchmark match selection behavior.
+- Verified evidence capture with 16 unit tests, 1,000 legacy/new matcher parity
+  cases, an existing-DB migration check, and a live title-mismatch smoke test.
 
 ## In Progress Tasks
 
@@ -143,6 +147,8 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Split provider no-result, provider unavailable, parser failure, and network
   transient in Benchmark analysis.
 - Align 30-50 `title_mismatch` cases with DEBUG candidate logs.
+- Deploy rejected candidate evidence capture to the VPS and validate the first
+  populated Daily Benchmark run.
 
 ## Next Decisions
 

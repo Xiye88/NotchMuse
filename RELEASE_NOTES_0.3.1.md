@@ -3,6 +3,10 @@
 NotchMuse v0.3.1 is a stability and lyrics-display quality update for the
 GitHub beta.
 
+Documentation: [English README](https://github.com/Xiye88/NotchMuse#readme) ·
+[简体中文](https://github.com/Xiye88/NotchMuse/blob/main/README.zh-CN.md) ·
+[Setup help](https://github.com/Xiye88/NotchMuse/blob/main/SUPPORT.md)
+
 ## Highlights
 
 - Long lyrics scroll left once, stop at the end, and reset for each new line.
@@ -19,6 +23,8 @@ GitHub beta.
 2. Open the DMG and drag `NotchMuse.app` into `Applications`.
 3. Control-click NotchMuse and choose `Open` on first launch.
 4. Allow Spotify automation access when macOS asks.
+5. Look for the orange note icon in the menu bar, then open Settings to choose
+   Status Bar Mode or Notch Mode.
 
 ## Unsigned macOS Notice
 

@@ -86,3 +86,4 @@ Last Updated: 2026-07-28
 | Latest VPS evidence check | 03_LAB | P0 | Runs 15-16 healthy; latest Coverage `68.4%` |
 | Next Matcher Evidence Gate | 05_MATCHER | P0 | Normalization NO-GO; candidate alignment defined |
 | Rejected candidate evidence capture | 03_LAB / 05_MATCHER | P0 | Verified locally and deployed to VPS |
+| Bilingual Release usage links | 06_DOCS | P1 | English, Chinese, Support, and menu bar entry |

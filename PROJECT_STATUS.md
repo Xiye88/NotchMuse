@@ -133,6 +133,8 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Deployed rejected candidate evidence capture to the VPS with a code backup,
   passing remote tests, compatible production SQLite migration, and unchanged
   systemd timer configuration.
+- Added English, Simplified Chinese, and Support links plus the menu bar entry
+  point to the v0.3.1 Release Notes.
 
 ## In Progress Tasks
 

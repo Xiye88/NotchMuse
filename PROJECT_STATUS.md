@@ -130,6 +130,9 @@ behavior and the Spotify + Apple Silicon scope unchanged.
   changing App or Benchmark match selection behavior.
 - Verified evidence capture with 16 unit tests, 1,000 legacy/new matcher parity
   cases, an existing-DB migration check, and a live title-mismatch smoke test.
+- Deployed rejected candidate evidence capture to the VPS with a code backup,
+  passing remote tests, compatible production SQLite migration, and unchanged
+  systemd timer configuration.
 
 ## In Progress Tasks
 
@@ -147,8 +150,8 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Split provider no-result, provider unavailable, parser failure, and network
   transient in Benchmark analysis.
 - Align 30-50 `title_mismatch` cases with DEBUG candidate logs.
-- Deploy rejected candidate evidence capture to the VPS and validate the first
-  populated Daily Benchmark run.
+- Validate rejected candidate evidence density after natural run `17` on
+  2026-07-29.
 
 ## Next Decisions
 

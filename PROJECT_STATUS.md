@@ -137,6 +137,8 @@ behavior and the Spotify + Apple Silicon scope unchanged.
   point to the v0.3.1 Release Notes.
 - Added structured rejected-candidate evidence aggregation to Benchmark
   `latest.json` and `latest.md`, excluding non-Matcher provider failures.
+- Deployed Matcher evidence reporting to the VPS; 17 remote tests passed and
+  run `16` backward-compatibility output was verified.
 
 ## In Progress Tasks
 

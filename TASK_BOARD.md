@@ -87,4 +87,4 @@ Last Updated: 2026-07-28
 | Next Matcher Evidence Gate | 05_MATCHER | P0 | Normalization NO-GO; candidate alignment defined |
 | Rejected candidate evidence capture | 03_LAB / 05_MATCHER | P0 | Verified locally and deployed to VPS |
 | Bilingual Release usage links | 06_DOCS | P1 | English, Chinese, Support, and menu bar entry |
-| Matcher evidence reporting | 03_LAB / 05_MATCHER | P0 | Structured JSON and Markdown aggregation verified |
+| Matcher evidence reporting | 03_LAB / 05_MATCHER | P0 | Verified and deployed; awaiting run 17 data |

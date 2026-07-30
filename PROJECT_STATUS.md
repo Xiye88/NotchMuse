@@ -157,6 +157,9 @@ Apple Silicon support unchanged until Phase 4 Go/No-Go.
   second-candidate identity evidence extension.
 - Implemented the evidence extension locally with 17 tests, 1,000 decision
   parity cases, and a compatible production-DB-copy migration.
+- Deployed second-candidate evidence capture to the VPS with a code and
+  database backup; 17 remote tests passed and run `18` remained `681/1000`
+  (`68.1%`) after schema migration.
 - Completed Lyrics Failure UX Audit and Production Stability Boundary Review.
 
 ## In Progress Tasks
@@ -164,8 +167,8 @@ Apple Silicon support unchanged until Phase 4 Go/No-Go.
 - Replace repository video links with GitHub native attachment URLs when
   browser upload permission is available.
 - Re-capture the Status Bar screenshot without left-edge lyric cropping.
-- Review and deploy the Phase 3 second-candidate evidence extension.
-- Validate second-candidate metadata density after the next natural run.
+- Validate second-candidate metadata density after natural run `19` on
+  2026-07-31.
 - Only if top and second identities are equivalent, run the bounded
   de-duplication simulation and manually review every proposed recovery.
 - Classify NetEase response/parser failure separately from Matcher failures.

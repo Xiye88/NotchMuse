@@ -97,3 +97,4 @@ Last Updated: 2026-07-30
 | v0.5 Phase 2 Matcher Improvement Proposal | 05_MATCHER | P0 | Production NO-GO; second-candidate evidence extension approved |
 | Lyrics Failure UX Audit | 04_UX | P1 | No P0; three P1 copy risks identified |
 | Production Stability Boundary Review | 01_APP | P0 | Benchmark isolated; Release DEBUG logging remains off |
+| Second-candidate evidence extension | 03_LAB / 05_MATCHER | P0 | Commit `08acf82`; deployed and remote tests passed |

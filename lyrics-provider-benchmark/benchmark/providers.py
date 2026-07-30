@@ -57,6 +57,7 @@ def _failed(provider: str, started: float, reason: str, error: str | None = None
 
 def _matching_failed(provider: str, started: float, decision: MatchDecision) -> ProviderResult:
     candidate = decision.top_candidate
+    second = decision.second_candidate
     return ProviderResult(
         provider,
         "failed",
@@ -72,6 +73,9 @@ def _matching_failed(provider: str, started: float, decision: MatchDecision) -> 
         decision.top_score,
         decision.second_score,
         decision.reject_reason,
+        second.title if second else None,
+        " / ".join(second.artists) if second else None,
+        second.duration_ms / 1000 if second else None,
     )
 
 

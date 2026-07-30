@@ -105,6 +105,9 @@ class MatcherTests(unittest.TestCase):
         self.assertEqual(row["matched_title"], "Song")
         self.assertIsNotNone(row["top_score"])
         self.assertIsNotNone(row["second_score"])
+        self.assertEqual(row["second_matched_title"], "Song")
+        self.assertEqual(row["second_matched_artist"], "Artist")
+        self.assertEqual(row["second_matched_duration_seconds"], 201)
 
 
 class RunnerTests(unittest.IsolatedAsyncioTestCase):

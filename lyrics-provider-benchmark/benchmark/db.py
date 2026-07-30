@@ -57,7 +57,10 @@ def init_db(db: sqlite3.Connection) -> None:
           raw_error text,
           top_score integer,
           second_score integer,
-          reject_reason text
+          reject_reason text,
+          second_matched_title text,
+          second_matched_artist text,
+          second_matched_duration_seconds real
         );
         create table if not exists missing_lyrics(
           id integer primary key,
@@ -89,6 +92,9 @@ def init_db(db: sqlite3.Connection) -> None:
     _add_column(db, "provider_results", "top_score", "integer")
     _add_column(db, "provider_results", "second_score", "integer")
     _add_column(db, "provider_results", "reject_reason", "text")
+    _add_column(db, "provider_results", "second_matched_title", "text")
+    _add_column(db, "provider_results", "second_matched_artist", "text")
+    _add_column(db, "provider_results", "second_matched_duration_seconds", "real")
     db.commit()
 
 
@@ -123,8 +129,9 @@ def insert_result(db: sqlite3.Connection, run_id: int, song_id: int, result: Pro
         insert into provider_results(
           run_id, song_id, provider, status, lyrics_available, line_count, latency_ms,
           failure_reason, match_score, matched_title, matched_artist, matched_duration_seconds, raw_error,
-          top_score, second_score, reject_reason
-        ) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+          top_score, second_score, reject_reason,
+          second_matched_title, second_matched_artist, second_matched_duration_seconds
+        ) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """,
         (
             run_id,
@@ -143,6 +150,9 @@ def insert_result(db: sqlite3.Connection, run_id: int, song_id: int, result: Pro
             result.top_score,
             result.second_score,
             result.reject_reason,
+            result.second_matched_title,
+            result.second_matched_artist,
+            result.second_matched_duration_seconds,
         ),
     )
 

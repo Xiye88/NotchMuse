@@ -34,6 +34,7 @@ class MatchDecision:
     top_score: int | None
     second_score: int | None
     top_candidate: Candidate | None
+    second_candidate: Candidate | None
 
 
 def score(track: Track, candidate: Candidate) -> int:
@@ -74,14 +75,15 @@ def best_match_index(track: Track, candidates: list[Candidate]) -> int | None:
 def match_decision(track: Track, candidates: list[Candidate]) -> MatchDecision:
     ranked = sorted(((index, candidate, score(track, candidate)) for index, candidate in enumerate(candidates)), key=lambda item: item[2], reverse=True)
     if not ranked:
-        return MatchDecision(None, "no_candidates", None, None, None)
+        return MatchDecision(None, "no_candidates", None, None, None, None)
     top_index, top_candidate, top_score = ranked[0]
     second_score = ranked[1][2] if len(ranked) >= 2 else None
+    second_candidate = ranked[1][1] if len(ranked) >= 2 else None
     if top_score < ACCEPTANCE_THRESHOLD:
-        return MatchDecision(None, "below_threshold", top_score, second_score, top_candidate)
+        return MatchDecision(None, "below_threshold", top_score, second_score, top_candidate, second_candidate)
     if second_score is not None and top_score - second_score < 6:
-        return MatchDecision(None, "ambiguous_gap", top_score, second_score, top_candidate)
-    return MatchDecision(top_index, None, top_score, second_score, top_candidate)
+        return MatchDecision(None, "ambiguous_gap", top_score, second_score, top_candidate, second_candidate)
+    return MatchDecision(top_index, None, top_score, second_score, top_candidate, second_candidate)
 
 
 def _parsed_title(title: str) -> tuple[str, set[str]]:

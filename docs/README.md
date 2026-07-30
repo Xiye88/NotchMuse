@@ -43,6 +43,10 @@ The independent [Lyrics Provider Benchmark](../lyrics-provider-benchmark/README.
 
 Production matching behavior changes only when evidence shows that the change improves useful matches without introducing confirmed false positives.
 
+v0.5 focuses on bounded Lyrics Matching Accuracy evidence. Production Matcher
+behavior remains unchanged until the Phase 4 Go/No-Go explicitly approves an
+implementation.
+
 The minimum gate is:
 
 1. Collect representative failed tracks.
@@ -67,3 +71,6 @@ Provider health is evaluated independently from Matcher quality:
 - **QQ Music, Soda Music, and Kugou** provide secondary evidence and fallback coverage.
 
 Provider priority changes require repeated benchmark evidence. A single run or isolated outage is not sufficient.
+
+v0.5 does not add Providers and does not optimize for maximum aggregate
+coverage.

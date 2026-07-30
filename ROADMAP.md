@@ -1,6 +1,6 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-07-26
+Last Updated: 2026-07-30
 
 ## Phase 1: GitHub Open Source Beta Release
 
@@ -61,6 +61,8 @@ Exit Criteria:
 
 ### v0.4 - Safe Lyrics Quality Improvement
 
+Status: Evidence foundation completed.
+
 Goal: Establish the Failure Analysis Pipeline, then improve matching without
 increasing false positives.
 
@@ -95,27 +97,47 @@ Explicitly Excluded:
 - Relaxing duration tolerance to `12s`.
 - Global provider reordering from aggregate ranking.
 
-### v0.5 - Lyrics Quality Hardening
+### v0.5 - Lyrics Matching Accuracy
 
-Goal: Consolidate proven quality improvements and provider health knowledge.
+Goal: Improve real matching accuracy through bounded evidence while confirmed
+false positives remain zero.
 
-Candidates:
+Phases:
 
-- Provider health classification and reporting.
-- Stable failure taxonomy and trend reporting.
-- Confidence-scoring experiments in Benchmark only.
-- Confirmed UX and display compatibility bug fixes.
-- Release hardening based on real GitHub feedback.
-- Apple Music Music.app AppleScript evidence spike, only after v0.4 gates.
-- Universal Binary decision, only with demonstrated demand and Intel QA
-  hardware.
+1. Phase 1 - Failure Analysis: completed with natural runs `17-18` and an
+   80-song stratified failure dataset.
+2. Phase 2 - Matcher Improvement Proposal: completed; production Matcher is
+   No-Go.
+3. Phase 3 - Evidence Completion and Bounded Validation: capture second
+   candidate identity first; de-duplication simulation remains conditional.
+4. Phase 4 - Go/No-Go: pending manual review of all proposed recoveries.
+
+Validation Gate:
+
+- Use the same run `18` dataset and failure pool.
+- Do not change score, threshold, Provider order, retry, or normalization.
+- Prove top and second candidate identity before counting any duplicate pool.
+- Report recovery count only from confirmed identity-equivalent pairs.
+- Manually review every proposed recovery.
+- Confirmed false positives remain `0`.
+- Benchmark simulation latency increase remains negligible.
+
+Explicitly Excluded:
+
+- New Providers.
+- Aggregate Coverage maximization as a goal.
+- Production Matcher changes before Phase 4 approval.
+- Title or artist normalization in the current experiment.
+- Album as an acceptance override.
+- Mandatory ISRC identity.
+- Provider priority changes without a separate Provider Health decision.
 
 Deferred:
 
 - Windows.
 - QQ Music and NetEase Cloud Music.
 - Intel Mac / Universal Binary without hardware and demand evidence.
-- Apple Music production integration before a stable now-playing spike.
+- Apple Music integration and Music.app evidence spike.
 - App Store distribution.
 
 ## Product Guardrails

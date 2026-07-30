@@ -1,12 +1,14 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-07-28
+Last Updated: 2026-07-30
 
 ## TODO
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| Align 50-100 failed tracks with DEBUG evidence | 03_LAB / 05_MATCHER | P0 | Candidate, score, reject reason, final decision |
+| Validate next natural run second-candidate density | 03_LAB / 05_MATCHER | P0 | Required before any de-duplication simulation |
+| Manually review Phase 3 proposed recoveries | 03_LAB / 05_MATCHER | P0 | Conditional; every recovery and false positives must remain 0 |
+| Evaluate lyrics failure-state copy | 04_UX / 01_APP | P1 | Proposal only until separated from Matcher work |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
 | Investigate NetEase response/parser failure | 03_LAB | P1 | Keep separate from matcher |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
@@ -20,16 +22,19 @@ Last Updated: 2026-07-28
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
-| v0.4 Evidence Gate | 03_LAB / 05_MATCHER | P0 | Candidate evidence before matcher changes |
+| v0.5 Phase 3 evidence completion | 03_LAB / 05_MATCHER | P0 | Capture second candidate identity; no selection change |
 | Provider Health Classification | 03_LAB | P0 | NetEase, LRCMux 404, LRCLIB transient |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
-| Failure taxonomy split | 03_LAB | P0 | Separate no-result, unavailable, parser, transient |
+| Phase 4 Matcher Go/No-Go preparation | 00_PM / 03_LAB / 05_MATCHER | P0 | Production remains unchanged |
 
 ## BLOCKED
 
 | Task | Owner | Priority | Blocker |
 | --- | --- | --- | --- |
-| Title normalization implementation | 05_MATCHER | P1 | Rejected candidate evidence missing |
+| Title normalization implementation | 05_MATCHER | P1 | Phase 3 second-candidate evidence takes priority; no safe normalization rule |
+| Candidate de-duplication simulation | 03_LAB / 05_MATCHER | P0 | Second candidate identity is not available in runs 17-18 |
+| Artist normalization implementation | 05_MATCHER | P1 | Second-candidate identity is required before ranking conclusions |
+| Track Identity album / mandatory ISRC | 05_MATCHER / 01_APP | P1 | Candidate fields incomplete; no safe evidence yet |
 | LRCLIB App retry | 01_APP / 03_LAB | P1 | Second retry success `0/25` |
 | Universal Binary and new platforms | 01_APP / 04_UX | P2 | Deferred by Phase 2 scope |
 | Broad public promotion | 00_PM / 06_DOCS | P1 | Clean-user journey and first issue triage missing |
@@ -87,4 +92,8 @@ Last Updated: 2026-07-28
 | Next Matcher Evidence Gate | 05_MATCHER | P0 | Normalization NO-GO; candidate alignment defined |
 | Rejected candidate evidence capture | 03_LAB / 05_MATCHER | P0 | Verified locally and deployed to VPS |
 | Bilingual Release usage links | 06_DOCS | P1 | English, Chinese, Support, and menu bar entry |
-| Matcher evidence reporting | 03_LAB / 05_MATCHER | P0 | Verified and deployed; awaiting run 17 data |
+| Matcher evidence reporting | 03_LAB / 05_MATCHER | P0 | Verified on natural runs 17-18 |
+| v0.5 Phase 1 Failure Analysis | 03_LAB | P0 | Runs 17-18 verified; 80-song dataset created |
+| v0.5 Phase 2 Matcher Improvement Proposal | 05_MATCHER | P0 | Production NO-GO; second-candidate evidence extension approved |
+| Lyrics Failure UX Audit | 04_UX | P1 | No P0; three P1 copy risks identified |
+| Production Stability Boundary Review | 01_APP | P0 | Benchmark isolated; Release DEBUG logging remains off |

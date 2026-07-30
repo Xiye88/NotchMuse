@@ -1,15 +1,17 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-07-28
+Last Updated: 2026-07-30
 
 ## Current Phase
 
-Phase 2: Post Beta Optimization
+v0.5 Lyrics Matching Accuracy - Phase 3: Evidence Completion
 
 ## Current Goal
 
-Run a candidate-backed `v0.4` Evidence Gate while keeping production matching
-behavior and the Spotify + Apple Silicon scope unchanged.
+Capture second-candidate identity for ambiguous Benchmark decisions, then
+decide whether a bounded candidate de-duplication simulation is supported.
+Keep production matching behavior, Provider scope, Spotify integration, and
+Apple Silicon support unchanged until Phase 4 Go/No-Go.
 
 ## Release Status
 
@@ -32,10 +34,15 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 - Password authentication remains unavailable but is not required for current
   operations.
 - `lyrics-benchmark.timer` is enabled and active.
-- Runs `15-16` completed successfully after the earlier seven-run baseline.
-- Latest seven-run window `10-16` average Coverage: `67.76%`.
-- Latest run: `16`, completed 2026-07-28, Coverage `68.4%`.
-- Next scheduled trigger: 2026-07-29 00:00 UTC.
+- Runs `17-18` completed naturally after rejected-candidate evidence reporting
+  was deployed.
+- Latest run: `18`, completed 2026-07-30, Coverage `68.1%`.
+- Latest seven-day average Coverage: `68.34%`.
+- Run `18` Matcher evidence: `3,786` matching failures, `2,602`
+  candidate-backed, `1,184` no-candidate, `1,412` below-threshold, and `1,190`
+  ambiguity-gap rows.
+- Candidate evidence coverage: `68.73%`.
+- Next scheduled trigger: 2026-07-31 00:00 UTC.
 
 ## Blocking Issues
 
@@ -45,11 +52,14 @@ behavior and the Spotify + Apple Silicon scope unchanged.
 
 ### P1 Analysis Gates
 
-- Run `11-12` `title_mismatch` increased to `102/114`.
-- `128/216` audited title mismatches are best classified as provider response
-  or classification drift, not a proven normalization gap.
-- Rejected candidate evidence has not yet been collected from the new DEBUG
-  matcher decision logs, so title normalization remains gated.
+- Production Matcher changes remain blocked until the Phase 3 experiment and
+  Phase 4 Go/No-Go complete.
+- `224/319` run `18` failed songs have a source-aligned top candidate rejected
+  in a score tie, but the second candidate identity is not yet stored.
+- Equal scores do not prove identity-equivalent candidates or equal lyric text
+  and timing. Candidate de-duplication simulation remains conditional.
+- Title and artist normalization remain No-Go; current evidence is dominated
+  by source-aligned score ties whose second candidate identity is unknown.
 - NetEase produced zero successes over seven days and has substantial parser
   failures; keep its production priority unchanged until a controlled provider
   decision is approved.
@@ -139,35 +149,45 @@ behavior and the Spotify + Apple Silicon scope unchanged.
   `latest.json` and `latest.md`, excluding non-Matcher provider failures.
 - Deployed Matcher evidence reporting to the VPS; 17 remote tests passed and
   run `16` backward-compatibility output was verified.
+- Verified natural runs `17-18`; run `18` Coverage is `68.1%` and candidate
+  evidence coverage is `68.73%`.
+- Created an 80-row, 80-song stratified v0.5 failure dataset from run `18`.
+- Completed v0.5 Failure Analysis and Matcher Improvement Proposal.
+- Confirmed production Matcher is No-Go and approved a Benchmark-only
+  second-candidate identity evidence extension.
+- Implemented the evidence extension locally with 17 tests, 1,000 decision
+  parity cases, and a compatible production-DB-copy migration.
+- Completed Lyrics Failure UX Audit and Production Stability Boundary Review.
 
 ## In Progress Tasks
 
 - Replace repository video links with GitHub native attachment URLs when
   browser upload permission is available.
 - Re-capture the Status Bar screenshot without left-edge lyric cropping.
-- Collect bounded local evidence through the new DEBUG matcher decision logs.
-- Classify NetEase response/parser failure separately from matcher failures.
+- Review and deploy the Phase 3 second-candidate evidence extension.
+- Validate second-candidate metadata density after the next natural run.
+- Only if top and second identities are equivalent, run the bounded
+  de-duplication simulation and manually review every proposed recovery.
+- Classify NetEase response/parser failure separately from Matcher failures.
 - Classify LRCMux HTTP 404 semantics.
 - Continue Benchmark-only stratified LRCLIB experiments if needed.
 - Continue collecting structured GitHub beta feedback.
 - Complete one real clean-Mac installation journey.
 - Run the first weekly issue triage after targeted beta promotion.
-- Align 50-100 failed tracks with DEBUG candidate logs and Benchmark rows.
-- Split provider no-result, provider unavailable, parser failure, and network
-  transient in Benchmark analysis.
-- Align 30-50 `title_mismatch` cases with DEBUG candidate logs.
-- Validate rejected candidate evidence density after natural run `17` on
-  2026-07-29.
+- Evaluate three P1 failure-state copy changes without coupling them to Matcher
+  work: `Finding lyrics`, generic unavailable guidance, and refresh guidance.
 
 ## Next Decisions
 
 - Keep the transient Notch resume layout switch as a known beta risk.
-- Approve Evidence Gate and Provider Health Classification as the first v0.4
-  work, before title or artist normalization.
-- Decide when to run a DEBUG-only, local, bounded plaintext candidate sampling
-  session for manual title mismatch audits.
-- Keep Title normalization, Provider priority changes, and App retry out of
-  the current release until evidence review is complete.
+- Phase 3 second-candidate evidence extension: Approved.
+- Candidate de-duplication simulation: Conditional; blocked until second
+  candidate identity evidence exists.
+- Production Matcher implementation: No-Go pending Phase 4.
+- Keep title/artist normalization, Provider priority changes, App retry,
+  album ranking, and mandatory ISRC out of v0.5 until separate evidence gates
+  pass.
+- Do not add Providers or optimize for maximum aggregate Coverage.
 - Keep fuzzy title, partial artist, `12s` duration tolerance, and platform
   expansion out of the current roadmap.
 - Approve targeted early-beta promotion now; keep broad promotion gated on a

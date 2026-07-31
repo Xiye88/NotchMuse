@@ -108,9 +108,13 @@ Phases:
    80-song stratified failure dataset.
 2. Phase 2 - Matcher Improvement Proposal: completed; production Matcher is
    No-Go.
-3. Phase 3 - Evidence Completion and Bounded Validation: capture second
-   candidate identity first; de-duplication simulation remains conditional.
-4. Phase 4 - Go/No-Go: pending manual review of all proposed recoveries.
+3. Phase 3 - Evidence Completion and Bounded Validation: completed; second
+   candidate identity capture is deployed for natural run `19+`.
+4. Phase 4 - Matcher Optimization Simulation: in progress. The Benchmark-only
+   simulator and Top Songs proxy baseline are ready. Natural run `19` supplied
+   complete second identity for `489/489` ambiguity rows; `464` strict
+   identity-equivalent rows may enter Benchmark-only simulation. Production
+   remains No-Go pending labeled evidence and manual review.
 
 Validation Gate:
 
@@ -121,6 +125,8 @@ Validation Gate:
 - Manually review every proposed recovery.
 - Confirmed false positives remain `0`.
 - Benchmark simulation latency increase remains negligible.
+- At least one ranking strategy improves manually verified
+  correct-candidate rate without increasing confirmed false positives.
 
 Explicitly Excluded:
 

@@ -4,14 +4,15 @@ Last Updated: 2026-07-30
 
 ## Current Phase
 
-v0.5 Lyrics Matching Accuracy - Phase 3: Evidence Completion
+v0.5 Lyrics Matching Accuracy - Phase 4: Matcher Optimization Simulation
 
 ## Current Goal
 
-Capture second-candidate identity for ambiguous Benchmark decisions, then
-decide whether a bounded candidate de-duplication simulation is supported.
-Keep production matching behavior, Provider scope, Spotify integration, and
-Apple Silicon support unchanged until Phase 4 Go/No-Go.
+Use a Benchmark-only offline simulator and a user-weighted proxy dataset to
+compare bounded ranking signals. Approve production work only when labeled
+candidate evidence improves correct-candidate rate with zero confirmed false
+positives. Keep production matching behavior, Provider scope, Spotify
+integration, and Apple Silicon support unchanged until that gate passes.
 
 ## Release Status
 
@@ -34,15 +35,17 @@ Apple Silicon support unchanged until Phase 4 Go/No-Go.
 - Password authentication remains unavailable but is not required for current
   operations.
 - `lyrics-benchmark.timer` is enabled and active.
-- Runs `17-18` completed naturally after rejected-candidate evidence reporting
+- Runs `17-19` completed naturally after rejected-candidate evidence reporting
   was deployed.
-- Latest run: `18`, completed 2026-07-30, Coverage `68.1%`.
-- Latest seven-day average Coverage: `68.34%`.
-- Run `18` Matcher evidence: `3,786` matching failures, `2,602`
-  candidate-backed, `1,184` no-candidate, `1,412` below-threshold, and `1,190`
+- Latest run: `19`, completed 2026-07-31, Coverage `64.4%`.
+- Latest seven-day average Coverage: `67.73%`.
+- Run `19` Matcher evidence: `3,023` matching failures, `1,890`
+  candidate-backed, `1,133` no-candidate, `1,401` below-threshold, and `489`
   ambiguity-gap rows.
-- Candidate evidence coverage: `68.73%`.
-- Next scheduled trigger: 2026-07-31 00:00 UTC.
+- Candidate evidence coverage: `62.52%`.
+- Run `19` second-candidate identity fill: `489/489` (`100%`) for
+  ambiguity-gap rows.
+- Next scheduled trigger: 2026-08-01 00:00 UTC.
 
 ## Blocking Issues
 
@@ -52,12 +55,14 @@ Apple Silicon support unchanged until Phase 4 Go/No-Go.
 
 ### P1 Analysis Gates
 
-- Production Matcher changes remain blocked until the Phase 3 experiment and
-  Phase 4 Go/No-Go complete.
-- `224/319` run `18` failed songs have a source-aligned top candidate rejected
-  in a score tie, but the second candidate identity is not yet stored.
-- Equal scores do not prove identity-equivalent candidates or equal lyric text
-  and timing. Candidate de-duplication simulation remains conditional.
+- Production Matcher changes remain blocked until natural run `19+` supplies
+  second-candidate identity and manual ground truth proves a safe ranking
+  strategy.
+- Run `19` has `464` identity-equivalent and `25` non-equivalent
+  ambiguity-gap provider rows. Metadata equivalence does not prove lyric text,
+  timing, or version correctness.
+- The `464` eligible rows remain unlabeled; correct-candidate and
+  false-positive rates cannot be claimed yet.
 - Title and artist normalization remain No-Go; current evidence is dominated
   by source-aligned score ties whose second candidate identity is unknown.
 - NetEase produced zero successes over seven days and has substantial parser
@@ -72,6 +77,8 @@ Apple Silicon support unchanged until Phase 4 Go/No-Go.
   journey has not yet been completed end to end.
 - The current `network_error` bucket mixes HTTP 404, timeout, DNS, and parser
   failures and cannot directly justify Matcher changes.
+- The Top Songs dataset is an Apple Music chart-derived proxy, not Spotify
+  telemetry or real NotchMuse user telemetry.
 
 ## Completed Tasks
 
@@ -161,16 +168,32 @@ Apple Silicon support unchanged until Phase 4 Go/No-Go.
   database backup; 17 remote tests passed and run `18` remained `681/1000`
   (`68.1%`) after schema migration.
 - Completed Lyrics Failure UX Audit and Production Stability Boundary Review.
+- Built a Benchmark-only offline ranking simulator for duration, exact artist,
+  album/version metadata, and bounded title-marker signals.
+- Verified the simulator and Benchmark suite with `23` passing tests.
+- Added a `300`-track, `300`-unique-track Top Songs proxy dataset without
+  selecting by Benchmark outcome.
+- Established the run `18` proxy baseline: `215/300` (`71.7%`) unweighted and
+  `72.9%` user-weighted accuracy.
+- Completed a copy-only review for `Finding lyrics`, `No lyrics found`, and
+  generic lyrics-unavailable states; no App changes were made.
+- Verified natural run `19`: timer active/enabled, service inactive, database
+  snapshot hash matched the VPS, and Coverage was `644/1000` (`64.4%`).
+- Verified second-candidate identity fill at `489/489` (`100%`).
+- Classified run `19` ambiguity rows as `464` identity-equivalent, `25`
+  non-equivalent, and `0` missing under the strict metadata key.
+- Approved Benchmark-only identity-equivalent de-duplication simulation;
+  production Matcher remains No-Go.
 
 ## In Progress Tasks
 
 - Replace repository video links with GitHub native attachment URLs when
   browser upload permission is available.
 - Re-capture the Status Bar screenshot without left-edge lyric cropping.
-- Validate second-candidate metadata density after natural run `19` on
-  2026-07-31.
-- Only if top and second identities are equivalent, run the bounded
-  de-duplication simulation and manually review every proposed recovery.
+- Label eligible run `19+` candidate pairs and compare old vs experimental
+  ranking in the offline simulator.
+- Manually review every proposed recovery and keep confirmed false positives
+  at `0`.
 - Classify NetEase response/parser failure separately from Matcher failures.
 - Classify LRCMux HTTP 404 semantics.
 - Continue Benchmark-only stratified LRCLIB experiments if needed.
@@ -183,10 +206,12 @@ Apple Silicon support unchanged until Phase 4 Go/No-Go.
 ## Next Decisions
 
 - Keep the transient Notch resume layout switch as a known beta risk.
-- Phase 3 second-candidate evidence extension: Approved.
-- Candidate de-duplication simulation: Conditional; blocked until second
-  candidate identity evidence exists.
-- Production Matcher implementation: No-Go pending Phase 4.
+- Phase 3 second-candidate evidence extension: Completed and deployed.
+- Benchmark-only ranking simulation tooling: Go.
+- Benchmark-only identity-equivalent de-duplication simulation: Go for the
+  `464` eligible run `19` rows; `25` non-equivalent rows stay unresolved.
+- Production Matcher implementation: No-Go; no ranking strategy has yet
+  improved manually verified matches with zero confirmed false positives.
 - Keep title/artist normalization, Provider priority changes, App retry,
   album ranking, and mandatory ISRC out of v0.5 until separate evidence gates
   pass.

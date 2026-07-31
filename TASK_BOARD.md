@@ -6,9 +6,7 @@ Last Updated: 2026-07-30
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| Validate next natural run second-candidate density | 03_LAB / 05_MATCHER | P0 | Required before any de-duplication simulation |
-| Manually review Phase 3 proposed recoveries | 03_LAB / 05_MATCHER | P0 | Conditional; every recovery and false positives must remain 0 |
-| Evaluate lyrics failure-state copy | 04_UX / 01_APP | P1 | Proposal only until separated from Matcher work |
+| Manually label run 19 proposed recoveries | 03_LAB / 05_MATCHER | P0 | 464 eligible provider rows; false positives must remain 0 |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
 | Investigate NetEase response/parser failure | 03_LAB | P1 | Keep separate from matcher |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
@@ -22,17 +20,17 @@ Last Updated: 2026-07-30
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
-| v0.5 Phase 3 evidence completion | 03_LAB / 05_MATCHER | P0 | Capture second candidate identity; no selection change |
+| v0.5 Phase 4 labeled simulation | 03_LAB / 05_MATCHER | P0 | Run 19 identity gate passed; manual ground truth pending |
 | Provider Health Classification | 03_LAB | P0 | NetEase, LRCMux 404, LRCLIB transient |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
-| Phase 4 Matcher Go/No-Go preparation | 00_PM / 03_LAB / 05_MATCHER | P0 | Production remains unchanged |
+| Phase 4 Matcher Go/No-Go | 00_PM / 03_LAB / 05_MATCHER | P0 | Simulator ready; production remains unchanged |
 
 ## BLOCKED
 
 | Task | Owner | Priority | Blocker |
 | --- | --- | --- | --- |
 | Title normalization implementation | 05_MATCHER | P1 | Phase 3 second-candidate evidence takes priority; no safe normalization rule |
-| Candidate de-duplication simulation | 03_LAB / 05_MATCHER | P0 | Second candidate identity is not available in runs 17-18 |
+| Production Matcher implementation | 01_APP / 05_MATCHER | P0 | No strategy has passed labeled accuracy and zero-false-positive gate |
 | Artist normalization implementation | 05_MATCHER | P1 | Second-candidate identity is required before ranking conclusions |
 | Track Identity album / mandatory ISRC | 05_MATCHER / 01_APP | P1 | Candidate fields incomplete; no safe evidence yet |
 | LRCLIB App retry | 01_APP / 03_LAB | P1 | Second retry success `0/25` |
@@ -98,3 +96,8 @@ Last Updated: 2026-07-30
 | Lyrics Failure UX Audit | 04_UX | P1 | No P0; three P1 copy risks identified |
 | Production Stability Boundary Review | 01_APP | P0 | Benchmark isolated; Release DEBUG logging remains off |
 | Second-candidate evidence extension | 03_LAB / 05_MATCHER | P0 | Commit `08acf82`; deployed and remote tests passed |
+| Offline ranking simulator | 05_MATCHER | P0 | Benchmark-only; four signal groups; 23 tests pass |
+| Top Songs proxy dataset | 03_LAB | P1 | 300 unique tracks; run 18 weighted baseline `72.9%` |
+| Failure-state copy review | 04_UX | P1 | Proposal complete; no Swift or behavior change |
+| Natural run 19 evidence verification | 03_LAB | P0 | 489/489 second identity filled; snapshot hash matched VPS |
+| Phase 3 de-duplication Go/No-Go | 05_MATCHER | P0 | Benchmark-only GO for 464 equivalent rows; production NO-GO |

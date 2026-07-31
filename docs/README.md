@@ -47,6 +47,15 @@ v0.5 focuses on bounded Lyrics Matching Accuracy evidence. Production Matcher
 behavior remains unchanged until the Phase 4 Go/No-Go explicitly approves an
 implementation.
 
+Phase 4 uses a Benchmark-only offline simulator to compare duration, exact
+artist, album/version, and bounded title signals. The Top Songs dataset is a
+chart-derived user-value proxy, not Spotify telemetry or a product-level
+availability claim.
+
+Natural run `19` produced complete second identity for `489` ambiguity rows;
+`464` strict metadata-equivalent rows are eligible for offline simulation,
+not production acceptance.
+
 The minimum gate is:
 
 1. Collect representative failed tracks.

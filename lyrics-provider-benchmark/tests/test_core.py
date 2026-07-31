@@ -11,6 +11,7 @@ from benchmark.db import connect, init_db, insert_result
 from benchmark.dataset import sample_tracks
 from benchmark.dataset import load_tracks
 from benchmark.matcher import Candidate, Track, best_match_index, match_decision, score
+from benchmark.offline_simulator import RankingCase, Signals, evaluate_cases, load_cases_from_csv, load_cases_from_sqlite
 from benchmark.providers import _matching_failed
 from benchmark.report import build_summary, write_reports
 from benchmark.runner import ProviderResult, run_track
@@ -260,6 +261,239 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(evidence["providers"]["B"]["total_matching_failed"], 1)
         self.assertIn("Matcher Evidence", latest)
         self.assertIn("| Overall | 3 | 2 | 1 | 1 | 1 | 66.67% |", latest)
+
+
+class OfflineRankingSimulatorTests(unittest.TestCase):
+    def test_supports_artist_album_and_live_title_signals(self):
+        base = dict(
+            source_duration_seconds=200,
+            top_duration_seconds=200,
+            second_duration_seconds=200,
+            old_decision="ambiguous_gap",
+            label="second",
+        )
+        cases = [
+            (
+                RankingCase(
+                    case_id="artist",
+                    source_title="Song",
+                    source_artist="Artist",
+                    top_title="Song",
+                    top_artist="Guest",
+                    second_title="Song",
+                    second_artist="Artist",
+                    **base,
+                ),
+                Signals(complete_artist_exact=True),
+            ),
+            (
+                RankingCase(
+                    case_id="album",
+                    source_title="Song",
+                    source_artist="Artist",
+                    source_album="Studio",
+                    top_title="Song",
+                    top_artist="Artist",
+                    top_album="Live",
+                    second_title="Song",
+                    second_artist="Artist",
+                    second_album="Studio",
+                    **base,
+                ),
+                Signals(album_version_metadata=True),
+            ),
+            (
+                RankingCase(
+                    case_id="live",
+                    source_title="Song",
+                    source_artist="Artist",
+                    top_title="Song Live",
+                    top_artist="Artist",
+                    second_title="Song",
+                    second_artist="Artist",
+                    **base,
+                ),
+                Signals(title_live=True),
+            ),
+        ]
+
+        for case, signals in cases:
+            with self.subTest(case=case.case_id):
+                result = evaluate_cases([case], signals)
+                self.assertEqual(result.experimental.correct_candidate_rate, 1.0)
+                self.assertEqual(result.experimental.false_positive_rate, 0.0)
+
+    def test_title_marker_signal_requires_a_marker(self):
+        case = RankingCase(
+            case_id="no-marker",
+            source_title="Song",
+            source_artist="Artist",
+            source_duration_seconds=200,
+            top_title="Song",
+            top_artist="Artist",
+            top_duration_seconds=200,
+            second_title="Song Extended",
+            second_artist="Artist",
+            second_duration_seconds=200,
+            old_decision="ambiguous_gap",
+            label="top",
+        )
+
+        result = evaluate_cases([case], Signals(title_feat=True))
+
+        self.assertEqual(result.experimental.correct_candidate_rate, 0.0)
+        self.assertEqual(result.experimental.false_positive_rate, 0.0)
+        self.assertEqual(result.experimental.unresolved, 1)
+
+    def test_title_marker_signal_recognizes_remastered_and_featuring(self):
+        cases = [
+            RankingCase(
+                case_id="remastered",
+                source_title="Song Remastered",
+                source_artist="Artist",
+                source_duration_seconds=200,
+                top_title="Song Remastered Live",
+                top_artist="Artist",
+                top_duration_seconds=200,
+                second_title="Song",
+                second_artist="Artist",
+                second_duration_seconds=200,
+                old_decision="ambiguous_gap",
+                label="second",
+            ),
+            RankingCase(
+                case_id="featuring",
+                source_title="Song featuring Guest",
+                source_artist="Artist",
+                source_duration_seconds=200,
+                top_title="Song Live",
+                top_artist="Artist",
+                top_duration_seconds=200,
+                second_title="Song",
+                second_artist="Artist",
+                second_duration_seconds=200,
+                old_decision="ambiguous_gap",
+                label="second",
+            ),
+        ]
+
+        for case, signals in (
+            (cases[0], Signals(title_remastered=True)),
+            (cases[1], Signals(title_feat=True)),
+        ):
+            with self.subTest(case=case.case_id):
+                result = evaluate_cases([case], signals)
+                self.assertEqual(result.experimental.correct_candidate_rate, 1.0)
+                self.assertEqual(result.experimental.false_positive_rate, 0.0)
+
+    def test_keeps_rows_without_second_identity_or_ground_truth_unresolved(self):
+        cases = [
+            RankingCase(
+                case_id="missing-second",
+                source_title="Song",
+                source_artist="Artist",
+                source_duration_seconds=200,
+                top_title="Song",
+                top_artist="Artist",
+                top_duration_seconds=200,
+                second_score=90,
+                old_decision="ambiguous_gap",
+                label="top",
+            ),
+            RankingCase(
+                case_id="uncertain-label",
+                source_title="Song",
+                source_artist="Artist",
+                source_duration_seconds=200,
+                top_title="Song",
+                top_artist="Artist",
+                top_duration_seconds=200,
+                second_title="Song",
+                second_artist="Artist",
+                second_duration_seconds=201,
+                second_score=90,
+                old_decision="ambiguous_gap",
+                label="uncertain",
+            ),
+        ]
+
+        result = evaluate_cases(cases, Signals(duration_difference=True))
+
+        self.assertEqual(result.eligibility["eligible"], 0)
+        self.assertEqual(result.eligibility["missing_evidence"], 1)
+        self.assertEqual(result.ambiguous_unresolved, 1)
+
+    def test_reports_correct_and_false_positive_rates_from_manual_labels(self):
+        cases = [
+            RankingCase(
+                case_id="correct-top",
+                source_title="Song",
+                source_artist="Artist",
+                source_duration_seconds=200,
+                top_title="Song",
+                top_artist="Artist",
+                top_duration_seconds=200,
+                second_title="Song",
+                second_artist="Artist",
+                second_duration_seconds=201,
+                second_score=90,
+                old_decision="ambiguous_gap",
+                label="top",
+            ),
+            RankingCase(
+                case_id="wrong-top",
+                source_title="Other",
+                source_artist="Artist",
+                source_duration_seconds=200,
+                top_title="Other",
+                top_artist="Artist",
+                top_duration_seconds=200,
+                second_title="Other",
+                second_artist="Artist",
+                second_duration_seconds=201,
+                second_score=90,
+                old_decision="ambiguous_gap",
+                label="neither",
+            ),
+        ]
+
+        result = evaluate_cases(cases, Signals(duration_difference=True))
+
+        self.assertEqual(result.experimental.correct_candidate_rate, 0.5)
+        self.assertEqual(result.experimental.false_positive_rate, 0.5)
+        self.assertEqual(result.old.correct_candidate_rate, 0.0)
+        self.assertEqual(result.old.false_positive_rate, 0.0)
+
+    def test_loads_cases_from_csv_and_sqlite_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            csv_path = root / "cases.csv"
+            csv_path.write_text(
+                "case_id,source_title,source_artist,source_duration_seconds,matched_title,matched_artist,matched_duration_seconds,second_matched_title,second_matched_artist,second_matched_duration_seconds,reject_reason,manual_label\n"
+                "c1,Song,Artist,200,Song,Artist,200,Song,Artist,201,ambiguous_gap,top\n",
+                encoding="utf-8",
+            )
+            db = connect(root / "bench.sqlite3")
+            init_db(db)
+            db.execute("insert into benchmark_runs(id, started_at, dataset_name, status) values(1, 'now', 'unit', 'finished')")
+            db.execute("insert into songs(id, spotify_track_id, title, artist, album, duration_seconds, category, source_dataset) values(1, 's1', 'Song', 'Artist', '', 200, '', 'unit')")
+            db.execute(
+                """
+                insert into provider_results(
+                  run_id, song_id, provider, status, lyrics_available, line_count, latency_ms,
+                  failure_reason, matched_title, matched_artist, matched_duration_seconds,
+                  second_score, reject_reason, second_matched_title, second_matched_artist, second_matched_duration_seconds
+                ) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (1, 1, "Unit", "failed", 0, 0, 1, "matching_failed", "Song", "Artist", 200, 90, "ambiguous_gap", "Song", "Artist", 201),
+            )
+            db.commit()
+
+            csv_cases = load_cases_from_csv(csv_path)
+            sqlite_cases = load_cases_from_sqlite(db, 1)
+
+        self.assertEqual(csv_cases[0].label, "top")
+        self.assertEqual(sqlite_cases[0].second_title, "Song")
 
     def test_failed_tracks_records_attempted_providers_and_analysis(self):
         with tempfile.TemporaryDirectory() as tmp:

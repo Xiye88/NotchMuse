@@ -1,6 +1,6 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-07-30
+Last Updated: 2026-07-31
 
 ## Current Phase
 
@@ -45,6 +45,9 @@ integration, and Apple Silicon support unchanged until that gate passes.
 - Candidate evidence coverage: `62.52%`.
 - Run `19` second-candidate identity fill: `489/489` (`100%`) for
   ambiguity-gap rows.
+- Run `19` Provider health incident: LRCLIB recorded `970` read timeouts,
+  NetEase recorded `907` no-result rows plus `93` parser exceptions, and
+  LRCMux recorded `211` HTTP 404 responses.
 - Next scheduled trigger: 2026-08-01 00:00 UTC.
 
 ## Blocking Issues
@@ -63,6 +66,9 @@ integration, and Apple Silicon support unchanged until that gate passes.
   timing, or version correctness.
 - The `464` eligible rows remain unlabeled; correct-candidate and
   false-positive rates cannot be claimed yet.
+- The Python Benchmark Kugou adapter does not use the de-duplication already
+  present in the Swift App. Benchmark ambiguity cannot be treated as an App
+  production Matcher defect until parity is restored.
 - Title and artist normalization remain No-Go; current evidence is dominated
   by source-aligned score ties whose second candidate identity is unknown.
 - NetEase produced zero successes over seven days and has substantial parser
@@ -184,6 +190,16 @@ integration, and Apple Silicon support unchanged until that gate passes.
   non-equivalent, and `0` missing under the strict metadata key.
 - Approved Benchmark-only identity-equivalent de-duplication simulation;
   production Matcher remains No-Go.
+- Completed the run `19` Phase 4 simulation audit. Strict source alignment
+  leaves `396` Provider rows across an upper bound of `101` failed songs; the
+  300-track Top Songs proxy has `46/101` misses with at least one eligible
+  duplicate pair. These are not verified recoveries.
+- Audited open-source lyrics applications and source strategies. The reviewed
+  projects combine LRCLIB, regional Provider endpoints, Musixmatch,
+  host-specific APIs, and maintained aggregation backends; no single stable,
+  free, official source solves global synced-lyrics Coverage.
+- Confirmed existing Provider health and Benchmark/App parity are the next
+  evidence gate. Production Provider expansion remains No-Go.
 
 ## In Progress Tasks
 
@@ -194,6 +210,9 @@ integration, and Apple Silicon support unchanged until that gate passes.
   ranking in the offline simulator.
 - Manually review every proposed recovery and keep confirmed false positives
   at `0`.
+- Align Benchmark Kugou de-duplication with the existing Swift App behavior.
+- Diagnose the run `19` LRCLIB timeout incident with Provider-specific pacing
+  before using its hit rate in source decisions.
 - Classify NetEase response/parser failure separately from Matcher failures.
 - Classify LRCMux HTTP 404 semantics.
 - Continue Benchmark-only stratified LRCLIB experiments if needed.
@@ -212,6 +231,10 @@ integration, and Apple Silicon support unchanged until that gate passes.
   `464` eligible run `19` rows; `25` non-equivalent rows stay unresolved.
 - Production Matcher implementation: No-Go; no ranking strategy has yet
   improved manually verified matches with zero confirmed false positives.
+- Production Provider expansion: No-Go until LRCLIB, NetEase, LRCMux, and
+  Benchmark/App parity are resolved on a fixed popular-song dataset.
+- Musixmatch official API: conditional research candidate only if recurring
+  cost and licensing are accepted; reverse-engineered access is No-Go.
 - Keep title/artist normalization, Provider priority changes, App retry,
   album ranking, and mandatory ISRC out of v0.5 until separate evidence gates
   pass.

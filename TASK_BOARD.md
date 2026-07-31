@@ -1,14 +1,17 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-07-30
+Last Updated: 2026-07-31
 
 ## TODO
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Manually label run 19 proposed recoveries | 03_LAB / 05_MATCHER | P0 | 464 eligible provider rows; false positives must remain 0 |
+| Align Benchmark Kugou de-duplication with Swift App | 03_LAB / 05_MATCHER | P0 | Benchmark-only parity experiment; no App change |
+| Diagnose LRCLIB run 19 timeout incident | 03_LAB | P0 | 970/1000 timeouts; test pacing/transport before source conclusions |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
-| Investigate NetEase response/parser failure | 03_LAB | P1 | Keep separate from matcher |
+| Investigate NetEase response/parser failure | 03_LAB | P0 | 907 no-result + 93 parser exceptions; controlled request currently succeeds |
+| Build fixed 100-song popular-miss Provider matrix | 03_LAB | P1 | Report unique incremental Coverage and verified sync correctness |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
 | Replace Demo links with GitHub native attachments | 06_DOCS | P2 | Requires browser local-file access |
 | Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
@@ -31,6 +34,7 @@ Last Updated: 2026-07-30
 | --- | --- | --- | --- |
 | Title normalization implementation | 05_MATCHER | P1 | Phase 3 second-candidate evidence takes priority; no safe normalization rule |
 | Production Matcher implementation | 01_APP / 05_MATCHER | P0 | No strategy has passed labeled accuracy and zero-false-positive gate |
+| Production Provider expansion | 01_APP / 03_LAB | P0 | Existing Provider health and Benchmark/App parity unresolved |
 | Artist normalization implementation | 05_MATCHER | P1 | Second-candidate identity is required before ranking conclusions |
 | Track Identity album / mandatory ISRC | 05_MATCHER / 01_APP | P1 | Candidate fields incomplete; no safe evidence yet |
 | LRCLIB App retry | 01_APP / 03_LAB | P1 | Second retry success `0/25` |
@@ -101,3 +105,5 @@ Last Updated: 2026-07-30
 | Failure-state copy review | 04_UX | P1 | Proposal complete; no Swift or behavior change |
 | Natural run 19 evidence verification | 03_LAB | P0 | 489/489 second identity filled; snapshot hash matched VPS |
 | Phase 3 de-duplication Go/No-Go | 05_MATCHER | P0 | Benchmark-only GO for 464 equivalent rows; production NO-GO |
+| Phase 4 run 19 simulation audit | 03_LAB / 05_MATCHER | P0 | 101-song recovery upper bound; no labeled accuracy claim |
+| Open-source lyrics source landscape | 00_PM / 03_LAB | P0 | Existing-source recovery first; Musixmatch official is conditional |

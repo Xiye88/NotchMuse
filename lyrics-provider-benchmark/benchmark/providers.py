@@ -8,6 +8,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import unicodedata
 import zlib
 from dataclasses import dataclass
 
@@ -122,7 +123,17 @@ class LRCLIBProvider:
     def fetch(self, track: Track, started: float) -> ProviderResult:
         query = urllib.parse.urlencode({"track_name": track.title, "artist_name": track.artist})
         rows = _json(_request(f"https://lrclib.net/api/search?{query}"))
-        usable = [row for row in rows if row.get("syncedLyrics")]
+        usable = [
+            row
+            for row in rows
+            if row.get("syncedLyrics") and isinstance(row.get("duration"), (int, float))
+        ]
+        usable = _deduplicated(
+            usable,
+            lambda row: _provider_identity_signature(
+                row["trackName"], [row["artistName"]], int(float(row["duration"]) * 1000)
+            )[:2],
+        )
         if not usable:
             return _failed(self.name, started, "no_lyrics_found")
         candidates = [Candidate(row["trackName"], [row["artistName"]], int(float(row["duration"]) * 1000)) for row in usable]
@@ -141,13 +152,20 @@ class NetEaseProvider:
         body = urllib.parse.urlencode({"s": f"{track.title} {track.artist}", "type": "1", "limit": "10", "offset": "0"}).encode()
         search = _json(
             _request(
-                "https://music.163.com/api/search/get/web",
+                "https://music.163.com/api/search/get",
                 method="POST",
                 data=body,
                 headers={"Content-Type": "application/x-www-form-urlencoded", "Referer": "https://music.163.com/"},
             )
         )
-        songs = (search.get("result") or {}).get("songs") or []
+        result = search.get("result")
+        songs = result.get("songs") or [] if isinstance(result, dict) else []
+        songs = _deduplicated(
+            songs,
+            lambda song: _provider_identity_signature(
+                song["name"], [artist["name"] for artist in song.get("artists", [])], int(song["duration"])
+            ),
+        )
         candidates = [Candidate(song["name"], [artist["name"] for artist in song.get("artists", [])], int(song["duration"])) for song in songs]
         decision = match_decision(track, candidates)
         if decision.index is None:
@@ -250,15 +268,19 @@ class KugouProvider:
             return _matching_failed(self.name, started, reject or match_decision(track, []))
         query = urllib.parse.urlencode({"ver": "1", "man": "yes", "client": "pc", "keyword": f"{song['title']} {song['artist']}", "duration": str(song["duration"] * 1000), "hash": song["hash"]})
         payload = _json(_request(f"https://lyrics.kugou.com/search?{query}"))
+        lyric_rows = _deduplicated(
+            payload.get("candidates", []),
+            lambda item: _metadata_signature(item["song"], item["singer"], int(item["duration"])),
+        )
         candidates = [
             Candidate(item["song"], [item["singer"]], int(item["duration"]))
-            for item in payload.get("candidates", [])
+            for item in lyric_rows
         ]
         decision = match_decision(track, candidates)
         if decision.index is None:
             return _matching_failed(self.name, started, decision)
         index = decision.index
-        lyric_meta = payload["candidates"][index]
+        lyric_meta = lyric_rows[index]
         download_query = urllib.parse.urlencode({"ver": "1", "client": "pc", "id": lyric_meta["id"], "accesskey": lyric_meta["accesskey"], "fmt": "krc", "charset": "utf8"})
         download = _json(_request(f"https://lyrics.kugou.com/download?{download_query}"))
         if download.get("status") != 200 or not download.get("content"):
@@ -273,6 +295,10 @@ class KugouProvider:
         for item in (payload.get("data") or {}).get("info", []):
             songs.append(item)
             songs.extend(item.get("group") or [])
+        songs = _deduplicated(
+            songs,
+            lambda song: _metadata_signature(song["songname"], song["singername"], int(song["duration"]) * 1000),
+        )
         candidates = [Candidate(song["songname"], [song["singername"]], int(song["duration"]) * 1000) for song in songs]
         decision = match_decision(track, candidates)
         if decision.index is None:
@@ -326,6 +352,36 @@ class SodaProvider:
             "version_code": "2.1.0",
             "version_name": "2.1.0",
         }
+
+
+def _deduplicated(values: list, signature) -> list:
+    seen = set()
+    result = []
+    for value in values:
+        key = signature(value)
+        if key not in seen:
+            seen.add(key)
+            result.append(value)
+    return result
+
+
+def _metadata_signature(title: str, artist: str, duration_ms: int) -> tuple[str, str, int]:
+    return _normalized(title), _normalized(artist), (duration_ms + 500) // 1000
+
+
+def _provider_identity_signature(title: str, artists: list[str], duration_ms: int) -> tuple[str, tuple[str, ...], int]:
+    members = {
+        _normalized(part)
+        for artist in artists
+        for part in re.split(r"[,/&;×、＋+]", artist)
+        if _normalized(part)
+    }
+    return _normalized(title), tuple(sorted(members)), (duration_ms + 500) // 1000
+
+
+def _normalized(value: str) -> str:
+    folded = "".join(ch for ch in unicodedata.normalize("NFKD", value.casefold()) if not unicodedata.combining(ch))
+    return "".join(ch for ch in folded if ch.isalnum())
 
 
 def _decrypt_krc(encoded: str) -> str:

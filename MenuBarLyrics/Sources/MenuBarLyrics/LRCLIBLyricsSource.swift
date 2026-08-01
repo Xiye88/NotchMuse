@@ -20,7 +20,7 @@ struct LRCLIBLyricsSource {
 
     func parse(_ data: Data, for track: SpotifyTrack) throws -> [LyricLine] {
         let results = try JSONDecoder().decode([Result].self, from: data)
-        let usable = results.filter { $0.syncedLyrics?.isEmpty == false }
+        let usable = results.filter { $0.syncedLyrics?.isEmpty == false && $0.duration != nil }
         guard !hasUnmarkedScriptConflict(usable, track: track),
               !hasDuplicateScriptConflict(usable) else { return [] }
 
@@ -59,7 +59,9 @@ struct LRCLIBLyricsSource {
     private func metadataKey(for result: Result) -> MetadataKey {
         MetadataKey(
             title: normalize(result.trackName),
-            artist: normalize(result.artistName)
+            artist: Set(result.artistName.components(separatedBy: CharacterSet(charactersIn: ",/&;×、"))
+                .map(normalize)
+                .filter { !$0.isEmpty })
         )
     }
 
@@ -115,16 +117,16 @@ private enum Script {
 
 private struct MetadataKey: Hashable {
     let title: String
-    let artist: String
+    let artist: Set<String>
 }
 
 private struct Result: Decodable {
     let trackName: String
     let artistName: String
-    let duration: Double
+    let duration: Double?
     let syncedLyrics: String?
 
     var candidate: TrackMatcher.Candidate {
-        TrackMatcher.Candidate(title: trackName, artists: [artistName], durationMs: Int(duration * 1000))
+        TrackMatcher.Candidate(title: trackName, artists: [artistName], durationMs: Int((duration ?? 0) * 1000))
     }
 }

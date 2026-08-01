@@ -20,6 +20,18 @@ struct NetEaseLyricsSource {
     }
 
     private func search(_ track: SpotifyTrack) async throws -> [Song] {
+        let searchRequest = searchRequest(for: track)
+        let (data, response) = try await URLSession.shared.data(for: searchRequest)
+        return try parseSearch(LyricsHTTP.validate(data: data, response: response))
+    }
+
+    func parseSearch(_ data: Data) throws -> [Song] {
+        let songs = try JSONDecoder().decode(SearchResponse.self, from: data).result?.songs ?? []
+        var seen = Set<NetEaseMetadataKey>()
+        return songs.filter { seen.insert(metadataKey(for: $0)).inserted }
+    }
+
+    func searchRequest(for track: SpotifyTrack) -> URLRequest {
         var form = URLComponents()
         form.queryItems = [
             URLQueryItem(name: "s", value: "\(track.name) \(track.artist)"),
@@ -27,12 +39,11 @@ struct NetEaseLyricsSource {
             URLQueryItem(name: "limit", value: "10"),
             URLQueryItem(name: "offset", value: "0")
         ]
-        var searchRequest = request(URL(string: "https://music.163.com/api/search/get/web")!)
+        var searchRequest = request(URL(string: "https://music.163.com/api/search/get")!)
         searchRequest.httpMethod = "POST"
         searchRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         searchRequest.httpBody = form.percentEncodedQuery?.data(using: .utf8)
-        let (data, response) = try await URLSession.shared.data(for: searchRequest)
-        return try JSONDecoder().decode(SearchResponse.self, from: LyricsHTTP.validate(data: data, response: response)).result?.songs ?? []
+        return searchRequest
     }
 
     private func request(_ url: URL) -> URLRequest {
@@ -43,6 +54,26 @@ struct NetEaseLyricsSource {
         return request
     }
 
+    private func metadataKey(for song: Song) -> NetEaseMetadataKey {
+        NetEaseMetadataKey(
+            title: normalize(song.name),
+            artists: Set(song.artists.map { normalize($0.name) }),
+            duration: (song.duration + 500) / 1000
+        )
+    }
+
+    private func normalize(_ value: String) -> String {
+        value.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
+            .map(String.init).joined()
+    }
+
+}
+
+private struct NetEaseMetadataKey: Hashable {
+    let title: String
+    let artists: Set<String>
+    let duration: Int
 }
 
 private struct SearchResponse: Decodable {
@@ -53,14 +84,14 @@ private struct SearchResult: Decodable {
     let songs: [Song]
 }
 
-private struct Song: Decodable {
+struct Song: Decodable {
     let id: Int
     let name: String
     let artists: [Artist]
     let duration: Int
 }
 
-private struct Artist: Decodable {
+struct Artist: Decodable {
     let name: String
 }
 

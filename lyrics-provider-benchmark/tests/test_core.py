@@ -5,6 +5,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from benchmark.analysis import analyze_matching_issue, refresh_failed_tracks
 from benchmark.db import connect, init_db, insert_result
@@ -12,7 +13,7 @@ from benchmark.dataset import sample_tracks
 from benchmark.dataset import load_tracks
 from benchmark.matcher import Candidate, Track, best_match_index, match_decision, score
 from benchmark.offline_simulator import RankingCase, Signals, evaluate_cases, load_cases_from_csv, load_cases_from_sqlite
-from benchmark.providers import _matching_failed
+from benchmark.providers import HTTPResponse, KugouProvider, LRCLIBProvider, NetEaseProvider, _matching_failed
 from benchmark.report import build_summary, write_reports
 from benchmark.runner import ProviderResult, run_track
 
@@ -138,6 +139,90 @@ class RunnerTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(calls, ["first", "second", "third"])
         self.assertEqual([r.provider for r in results], ["first", "second", "third"])
+
+
+class ProviderRecoveryTests(unittest.TestCase):
+    def test_lrclib_ignores_rows_without_duration(self):
+        payload = [
+            {
+                "trackName": "Song",
+                "artistName": "Artist",
+                "duration": None,
+                "syncedLyrics": "[00:01.00]Incomplete",
+            },
+            {
+                "trackName": "Song",
+                "artistName": "Artist",
+                "duration": 200,
+                "syncedLyrics": "[00:01.00]Complete",
+            },
+            {
+                "trackName": "song",
+                "artistName": "ARTIST",
+                "duration": 199,
+                "syncedLyrics": "[00:01.00]Duplicate",
+            },
+        ]
+        track = Track("t1", "Song", "Artist", "", 200)
+        with patch("benchmark.providers._request", return_value=HTTPResponse(200, json.dumps(payload).encode())):
+            result = LRCLIBProvider().fetch(track, time.monotonic())
+
+        self.assertTrue(result.lyrics_available)
+        self.assertEqual(result.line_count, 1)
+
+    def test_netease_uses_plain_search_endpoint(self):
+        responses = [
+            HTTPResponse(
+                200,
+                json.dumps(
+                    {
+                        "result": {
+                            "songs": [
+                                {
+                                    "id": 1,
+                                    "name": "Song",
+                                    "artists": [{"name": "Artist"}],
+                                    "duration": 200_000,
+                                },
+                                {
+                                    "id": 2,
+                                    "name": "song",
+                                    "artists": [{"name": "ARTIST"}],
+                                    "duration": 200_000,
+                                }
+                            ]
+                        }
+                    }
+                ).encode(),
+            ),
+            HTTPResponse(200, json.dumps({"lrc": {"lyric": "[00:01.00]Line"}}).encode()),
+        ]
+        urls = []
+
+        def request(url, *args, **kwargs):
+            urls.append(url)
+            return responses.pop(0)
+
+        with patch("benchmark.providers._request", side_effect=request):
+            result = NetEaseProvider().fetch(Track("t1", "Song", "Artist", "", 200), time.monotonic())
+
+        self.assertTrue(result.lyrics_available)
+        self.assertEqual(urls[0], "https://music.163.com/api/search/get")
+
+    def test_kugou_song_search_deduplicates_equivalent_rows(self):
+        payload = {
+            "data": {
+                "info": [
+                    {"hash": "first", "songname": "Song", "singername": "Artist", "duration": 200},
+                    {"hash": "second", "songname": "song", "singername": "ARTIST", "duration": 200},
+                ]
+            }
+        }
+        with patch("benchmark.providers._request", return_value=HTTPResponse(200, json.dumps(payload).encode())):
+            song, _, _, reject = KugouProvider()._song(Track("t1", "Song", "Artist", "", 200))
+
+        self.assertIsNotNone(song)
+        self.assertIsNone(reject)
 
 
 class ReportTests(unittest.TestCase):

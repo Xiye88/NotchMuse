@@ -50,6 +50,7 @@ enum SelfTests {
         testTrackMatcherDiagnostics()
         testLyricsHTTP()
         testLyricsCache()
+        testNetEaseRequest()
         testLRCLIBRequest()
         testLRCLIBFixtures()
         testLRCMuxRequest()
@@ -315,6 +316,15 @@ enum SelfTests {
         check(request.value(forHTTPHeaderField: "User-Agent") == "NotchMuse/0.3 (macOS)", "sets the LRCLIB user agent")
     }
 
+    private static func testNetEaseRequest() {
+        let track = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
+        let source = NetEaseLyricsSource()
+        let request = source.searchRequest(for: track)
+        check(request.url?.path == "/api/search/get", "uses the plain NetEase search response endpoint")
+        let duplicateSearch = Data(#"{"result":{"songs":[{"id":1,"name":"Song","artists":[{"name":"Artist"}],"duration":200000},{"id":2,"name":"song","artists":[{"name":"ARTIST"}],"duration":200000}]}}"#.utf8)
+        check((try! source.parseSearch(duplicateSearch)).count == 1, "deduplicates equivalent NetEase recordings")
+    }
+
     private static func testLRCLIBFixtures() {
         let source = LRCLIBLyricsSource()
         let loveScenario = SpotifyTrack(name: "LOVE SCENARIO", artist: "iKON", album: "Return", duration: 209)
@@ -364,6 +374,25 @@ enum SelfTests {
         let latin = SpotifyTrack(name: "Hello", artist: "Adele", album: "25", duration: 200)
         let latinOnly = lrclibJSON([("Hello", "Adele", "25", 200, "[00:01.00]Hello from the other side")])
         check(!(try! source.parse(latinOnly, for: latin)).isEmpty, "keeps normal Latin lyrics")
+
+        let missingDuration = try! JSONSerialization.data(withJSONObject: [
+            ["id": 1, "trackName": "Hello", "artistName": "Adele", "albumName": "25",
+             "duration": NSNull(), "syncedLyrics": "[00:01.00]Incomplete"],
+            ["id": 2, "trackName": "Hello", "artistName": "Adele", "albumName": "25",
+             "duration": 200, "syncedLyrics": "[00:01.00]Hello from the other side"]
+        ])
+        check((try? source.parse(missingDuration, for: latin)) == [
+            LyricLine(time: 1, text: "Hello from the other side")
+        ], "ignores LRCLIB rows without duration")
+
+        let repeatedArtist = try! JSONSerialization.data(withJSONObject: [
+            ["id": 1, "trackName": "Wonderwall (Remastered)", "artistName": "Oasis, Oasis",
+             "duration": 258.8, "syncedLyrics": "[00:01.00]Today is gonna be the day"],
+            ["id": 2, "trackName": "Wonderwall (Remastered)", "artistName": "Oasis",
+             "duration": 259, "syncedLyrics": "[00:01.00]Today is gonna be the day"]
+        ])
+        let wonderwall = SpotifyTrack(name: "Wonderwall (Remastered)", artist: "Oasis", album: "", duration: 259)
+        check(!(try! source.parse(repeatedArtist, for: wonderwall)).isEmpty, "deduplicates repeated LRCLIB artist identities")
 
         let tied = lrclibJSON([
             ("Song", "Artist", "Album", 198, "[00:01.00]First"),

@@ -1,18 +1,16 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-07-31
+Last Updated: 2026-08-01
 
 ## Current Phase
 
-v0.5 Lyrics Matching Accuracy - Phase 4: Matcher Optimization Simulation
+v0.5 Lyrics Matching Accuracy - Phase 4.1: Existing Provider Recovery
 
 ## Current Goal
 
-Use a Benchmark-only offline simulator and a user-weighted proxy dataset to
-compare bounded ranking signals. Approve production work only when labeled
-candidate evidence improves correct-candidate rate with zero confirmed false
-positives. Keep production matching behavior, Provider scope, Spotify
-integration, and Apple Silicon support unchanged until that gate passes.
+Restore the existing LRCLIB, NetEase, and Kugou paths before considering new
+Providers or Matcher relaxation. Validate gains on natural 1000-song runs and
+the fixed Top Songs proxy while confirmed false positives remain zero.
 
 ## Release Status
 
@@ -48,7 +46,11 @@ integration, and Apple Silicon support unchanged until that gate passes.
 - Run `19` Provider health incident: LRCLIB recorded `970` read timeouts,
   NetEase recorded `907` no-result rows plus `93` parser exceptions, and
   LRCMux recorded `211` HTTP 404 responses.
-- Next scheduled trigger: 2026-08-01 00:00 UTC.
+- Natural run `20` completed on 2026-08-01 with `674/1000` Coverage (`67.4%`).
+- LRCLIB timeouts did not recur in run `20`; the stable failure was `131`
+  null-duration parser rows.
+- The P0 Provider recovery patch is deployed. The next natural run is `21`,
+  scheduled for 2026-08-02 00:00 UTC.
 
 ## Blocking Issues
 
@@ -71,9 +73,9 @@ integration, and Apple Silicon support unchanged until that gate passes.
   production Matcher defect until parity is restored.
 - Title and artist normalization remain No-Go; current evidence is dominated
   by source-aligned score ties whose second candidate identity is unknown.
-- NetEase produced zero successes over seven days and has substantial parser
-  failures; keep its production priority unchanged until a controlled provider
-  decision is approved.
+- Run `20` still predates the Provider recovery patch: NetEase recorded zero
+  successes and LRCLIB recorded `79`. Natural run `21` is required before
+  claiming aggregate Coverage improvement.
 - LRCMux HTTP 404 responses need no-result/endpoint semantics classification.
 - LRCLIB immediate retry is not supported: second retry recovered `0/25`.
 - Notch Mode can briefly switch to lyric-only height for about 1-2 seconds
@@ -200,6 +202,14 @@ integration, and Apple Silicon support unchanged until that gate passes.
   free, official source solves global synced-lyrics Coverage.
 - Confirmed existing Provider health and Benchmark/App parity are the next
   evidence gate. Production Provider expansion remains No-Go.
+- Implemented and deployed P0 Existing Provider Recovery without changing the
+  Matcher: LRCLIB skips null-duration rows, NetEase uses its plain-response
+  endpoint, and LRCLIB/NetEase/Kugou remove identity-equivalent duplicates.
+- Passed `26` Python tests locally and on VPS, Swift self-tests, and a Swift
+  Release build.
+- Replayed the nine missing tracks from the Top Songs first 100. Existing
+  Providers recovered `6/9`, moving the bounded sample from `91/100` to a
+  potential `97/100` with no confirmed wrong-track selection.
 
 ## In Progress Tasks
 
@@ -210,10 +220,9 @@ integration, and Apple Silicon support unchanged until that gate passes.
   ranking in the offline simulator.
 - Manually review every proposed recovery and keep confirmed false positives
   at `0`.
-- Align Benchmark Kugou de-duplication with the existing Swift App behavior.
-- Diagnose the run `19` LRCLIB timeout incident with Provider-specific pacing
-  before using its hit rate in source decisions.
-- Classify NetEase response/parser failure separately from Matcher failures.
+- Verify the deployed Provider recovery on natural run `21`.
+- Re-run the fixed Top Songs matrix after run `21` and measure unique Provider
+  contribution, latency, and confirmed false positives.
 - Classify LRCMux HTTP 404 semantics.
 - Continue Benchmark-only stratified LRCLIB experiments if needed.
 - Continue collecting structured GitHub beta feedback.
@@ -233,6 +242,7 @@ integration, and Apple Silicon support unchanged until that gate passes.
   improved manually verified matches with zero confirmed false positives.
 - Production Provider expansion: No-Go until LRCLIB, NetEase, LRCMux, and
   Benchmark/App parity are resolved on a fixed popular-song dataset.
+- P0 Existing Provider Recovery: Go; implemented and deployed.
 - Musixmatch official API: conditional research candidate only if recurring
   cost and licensing are accepted; reverse-engineered access is No-Go.
 - Keep title/artist normalization, Provider priority changes, App retry,

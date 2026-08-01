@@ -1,17 +1,15 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-07-31
+Last Updated: 2026-08-01
 
 ## TODO
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Manually label run 19 proposed recoveries | 03_LAB / 05_MATCHER | P0 | 464 eligible provider rows; false positives must remain 0 |
-| Align Benchmark Kugou de-duplication with Swift App | 03_LAB / 05_MATCHER | P0 | Benchmark-only parity experiment; no App change |
-| Diagnose LRCLIB run 19 timeout incident | 03_LAB | P0 | 970/1000 timeouts; test pacing/transport before source conclusions |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
-| Investigate NetEase response/parser failure | 03_LAB | P0 | 907 no-result + 93 parser exceptions; controlled request currently succeeds |
 | Build fixed 100-song popular-miss Provider matrix | 03_LAB | P1 | Report unique incremental Coverage and verified sync correctness |
+| Verify P0 Provider recovery on natural run 21 | 03_LAB / 05_MATCHER | P0 | Compare Coverage, Provider contribution, latency, and false positives |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
 | Replace Demo links with GitHub native attachments | 06_DOCS | P2 | Requires browser local-file access |
 | Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
@@ -27,6 +25,7 @@ Last Updated: 2026-07-31
 | Provider Health Classification | 03_LAB | P0 | NetEase, LRCMux 404, LRCLIB transient |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 | Phase 4 Matcher Go/No-Go | 00_PM / 03_LAB / 05_MATCHER | P0 | Simulator ready; production remains unchanged |
+| P0 Provider recovery natural validation | 03_LAB | P0 | Patch deployed; run 21 scheduled for 2026-08-02 UTC |
 
 ## BLOCKED
 
@@ -107,3 +106,5 @@ Last Updated: 2026-07-31
 | Phase 3 de-duplication Go/No-Go | 05_MATCHER | P0 | Benchmark-only GO for 464 equivalent rows; production NO-GO |
 | Phase 4 run 19 simulation audit | 03_LAB / 05_MATCHER | P0 | 101-song recovery upper bound; no labeled accuracy claim |
 | Open-source lyrics source landscape | 00_PM / 03_LAB | P0 | Existing-source recovery first; Musixmatch official is conditional |
+| Existing Provider recovery implementation | 01_APP / 03_LAB / 05_MATCHER | P0 | LRCLIB, NetEase, and Kugou repaired without Matcher changes |
+| Top Songs missing-track replay | 03_LAB / 05_MATCHER | P0 | Recovered 6/9; bounded first-100 result 91 to potential 97 |

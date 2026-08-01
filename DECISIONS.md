@@ -115,3 +115,19 @@ Reason:
   priority strategy.
 - DEBUG-only decision logs are the smallest change that closes the evidence
   gap without altering matching results.
+
+### 2026-08-01: Recover existing Providers before adding sources
+
+Decision: Repair LRCLIB, NetEase, and Kugou endpoint/parser/duplicate-candidate
+defects before evaluating a new lyrics Provider. Keep production Matcher score,
+threshold, and acceptance rules unchanged.
+
+Reason:
+- Run `20` exposed reproducible null-duration and NetEase response endpoint
+  failures rather than catalog absence alone.
+- The existing Providers recovered `6/9` missing tracks in a bounded Top Songs
+  replay after the repair.
+- Adding another undocumented Provider before restoring current paths would
+  add maintenance cost and hide measurement errors.
+- New Provider evaluation remains gated by natural run `21` and a fixed
+  popular-song matrix with zero confirmed wrong-track selections.

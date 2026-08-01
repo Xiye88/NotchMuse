@@ -1,6 +1,6 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-07-30
+Last Updated: 2026-08-01
 
 ## Phase 1: GitHub Open Source Beta Release
 
@@ -115,6 +115,10 @@ Phases:
    complete second identity for `489/489` ambiguity rows; `464` strict
    identity-equivalent rows may enter Benchmark-only simulation. Production
    remains No-Go pending labeled evidence and manual review.
+5. Phase 4.1 - Existing Provider Recovery: implemented and deployed. LRCLIB,
+   NetEase, and Kugou parser/endpoint/duplicate-candidate defects were repaired
+   without changing Matcher acceptance. Natural run `21` is the aggregate
+   validation gate; the bounded Top Songs replay recovered `6/9` misses.
 
 Validation Gate:
 

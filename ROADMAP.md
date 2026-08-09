@@ -1,6 +1,6 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-08-01
+Last Updated: 2026-08-09
 
 ## Phase 1: GitHub Open Source Beta Release
 
@@ -115,10 +115,15 @@ Phases:
    complete second identity for `489/489` ambiguity rows; `464` strict
    identity-equivalent rows may enter Benchmark-only simulation. Production
    remains No-Go pending labeled evidence and manual review.
-5. Phase 4.1 - Existing Provider Recovery: implemented and deployed. LRCLIB,
+5. Phase 4.1 - Existing Provider Recovery: completed and validated. LRCLIB,
    NetEase, and Kugou parser/endpoint/duplicate-candidate defects were repaired
-   without changing Matcher acceptance. Natural run `21` is the aggregate
-   validation gate; the bounded Top Songs replay recovered `6/9` misses.
+   without changing Matcher acceptance. Runs `21-28` average `89.38%`
+   Coverage, compared with `67.4%` on run `20`.
+6. Phase 4.2 - Remaining Coverage Evidence: in progress. Classify Soda's
+   invalid responses, LRCMux 404 semantics, and a labeled sample from the
+   remaining `108` misses before any new Provider or Matcher proposal.
+7. Phase 4.3 - Public Delivery: pending Product Owner version decision. The
+   recovery code is on `main` but is not included in the public `v0.3.1` DMG.
 
 Validation Gate:
 

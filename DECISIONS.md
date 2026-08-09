@@ -14,7 +14,7 @@
 - Do not change provider order, matching thresholds, duration tolerance, or
   App retry based only on aggregate Coverage.
 
-Last Updated: 2026-07-24
+Last Updated: 2026-08-09
 
 ## Decision Log
 
@@ -131,3 +131,19 @@ Reason:
   add maintenance cost and hide measurement errors.
 - New Provider evaluation remains gated by natural run `21` and a fixed
   popular-song matrix with zero confirmed wrong-track selections.
+
+### 2026-08-09: Validate recovery and prioritize public delivery
+
+Decision: Treat the existing Provider recovery as validated after natural
+runs `21-28`, keep the production Matcher unchanged, and prioritize packaging
+the recovery for public users before further matching experiments.
+
+Reason:
+- Coverage remained between `89.1%` and `89.6%` for eight natural daily runs,
+  compared with `67.4%` on run `20`.
+- The latest Top Songs proxy reached `277/300` and its first 100 reached
+  `96/100`.
+- The current public `v0.3.1` DMG predates the recovery commit, so continued
+  analysis alone does not improve the experience of existing users.
+- Soda and the remaining uncovered tracks still require evidence; they do not
+  justify a broad Matcher relaxation or immediate new Provider integration.

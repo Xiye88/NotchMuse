@@ -1,16 +1,16 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-08-01
+Last Updated: 2026-08-09
 
 ## Current Phase
 
-v0.5 Lyrics Matching Accuracy - Phase 4.1: Existing Provider Recovery
+v0.5 Lyrics Matching Accuracy - Phase 4.2: Remaining Coverage Evidence
 
 ## Current Goal
 
-Restore the existing LRCLIB, NetEase, and Kugou paths before considering new
-Providers or Matcher relaxation. Validate gains on natural 1000-song runs and
-the fixed Top Songs proxy while confirmed false positives remain zero.
+Package the validated LRCLIB, NetEase, and Kugou recovery for public users,
+then classify the remaining 10-11% uncovered songs without relaxing the
+production Matcher or adding an unverified Provider.
 
 ## Release Status
 
@@ -26,6 +26,9 @@ the fixed Top Songs proxy while confirmed false positives remain zero.
 - Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1
 - Current support: macOS 14+, Apple Silicon, Spotify desktop app.
 - Developer ID signing and notarization remain deferred.
+- Important release gap: the public `v0.3.1` tag points to `3666710`; the
+  validated Provider recovery is on `main` at `8c205e3` and is not included in
+  the current public DMG.
 
 ## Benchmark Health
 
@@ -33,24 +36,22 @@ the fixed Top Songs proxy while confirmed false positives remain zero.
 - Password authentication remains unavailable but is not required for current
   operations.
 - `lyrics-benchmark.timer` is enabled and active.
-- Runs `17-19` completed naturally after rejected-candidate evidence reporting
-  was deployed.
-- Latest run: `19`, completed 2026-07-31, Coverage `64.4%`.
-- Latest seven-day average Coverage: `67.73%`.
-- Run `19` Matcher evidence: `3,023` matching failures, `1,890`
-  candidate-backed, `1,133` no-candidate, `1,401` below-threshold, and `489`
-  ambiguity-gap rows.
-- Candidate evidence coverage: `62.52%`.
-- Run `19` second-candidate identity fill: `489/489` (`100%`) for
-  ambiguity-gap rows.
-- Run `19` Provider health incident: LRCLIB recorded `970` read timeouts,
-  NetEase recorded `907` no-result rows plus `93` parser exceptions, and
-  LRCMux recorded `211` HTTP 404 responses.
-- Natural run `20` completed on 2026-08-01 with `674/1000` Coverage (`67.4%`).
-- LRCLIB timeouts did not recur in run `20`; the stable failure was `131`
-  null-duration parser rows.
-- The P0 Provider recovery patch is deployed. The next natural run is `21`,
-  scheduled for 2026-08-02 00:00 UTC.
+- Natural runs `21-28` completed successfully after P0 Provider recovery.
+- Coverage across runs `21-28` averages `89.38%`, with a `89.1-89.6%` range.
+- Latest run: `28`, completed 2026-08-09, Coverage `892/1000` (`89.2%`).
+- Run `20` baseline was `674/1000` (`67.4%`); recovery produced a sustained
+  improvement of about `21.98` percentage points.
+- Run `28` Provider successes: LRCLIB `628`, LRCMux `603`, NetEase `515`,
+  Kugou `203`, QQ `32`, and Soda `0`.
+- Run `28` unique contributions: LRCLIB `135`, LRCMux `72`, NetEase `38`,
+  Kugou `10`, QQ `1`, and Soda `0`.
+- Run `28` Matcher evidence: `1,215` no-candidate, `971` below-threshold, and
+  `391` ambiguity-gap Provider rows.
+- The Top Songs proxy reached `277/300` (`92.33%`); its first 100 reached
+  `96/100` on the latest natural run.
+- The latest `108` uncovered songs are concentrated in Korean (`43`), Chinese
+  pop (`28`), Spotify hot (`22`), Japanese (`10`), English pop (`4`), and
+  independent (`1`) tracks.
 
 ## Blocking Issues
 
@@ -60,6 +61,8 @@ the fixed Top Songs proxy while confirmed false positives remain zero.
 
 ### P1 Analysis Gates
 
+- The largest delivery blocker is that the public `v0.3.1` DMG predates the
+  validated Provider recovery now present on `main`.
 - Production Matcher changes remain blocked until natural run `19+` supplies
   second-candidate identity and manual ground truth proves a safe ranking
   strategy.
@@ -68,15 +71,13 @@ the fixed Top Songs proxy while confirmed false positives remain zero.
   timing, or version correctness.
 - The `464` eligible rows remain unlabeled; correct-candidate and
   false-positive rates cannot be claimed yet.
-- The Python Benchmark Kugou adapter does not use the de-duplication already
-  present in the Swift App. Benchmark ambiguity cannot be treated as an App
-  production Matcher defect until parity is restored.
 - Title and artist normalization remain No-Go; current evidence is dominated
-  by source-aligned score ties whose second candidate identity is unknown.
-- Run `20` still predates the Provider recovery patch: NetEase recorded zero
-  successes and LRCLIB recorded `79`. Natural run `21` is required before
-  claiming aggregate Coverage improvement.
-- LRCMux HTTP 404 responses need no-result/endpoint semantics classification.
+  by source-aligned score ties whose ground-truth lyric correctness is not
+  manually labeled.
+- Soda is currently unhealthy: run `28` returned `0/1000`, with all requests
+  recorded as `invalid_response` JSON parse failures.
+- LRCMux recorded `239` HTTP 404 responses in run `28`; no-result/endpoint
+  semantics still need classification.
 - LRCLIB immediate retry is not supported: second retry recovered `0/25`.
 - Notch Mode can briefly switch to lyric-only height for about 1-2 seconds
   after Spotify resumes, then returns to Song + Lyric. This is a transient P1
@@ -87,6 +88,9 @@ the fixed Top Songs proxy while confirmed false positives remain zero.
   failures and cannot directly justify Matcher changes.
 - The Top Songs dataset is an Apple Music chart-derived proxy, not Spotify
   telemetry or real NotchMuse user telemetry.
+- Public validation volume remains too small for retention conclusions: the
+  repository currently has no GitHub Issues, and the `v0.3.1` DMG has only
+  three recorded downloads.
 
 ## Completed Tasks
 
@@ -210,6 +214,12 @@ the fixed Top Songs proxy while confirmed false positives remain zero.
 - Replayed the nine missing tracks from the Top Songs first 100. Existing
   Providers recovered `6/9`, moving the bounded sample from `91/100` to a
   potential `97/100` with no confirmed wrong-track selection.
+- Validated Provider recovery on eight natural daily runs (`21-28`), with
+  average Coverage `89.38%` and no regression to the old `67%` baseline.
+- Confirmed the latest natural Top Songs proxy at `277/300` (`92.33%`) and the
+  first 100 at `96/100`.
+- Re-ran Swift self-tests and Release build on 2026-08-09; both passed.
+- Re-ran the Python Benchmark suite; all `26` tests passed.
 
 ## In Progress Tasks
 
@@ -220,9 +230,11 @@ the fixed Top Songs proxy while confirmed false positives remain zero.
   ranking in the offline simulator.
 - Manually review every proposed recovery and keep confirmed false positives
   at `0`.
-- Verify the deployed Provider recovery on natural run `21`.
-- Re-run the fixed Top Songs matrix after run `21` and measure unique Provider
-  contribution, latency, and confirmed false positives.
+- Prepare a minimal hotfix Release Candidate containing the validated Provider
+  recovery already on `main`.
+- Investigate Soda's `0/1000` invalid-response regression without changing
+  production Matcher behavior.
+- Build and label a fixed sample from the remaining `108` uncovered songs.
 - Classify LRCMux HTTP 404 semantics.
 - Continue Benchmark-only stratified LRCLIB experiments if needed.
 - Continue collecting structured GitHub beta feedback.
@@ -243,6 +255,9 @@ the fixed Top Songs proxy while confirmed false positives remain zero.
 - Production Provider expansion: No-Go until LRCLIB, NetEase, LRCMux, and
   Benchmark/App parity are resolved on a fixed popular-song dataset.
 - P0 Existing Provider Recovery: Go; implemented and deployed.
+- P0 Existing Provider Recovery validation: Passed on runs `21-28`.
+- Public delivery of Provider recovery: recommend a minimal hotfix release;
+  Product Owner version decision is required.
 - Musixmatch official API: conditional research candidate only if recurring
   cost and licensing are accepted; reverse-engineered access is No-Go.
 - Keep title/artist normalization, Provider priority changes, App retry,

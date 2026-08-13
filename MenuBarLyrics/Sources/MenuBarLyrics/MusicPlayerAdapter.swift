@@ -1,6 +1,6 @@
 import Foundation
 
-enum PlayerSource: String, Equatable, Sendable {
+enum PlayerSource: String, CaseIterable, Equatable, Sendable {
     case spotify = "Spotify"
     case appleMusic = "Apple Music"
 }

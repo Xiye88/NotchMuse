@@ -11,7 +11,11 @@ struct AppleMusicAdapter: MusicPlayerAdapter {
             if s is "stopped" then return "stopped"
             set t to current track
             set sep to ASCII character 31
-            return s & sep & (name of t) & sep & (artist of t) & sep & (album of t) & sep & (duration of t as string) & sep & (player position as string) & sep & (persistent ID of t as string)
+            set trackID to ""
+            try
+              set trackID to persistent ID of t as string
+            end try
+            return s & sep & (name of t) & sep & (artist of t) & sep & (album of t) & sep & (duration of t as string) & sep & (player position as string) & sep & trackID
           end tell
         else
           return "closed"

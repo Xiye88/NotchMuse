@@ -2,6 +2,11 @@
 "Spotify: Connected" = "Spotify: Connected";
 "Spotify: Not Running" = "Spotify: Not Running";
 "Spotify: Connection Error" = "Spotify: Connection Error";
+"%@: Checking..." = "%@: Checking...";
+"%@: Connected" = "%@: Connected";
+"%@: Not Running" = "%@: Not Running";
+"%@: Connection Error" = "%@: Connection Error";
+"Lyrics: Waiting for %@" = "Lyrics: Waiting for %@";
 "Lyrics: Waiting for Spotify" = "Lyrics: Waiting for Spotify";
 "Lyrics: Searching..." = "Lyrics: Searching...";
 "Lyrics: Available" = "Lyrics: Available";
@@ -15,6 +20,10 @@
 "Checking Spotify..." = "Checking Spotify...";
 "Spotify is not running" = "Spotify is not running";
 "Cannot connect to Spotify" = "Cannot connect to Spotify";
+"Checking %@..." = "Checking %@...";
+"%@ is not running" = "%@ is not running";
+"Waiting for %@" = "Waiting for %@";
+"Cannot connect to %@. Check Automation permission in System Settings." = "Cannot connect to %@. Check Automation permission in System Settings.";
 "Paused: %@" = "Paused: %@";
 "Song: %@" = "Song: %@";
 "Artist: %@" = "Artist: %@";
@@ -38,7 +47,7 @@
 "Settings…" = "Settings…";
 "Quit" = "Quit";
 "Welcome to NotchMuse 🎵" = "Welcome to NotchMuse 🎵";
-"First Launch Guide" = "NotchMuse displays synchronized lyrics on your Mac menu bar and notch area.\n\n1. Open Spotify and play a song.\n2. Choose Status Bar or Notch Mode in Settings.\n3. Adjust lyrics color, font size, and width in Settings.\n\nAccessibility permission is only needed if you select the Left status bar position. Open Settings from the orange music-note menu bar icon.";
+"First Launch Guide" = "NotchMuse displays synchronized lyrics on your Mac menu bar and notch area.\n\n1. Choose Spotify or Apple Music in Settings, then play a song.\n2. Choose Status Bar or Notch Mode.\n3. Adjust lyrics color, font size, and width.\n\nAllow Automation access when macOS asks to read the selected player. Accessibility permission is only needed for the Left status bar position. Open Settings from the orange music-note menu bar icon.";
 "Continue" = "Continue";
 "NotchMuse Settings" = "NotchMuse Settings";
 "Display" = "Display";
@@ -74,6 +83,7 @@
 "Animation Speed" = "Animation Speed";
 "Opacity" = "Opacity";
 "General" = "General";
+"Music Player" = "Music Player";
 "Language" = "Language";
 "Launch at Login" = "Launch at Login";
 "Language Change" = "Language Change";

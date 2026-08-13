@@ -14,9 +14,18 @@ enum AppPreferences {
     static let customWidthKey = "CustomWidth"
     static let hasShownFirstLaunchGuideKey = "HasShownFirstLaunchGuide"
     static let languageKey = "AppLanguage"
+    static let playerSourceKey = "PlayerSource"
 
     static var language: AppLanguage {
         AppLanguage(rawValue: UserDefaults.standard.string(forKey: languageKey) ?? "") ?? .english
+    }
+
+    static var playerSource: PlayerSource {
+        normalizedPlayerSource(UserDefaults.standard.string(forKey: playerSourceKey))
+    }
+
+    static func normalizedPlayerSource(_ rawValue: String?) -> PlayerSource {
+        PlayerSource(rawValue: rawValue ?? "") ?? .spotify
     }
 
     static var displayMode: DisplayMode {
@@ -94,6 +103,7 @@ final class SettingsWindowController: NSWindowController {
     private let customWidthValue = NSTextField(labelWithString: "")
     private let launchAtLoginSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
+    private let playerPopUp = NSPopUpButton()
     private let contentStack = NSStackView()
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
@@ -167,6 +177,11 @@ final class SettingsWindowController: NSWindowController {
         }
         languagePopUp.target = self
         languagePopUp.action = #selector(languageChanged)
+        for source in PlayerSource.allCases {
+            playerPopUp.addItem(withTitle: source.rawValue)
+        }
+        playerPopUp.target = self
+        playerPopUp.action = #selector(playerChanged)
 
         contentStack.orientation = .vertical
         contentStack.alignment = .leading
@@ -197,6 +212,7 @@ final class SettingsWindowController: NSWindowController {
         contentStack.addArrangedSubview(separator())
         contentStack.addArrangedSubview(sectionTitle(L10n.text("General")))
         contentStack.addArrangedSubview(grid([
+            [label(L10n.text("Music Player")), playerPopUp],
             [label(L10n.text("Language")), languagePopUp],
             [label(L10n.text("Launch at Login")), launchAtLoginSwitch]
         ]))
@@ -285,6 +301,7 @@ final class SettingsWindowController: NSWindowController {
         opacityValue.stringValue = "\(Int(opacitySlider.doubleValue * 100))%"
         customWidthValue.stringValue = "\(Int(customWidthSlider.doubleValue)) pt"
         launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
+        playerPopUp.selectItem(at: PlayerSource.allCases.firstIndex(of: AppPreferences.playerSource) ?? 0)
         languagePopUp.selectItem(at: AppLanguage.allCases.firstIndex(of: AppPreferences.language) ?? 0)
         updateControlAvailability()
     }
@@ -400,5 +417,11 @@ final class SettingsWindowController: NSWindowController {
         alert.informativeText = L10n.text("Restart NotchMuse to apply the new language.")
         alert.addButton(withTitle: L10n.text("OK"))
         alert.runModal()
+    }
+
+    @objc private func playerChanged() {
+        let sources = PlayerSource.allCases
+        guard sources.indices.contains(playerPopUp.indexOfSelectedItem) else { return }
+        save(sources[playerPopUp.indexOfSelectedItem], key: AppPreferences.playerSourceKey)
     }
 }

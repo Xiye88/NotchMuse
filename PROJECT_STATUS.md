@@ -4,13 +4,14 @@ Last Updated: 2026-08-13
 
 ## Current Phase
 
-v0.6 Multi-Player Architecture - Development Batch 2 Evidence Gate
+v0.6 Apple Music Production Integration - Runtime Evidence Gate
 
 ## Current Goal
 
-Unblock authenticated Spotify and Apple Music runtime validation, then add
-strategy-blind labels to the frozen Track Identity Dataset without changing
-the production Matcher, Provider priority, or current public Release.
+Complete the five-song Apple Music playback matrix and Spotify regression on
+real authenticated players. Apple Music is now wired through the shared
+adapter and existing lyrics/display pipeline; Release remains gated by runtime
+evidence rather than further architecture work.
 
 ## Release Status
 
@@ -92,12 +93,14 @@ the production Matcher, Provider priority, or current public Release.
 - Public validation volume remains too small for retention conclusions: the
   repository currently has no GitHub Issues, and the `v0.3.1` DMG has only
   three recorded downloads.
-- Apple Music is approved only for an isolated runtime spike; active-track,
-  permission, state and timing-drift acceptance is not yet complete.
+- Apple Music production routing is implemented behind a persistent Settings
+  choice, but active-track, permission-denial, five-song lyrics, restart and
+  timing-drift acceptance is not yet complete.
 - Spotify is blocked at login by `accesspoint:17` country/profile mismatch.
-  Music.app is logged out, stopped, and has no playable tracks. Spotify parity
-  and Apple Music two-track runtime tests remain incomplete; Apple Music
-  Release integration is therefore No-Go.
+  Music.app is reachable through public Apple Events but is stopped and all
+  visible playlists contain zero tracks. Spotify parity and the Apple Music
+  five-track runtime matrix remain incomplete; Apple Music Release integration
+  is therefore Conditional Go, not GO.
 - QQ Music and NetEase Cloud Music have no verified stable public macOS
   now-playing interface. Private MediaRemote and Accessibility scraping remain
   excluded from production.
@@ -107,6 +110,18 @@ the production Matcher, Provider priority, or current public Release.
 
 ## Completed Tasks
 
+- Wired Apple Music into the production `MusicPlayerAdapter` selection path
+  with Spotify as the unchanged default. The selected player now feeds the
+  existing LyricsClient, Status Bar and Notch display path without Matcher or
+  Provider changes.
+- Added a bilingual Music Player setting, player-neutral connection states,
+  Automation recovery guidance, stale-lyric clearing, and a generation guard
+  that prevents an old Adapter response from overwriting a newly selected
+  player.
+- Verified Swift self-tests, localized strings, ad-hoc signed Release build,
+  and public Apple Events access to Music.app. Music.app returned `stopped` and
+  no local test tracks, so this is implementation evidence rather than the
+  required five-song runtime evidence.
 - Finalized the public Feedback Email configuration at one build location using
   `ztongxue3@gmail.com`; English, Chinese, song/no-song, Spotify/Apple Music,
   default Mail Client, Cancel, and Send paths passed. Status: READY.

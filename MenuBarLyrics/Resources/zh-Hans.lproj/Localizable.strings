@@ -2,6 +2,11 @@
 "Spotify: Connected" = "Spotify：已连接";
 "Spotify: Not Running" = "Spotify：未运行";
 "Spotify: Connection Error" = "Spotify：连接失败";
+"%@: Checking..." = "%@：检查中…";
+"%@: Connected" = "%@：已连接";
+"%@: Not Running" = "%@：未运行";
+"%@: Connection Error" = "%@：连接失败";
+"Lyrics: Waiting for %@" = "歌词：等待 %@";
 "Lyrics: Waiting for Spotify" = "歌词：等待 Spotify";
 "Lyrics: Searching..." = "歌词：搜索中…";
 "Lyrics: Available" = "歌词：已找到";
@@ -15,6 +20,10 @@
 "Checking Spotify..." = "正在检查 Spotify…";
 "Spotify is not running" = "Spotify 未运行";
 "Cannot connect to Spotify" = "无法连接 Spotify";
+"Checking %@..." = "正在检查 %@…";
+"%@ is not running" = "%@ 未运行";
+"Waiting for %@" = "等待 %@";
+"Cannot connect to %@. Check Automation permission in System Settings." = "无法连接 %@。请在“系统设置”中检查“自动化”权限。";
 "Paused: %@" = "已暂停：%@";
 "Song: %@" = "歌曲：%@";
 "Artist: %@" = "歌手：%@";
@@ -38,7 +47,7 @@
 "Settings…" = "设置…";
 "Quit" = "退出";
 "Welcome to NotchMuse 🎵" = "欢迎使用 NotchMuse 🎵";
-"First Launch Guide" = "NotchMuse 会在 Mac 状态栏或刘海区域显示同步歌词。\n\n1. 打开 Spotify 并播放歌曲。\n2. 在设置中选择状态栏或刘海模式。\n3. 在设置中调整歌词颜色、字体大小和宽度。\n\n只有选择状态栏左侧位置时才需要辅助功能权限。点击菜单栏中的橙色音符即可打开设置。";
+"First Launch Guide" = "NotchMuse 会在 Mac 状态栏或刘海区域显示同步歌词。\n\n1. 在设置中选择 Spotify 或 Apple Music，然后播放歌曲。\n2. 选择状态栏或刘海模式。\n3. 调整歌词颜色、字体大小和宽度。\n\nmacOS 请求读取所选播放器时，请允许“自动化”权限。只有选择状态栏左侧位置时才需要辅助功能权限。点击菜单栏中的橙色音符即可打开设置。";
 "Continue" = "继续";
 "NotchMuse Settings" = "NotchMuse 设置";
 "Display" = "显示";
@@ -74,6 +83,7 @@
 "Animation Speed" = "动画速度";
 "Opacity" = "不透明度";
 "General" = "通用";
+"Music Player" = "音乐播放器";
 "Language" = "语言";
 "Launch at Login" = "登录时启动";
 "Language Change" = "语言更改";

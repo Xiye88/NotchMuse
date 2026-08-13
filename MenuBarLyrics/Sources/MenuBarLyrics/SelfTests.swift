@@ -102,8 +102,8 @@ enum SelfTests {
     }
 
     private static func testStatusFeedback() {
-        check(SpotifyFeedback.notRunning.menuTitle == L10n.text("Spotify: Not Running"), "explains when Spotify is not running")
-        check(SpotifyFeedback.connected.menuTitle == L10n.text("Spotify: Connected"), "shows a connected Spotify state")
+        check(PlayerFeedback.notRunning.menuTitle(for: .spotify) == "Spotify: Not Running", "explains when Spotify is not running")
+        check(PlayerFeedback.connected.menuTitle(for: .appleMusic) == "Apple Music: Connected", "shows the selected player state")
         check(LyricsFeedback.searching.displayText == L10n.text("Changing song..."), "explains song changes")
         check(LyricsFeedback.notFound.displayText == L10n.text("No lyrics found"), "explains missing lyrics")
         check(LyricsFeedback.networkFailure.displayText == L10n.text("Lyrics network unavailable"), "explains lyric network failures")
@@ -117,6 +117,8 @@ enum SelfTests {
         check(L10n.text("Report Lyrics Issue…", language: .english) == "Report Lyrics Issue…", "localizes the English feedback entry")
         check(L10n.text("Report Lyrics Issue…", language: .simplifiedChinese) == "报告歌词问题…", "localizes the Chinese feedback entry")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
+        check(AppPreferences.normalizedPlayerSource(nil) == .spotify, "defaults to Spotify")
+        check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
     }
 
     private static func testMusicPlayerAdapterModel() {
@@ -170,6 +172,12 @@ enum SelfTests {
         }
         check(track.title == "Song" && track.nativeTrackID == "ABC123", "maps Apple Music identity fields")
         check(track.playbackPosition == 42.5 && track.playerSource == .appleMusic, "maps Apple Music playback fields")
+        let paused = "paused\u{1F}歌曲 (Live)\u{1F}歌手\u{1F}专辑\u{1F}240\u{1F}12\u{1F}"
+        guard case let .paused(pausedTrack) = AppleMusicAdapter.parse(paused) else {
+            check(false, "parses a paused Apple Music response")
+            return
+        }
+        check(pausedTrack.nativeTrackID == nil && pausedTrack.versionHints == [.live], "allows missing Apple Music identity and preserves metadata hints")
         check(AppleMusicAdapter.parse("closed") == .closed, "maps a closed Apple Music state")
         check(AppleMusicAdapter.parse("stopped") == .stopped, "maps a stopped Apple Music state")
     }

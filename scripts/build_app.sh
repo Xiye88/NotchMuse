@@ -80,7 +80,7 @@ cat > "$CONTENTS/Info.plist" <<PLIST
     </dict>
   </dict>
   <key>NSAppleEventsUsageDescription</key>
-  <string>NotchMuse reads the current Spotify track to show synced lyrics in the menu bar.</string>
+  <string>NotchMuse reads the current track from Spotify or Apple Music to show synced lyrics.</string>
 </dict>
 </plist>
 PLIST

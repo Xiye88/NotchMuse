@@ -157,7 +157,7 @@ Deferred:
 
 ### v0.6 - Multi-Player Architecture and Evidence
 
-Status: Research complete; isolated spikes pending.
+Status: Apple Music production path implemented; real playback gate pending.
 
 Goal: Add a maintainable player boundary without regressing Spotify, then use
 new metadata as evidence rather than immediately changing production matching.
@@ -166,7 +166,7 @@ Order:
 
 1. Publish the already validated Provider recovery.
 2. Wrap SpotifyReader with a neutral adapter and prove exact behavior parity.
-3. Run an isolated Apple Music Apple Events spike.
+3. Complete the five-song Apple Music matrix and authenticated Spotify parity.
 4. User-triggered email feedback: completed with the approved public address.
 5. Capture and label Track Identity evidence in Benchmark.
 6. Run QQ Music and NetEase diagnostic probes only on current installed apps.
@@ -175,7 +175,8 @@ Order:
 Go / No-Go:
 
 - Unified adapter boundary: Go for Spike.
-- Apple Music: Conditional Go for Spike; Release No-Go pending runtime matrix.
+- Apple Music: Conditional Go; production path is implemented but Release
+  remains blocked by the five-song runtime matrix and Spotify regression.
 - QQ Music: diagnostic-only Conditional Go; production No-Go.
 - NetEase player: production No-Go; diagnostic-only evidence allowed.
 - Track Identity ranking: Benchmark-only Go; production Matcher No-Go.

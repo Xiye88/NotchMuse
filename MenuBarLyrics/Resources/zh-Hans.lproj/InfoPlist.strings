@@ -1,1 +1,1 @@
-"NSAppleEventsUsageDescription" = "NotchMuse 会读取 Spotify 当前播放的歌曲，用于在状态栏显示同步歌词。";
+"NSAppleEventsUsageDescription" = "NotchMuse 会读取 Spotify 或 Apple Music 当前播放的歌曲，用于显示同步歌词。";

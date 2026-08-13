@@ -1,18 +1,18 @@
 import AppKit
 import Foundation
 
-enum SpotifyFeedback {
+enum PlayerFeedback {
     case checking
     case connected
     case notRunning
     case unavailable
 
-    var menuTitle: String {
+    func menuTitle(for source: PlayerSource) -> String {
         switch self {
-        case .checking: return L10n.text("Spotify: Checking...")
-        case .connected: return L10n.text("Spotify: Connected")
-        case .notRunning: return L10n.text("Spotify: Not Running")
-        case .unavailable: return L10n.text("Spotify: Connection Error")
+        case .checking: return L10n.format("%@: Checking...", source.rawValue)
+        case .connected: return L10n.format("%@: Connected", source.rawValue)
+        case .notRunning: return L10n.format("%@: Not Running", source.rawValue)
+        case .unavailable: return L10n.format("%@: Connection Error", source.rawValue)
         }
     }
 }
@@ -24,9 +24,9 @@ enum LyricsFeedback {
     case notFound
     case networkFailure
 
-    var menuTitle: String {
+    func menuTitle(for source: PlayerSource) -> String {
         switch self {
-        case .waiting: return L10n.text("Lyrics: Waiting for Spotify")
+        case .waiting: return L10n.format("Lyrics: Waiting for %@", source.rawValue)
         case .searching: return L10n.text("Lyrics: Searching...")
         case .available: return L10n.text("Lyrics: Available")
         case .notFound: return L10n.text("Lyrics: Not Found")
@@ -56,24 +56,24 @@ final class MenuBarController: NSObject {
     }()
     private let overlay = OverlayLyricsWindow()
     private let lyricsClient = LyricsClient()
-    private let player = SpotifyAdapter()
+    private var player: any MusicPlayerAdapter = SpotifyAdapter()
     private var displayMode = AppPreferences.displayMode
     private var position = AppPreferences.position
     private var notchStyle = AppPreferences.notchStyle
     private var settingsWindowController: SettingsWindowController?
     private let positionMenu = NSMenu()
     private let positionMenuItem = NSMenuItem(title: L10n.text("Status Bar Position"), action: nil, keyEquivalent: "")
-    private let spotifyStatusItem = NSMenuItem(title: SpotifyFeedback.checking.menuTitle, action: nil, keyEquivalent: "")
-    private let lyricsStatusItem = NSMenuItem(title: LyricsFeedback.waiting.menuTitle, action: nil, keyEquivalent: "")
+    private let playerStatusItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+    private let lyricsStatusItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let songItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let artistItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private var isLyricsHidden = false
-    private var displaySource = L10n.text("Checking Spotify...")
+    private var displaySource = ""
     private var currentTrack: SpotifyTrack?
     private var currentPlayerTrack: NowPlayingTrack?
     private var currentLines: [LyricLine] = []
-    private var latestSpotifyPosition: TimeInterval?
-    private var latestSpotifyUptime: TimeInterval?
+    private var latestPlayerPosition: TimeInterval?
+    private var latestPlayerUptime: TimeInterval?
     private var displayProgress: CGFloat = 0
     private var displayIdentity: Int?
     private var scroll = ScrollState()
@@ -81,8 +81,13 @@ final class MenuBarController: NSObject {
     private var scrollTimer: Timer?
     private var progressTimer: Timer?
     private var pollTask: Task<Void, Never>?
+    private var pollGeneration = 0
 
     func start() {
+        player = Self.adapter(for: AppPreferences.playerSource)
+        setPlayerFeedback(.checking)
+        setLyricsFeedback(.waiting)
+        displaySource = L10n.format("Checking %@...", player.source.rawValue)
         setupButton()
         setupMenu()
         reloadSettings()
@@ -126,7 +131,7 @@ final class MenuBarController: NSObject {
 
     private func setupMenu() {
         let menu = NSMenu()
-        menu.addItem(spotifyStatusItem)
+        menu.addItem(playerStatusItem)
         menu.addItem(lyricsStatusItem)
         songItem.isHidden = true
         artistItem.isHidden = true
@@ -160,10 +165,14 @@ final class MenuBarController: NSObject {
 
     private func startPoll(forceLyricsRefresh: Bool = false) {
         guard pollTask == nil else { return }
+        pollGeneration += 1
+        let generation = pollGeneration
         pollTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            await pollSpotify(forceLyricsRefresh: forceLyricsRefresh)
-            pollTask = nil
+            await pollPlayer(forceLyricsRefresh: forceLyricsRefresh)
+            if pollGeneration == generation {
+                pollTask = nil
+            }
         }
     }
 
@@ -171,43 +180,49 @@ final class MenuBarController: NSObject {
         startPoll()
     }
 
-    private func pollSpotify(forceLyricsRefresh: Bool = false) async {
+    private func pollPlayer(forceLyricsRefresh: Bool = false) async {
         guard !Task.isCancelled else { return }
+        let source = player.source
+        let snapshot = await player.snapshot()
+        guard !Task.isCancelled, source == player.source else { return }
 
-        switch await player.snapshot() {
+        switch snapshot {
         case .closed:
-            setSpotifyFeedback(.notRunning)
+            setPlayerFeedback(.notRunning)
             setLyricsFeedback(.waiting)
             setTrackInfo(nil)
             currentTrack = nil
             currentPlayerTrack = nil
             currentLines = []
             stopProgressTimer()
-            setDisplay(L10n.text("Spotify is not running"))
+            setDisplay(L10n.format("%@ is not running", player.source.rawValue))
         case .stopped:
-            setSpotifyFeedback(.connected)
+            setPlayerFeedback(.connected)
             setLyricsFeedback(.waiting)
             setTrackInfo(nil)
             currentTrack = nil
             currentPlayerTrack = nil
             currentLines = []
             stopProgressTimer()
-            setDisplay(L10n.text("Waiting for Spotify"))
+            setDisplay(L10n.format("Waiting for %@", player.source.rawValue))
         case .unavailable:
-            setSpotifyFeedback(.unavailable)
+            setPlayerFeedback(.unavailable)
             setLyricsFeedback(.waiting)
             setTrackInfo(nil)
+            currentTrack = nil
+            currentPlayerTrack = nil
+            currentLines = []
             stopProgressTimer()
-            setDisplay(L10n.text("Cannot connect to Spotify"))
+            setDisplay(L10n.format("Cannot connect to %@. Check Automation permission in System Settings.", player.source.rawValue))
         case let .paused(nowPlaying):
             let track = nowPlaying.spotifyTrack
             let position = nowPlaying.playbackPosition
             currentPlayerTrack = nowPlaying
-            setSpotifyFeedback(.connected)
+            setPlayerFeedback(.connected)
             setTrackInfo(nil)
             await updateTrackIfNeeded(track, force: forceLyricsRefresh)
-            latestSpotifyPosition = position
-            latestSpotifyUptime = nil
+            latestPlayerPosition = position
+            latestPlayerUptime = nil
             stopProgressTimer()
             let text = LyricClock.moment(at: position, in: currentLines)?.text ?? unpausedFallbackText()
             setDisplay(L10n.format("Paused: %@", text))
@@ -215,11 +230,11 @@ final class MenuBarController: NSObject {
             let track = nowPlaying.spotifyTrack
             let position = nowPlaying.playbackPosition
             currentPlayerTrack = nowPlaying
-            setSpotifyFeedback(.connected)
+            setPlayerFeedback(.connected)
             setTrackInfo(track)
             await updateTrackIfNeeded(track, force: forceLyricsRefresh)
-            latestSpotifyPosition = position
-            latestSpotifyUptime = ProcessInfo.processInfo.systemUptime
+            latestPlayerPosition = position
+            latestPlayerUptime = ProcessInfo.processInfo.systemUptime
             updatePlayingDisplay()
         }
     }
@@ -294,12 +309,12 @@ final class MenuBarController: NSObject {
         updateScrollTimer(overflows: overflows)
     }
 
-    private func setSpotifyFeedback(_ feedback: SpotifyFeedback) {
-        spotifyStatusItem.title = feedback.menuTitle
+    private func setPlayerFeedback(_ feedback: PlayerFeedback) {
+        playerStatusItem.title = feedback.menuTitle(for: player.source)
     }
 
     private func setLyricsFeedback(_ feedback: LyricsFeedback) {
-        lyricsStatusItem.title = feedback.menuTitle
+        lyricsStatusItem.title = feedback.menuTitle(for: player.source)
     }
 
     private func setTrackInfo(_ track: SpotifyTrack?) {
@@ -359,12 +374,12 @@ final class MenuBarController: NSObject {
     }
 
     private func currentPlaybackPosition() -> TimeInterval? {
-        guard let latestSpotifyPosition, let latestSpotifyUptime else { return latestSpotifyPosition }
-        return latestSpotifyPosition + ProcessInfo.processInfo.systemUptime - latestSpotifyUptime
+        guard let latestPlayerPosition, let latestPlayerUptime else { return latestPlayerPosition }
+        return latestPlayerPosition + ProcessInfo.processInfo.systemUptime - latestPlayerUptime
     }
 
     private func updateProgressTimer() {
-        guard !isLyricsHidden, latestSpotifyUptime != nil, !currentLines.isEmpty else {
+        guard !isLyricsHidden, latestPlayerUptime != nil, !currentLines.isEmpty else {
             stopProgressTimer()
             return
         }
@@ -411,6 +426,22 @@ final class MenuBarController: NSObject {
     }
 
     private func reloadSettings() {
+        let selectedSource = AppPreferences.playerSource
+        if selectedSource != player.source {
+            pollTask?.cancel()
+            pollTask = nil
+            pollGeneration += 1
+            player = Self.adapter(for: selectedSource)
+            currentTrack = nil
+            currentPlayerTrack = nil
+            currentLines = []
+            latestPlayerPosition = nil
+            latestPlayerUptime = nil
+            setPlayerFeedback(.checking)
+            setLyricsFeedback(.waiting)
+            setDisplay(L10n.format("Checking %@...", selectedSource.rawValue))
+            startPoll(forceLyricsRefresh: true)
+        }
         displayMode = AppPreferences.displayMode
         position = AppPreferences.position
         notchStyle = AppPreferences.notchStyle
@@ -420,6 +451,13 @@ final class MenuBarController: NSObject {
         }
         scroll.reset()
         updateDisplay()
+    }
+
+    private static func adapter(for source: PlayerSource) -> any MusicPlayerAdapter {
+        switch source {
+        case .spotify: SpotifyAdapter()
+        case .appleMusic: AppleMusicAdapter()
+        }
     }
 
     @objc private func refreshLyrics() {

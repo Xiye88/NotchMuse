@@ -96,9 +96,10 @@ evidence rather than further architecture work.
 - Apple Music production routing is implemented behind a persistent Settings
   choice, but active-track, permission-denial, five-song lyrics, restart and
   timing-drift acceptance is not yet complete.
-- Spotify is blocked at login by `accesspoint:17` country/profile mismatch.
-  Music.app is reachable through public Apple Events but is stopped and all
-  visible playlists contain zero tracks. Spotify parity and the Apple Music
+- Spotify authentication is now available, but playback currently reports the
+  selected content as unavailable and exposes no current track. Music.app is
+  reachable through public Apple Events, but after restart it is stopped and
+  all visible playlists contain zero tracks. Spotify parity and the Apple Music
   five-track runtime matrix remain incomplete; Apple Music Release integration
   is therefore Conditional Go, not GO.
 - Authenticated-player validation on 2026-08-14 proved the public Apple Music
@@ -324,8 +325,8 @@ evidence rather than further architecture work.
   work: `Finding lyrics`, generic unavailable guidance, and refresh guidance.
 - Complete authenticated Spotify playback parity for switching, pause/resume,
   Status Bar, and Notch Mode before Release migration.
-- Run the isolated Apple Music active-playback and timing-drift matrix with at
-  least two playable tracks.
+- Complete the Apple Music five-song, screenshot-backed playback and lyrics
+  matrix, including restart recovery and timing-drift checks.
 - Blind-label a stratified Track Identity v1 sample before rerunning ranking.
 
 ## Next Decisions

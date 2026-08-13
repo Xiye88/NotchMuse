@@ -156,7 +156,7 @@ def _case_from_mapping(row: dict) -> RankingCase:
         second_duration_seconds=_optional_float(row.get("second_duration_seconds") or row.get("second_matched_duration_seconds")),
         second_score=_optional_int(row.get("second_score")),
         old_decision=_optional_str(row.get("old_decision") or row.get("reject_reason")),
-        label=str(row.get("label") or row.get("manual_label") or "uncertain"),
+        label=str(row.get("label") or row.get("manual_label") or row.get("human_label") or "uncertain"),
         top_album=_optional_str(row.get("top_album") or row.get("matched_album")),
         second_album=_optional_str(row.get("second_album") or row.get("second_matched_album")),
     )

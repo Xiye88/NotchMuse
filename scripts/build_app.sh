@@ -13,6 +13,13 @@ VERSION="${NOTCHMUSE_VERSION:-0.3.1}"
 BUILD_NUMBER="${NOTCHMUSE_BUILD_NUMBER:-4}"
 BUNDLE_ID="app.notchmuse.mac"
 SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
+DEFAULT_FEEDBACK_EMAIL="ztongxue3@gmail.com"
+FEEDBACK_EMAIL="${FEEDBACK_EMAIL:-$DEFAULT_FEEDBACK_EMAIL}"
+
+if [[ "$FEEDBACK_EMAIL" != "FEEDBACK_EMAIL" && ! "$FEEDBACK_EMAIL" =~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' ]]; then
+  echo "Invalid FEEDBACK_EMAIL" >&2
+  exit 1
+fi
 
 mkdir -p "$DIST"
 
@@ -55,6 +62,8 @@ cat > "$CONTENTS/Info.plist" <<PLIST
   <string>$VERSION</string>
   <key>CFBundleVersion</key>
   <string>$BUILD_NUMBER</string>
+  <key>FeedbackEmail</key>
+  <string>$FEEDBACK_EMAIL</string>
   <key>LSMinimumSystemVersion</key>
   <string>14.0</string>
   <key>LSUIElement</key>

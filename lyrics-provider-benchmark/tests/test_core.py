@@ -580,6 +580,19 @@ class OfflineRankingSimulatorTests(unittest.TestCase):
         self.assertEqual(csv_cases[0].label, "top")
         self.assertEqual(sqlite_cases[0].second_title, "Song")
 
+    def test_loads_human_label_from_frozen_dataset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "cases.csv"
+            path.write_text(
+                "case_id,source_title,source_artist,source_duration_seconds,human_label\n"
+                "c1,Song,Artist,200,neither\n",
+                encoding="utf-8",
+            )
+
+            cases = load_cases_from_csv(path)
+
+        self.assertEqual(cases[0].label, "neither")
+
     def test_failed_tracks_records_attempted_providers_and_analysis(self):
         with tempfile.TemporaryDirectory() as tmp:
             db = connect(Path(tmp) / "bench.sqlite3")

@@ -205,6 +205,38 @@ enum SelfTests {
         let chineseBody = URLComponents(url: chineseURL!, resolvingAgainstBaseURL: false)?
             .queryItems?.first(where: { $0.name == "body" })?.value
         check(chineseBody?.contains("问题类型") == true, "localizes the Chinese feedback draft")
+        let appleMusicTrack = NowPlayingTrack(
+            title: "Apple Song",
+            artist: "Apple Artist",
+            album: "Apple Album",
+            duration: 180,
+            playbackPosition: 10,
+            playbackState: .playing,
+            playerSource: .appleMusic,
+            nativeTrackID: "ABC",
+            isrc: nil,
+            versionHints: nil
+        )
+        let appleMusicURL = LyricsIssueReporter.mailtoURL(
+            recipient: "feedback@example.com",
+            track: appleMusicTrack,
+            provider: "LRCMux",
+            appVersion: "0.6",
+            language: .english
+        )
+        let appleMusicBody = URLComponents(url: appleMusicURL!, resolvingAgainstBaseURL: false)?
+            .queryItems?.first(where: { $0.name == "body" })?.value
+        check(appleMusicBody?.contains("Player source: Apple Music") == true, "includes Apple Music source metadata")
+        let emptyURL = LyricsIssueReporter.mailtoURL(
+            recipient: "feedback@example.com",
+            track: nil,
+            provider: nil,
+            appVersion: "0.6",
+            language: .english
+        )
+        let emptyBody = URLComponents(url: emptyURL!, resolvingAgainstBaseURL: false)?
+            .queryItems?.first(where: { $0.name == "body" })?.value
+        check(emptyBody?.contains("Current song: Unknown") == true, "supports feedback with no playing song")
         check(LyricsIssueReporter.mailtoURL(recipient: "FEEDBACK_EMAIL", track: track, provider: nil, appVersion: "0.6") == nil, "does not open an unconfigured feedback address")
     }
 
@@ -730,11 +762,14 @@ enum SelfTests {
 
         let fetched = try! await client.syncedLyrics(for: track)
         check(fetched == first, "returns the first non-empty result despite one source failure")
+        let selectedProvider = client.selectedProvider
+        check(selectedProvider != nil, "records the selected lyrics provider for feedback")
         var counts = await calls.snapshot()
         check(counts == [1, 1, 1], "calls all three configured sources")
 
         let cached = try! await client.syncedLyrics(for: track)
         check(cached == first, "returns cached lyrics")
+        check(client.selectedProvider == selectedProvider, "preserves the selected provider on a cache hit")
         counts = await calls.snapshot()
         check(counts == [1, 1, 1], "cache hit does not call sources")
 

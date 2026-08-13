@@ -1,7 +1,9 @@
 import Foundation
 
 enum LyricsIssueReporter {
-    static let recipient = "FEEDBACK_EMAIL"
+    static var recipient: String {
+        Bundle.main.object(forInfoDictionaryKey: "FeedbackEmail") as? String ?? "FEEDBACK_EMAIL"
+    }
 
     static func mailtoURL(
         recipient: String = recipient,

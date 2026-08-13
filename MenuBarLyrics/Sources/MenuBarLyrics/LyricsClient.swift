@@ -33,7 +33,7 @@ final class LyricsClient {
     func syncedLyrics(for track: SpotifyTrack, bypassCache: Bool = false) async throws -> [LyricLine] {
         let key = "\(track.name)\u{1F}\(track.artist)\u{1F}\(track.album)\u{1F}\(track.duration)"
         if let cached = cache.value(for: key, bypass: bypassCache) {
-            selectedProvider = nil
+            selectedProvider = cache.provider(for: key)
             return cached
         }
 
@@ -49,7 +49,7 @@ final class LyricsClient {
         if lines.isEmpty {
             DebugLog.lyrics("Lyrics search found no match for \(track.name) by \(track.artist)")
         }
-        cache.insert(lines, for: key)
+        cache.insert(lines, provider: result.selectedProvider, for: key)
         return lines
     }
 
@@ -122,8 +122,13 @@ private extension Array {
 }
 
 struct LyricsCache {
+    private struct Entry {
+        let lines: [LyricLine]
+        let provider: String?
+    }
+
     private let capacity: Int
-    private var values: [String: [LyricLine]] = [:]
+    private var values: [String: Entry] = [:]
     private var keys: [String] = []
 
     init(capacity: Int) {
@@ -131,12 +136,16 @@ struct LyricsCache {
     }
 
     func value(for key: String, bypass: Bool = false) -> [LyricLine]? {
-        bypass ? nil : values[key]
+        bypass ? nil : values[key]?.lines
     }
 
-    mutating func insert(_ lines: [LyricLine], for key: String) {
+    func provider(for key: String) -> String? {
+        values[key]?.provider
+    }
+
+    mutating func insert(_ lines: [LyricLine], provider: String? = nil, for key: String) {
         guard !lines.isEmpty else { return }
-        if values.updateValue(lines, forKey: key) == nil {
+        if values.updateValue(Entry(lines: lines, provider: provider), forKey: key) == nil {
             keys.append(key)
         }
         if keys.count > capacity {

@@ -4,14 +4,13 @@ Last Updated: 2026-08-13
 
 ## Current Phase
 
-v0.6 Multi-Player Architecture - Development Batch 1 Validation
+v0.6 Multi-Player Architecture - Development Batch 2 Evidence Gate
 
 ## Current Goal
 
-Complete real-device parity validation for the minimal Spotify Adapter and the
-isolated Apple Music spike without changing the production Matcher, Provider
-priority, or current public Release. The validated Provider recovery still
-needs public delivery before broad expansion.
+Unblock authenticated Spotify and Apple Music runtime validation, then add
+strategy-blind labels to the frozen Track Identity Dataset without changing
+the production Matcher, Provider priority, or current public Release.
 
 ## Release Status
 
@@ -39,7 +38,8 @@ needs public delivery before broad expansion.
 - `lyrics-benchmark.timer` is enabled and active.
 - Natural runs `21-28` completed successfully after P0 Provider recovery.
 - Coverage across runs `21-28` averages `89.38%`, with a `89.1-89.6%` range.
-- Latest run: `28`, completed 2026-08-09, Coverage `892/1000` (`89.2%`).
+- Latest verified run: `32`, completed 2026-08-13, Coverage `889/1000`
+  (`88.9%`).
 - Run `20` baseline was `674/1000` (`67.4%`); recovery produced a sustained
   improvement of about `21.98` percentage points.
 - Run `28` Provider successes: LRCLIB `628`, LRCMux `603`, NetEase `515`,
@@ -94,19 +94,31 @@ needs public delivery before broad expansion.
   three recorded downloads.
 - Apple Music is approved only for an isolated runtime spike; active-track,
   permission, state and timing-drift acceptance is not yet complete.
-- The Batch 1 validation Mac has no authenticated playable Spotify or Apple
-  Music session. Spotify parity and Apple Music two-track runtime tests remain
-  incomplete; Apple Music Release integration is therefore No-Go.
+- Spotify is blocked at login by `accesspoint:17` country/profile mismatch.
+  Music.app is logged out, stopped, and has no playable tracks. Spotify parity
+  and Apple Music two-track runtime tests remain incomplete; Apple Music
+  Release integration is therefore No-Go.
 - QQ Music and NetEase Cloud Music have no verified stable public macOS
   now-playing interface. Private MediaRemote and Accessibility scraping remain
   excluded from production.
-- The email feedback flow is blocked from Release implementation until the
-  Product Owner provides a public `FEEDBACK_EMAIL` value.
-- Track Identity v1 ranking metrics remain blocked by missing frozen top-three
-  candidates, stable candidate IDs, strategy-blind labels, and a holdout run.
+- Track Identity Dataset v1 is frozen from natural run `32`, but ranking metrics
+  remain blocked by `0/2,568` human-label coverage, missing candidate album and
+  ISRC, and no third-or-later frozen candidates.
 
 ## Completed Tasks
 
+- Finalized the public Feedback Email configuration at one build location using
+  `ztongxue3@gmail.com`; English, Chinese, song/no-song, Spotify/Apple Music,
+  default Mail Client, Cancel, and Send paths passed. Status: READY.
+- Froze Track Identity Dataset v1 from natural run `32`: `2,568` failed cases,
+  SHA-256 `b0bbb940...ffca6d9d`, with explicit Apple Music catalog-proxy source
+  labeling and `27/27` Python tests passing.
+- Completed Batch 2 Candidate Ranking review. Human-label denominator is zero,
+  so accuracy/false-positive/ambiguity/no-result deltas are not computable and
+  production ranking remains No-Go.
+- Reconfirmed QQ Music and NetEase player adapters as production No-Go.
+- Selected the v0.6 UX Top 3: failure-state clarity, conditional temporary
+  offset, and Restore Defaults.
 - Implemented the minimal `MusicPlayerAdapter`, `NowPlayingTrack`, and
   `SpotifyAdapter` boundary without rewriting `SpotifyReader` or changing the
   Matcher, Provider priority, or UI presentation.
@@ -115,7 +127,7 @@ needs public delivery before broad expansion.
 - Added Track Identity version-hint representation for offline evidence only;
   production matching does not consume it.
 - Added a bilingual, user-triggered `Report Lyrics Issue…` mailto flow with no
-  telemetry; delivery remains disabled behind `FEEDBACK_EMAIL`.
+  telemetry; the public recipient is configured and delivery status is READY.
 - Completed QQ Music and NetEase diagnostic probes; both remain production
   No-Go without a verified public scripting interface.
 - Reduced the competitive UX backlog to three bounded recommendations.
@@ -283,10 +295,7 @@ needs public delivery before broad expansion.
   Status Bar, and Notch Mode before Release migration.
 - Run the isolated Apple Music active-playback and timing-drift matrix with at
   least two playable tracks.
-- Configure a public `FEEDBACK_EMAIL` and verify English and Simplified Chinese
-  mail drafts before shipping the feedback entry.
-- Extend Benchmark evidence with album/native ID/optional ISRC only after a
-  frozen candidate data contract is approved.
+- Blind-label a stratified Track Identity v1 sample before rerunning ranking.
 
 ## Next Decisions
 
@@ -316,11 +325,11 @@ needs public delivery before broad expansion.
 - Keep v0.4 scoped to Spotify + Apple Silicon.
 - Treat Apple Music as the v0.6 second-player candidate only after an isolated
   Music.app spike proves stable playback metadata and position.
-- Keep Chinese Support/Feedback translation deferred until user demand proves
-  the maintenance cost is justified.
+- Keep broader Chinese Support documentation deferred; App feedback UI and
+  email drafts are already bilingual.
 - Unified Music Player Layer: Go for a Spotify-compatible spike only.
 - Apple Music: Conditional Go for isolated runtime validation; Release No-Go.
 - QQ Music: Conditional Go for a diagnostic probe; production No-Go.
 - NetEase Cloud Music player: production No-Go; diagnostic probe only.
 - Private MediaRemote and Accessibility scraping: No-Go for production.
-- Email feedback: Conditional Go; blocked on a real public feedback address.
+- Email feedback: READY with Product Owner-approved public address.

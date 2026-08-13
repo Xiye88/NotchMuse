@@ -167,7 +167,7 @@ Order:
 1. Publish the already validated Provider recovery.
 2. Wrap SpotifyReader with a neutral adapter and prove exact behavior parity.
 3. Run an isolated Apple Music Apple Events spike.
-4. Add a user-triggered email feedback path after a public address is supplied.
+4. User-triggered email feedback: completed with the approved public address.
 5. Capture and label Track Identity evidence in Benchmark.
 6. Run QQ Music and NetEase diagnostic probes only on current installed apps.
 7. Consider a second production player only after the first two adapters pass.
@@ -179,7 +179,7 @@ Go / No-Go:
 - QQ Music: diagnostic-only Conditional Go; production No-Go.
 - NetEase player: production No-Go; diagnostic-only evidence allowed.
 - Track Identity ranking: Benchmark-only Go; production Matcher No-Go.
-- Email feedback: Conditional Go pending `FEEDBACK_EMAIL`.
+- Email feedback: Ready; public recipient configured in one build location.
 
 Explicitly Excluded:
 

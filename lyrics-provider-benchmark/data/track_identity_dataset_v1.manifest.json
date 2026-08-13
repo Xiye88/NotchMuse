@@ -1,0 +1,44 @@
+{
+  "dataset_version": "v1",
+  "frozen_date": "2026-08-13",
+  "source": {
+    "environment": "VPS natural daily benchmark",
+    "database": "/var/lib/lyrics-provider-benchmark/benchmark.sqlite3",
+    "run_id": 32,
+    "dataset_name": "extended_1000",
+    "started_at": "2026-08-13T00:00:17.304028+00:00",
+    "finished_at": "2026-08-13T00:10:34.163712+00:00"
+  },
+  "run_coverage": {
+    "songs_with_lyrics": 889,
+    "songs_total": 1000,
+    "coverage_percent": 88.9
+  },
+  "artifact": {
+    "path": "data/track_identity_dataset_v1.csv",
+    "sha256": "b0bbb94064bfe5f951a1db9d7d134726eee6fe8cbe1af6c4bf3d1362ffca6d9d",
+    "cases": 2568,
+    "unique_case_ids": 2568
+  },
+  "player_source": {
+    "value": "apple_music_catalog",
+    "meaning": "Apple Music RSS / iTunes catalog proxy metadata; not Spotify telemetry or a real player session"
+  },
+  "identity": {
+    "case_id": "run_id:song_id:provider",
+    "candidate_id": "first 20 hex characters of SHA-256(provider, raw title, raw artist, raw duration)",
+    "candidate_id_scope": "deterministic evidence identity, not a provider-native ID"
+  },
+  "labels": {
+    "human_labeled": 0,
+    "uncertain": 2568
+  },
+  "known_missing_fields": [
+    "isrc",
+    "top_album",
+    "second_album",
+    "provider-native candidate ID",
+    "third and later candidates",
+    "strategy-blind human label"
+  ]
+}

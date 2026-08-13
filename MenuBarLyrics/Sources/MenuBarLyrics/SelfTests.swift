@@ -15,6 +15,9 @@ enum SelfTests {
         testStatusFeedback()
         testLocalization()
         testSingleInstanceLock()
+        testMusicPlayerAdapterModel()
+        testAppleMusicResponseParsing()
+        testLyricsIssueReport()
 
         let parsed = LyricParser.parse("[00:01.50]Hello\n[00:03.00]World")
         check(parsed == [
@@ -111,7 +114,98 @@ enum SelfTests {
         check(L10n.text("Settings…", language: .simplifiedChinese) == "设置…", "loads Simplified Chinese localization")
         check(L10n.text("Hide Lyrics", language: .simplifiedChinese) == "隐藏歌词", "localizes the hide lyrics menu item")
         check(L10n.text("Show Lyrics", language: .simplifiedChinese) == "显示歌词", "localizes the show lyrics menu item")
+        check(L10n.text("Report Lyrics Issue…", language: .english) == "Report Lyrics Issue…", "localizes the English feedback entry")
+        check(L10n.text("Report Lyrics Issue…", language: .simplifiedChinese) == "报告歌词问题…", "localizes the Chinese feedback entry")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
+    }
+
+    private static func testMusicPlayerAdapterModel() {
+        let spotify = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
+        let nowPlaying = NowPlayingTrack(
+            title: spotify.name,
+            artist: spotify.artist,
+            album: spotify.album,
+            duration: spotify.duration,
+            playbackPosition: 42,
+            playbackState: .playing,
+            playerSource: .spotify,
+            nativeTrackID: nil,
+            isrc: nil,
+            versionHints: [.live]
+        )
+
+        check(nowPlaying.spotifyTrack == spotify, "preserves Spotify metadata at the lyrics boundary")
+        check(nowPlaying.versionHints == [.live], "carries version hints without changing matching")
+        check(TrackVersionHint.detect(title: "Oliver", album: "Album") == nil, "does not infer Live from a partial word")
+        check(TrackVersionHint.detect(title: "Song (feat. Guest)", album: "Deluxe") == [.deluxe, .featuredArtist], "detects bounded version markers")
+        check(MusicPlayerSnapshot.playing(nowPlaying).currentTrack == nowPlaying, "exposes the current adapter track")
+        check(MusicPlayerSnapshot.playing(nowPlaying).playbackPosition == 42, "exposes the adapter playback position")
+        let advanced = NowPlayingTrack(
+            title: nowPlaying.title,
+            artist: nowPlaying.artist,
+            album: nowPlaying.album,
+            duration: nowPlaying.duration,
+            playbackPosition: 99,
+            playbackState: .playing,
+            playerSource: nowPlaying.playerSource,
+            nativeTrackID: nowPlaying.nativeTrackID,
+            isrc: nowPlaying.isrc,
+            versionHints: nowPlaying.versionHints
+        )
+        check(advanced.observationIdentity == nowPlaying.observationIdentity, "does not report position ticks as track changes")
+        check(SpotifyAdapter.snapshot(from: .closed) == .closed, "preserves Spotify closed state")
+        check(SpotifyAdapter.snapshot(from: .unavailable) == .unavailable, "preserves Spotify unavailable state")
+        guard case let .playing(adapted) = SpotifyAdapter.snapshot(from: .playing(track: spotify, position: 42)) else {
+            check(false, "preserves Spotify playing state")
+            return
+        }
+        check(adapted.spotifyTrack == spotify && adapted.playbackPosition == 42, "preserves Spotify track and position")
+    }
+
+    private static func testAppleMusicResponseParsing() {
+        let response = "playing\u{1F}Song\u{1F}Artist\u{1F}Album\u{1F}200\u{1F}42.5\u{1F}ABC123"
+        guard case let .playing(track) = AppleMusicAdapter.parse(response) else {
+            check(false, "parses a playing Apple Music response")
+            return
+        }
+        check(track.title == "Song" && track.nativeTrackID == "ABC123", "maps Apple Music identity fields")
+        check(track.playbackPosition == 42.5 && track.playerSource == .appleMusic, "maps Apple Music playback fields")
+        check(AppleMusicAdapter.parse("closed") == .closed, "maps a closed Apple Music state")
+        check(AppleMusicAdapter.parse("stopped") == .stopped, "maps a stopped Apple Music state")
+    }
+
+    private static func testLyricsIssueReport() {
+        let track = NowPlayingTrack(
+            title: "Song & More",
+            artist: "Artist",
+            album: "Album",
+            duration: 200,
+            playbackPosition: 42,
+            playbackState: .playing,
+            playerSource: .spotify,
+            nativeTrackID: nil,
+            isrc: nil,
+            versionHints: nil
+        )
+        let url = LyricsIssueReporter.mailtoURL(
+            recipient: "feedback@example.com",
+            track: track,
+            provider: "LRCLIB",
+            appVersion: "0.6"
+        )
+        check(url?.scheme == "mailto", "builds a mailto feedback URL")
+        check(url?.absoluteString.contains("Song%20%26%20More") == true, "percent-encodes feedback metadata")
+        let chineseURL = LyricsIssueReporter.mailtoURL(
+            recipient: "feedback@example.com",
+            track: track,
+            provider: "LRCLIB",
+            appVersion: "0.6",
+            language: .simplifiedChinese
+        )
+        let chineseBody = URLComponents(url: chineseURL!, resolvingAgainstBaseURL: false)?
+            .queryItems?.first(where: { $0.name == "body" })?.value
+        check(chineseBody?.contains("问题类型") == true, "localizes the Chinese feedback draft")
+        check(LyricsIssueReporter.mailtoURL(recipient: "FEEDBACK_EMAIL", track: track, provider: nil, appVersion: "0.6") == nil, "does not open an unconfigured feedback address")
     }
 
     private static func testSingleInstanceLock() {

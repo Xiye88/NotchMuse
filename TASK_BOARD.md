@@ -17,7 +17,6 @@ Last Updated: 2026-08-13
 | Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
 | Complete real clean-Mac user journey | 04_UX | P0 | Gatekeeper, TCC, Spotify, lyrics recovery |
 | Run first weekly beta issue triage | 00_PM / 06_DOCS | P1 | Blocked by zero submitted Issues and very low download volume |
-| Spotify adapter parity spike | 01_APP | P0 | 2-4 hours; preserve current polling and lyrics boundary |
 | Apple Music runtime spike | 01_APP / 04_UX | P0 | Validate six fields, Automation denial, switching and drift |
 | Confirm public feedback email | Product Owner | P1 | Required before `Report Lyrics Issue` implementation |
 | Label v0.6 frozen ranking cases | 03_LAB / 05_MATCHER | P1 | Strategy-blind labels; every changed decision reviewed |
@@ -34,6 +33,7 @@ Last Updated: 2026-08-13
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 | Phase 4 Matcher Go/No-Go | 00_PM / 03_LAB / 05_MATCHER | P0 | Simulator ready; production remains unchanged |
 | v0.6 Multi-Player Architecture evidence | 01_APP / 04_UX / 05_MATCHER | P0 | Design complete; runtime spikes pending |
+| v0.6 Batch 1 runtime validation | 01_APP / 04_UX | P0 | Code gates pass; authenticated Spotify and playable Apple Music sessions are missing |
 
 ## BLOCKED
 
@@ -52,11 +52,18 @@ Last Updated: 2026-08-13
 | QQ Music production integration | 01_APP | P2 | No stable public now-playing API verified |
 | NetEase player production integration | 01_APP | P2 | No stable public now-playing API verified |
 | Report Lyrics Issue release implementation | 01_APP / 04_UX | P1 | Public feedback address not provided |
+| Track Identity enhanced ranking | 03_LAB / 05_MATCHER | P1 | Frozen top-three candidates, stable IDs, labels, and holdout are missing |
 
 ## DONE
 
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
+| Spotify Adapter implementation | 01_APP | P0 | Minimal wrapper wired; SpotifyReader and lyrics boundary preserved; self-tests pass |
+| Apple Music public API spike code | 01_APP / 04_UX | P0 | State read and parser pass; runtime remains Conditional Go |
+| Track Identity v1 representation | 01_APP / 05_MATCHER | P1 | Neutral metadata and version hints added; production Matcher unchanged |
+| Feedback Email implementation | 01_APP / 04_UX | P1 | Bilingual user-triggered mailto ready behind FEEDBACK_EMAIL |
+| QQ / NetEase diagnostic probe | 01_APP | P2 | Both production No-Go; no public scripting interface verified |
+| LyricsX UX bounded backlog | 04_UX | P2 | Three near-term recommendations; no UI redesign |
 | GitHub `v0.3.0-beta` release | Project | P0 | Published and verified |
 | GitHub `v0.3.1` release | Project | P0 | Pre-release published; downloaded DMG verified |
 | Freeze v0.3.1 repository diff | 00_PM / 01_APP | P0 | Release commit `3666710` |

@@ -11,6 +11,7 @@ final class LyricsClient {
     private var cache = LyricsCache(capacity: 100)
     private let sources: [Source]
     private let sourceNames: [String]
+    private(set) var selectedProvider: String?
 
     init(sources: [Source]? = nil) {
         if let sources {
@@ -32,9 +33,11 @@ final class LyricsClient {
     func syncedLyrics(for track: SpotifyTrack, bypassCache: Bool = false) async throws -> [LyricLine] {
         let key = "\(track.name)\u{1F}\(track.artist)\u{1F}\(track.album)\u{1F}\(track.duration)"
         if let cached = cache.value(for: key, bypass: bypassCache) {
+            selectedProvider = nil
             return cached
         }
 
+        selectedProvider = nil
         DebugLog.lyricsDiagnostic("matcher.track title=\(DebugLog.metadata(track.name)) artist=\(DebugLog.metadata(track.artist)) album=\(DebugLog.metadata(track.album)) duration=\(Int(track.duration.rounded()))")
         let result = await Self.firstNonEmptyResult(sources, names: sourceNames, for: track)
         guard result.hadSuccessfulSource else {
@@ -42,6 +45,7 @@ final class LyricsClient {
             throw LyricsClientError.networkFailure
         }
         let lines = result.lines
+        selectedProvider = result.selectedProvider
         if lines.isEmpty {
             DebugLog.lyrics("Lyrics search found no match for \(track.name) by \(track.artist)")
         }

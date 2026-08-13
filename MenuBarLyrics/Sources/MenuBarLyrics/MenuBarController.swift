@@ -56,6 +56,7 @@ final class MenuBarController: NSObject {
     }()
     private let overlay = OverlayLyricsWindow()
     private let lyricsClient = LyricsClient()
+    private let player = SpotifyAdapter()
     private var displayMode = AppPreferences.displayMode
     private var position = AppPreferences.position
     private var notchStyle = AppPreferences.notchStyle
@@ -69,6 +70,7 @@ final class MenuBarController: NSObject {
     private var isLyricsHidden = false
     private var displaySource = L10n.text("Checking Spotify...")
     private var currentTrack: SpotifyTrack?
+    private var currentPlayerTrack: NowPlayingTrack?
     private var currentLines: [LyricLine] = []
     private var latestSpotifyPosition: TimeInterval?
     private var latestSpotifyUptime: TimeInterval?
@@ -145,6 +147,7 @@ final class MenuBarController: NSObject {
         menu.addItem(positionMenuItem)
 
         menu.addItem(NSMenuItem(title: L10n.text("Refresh Lyrics"), action: #selector(refreshLyrics), keyEquivalent: "r"))
+        menu.addItem(NSMenuItem(title: L10n.text("Report Lyrics Issue…"), action: #selector(reportLyricsIssue), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: L10n.text("Settings…"), action: #selector(showSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: L10n.text("Quit"), action: #selector(quit), keyEquivalent: "q"))
@@ -171,22 +174,35 @@ final class MenuBarController: NSObject {
     private func pollSpotify(forceLyricsRefresh: Bool = false) async {
         guard !Task.isCancelled else { return }
 
-        switch await SpotifyReader.read() {
+        switch await player.snapshot() {
         case .closed:
             setSpotifyFeedback(.notRunning)
             setLyricsFeedback(.waiting)
             setTrackInfo(nil)
             currentTrack = nil
+            currentPlayerTrack = nil
             currentLines = []
             stopProgressTimer()
             setDisplay(L10n.text("Spotify is not running"))
+        case .stopped:
+            setSpotifyFeedback(.connected)
+            setLyricsFeedback(.waiting)
+            setTrackInfo(nil)
+            currentTrack = nil
+            currentPlayerTrack = nil
+            currentLines = []
+            stopProgressTimer()
+            setDisplay(L10n.text("Waiting for Spotify"))
         case .unavailable:
             setSpotifyFeedback(.unavailable)
             setLyricsFeedback(.waiting)
             setTrackInfo(nil)
             stopProgressTimer()
             setDisplay(L10n.text("Cannot connect to Spotify"))
-        case let .paused(track, position):
+        case let .paused(nowPlaying):
+            let track = nowPlaying.spotifyTrack
+            let position = nowPlaying.playbackPosition
+            currentPlayerTrack = nowPlaying
             setSpotifyFeedback(.connected)
             setTrackInfo(nil)
             await updateTrackIfNeeded(track, force: forceLyricsRefresh)
@@ -195,7 +211,10 @@ final class MenuBarController: NSObject {
             stopProgressTimer()
             let text = LyricClock.moment(at: position, in: currentLines)?.text ?? unpausedFallbackText()
             setDisplay(L10n.format("Paused: %@", text))
-        case let .playing(track, position):
+        case let .playing(nowPlaying):
+            let track = nowPlaying.spotifyTrack
+            let position = nowPlaying.playbackPosition
+            currentPlayerTrack = nowPlaying
             setSpotifyFeedback(.connected)
             setTrackInfo(track)
             await updateTrackIfNeeded(track, force: forceLyricsRefresh)
@@ -405,6 +424,22 @@ final class MenuBarController: NSObject {
 
     @objc private func refreshLyrics() {
         startPoll(forceLyricsRefresh: true)
+    }
+
+    @objc private func reportLyricsIssue() {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Development"
+        guard let url = LyricsIssueReporter.mailtoURL(
+            track: currentPlayerTrack,
+            provider: lyricsClient.selectedProvider,
+            appVersion: version
+        ) else {
+            let alert = NSAlert()
+            alert.messageText = L10n.text("Feedback email is not configured")
+            alert.informativeText = L10n.text("Set FEEDBACK_EMAIL before distributing this feature.")
+            alert.runModal()
+            return
+        }
+        NSWorkspace.shared.open(url)
     }
 
     @objc private func showSettings() {

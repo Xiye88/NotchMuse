@@ -1,6 +1,6 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-08-09
+Last Updated: 2026-08-13
 
 ## Phase 1: GitHub Open Source Beta Release
 
@@ -152,8 +152,43 @@ Deferred:
 - Windows.
 - QQ Music and NetEase Cloud Music.
 - Intel Mac / Universal Binary without hardware and demand evidence.
-- Apple Music integration and Music.app evidence spike.
+- Apple Music production integration; its evidence spike moves to v0.6.
 - App Store distribution.
+
+### v0.6 - Multi-Player Architecture and Evidence
+
+Status: Research complete; isolated spikes pending.
+
+Goal: Add a maintainable player boundary without regressing Spotify, then use
+new metadata as evidence rather than immediately changing production matching.
+
+Order:
+
+1. Publish the already validated Provider recovery.
+2. Wrap SpotifyReader with a neutral adapter and prove exact behavior parity.
+3. Run an isolated Apple Music Apple Events spike.
+4. Add a user-triggered email feedback path after a public address is supplied.
+5. Capture and label Track Identity evidence in Benchmark.
+6. Run QQ Music and NetEase diagnostic probes only on current installed apps.
+7. Consider a second production player only after the first two adapters pass.
+
+Go / No-Go:
+
+- Unified adapter boundary: Go for Spike.
+- Apple Music: Conditional Go for Spike; Release No-Go pending runtime matrix.
+- QQ Music: diagnostic-only Conditional Go; production No-Go.
+- NetEase player: production No-Go; diagnostic-only evidence allowed.
+- Track Identity ranking: Benchmark-only Go; production Matcher No-Go.
+- Email feedback: Conditional Go pending `FEEDBACK_EMAIL`.
+
+Explicitly Excluded:
+
+- Shipping three new players together.
+- Private MediaRemote in the Release binary.
+- Accessibility/UI scraping as a playback backend.
+- New lyrics Providers.
+- Production Matcher changes without labeled holdout evidence.
+- Large UI redesign, Windows, Intel-first work, or automatic telemetry.
 
 ## Product Guardrails
 

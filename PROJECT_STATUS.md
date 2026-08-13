@@ -1,16 +1,17 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-08-09
+Last Updated: 2026-08-13
 
 ## Current Phase
 
-v0.5 Lyrics Matching Accuracy - Phase 4.2: Remaining Coverage Evidence
+v0.6 Multi-Player Architecture - Research and Spike Gate
 
 ## Current Goal
 
-Package the validated LRCLIB, NetEase, and Kugou recovery for public users,
-then classify the remaining 10-11% uncovered songs without relaxing the
-production Matcher or adding an unverified Provider.
+Preserve the stable Spotify experience while validating a minimal player
+adapter boundary, Apple Music feasibility, Track Identity evidence, and a
+privacy-preserving feedback loop. The validated Provider recovery still needs
+public delivery before broad expansion.
 
 ## Release Status
 
@@ -91,6 +92,13 @@ production Matcher or adding an unverified Provider.
 - Public validation volume remains too small for retention conclusions: the
   repository currently has no GitHub Issues, and the `v0.3.1` DMG has only
   three recorded downloads.
+- Apple Music is approved only for an isolated runtime spike; active-track,
+  permission, state and timing-drift acceptance is not yet complete.
+- QQ Music and NetEase Cloud Music have no verified stable public macOS
+  now-playing interface. Private MediaRemote and Accessibility scraping remain
+  excluded from production.
+- The email feedback flow is blocked from Release implementation until the
+  Product Owner provides a public `FEEDBACK_EMAIL` value.
 
 ## Completed Tasks
 
@@ -220,6 +228,17 @@ production Matcher or adding an unverified Provider.
   first 100 at `96/100`.
 - Re-ran Swift self-tests and Release build on 2026-08-09; both passed.
 - Re-ran the Python Benchmark suite; all `26` tests passed.
+- Completed direct source audits of LyricsX, the maintained MxIris fork,
+  MusicPlayer, LyricsKit, and LyricFever without copying third-party code.
+- Designed a progressive Unified Music Player Layer that first wraps the
+  existing SpotifyReader and keeps LyricsClient/TrackMatcher unchanged.
+- Classified Apple Music as Conditional Go for an isolated public-API spike;
+  QQ Music as diagnostic-probe-only; and NetEase player integration as
+  production No-Go.
+- Designed the v0.6 Track Identity and offline Candidate Ranking evidence
+  experiment; production Matcher remains unchanged.
+- Designed a minimal bilingual, user-triggered `Report Lyrics Issue` email
+  flow with no automatic upload or telemetry.
 
 ## In Progress Tasks
 
@@ -242,6 +261,13 @@ production Matcher or adding an unverified Provider.
 - Run the first weekly issue triage after targeted beta promotion.
 - Evaluate three P1 failure-state copy changes without coupling them to Matcher
   work: `Finding lyrics`, generic unavailable guidance, and refresh guidance.
+- Run the Spotify adapter parity spike without registering additional players.
+- Run an isolated Apple Music active-playback and timing-drift matrix.
+- Collect QQ Music and NetEase MediaRemote field evidence on Macs where the
+  current players are installed; do not link the probe into Release.
+- Obtain a public feedback address before implementing `Report Lyrics Issue`.
+- Extend Benchmark evidence with album/native ID/optional ISRC only after a
+  frozen candidate data contract is approved.
 
 ## Next Decisions
 
@@ -269,7 +295,13 @@ production Matcher or adding an unverified Provider.
 - Approve targeted early-beta promotion now; keep broad promotion gated on a
   clean-user journey pass and initial issue triage.
 - Keep v0.4 scoped to Spotify + Apple Silicon.
-- Treat Apple Music as a v0.5 candidate only after a Music.app AppleScript
-  evidence spike proves stable playback metadata and position.
+- Treat Apple Music as the v0.6 second-player candidate only after an isolated
+  Music.app spike proves stable playback metadata and position.
 - Keep Chinese Support/Feedback translation deferred until user demand proves
   the maintenance cost is justified.
+- Unified Music Player Layer: Go for a Spotify-compatible spike only.
+- Apple Music: Conditional Go for isolated runtime validation; Release No-Go.
+- QQ Music: Conditional Go for a diagnostic probe; production No-Go.
+- NetEase Cloud Music player: production No-Go; diagnostic probe only.
+- Private MediaRemote and Accessibility scraping: No-Go for production.
+- Email feedback: Conditional Go; blocked on a real public feedback address.

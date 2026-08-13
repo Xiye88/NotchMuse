@@ -14,7 +14,7 @@
 - Do not change provider order, matching thresholds, duration tolerance, or
   App retry based only on aggregate Coverage.
 
-Last Updated: 2026-08-09
+Last Updated: 2026-08-13
 
 ## Decision Log
 
@@ -147,3 +147,54 @@ Reason:
   analysis alone does not improve the experience of existing users.
 - Soda and the remaining uncovered tracks still require evidence; they do not
   justify a broad Matcher relaxation or immediate new Provider integration.
+
+### 2026-08-13: Use a Spotify-first player adapter migration
+
+Decision: Introduce a neutral player boundary through an isolated spike that
+wraps the existing SpotifyReader. Do not rewrite Spotify or implement active
+multi-player arbitration in the first batch.
+
+Reason:
+- LyricsX and LyricFever prove the adapter pattern, but NotchMuse can obtain the
+  same boundary with fewer moving parts.
+- Spotify is stable and must remain the behavioral reference.
+- Automatic switching has stale-track, permission and timing risks that cannot
+  be validated with only one production adapter.
+
+### 2026-08-13: Keep private system-wide playback APIs out of production
+
+Decision: Do not ship private MediaRemote or Accessibility/UI scraping as a
+NotchMuse player backend. Permit one-off diagnostic probes for QQ Music and
+NetEase Cloud Music only.
+
+Reason:
+- macOS does not expose a stable public API for reading arbitrary apps' system
+  now-playing metadata.
+- Private framework loading and UI hierarchy scraping are fragile across OS and
+  player updates.
+- Apple Music already offers a public Apple Events path and is the appropriate
+  second-player candidate.
+
+### 2026-08-13: Keep v0.6 identity work Benchmark-only
+
+Decision: Capture richer Track Identity evidence and run Current-vs-Enhanced
+ranking offline. Do not change the production Matcher until labeled development
+and holdout sets improve correct matches without increasing confirmed false
+positives.
+
+Reason:
+- Album, native ID and ISRC are not currently available on both sides of most
+  comparisons.
+- Cross-service native IDs are not comparable.
+- Reduced ambiguity without ground truth can increase wrong lyrics.
+
+### 2026-08-13: Use explicit email feedback without telemetry
+
+Decision: `Report Lyrics Issue` may open the user's default mail client with a
+visible, editable bilingual draft. Do not send automatically or attach hidden
+logs. Implementation remains blocked until a public feedback address is set.
+
+Reason:
+- It creates a direct quality loop without backend infrastructure or automatic
+  data collection.
+- The user remains in control of every field and the final send action.

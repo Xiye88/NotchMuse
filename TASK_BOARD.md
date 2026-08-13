@@ -1,6 +1,6 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-08-09
+Last Updated: 2026-08-13
 
 ## TODO
 
@@ -17,6 +17,12 @@ Last Updated: 2026-08-09
 | Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
 | Complete real clean-Mac user journey | 04_UX | P0 | Gatekeeper, TCC, Spotify, lyrics recovery |
 | Run first weekly beta issue triage | 00_PM / 06_DOCS | P1 | Blocked by zero submitted Issues and very low download volume |
+| Spotify adapter parity spike | 01_APP | P0 | 2-4 hours; preserve current polling and lyrics boundary |
+| Apple Music runtime spike | 01_APP / 04_UX | P0 | Validate six fields, Automation denial, switching and drift |
+| Confirm public feedback email | Product Owner | P1 | Required before `Report Lyrics Issue` implementation |
+| Label v0.6 frozen ranking cases | 03_LAB / 05_MATCHER | P1 | Strategy-blind labels; every changed decision reviewed |
+| QQ Music current-version field probe | 01_APP | P2 | Requires a Mac with QQ Music installed; private probe only |
+| NetEase current-version field probe | 01_APP | P2 | Stop if timing fields are unstable; no AX production path |
 
 ## IN PROGRESS
 
@@ -27,6 +33,7 @@ Last Updated: 2026-08-09
 | Remaining Provider Health Classification | 03_LAB | P0 | Soda invalid response and LRCMux 404 semantics |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 | Phase 4 Matcher Go/No-Go | 00_PM / 03_LAB / 05_MATCHER | P0 | Simulator ready; production remains unchanged |
+| v0.6 Multi-Player Architecture evidence | 01_APP / 04_UX / 05_MATCHER | P0 | Design complete; runtime spikes pending |
 
 ## BLOCKED
 
@@ -41,6 +48,10 @@ Last Updated: 2026-08-09
 | Universal Binary and new platforms | 01_APP / 04_UX | P2 | Deferred by Phase 2 scope |
 | Broad public promotion | 00_PM / 06_DOCS | P1 | Clean-user journey and first issue triage missing |
 | Retention-driven roadmap decisions | 00_PM | P1 | No Issues and only three DMG downloads; insufficient user evidence |
+| Apple Music Release integration | 01_APP / 04_UX | P1 | Isolated runtime spike and Spotify parity not complete |
+| QQ Music production integration | 01_APP | P2 | No stable public now-playing API verified |
+| NetEase player production integration | 01_APP | P2 | No stable public now-playing API verified |
+| Report Lyrics Issue release implementation | 01_APP / 04_UX | P1 | Public feedback address not provided |
 
 ## DONE
 
@@ -113,3 +124,9 @@ Last Updated: 2026-08-09
 | Provider recovery natural validation | 03_LAB / 05_MATCHER | P0 | Runs 21-28 average `89.38%`; latest `89.2%` |
 | Latest Top Songs natural validation | 03_LAB | P0 | Run 28: `277/300` overall and `96/100` first 100 |
 | 2026-08-09 code verification | 01_APP / 03_LAB | P0 | Swift self-tests, Release build, and 26 Python tests passed |
+| LyricsX / LyricFever deep source audit | 01_APP / 04_UX / 05_MATCHER | P0 | Player, lyrics and floating UX boundaries documented |
+| Unified Music Player Layer design | 01_APP / 05_MATCHER | P0 | Progressive Spotify-first migration approved for spike |
+| Apple Music feasibility review | 01_APP | P0 | Public Apple Events path verified; runtime spike pending |
+| QQ / NetEase player feasibility review | 01_APP | P1 | Diagnostic probes only; production paths rejected |
+| v0.6 Track Identity experiment design | 03_LAB / 05_MATCHER | P1 | Benchmark-only gate; production Matcher unchanged |
+| Email feedback UX design | 01_APP / 04_UX | P1 | Native mailto flow ready, pending address |

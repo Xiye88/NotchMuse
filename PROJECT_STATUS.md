@@ -101,6 +101,18 @@ evidence rather than further architecture work.
   visible playlists contain zero tracks. Spotify parity and the Apple Music
   five-track runtime matrix remain incomplete; Apple Music Release integration
   is therefore Conditional Go, not GO.
+- Authenticated-player validation on 2026-08-14 proved the public Apple Music
+  metadata and display path with real playback before Music.app restart. The
+  adapter read `LEMONADE` by aespa, Chinese and English queue items, and
+  `persistent ID`; seek/pause/resume timing stayed aligned. Status Bar and
+  Notch Mode both rendered current lyrics, and song changes replaced stale
+  text. After Music.app restart, Apple Music cleared `current track` and left
+  playback controls disabled while its cloud library remained at zero tracks;
+  NotchMuse correctly changed to `Waiting for Apple Music` without stale
+  lyrics. Spotify is authenticated but reports that the selected content
+  cannot currently be played and exposes no current track. The five-song
+  complete-chain gate, restart recovery, and Spotify regression therefore
+  remain open.
 - QQ Music and NetEase Cloud Music have no verified stable public macOS
   now-playing interface. Private MediaRemote and Accessibility scraping remain
   excluded from production.
@@ -122,6 +134,10 @@ evidence rather than further architecture work.
   and public Apple Events access to Music.app. Music.app returned `stopped` and
   no local test tracks, so this is implementation evidence rather than the
   required five-song runtime evidence.
+- Completed partial authenticated Apple Music runtime validation: real
+  metadata, play/pause/resume, seek, position advance, multiple song changes,
+  stale-lyric clearing, Status Bar rendering, Notch rendering, and NotchMuse
+  restart all behaved correctly while Music.app had an active queue.
 - Finalized the public Feedback Email configuration at one build location using
   `ztongxue3@gmail.com`; English, Chinese, song/no-song, Spotify/Apple Music,
   default Mail Client, Cancel, and Send paths passed. Status: READY.

@@ -1,6 +1,6 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-08-13
+Last Updated: 2026-08-14
 
 ## Current Phase
 
@@ -8,10 +8,10 @@ v0.6 Apple Music Production Integration - Runtime Evidence Gate
 
 ## Current Goal
 
-Complete the five-song Apple Music playback matrix and Spotify regression on
-real authenticated players. Apple Music is now wired through the shared
-adapter and existing lyrics/display pipeline; Release remains gated by runtime
-evidence rather than further architecture work.
+Close the final Apple Music Automation permission and restart-policy decisions.
+The five-song Apple Music matrix and core Spotify regression now pass on real
+authenticated players; Release remains gated by the remaining permission and
+recovery acceptance evidence rather than further architecture work.
 
 ## Release Status
 
@@ -93,27 +93,25 @@ evidence rather than further architecture work.
 - Public validation volume remains too small for retention conclusions: the
   repository currently has no GitHub Issues, and the `v0.3.1` DMG has only
   three recorded downloads.
-- Apple Music production routing is implemented behind a persistent Settings
-  choice, but active-track, permission-denial, five-song lyrics, restart and
-  timing-drift acceptance is not yet complete.
-- Spotify authentication is now available, but playback currently reports the
-  selected content as unavailable and exposes no current track. Music.app is
-  reachable through public Apple Events, but after restart it is stopped and
-  all visible playlists contain zero tracks. Spotify parity and the Apple Music
-  five-track runtime matrix remain incomplete; Apple Music Release integration
-  is therefore Conditional Go, not GO.
-- Authenticated-player validation on 2026-08-14 proved the public Apple Music
-  metadata and display path with real playback before Music.app restart. The
-  adapter read `LEMONADE` by aespa, Chinese and English queue items, and
-  `persistent ID`; seek/pause/resume timing stayed aligned. Status Bar and
-  Notch Mode both rendered current lyrics, and song changes replaced stale
-  text. After Music.app restart, Apple Music cleared `current track` and left
-  playback controls disabled while its cloud library remained at zero tracks;
-  NotchMuse correctly changed to `Waiting for Apple Music` without stale
-  lyrics. Spotify is authenticated but reports that the selected content
-  cannot currently be played and exposes no current track. The five-song
-  complete-chain gate, restart recovery, and Spotify regression therefore
-  remain open.
+- Apple Music production routing and the five-song runtime matrix pass on the
+  current v0.6 build. Remaining acceptance evidence is limited to Automation
+  permission denial/re-grant and the expected behavior when Music.app restarts
+  without retaining `current track`.
+- Authenticated-player validation on 2026-08-14 covered two English tracks, two
+  Chinese tracks, and one complex `with` metadata track. All five completed the
+  Apple Music Adapter, LyricsClient, and Status Bar chain with current lyrics.
+  Notch Mode, pause/resume, song switching, stale-lyric clearing, and NotchMuse
+  restart also passed. When Music.app exposed no current track, NotchMuse safely
+  showed `Waiting for Apple Music`; manually resuming playback restored lyrics.
+- Spotify core parity now passes on the same v0.6 build: `Cruel Summer` rendered
+  current Notch lyrics, and switching to `After Hours` replaced the title and
+  lyric without stale content. Apple Music Release integration remains
+  Conditional Go until the permission and restart-policy gates close.
+- The existing v0.6 Release binary self-test passes under English. Two status
+  assertions are not locale-isolated and fail under `zh-Hans`; a fresh source
+  rebuild is also blocked locally by a Swift 6.3.3 compiler / Swift 6.3.2 SDK
+  module mismatch. Neither issue invalidates the observed runtime evidence, but
+  both must be resolved before a new Release artifact is built.
 - QQ Music and NetEase Cloud Music have no verified stable public macOS
   now-playing interface. Private MediaRemote and Accessibility scraping remain
   excluded from production.
@@ -139,6 +137,10 @@ evidence rather than further architecture work.
   metadata, play/pause/resume, seek, position advance, multiple song changes,
   stale-lyric clearing, Status Bar rendering, Notch rendering, and NotchMuse
   restart all behaved correctly while Music.app had an active queue.
+- Completed the five-song Apple Music runtime matrix on the current v0.6 build:
+  `She Is My Sin`, `Fire`, `稻香`, `爱你没差`, and `等你下课 (with 杨瑞代)`
+  all rendered current lyrics. Spotify core regression also passed with
+  `Cruel Summer` and a switch to `After Hours`.
 - Finalized the public Feedback Email configuration at one build location using
   `ztongxue3@gmail.com`; English, Chinese, song/no-song, Spotify/Apple Music,
   default Mail Client, Cancel, and Send paths passed. Status: READY.
@@ -323,10 +325,10 @@ evidence rather than further architecture work.
 - Run the first weekly issue triage after targeted beta promotion.
 - Evaluate three P1 failure-state copy changes without coupling them to Matcher
   work: `Finding lyrics`, generic unavailable guidance, and refresh guidance.
-- Complete authenticated Spotify playback parity for switching, pause/resume,
-  Status Bar, and Notch Mode before Release migration.
-- Complete the Apple Music five-song, screenshot-backed playback and lyrics
-  matrix, including restart recovery and timing-drift checks.
+- Exercise Apple Music Automation denial and re-grant on a disposable user
+  account or after explicit approval to change the macOS security permission.
+- Decide whether Music.app restart must preserve playback, or whether the safe
+  Waiting state plus manual replay recovery is acceptable for v0.6.
 - Blind-label a stratified Track Identity v1 sample before rerunning ranking.
 
 ## Next Decisions

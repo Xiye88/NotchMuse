@@ -17,10 +17,11 @@ Last Updated: 2026-08-14
 | Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
 | Complete real clean-Mac user journey | 04_UX | P0 | Gatekeeper, TCC, Spotify, lyrics recovery |
 | Run first weekly beta issue triage | 00_PM / 06_DOCS | P1 | Blocked by zero submitted Issues and very low download volume |
-| Apple Music five-song runtime matrix | 01_APP / 04_UX | P0 | Partial real pass; needs five screenshot-backed complete-chain cases after Music.app playback is restored |
 | Label v0.6 frozen ranking cases | 03_LAB / 05_MATCHER | P1 | Strategy-blind labels; every changed decision reviewed |
 | QQ Music current-version field probe | 01_APP | P2 | Requires a Mac with QQ Music installed; private probe only |
 | NetEase current-version field probe | 01_APP | P2 | Stop if timing fields are unstable; no AX production path |
+| Isolate self-test language assertions | 01_APP | P1 | English hard-coded assertions fail when AppLanguage is zh-Hans |
+| Repair local Swift toolchain / SDK pairing | 01_APP / 02_RELEASE | P0 | Swift 6.3.3 compiler cannot import Swift 6.3.2 SDK modules |
 
 ## IN PROGRESS
 
@@ -31,8 +32,8 @@ Last Updated: 2026-08-14
 | Remaining Provider Health Classification | 03_LAB | P0 | Soda invalid response and LRCMux 404 semantics |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 | Phase 4 Matcher Go/No-Go | 00_PM / 03_LAB / 05_MATCHER | P0 | Simulator ready; production remains unchanged |
-| v0.6 Apple Music production integration | 01_APP / 04_UX | P0 | Shared pipeline and partial real playback pass; permission denial and full five-song matrix pending |
-| v0.6 player regression validation | 01_APP / 04_UX | P0 | Music.app clears current track after restart; Spotify authenticated but content playback unavailable |
+| v0.6 Apple Music production integration | 01_APP / 04_UX | P0 | Five-song and dual-mode runtime pass; Automation denial/re-grant pending |
+| v0.6 player restart policy | 00_PM / 01_APP / 04_UX | P1 | Decide whether safe Waiting state plus manual replay is acceptable when Music.app loses current track |
 
 ## BLOCKED
 
@@ -47,7 +48,7 @@ Last Updated: 2026-08-14
 | Universal Binary and new platforms | 01_APP / 04_UX | P2 | Deferred by Phase 2 scope |
 | Broad public promotion | 00_PM / 06_DOCS | P1 | Clean-user journey and first issue triage missing |
 | Retention-driven roadmap decisions | 00_PM | P1 | No Issues and only three DMG downloads; insufficient user evidence |
-| Apple Music Release integration | 01_APP / 04_UX | P0 | Five-song Apple Music matrix and authenticated Spotify parity not complete |
+| Apple Music Release integration | 01_APP / 04_UX | P0 | Runtime matrix and Spotify core parity pass; Automation denial/re-grant remains |
 | QQ Music production integration | 01_APP | P2 | No stable public now-playing API verified |
 | NetEase player production integration | 01_APP | P2 | No stable public now-playing API verified |
 | Track Identity enhanced ranking | 03_LAB / 05_MATCHER | P1 | Dataset frozen; human labels 0/2,568 and candidate album/ISRC absent |
@@ -57,6 +58,9 @@ Last Updated: 2026-08-14
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
 | Apple Music production routing | 01_APP / 04_UX | P0 | Settings selection feeds shared Adapter, LyricsClient, Status Bar and Notch path; automated verification PASS |
+| Apple Music five-song runtime matrix | 01_APP / 04_UX | P0 | PASS: 2 English, 2 Chinese, 1 complex metadata; Status Bar lyrics verified |
+| Apple Music Notch and restart validation | 01_APP / 04_UX | P0 | PASS: Notch lyrics, app restart reconnect, safe Waiting fallback, manual playback recovery |
+| Spotify v0.6 core parity | 01_APP / 04_UX | P0 | PASS: live lyrics for Cruel Summer and track switch to After Hours without stale content |
 | Spotify Adapter implementation | 01_APP | P0 | Minimal wrapper wired; SpotifyReader and lyrics boundary preserved; self-tests pass |
 | Apple Music public API spike code | 01_APP / 04_UX | P0 | State read and parser pass; runtime remains Conditional Go |
 | Track Identity v1 representation | 01_APP / 05_MATCHER | P1 | Neutral metadata and version hints added; production Matcher unchanged |

@@ -15,7 +15,9 @@ Matcher, Provider order, retry, threshold, or normalization behavior.
 
 - `v0.3.0-beta` is published as a GitHub Pre-release.
 - `v0.3.1` build `4` is published as a GitHub Pre-release.
-- `v0.6.0` build `6` Release Candidate is generated and verified.
+- `v0.6.0` build `6` is published as a GitHub Pre-release.
+- `v0.6.0` release commit: `e8487b7`.
+- `v0.6.0` release tag: `v0.6.0`.
 - `v0.6.0` DMG SHA-256:
   `770b80446b58d114e04af3dfa9016f3794ce607dedf1d2653dbebcb4b73b38d9`.
 - Release commit: `3666710`.
@@ -25,15 +27,14 @@ Matcher, Provider order, retry, threshold, or normalization behavior.
 - The DMG was downloaded again from GitHub; SHA-256 matched and
   `hdiutil verify` passed.
 - Repository: https://github.com/Xiye88/NotchMuse
-- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1
+- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0
 - Apple Music production integration is GO for `v0.6.0`: authenticated
   playback, both display modes, pause/resume, song switching, app restart,
   Automation denial/re-grant, stale-lyric clearing, and Spotify regression pass.
 - Current support: macOS 14+, Apple Silicon, Spotify or Apple Music.
 - Developer ID signing and notarization remain deferred.
-- Important release gap: the public `v0.3.1` tag points to `3666710`; the
-  validated Provider recovery is on `main` at `8c205e3` and is not included in
-  the current public DMG.
+- The GitHub-downloaded `v0.6.0` DMG matches the local artifact, its SHA-256
+  file reports `OK`, and `hdiutil verify` passes.
 
 ## Benchmark Health
 
@@ -67,8 +68,6 @@ Matcher, Provider order, retry, threshold, or normalization behavior.
 
 ### P1 Analysis Gates
 
-- The largest delivery blocker is that the public `v0.3.1` DMG predates the
-  validated Provider recovery now present on `main`.
 - Production Matcher changes remain blocked until natural run `19+` supplies
   second-candidate identity and manual ground truth proves a safe ranking
   strategy.

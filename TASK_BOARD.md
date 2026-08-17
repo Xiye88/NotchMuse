@@ -9,7 +9,6 @@ Last Updated: 2026-08-17
 | Manually label run 19 proposed recoveries | 03_LAB / 05_MATCHER | P0 | 464 eligible provider rows; false positives must remain 0 |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
 | Build fixed 100-song popular-miss Provider matrix | 03_LAB | P1 | Report unique incremental Coverage and verified sync correctness |
-| Package validated Provider recovery into a public hotfix | 01_APP / 02_RELEASE | P0 | Current `v0.3.1` DMG predates commit `8c205e3` |
 | Audit Soda invalid-response regression | 03_LAB | P0 | Run 28: `0/1000`, all JSON parse failures; no Matcher changes |
 | Label a fixed sample from 108 remaining misses | 03_LAB / 05_MATCHER | P0 | Prioritize Korean, Chinese pop, Spotify hot, and Japanese tracks |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
@@ -52,6 +51,8 @@ Last Updated: 2026-08-17
 
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
+| Publish v0.6.0 GitHub Pre-release | 00_PM / 01_APP / 02_RELEASE | P0 | main, tag, DMG, checksum, Release Notes, and remote artifact verification complete |
+| Package validated Provider recovery publicly | 01_APP / 02_RELEASE | P0 | Included in the v0.6.0 public DMG |
 | Apple Music v0.6 Release gate | 01_APP / 04_UX | P0 | GO: runtime matrix, Automation denial/re-grant, restart recovery, stale clearing, and Spotify regression pass |
 | Self-test language isolation | 01_APP | P1 | English and zh-Hans Release self-tests pass independently |
 | Local Release toolchain recovery | 01_APP / 02_RELEASE | P0 | Swift 6.3.3 clean build passes with installed macOS 15.4 SDK |

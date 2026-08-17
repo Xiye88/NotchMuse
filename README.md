@@ -18,13 +18,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1"><strong>Download the latest beta</strong></a>
+  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0"><strong>Download the latest beta</strong></a>
   ·
   <a href="https://github.com/Xiye88/NotchMuse/issues">Report an issue</a>
 </p>
 
 <p align="center">
-  macOS 14+ · Apple Silicon · Spotify desktop app required
+  macOS 14+ · Apple Silicon · Spotify or Apple Music
 </p>
 
 ## Demo
@@ -51,7 +51,7 @@ Song information and synchronized lyrics appear below the MacBook notch.
 
 | **Menu Bar lyrics** | **Notch Mode** |
 | --- | --- |
-| Keep Spotify-synchronized lyrics on the left or right side of the menu bar. | Choose Lyric Only, Song + Lyric, or Expanded layouts near the notch. |
+| Keep Spotify or Apple Music synchronized lyrics on the left or right side of the menu bar. | Choose Lyric Only, Song + Lyric, or Expanded layouts near the notch. |
 | **Private by design** | **Fits your workspace** |
 | No account, telemetry, or audio upload. English and Simplified Chinese are built in. | Target built-in or external displays and adjust width, color, type size, animation, and opacity. |
 
@@ -83,13 +83,13 @@ Choose the display mode and adjust width, color, font size, animation speed, opa
 
 ## Quick Start
 
-Before you start: NotchMuse currently requires macOS 14 or later, an Apple Silicon Mac, and the Spotify desktop app.
+Before you start: NotchMuse currently requires macOS 14 or later, an Apple Silicon Mac, and Spotify or Apple Music.
 
-1. Download `NotchMuse.dmg` from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1).
+1. Download `NotchMuse.dmg` from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0).
 2. Open the DMG and drag `NotchMuse.app` to `Applications`.
 3. Because this is an unsigned beta, Control-click `NotchMuse.app`, choose `Open`, then confirm `Open`.
-4. Open Spotify and play a song.
-5. Allow macOS Automation when NotchMuse asks to control Spotify.
+4. Open Spotify or Apple Music and play a song.
+5. In Settings, choose the Music Player and allow macOS Automation when prompted.
 6. Look for the orange note icon in the menu bar.
 7. Use Settings to choose Status Bar Mode or Notch Mode.
 
@@ -99,7 +99,7 @@ Before you start: NotchMuse currently requires macOS 14 or later, an Apple Silic
 
 - macOS 14.0 or later
 - Apple Silicon Mac
-- Spotify desktop app for macOS
+- Spotify desktop app for macOS or Apple Music
 
 The current beta build is `arm64` only. Intel Mac and Universal Binary support are planned for a later phase.
 
@@ -107,7 +107,7 @@ The current beta build is `arm64` only. Intel Mac and Universal Binary support a
 2. Open the DMG.
 3. Drag `NotchMuse.app` into `Applications`.
 4. Open NotchMuse from `Applications`.
-5. When macOS asks for permission to control Spotify, allow it.
+5. When macOS asks for permission to control the selected music player, allow it.
 
 ### Unsigned Beta Notice
 
@@ -141,12 +141,12 @@ NotchMuse does not require a menu bar organizer. If your menu bar is already cro
 
 ## Roadmap
 
-- v0.4: lyrics matching quality and provider health
-- Later: signed distribution and broader Mac compatibility
+- Current beta: Spotify and Apple Music playback
+- Later: lyrics quality, signed distribution, and broader Mac compatibility
 
 ## Usage
 
-1. Open Spotify and play a song.
+1. Open Spotify or Apple Music and play a song.
 2. Open NotchMuse.
 3. Lyrics appear in the menu bar or notch area.
 4. Use the menu bar note icon to open the control menu.
@@ -156,7 +156,7 @@ If a menu bar organizer hides the NotchMuse icon, expand hidden menu bar items o
 
 ## Permissions
 
-- Automation / Spotify: reads current track, playback state, and playback position.
+- Automation / Spotify or Apple Music: reads current track, playback state, and playback position.
 - Accessibility: only needed for the left Status Bar layout so NotchMuse can avoid active app menu items.
 - Network: queries public lyrics providers for the current song.
 
@@ -167,7 +167,7 @@ For setup help, read [SUPPORT.md](SUPPORT.md). For feedback, read [FEEDBACK.md](
 ## Privacy
 
 - No NotchMuse account is required.
-- NotchMuse does not read or upload Spotify audio.
+- NotchMuse does not read or upload audio from Spotify or Apple Music.
 - NotchMuse does not collect telemetry, usage analytics, or personal profiles.
 - Track title, artist, album, and duration may be sent to third-party lyrics providers for matching.
 - Settings are stored locally with `UserDefaults`.

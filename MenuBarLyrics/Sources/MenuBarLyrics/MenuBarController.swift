@@ -7,12 +7,12 @@ enum PlayerFeedback {
     case notRunning
     case unavailable
 
-    func menuTitle(for source: PlayerSource) -> String {
+    func menuTitle(for source: PlayerSource, language: AppLanguage = AppPreferences.language) -> String {
         switch self {
-        case .checking: return L10n.format("%@: Checking...", source.rawValue)
-        case .connected: return L10n.format("%@: Connected", source.rawValue)
-        case .notRunning: return L10n.format("%@: Not Running", source.rawValue)
-        case .unavailable: return L10n.format("%@: Connection Error", source.rawValue)
+        case .checking: return L10n.format("%@: Checking...", source.rawValue, language: language)
+        case .connected: return L10n.format("%@: Connected", source.rawValue, language: language)
+        case .notRunning: return L10n.format("%@: Not Running", source.rawValue, language: language)
+        case .unavailable: return L10n.format("%@: Connection Error", source.rawValue, language: language)
         }
     }
 }

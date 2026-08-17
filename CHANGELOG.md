@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.6.0 - 2026-08-17
+
+### Added
+
+- Added Apple Music as a selectable music player alongside Spotify
+- Added bilingual player status, permission recovery guidance, and lyrics issue reporting
+
+### Changed
+
+- Routed Spotify and Apple Music through a shared player adapter without changing lyrics matching
+- Kept Spotify as the default player for existing users
+
+### Fixed
+
+- Cleared stale lyrics when the selected player stops, exits, or loses Automation permission
+- Isolated English self-test assertions from the selected app language
+
+### Notes
+
+- Production Matcher scores, thresholds, Provider order, retry, and normalization are unchanged
+- The release remains an unsigned Apple Silicon beta for macOS 14 or later
+
 ## 0.3.1 - 2026-07-26
 
 ### Added

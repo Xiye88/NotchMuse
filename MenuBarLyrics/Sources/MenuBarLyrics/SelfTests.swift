@@ -102,8 +102,8 @@ enum SelfTests {
     }
 
     private static func testStatusFeedback() {
-        check(PlayerFeedback.notRunning.menuTitle(for: .spotify) == "Spotify: Not Running", "explains when Spotify is not running")
-        check(PlayerFeedback.connected.menuTitle(for: .appleMusic) == "Apple Music: Connected", "shows the selected player state")
+        check(PlayerFeedback.notRunning.menuTitle(for: .spotify, language: .english) == "Spotify: Not Running", "explains when Spotify is not running")
+        check(PlayerFeedback.connected.menuTitle(for: .appleMusic, language: .english) == "Apple Music: Connected", "shows the selected player state")
         check(LyricsFeedback.searching.displayText == L10n.text("Changing song..."), "explains song changes")
         check(LyricsFeedback.notFound.displayText == L10n.text("No lyrics found"), "explains missing lyrics")
         check(LyricsFeedback.networkFailure.displayText == L10n.text("Lyrics network unavailable"), "explains lyric network failures")

@@ -1,6 +1,6 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-08-14
+Last Updated: 2026-08-17
 
 ## TODO
 
@@ -20,8 +20,6 @@ Last Updated: 2026-08-14
 | Label v0.6 frozen ranking cases | 03_LAB / 05_MATCHER | P1 | Strategy-blind labels; every changed decision reviewed |
 | QQ Music current-version field probe | 01_APP | P2 | Requires a Mac with QQ Music installed; private probe only |
 | NetEase current-version field probe | 01_APP | P2 | Stop if timing fields are unstable; no AX production path |
-| Isolate self-test language assertions | 01_APP | P1 | English hard-coded assertions fail when AppLanguage is zh-Hans |
-| Repair local Swift toolchain / SDK pairing | 01_APP / 02_RELEASE | P0 | Swift 6.3.3 compiler cannot import Swift 6.3.2 SDK modules |
 
 ## IN PROGRESS
 
@@ -32,8 +30,6 @@ Last Updated: 2026-08-14
 | Remaining Provider Health Classification | 03_LAB | P0 | Soda invalid response and LRCMux 404 semantics |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 | Phase 4 Matcher Go/No-Go | 00_PM / 03_LAB / 05_MATCHER | P0 | Simulator ready; production remains unchanged |
-| v0.6 Apple Music production integration | 01_APP / 04_UX | P0 | Five-song and dual-mode runtime pass; Automation denial/re-grant pending |
-| v0.6 player restart policy | 00_PM / 01_APP / 04_UX | P1 | Decide whether safe Waiting state plus manual replay is acceptable when Music.app loses current track |
 
 ## BLOCKED
 
@@ -48,7 +44,6 @@ Last Updated: 2026-08-14
 | Universal Binary and new platforms | 01_APP / 04_UX | P2 | Deferred by Phase 2 scope |
 | Broad public promotion | 00_PM / 06_DOCS | P1 | Clean-user journey and first issue triage missing |
 | Retention-driven roadmap decisions | 00_PM | P1 | No Issues and only three DMG downloads; insufficient user evidence |
-| Apple Music Release integration | 01_APP / 04_UX | P0 | Runtime matrix and Spotify core parity pass; Automation denial/re-grant remains |
 | QQ Music production integration | 01_APP | P2 | No stable public now-playing API verified |
 | NetEase player production integration | 01_APP | P2 | No stable public now-playing API verified |
 | Track Identity enhanced ranking | 03_LAB / 05_MATCHER | P1 | Dataset frozen; human labels 0/2,568 and candidate album/ISRC absent |
@@ -57,6 +52,9 @@ Last Updated: 2026-08-14
 
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
+| Apple Music v0.6 Release gate | 01_APP / 04_UX | P0 | GO: runtime matrix, Automation denial/re-grant, restart recovery, stale clearing, and Spotify regression pass |
+| Self-test language isolation | 01_APP | P1 | English and zh-Hans Release self-tests pass independently |
+| Local Release toolchain recovery | 01_APP / 02_RELEASE | P0 | Swift 6.3.3 clean build passes with installed macOS 15.4 SDK |
 | Apple Music production routing | 01_APP / 04_UX | P0 | Settings selection feeds shared Adapter, LyricsClient, Status Bar and Notch path; automated verification PASS |
 | Apple Music five-song runtime matrix | 01_APP / 04_UX | P0 | PASS: 2 English, 2 Chinese, 1 complex metadata; Status Bar lyrics verified |
 | Apple Music Notch and restart validation | 01_APP / 04_UX | P0 | PASS: Notch lyrics, app restart reconnect, safe Waiting fallback, manual playback recovery |

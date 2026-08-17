@@ -18,13 +18,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1"><strong>下载最新 beta</strong></a>
+  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0"><strong>下载最新 beta</strong></a>
   ·
   <a href="https://github.com/Xiye88/NotchMuse/issues">报告问题</a>
 </p>
 
 <p align="center">
-  macOS 14+ · Apple Silicon · 需要 Spotify 桌面应用
+  macOS 14+ · Apple Silicon · Spotify 或 Apple Music
 </p>
 
 ## 演示
@@ -51,7 +51,7 @@
 
 | **菜单栏歌词** | **刘海歌词** |
 | --- | --- |
-| 在菜单栏左侧或右侧保持显示 Spotify 同步歌词。 | 在刘海附近选择 Lyric Only、Song + Lyric 或 Expanded 布局。 |
+| 在菜单栏左侧或右侧保持显示 Spotify 或 Apple Music 同步歌词。 | 在刘海附近选择 Lyric Only、Song + Lyric 或 Expanded 布局。 |
 | **重视隐私** | **适配你的工作区** |
 | 不需要账号，不收集遥测数据，不上传音频。内置 English 和简体中文。 | 可选择内建或外接显示器，并调整宽度、颜色、字号、动画和透明度。 |
 
@@ -83,13 +83,13 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 
 ## 快速开始
 
-开始前请确认：NotchMuse 当前需要 macOS 14 或更高版本、Apple Silicon Mac，以及 Spotify 桌面应用。
+开始前请确认：NotchMuse 当前需要 macOS 14 或更高版本、Apple Silicon Mac，以及 Spotify 或 Apple Music。
 
-1. 从 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.3.1) 下载 `NotchMuse.dmg`。
+1. 从 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0) 下载 `NotchMuse.dmg`。
 2. 打开 DMG，把 `NotchMuse.app` 拖到 `Applications`。
 3. 这是 unsigned beta：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
-4. 打开 Spotify 并播放一首歌。
-5. 当 macOS 询问 NotchMuse 是否可以控制 Spotify 时，选择允许 Automation。
+4. 打开 Spotify 或 Apple Music 并播放一首歌。
+5. 在 Settings 中选择 Music Player，并在提示时允许 macOS Automation。
 6. 在菜单栏里找到橙色音符图标。
 7. 打开 Settings，选择 Status Bar Mode 或 Notch Mode。
 
@@ -99,7 +99,7 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 
 - macOS 14.0 或更高版本
 - Apple Silicon Mac
-- Spotify macOS 桌面应用
+- Spotify macOS 桌面应用或 Apple Music
 
 当前 beta 构建仅支持 `arm64`。Intel Mac 和 Universal Binary 支持计划在后续阶段处理。
 
@@ -107,7 +107,7 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 2. 打开 DMG。
 3. 把 `NotchMuse.app` 拖到 `Applications`。
 4. 从 `Applications` 打开 NotchMuse。
-5. 当 macOS 询问是否允许控制 Spotify 时，选择允许。
+5. 当 macOS 询问是否允许控制当前音乐播放器时，选择允许。
 
 ### 未签名 Beta 说明
 
@@ -141,12 +141,12 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 
 ## 路线图
 
-- v0.4：歌词匹配质量和 provider health
-- 后续：signed distribution 和更广泛的 Mac 兼容性
+- 当前 beta：Spotify 和 Apple Music 播放
+- 后续：歌词质量、signed distribution 和更广泛的 Mac 兼容性
 
 ## 使用
 
-1. 打开 Spotify 并播放一首歌。
+1. 打开 Spotify 或 Apple Music 并播放一首歌。
 2. 打开 NotchMuse。
 3. 歌词会显示在菜单栏或刘海区域。
 4. 使用菜单栏音符图标打开控制菜单。
@@ -156,7 +156,7 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 
 ## 权限
 
-- Automation / Spotify：读取当前曲目、播放状态和播放位置。
+- Automation / Spotify 或 Apple Music：读取当前曲目、播放状态和播放位置。
 - Accessibility：仅 Left Status Bar 布局需要，用于避开当前应用的菜单项。
 - Network：为当前歌曲查询公开歌词 provider。
 
@@ -167,7 +167,7 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 ## 隐私
 
 - 不需要 NotchMuse 账号。
-- NotchMuse 不读取或上传 Spotify 音频。
+- NotchMuse 不读取或上传 Spotify 或 Apple Music 音频。
 - NotchMuse 不收集遥测数据、使用分析或个人资料。
 - 曲名、artist、album 和时长可能会发送给第三方歌词 provider 用于匹配。
 - 设置使用 `UserDefaults` 保存在本地。

@@ -34,7 +34,7 @@ codesign --verify --deep --strict "$APP"
 hdiutil verify "$DMG" >/dev/null
 
 if [[ "$SIGN_IDENTITY" == "-" ]]; then
-  echo "Warning: ad-hoc signed unsigned GitHub beta; macOS Gatekeeper warning is expected." >&2
+  echo "Warning: ad-hoc signed GitHub beta; Developer ID signing and notarization are absent." >&2
 else
   spctl --assess --type execute --verbose=2 "$APP"
 fi

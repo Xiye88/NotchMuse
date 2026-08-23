@@ -87,7 +87,7 @@ Before you start: NotchMuse currently requires macOS 14 or later, an Apple Silic
 
 1. Download `NotchMuse.dmg` from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0).
 2. Open the DMG and drag `NotchMuse.app` to `Applications`.
-3. Because this is an unsigned beta, Control-click `NotchMuse.app`, choose `Open`, then confirm `Open`.
+3. Because this beta is not notarized, Control-click `NotchMuse.app`, choose `Open`, then confirm `Open`.
 4. Open Spotify or Apple Music and play a song.
 5. In Settings, choose the Music Player and allow macOS Automation when prompted.
 6. Look for the orange note icon in the menu bar.
@@ -109,9 +109,9 @@ The current beta build is `arm64` only. Intel Mac and Universal Binary support a
 4. Open NotchMuse from `Applications`.
 5. When macOS asks for permission to control the selected music player, allow it.
 
-### Unsigned Beta Notice
+### Beta Signing Notice
 
-This GitHub beta is distributed as an unsigned macOS build. macOS may ask you to confirm the first launch because the app is not signed with Apple Developer ID yet.
+This GitHub beta is ad-hoc signed, but it is not signed with Apple Developer ID or notarized. macOS may ask you to confirm the first launch.
 
 To open it:
 
@@ -124,7 +124,7 @@ If macOS still blocks it, go to `System Settings > Privacy & Security` and choos
 
 Developer ID signing and Apple notarization are deferred to a future Distribution Phase.
 
-If installation, Gatekeeper, Spotify permission, or lyrics lookup fails, see [SUPPORT.md](SUPPORT.md).
+If installation, Gatekeeper, music player Automation permission, or lyrics lookup fails, see [SUPPORT.md](SUPPORT.md).
 
 ## Optional Menu Bar Setup
 
@@ -132,7 +132,7 @@ NotchMuse does not require a menu bar organizer. If your menu bar is already cro
 
 ## Known Issues
 
-- The beta is unsigned, so macOS Gatekeeper warnings are expected.
+- The beta is not signed with Apple Developer ID or notarized, so macOS Gatekeeper warnings are expected.
 - Lyrics coverage depends on third-party providers.
 - Word-by-word lyrics are not guaranteed; most providers return line-level timing.
 - Left Status Bar mode requires Accessibility permission.

@@ -87,7 +87,7 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 
 1. 从 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0) 下载 `NotchMuse.dmg`。
 2. 打开 DMG，把 `NotchMuse.app` 拖到 `Applications`。
-3. 这是 unsigned beta：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
+3. 这个 beta 尚未 notarize：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
 4. 打开 Spotify 或 Apple Music 并播放一首歌。
 5. 在 Settings 中选择 Music Player，并在提示时允许 macOS Automation。
 6. 在菜单栏里找到橙色音符图标。
@@ -109,9 +109,9 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 4. 从 `Applications` 打开 NotchMuse。
 5. 当 macOS 询问是否允许控制当前音乐播放器时，选择允许。
 
-### 未签名 Beta 说明
+### Beta 签名说明
 
-这个 GitHub beta 以 unsigned macOS build 形式发布。因为应用尚未使用 Apple Developer ID 签名，macOS 首次启动时可能会要求你确认。
+这个 GitHub beta 已进行 ad-hoc signing，但尚未使用 Apple Developer ID 签名或 notarize。macOS 首次启动时可能会要求你确认。
 
 打开方式：
 
@@ -124,7 +124,7 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 
 Developer ID signing 和 Apple notarization 已推迟到未来 Distribution Phase。
 
-如果安装、Gatekeeper、Spotify permission 或歌词查询失败，请查看 [SUPPORT.md](SUPPORT.md)。
+如果安装、Gatekeeper、音乐播放器 Automation permission 或歌词查询失败，请查看 [SUPPORT.md](SUPPORT.md)。
 
 ## 可选菜单栏设置
 
@@ -132,7 +132,7 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 
 ## 已知问题
 
-- beta 尚未签名，因此 macOS Gatekeeper 警告是预期行为。
+- beta 尚未使用 Apple Developer ID 签名或 notarize，因此 macOS Gatekeeper 警告是预期行为。
 - 歌词覆盖率依赖第三方 provider。
 - 不保证逐字歌词；多数 provider 返回的是逐行时间轴。
 - Left Status Bar mode 需要 Accessibility permission。

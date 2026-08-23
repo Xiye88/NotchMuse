@@ -2,9 +2,9 @@
 
 NotchMuse is currently an early public beta. This page covers the most common setup and troubleshooting steps before opening an issue.
 
-## Install and open the unsigned beta
+## Install and open the beta
 
-The GitHub beta is unsigned. macOS may block the first launch because the app is not signed with Apple Developer ID yet.
+The GitHub beta is ad-hoc signed, but it is not signed with Apple Developer ID or notarized. macOS may block the first launch.
 
 Try this first:
 
@@ -16,16 +16,16 @@ Try this first:
 
 If macOS still blocks it, open `System Settings > Privacy & Security` and choose `Open Anyway` for NotchMuse.
 
-## Spotify permission
+## Music player Automation permission
 
-NotchMuse reads the current Spotify track through macOS Automation.
+NotchMuse reads the current Spotify or Apple Music track through macOS Automation.
 
 If lyrics do not appear:
 
-1. Make sure the Spotify desktop app is open and playing a song.
-2. When macOS asks whether NotchMuse can control Spotify, choose `Allow`.
-3. If you denied the prompt, check `System Settings > Privacy & Security > Automation` and allow NotchMuse to control Spotify.
-4. Restart NotchMuse after changing the permission.
+1. Make sure the selected music player is open and playing a song.
+2. When macOS asks whether NotchMuse can control Spotify or Music, choose `Allow`.
+3. If you denied the prompt, check `System Settings > Privacy & Security > Automation` and allow NotchMuse to control the selected player.
+4. Return to the player and resume playback. NotchMuse should recover automatically; use `Refresh Lyrics` if needed.
 
 ## Accessibility permission
 

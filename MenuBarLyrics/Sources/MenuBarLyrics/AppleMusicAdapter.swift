@@ -9,7 +9,11 @@ struct AppleMusicAdapter: MusicPlayerAdapter {
           tell application "Music"
             set s to player state as string
             if s is "stopped" then return "stopped"
-            set t to current track
+            try
+              set t to current track
+            on error
+              return "stopped"
+            end try
             set sep to ASCII character 31
             set trackID to ""
             try

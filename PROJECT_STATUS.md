@@ -1,15 +1,15 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-08-17
+Last Updated: 2026-08-24
 
 ## Current Phase
 
-v0.6.0 Release Candidate
+v0.6.0 Post-Release Stability Validation
 
 ## Current Goal
 
-Publish the verified Apple Music integration without changing the production
-Matcher, Provider order, retry, threshold, or normalization behavior.
+Validate real-world v0.6.0 stability and prepare only confirmed stability
+fixes without changing the production Matcher or adding product features.
 
 ## Release Status
 
@@ -20,6 +20,11 @@ Matcher, Provider order, retry, threshold, or normalization behavior.
 - `v0.6.0` release tag: `v0.6.0`.
 - `v0.6.0` DMG SHA-256:
   `770b80446b58d114e04af3dfa9016f3794ce607dedf1d2653dbebcb4b73b38d9`.
+- Post-release gate: `PASS WITH RISKS`.
+- A local `v0.6.1` build `7` stability candidate fixes the transient Apple
+  Music false-permission state. It is not tagged or published.
+- `v0.6.1` candidate DMG SHA-256:
+  `2f5b4449ecf42eafc8c39f6d2ef679662a70d78a6dbd3bdfda347d5134503b1b`.
 - Release commit: `3666710`.
 - Release tag: `v0.3.1`.
 - DMG SHA-256:
@@ -44,8 +49,10 @@ Matcher, Provider order, retry, threshold, or normalization behavior.
 - `lyrics-benchmark.timer` is enabled and active.
 - Natural runs `21-28` completed successfully after P0 Provider recovery.
 - Coverage across runs `21-28` averages `89.38%`, with a `89.1-89.6%` range.
-- Latest verified run: `32`, completed 2026-08-13, Coverage `889/1000`
-  (`88.9%`).
+- Latest verified run: `42`, completed 2026-08-23, Coverage `893/1000`
+  (`89.3%`).
+- Runs `36-42` average `89.23%`; runs `29-35` average `89.04%`.
+- Latest Top Songs result is `276/300`; the first 100 is `96/100`.
 - Run `20` baseline was `674/1000` (`67.4%`); recovery produced a sustained
   improvement of about `21.98` percentage points.
 - Run `28` Provider successes: LRCLIB `628`, LRCMux `603`, NetEase `515`,
@@ -64,9 +71,19 @@ Matcher, Provider order, retry, threshold, or normalization behavior.
 
 ### P0 Publish Gates
 
-- None for `v0.3.1`; release completed and the downloaded artifact verified.
+- None for the published `v0.6.0` artifact.
+- Before new feature work, publish the verified `v0.6.1` stability patch for
+  the transient Apple Music false-permission message.
 
 ### P1 Analysis Gates
+
+- v0.6.0 can briefly show an incorrect Automation permission message while
+  Apple Music changes tracks. The local v0.6.1 candidate classifies this as a
+  stopped/transition state and passes the real reproduction.
+- Spotify restart can remain in `Spotify is not running` while the desktop
+  client finishes startup registration, then recovers without NotchMuse restart.
+- Real network disconnect/recovery and system sleep/resume remain manual
+  post-release validation gaps.
 
 - Production Matcher changes remain blocked until natural run `19+` supplies
   second-candidate identity and manual ground truth proves a safe ranking
@@ -119,6 +136,18 @@ Matcher, Provider order, retry, threshold, or normalization behavior.
   ISRC, and no third-or-later frozen candidates.
 
 ## Completed Tasks
+
+- Completed v0.6.0 post-release Apple Music 60-minute validation, 20+ song
+  changes, rapid switching, pause/resume, missing lyrics, player restart, app
+  restart, Automation recovery, Status Bar, and Notch Mode checks.
+- Completed Spotify 30-minute regression, ten-song switching, pause/resume,
+  player restart, and two-player-open checks without a functional regression.
+- Verified stable CPU, RSS, thread, FD, network, and osascript observations;
+  no runtime growth trend was found.
+- Re-downloaded the public v0.6.0 DMG, matched SHA-256, verified and mounted it,
+  installed it, and passed both localized self-tests plus real-player smoke tests.
+- Built and verified the local v0.6.1 build 7 DMG candidate containing only the
+  Apple Music transition-state fix.
 
 - Wired Apple Music into the production `MusicPlayerAdapter` selection path
   with Spotify as the unchanged default. The selected player now feeds the

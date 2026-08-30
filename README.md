@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0"><strong>Download the latest beta</strong></a>
+  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.1"><strong>Download the latest beta</strong></a>
   ·
   <a href="https://github.com/Xiye88/NotchMuse/issues">Report an issue</a>
 </p>
@@ -85,7 +85,7 @@ Choose the display mode and adjust width, color, font size, animation speed, opa
 
 Before you start: NotchMuse currently requires macOS 14 or later, an Apple Silicon Mac, and Spotify or Apple Music.
 
-1. Download `NotchMuse.dmg` from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0).
+1. Download `NotchMuse.dmg` from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.1).
 2. Open the DMG and drag `NotchMuse.app` to `Applications`.
 3. Because this beta is not notarized, Control-click `NotchMuse.app`, choose `Open`, then confirm `Open`.
 4. Open Spotify or Apple Music and play a song.

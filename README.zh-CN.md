@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0"><strong>下载最新 beta</strong></a>
+  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.1"><strong>下载最新 beta</strong></a>
   ·
   <a href="https://github.com/Xiye88/NotchMuse/issues">报告问题</a>
 </p>
@@ -85,7 +85,7 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 
 开始前请确认：NotchMuse 当前需要 macOS 14 或更高版本、Apple Silicon Mac，以及 Spotify 或 Apple Music。
 
-1. 从 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0) 下载 `NotchMuse.dmg`。
+1. 从 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.1) 下载 `NotchMuse.dmg`。
 2. 打开 DMG，把 `NotchMuse.app` 拖到 `Applications`。
 3. 这个 beta 尚未 notarize：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
 4. 打开 Spotify 或 Apple Music 并播放一首歌。

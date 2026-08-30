@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.1 - 2026-08-30
+
+### Fixed
+
+- Prevented a transient Apple Music track change from being reported as an
+  Automation permission error
+
+### Validation
+
+- Passed Apple Music and Spotify network recovery checks without stale lyrics
+- Passed Apple Music and Spotify sleep/wake recovery checks in Status Bar and
+  Notch modes
+
+### Notes
+
+- Production Matcher behavior and Provider order are unchanged
+- This remains an ad-hoc signed Apple Silicon beta for macOS 14 or later
+
 ## 0.6.0 - 2026-08-17
 
 ### Added

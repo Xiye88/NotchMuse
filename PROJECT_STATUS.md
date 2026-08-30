@@ -4,7 +4,7 @@ Last Updated: 2026-08-31
 
 ## Current Phase
 
-v0.7 Lyrics Quality Hardening - Evidence Preparation
+v0.7 Lyrics Quality Hardening - Labeled Evidence Gate
 
 ## Current Goal
 
@@ -49,29 +49,32 @@ without changing the production Matcher or adding a music platform.
 - Password authentication remains unavailable but is not required for current
   operations.
 - `lyrics-benchmark.timer` is enabled and active.
-- Latest natural run: `49`, completed 2026-08-30, Coverage `889/1000`
-  (`88.9%`).
-- Run `49` Provider successes: LRCLIB `623`, LRCMux `600`, NetEase `531`,
-  Kugou `205`, QQ `42`, and Soda `0`.
-- Run `49` unique contributions: LRCLIB `128`, LRCMux `66`, NetEase `36`,
-  Kugou `8`, QQ `3`, and Soda `0`.
+- Latest natural run: `50`, completed 2026-08-31, Coverage `890/1000`
+  (`89.0%`).
+- Run `50` Top Songs Coverage is `272/300` (`90.67%`); Top 100 is
+  `97/100` (`97.0%`). The full `300/300` join is verified.
+- Runs `44-50` average Overall Coverage is `89.09%`; Top Songs is `90.52%`;
+  Top 100 is `96.29%`.
+- Run `50` Provider successes: LRCLIB `622`, LRCMux `602`, NetEase `521`,
+  Kugou `206`, QQ `65`, and Soda `0`.
+- Run `50` unique contributions: LRCLIB `125`, LRCMux `70`, NetEase `38`,
+  Kugou `9`, QQ `3`, and Soda `0`.
 - The Benchmark service is inactive between runs and
   `lyrics-benchmark.timer` remains active.
 - Run `20` baseline was `674/1000` (`67.4%`); recovery produced a sustained
   improvement of about `21.98` percentage points.
-- Run `49` Provider-result rows contain `2,533` matching failures, `191`
-  no-lyrics results, `276` API-unavailable results, `997` invalid responses,
+- Run `50` Provider-result rows contain `2,520` matching failures, `194`
+  no-lyrics results, `266` API-unavailable results, `1,002` invalid responses,
   and `2` unknown errors. These row labels cannot be converted into song-level
   wrong-match, no-result, network, or parser counts without cleaner taxonomy
   and human truth labels.
-- The latest newly verified Top Songs join is unavailable because the follow-up
-  VPS SSH session stopped at the banner. The most recent verified natural
-  baseline remains run `28`: `277/300` (`92.33%`) and Top 100 `96/100`.
-- That Top Songs baseline has `23` misses in the first 300 and `4` misses in
-  the first 100.
-- The latest `108` uncovered songs are concentrated in Korean (`43`), Chinese
-  pop (`28`), Spotify hot (`22`), Japanese (`10`), English pop (`4`), and
-  independent (`1`) tracks.
+- A frozen 50-track popular-miss dataset now aggregates unique misses from
+  natural runs `20-50`, preserving each discovery run. It does not duplicate
+  rows to meet the quota.
+- Run `50` analysis-layer provider-row evidence is: no-result `1,591`, parser
+  `1,002`, network `19`, Matcher rejection `971`, and ambiguity `401`.
+- Wrong-candidate and confirmed-false-positive rates remain unmeasured because
+  Track Identity v1 has `0/2,568` human labels.
 
 ## Blocking Issues
 
@@ -85,18 +88,17 @@ without changing the production Matcher or adding a music platform.
 - Spotify restart can remain in `Spotify is not running` while the desktop
   client finishes startup registration, then recovers without NotchMuse restart.
 
-- Production Matcher changes remain blocked until natural run `19+` supplies
-  second-candidate identity and manual ground truth proves a safe ranking
-  strategy.
+- Production Matcher changes remain blocked until strategy-blind human labels
+  and an independent holdout prove a safe ranking strategy.
 - Run `19` has `464` identity-equivalent and `25` non-equivalent
   ambiguity-gap provider rows. Metadata equivalence does not prove lyric text,
   timing, or version correctness.
-- The `464` eligible rows remain unlabeled; correct-candidate and
+- Track Identity v1 has `0/2,568` human labels; correct-candidate and
   false-positive rates cannot be claimed yet.
 - Title and artist normalization remain No-Go; current evidence is dominated
   by source-aligned score ties whose ground-truth lyric correctness is not
   manually labeled.
-- Soda is currently unhealthy: run `28` returned `0/1000`, with all requests
+- Soda is currently unhealthy: run `50` returned `0/1000`, with all requests
   recorded as `invalid_response` JSON parse failures.
 - LRCMux recorded `239` HTTP 404 responses in run `28`; no-result/endpoint
   semantics still need classification.
@@ -134,9 +136,24 @@ without changing the production Matcher or adding a music platform.
 - Track Identity Dataset v1 is frozen from natural run `32`, but ranking metrics
   remain blocked by `0/2,568` human-label coverage, missing candidate album and
   ISRC, and no third-or-later frozen candidates.
+- A 40-case run 32 ambiguity audit found one evidence-level duplicate and 39
+  cases with insufficient metadata. Candidate de-duplication remains No-Go.
+- Timing Quality static checks cover 35 songs and 1,830 lines. Audible early,
+  late, fixed-offset, and drift judgments remain unverified pending listening.
 
 ## Completed Tasks
 
+- Verified v0.7 run `50` Overall, Top Songs, Top 100, Provider Health, and
+  two-window seven-day baselines.
+- Froze 50 unique popular-song misses with discovery-run provenance and
+  explicit missing-field boundaries.
+- Completed the Track Identity signal audit and a 40-case tie/small-gap audit.
+- Completed Offline Ranking Simulator v2 evidence review. Production remains
+  No-Go because accuracy and false-positive deltas are not computable.
+- Completed a 35-song Timing Quality static snapshot and prioritized 11 songs
+  for manual listening.
+- Reverified the feedback entry, public release documentation, and next-player
+  priority matrix without changing App or Release behavior.
 - Published `v0.6.1` build `7` with release commit `9180b78`, tag `v0.6.1`,
   DMG, checksum, and focused stability Release Notes.
 - Passed real Apple Music and Spotify network disconnect/recovery checks with
@@ -351,15 +368,13 @@ without changing the production Matcher or adding a music platform.
 - Replace repository video links with GitHub native attachment URLs when
   browser upload permission is available.
 - Re-capture the Status Bar screenshot without left-edge lyric cropping.
-- Label eligible run `19+` candidate pairs and compare old vs experimental
-  ranking in the offline simulator.
-- Manually review every proposed recovery and keep confirmed false positives
-  at `0`.
-- Prepare a minimal hotfix Release Candidate containing the validated Provider
-  recovery already on `main`.
+- Strategy-blind label the 50 popular misses and a frozen ambiguity pool.
+- Add lyric-text evidence and an independent holdout before rerunning ranking.
+- Correct Benchmark-only evaluator semantics so Current and Experimental use
+  comparable selected-case denominators.
 - Investigate Soda's `0/1000` invalid-response regression without changing
   production Matcher behavior.
-- Build and label a fixed sample from the remaining `108` uncovered songs.
+- Manually listen to the 11 prioritized Timing Quality samples.
 - Classify LRCMux HTTP 404 semantics.
 - Continue Benchmark-only stratified LRCLIB experiments if needed.
 - Continue collecting structured GitHub beta feedback.
@@ -374,8 +389,8 @@ without changing the production Matcher or adding a music platform.
 - Keep the transient Notch resume layout switch as a known beta risk.
 - Phase 3 second-candidate evidence extension: Completed and deployed.
 - Benchmark-only ranking simulation tooling: Go.
-- Benchmark-only identity-equivalent de-duplication simulation: Go for the
-  `464` eligible run `19` rows; `25` non-equivalent rows stay unresolved.
+- Benchmark-only identity-equivalent de-duplication: No-Go until lyric text and
+  human labels distinguish true duplicates from different versions.
 - Production Matcher implementation: No-Go; no ranking strategy has yet
   improved manually verified matches with zero confirmed false positives.
 - Production Provider expansion: No-Go until LRCLIB, NetEase, LRCMux, and
@@ -404,3 +419,6 @@ without changing the production Matcher or adding a music platform.
 - NetEase Cloud Music player: production No-Go; diagnostic probe only.
 - Private MediaRemote and Accessibility scraping: No-Go for production.
 - Email feedback: READY with Product Owner-approved public address.
+- v0.7 final gate: CONDITIONAL GO for labeling and Benchmark-only evaluator
+  correction; Production score, threshold, normalization, dedup, and Provider
+  priority remain unchanged.

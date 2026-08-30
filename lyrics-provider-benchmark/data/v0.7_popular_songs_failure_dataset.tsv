@@ -1,0 +1,51 @@
+discovery_run	track_id	title	artist	album	duration	category	player_source	provider_candidates	top_score	second_score	selected_candidate	reject_reason	failure_classification
+50	1884874215	A Heartbeat's Turn	Zhang Zi Ning & Rex	A Heartbeat's Turn	190	spotify_hot		NetEase	0			no_candidates|no_lyrics_found|api_unavailable|below_threshold|invalid_response	matcher_rejection|no-result|parser
+50	1792155060	Nakorn Dara	YOUNGOHM	Nakorn Dara	196	spotify_hot						no_candidates|no_lyrics_found|api_unavailable|invalid_response	no-result|parser
+50	1876432402	Good Luck to The Both of Us	Tattoo Colour	Good Luck to The Both of Us - Single	236	spotify_hot		LRCLIB|NetEase	0			no_candidates|below_threshold|api_unavailable|invalid_response	matcher_rejection|no-result|parser
+50	269573364	Billie Jean	Michael Jackson	Thriller	294	english_pop		Kugou|NetEase	0	0		no_lyrics_found|api_unavailable|below_threshold|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	905226305	我怀念的	孙燕姿	逆光	289	chinese_pop		Kugou|NetEase	0	0		below_threshold|no_lyrics_found|api_unavailable|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1811349432	颜色	Gareth.T	顏色 - Single	211	chinese_pop		Kugou|LRCLIB|LRCMux|NetEase	0	0		below_threshold|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	541857036	天黑黑	孙燕姿	The Moment	236	chinese_pop		Kugou|NetEase	95	95		ambiguous_gap|no_lyrics_found|api_unavailable|no_candidates|invalid_response	ambiguity|no-result|parser
+50	930758244	爱请问怎么走	A-Lin	精選A-Lin - Everlasting…Best and More	266	chinese_pop		Kugou|NetEase	95	95		ambiguous_gap|below_threshold|no_lyrics_found|api_unavailable|no_candidates|invalid_response	ambiguity|matcher_rejection|no-result|parser
+50	6789835836	旋轉木馬	米爺 & 黃淑蔓	旋轉木馬 - Single	195	chinese_pop		Kugou|NetEase	0			below_threshold|no_lyrics_found|api_unavailable|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1804348174	懷疑人生	MC 張天賦	懷疑人生 - Single	269	chinese_pop		Kugou|LRCLIB|NetEase	0	0		below_threshold|api_unavailable|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1590828011	記憶棉	MC 張天賦	記憶棉 - Single	273	chinese_pop		Kugou|LRCLIB|NetEase	0	0		below_threshold|api_unavailable|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	604748203	夜の踊り子	サカナクション	Sakanaction	303	japanese		Kugou|LRCLIB|NetEase	95	95		ambiguous_gap|below_threshold|api_unavailable|no_candidates|invalid_response	ambiguity|matcher_rejection|no-result|parser
+50	1681600508	ケセラセラ	Mrs. GREEN APPLE	Que Sera Sera - Single	273	japanese		Kugou|LRCLIB|NetEase	95	95		ambiguous_gap|below_threshold|api_unavailable|no_candidates|invalid_response	ambiguity|matcher_rejection|no-result|parser
+50	1446781787	マリーゴールド	あいみょん	Momentary Sixth Sense	307	japanese		Kugou|LRCLIB|NetEase	95	95		ambiguous_gap|below_threshold|api_unavailable|no_candidates|invalid_response	ambiguity|matcher_rejection|no-result|parser
+50	1734500896	Magnetic	아일릿	SUPER REAL ME - EP	161	korean		Kugou|LRCLIB|LRCMux|NetEase	0	0		below_threshold|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1764485170	LOVE ATTACK	리센느	SCENEDROME - EP	182	korean		Kugou|LRCLIB|LRCMux|NetEase	0	0		below_threshold|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1887194026	It's Me	아일릿	MAMIHLAPINATAPAI - EP	138	korean		Kugou|LRCMux|NetEase	0	0		below_threshold|no_lyrics_found|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1822439986	Deja Vu	리센느	Dearest - Single	184	korean		Kugou|LRCLIB|LRCMux|NetEase	0	0		below_threshold|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1887671068	ACAI	코르티스	GREENGREEN - EP	174	korean		Kugou|LRCMux|NetEase	0	0		below_threshold|no_lyrics_found|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1887671072	YOUNGCREATORCREW	코르티스	GREENGREEN - EP	177	korean		Kugou|LRCMux|NetEase	0	0		below_threshold|no_lyrics_found|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1886030615	KISS KISS KISS (Prod. by Hukky Shibaseki) [feat. SUNWOO]	나우아임영 & Royal 44	Show Me The Money 12 Episode 2	219	korean		Kugou|NetEase	0	0		below_threshold|no_lyrics_found|api_unavailable|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1832031345	FaSHioN	코르티스	COLOR OUTSIDE THE LINES - EP	175	korean		Kugou|LRCMux|NetEase	0	0		below_threshold|no_lyrics_found|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1744448416	How Sweet	뉴진스	How Sweet - EP	219	korean		Kugou|LRCLIB|LRCMux|NetEase	0	0		below_threshold|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1764485172	Pinball	리센느	SCENEDROME - EP	193	korean		Kugou|LRCLIB|LRCMux|NetEase	0	0		below_threshold|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1569920439	And July (feat. DEAN & dj friz)	헤이즈	And July - EP	226	korean		Kugou|LRCLIB|LRCMux|NetEase	81	81		below_threshold|ambiguous_gap|no_candidates|invalid_response	ambiguity|matcher_rejection|no-result|parser
+50	1242155573	한시 오분 (1:05)	검정치마	TEAM BABY	240	korean		Kugou|NetEase	0	0		below_threshold|no_lyrics_found|api_unavailable|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1887671066	TNT	코르티스	GREENGREEN - EP	123	korean		Kugou|LRCMux|NetEase	0	0		below_threshold|no_lyrics_found|no_candidates|invalid_response	matcher_rejection|no-result|parser
+50	1635469694	Attention	뉴진스	NewJeans 1st EP 'New Jeans'	180	korean		Kugou|LRCLIB|LRCMux|NetEase|QQ	0	0		below_threshold|invalid_response	matcher_rejection|parser
+49	1720142741	永久損毀	MC 張天賦 & 陳蕾	永久損毀 - Single	232	chinese_pop		Kugou|NetEase	0	0		below_threshold|api_unavailable|no_candidates|invalid_response	matcher_rejection|network|no-result|parser
+48	1497822969	離開我的依賴	Evangeline	離開我的依賴 - Single	234	spotify_hot		Kugou|NetEase	0	0		below_threshold|api_unavailable|no_candidates|invalid_response	matcher_rejection|network|no-result|parser
+48	6770401926	BAD	에이티즈	GOLDEN HOUR : Part.5 - EP	156	korean		Kugou|LRCMux|NetEase	0	0		below_threshold|api_unavailable|no_candidates|invalid_response	matcher_rejection|network|no-result|parser
+47	1829905640	ที่คั่นหนังสือ (Sometimes) [feat. NONT TANONT]	BOWKYLION	ที่คั่นหนังสือ (Sometimes) [feat. NONT TANONT] - Single	292	spotify_hot		Kugou|LRCLIB|LRCMux|NetEase	0	0		below_threshold|no_candidates|invalid_response	matcher_rejection|no-result|parser
+34	6789836210	FB愛不完	床哥 & Novel Fergus	FB愛不完 - Single	176	chinese_pop		Kugou|NetEase	0			below_threshold|no_lyrics_found|api_unavailable|no_candidates|invalid_response	matcher_rejection|no-result|parser
+25	1072339996	不将就 (电影《何以笙箫默》片尾曲)	李荣浩	An Ideal	313	chinese_pop		NetEase|Soda	95	95		unknown_error|no_lyrics_found|api_unavailable|ambiguous_gap|no_candidates|below_threshold	ambiguity|matcher_rejection|network|no-result
+20	1832516372	kota ini tak sama tanpamu (with Aziz Harun & Aisha Retno)	Nadhif Basalamah, Aziz Harun & Aisha Retno	kota ini tak sama tanpamu (with Aziz Harun & Aisha Retno) - Single	270	spotify_hot		LRCLIB|LRCMux	95	95		no_candidates|ambiguous_gap|below_threshold|no_lyrics_found	ambiguity|matcher_rejection|no-result
+20	1440920614	Enchanted	Taylor Swift	Speak Now	352	spotify_hot		Kugou|LRCLIB|Soda	95	95		ambiguous_gap|api_unavailable|no_lyrics_found|no_candidates|below_threshold	ambiguity|matcher_rejection|no-result
+20	6764229100	เมื่อไหร่จะมี (มีใจให้กัน)	BLVCKHEART	เมื่อไหร่จะมี (มีใจให้กัน) - Single	215	spotify_hot		Kugou|LRCLIB|Soda	95	95		below_threshold|ambiguous_gap|api_unavailable|unknown_error|invalid_response	ambiguity|matcher_rejection|no-result|parser
+20	1792752613	PLEASE	Atom Chanakan	CYANTIST	285	spotify_hot		Soda	0	0		no_candidates|no_lyrics_found|api_unavailable|below_threshold	matcher_rejection|no-result
+20	1785191170	One Of My Life (feat. K6Y)	BLVCKHEART	One Of My Life (feat. K6Y) - Single	216	spotify_hot		Kugou|LRCLIB|Soda	95	95		ambiguous_gap|api_unavailable|no_lyrics_found|no_candidates|below_threshold	ambiguity|matcher_rejection|no-result
+20	6769568597	Ran To Atlanta	Drake, Future & Molly Santana	ICEMAN	247	english_pop		LRCMux|Soda	0			no_candidates|no_lyrics_found|below_threshold	matcher_rejection|no-result
+20	6769327013	玻璃	Gareth.T	玻璃 - Single	185	chinese_pop		Kugou|LRCLIB|LRCMux|Soda	95	95		ambiguous_gap|below_threshold|no_lyrics_found|no_candidates	ambiguity|matcher_rejection|no-result
+20	1134344911	爱错	王力宏	Shangri-La	239	chinese_pop		Kugou|LRCLIB|LRCMux|Soda	95	95		below_threshold|ambiguous_gap|no_lyrics_found|no_candidates	ambiguity|matcher_rejection|no-result
+20	1579903651	特别的人	方大同	危險世界	259	chinese_pop		Kugou|LRCLIB|Soda	95	95		below_threshold|ambiguous_gap|api_unavailable|no_lyrics_found|no_candidates	ambiguity|matcher_rejection|no-result
+20	200473135	阴天	莫文蔚	Karen Mok Greatest Hits	243	chinese_pop		Kugou|LRCLIB|LRCMux|Soda	95	95		ambiguous_gap|below_threshold|no_lyrics_found|no_candidates	ambiguity|matcher_rejection|no-result
+20	905206660	爱我还是他	陶喆	太平盛世	293	chinese_pop		Kugou	95	95		ambiguous_gap|no_lyrics_found|api_unavailable|no_candidates	ambiguity|no-result
+20	298837675	开始懂了	孙燕姿	My Desired Happiness	271	chinese_pop		Kugou|LRCLIB|Soda	95	95		below_threshold|ambiguous_gap|api_unavailable|no_lyrics_found|no_candidates	ambiguity|matcher_rejection|no-result
+20	1443352465	爱情转移	陈奕迅	認了吧 (台灣版)	260	chinese_pop		Kugou|LRCLIB|LRCMux|QQ|Soda	95	95		below_threshold|ambiguous_gap|no_lyrics_found	ambiguity|matcher_rejection|no-result
+20	347295290	雨爱	杨丞琳	Rainie & Love?	262	chinese_pop		Kugou|LRCLIB|LRCMux|Soda	95	95		ambiguous_gap|below_threshold|no_lyrics_found|no_candidates	ambiguity|matcher_rejection|no-result
+20	1871400641	关键词	林俊杰	From M.E. To Myself	208	chinese_pop		Kugou|LRCLIB|Soda	95	95		below_threshold|ambiguous_gap|api_unavailable|no_lyrics_found|no_candidates	ambiguity|matcher_rejection|no-result
+20	255921025	我不难过	孙燕姿	未完成	320	chinese_pop		Kugou|Soda	95	95		ambiguous_gap|no_lyrics_found|api_unavailable|no_candidates|below_threshold	ambiguity|matcher_rejection|no-result

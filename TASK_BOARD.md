@@ -6,11 +6,12 @@ Last Updated: 2026-08-31
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| Manually label run 19 proposed recoveries | 03_LAB / 05_MATCHER | P0 | 464 eligible provider rows; false positives must remain 0 |
+| Strategy-blind label popular misses and ambiguity pool | 03_LAB / 05_MATCHER | P0 | Start with frozen 50 + 40; false positives must remain 0 |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
-| Build fixed 100-song popular-miss Provider matrix | 03_LAB | P1 | Report unique incremental Coverage and verified sync correctness |
-| Audit Soda invalid-response regression | 03_LAB | P0 | Run 28: `0/1000`, all JSON parse failures; no Matcher changes |
-| Label a fixed sample from 108 remaining misses | 03_LAB / 05_MATCHER | P0 | Prioritize Korean, Chinese pop, Spotify hot, and Japanese tracks |
+| Add lyric-text evidence and independent holdout | 03_LAB / 05_MATCHER | P0 | Required before ranking delta is computable |
+| Audit Soda invalid-response regression | 03_LAB | P0 | Run 50: `0/1000`, all JSON parse failures; no Matcher changes |
+| Manually listen to Timing Quality priority sample | 03_LAB / 04_UX | P1 | 11 songs; measure start/middle/end error |
+| Correct offline evaluator denominators | 05_MATCHER | P1 | Benchmark-only; include comparable Current decisions |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
 | Replace Demo links with GitHub native attachments | 06_DOCS | P2 | Requires browser local-file access |
 | Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
@@ -25,10 +26,9 @@ Last Updated: 2026-08-31
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
-| v0.7 popular-miss evidence dataset | 03_LAB / 05_MATCHER | P0 | Separate Provider no-result from Matcher rejection; no production changes |
-| Remaining Provider Health Classification | 03_LAB | P0 | Soda invalid response and LRCMux 404 semantics |
+| v0.7 human truth labeling | 03_LAB / 05_MATCHER | P0 | Dataset frozen; labels and lyric text pending |
+| Remaining Provider semantics | 03_LAB | P1 | Soda invalid response and LRCMux 404 meaning |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
-| Phase 4 Matcher Go/No-Go | 00_PM / 03_LAB / 05_MATCHER | P0 | Simulator ready; production remains unchanged |
 
 ## BLOCKED
 
@@ -46,12 +46,21 @@ Last Updated: 2026-08-31
 | QQ Music production integration | 01_APP | P2 | No stable public now-playing API verified |
 | NetEase player production integration | 01_APP | P2 | No stable public now-playing API verified |
 | Track Identity enhanced ranking | 03_LAB / 05_MATCHER | P1 | Dataset frozen; human labels 0/2,568 and candidate album/ISRC absent |
+| Candidate deduplication | 03_LAB / 05_MATCHER | P0 | 40-case audit found 1 duplicate and 39 indeterminate cases |
 
 ## DONE
 
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
-| v0.7 latest Benchmark baseline | 03_LAB | P0 | Run 49 Coverage `88.9%`; timer active; latest Top Songs join unavailable |
+| v0.7 run 50 baseline | 03_LAB | P0 | Overall 89.0%; Top Songs 90.67%; Top 100 97.0% |
+| v0.7 popular-miss dataset freeze | 03_LAB | P0 | 50 unique tracks with discovery-run provenance |
+| v0.7 Provider Health audit | 03_LAB | P0 | Core/fallback/low-value/unhealthy classified; no order change |
+| v0.7 Track Identity audit | 05_MATCHER | P0 | Album/ISRC absent; version signals remain audit-only |
+| v0.7 Candidate Ambiguity audit | 03_LAB / 05_MATCHER | P0 | 40 cases: A=1, B=0, C=0, D=39; dedup No-Go |
+| v0.7 Ranking Simulation Gate | 05_MATCHER | P0 | Accuracy/FP not computable; Production No-Go |
+| v0.7 Timing Quality snapshot | 03_LAB / 04_UX | P1 | 35 songs/1,830 lines; auditory dimensions pending |
+| v0.7 Feedback and docs QA | 01_APP / 04_UX / 06_DOCS | P1 | READY/PASS; no code or public-doc changes |
+| v0.7 Platform matrix | 00_PM / 01_APP | P2 | Universal Binary first conditional candidate; all platforms deferred |
 | Publish v0.6.1 stability patch | 00_PM / 01_APP / 02_RELEASE | P0 | Release commit `9180b78`; tag, DMG and checksum published |
 | v0.6.1 network recovery | 01_APP / 04_UX | P1 | Apple Music and Spotify recover without stale lyrics |
 | v0.6.1 sleep/wake recovery | 01_APP / 04_UX | P1 | Apple Music Status Bar and Spotify Notch Mode pass |

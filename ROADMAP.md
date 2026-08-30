@@ -191,7 +191,7 @@ Explicitly Excluded:
 
 ### v0.7 - Lyrics Quality Hardening
 
-Status: Evidence preparation in progress.
+Status: Evidence baseline completed; labeled truth gate in progress.
 
 Goal: Improve user-perceived accuracy by reducing popular-song misses, wrong
 versions, and wrong candidates without optimizing aggregate Coverage alone.
@@ -206,6 +206,17 @@ Order:
    translation, and cover identity cases.
 5. Run offline candidate-ranking simulations using title, artist, duration,
    album, and version metadata.
+
+Current result:
+
+- Run 50 Overall is `89.0%`; Top Songs is `90.67%`; Top 100 is `97.0%`.
+- A 50-track unique popular-miss dataset and 40-case ambiguity audit are frozen.
+- Track Identity v1 still has `0/2,568` human labels; album and ISRC candidate
+  evidence are absent.
+- Offline signal selection counts are available, but correctness and confirmed
+  false-positive deltas are not computable.
+- Gate is `CONDITIONAL GO` for labeling and Benchmark-only evaluator fixes;
+  Production Matcher remains No-Go.
 
 Gate:
 

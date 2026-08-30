@@ -1,14 +1,11 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-08-24
+Last Updated: 2026-08-31
 
 ## TODO
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| Publish v0.6.1 stability patch | 00_PM / 01_APP / 02_RELEASE | P0 | Build 7 DMG verified; no feature or Matcher changes |
-| Complete network disconnect/recovery check | 01_APP / 04_UX | P1 | Requires action-time permission to change Mac network state |
-| Complete system sleep/resume check | 04_UX | P1 | Requires manual hardware interaction |
 | Manually label run 19 proposed recoveries | 03_LAB / 05_MATCHER | P0 | 464 eligible provider rows; false positives must remain 0 |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
 | Build fixed 100-song popular-miss Provider matrix | 03_LAB | P1 | Report unique incremental Coverage and verified sync correctness |
@@ -28,7 +25,7 @@ Last Updated: 2026-08-24
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
-| v0.5 Phase 4 labeled simulation | 03_LAB / 05_MATCHER | P0 | Run 19 identity gate passed; manual ground truth pending |
+| v0.7 popular-miss evidence dataset | 03_LAB / 05_MATCHER | P0 | Separate Provider no-result from Matcher rejection; no production changes |
 | Remaining Provider Health Classification | 03_LAB | P0 | Soda invalid response and LRCMux 404 semantics |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 | Phase 4 Matcher Go/No-Go | 00_PM / 03_LAB / 05_MATCHER | P0 | Simulator ready; production remains unchanged |
@@ -54,11 +51,16 @@ Last Updated: 2026-08-24
 
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
+| v0.7 latest Benchmark baseline | 03_LAB | P0 | Run 49 Coverage `88.9%`; timer active; latest Top Songs join unavailable |
+| Publish v0.6.1 stability patch | 00_PM / 01_APP / 02_RELEASE | P0 | Release commit `9180b78`; tag, DMG and checksum published |
+| v0.6.1 network recovery | 01_APP / 04_UX | P1 | Apple Music and Spotify recover without stale lyrics |
+| v0.6.1 sleep/wake recovery | 01_APP / 04_UX | P1 | Apple Music Status Bar and Spotify Notch Mode pass |
+| v0.6.1 public artifact validation | 02_RELEASE | P0 | GitHub DMG SHA-256 `c36d5141...f52ed`; install and both player smokes pass |
 | v0.6.0 Apple Music long-run stability | 01_APP / 04_UX | P0 | 60+ min, 20+ changes, restart/recovery and resource checks complete |
 | v0.6.0 Spotify regression stability | 04_UX / 01_APP | P0 | 30 min, ten changes, pause/resume and restart recovery complete |
 | v0.6.0 public artifact revalidation | 02_RELEASE | P0 | GitHub DMG hash, hdiutil, install, launch and both player smokes pass |
 | Apple Music transient state fix | 01_APP / 04_UX | P1 | v0.6.1 build 7 shows Changing song instead of false permission warning |
-| v0.6.1 local patch artifact | 01_APP / 02_RELEASE | P0 | DMG verified; SHA-256 `2f5b4449...503b1b`; not published |
+| v0.6.1 local patch artifact | 01_APP / 02_RELEASE | P0 | Superseded by the verified public artifact |
 | v0.6 support documentation audit | 06_DOCS | P1 | Signing, Automation, and feedback-draft wording corrected |
 | Publish v0.6.0 GitHub Pre-release | 00_PM / 01_APP / 02_RELEASE | P0 | main, tag, DMG, checksum, Release Notes, and remote artifact verification complete |
 | Package validated Provider recovery publicly | 01_APP / 02_RELEASE | P0 | Included in the v0.6.0 public DMG |

@@ -1,30 +1,31 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-08-24
+Last Updated: 2026-08-31
 
 ## Current Phase
 
-v0.6.0 Post-Release Stability Validation
+v0.7 Lyrics Quality Hardening - Evidence Preparation
 
 ## Current Goal
 
-Validate real-world v0.6.0 stability and prepare only confirmed stability
-fixes without changing the production Matcher or adding product features.
+Reduce popular-song misses and wrong-version matches through labeled evidence
+without changing the production Matcher or adding a music platform.
 
 ## Release Status
 
 - `v0.3.0-beta` is published as a GitHub Pre-release.
 - `v0.3.1` build `4` is published as a GitHub Pre-release.
-- `v0.6.0` build `6` is published as a GitHub Pre-release.
+- `v0.6.0` build `6` and `v0.6.1` build `7` are published as GitHub
+  Pre-releases.
 - `v0.6.0` release commit: `e8487b7`.
 - `v0.6.0` release tag: `v0.6.0`.
 - `v0.6.0` DMG SHA-256:
   `770b80446b58d114e04af3dfa9016f3794ce607dedf1d2653dbebcb4b73b38d9`.
-- Post-release gate: `PASS WITH RISKS`.
-- A local `v0.6.1` build `7` stability candidate fixes the transient Apple
-  Music false-permission state. It is not tagged or published.
-- `v0.6.1` candidate DMG SHA-256:
-  `2f5b4449ecf42eafc8c39f6d2ef679662a70d78a6dbd3bdfda347d5134503b1b`.
+- `v0.6.1` release commit: `9180b78`.
+- `v0.6.1` release tag: `v0.6.1`.
+- `v0.6.1` DMG SHA-256:
+  `c36d51416759108abbc9fa41b20a48510b1208b7f9d0f72f8b240753bb8f52ed`.
+- Final stability gate: `PASS`.
 - Release commit: `3666710`.
 - Release tag: `v0.3.1`.
 - DMG SHA-256:
@@ -32,14 +33,15 @@ fixes without changing the production Matcher or adding product features.
 - The DMG was downloaded again from GitHub; SHA-256 matched and
   `hdiutil verify` passed.
 - Repository: https://github.com/Xiye88/NotchMuse
-- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.0
+- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.1
 - Apple Music production integration is GO for `v0.6.0`: authenticated
   playback, both display modes, pause/resume, song switching, app restart,
   Automation denial/re-grant, stale-lyric clearing, and Spotify regression pass.
 - Current support: macOS 14+, Apple Silicon, Spotify or Apple Music.
 - Developer ID signing and notarization remain deferred.
-- The GitHub-downloaded `v0.6.0` DMG matches the local artifact, its SHA-256
-  file reports `OK`, and `hdiutil verify` passes.
+- The GitHub-downloaded `v0.6.1` DMG matches the release binary, its SHA-256
+  file reports `OK`, `hdiutil verify` passes, and live Apple Music and Spotify
+  lyrics smoke tests pass.
 
 ## Benchmark Health
 
@@ -47,22 +49,26 @@ fixes without changing the production Matcher or adding product features.
 - Password authentication remains unavailable but is not required for current
   operations.
 - `lyrics-benchmark.timer` is enabled and active.
-- Natural runs `21-28` completed successfully after P0 Provider recovery.
-- Coverage across runs `21-28` averages `89.38%`, with a `89.1-89.6%` range.
-- Latest verified run: `42`, completed 2026-08-23, Coverage `893/1000`
-  (`89.3%`).
-- Runs `36-42` average `89.23%`; runs `29-35` average `89.04%`.
-- Latest Top Songs result is `276/300`; the first 100 is `96/100`.
+- Latest natural run: `49`, completed 2026-08-30, Coverage `889/1000`
+  (`88.9%`).
+- Run `49` Provider successes: LRCLIB `623`, LRCMux `600`, NetEase `531`,
+  Kugou `205`, QQ `42`, and Soda `0`.
+- Run `49` unique contributions: LRCLIB `128`, LRCMux `66`, NetEase `36`,
+  Kugou `8`, QQ `3`, and Soda `0`.
+- The Benchmark service is inactive between runs and
+  `lyrics-benchmark.timer` remains active.
 - Run `20` baseline was `674/1000` (`67.4%`); recovery produced a sustained
   improvement of about `21.98` percentage points.
-- Run `28` Provider successes: LRCLIB `628`, LRCMux `603`, NetEase `515`,
-  Kugou `203`, QQ `32`, and Soda `0`.
-- Run `28` unique contributions: LRCLIB `135`, LRCMux `72`, NetEase `38`,
-  Kugou `10`, QQ `1`, and Soda `0`.
-- Run `28` Matcher evidence: `1,215` no-candidate, `971` below-threshold, and
-  `391` ambiguity-gap Provider rows.
-- The Top Songs proxy reached `277/300` (`92.33%`); its first 100 reached
-  `96/100` on the latest natural run.
+- Run `49` Provider-result rows contain `2,533` matching failures, `191`
+  no-lyrics results, `276` API-unavailable results, `997` invalid responses,
+  and `2` unknown errors. These row labels cannot be converted into song-level
+  wrong-match, no-result, network, or parser counts without cleaner taxonomy
+  and human truth labels.
+- The latest newly verified Top Songs join is unavailable because the follow-up
+  VPS SSH session stopped at the banner. The most recent verified natural
+  baseline remains run `28`: `277/300` (`92.33%`) and Top 100 `96/100`.
+- That Top Songs baseline has `23` misses in the first 300 and `4` misses in
+  the first 100.
 - The latest `108` uncovered songs are concentrated in Korean (`43`), Chinese
   pop (`28`), Spotify hot (`22`), Japanese (`10`), English pop (`4`), and
   independent (`1`) tracks.
@@ -71,19 +77,13 @@ fixes without changing the production Matcher or adding product features.
 
 ### P0 Publish Gates
 
-- None for the published `v0.6.0` artifact.
-- Before new feature work, publish the verified `v0.6.1` stability patch for
-  the transient Apple Music false-permission message.
+- None. The v0.6 integration, post-release validation, and v0.6.1 stability
+  patch are archived.
 
 ### P1 Analysis Gates
 
-- v0.6.0 can briefly show an incorrect Automation permission message while
-  Apple Music changes tracks. The local v0.6.1 candidate classifies this as a
-  stopped/transition state and passes the real reproduction.
 - Spotify restart can remain in `Spotify is not running` while the desktop
   client finishes startup registration, then recovers without NotchMuse restart.
-- Real network disconnect/recovery and system sleep/resume remain manual
-  post-release validation gaps.
 
 - Production Matcher changes remain blocked until natural run `19+` supplies
   second-candidate identity and manual ground truth proves a safe ranking
@@ -137,6 +137,13 @@ fixes without changing the production Matcher or adding product features.
 
 ## Completed Tasks
 
+- Published `v0.6.1` build `7` with release commit `9180b78`, tag `v0.6.1`,
+  DMG, checksum, and focused stability Release Notes.
+- Passed real Apple Music and Spotify network disconnect/recovery checks with
+  no crash, persistent stale lyrics, or failed recovery.
+- Passed real Apple Music Status Bar and Spotify Notch Mode sleep/wake checks.
+- Re-downloaded the public v0.6.1 DMG, verified its SHA-256 and disk image,
+  installed it, and passed live Apple Music and Spotify lyrics smoke tests.
 - Completed v0.6.0 post-release Apple Music 60-minute validation, 20+ song
   changes, rapid switching, pause/resume, missing lyrics, player restart, app
   restart, Automation recovery, Status Bar, and Notch Mode checks.
@@ -360,10 +367,6 @@ fixes without changing the production Matcher or adding product features.
 - Run the first weekly issue triage after targeted beta promotion.
 - Evaluate three P1 failure-state copy changes without coupling them to Matcher
   work: `Finding lyrics`, generic unavailable guidance, and refresh guidance.
-- Exercise Apple Music Automation denial and re-grant on a disposable user
-  account or after explicit approval to change the macOS security permission.
-- Decide whether Music.app restart must preserve playback, or whether the safe
-  Waiting state plus manual replay recovery is acceptable for v0.6.
 - Blind-label a stratified Track Identity v1 sample before rerunning ranking.
 
 ## Next Decisions
@@ -379,8 +382,7 @@ fixes without changing the production Matcher or adding product features.
   Benchmark/App parity are resolved on a fixed popular-song dataset.
 - P0 Existing Provider Recovery: Go; implemented and deployed.
 - P0 Existing Provider Recovery validation: Passed on runs `21-28`.
-- Public delivery of Provider recovery: recommend a minimal hotfix release;
-  Product Owner version decision is required.
+- Public delivery of Provider recovery: completed in v0.6.0.
 - Musixmatch official API: conditional research candidate only if recurring
   cost and licensing are accepted; reverse-engineered access is No-Go.
 - Keep title/artist normalization, Provider priority changes, App retry,
@@ -392,12 +394,12 @@ fixes without changing the production Matcher or adding product features.
 - Approve targeted early-beta promotion now; keep broad promotion gated on a
   clean-user journey pass and initial issue triage.
 - Keep v0.4 scoped to Spotify + Apple Silicon.
-- Treat Apple Music as the v0.6 second-player candidate only after an isolated
-  Music.app spike proves stable playback metadata and position.
+- Apple Music production integration: GO and archived after v0.6.1 stability
+  validation.
 - Keep broader Chinese Support documentation deferred; App feedback UI and
   email drafts are already bilingual.
-- Unified Music Player Layer: Go for a Spotify-compatible spike only.
-- Apple Music: Conditional Go for isolated runtime validation; Release No-Go.
+- Unified Music Player Layer: released for Spotify and Apple Music.
+- Apple Music: GO; v0.6.0 and v0.6.1 are published.
 - QQ Music: Conditional Go for a diagnostic probe; production No-Go.
 - NetEase Cloud Music player: production No-Go; diagnostic probe only.
 - Private MediaRemote and Accessibility scraping: No-Go for production.

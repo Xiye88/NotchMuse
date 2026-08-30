@@ -157,7 +157,7 @@ Deferred:
 
 ### v0.6 - Multi-Player Architecture and Evidence
 
-Status: Apple Music production path implemented; real playback gate pending.
+Status: DONE / ARCHIVED. v0.6.0 and v0.6.1 are published.
 
 Goal: Add a maintainable player boundary without regressing Spotify, then use
 new metadata as evidence rather than immediately changing production matching.
@@ -172,15 +172,13 @@ Order:
 6. Run QQ Music and NetEase diagnostic probes only on current installed apps.
 7. Consider a second production player only after the first two adapters pass.
 
-Go / No-Go:
+Final result:
 
-- Unified adapter boundary: Go for Spike.
-- Apple Music: Conditional Go; production path is implemented but Release
-  remains blocked by the five-song runtime matrix and Spotify regression.
-- QQ Music: diagnostic-only Conditional Go; production No-Go.
-- NetEase player: production No-Go; diagnostic-only evidence allowed.
-- Track Identity ranking: Benchmark-only Go; production Matcher No-Go.
-- Email feedback: Ready; public recipient configured in one build location.
+- Apple Music and Spotify production paths are released and pass long-run,
+  network recovery, sleep/wake, and public artifact smoke validation.
+- v0.6.1 fixes the transient Apple Music false Automation permission warning.
+- Email feedback is Ready with no telemetry or background upload.
+- Production Matcher behavior remained unchanged throughout v0.6.
 
 Explicitly Excluded:
 
@@ -190,6 +188,31 @@ Explicitly Excluded:
 - New lyrics Providers.
 - Production Matcher changes without labeled holdout evidence.
 - Large UI redesign, Windows, Intel-first work, or automatic telemetry.
+
+### v0.7 - Lyrics Quality Hardening
+
+Status: Evidence preparation in progress.
+
+Goal: Improve user-perceived accuracy by reducing popular-song misses, wrong
+versions, and wrong candidates without optimizing aggregate Coverage alone.
+
+Order:
+
+1. Freeze the latest Overall, Top Songs, and Top 100 baselines.
+2. Build a complete missing dataset for failed popular tracks.
+3. Separate Provider no-result, network, and parser failures from Matcher
+   rejection or ambiguity.
+4. Label Live, Remix, Acoustic, Remastered, Deluxe, OST, feat/with,
+   translation, and cover identity cases.
+5. Run offline candidate-ranking simulations using title, artist, duration,
+   album, and version metadata.
+
+Gate:
+
+- Production Matcher remains unchanged until a labeled holdout shows a real
+  correct-selection improvement with confirmed false positives equal to zero.
+- Provider priority does not change from one Benchmark run.
+- No new music platform or lyrics Provider is implemented in this phase.
 
 ## Product Guardrails
 

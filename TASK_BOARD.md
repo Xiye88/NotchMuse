@@ -6,12 +6,11 @@ Last Updated: 2026-08-31
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| Strategy-blind label popular misses and ambiguity pool | 03_LAB / 05_MATCHER | P0 | Start with frozen 50 + 40; false positives must remain 0 |
+| Capture candidate identity and lyric text | 03_LAB / 05_MATCHER | P0 | Stable ID, ISRC, album, lyric body for frozen 50 |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
-| Add lyric-text evidence and independent holdout | 03_LAB / 05_MATCHER | P0 | Required before ranking delta is computable |
+| Build independent labeled holdout | 03_LAB / 05_MATCHER | P0 | Required before reopening Production Gate |
 | Audit Soda invalid-response regression | 03_LAB | P0 | Run 50: `0/1000`, all JSON parse failures; no Matcher changes |
 | Manually listen to Timing Quality priority sample | 03_LAB / 04_UX | P1 | 11 songs; measure start/middle/end error |
-| Correct offline evaluator denominators | 05_MATCHER | P1 | Benchmark-only; include comparable Current decisions |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
 | Replace Demo links with GitHub native attachments | 06_DOCS | P2 | Requires browser local-file access |
 | Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
@@ -26,7 +25,7 @@ Last Updated: 2026-08-31
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
-| v0.7 human truth labeling | 03_LAB / 05_MATCHER | P0 | Dataset frozen; labels and lyric text pending |
+| v0.7 metadata completion | 03_LAB / 05_MATCHER | P0 | 50 labels exist; 49 remain insufficient |
 | Remaining Provider semantics | 03_LAB | P1 | Soda invalid response and LRCMux 404 meaning |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 
@@ -52,6 +51,11 @@ Last Updated: 2026-08-31
 
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
+| v0.7 final Production Gate | 00_PM | P0 | NO-GO; no Production Matcher change approved |
+| Candidate Ground Truth v1 | 03_LAB / 05_MATCHER | P0 | 50 cases: 1 indistinguishable, 49 insufficient |
+| Ranking Simulator v3 | 05_MATCHER | P0 | Benchmark-only evaluator; 11 focused tests pass |
+| Run 50 Top Songs ownership | 03_LAB | P0 | Provider 3.57%; Matcher 0%; Metadata 96.43% |
+| Soda endpoint audit | 03_LAB | P0 | REMOVE-CANDIDATE recommendation; production unchanged |
 | v0.7 run 50 baseline | 03_LAB | P0 | Overall 89.0%; Top Songs 90.67%; Top 100 97.0% |
 | v0.7 popular-miss dataset freeze | 03_LAB | P0 | 50 unique tracks with discovery-run provenance |
 | v0.7 Provider Health audit | 03_LAB | P0 | Core/fallback/low-value/unhealthy classified; no order change |

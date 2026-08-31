@@ -191,7 +191,7 @@ Explicitly Excluded:
 
 ### v0.7 - Lyrics Quality Hardening
 
-Status: Evidence baseline completed; labeled truth gate in progress.
+Status: Final Production Gate completed - NO-GO.
 
 Goal: Improve user-perceived accuracy by reducing popular-song misses, wrong
 versions, and wrong candidates without optimizing aggregate Coverage alone.
@@ -215,8 +215,11 @@ Current result:
   evidence are absent.
 - Offline signal selection counts are available, but correctness and confirmed
   false-positive deltas are not computable.
-- Gate is `CONDITIONAL GO` for labeling and Benchmark-only evaluator fixes;
-  Production Matcher remains No-Go.
+- Final Production Gate is `NO-GO`: Ground Truth v1 has 50 explicit labels,
+  but only one indistinguishable duplicate and zero resolved top/second/neither
+  cases. Ranking uplift and a valid false-positive rate cannot be established.
+- Reopen the Gate only after candidate stable ID, ISRC, album, and lyric text
+  produce a labeled training set plus an independent holdout.
 
 Gate:
 

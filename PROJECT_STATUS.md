@@ -4,7 +4,7 @@ Last Updated: 2026-08-31
 
 ## Current Phase
 
-v0.7 Lyrics Quality Hardening - Labeled Evidence Gate
+v0.7 Lyrics Quality Hardening - Production Gate NO-GO
 
 ## Current Goal
 
@@ -140,9 +140,24 @@ without changing the production Matcher or adding a music platform.
   cases with insufficient metadata. Candidate de-duplication remains No-Go.
 - Timing Quality static checks cover 35 songs and 1,830 lines. Audible early,
   late, fixed-offset, and drift judgments remain unverified pending listening.
+- Candidate Ground Truth v1 contains 50 cases: one indistinguishable strict
+  duplicate and 49 insufficient-metadata cases. Resolved top/second/neither
+  denominator is zero.
+- Run 50 Top Songs primary ownership is Provider `1/28` (`3.57%`), Matcher
+  `0/28`, Metadata limitation `27/28` (`96.43%`), and Network/Parser `0/28`.
+- Soda is a `REMOVE-CANDIDATE` recommendation: a fresh probe returned HTTP
+  200 with an empty JSON body, consistent with `0/1000` run 50 success and
+  `1000/1000` invalid responses. No production order change was made.
 
 ## Completed Tasks
 
+- Completed the v0.7 final Production Gate with `NO-GO`.
+- Established Candidate Ground Truth v1 with 50 explicit labels and no forced
+  top/second truth.
+- Added and tested Benchmark-only Ranking Simulator v3 with strict FP,
+  wrong-candidate, unresolved, stable-ID dedup, and identity-signal metrics.
+- Completed the run 50 Top Songs root-cause ownership dataset and Soda endpoint
+  response audit.
 - Verified v0.7 run `50` Overall, Top Songs, Top 100, Provider Health, and
   two-window seven-day baselines.
 - Froze 50 unique popular-song misses with discovery-run provenance and
@@ -368,10 +383,9 @@ without changing the production Matcher or adding a music platform.
 - Replace repository video links with GitHub native attachment URLs when
   browser upload permission is available.
 - Re-capture the Status Bar screenshot without left-edge lyric cropping.
-- Strategy-blind label the 50 popular misses and a frozen ambiguity pool.
-- Add lyric-text evidence and an independent holdout before rerunning ranking.
-- Correct Benchmark-only evaluator semantics so Current and Experimental use
-  comparable selected-case denominators.
+- Capture candidate stable ID, ISRC, album, and lyric text for the frozen 50
+  cases, then strategy-blind re-label them.
+- Build an independent labeled holdout before any new ranking experiment.
 - Investigate Soda's `0/1000` invalid-response regression without changing
   production Matcher behavior.
 - Manually listen to the 11 prioritized Timing Quality samples.
@@ -419,6 +433,6 @@ without changing the production Matcher or adding a music platform.
 - NetEase Cloud Music player: production No-Go; diagnostic probe only.
 - Private MediaRemote and Accessibility scraping: No-Go for production.
 - Email feedback: READY with Product Owner-approved public address.
-- v0.7 final gate: CONDITIONAL GO for labeling and Benchmark-only evaluator
-  correction; Production score, threshold, normalization, dedup, and Provider
-  priority remain unchanged.
+- v0.7 final gate: NO-GO. Ground Truth structure exists, but ranking has zero
+  evaluable top/second/neither cases and no proven uplift. Production score,
+  threshold, normalization, dedup, and Provider priority remain unchanged.

@@ -228,6 +228,40 @@ Gate:
 - Provider priority does not change from one Benchmark run.
 - No new music platform or lyrics Provider is implemented in this phase.
 
+### v0.7.1 - Lyrics Metadata & Source Intelligence
+
+Status: Evidence audit completed - Production Gate `NO-GO`.
+
+Goal: Test whether existing player and Provider metadata can resolve the
+remaining identity gaps without relaxing Matcher safety.
+
+Result:
+
+- Spotify can expose a native Spotify ID/URL and secondary local metadata;
+  Apple Music can expose persistent/database IDs, release date/year, and album
+  metadata. Neither local scripting interface exposes ISRC.
+- LRCLIB and LRCMux return useful album/source metadata, LRCMux returns ISRC,
+  and several Providers have native IDs that current evidence storage drops.
+- The frozen 49 insufficient-metadata cases contain none of those candidate
+  fields, so confirmed resolution remains `0/49`.
+- Two-Provider consensus makes six provisional selections after version
+  guarding, but correctness, ambiguity reduction, and confirmed false-positive
+  rate remain `N/A`; a three-Provider threshold selects none.
+- Two of the three Top 100 misses have confirmed public synced lyrics, but both
+  require a cross-language catalog identity path that is not available through
+  the current low-maintenance local adapters.
+- Current reasonable target is a validated `92%`, not a commitment to 95-98%.
+
+Gate:
+
+- No Production metadata patch is approved.
+- The only next evidence batch is Benchmark-only Metadata Capture v2 for the
+  28 Top Songs misses, followed by strategy-blind labeling and an independent
+  holdout.
+- If that batch cannot prove real ambiguity resolution with zero confirmed
+  false positives, close deep Matcher/metadata optimization and prioritize
+  user growth.
+
 ## Product Guardrails
 
 - Lyrics Quality and stability take priority over expansion.

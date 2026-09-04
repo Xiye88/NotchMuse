@@ -1,14 +1,14 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-08-31
+Last Updated: 2026-09-04
 
 ## TODO
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| Capture candidate identity and lyric text | 03_LAB / 05_MATCHER | P0 | Stable ID, ISRC, album, lyric body for frozen 50 |
+| Benchmark-only Metadata Capture v2 | 03_LAB / 05_MATCHER | P0 | Top Songs 28 miss: native ID, album/year/ISRC, lyric-body hash; no Production import |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
-| Build independent labeled holdout | 03_LAB / 05_MATCHER | P0 | Required before reopening Production Gate |
+| Build strategy-blind labeled holdout | 03_LAB / 05_MATCHER | P0 | Required before reopening Metadata or Matcher Production Gate |
 | Audit Soda invalid-response regression | 03_LAB | P0 | Run 50: `0/1000`, all JSON parse failures; no Matcher changes |
 | Manually listen to Timing Quality priority sample | 03_LAB / 04_UX | P1 | 11 songs; measure start/middle/end error |
 | Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
@@ -25,7 +25,6 @@ Last Updated: 2026-08-31
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
-| v0.7 metadata completion | 03_LAB / 05_MATCHER | P0 | 50 labels exist; 49 remain insufficient |
 | Remaining Provider semantics | 03_LAB | P1 | Soda invalid response and LRCMux 404 meaning |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
 
@@ -34,7 +33,8 @@ Last Updated: 2026-08-31
 | Task | Owner | Priority | Blocker |
 | --- | --- | --- | --- |
 | Title normalization implementation | 05_MATCHER | P1 | Phase 3 second-candidate evidence takes priority; no safe normalization rule |
-| Production Matcher implementation | 01_APP / 05_MATCHER | P0 | No strategy has passed labeled accuracy and zero-false-positive gate |
+| Production Matcher implementation | 01_APP / 05_MATCHER | P0 | v0.7 closed NO-GO; ranking/threshold/weights stopped |
+| Production metadata enrichment | 01_APP / 05_MATCHER | P0 | 0/49 confirmed resolved; consensus FP and accuracy are N/A |
 | Production Provider expansion | 01_APP / 03_LAB | P0 | Existing Provider health and Benchmark/App parity unresolved |
 | Artist normalization implementation | 05_MATCHER | P1 | Second-candidate identity is required before ranking conclusions |
 | Track Identity album / mandatory ISRC | 05_MATCHER / 01_APP | P1 | Candidate fields incomplete; no safe evidence yet |
@@ -51,6 +51,13 @@ Last Updated: 2026-08-31
 
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
+| v0.7.1 Metadata & Source Intelligence Gate | 00_PM | P0 | NO-GO; no Production metadata patch approved |
+| Player Metadata Capability Matrix | 01_APP / 05_MATCHER | P0 | Native IDs/secondary fields exist; no local-script ISRC |
+| Provider Metadata Capability Matrix | 03_LAB | P0 | Confirmed discarded metadata; no production order change |
+| Metadata Resolution Opportunity audit | 03_LAB / 05_MATCHER | P0 | 49 eligible for recapture; 0/49 confirmed resolved |
+| Cross-provider consensus experiment | 03_LAB / 05_MATCHER | P0 | 6/49 provisional; accuracy and confirmed FP remain N/A |
+| Top Songs Recovery audit | 03_LAB | P0 | Top 100: 2 opportunities, 0 safe production paths |
+| Feedback data-loop QA | 01_APP / 04_UX | P1 | READY/PASS; release self-test and configured email verified |
 | v0.7 final Production Gate | 00_PM | P0 | NO-GO; no Production Matcher change approved |
 | Candidate Ground Truth v1 | 03_LAB / 05_MATCHER | P0 | 50 cases: 1 indistinguishable, 49 insufficient |
 | Ranking Simulator v3 | 05_MATCHER | P0 | Benchmark-only evaluator; 11 focused tests pass |

@@ -1,15 +1,15 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-08-31
+Last Updated: 2026-09-04
 
 ## Current Phase
 
-v0.7 Lyrics Quality Hardening - Production Gate NO-GO
+v0.7.1 Lyrics Metadata & Source Intelligence - Production Gate NO-GO
 
 ## Current Goal
 
-Reduce popular-song misses and wrong-version matches through labeled evidence
-without changing the production Matcher or adding a music platform.
+Determine whether currently discarded player or Provider metadata can safely
+resolve popular-song identity gaps without changing the production Matcher.
 
 ## Release Status
 
@@ -45,10 +45,10 @@ without changing the production Matcher or adding a music platform.
 
 ## Benchmark Health
 
-- VPS access works through the existing local SSH key.
-- Password authentication remains unavailable but is not required for current
-  operations.
-- `lyrics-benchmark.timer` is enabled and active.
+- VPS access was previously verified through the existing local SSH key, but a
+  read-only recheck on 2026-09-04 was rejected by the current credentials.
+- The timer was enabled and active at the run 50 verification point; its
+  current state was not re-verified in this phase.
 - Latest natural run: `50`, completed 2026-08-31, Coverage `890/1000`
   (`89.0%`).
 - Run `50` Top Songs Coverage is `272/300` (`90.67%`); Top 100 is
@@ -73,8 +73,10 @@ without changing the production Matcher or adding a music platform.
   rows to meet the quota.
 - Run `50` analysis-layer provider-row evidence is: no-result `1,591`, parser
   `1,002`, network `19`, Matcher rejection `971`, and ambiguity `401`.
-- Wrong-candidate and confirmed-false-positive rates remain unmeasured because
-  Track Identity v1 has `0/2,568` human labels.
+- Candidate Ground Truth v1 now has 50 explicit labels, but 49 are
+  insufficient-metadata and one is indistinguishable. Resolved
+  top/second/neither denominator remains zero, so wrong-candidate and confirmed
+  false-positive rates remain `N/A`.
 
 ## Blocking Issues
 
@@ -88,13 +90,14 @@ without changing the production Matcher or adding a music platform.
 - Spotify restart can remain in `Spotify is not running` while the desktop
   client finishes startup registration, then recovers without NotchMuse restart.
 
-- Production Matcher changes remain blocked until strategy-blind human labels
-  and an independent holdout prove a safe ranking strategy.
+- Production Matcher and metadata enrichment remain blocked until raw
+  candidate identity fields produce strategy-blind labels and an independent
+  holdout proves a safe decision.
 - Run `19` has `464` identity-equivalent and `25` non-equivalent
   ambiguity-gap provider rows. Metadata equivalence does not prove lyric text,
   timing, or version correctness.
-- Track Identity v1 has `0/2,568` human labels; correct-candidate and
-  false-positive rates cannot be claimed yet.
+- Candidate Ground Truth v1 has no resolved top/second/neither labels;
+  correct-candidate and false-positive rates cannot be claimed yet.
 - Title and artist normalization remain No-Go; current evidence is dominated
   by source-aligned score ties whose ground-truth lyric correctness is not
   manually labeled.
@@ -151,6 +154,19 @@ without changing the production Matcher or adding a music platform.
 
 ## Completed Tasks
 
+- Completed the v0.7.1 Lyrics Metadata & Source Intelligence Gate with
+  `NO-GO`; no Production patch was approved.
+- Audited Spotify and Apple Music scripting metadata. Both expose useful native
+  IDs and secondary fields, but neither exposes ISRC through the current local
+  scripting interface.
+- Audited Provider raw metadata and run 50 unique value. LRCLIB, LRCMux, and
+  Soda have confirmed fields discarded before evidence storage.
+- Re-evaluated all 49 insufficient-metadata cases: confirmed resolved remains
+  `0/49`; Cross-provider consensus has six provisional selections but no
+  evaluable accuracy or false-positive denominator.
+- Verified two of the three Top 100 misses have public synced-lyrics recovery
+  opportunities, while none has a low-maintenance safe Production path.
+- Reverified the v0.6.1 feedback flow and Release binary self-test.
 - Completed the v0.7 final Production Gate with `NO-GO`.
 - Established Candidate Ground Truth v1 with 50 explicit labels and no forced
   top/second truth.

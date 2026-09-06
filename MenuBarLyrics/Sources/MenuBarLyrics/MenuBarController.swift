@@ -9,10 +9,10 @@ enum PlayerFeedback {
 
     func menuTitle(for source: PlayerSource, language: AppLanguage = AppPreferences.language) -> String {
         switch self {
-        case .checking: return L10n.format("%@: Checking...", source.rawValue, language: language)
-        case .connected: return L10n.format("%@: Connected", source.rawValue, language: language)
-        case .notRunning: return L10n.format("%@: Not Running", source.rawValue, language: language)
-        case .unavailable: return L10n.format("%@: Connection Error", source.rawValue, language: language)
+        case .checking: return L10n.format("%@: Checking...", source.displayName(language: language), language: language)
+        case .connected: return L10n.format("%@: Connected", source.displayName(language: language), language: language)
+        case .notRunning: return L10n.format("%@: Not Running", source.displayName(language: language), language: language)
+        case .unavailable: return L10n.format("%@: Connection Error", source.displayName(language: language), language: language)
         }
     }
 }
@@ -26,7 +26,7 @@ enum LyricsFeedback {
 
     func menuTitle(for source: PlayerSource) -> String {
         switch self {
-        case .waiting: return L10n.format("Lyrics: Waiting for %@", source.rawValue)
+        case .waiting: return L10n.format("Lyrics: Waiting for %@", source.displayName())
         case .searching: return L10n.text("Lyrics: Searching...")
         case .available: return L10n.text("Lyrics: Available")
         case .notFound: return L10n.text("Lyrics: Not Found")
@@ -87,7 +87,7 @@ final class MenuBarController: NSObject {
         player = Self.adapter(for: AppPreferences.playerSource)
         setPlayerFeedback(.checking)
         setLyricsFeedback(.waiting)
-        displaySource = L10n.format("Checking %@...", player.source.rawValue)
+        displaySource = L10n.format("Checking %@...", player.source.displayName())
         setupButton()
         setupMenu()
         reloadSettings()
@@ -118,6 +118,7 @@ final class MenuBarController: NSObject {
         stopProgressTimer()
         pollTask?.cancel()
         pollTask = nil
+        player.shutdown()
         overlay.hide()
         statusItem.menu = nil
         NSStatusBar.system.removeStatusItem(statusItem)
@@ -195,7 +196,7 @@ final class MenuBarController: NSObject {
             currentPlayerTrack = nil
             currentLines = []
             stopProgressTimer()
-            setDisplay(L10n.format("%@ is not running", player.source.rawValue))
+            setDisplay(L10n.format("%@ is not running", player.source.displayName()))
         case .stopped:
             setPlayerFeedback(.connected)
             setLyricsFeedback(.waiting)
@@ -204,7 +205,7 @@ final class MenuBarController: NSObject {
             currentPlayerTrack = nil
             currentLines = []
             stopProgressTimer()
-            setDisplay(L10n.format("Waiting for %@", player.source.rawValue))
+            setDisplay(L10n.format("Waiting for %@", player.source.displayName()))
         case .unavailable:
             setPlayerFeedback(.unavailable)
             setLyricsFeedback(.waiting)
@@ -213,7 +214,11 @@ final class MenuBarController: NSObject {
             currentPlayerTrack = nil
             currentLines = []
             stopProgressTimer()
-            setDisplay(L10n.format("Cannot connect to %@. Check Automation permission in System Settings.", player.source.rawValue))
+            if player.source == .netEaseMusic {
+                setDisplay(L10n.text("NetEase bridge unavailable. Restart NotchMuse or choose another player."))
+            } else {
+                setDisplay(L10n.format("Cannot connect to %@. Check Automation permission in System Settings.", player.source.displayName()))
+            }
         case let .paused(nowPlaying):
             let track = nowPlaying.spotifyTrack
             let position = nowPlaying.playbackPosition
@@ -431,6 +436,7 @@ final class MenuBarController: NSObject {
             pollTask?.cancel()
             pollTask = nil
             pollGeneration += 1
+            player.shutdown()
             player = Self.adapter(for: selectedSource)
             currentTrack = nil
             currentPlayerTrack = nil
@@ -439,7 +445,7 @@ final class MenuBarController: NSObject {
             latestPlayerUptime = nil
             setPlayerFeedback(.checking)
             setLyricsFeedback(.waiting)
-            setDisplay(L10n.format("Checking %@...", selectedSource.rawValue))
+            setDisplay(L10n.format("Checking %@...", selectedSource.displayName()))
             startPoll(forceLyricsRefresh: true)
         }
         displayMode = AppPreferences.displayMode
@@ -457,6 +463,7 @@ final class MenuBarController: NSObject {
         switch source {
         case .spotify: SpotifyAdapter()
         case .appleMusic: AppleMusicAdapter()
+        case .netEaseMusic: NetEaseMusicAdapter()
         }
     }
 

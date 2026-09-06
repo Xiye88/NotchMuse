@@ -186,7 +186,7 @@ final class MediaRemoteBridge: @unchecked Sendable {
                 self.stoppingStream = false
                 return expected
             }
-            if !wasExpected && terminated.terminationStatus != 0 {
+            if !wasExpected {
                 let message = String(data: errors.value(), encoding: .utf8) ?? ""
                 onFailure(.commandFailed(terminated.terminationStatus, message))
             }

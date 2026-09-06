@@ -178,7 +178,7 @@ final class SettingsWindowController: NSWindowController {
         languagePopUp.target = self
         languagePopUp.action = #selector(languageChanged)
         for source in PlayerSource.allCases {
-            playerPopUp.addItem(withTitle: source.rawValue)
+            playerPopUp.addItem(withTitle: source.displayName())
         }
         playerPopUp.target = self
         playerPopUp.action = #selector(playerChanged)

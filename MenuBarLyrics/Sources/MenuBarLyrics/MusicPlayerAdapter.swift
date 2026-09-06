@@ -3,6 +3,11 @@ import Foundation
 enum PlayerSource: String, CaseIterable, Equatable, Sendable {
     case spotify = "Spotify"
     case appleMusic = "Apple Music"
+    case netEaseMusic = "NetEase Cloud Music"
+
+    func displayName(language: AppLanguage = AppPreferences.language) -> String {
+        self == .netEaseMusic ? L10n.text(rawValue, language: language) : rawValue
+    }
 }
 
 enum PlayerPlaybackState: String, Equatable, Sendable {
@@ -91,6 +96,7 @@ protocol MusicPlayerAdapter: Sendable {
     var source: PlayerSource { get }
     func snapshot() async -> MusicPlayerSnapshot
     func observeTrackChanges() -> AsyncStream<NowPlayingTrack?>
+    func shutdown()
 }
 
 extension MusicPlayerAdapter {
@@ -98,6 +104,7 @@ extension MusicPlayerAdapter {
     func currentTrack() async -> NowPlayingTrack? { await snapshot().currentTrack }
     func playbackState() async -> PlayerPlaybackState? { await snapshot().playbackState }
     func playbackPosition() async -> TimeInterval? { await snapshot().playbackPosition }
+    func shutdown() {}
 
     func observeTrackChanges() -> AsyncStream<NowPlayingTrack?> {
         AsyncStream { continuation in

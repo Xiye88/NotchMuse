@@ -69,6 +69,7 @@ enum SelfTests {
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
+            await testNetEaseMusicAdapter()
             await testLyricsClient()
             if ProcessInfo.processInfo.environment["LRCLIB_LIVE_TESTS"] == "1" {
                 await testLRCLIBLive()
@@ -121,6 +122,9 @@ enum SelfTests {
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
         check(AppPreferences.normalizedPlayerSource(nil) == .spotify, "defaults to Spotify")
         check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
+        check(AppPreferences.normalizedPlayerSource("NetEase Cloud Music") == .netEaseMusic, "persists NetEase selection")
+        check(PlayerSource.netEaseMusic.displayName(language: .english) == "NetEase Cloud Music", "shows the English NetEase name")
+        check(PlayerSource.netEaseMusic.displayName(language: .simplifiedChinese) == "网易云音乐", "shows the Chinese NetEase name")
     }
 
     private static func testMusicPlayerAdapterModel() {
@@ -276,6 +280,55 @@ enum SelfTests {
         check(rapid.consume(event("B"), at: 0.05).isEmpty, "replaces rapid transition A with B")
         check(rapid.consume(event("C"), at: 0.1).isEmpty, "replaces rapid transition B with C")
         check(rapid.flush(at: 0.4) == [.event(event("C"))], "commits only the final rapid transition")
+    }
+
+    private static func testNetEaseMusicAdapter() async {
+        let event = MediaRemoteEvent(
+            bundleIdentifier: NetEaseMusicAdapter.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: "晴天",
+            artist: "周杰伦",
+            album: "叶惠美",
+            duration: 269,
+            elapsedTimeNow: 42,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: "track-1",
+            mediaType: "MRMediaRemoteMediaTypeMusic"
+        )
+        guard case let .playing(track) = NetEaseMusicAdapter.snapshot(from: event, isRunning: true) else {
+            check(false, "maps a playing NetEase event")
+            return
+        }
+        check(track.title == "晴天" && track.playerSource == .netEaseMusic, "maps NetEase track metadata")
+        check(track.nativeTrackID == "track-1", "preserves the NetEase native track ID")
+
+        var paused = event
+        paused.playing = false
+        check(NetEaseMusicAdapter.snapshot(from: paused, isRunning: true).playbackState == .paused, "maps NetEase pause state")
+        let foreign = MediaRemoteEvent(
+            bundleIdentifier: "com.spotify.client",
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: "Other",
+            artist: nil,
+            album: nil,
+            duration: nil,
+            elapsedTimeNow: nil,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: nil,
+            mediaType: nil
+        )
+        check(NetEaseMusicAdapter.snapshot(from: foreign, isRunning: true) == .stopped, "rejects a foreign Now Playing owner")
+        check(NetEaseMusicAdapter.snapshot(from: nil, isRunning: false) == .closed, "reports a closed NetEase app")
+        check(NetEaseMusicAdapter.snapshot(from: nil, isRunning: true) == .stopped, "reports a running NetEase app without a current track")
+
+        let unavailable = NetEaseMusicAdapter(bridge: nil, isRunning: { true })
+        let unavailableSnapshot = await unavailable.snapshot()
+        check(unavailableSnapshot == .unavailable, "reports missing bridge resources")
+        unavailable.shutdown()
     }
 
     private static func testAppleMusicResponseParsing() {

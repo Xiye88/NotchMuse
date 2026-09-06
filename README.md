@@ -179,3 +179,5 @@ Architecture, build and test instructions, Lyrics Quality Benchmark, Evidence Ga
 ## License
 
 NotchMuse is released under the MIT License. Third-party notices are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+NetEase playback support uses the BSD-3-Clause-licensed MediaRemote Adapter bridge; its pinned source revision and attribution are documented in the third-party notices.

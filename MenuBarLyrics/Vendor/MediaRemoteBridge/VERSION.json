@@ -1,0 +1,11 @@
+{
+  "name": "mediaremote-adapter-framework",
+  "repository": "https://github.com/MxIris-LyricsX-Project/mediaremote-adapter-framework",
+  "commit": "6bbb7d30f9ddb209a583fa509b9ca145df97f502",
+  "license": "BSD-3-Clause",
+  "artifacts": {
+    "MediaRemoteAdapter.framework/MediaRemoteAdapter": "e5241c9d92cc5e79fb4d67d9ff029e0781e49b23cbea84018378e5ea888b50b5",
+    "MediaRemoteAdapterTestClient": "a9953e9db2cd3022f3392ee618a8bb76ede264358d34e5e3dc8844a1be1049bd",
+    "mediaremote-adapter.pl": "fd6ce4dfd6cbe1578e0effeaf8c38468299a596d055975a1a978c9a6df8e9760"
+  }
+}

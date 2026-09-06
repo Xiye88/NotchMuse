@@ -179,3 +179,5 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 ## 许可证
 
 NotchMuse 使用 MIT License 发布。第三方声明列在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+网易云音乐播放支持使用 BSD-3-Clause 许可的 MediaRemote Adapter bridge；固定源码版本与署名信息记录在第三方声明中。

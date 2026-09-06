@@ -17,6 +17,8 @@ enum SelfTests {
         testSingleInstanceLock()
         testMusicPlayerAdapterModel()
         testAppleMusicResponseParsing()
+        testMediaRemoteBridge()
+        testNetEaseEventConvergence()
         testLyricsIssueReport()
 
         let parsed = LyricParser.parse("[00:01.50]Hello\n[00:03.00]World")
@@ -162,6 +164,118 @@ enum SelfTests {
             return
         }
         check(adapted.spotifyTrack == spotify && adapted.playbackPosition == 42, "preserves Spotify track and position")
+    }
+
+    private static func testMediaRemoteBridge() {
+        let root = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("notchmuse-bridge-\(UUID().uuidString)")
+        let framework = root.appendingPathComponent("MediaRemoteAdapter.framework")
+        let helper = root.appendingPathComponent("MediaRemoteAdapterTestClient")
+        let script = root.appendingPathComponent("mediaremote-adapter.pl")
+        try? FileManager.default.createDirectory(at: framework, withIntermediateDirectories: true)
+        FileManager.default.createFile(atPath: helper.path, contents: Data())
+        let fakeBridge = #"""
+        use strict;
+        use warnings;
+        my $command = $ARGV[2] // '';
+        if ($command eq 'test') { sleep 2; exit 0; }
+        if ($command eq 'stream') { sleep 2; exit 0; }
+        print "null\n";
+        """#
+        try? fakeBridge.write(to: script, atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let paths = MediaRemoteBridge.Paths(resourceDirectory: root)
+        check(paths.script.path == script.path, "resolves the bridge script relative to resources")
+        check(paths.framework.path == framework.path, "resolves the bridge framework relative to resources")
+        check(paths.testClient.path == helper.path, "resolves the bridge helper relative to resources")
+
+        let sample = #"{"bundleIdentifier":"com.netease.163music","playing":true,"title":"晴天","uniqueIdentifier":535824739}"#.data(using: .utf8)!
+        let event = try? JSONDecoder().decode(MediaRemoteEvent.self, from: sample)
+        check(event?.uniqueIdentifier?.rawValue == "535824739", "decodes numeric MediaRemote identifiers")
+        let stringID = #"{"bundleIdentifier":"com.netease.163music","playing":true,"title":"Song","uniqueIdentifier":"track-1"}"#.data(using: .utf8)!
+        check((try? JSONDecoder().decode(MediaRemoteEvent.self, from: stringID))?.uniqueIdentifier?.rawValue == "track-1", "decodes string MediaRemote identifiers")
+
+        let streamLine = #"{"type":"data","diff":false,"payload":{"bundleIdentifier":"com.netease.163music","playing":true,"title":"晴天"}}"#.data(using: .utf8)!
+        check((try? MediaRemoteBridge.decodeStreamLine(streamLine))?.title == "晴天", "decodes a stream payload")
+        let empty = #"{"type":"data","diff":false,"payload":{}}"#.data(using: .utf8)!
+        check((try? MediaRemoteBridge.decodeStreamLine(empty)) == nil, "ignores an empty stream payload")
+        check((try? MediaRemoteBridge.decodeStreamLine(Data("not-json".utf8))) == nil, "rejects malformed stream JSON")
+
+        let bridge = MediaRemoteBridge(paths: paths)
+        do {
+            try bridge.healthCheck(timeout: 0.05)
+            check(false, "times out a blocked bridge health check")
+        } catch MediaRemoteBridgeError.timedOut {
+            check(true, "times out a blocked bridge health check")
+        } catch {
+            check(false, "reports the bridge timeout accurately")
+        }
+
+        do {
+            try bridge.startStream(onEvent: { _ in }, onFailure: { _ in })
+            do {
+                try bridge.startStream(onEvent: { _ in }, onFailure: { _ in })
+                check(false, "rejects a duplicate bridge stream")
+            } catch MediaRemoteBridgeError.streamAlreadyRunning {
+                check(true, "rejects a duplicate bridge stream")
+            } catch {
+                check(false, "reports duplicate stream ownership accurately")
+            }
+            bridge.shutdown()
+            check(!bridge.isStreamRunning, "stops the bridge stream synchronously")
+        } catch {
+            check(false, "starts and stops a bridge stream")
+        }
+    }
+
+    private static func testNetEaseEventConvergence() {
+        func event(
+            _ title: String,
+            playing: Bool = true,
+            owner: String = "com.netease.163music",
+            position: TimeInterval = 10
+        ) -> MediaRemoteEvent {
+            MediaRemoteEvent(
+                bundleIdentifier: owner,
+                parentApplicationBundleIdentifier: nil,
+                playing: playing,
+                title: title,
+                artist: "Artist",
+                album: "Album",
+                duration: 200,
+                elapsedTimeNow: position,
+                timestamp: nil,
+                uniqueIdentifier: nil,
+                contentItemIdentifier: title,
+                mediaType: "MRMediaRemoteMediaTypeMusic"
+            )
+        }
+
+        var converger = NetEaseEventConverger(quietInterval: 0.3)
+        let firstA = event("A")
+        let confirmedA = event("A", position: 10.1)
+        check(converger.consume(firstA, at: 0).isEmpty, "waits for a new identity to converge")
+        check(converger.consume(confirmedA, at: 0.1) == [.event(confirmedA)], "commits two matching identities")
+        check(converger.consume(confirmedA, at: 0.2).isEmpty, "drops exact duplicate events")
+
+        let pausedA = event("A", playing: false)
+        check(converger.consume(pausedA, at: 0.3) == [.event(pausedA)], "commits same-track playback changes immediately")
+
+        let b = event("B")
+        check(converger.consume(b, at: 1).isEmpty, "holds one new identity")
+        check(converger.flush(at: 1.29).isEmpty, "does not flush before the quiet interval")
+        check(converger.flush(at: 1.3) == [.event(b)], "commits a new identity after the quiet interval")
+
+        let foreign = event("Other", owner: "com.spotify.client")
+        check(converger.consume(foreign, at: 2) == [.clear], "clears NetEase state when another player owns Now Playing")
+        check(converger.consume(foreign, at: 2.1).isEmpty, "does not repeat an identical foreign-owner clear")
+
+        var rapid = NetEaseEventConverger(quietInterval: 0.3)
+        check(rapid.consume(event("A"), at: 0).isEmpty, "holds rapid transition A")
+        check(rapid.consume(event("B"), at: 0.05).isEmpty, "replaces rapid transition A with B")
+        check(rapid.consume(event("C"), at: 0.1).isEmpty, "replaces rapid transition B with C")
+        check(rapid.flush(at: 0.4) == [.event(event("C"))], "commits only the final rapid transition")
     }
 
     private static func testAppleMusicResponseParsing() {

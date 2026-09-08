@@ -176,6 +176,7 @@ enum SelfTests {
         let framework = root.appendingPathComponent("MediaRemoteAdapter.framework")
         let helper = root.appendingPathComponent("MediaRemoteAdapterTestClient")
         let script = root.appendingPathComponent("mediaremote-adapter.pl")
+        let watchdog = root.appendingPathComponent("mediaremote-watchdog.sh")
         try? FileManager.default.createDirectory(at: framework, withIntermediateDirectories: true)
         FileManager.default.createFile(atPath: helper.path, contents: Data())
         let fakeBridge = #"""
@@ -187,12 +188,15 @@ enum SelfTests {
         print "null\n";
         """#
         try? fakeBridge.write(to: script, atomically: true, encoding: .utf8)
+        try? "exec /usr/bin/perl \"$@\"\n".write(to: watchdog, atomically: true, encoding: .utf8)
+        try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: watchdog.path)
         defer { try? FileManager.default.removeItem(at: root) }
 
         let paths = MediaRemoteBridge.Paths(resourceDirectory: root)
         check(paths.script.path == script.path, "resolves the bridge script relative to resources")
         check(paths.framework.path == framework.path, "resolves the bridge framework relative to resources")
         check(paths.testClient.path == helper.path, "resolves the bridge helper relative to resources")
+        check(paths.watchdog.path == watchdog.path, "resolves the bridge watchdog relative to resources")
 
         let sample = #"{"bundleIdentifier":"com.netease.163music","playing":true,"title":"晴天","uniqueIdentifier":535824739}"#.data(using: .utf8)!
         let event = try? JSONDecoder().decode(MediaRemoteEvent.self, from: sample)

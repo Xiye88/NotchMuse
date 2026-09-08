@@ -84,11 +84,13 @@ final class MediaRemoteBridge: @unchecked Sendable {
         let script: URL
         let framework: URL
         let testClient: URL
+        let watchdog: URL
 
         init(resourceDirectory: URL) {
             script = resourceDirectory.appendingPathComponent("mediaremote-adapter.pl")
             framework = resourceDirectory.appendingPathComponent("MediaRemoteAdapter.framework")
             testClient = resourceDirectory.appendingPathComponent("MediaRemoteAdapterTestClient")
+            watchdog = resourceDirectory.appendingPathComponent("mediaremote-watchdog.sh")
         }
     }
 
@@ -110,7 +112,8 @@ final class MediaRemoteBridge: @unchecked Sendable {
         let manager = FileManager.default
         guard manager.fileExists(atPath: paths.script.path),
               manager.fileExists(atPath: paths.framework.path),
-              manager.isExecutableFile(atPath: paths.testClient.path) else {
+              manager.isExecutableFile(atPath: paths.testClient.path),
+              manager.isExecutableFile(atPath: paths.watchdog.path) else {
             throw MediaRemoteBridgeError.resourcesMissing(paths.script.deletingLastPathComponent().path)
         }
         return MediaRemoteBridge(paths: paths)
@@ -282,8 +285,13 @@ final class MediaRemoteBridge: @unchecked Sendable {
 
     private func makeProcess(command: String, options: [String]) -> Process {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/perl")
-        process.arguments = [paths.script.path, paths.framework.path, paths.testClient.path, command] + options
+        if command == "stream" {
+            process.executableURL = URL(fileURLWithPath: "/bin/sh")
+            process.arguments = [paths.watchdog.path, paths.script.path, paths.framework.path, paths.testClient.path, command] + options
+        } else {
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/perl")
+            process.arguments = [paths.script.path, paths.framework.path, paths.testClient.path, command] + options
+        }
         return process
     }
 }

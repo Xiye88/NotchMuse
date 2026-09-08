@@ -52,7 +52,8 @@ cp "$PROJECT/.build/release/NotchMuse" "$MACOS/NotchMuse"
 cp "$PROJECT/Resources/AppIcon.icns" "$RESOURCES/AppIcon.icns"
 cp -R "$PROJECT/Resources/en.lproj" "$PROJECT/Resources/zh-Hans.lproj" "$RESOURCES/"
 cp -R "$BRIDGE_SOURCE" "$BRIDGE_DEST"
-chmod 755 "$BRIDGE_DEST/mediaremote-adapter.pl" "$BRIDGE_DEST/MediaRemoteAdapterTestClient"
+cp "$PROJECT/Resources/mediaremote-watchdog.sh" "$BRIDGE_DEST/mediaremote-watchdog.sh"
+chmod 755 "$BRIDGE_DEST/mediaremote-adapter.pl" "$BRIDGE_DEST/MediaRemoteAdapterTestClient" "$BRIDGE_DEST/mediaremote-watchdog.sh"
 cp "$ROOT/THIRD_PARTY_NOTICES.md" "$RESOURCES/THIRD_PARTY_NOTICES.md"
 mkdir -p "$RESOURCES/LICENSES"
 cp "$ROOT/LICENSES/Apache-2.0.txt" "$RESOURCES/LICENSES/Apache-2.0.txt"
@@ -119,7 +120,9 @@ fi
 codesign --verify --deep --strict "$APP"
 test -x "$BRIDGE_DEST/mediaremote-adapter.pl"
 test -x "$BRIDGE_DEST/MediaRemoteAdapterTestClient"
+test -x "$BRIDGE_DEST/mediaremote-watchdog.sh"
 perl -c "$BRIDGE_DEST/mediaremote-adapter.pl" >/dev/null
+/bin/sh -n "$BRIDGE_DEST/mediaremote-watchdog.sh"
 /usr/bin/perl \
   "$BRIDGE_DEST/mediaremote-adapter.pl" \
   "$BRIDGE_DEST/MediaRemoteAdapter.framework" \

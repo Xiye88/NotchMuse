@@ -34,6 +34,7 @@ codesign --verify --deep --strict "$APP"
 [[ -d "$APP/Contents/Resources/MediaRemoteBridge/MediaRemoteAdapter.framework" ]]
 [[ -x "$APP/Contents/Resources/MediaRemoteBridge/mediaremote-adapter.pl" ]]
 [[ -x "$APP/Contents/Resources/MediaRemoteBridge/MediaRemoteAdapterTestClient" ]]
+[[ -x "$APP/Contents/Resources/MediaRemoteBridge/mediaremote-watchdog.sh" ]]
 hdiutil verify "$DMG" >/dev/null
 
 if [[ "$SIGN_IDENTITY" == "-" ]]; then

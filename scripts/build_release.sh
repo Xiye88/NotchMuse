@@ -31,6 +31,9 @@ NOTCHMUSE_SIGN_IDENTITY="$SIGN_IDENTITY" \
 [[ "$(defaults read "$APP/Contents/Info" CFBundleVersion)" == "$BUILD_NUMBER" ]]
 file "$APP/Contents/MacOS/NotchMuse" | grep -q 'arm64'
 codesign --verify --deep --strict "$APP"
+[[ -d "$APP/Contents/Resources/MediaRemoteBridge/MediaRemoteAdapter.framework" ]]
+[[ -x "$APP/Contents/Resources/MediaRemoteBridge/mediaremote-adapter.pl" ]]
+[[ -x "$APP/Contents/Resources/MediaRemoteBridge/MediaRemoteAdapterTestClient" ]]
 hdiutil verify "$DMG" >/dev/null
 
 if [[ "$SIGN_IDENTITY" == "-" ]]; then

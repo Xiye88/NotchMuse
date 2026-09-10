@@ -1,6 +1,6 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-08-13
+Last Updated: 2026-09-11
 
 ## Phase 1: GitHub Open Source Beta Release
 
@@ -261,6 +261,32 @@ Gate:
 - If that batch cannot prove real ambiguity resolution with zero confirmed
   false positives, close deep Matcher/metadata optimization and prioritize
   user growth.
+
+### v0.8 - NetEase Cloud Music Integration
+
+Status: Production Candidate complete; manual Gate pending.
+
+Goal: Bundle the pinned LyricsX-compatible MediaRemote Bridge and add NetEase
+through the existing Player Adapter boundary without changing lyrics matching.
+
+Current result:
+
+- Pinned BSD-3-Clause Bridge, Bundle-only paths, attribution, signing, and
+  local `0.8.0` build `8` DMG checks pass.
+- Status Bar, Notch Mode, 30 Next actions, 10 pause/resume pairs, three NetEase
+  restarts, and 22 three-player owner transitions pass.
+- Spotify and Apple Music smoke regression passes.
+- Commit `ade26f7` removes the forced-exit Perl orphan; 3/3 checks pass.
+- Continuous 60-minute, Sleep/Wake, network recovery, and two unique songs
+  remain before the final Production Gate.
+
+Gate:
+
+- No push, tag, or GitHub Release before the remaining manual checks.
+- Keep the system `mediaremoteagent` empty-response incident as an explicit
+  private-API maintenance risk.
+- Production Matcher, Provider priority, SpotifyReader, and AppleMusicAdapter
+  remain unchanged.
 
 ## Product Guardrails
 

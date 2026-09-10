@@ -1,11 +1,12 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-09-04
+Last Updated: 2026-09-11
 
 ## TODO
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
+| v0.8 manual Production Gate | Product Owner / 04_UX | P0 | 60 min, Sleep/Wake, network recovery, two unique songs |
 | Benchmark-only Metadata Capture v2 | 03_LAB / 05_MATCHER | P0 | Top Songs 28 miss: native ID, album/year/ISRC, lyric-body hash; no Production import |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
 | Build strategy-blind labeled holdout | 03_LAB / 05_MATCHER | P0 | Required before reopening Metadata or Matcher Production Gate |
@@ -24,6 +25,7 @@ Last Updated: 2026-09-04
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
+| v0.8 NetEase Production Candidate | 00_PM / 01_APP | P0 | Implementation and automatic gates pass; manual gate pending |
 | Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
 | Remaining Provider semantics | 03_LAB | P1 | Soda invalid response and LRCMux 404 meaning |
 | Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
@@ -43,7 +45,6 @@ Last Updated: 2026-09-04
 | Broad public promotion | 00_PM / 06_DOCS | P1 | Clean-user journey and first issue triage missing |
 | Retention-driven roadmap decisions | 00_PM | P1 | No Issues and only three DMG downloads; insufficient user evidence |
 | QQ Music production integration | 01_APP | P2 | No stable public now-playing API verified |
-| NetEase player production integration | 01_APP | P2 | No stable public now-playing API verified |
 | Track Identity enhanced ranking | 03_LAB / 05_MATCHER | P1 | Dataset frozen; human labels 0/2,568 and candidate album/ISRC absent |
 | Candidate deduplication | 03_LAB / 05_MATCHER | P0 | 40-case audit found 1 duplicate and 39 indeterminate cases |
 
@@ -51,6 +52,10 @@ Last Updated: 2026-09-04
 
 | Task | Owner | Priority | Result |
 | --- | --- | --- | --- |
+| Bundled MediaRemote Bridge | 01_APP / 02_RELEASE | P0 | Pinned BSD-3 dependency, Bundle paths, local DMG verified |
+| NetEase runtime and event stress | 01_APP / 04_UX | P0 | 30 Next, 10 pause/resume, 3 restarts, 22 owner changes |
+| NetEase helper orphan fix | 01_APP | P1 | `ade26f7`; forced-exit cleanup 3/3 PASS |
+| Spotify / Apple Music v0.8 smoke regression | 01_APP / 04_UX | P0 | Both existing players retain real lyrics paths |
 | v0.7.1 Metadata & Source Intelligence Gate | 00_PM | P0 | NO-GO; no Production metadata patch approved |
 | Player Metadata Capability Matrix | 01_APP / 05_MATCHER | P0 | Native IDs/secondary fields exist; no local-script ISRC |
 | Provider Metadata Capability Matrix | 03_LAB | P0 | Confirmed discarded metadata; no production order change |

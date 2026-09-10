@@ -1,15 +1,15 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-09-04
+Last Updated: 2026-09-11
 
 ## Current Phase
 
-v0.7.1 Lyrics Metadata & Source Intelligence - Production Gate NO-GO
+v0.8 NetEase Cloud Music Production Candidate - Manual Gate Pending
 
 ## Current Goal
 
-Determine whether currently discarded player or Provider metadata can safely
-resolve popular-song identity gaps without changing the production Matcher.
+Complete the remaining real-device lifecycle checks for the bundled,
+fixed-version MediaRemote Bridge before deciding the v0.8 Production Gate.
 
 ## Release Status
 
@@ -79,6 +79,14 @@ resolve popular-song identity gaps without changing the production Matcher.
   false-positive rates remain `N/A`.
 
 ## Blocking Issues
+
+### v0.8 Candidate Gate
+
+- Continuous 60-minute playback, Sleep/Wake, network recovery, and two more
+  unique NetEase songs require Product Owner runtime validation.
+- The system `mediaremoteagent` returned empty metadata once and recovered
+  after the agent was restarted. No automatic system-process workaround ships.
+- No v0.8 push, tag, or GitHub Release has been made.
 
 ### P0 Publish Gates
 
@@ -153,6 +161,16 @@ resolve popular-song identity gaps without changing the production Matcher.
   `1000/1000` invalid responses. No production order change was made.
 
 ## Completed Tasks
+
+- Built the v0.8 NetEase Production Candidate with the pinned BSD-3-Clause
+  MediaRemote Bridge and Bundle-only runtime paths.
+- Verified Status Bar and Notch Mode playback, 30 track changes, 10
+  pause/resume pairs, three NetEase restarts, 22 three-player owner changes,
+  and Spotify/Apple Music smoke regression.
+- Fixed forced-exit Perl orphan cleanup in `ade26f7`; three repetitions ended
+  with zero App/watchdog/Perl processes.
+- Built and mounted local `0.8.0` build `8` DMG; SHA-256 is
+  `f271deefa04fa87f7d0be8b93684359776f7039d8595a4dabab56129bdafab0f`.
 
 - Completed the v0.7.1 Lyrics Metadata & Source Intelligence Gate with
   `NO-GO`; no Production patch was approved.

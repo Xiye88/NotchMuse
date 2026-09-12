@@ -277,8 +277,8 @@ Current result:
   restarts, and 22 three-player owner transitions pass.
 - Spotify and Apple Music smoke regression passes.
 - Commit `ade26f7` removes the forced-exit Perl orphan; 3/3 checks pass.
-- Continuous 60-minute, Sleep/Wake, network recovery, and two unique songs
-  remain before the final Production Gate.
+- The 15-song unique-track matrix passes. Continuous 60-minute, Sleep/Wake,
+  and network recovery remain before the final Production Gate.
 
 Gate:
 

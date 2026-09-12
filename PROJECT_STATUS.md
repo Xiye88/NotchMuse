@@ -82,8 +82,8 @@ fixed-version MediaRemote Bridge before deciding the v0.8 Production Gate.
 
 ### v0.8 Candidate Gate
 
-- Continuous 60-minute playback, Sleep/Wake, network recovery, and two more
-  unique NetEase songs require Product Owner runtime validation.
+- Continuous 60-minute playback, Sleep/Wake, and network recovery require
+  Product Owner runtime validation.
 - The system `mediaremoteagent` returned empty metadata once and recovered
   after the agent was restarted. No automatic system-process workaround ships.
 - No v0.8 push, tag, or GitHub Release has been made.
@@ -165,8 +165,8 @@ fixed-version MediaRemote Bridge before deciding the v0.8 Production Gate.
 - Built the v0.8 NetEase Production Candidate with the pinned BSD-3-Clause
   MediaRemote Bridge and Bundle-only runtime paths.
 - Verified Status Bar and Notch Mode playback, 30 track changes, 10
-  pause/resume pairs, three NetEase restarts, 22 three-player owner changes,
-  and Spotify/Apple Music smoke regression.
+  pause/resume pairs, 15 unique tracks, three NetEase restarts, 22 three-player
+  owner changes, and Spotify/Apple Music smoke regression.
 - Fixed forced-exit Perl orphan cleanup in `ade26f7`; three repetitions ended
   with zero App/watchdog/Perl processes.
 - Built and mounted local `0.8.0` build `8` DMG; SHA-256 is

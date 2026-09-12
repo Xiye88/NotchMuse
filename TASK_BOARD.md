@@ -6,7 +6,7 @@ Last Updated: 2026-09-11
 
 | Task | Owner | Priority | Notes |
 | --- | --- | --- | --- |
-| v0.8 manual Production Gate | Product Owner / 04_UX | P0 | 60 min, Sleep/Wake, network recovery, two unique songs |
+| v0.8 manual Production Gate | Product Owner / 04_UX | P0 | 60 min, Sleep/Wake, network recovery |
 | Benchmark-only Metadata Capture v2 | 03_LAB / 05_MATCHER | P0 | Top Songs 28 miss: native ID, album/year/ISRC, lyric-body hash; no Production import |
 | Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
 | Build strategy-blind labeled holdout | 03_LAB / 05_MATCHER | P0 | Required before reopening Metadata or Matcher Production Gate |
@@ -56,6 +56,7 @@ Last Updated: 2026-09-11
 | NetEase runtime and event stress | 01_APP / 04_UX | P0 | 30 Next, 10 pause/resume, 3 restarts, 22 owner changes |
 | NetEase helper orphan fix | 01_APP | P1 | `ade26f7`; forced-exit cleanup 3/3 PASS |
 | Spotify / Apple Music v0.8 smoke regression | 01_APP / 04_UX | P0 | Both existing players retain real lyrics paths |
+| NetEase 15-song unique-track matrix | 01_APP / 04_UX | P0 | Bridge metadata and NotchMuse lyrics converge on all 15 samples |
 | v0.7.1 Metadata & Source Intelligence Gate | 00_PM | P0 | NO-GO; no Production metadata patch approved |
 | Player Metadata Capability Matrix | 01_APP / 05_MATCHER | P0 | Native IDs/secondary fields exist; no local-script ISRC |
 | Provider Metadata Capability Matrix | 03_LAB | P0 | Confirmed discarded metadata; no production order change |

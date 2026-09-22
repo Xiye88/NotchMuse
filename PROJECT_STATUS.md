@@ -8,40 +8,44 @@ v0.8 Production Quality Sprint — not released.
 
 ## Current Goal
 
-Turn the existing three-player candidate into a release candidate by fixing
-player selection and state regressions, completing Notch UX regression, and
-passing the release artifact gates.
+Finish real-player, lifecycle, Notch UX, and clean-install QA for the local
+`0.8.0` build `15` candidate before any public release decision.
 
 ## Current Product State
 
 - Spotify, Apple Music, and NetEase adapters exist in the candidate codebase.
-- The current player is manually selected and defaults to Spotify. Player Auto
-  Detect is not implemented.
-- A regression report says the NetEase option disappeared from Settings after
-  UX changes. The enum, Settings UI/datasource, adapter registration, and
-  persistence must be verified and covered by a regression test.
+- Auto Detect is the default and supports Spotify, Apple Music, and NetEase by
+  bundle ID. Explicit player overrides remain available.
+- Settings exposes Auto Detect plus all three players. Enum, datasource,
+  persistence, bundle IDs, and adapter factory are covered by self-tests.
+- Playing, Paused, and Stopped behavior is implemented. Paused stops lyric
+  progress and marquee scrolling; Stopped defaults to hiding lyrics and can
+  instead retain the final lyric.
+- Track ownership and native identity changes clear old lyrics before loading;
+  stale asynchronous results cannot overwrite a newer track.
 - Notch background modes and hover behavior exist in the prior candidate, but
   their v0.8 defaults and GUI behavior remain release-gate work.
-- The previous NetEase candidate reached `0.8.0` build `14`. Its local DMG was
-  verified, but the current Production Quality Sprint RC has not been approved.
+- The integrated candidate reached local `0.8.0` build `15`. Automated build,
+  self-test, deep signature verification, and DMG verification pass, but the
+  release candidate has not completed real-player or clean-install QA.
 
 ## Sprint Gates
 
-### P0
+### P0 — DONE
 
 1. Add Auto Detect as the recommended default for Spotify, Apple Music, and
    NetEase, while preserving explicit player selection.
 2. Restore and regression-test all three Settings player options.
 3. Clear stale lyrics whenever ownership or track identity changes.
 
-### P1
+### P1 — IMPLEMENTED / QA PENDING
 
 1. Make Playing, Paused, and Stopped behavior deterministic. Stopped defaults
    to hiding lyrics; users may choose to keep the final lyric paused.
 2. Verify lyric-only default presentation, `None / Black / Custom` backgrounds,
    and the Hide lyrics on hover toggle with ON as the default.
 
-### P2 Release Candidate
+### P2 Release Candidate — IN PROGRESS
 
 1. Pass focused automated and real-player regression.
 2. Build and verify the DMG and checksum.
@@ -52,6 +56,14 @@ passing the release artifact gates.
 
 ## Release Status
 
+- P0 integration commits: `8864f52` (App) and `6ae46e0` (sprint docs) on
+  `codex/netease-production-candidate`.
+- Local artifact: `0.8.0` build `15`; DMG SHA-256
+  `215b80865bbfb114a79a75bf9626624b9d3570be8620aaca7c001bfd6930ff76`.
+- Release binary self-test, `codesign --verify --deep --strict`, and
+  `hdiutil verify` pass.
+- The app is arm64 and ad-hoc signed with no Team ID. Gatekeeper rejects it;
+  Developer ID signing, notarization, and stapling are not complete.
 - v0.8 has not been merged to the release branch, pushed, tagged, or published.
 - No v0.8 GitHub Release exists.
 - Developer ID signing, notarization, and stapling remain incomplete unless a
@@ -74,5 +86,6 @@ passing the release artifact gates.
 notes, DMG, checksum, and `latest.json` only; it will not host source code. The
 website is not part of the current sprint.
 
-See `TASK_BOARD.md` for owners and live status. The untracked candidate
-`PROJECT_HANDOFF.md` remains the detailed build-14 evidence source.
+See `TASK_BOARD.md` for owners and live status. `PROJECT_HANDOFF.md` remains an
+untracked build-14 evidence source and is superseded by this status for build
+15 facts.

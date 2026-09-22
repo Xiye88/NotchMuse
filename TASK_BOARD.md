@@ -14,23 +14,34 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | Workspace | Status | Current responsibility |
 | --- | --- | --- |
 | `00_PM` | ACTIVE | Sprint coordination, integration, gates, and release decision |
-| `01_APP` | ACTIVE | Player auto detection, state handling, and Settings regression |
+| `01_APP` | ARCHIVED | P0 implementation merged as `8864f52` |
 | `02_RELEASE` | ACTIVE | RC build, DMG, checksum, signing assessment, and release preparation |
 | `03_LAB` | ARCHIVED | Benchmark experiments; reopen only with a new evidence question |
 | `04_UX` | ACTIVE | Notch background and hover regression verification |
 | `05_MATCHER` | ARCHIVED | v0.7 evidence gate was NO-GO; Production Matcher remains frozen |
-| `06_DOCS` | ACTIVE | Sprint status, roadmap, task board, and release documentation |
+| `06_DOCS` | ARCHIVED | Sprint reset merged as `6ae46e0` |
 | `07_QA` | ACTIVE | Automated regression and real-player release gates |
 
-## Active Work
+## Sprint Work
 
 | ID | Priority | Owner | Status | Deliverable / exit criteria |
 | --- | --- | --- | --- | --- |
-| `P0-1` | P0 | `01_APP` / `07_QA` | ACTIVE | Player setting defaults to Auto Detect; detects active Spotify (`com.spotify.client`), Apple Music (`com.apple.Music`), or NetEase (`com.netease.163music`); deterministic switching and stale-lyric clearing are tested |
-| `P0-2` | P0 | `01_APP` / `07_QA` | ACTIVE | Restore Spotify, Apple Music, and NetEase in Settings; verify `PlayerSource`, `SettingsWindowController`, adapter registration, datasource, persistence, and add a regression test |
-| `P1-1` | P1 | `01_APP` / `07_QA` | ACTIVE | Playing shows and scrolls; Paused holds and stops scrolling; Stopped follows the selected hide/hold policy; track changes clear old lyrics before loading new lyrics |
+| `P0-1` | P0 | `01_APP` / `07_QA` | DONE | Auto Detect is the default; bundle detection, deterministic priority, owner switching, and stale-result guards have self-test coverage |
+| `P0-2` | P0 | `01_APP` / `07_QA` | DONE | Settings exposes Auto, Spotify, Apple Music, and NetEase; enum, datasource, persistence, bundle IDs, and adapter factory are regression-tested |
+| `P1-1` | P1 | `01_APP` / `07_QA` | QA PENDING | Playing/Paused/Stopped code is implemented; paused marquee stops, stopped hide/hold is configurable, and native identity changes clear old lyrics; real-player regression remains |
 | `P1-2` | P1 | `04_UX` / `07_QA` | ACTIVE | Default lyric-only presentation; Background supports None/Black/Custom with None default; Hide lyrics on hover supports ON/OFF with ON default |
-| `P2-1` | P2 | `02_RELEASE` / `07_QA` / `06_DOCS` | ACTIVE | Produce and verify the v0.8 RC DMG and checksum; report actual signing state; update release notes and status documents; obtain final approval before any public release |
+| `P2-1` | P2 | `02_RELEASE` / `07_QA` / `06_DOCS` | QA PENDING | Local `0.8.0` build `15` DMG is verified; real-player/lifecycle/clean-install gates and final approval remain before any public release |
+
+## Current Evidence
+
+- P0 integration commits: `8864f52` (App) and `6ae46e0` (sprint docs) on
+  `codex/netease-production-candidate`.
+- Release and Debug builds plus self-tests: PASS.
+- Local build `15` DMG SHA-256:
+  `215b80865bbfb114a79a75bf9626624b9d3570be8620aaca7c001bfd6930ff76`.
+- `codesign --verify --deep --strict` and `hdiutil verify`: PASS.
+- Signing: ad-hoc, arm64, no Team ID; Gatekeeper assessment: rejected.
+- GitHub push, tag, and Release: NOT STARTED.
 
 ## Product Decisions
 

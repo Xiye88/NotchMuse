@@ -12,6 +12,8 @@ candidate.
 
 ### P0 — Player Ownership and Settings
 
+Status: IMPLEMENTED / AUTOMATED CHECKS PASS
+
 - Make Auto Detect the recommended default player mode.
 - Detect Spotify (`com.spotify.client`), Apple Music (`com.apple.Music`), and
   NetEase (`com.netease.163music`).
@@ -26,6 +28,8 @@ track changes, all four Settings choices persist, and regression checks pass.
 
 ### P1 — Lyrics State and Notch UX
 
+Status: IMPLEMENTED / REAL-PLAYER AND GUI QA PENDING
+
 - Playing: show lyrics and scroll.
 - Paused: retain lyrics and stop scrolling.
 - Stopped: apply the configured hide-or-hold policy.
@@ -39,6 +43,8 @@ Spotify, Apple Music, and NetEase.
 
 ### P2 — v0.8 Release Candidate
 
+Status: LOCAL BUILD 15 VERIFIED / RELEASE GATES PENDING
+
 - Run automated tests, real-player smoke tests, lifecycle checks, and a clean
   install gate proportionate to release risk.
 - Build and verify the DMG and checksum.
@@ -46,6 +52,11 @@ Spotify, Apple Music, and NetEase.
 - Synchronize `PROJECT_STATUS.md`, `TASK_BOARD.md`, `ROADMAP.md`, CHANGELOG,
   and release notes after the implementation and QA evidence land.
 - Obtain Product Owner confirmation immediately before public push/tag/release.
+
+Current local artifact: `0.8.0` build `15`, SHA-256
+`215b80865bbfb114a79a75bf9626624b9d3570be8620aaca7c001bfd6930ff76`.
+It is arm64 and ad-hoc signed; Gatekeeper rejects it. Real-player, lifecycle,
+Notch GUI, and clean-install gates remain.
 
 Exit criteria: a reproducible verified RC with a recorded GO, CONDITIONAL GO,
 or NO-GO decision. This roadmap does not claim the RC is complete.

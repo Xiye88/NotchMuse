@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.8.0 - Unreleased
+
+### Added
+
+- Added NetEase Cloud Music through the bundled MediaRemote bridge
+- Added Auto Detect as the recommended default for Spotify, Apple Music, and
+  NetEase, while retaining explicit player selection
+- Added configurable stopped-player behavior: hide lyrics by default or keep
+  the final lyric paused
+- Added Notch background modes for None, Black, and Custom Color, plus the Hide
+  on Hover toggle
+
+### Fixed
+
+- Restored and regression-tested the complete four-item player Settings list
+- Stopped lyric progress and marquee movement while playback is paused
+- Cleared old lyrics when the active player or native track identity changes
+- Prevented an older asynchronous lyrics response from replacing a newer track
+
+### Validation
+
+- Local `0.8.0` build `15` passes Release self-tests, deep code-signature
+  verification, and DMG verification
+- Public release remains blocked on real-player, lifecycle, Notch GUI, and
+  clean-install QA
+
+### Notes
+
+- Production Matcher behavior and Provider order are unchanged
+- The current candidate is an ad-hoc signed arm64 beta; Developer ID signing,
+  notarization, and stapling are absent
+
 ## 0.6.1 - 2026-08-30
 
 ### Fixed

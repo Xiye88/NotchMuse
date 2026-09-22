@@ -351,10 +351,30 @@ enum SelfTests {
         }
         check(track.title == "晴天" && track.playerSource == .netEaseMusic, "maps NetEase track metadata")
         check(track.nativeTrackID == "track-1", "preserves the NetEase native track ID")
+        guard case let .playing(advanced) = NetEaseMusicAdapter.advanced(.playing(track), since: 100, now: 105) else {
+            check(false, "advances a playing NetEase track")
+            return
+        }
+        check(advanced.playbackPosition == 47, "advances cached NetEase playback position between stream events")
+        let unknownDuration = NowPlayingTrack(
+            title: track.title,
+            artist: track.artist,
+            album: track.album,
+            duration: 0,
+            playbackPosition: 42,
+            playbackState: .playing,
+            playerSource: .netEaseMusic,
+            nativeTrackID: track.nativeTrackID,
+            isrc: nil,
+            versionHints: nil
+        )
+        check(NetEaseMusicAdapter.advanced(.playing(unknownDuration), since: 100, now: 105).playbackPosition == 47, "advances NetEase playback when duration is unavailable")
 
         var paused = event
         paused.playing = false
-        check(NetEaseMusicAdapter.snapshot(from: paused, isRunning: true).playbackState == .paused, "maps NetEase pause state")
+        let pausedSnapshot = NetEaseMusicAdapter.snapshot(from: paused, isRunning: true)
+        check(pausedSnapshot.playbackState == .paused, "maps NetEase pause state")
+        check(NetEaseMusicAdapter.advanced(pausedSnapshot, since: 100, now: 105).playbackPosition == 42, "does not advance a paused NetEase track")
         let foreign = MediaRemoteEvent(
             bundleIdentifier: "com.spotify.client",
             parentApplicationBundleIdentifier: nil,

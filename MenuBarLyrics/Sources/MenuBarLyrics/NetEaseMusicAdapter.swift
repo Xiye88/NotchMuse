@@ -10,6 +10,7 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
     private let isRunning: @Sendable () -> Bool
     private let lock = NSLock()
     private var current: MusicPlayerSnapshot = .unavailable
+    private var currentUpdatedAt: TimeInterval?
     private var converger = NetEaseEventConverger()
     private var started = false
     private var stopped = false
@@ -53,7 +54,9 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
         } else if action.refresh {
             await refresh()
         }
-        return lock.withLock { current }
+        return lock.withLock {
+            Self.advanced(current, since: currentUpdatedAt, now: ProcessInfo.processInfo.systemUptime)
+        }
     }
 
     func shutdown() {
@@ -84,6 +87,28 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
         return state == .playing ? .playing(track) : .paused(track)
     }
 
+    static func advanced(
+        _ snapshot: MusicPlayerSnapshot,
+        since updatedAt: TimeInterval?,
+        now: TimeInterval
+    ) -> MusicPlayerSnapshot {
+        guard let updatedAt, case let .playing(track) = snapshot else { return snapshot }
+        let advancedPosition = track.playbackPosition + max(0, now - updatedAt)
+        let position = track.duration > 0 ? min(track.duration, advancedPosition) : advancedPosition
+        return .playing(NowPlayingTrack(
+            title: track.title,
+            artist: track.artist,
+            album: track.album,
+            duration: track.duration,
+            playbackPosition: position,
+            playbackState: track.playbackState,
+            playerSource: track.playerSource,
+            nativeTrackID: track.nativeTrackID,
+            isrc: track.isrc,
+            versionHints: track.versionHints
+        ))
+    }
+
     private func connect() async {
         guard let bridge else {
             lock.withLock { current = .unavailable }
@@ -97,7 +122,10 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
                 try self.startStream()
                 return event
             }.value
-            lock.withLock { current = Self.snapshot(from: initial, isRunning: isRunning()) }
+            lock.withLock {
+                current = Self.snapshot(from: initial, isRunning: isRunning())
+                currentUpdatedAt = ProcessInfo.processInfo.systemUptime
+            }
         } catch {
             lock.withLock { current = .unavailable }
         }
@@ -106,7 +134,10 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
     private func refresh() async {
         guard let bridge else { return }
         let event = await Task.detached { try? bridge.get() }.value
-        lock.withLock { current = Self.snapshot(from: event, isRunning: isRunning()) }
+        lock.withLock {
+            current = Self.snapshot(from: event, isRunning: isRunning())
+            currentUpdatedAt = ProcessInfo.processInfo.systemUptime
+        }
     }
 
     private func startStream() throws {
@@ -144,8 +175,10 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
                 print("[NetEase] track=\(event.contentItemIdentifier ?? event.uniqueIdentifier?.rawValue ?? "-") title=\(event.title) artist=\(event.artist ?? "-") timestamp=\(event.timestamp ?? "-")")
 #endif
                 current = Self.snapshot(from: event, isRunning: isRunning())
+                currentUpdatedAt = ProcessInfo.processInfo.systemUptime
             case .clear:
                 current = isRunning() ? .stopped : .closed
+                currentUpdatedAt = nil
             }
         }
     }

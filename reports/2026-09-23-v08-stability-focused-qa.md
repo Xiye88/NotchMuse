@@ -30,24 +30,33 @@ Focused stability gate: **PASS with environment blockers**. No product-code chan
 - Notch runtime screenshots confirmed Background None, Black, and archived custom pink; Custom width 360 was bounded correctly. A securely archived custom cyan lyric color was persisted and decoded successfully.
 - Static/runtime checks confirm Auto, Spotify, Apple Music, and NetEase choices; all PlayerSource values round-trip through preferences. Defaults remain Auto, Background None, Hide on Hover on, and Hide on stop.
 
+## Second-Phase Incremental PASS
+
+- Apple Music real playback: `以父之名` by `周杰伦` reported `com.apple.Music`, `playing=true`, rate 1; Auto displayed its synced lyrics.
+- Spotify real playback: Taylor Swift playback reported `com.spotify.client`, `playing=true`, rate 1; Auto changed the visible lyric to the Spotify track.
+- Cross-provider Auto handoff: while Apple Music and Spotify were both playing, the more recent Spotify activity won; pausing Spotify while Apple Music continued caused Auto to return to Apple Music within the next polling interval. Screenshots and independent AppleScript playback state agreed with the visible lyrics.
+- The isolated QA app's status menu was exposed through macOS Accessibility and opened `NotchMuse 设置` successfully.
+- The Player popup visibly contained Auto Detect, Spotify, Apple Music, and 网易云音乐. Selecting Apple Music and returning to Auto updated the control correctly.
+- Numeric Enter handling was exercised in the live Settings window: font size 18 updated its slider, animation speed 1.5 updated its slider, opacity 80 updated its slider to 0.8, and custom width 420 updated its slider.
+- All five width controls were exercised: Auto, Compact, Standard, Wide, and Custom each became selected; Custom revealed its slider and editable value field.
+
 ## FAIL
 
 - None observed in the executed scope.
 
 ## BLOCKED
 
-- Direct Settings window click-through: the Computer Use accessibility surface does not enumerate this `LSUIElement` menu-only QA app, so the live color panel, preset clicks, numeric Enter handling, and five width buttons were not manually clicked. Their code paths and self-tests pass; runtime preference-driven rendering was verified where possible.
+- Live color panel and preset click-through were not completed before the second-phase stop boundary. Secure custom-color persistence, rendering, preset code paths, and self-tests passed, but no claim is made for live color-panel interaction.
 - Hover pointer entry/exit: global overlay cursor movement was not reliably addressable by the available app-bound UI automation. Default/persistence and implementation checks pass.
-- Spotify and Apple Music live playback: both are installed but not running with an active authenticated playback session. No PASS is claimed.
 
 ## PENDING
 
 - Sleep/Wake recovery.
 - Network loss/recovery while fetching lyrics.
-- Cross-provider Auto handoff under simultaneous live playback.
 
 ## Environment Restoration
 
 - NetEase was left paused.
-- The user preference domain was backed up before QA and restored afterward.
+- The user preference domain was backed up before each QA phase and restored afterward.
+- Spotify and Apple Music were returned to their pre-test not-running state.
 - `/Applications/NotchMuse.app` build 15 was not overwritten and was relaunched after QA.

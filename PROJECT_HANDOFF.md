@@ -42,6 +42,10 @@ Current status:
 - P0.1 local install conflict is resolved: only
   `/Applications/NotchMuse.app` build 15 is Spotlight-visible. Old build 7 and
   build 14 app bundles are recoverable from Trash.
+- P0.2 focused runtime passed: with Auto Detect selected and only NetEase
+  running, the owner was `com.netease.163music` with active playback and a
+  current lyric was visibly rendered. Multi-player real switching remains a
+  build-15 QA gate.
 
 Pending confirmation:
 

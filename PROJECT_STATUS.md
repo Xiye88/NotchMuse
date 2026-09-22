@@ -40,6 +40,15 @@ Trash, not permanently deleted. Preferences were preserved and Player Source
 was set to Auto Detect. No login item or orphan helper was found; the current
 watchdog/Perl pair belongs to build 15.
 
+### P0.2 — IMPLEMENTED / MULTI-PLAYER QA PENDING
+
+Auto Detect is selected. In the focused build-15 runtime check, Spotify and
+Apple Music were closed, NetEase was running and playing as
+`com.netease.163music`, and NotchMuse visibly rendered the current lyric.
+Offline checks cover all bundle IDs, selection priority, current-owner
+retention, adapter registration, and stale-result rejection. Real switching
+among multiple open players remains part of `07_QA`.
+
 ### P0 — DONE
 
 1. Add Auto Detect as the recommended default for Spotify, Apple Music, and

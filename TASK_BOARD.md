@@ -27,8 +27,8 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | ID | Priority | Owner | Status | Deliverable / exit criteria |
 | --- | --- | --- | --- | --- |
 | `P0.1` | P0 | `00_PM` / `02_RELEASE` / `07_QA` | DONE | Only `/Applications/NotchMuse.app` build 15 remains installed/Spotlight-visible; old build 7/build 14 are in Trash; executable hash, one launch entry, helpers, preferences, and Auto Detect are verified |
-| `P0-1` | P0 | `01_APP` / `07_QA` | DONE | Auto Detect is the default; bundle detection, deterministic priority, owner switching, and stale-result guards have self-test coverage |
-| `P0-2` | P0 | `01_APP` / `07_QA` | DONE | Settings exposes Auto, Spotify, Apple Music, and NetEase; enum, datasource, persistence, bundle IDs, and adapter factory are regression-tested |
+| `P0.2` | P0 | `01_APP` / `07_QA` | IMPLEMENTED | Auto Detect is the default; deterministic selection and stale-result guards have self-test coverage; build 15 detected the only running NetEase player and rendered a visible lyric; multi-player real switching remains in QA |
+| `P0.3` | P0 | `01_APP` / `07_QA` | DONE | Settings exposes Auto, Spotify, Apple Music, and NetEase; enum, datasource, persistence, bundle IDs, and adapter factory are regression-tested |
 | `P1-1` | P1 | `01_APP` / `07_QA` | QA PENDING | Playing/Paused/Stopped code is implemented; paused marquee stops, stopped hide/hold is configurable, and native identity changes clear old lyrics; real-player regression remains |
 | `P1-2` | P1 | `04_UX` / `07_QA` | ACTIVE | Default lyric-only presentation; Background supports None/Black/Custom with None default; Hide lyrics on hover supports ON/OFF with ON default |
 | `P2-1` | P2 | `02_RELEASE` / `07_QA` / `06_DOCS` | QA PENDING | Local `0.8.0` build `15` DMG is verified; real-player/lifecycle/clean-install gates and final approval remain before any public release |
@@ -45,6 +45,9 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 - GitHub push, tag, and Release: NOT STARTED.
 - Installed app: one `/Applications/NotchMuse.app`, version `0.8.0` build `15`;
   Spotlight returns one result and Player Source is Auto Detect.
+- Focused Auto Detect runtime: Spotify and Apple Music were closed, NetEase
+  was the only running player, MediaRemote owner was `com.netease.163music`
+  with `playing=true`, and NotchMuse visibly rendered its current lyric.
 
 ## Physical Worktrees
 

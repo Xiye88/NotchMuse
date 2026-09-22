@@ -100,6 +100,11 @@ enum AppPreferences {
         defaults.bool(forKey: notchBackgroundEnabledKey)
     }
 
+    static func notchBackgroundMode(in defaults: UserDefaults = .standard) -> NotchBackgroundMode {
+        guard notchBackgroundEnabled(in: defaults) else { return .none }
+        return defaults.data(forKey: notchBackgroundColorKey) == nil ? .black : .custom
+    }
+
     static var notchHideOnHover: Bool { notchHideOnHover(in: .standard) }
 
     static func notchHideOnHover(in defaults: UserDefaults) -> Bool {
@@ -114,6 +119,12 @@ enum AppPreferences {
         return color
     }
 
+}
+
+enum NotchBackgroundMode: String, CaseIterable {
+    case none = "None"
+    case black = "Black"
+    case custom = "Custom"
 }
 
 @MainActor
@@ -135,7 +146,7 @@ final class SettingsWindowController: NSWindowController {
     private let launchAtLoginSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let playerPopUp = NSPopUpButton()
-    private let notchBackgroundSwitch = NSSwitch()
+    private let notchBackgroundPopUp = NSPopUpButton()
     private let notchBackgroundColorWell = NSColorWell()
     private let notchHideOnHoverSwitch = NSSwitch()
     private let contentStack = NSStackView()
@@ -207,8 +218,11 @@ final class SettingsWindowController: NSWindowController {
         animationSpeedSlider.action = #selector(animationSpeedChanged)
         opacitySlider.target = self
         opacitySlider.action = #selector(opacityChanged)
-        notchBackgroundSwitch.target = self
-        notchBackgroundSwitch.action = #selector(notchBackgroundChanged)
+        for mode in NotchBackgroundMode.allCases {
+            notchBackgroundPopUp.addItem(withTitle: L10n.text(mode.rawValue))
+        }
+        notchBackgroundPopUp.target = self
+        notchBackgroundPopUp.action = #selector(notchBackgroundChanged)
         notchBackgroundColorWell.target = self
         notchBackgroundColorWell.action = #selector(notchBackgroundColorChanged)
         notchHideOnHoverSwitch.target = self
@@ -250,7 +264,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue)],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue)],
             [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue)],
-            [label(L10n.text("Background")), notchBackgroundSwitch],
+            [label(L10n.text("Background")), notchBackgroundPopUp],
             [label(L10n.text("Background Color")), notchBackgroundColorWell],
             [label(L10n.text("Hide on Hover")), notchHideOnHoverSwitch]
         ])
@@ -345,7 +359,7 @@ final class SettingsWindowController: NSWindowController {
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
         animationSpeedSlider.doubleValue = Double(AppPreferences.animationSpeed)
         opacitySlider.doubleValue = Double(AppPreferences.opacity)
-        notchBackgroundSwitch.state = AppPreferences.notchBackgroundEnabled ? .on : .off
+        notchBackgroundPopUp.selectItem(at: NotchBackgroundMode.allCases.firstIndex(of: AppPreferences.notchBackgroundMode()) ?? 0)
         notchBackgroundColorWell.color = AppPreferences.notchBackgroundColor
         notchHideOnHoverSwitch.state = AppPreferences.notchHideOnHover ? .on : .off
         fontSizeValue.stringValue = "\(Int(fontSizeSlider.doubleValue)) pt"
@@ -369,7 +383,7 @@ final class SettingsWindowController: NSWindowController {
         notchStyleRow?.isHidden = statusBarMode
         customWidthRow?.isHidden = AppPreferences.displayWidth != .custom
         notchBackgroundRow?.isHidden = statusBarMode
-        notchBackgroundColorRow?.isHidden = statusBarMode || !AppPreferences.notchBackgroundEnabled
+        notchBackgroundColorRow?.isHidden = statusBarMode || AppPreferences.notchBackgroundMode() != .custom
         notchHideOnHoverRow?.isHidden = statusBarMode
         resizeWindowToFit()
     }
@@ -449,7 +463,17 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func notchBackgroundChanged() {
-        UserDefaults.standard.set(notchBackgroundSwitch.state == .on, forKey: AppPreferences.notchBackgroundEnabledKey)
+        let modes = NotchBackgroundMode.allCases
+        guard modes.indices.contains(notchBackgroundPopUp.indexOfSelectedItem) else { return }
+        switch modes[notchBackgroundPopUp.indexOfSelectedItem] {
+        case .none:
+            UserDefaults.standard.set(false, forKey: AppPreferences.notchBackgroundEnabledKey)
+        case .black:
+            UserDefaults.standard.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
+            UserDefaults.standard.removeObject(forKey: AppPreferences.notchBackgroundColorKey)
+        case .custom:
+            UserDefaults.standard.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
+        }
         updateControlAvailability()
         onSettingsChange()
     }

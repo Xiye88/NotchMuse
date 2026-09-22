@@ -72,6 +72,8 @@
 "Compact" = "Compact";
 "Normal" = "Normal";
 "Wide" = "Wide";
+"None" = "None";
+"Black" = "Black";
 "Custom" = "Custom";
 "Custom Width" = "Custom Width";
 "Appearance" = "Appearance";

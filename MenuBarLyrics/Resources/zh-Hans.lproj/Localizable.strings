@@ -72,6 +72,8 @@
 "Compact" = "紧凑";
 "Normal" = "标准";
 "Wide" = "宽";
+"None" = "无";
+"Black" = "黑色";
 "Custom" = "自定义";
 "Custom Width" = "自定义宽度";
 "Appearance" = "外观";

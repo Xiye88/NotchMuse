@@ -120,7 +120,8 @@ enum SelfTests {
         check(L10n.text("Report Lyrics Issue…", language: .english) == "Report Lyrics Issue…", "localizes the English feedback entry")
         check(L10n.text("Report Lyrics Issue…", language: .simplifiedChinese) == "报告歌词问题…", "localizes the Chinese feedback entry")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
-        check(AppPreferences.normalizedPlayerSource(nil) == .spotify, "defaults to Spotify")
+        check(AppPreferences.normalizedPlayerSource(nil) == .auto, "defaults to automatic player detection")
+        check(PlayerSource.allCases == [.auto, .spotify, .appleMusic, .netEaseMusic], "keeps Auto, Spotify, Apple Music, and NetEase in Settings")
         check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
         check(AppPreferences.normalizedPlayerSource("NetEase Cloud Music") == .netEaseMusic, "persists NetEase selection")
         let suiteName = "app.notchmuse.self-test.\(UUID().uuidString)"
@@ -128,6 +129,7 @@ enum SelfTests {
         defer { defaults.removePersistentDomain(forName: suiteName) }
         AppPreferences.setPlayerSource(.netEaseMusic, in: defaults)
         check(AppPreferences.playerSource(in: defaults) == .netEaseMusic, "round-trips the NetEase selection through defaults")
+        check(AppPreferences.playerStopBehavior(in: defaults) == .hide, "defaults to hiding lyrics when the player stops")
         check(!AppPreferences.notchBackgroundEnabled(in: defaults), "defaults the Notch background to off")
         check(AppPreferences.notchBackgroundMode(in: defaults) == .none, "labels the default Notch background as None")
         defaults.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
@@ -140,9 +142,10 @@ enum SelfTests {
         check(L10n.text("Black", language: .simplifiedChinese) == "黑色", "localizes the Chinese Black background choice")
         check(PlayerSource.netEaseMusic.displayName(language: .english) == "NetEase Cloud Music", "shows the English NetEase name")
         check(PlayerSource.netEaseMusic.displayName(language: .simplifiedChinese) == "网易云音乐", "shows the Chinese NetEase name")
+        check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == ["com.spotify.client", "com.apple.Music", "com.netease.163music"], "registers all supported player bundle identifiers")
     }
 
-    private static func testMusicPlayerAdapterModel() {
+    @MainActor private static func testMusicPlayerAdapterModel() {
         let spotify = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
         let nowPlaying = NowPlayingTrack(
             title: spotify.name,
@@ -183,6 +186,19 @@ enum SelfTests {
             return
         }
         check(adapted.spotifyTrack == spotify && adapted.playbackPosition == 42, "preserves Spotify track and position")
+        let paused = MusicPlayerSnapshot.paused(nowPlaying)
+        let playing = MusicPlayerSnapshot.playing(nowPlaying)
+        check(AutoDetectAdapter.select([(.spotify, paused), (.appleMusic, playing)], current: .spotify).source == .appleMusic, "switches Auto Detect to the playing app")
+        check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, playing)], current: .appleMusic).source == .appleMusic, "retains the current app when multiple players report playing")
+        check(AutoDetectAdapter.select([(.spotify, .closed), (.appleMusic, .stopped)], current: .spotify).snapshot == .stopped, "reports a running stopped player")
+        check(MenuBarController.shouldUpdateTrack(current: spotify, currentIdentity: "old", next: spotify, nextIdentity: "new", force: false), "reloads lyrics when native track identity changes")
+        check(!MenuBarController.shouldAnimateScroll(overflows: true, isPaused: true), "stops marquee scrolling while paused")
+        check(MenuBarController.shouldAnimateScroll(overflows: true, isPaused: false), "keeps marquee scrolling while playing")
+        for source in PlayerSource.allCases {
+            let adapter = MenuBarController.adapter(for: source)
+            check(adapter.source == source, "registers the \(source.rawValue) adapter")
+            adapter.shutdown()
+        }
     }
 
     private static func testMediaRemoteBridge() {

@@ -91,6 +91,9 @@
 "Hide on Hover" = "Hide on Hover";
 "General" = "General";
 "Music Player" = "Music Player";
+"When Player Stops" = "When Player Stops";
+"Hide Lyrics and Wait" = "Hide Lyrics and Wait";
+"Keep Last Lyrics and Pause" = "Keep Last Lyrics and Pause";
 "Language" = "Language";
 "Launch at Login" = "Launch at Login";
 "Language Change" = "Language Change";

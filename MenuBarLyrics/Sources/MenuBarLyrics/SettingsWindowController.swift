@@ -15,6 +15,7 @@ enum AppPreferences {
     static let hasShownFirstLaunchGuideKey = "HasShownFirstLaunchGuide"
     static let languageKey = "AppLanguage"
     static let playerSourceKey = "PlayerSource"
+    static let playerStopBehaviorKey = "PlayerStopBehavior"
     static let notchBackgroundEnabledKey = "NotchBackgroundEnabled"
     static let notchBackgroundColorKey = "NotchBackgroundColor"
     static let notchHideOnHoverKey = "NotchHideOnHover"
@@ -36,7 +37,15 @@ enum AppPreferences {
     }
 
     static func normalizedPlayerSource(_ rawValue: String?) -> PlayerSource {
-        PlayerSource(rawValue: rawValue ?? "") ?? .spotify
+        PlayerSource(rawValue: rawValue ?? "") ?? .auto
+    }
+
+    static var playerStopBehavior: PlayerStopBehavior {
+        playerStopBehavior(in: .standard)
+    }
+
+    static func playerStopBehavior(in defaults: UserDefaults) -> PlayerStopBehavior {
+        PlayerStopBehavior(rawValue: defaults.string(forKey: playerStopBehaviorKey) ?? "") ?? .hide
     }
 
     static var displayMode: DisplayMode {
@@ -121,6 +130,11 @@ enum AppPreferences {
 
 }
 
+enum PlayerStopBehavior: String, CaseIterable {
+    case hide = "Hide Lyrics and Wait"
+    case keep = "Keep Last Lyrics and Pause"
+}
+
 enum NotchBackgroundMode: String, CaseIterable {
     case none = "None"
     case black = "Black"
@@ -146,6 +160,7 @@ final class SettingsWindowController: NSWindowController {
     private let launchAtLoginSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let playerPopUp = NSPopUpButton()
+    private let playerStopBehaviorPopUp = NSPopUpButton()
     private let notchBackgroundPopUp = NSPopUpButton()
     private let notchBackgroundColorWell = NSColorWell()
     private let notchHideOnHoverSwitch = NSSwitch()
@@ -239,6 +254,11 @@ final class SettingsWindowController: NSWindowController {
         }
         playerPopUp.target = self
         playerPopUp.action = #selector(playerChanged)
+        for behavior in PlayerStopBehavior.allCases {
+            playerStopBehaviorPopUp.addItem(withTitle: L10n.text(behavior.rawValue))
+        }
+        playerStopBehaviorPopUp.target = self
+        playerStopBehaviorPopUp.action = #selector(playerStopBehaviorChanged)
 
         contentStack.orientation = .vertical
         contentStack.alignment = .leading
@@ -276,6 +296,7 @@ final class SettingsWindowController: NSWindowController {
         contentStack.addArrangedSubview(sectionTitle(L10n.text("General")))
         contentStack.addArrangedSubview(grid([
             [label(L10n.text("Music Player")), playerPopUp],
+            [label(L10n.text("When Player Stops")), playerStopBehaviorPopUp],
             [label(L10n.text("Language")), languagePopUp],
             [label(L10n.text("Launch at Login")), launchAtLoginSwitch]
         ]))
@@ -368,6 +389,7 @@ final class SettingsWindowController: NSWindowController {
         customWidthValue.stringValue = "\(Int(customWidthSlider.doubleValue)) pt"
         launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
         playerPopUp.selectItem(at: PlayerSource.allCases.firstIndex(of: AppPreferences.playerSource) ?? 0)
+        playerStopBehaviorPopUp.selectItem(at: PlayerStopBehavior.allCases.firstIndex(of: AppPreferences.playerStopBehavior) ?? 0)
         languagePopUp.selectItem(at: AppLanguage.allCases.firstIndex(of: AppPreferences.language) ?? 0)
         updateControlAvailability()
     }
@@ -520,5 +542,11 @@ final class SettingsWindowController: NSWindowController {
         guard sources.indices.contains(playerPopUp.indexOfSelectedItem) else { return }
         AppPreferences.setPlayerSource(sources[playerPopUp.indexOfSelectedItem])
         onSettingsChange()
+    }
+
+    @objc private func playerStopBehaviorChanged() {
+        let behaviors = PlayerStopBehavior.allCases
+        guard behaviors.indices.contains(playerStopBehaviorPopUp.indexOfSelectedItem) else { return }
+        save(behaviors[playerStopBehaviorPopUp.indexOfSelectedItem], key: AppPreferences.playerStopBehaviorKey)
     }
 }

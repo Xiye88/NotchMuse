@@ -68,8 +68,11 @@ final class MenuBarController: NSObject {
     private let songItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let artistItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private var isLyricsHidden = false
+    private var isPlayerStopped = false
+    private var isPlaybackPaused = false
     private var displaySource = ""
     private var currentTrack: SpotifyTrack?
+    private var currentTrackIdentity: String?
     private var currentPlayerTrack: NowPlayingTrack?
     private var currentLines: [LyricLine] = []
     private var latestPlayerPosition: TimeInterval?
@@ -195,81 +198,101 @@ final class MenuBarController: NSObject {
             setPlayerFeedback(.notRunning)
             setLyricsFeedback(.waiting)
             setTrackInfo(nil)
-            currentTrack = nil
-            currentPlayerTrack = nil
-            currentLines = []
-            stopProgressTimer()
-            setDisplay(L10n.format("%@ is not running", player.source.displayName()))
+            handlePlayerStopped(display: L10n.format("%@ is not running", player.source.displayName()))
         case .stopped:
             setPlayerFeedback(.connected)
             setLyricsFeedback(.waiting)
             setTrackInfo(nil)
-            currentTrack = nil
-            currentPlayerTrack = nil
-            currentLines = []
-            stopProgressTimer()
-            setDisplay(L10n.format("Waiting for %@", player.source.displayName()))
+            handlePlayerStopped(display: L10n.format("Waiting for %@", player.source.displayName()))
         case .unavailable:
             setPlayerFeedback(.unavailable)
             setLyricsFeedback(.waiting)
             setTrackInfo(nil)
-            currentTrack = nil
-            currentPlayerTrack = nil
-            currentLines = []
-            stopProgressTimer()
-            if player.source == .netEaseMusic {
-                setDisplay(L10n.text("NetEase bridge unavailable. Restart NotchMuse or choose another player."))
-            } else {
-                setDisplay(L10n.format("Cannot connect to %@. Check Automation permission in System Settings.", player.source.displayName()))
-            }
+            let display = player.source == .netEaseMusic
+                ? L10n.text("NetEase bridge unavailable. Restart NotchMuse or choose another player.")
+                : L10n.format("Cannot connect to %@. Check Automation permission in System Settings.", player.source.displayName())
+            handlePlayerStopped(display: display)
         case let .paused(nowPlaying):
+            isPlayerStopped = false
+            isPlaybackPaused = true
             let track = nowPlaying.spotifyTrack
             let position = nowPlaying.playbackPosition
             currentPlayerTrack = nowPlaying
             setPlayerFeedback(.connected)
             setTrackInfo(nil)
-            await updateTrackIfNeeded(track, force: forceLyricsRefresh)
+            await updateTrackIfNeeded(track, identity: nowPlaying.observationIdentity, force: forceLyricsRefresh)
             latestPlayerPosition = position
             latestPlayerUptime = nil
             stopProgressTimer()
             let text = LyricClock.moment(at: position, in: currentLines)?.text ?? unpausedFallbackText()
             setDisplay(L10n.format("Paused: %@", text))
         case let .playing(nowPlaying):
+            isPlayerStopped = false
+            isPlaybackPaused = false
             let track = nowPlaying.spotifyTrack
             let position = nowPlaying.playbackPosition
             currentPlayerTrack = nowPlaying
             setPlayerFeedback(.connected)
             setTrackInfo(track)
-            await updateTrackIfNeeded(track, force: forceLyricsRefresh)
+            await updateTrackIfNeeded(track, identity: nowPlaying.observationIdentity, force: forceLyricsRefresh)
             latestPlayerPosition = position
             latestPlayerUptime = ProcessInfo.processInfo.systemUptime
             updatePlayingDisplay()
         }
     }
 
-    private func updateTrackIfNeeded(_ track: SpotifyTrack, force: Bool) async {
-        guard force || currentTrack != track else { return }
+    private func handlePlayerStopped(display: String) {
+        stopProgressTimer()
+        latestPlayerUptime = nil
+        isPlayerStopped = true
+        isPlaybackPaused = true
+        guard AppPreferences.playerStopBehavior == .keep, currentTrack != nil else {
+            currentTrack = nil
+            currentTrackIdentity = nil
+            currentPlayerTrack = nil
+            currentLines = []
+            setDisplay(display)
+            return
+        }
+        let position = latestPlayerPosition ?? 0
+        let text = LyricClock.moment(at: position, in: currentLines)?.text ?? unpausedFallbackText()
+        setDisplay(L10n.format("Paused: %@", text))
+    }
+
+    private func updateTrackIfNeeded(_ track: SpotifyTrack, identity: String, force: Bool) async {
+        guard Self.shouldUpdateTrack(current: currentTrack, currentIdentity: currentTrackIdentity, next: track, nextIdentity: identity, force: force) else { return }
 #if DEBUG
         lyricsRequestCount += 1
         print("[Lyrics] request=\(lyricsRequestCount) source=\(player.source.rawValue) track=\(currentPlayerTrack?.nativeTrackID ?? "-") title=\(track.name) artist=\(track.artist)")
 #endif
         currentTrack = track
+        currentTrackIdentity = identity
         currentLines = []
         setLyricsFeedback(.searching)
         setDisplay(LyricsFeedback.searching.displayText)
 
         do {
             let lines = try await lyricsClient.syncedLyrics(for: track, bypassCache: force)
-            guard !Task.isCancelled, currentTrack == track else { return }
+            guard !Task.isCancelled, currentTrack == track, currentTrackIdentity == identity else { return }
             currentLines = lines
             let feedback: LyricsFeedback = lines.isEmpty ? .notFound : .available
             setLyricsFeedback(feedback)
             setDisplay(lines.isEmpty ? feedback.displayText : track.name)
         } catch {
-            guard !Task.isCancelled, currentTrack == track else { return }
+            guard !Task.isCancelled, currentTrack == track, currentTrackIdentity == identity else { return }
             setLyricsFeedback(.networkFailure)
             setDisplay(LyricsFeedback.networkFailure.displayText)
         }
+    }
+
+    static func shouldUpdateTrack(
+        current: SpotifyTrack?,
+        currentIdentity: String?,
+        next: SpotifyTrack,
+        nextIdentity: String,
+        force: Bool
+    ) -> Bool {
+        force || current != next || currentIdentity != nextIdentity
     }
 
     private func fallbackText() -> String {
@@ -295,7 +318,7 @@ final class MenuBarController: NSObject {
     }
 
     private func updateDisplay() {
-        guard !isLyricsHidden else {
+        guard !isLyricsHidden, !(isPlayerStopped && AppPreferences.playerStopBehavior == .hide) else {
             overlay.hide()
             updateScrollTimer(overflows: false)
             return
@@ -358,7 +381,7 @@ final class MenuBarController: NSObject {
     }
 
     private func updateScrollTimer(overflows: Bool) {
-        if overflows {
+        if Self.shouldAnimateScroll(overflows: overflows, isPaused: isPlaybackPaused) {
             guard scrollTimer == nil else { return }
             scrollTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
                 Task { @MainActor in
@@ -368,6 +391,10 @@ final class MenuBarController: NSObject {
         } else {
             stopScrollTimer()
         }
+    }
+
+    static func shouldAnimateScroll(overflows: Bool, isPaused: Bool) -> Bool {
+        overflows && !isPaused
     }
 
     private func stopScrollTimer() {
@@ -449,6 +476,7 @@ final class MenuBarController: NSObject {
             player.shutdown()
             player = Self.adapter(for: selectedSource)
             currentTrack = nil
+            currentTrackIdentity = nil
             currentPlayerTrack = nil
             currentLines = []
             latestPlayerPosition = nil
@@ -469,8 +497,9 @@ final class MenuBarController: NSObject {
         updateDisplay()
     }
 
-    private static func adapter(for source: PlayerSource) -> any MusicPlayerAdapter {
+    static func adapter(for source: PlayerSource) -> any MusicPlayerAdapter {
         switch source {
+        case .auto: AutoDetectAdapter()
         case .spotify: SpotifyAdapter()
         case .appleMusic: AppleMusicAdapter()
         case .netEaseMusic: NetEaseMusicAdapter()

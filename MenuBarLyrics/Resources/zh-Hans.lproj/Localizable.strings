@@ -91,6 +91,9 @@
 "Hide on Hover" = "悬停时隐藏";
 "General" = "通用";
 "Music Player" = "音乐播放器";
+"When Player Stops" = "播放器停止时";
+"Hide Lyrics and Wait" = "隐藏歌词，等待恢复";
+"Keep Last Lyrics and Pause" = "保持最后歌词并暂停";
 "Language" = "语言";
 "Launch at Login" = "登录时启动";
 "Language Change" = "语言更改";

@@ -86,6 +86,5 @@ Finish real-player, lifecycle, Notch UX, and clean-install QA for the local
 notes, DMG, checksum, and `latest.json` only; it will not host source code. The
 website is not part of the current sprint.
 
-See `TASK_BOARD.md` for owners and live status. `PROJECT_HANDOFF.md` remains an
-untracked build-14 evidence source and is superseded by this status for build
-15 facts.
+See `TASK_BOARD.md` for owners and live status. `PROJECT_HANDOFF.md` preserves
+the detailed build-14 evidence and starts with the current build-15 handoff.

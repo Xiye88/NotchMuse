@@ -20,16 +20,22 @@ struct NetEaseLyricsSource {
     }
 
     func matchingIndex(for track: SpotifyTrack, candidates: [TrackMatcher.Candidate]) -> Int? {
-        if let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "NetEase") {
+        let matchingTrack = SpotifyTrack(
+            name: track.name,
+            artist: track.artist.replacingOccurrences(of: "/", with: ","),
+            album: track.album,
+            duration: track.duration
+        )
+        if let index = TrackMatcher.bestMatchIndex(for: matchingTrack, candidates: candidates, provider: "NetEase") {
             return index
         }
         guard track.duration > 0, track.duration <= 65 else { return nil }
         let exactIdentityMatches = candidates.indices.filter { index in
             let candidate = candidates[index]
             let fullDurationTrack = SpotifyTrack(
-                name: track.name,
-                artist: track.artist,
-                album: track.album,
+                name: matchingTrack.name,
+                artist: matchingTrack.artist,
+                album: matchingTrack.album,
                 duration: Double(candidate.durationMs) / 1000
             )
             return TrackMatcher.score(fullDurationTrack, candidate: candidate) >= TrackMatcher.acceptanceThreshold

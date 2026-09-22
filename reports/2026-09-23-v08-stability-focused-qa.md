@@ -40,13 +40,21 @@ Focused stability gate: **PASS with environment blockers**. No product-code chan
 - Numeric Enter handling was exercised in the live Settings window: font size 18 updated its slider, animation speed 1.5 updated its slider, opacity 80 updated its slider to 0.8, and custom width 420 updated its slider.
 - All five width controls were exercised: Auto, Compact, Standard, Wide, and Custom each became selected; Custom revealed its slider and editable value field.
 
+## Third-Phase Incremental Result
+
+- PASS: the live lyric-color popup exposed Orange, White, Blue, Purple, Green, and Custom.
+- PASS: selecting Blue changed the popup selection; selecting Custom changed it again.
+- PASS: activating the custom color well opened the native macOS Colors panel, confirmed by a desktop screenshot.
+- BLOCKED: the time-bounded run stopped before an arbitrary panel color change could be proven through live preview and restart persistence. Existing secure-archive persistence and custom rendering evidence remains valid, but no additional PASS is claimed.
+- BLOCKED: overlay hover enter/leave remained outside reliable global-pointer automation and was not retried past the stop boundary.
+
 ## FAIL
 
 - None observed in the executed scope.
 
 ## BLOCKED
 
-- Live color panel and preset click-through were not completed before the second-phase stop boundary. Secure custom-color persistence, rendering, preset code paths, and self-tests passed, but no claim is made for live color-panel interaction.
+- Arbitrary live color-panel change, preview, and restart-persistence were not completed. The panel itself and preset selection were verified.
 - Hover pointer entry/exit: global overlay cursor movement was not reliably addressable by the available app-bound UI automation. Default/persistence and implementation checks pass.
 
 ## PENDING

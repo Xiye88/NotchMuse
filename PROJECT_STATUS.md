@@ -1,15 +1,15 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-09-22
+Last Updated: 2026-09-23
 
 ## Current Phase
 
-v0.8 Stability Fix Sprint — development active, release prohibited.
+v0.8 Stability Fix Sprint — focused QA active, release prohibited.
 
 ## Current Goal
 
-Fix real NetEase, playback-based Auto Detect, and Settings/Notch UX gaps before
-starting the final QA phase.
+Validate the merged NetEase, playback-based Auto Detect, and Settings/Notch UX
+changes against real players and GUI behavior.
 
 ## Current Product State
 
@@ -18,13 +18,13 @@ starting the final QA phase.
   bundle ID. Explicit player overrides remain available.
 - Settings exposes Auto Detect plus all three players. Enum, datasource,
   persistence, bundle IDs, and adapter factory are covered by self-tests.
-- Playing, Paused, and Stopped behavior is implemented. Paused stops lyric
-  progress and marquee scrolling; Stopped defaults to hiding lyrics and can
-  instead retain the final lyric.
+- Playing and non-playing behavior is deterministic. The default Hide policy
+  covers pause, player exit, and source switching; Keep retains the last lyric
+  while progress and marquee scrolling remain stopped.
 - Track ownership and native identity changes clear old lyrics before loading;
   stale asynchronous results cannot overwrite a newer track.
-- Notch background modes and hover behavior exist in the prior candidate, but
-  their v0.8 defaults and GUI behavior remain release-gate work.
+- Notch supports None/Black/Custom backgrounds, hover hiding, arbitrary lyric
+  color, numeric inputs, and functional custom width; GUI QA is active.
 - The integrated candidate reached local `0.8.0` build `15`. Automated build,
   self-test, deep signature verification, and DMG verification pass, but the
   release candidate has not completed real-player or clean-install QA.
@@ -63,7 +63,7 @@ among multiple open players remains part of `07_QA`.
 2. Verify lyric-only default presentation, `None / Black / Custom` backgrounds,
    and the Hide lyrics on hover toggle with ON as the default.
 
-### P2 Release Candidate — IN PROGRESS
+### P2 Release Candidate — NOT STARTED IN THIS SPRINT
 
 1. Pass focused automated and real-player regression.
 2. Build and verify the DMG and checksum.
@@ -74,7 +74,7 @@ among multiple open players remains part of `07_QA`.
 
 ## Release Status
 
-- P0 integration commits: `8864f52` (App) and `6ae46e0` (sprint docs) on
+- Stability integration commits: `28d7a3b` (App) and `46dc4f5` (UX) on
   `codex/netease-production-candidate`.
 - Local artifact: `0.8.0` build `15`; DMG SHA-256
   `215b80865bbfb114a79a75bf9626624b9d3570be8620aaca7c001bfd6930ff76`.

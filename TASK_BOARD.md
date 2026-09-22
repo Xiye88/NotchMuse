@@ -14,13 +14,13 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | Workspace | Status | Current responsibility |
 | --- | --- | --- |
 | `00_PM` | ACTIVE | Sprint coordination, integration, gates, and release decision |
-| `01_APP` | ACTIVE | P0 NetEase restoration, Auto Detect, and playback stability |
+| `01_APP` | ARCHIVED | P0 merged as `28d7a3b`; branch retained |
 | `02_RELEASE` | ARCHIVED | No release work during Stability Fix Sprint |
 | `03_LAB` | ARCHIVED | Benchmark experiments; reopen only with a new evidence question |
-| `04_UX` | DONE | P1 Settings/Notch UX implementation; GUI handoff to `07_QA` |
+| `04_UX` | ARCHIVED | P1 merged as `46dc4f5`; branch retained |
 | `05_MATCHER` | ARCHIVED | v0.7 evidence gate was NO-GO; Production Matcher remains frozen |
 | `06_DOCS` | ARCHIVED | `00_PM` updates Handoff after each development phase |
-| `07_QA` | ARCHIVED | Start only after P0 and P1 development complete |
+| `07_QA` | ACTIVE | Focused real-player, Settings, Notch, restart, and recovery regression |
 
 ## Sprint Work
 
@@ -31,11 +31,11 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | `P0-2` | P0 | `01_APP` | IMPLEMENTED | Auto selection uses playback state and freshness, preserves deterministic ownership, and does not select merely because an app is open |
 | `P0-3` | P0 | `01_APP` | IMPLEMENTED | NetEase rejects stale asynchronous state, reused track identifiers, and expired provider data; real-player regression remains |
 | `P1-1` | P1 | `04_UX` | IMPLEMENTED | Background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width are implemented |
-| `QA-GATE` | P1 | `07_QA` | BLOCKED | Start after integrated Debug/Release builds and self-tests pass |
+| `QA-GATE` | P1 | `07_QA` | ACTIVE | Report direct PASS/FAIL/BLOCKED evidence for real-player and GUI scenarios |
 
 ## Current Evidence
 
-- P0 integration commits: `8864f52` (App) and `6ae46e0` (sprint docs) on
+- Stability integration commits: `28d7a3b` (App) and `46dc4f5` (UX) on
   `codex/netease-production-candidate`.
 - Release and Debug builds plus self-tests: PASS.
 - Local build `15` DMG SHA-256:
@@ -52,8 +52,9 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 ## Physical Worktrees
 
 - PM/integration: `.worktrees/netease-production-candidate` (clean/current).
-- QA: archived; its old clean worktree is being deregistered until the
-  development gate opens.
+- QA: `.worktrees/07_QA` on `codex/v08-stability-qa` (active).
+- APP and UX worktrees were cleanly removed after merge; their branches and
+  commit history remain.
 - Legacy experiment root: repository root (dirty; retained until its uncommitted
   evidence is migrated or archived).
 - Four clean duplicate worktrees were deregistered; their branches and Git

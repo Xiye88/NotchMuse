@@ -2,6 +2,47 @@
 
 Last updated: 2026-09-23 (build 15)
 
+## Current Status
+
+- v0.8 Stability Fix Sprint is in focused QA; release remains prohibited.
+- Integration branch: `codex/netease-production-candidate` at `46dc4f5`.
+- `01_APP` and `04_UX` are merged and archived. The sole active execution
+  workspace is `07_QA` at `.worktrees/07_QA`.
+
+## Completed
+
+- Auto Detect now samples real adapter state, uses playback freshness/activity,
+  and does not claim a player merely because its app is open.
+- NetEase state rejects stale asynchronous results and out-of-order events,
+  handles reused native IDs, and expires after bridge data stops refreshing.
+- Settings persist Auto, Spotify, Apple Music, and NetEase selections.
+- Stop behavior covers pause, player exit, and source switching; `Hide` remains
+  the default and `Keep` preserves the last lyric without scrolling.
+- Notch UX supports None/Black/Custom backgrounds, hover hiding, arbitrary
+  lyric color plus presets, editable numeric controls, and functional Custom
+  Width down to 180 points.
+
+## Changed Files
+
+- Player/state: `MusicPlayerAdapter.swift`, `NetEaseMusicAdapter.swift`,
+  `NetEaseEventConverger.swift`, `MenuBarController.swift`.
+- UX: `SettingsWindowController.swift`, `OverlayLyricsWindow.swift`,
+  `BrandStyle.swift`.
+- Regression coverage: `SelfTests.swift`; release notes: `CHANGELOG.md`.
+
+## Verification
+
+- Integrated Debug build + self-tests: PASS.
+- Integrated Release build + self-tests: PASS.
+- English/Chinese strings lint and key parity: PASS.
+- `git diff --check`: PASS.
+
+## Next Actions
+
+- `07_QA` is running focused real-player and GUI validation. Record unavailable
+  player/permission/lifecycle scenarios as BLOCKED rather than inferred PASS.
+- Do not build a release candidate, push, tag, or publish during this sprint.
+
 ## Current Project State
 
 - Current version: `0.8.0` candidate, build `15`; not publicly released.
@@ -29,11 +70,9 @@ Last updated: 2026-09-23 (build 15)
 
 ## Active Execution
 
-- `01_APP`: P0 NetEase settings persistence, playback-based Auto Detect, and
-  NetEase play/pause/previous/next/seek/restart stability.
-- `04_UX`: P1 Notch defaults, Hover Hide, stopped behavior UI, full lyric
-  color picker with presets, editable numeric controls, and Custom Width.
-- `07_QA`: archived until both development workspaces are complete.
+- `01_APP`: archived after merge (`28d7a3b`).
+- `04_UX`: archived after merge (`46dc4f5`).
+- `07_QA`: active on focused real-player and GUI regression.
 - `00_PM`: integration, verification, and handoff updates.
 
 This section is the canonical current state. Older build-14 details below are

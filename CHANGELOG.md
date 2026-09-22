@@ -19,6 +19,10 @@
 - Stopped lyric progress and marquee movement while playback is paused
 - Cleared old lyrics when the active player or native track identity changes
 - Prevented an older asynchronous lyrics response from replacing a newer track
+- Selected Auto players from fresh playback evidence instead of app-open state
+- Rejected stale NetEase bridge results and out-of-order metadata events
+- Handled NetEase track changes that reuse a native media identifier
+- Expired frozen NetEase playback when bridge refreshes stop succeeding
 - Made font size, animation speed, opacity, and Custom Width directly editable
   with bounded numeric input
 - Applied Custom Width down to the documented 180-point minimum

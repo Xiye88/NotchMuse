@@ -1,10 +1,10 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-09-22
+Last Updated: 2026-09-23
 
 ## Current — v0.8 Stability Fix Sprint
 
-Status: DEVELOPMENT ACTIVE / QA BLOCKED / RELEASE PROHIBITED
+Status: DEVELOPMENT MERGED / QA ACTIVE / RELEASE PROHIBITED
 
 Goal: move the existing Spotify, Apple Music, and NetEase candidate from
 feature completion to production-quality behavior and a verified release
@@ -59,7 +59,7 @@ Spotify, Apple Music, and NetEase.
 
 ### P2 — v0.8 Release Candidate
 
-Status: LOCAL BUILD 15 VERIFIED / RELEASE GATES PENDING
+Status: DEFERRED UNTIL STABILITY QA COMPLETES
 
 - Run automated tests, real-player smoke tests, lifecycle checks, and a clean
   install gate proportionate to release risk.

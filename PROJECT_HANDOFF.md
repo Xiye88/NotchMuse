@@ -4,10 +4,11 @@ Last updated: 2026-09-23 (build 15)
 
 ## Current Status
 
-- v0.8 Stability Fix Sprint is in focused QA; release remains prohibited.
-- Integration branch: `codex/netease-production-candidate` at `46dc4f5`.
-- `01_APP` and `04_UX` are merged and archived. The sole active execution
-  workspace is `07_QA` at `.worktrees/07_QA`.
+- v0.8 Stability Fix Sprint implementation and focused QA are complete;
+  release remains prohibited.
+- Integration branch: `codex/netease-production-candidate` at `daff724` before
+  this handoff update.
+- `01_APP`, `04_UX`, and `07_QA` are merged and archived.
 
 ## Completed
 
@@ -36,12 +37,16 @@ Last updated: 2026-09-23 (build 15)
 - Integrated Release build + self-tests: PASS.
 - English/Chinese strings lint and key parity: PASS.
 - `git diff --check`: PASS.
+- Focused QA: PASS with environment blockers; 0 observed FAIL.
+- Real NetEase passed Auto play/pause, natural/manual next, previous, seek,
+  restart, metadata/ID/lyric refresh, Hide/Keep, and Notch background checks.
 
 ## Next Actions
 
-- `07_QA` is running focused real-player and GUI validation. Record unavailable
-  player/permission/lifecycle scenarios as BLOCKED rather than inferred PASS.
-- Do not build a release candidate, push, tag, or publish during this sprint.
+- Remaining gates: live Spotify/Apple Music, pointer Hover and direct Settings
+  clicking, Sleep/Wake, network recovery, and simultaneous-player Auto handoff.
+- Decide and execute those environment-dependent gates before entering the
+  Release Sprint. Do not push, tag, or publish.
 
 ## Current Project State
 
@@ -72,7 +77,7 @@ Last updated: 2026-09-23 (build 15)
 
 - `01_APP`: archived after merge (`28d7a3b`).
 - `04_UX`: archived after merge (`46dc4f5`).
-- `07_QA`: active on focused real-player and GUI regression.
+- `07_QA`: archived after focused QA report (`daff724`).
 - `00_PM`: integration, verification, and handoff updates.
 
 This section is the canonical current state. Older build-14 details below are

@@ -31,6 +31,9 @@
 
 - Local `0.8.0` build `15` passes Release self-tests, deep code-signature
   verification, and DMG verification
+- Focused stability QA passed automated checks and real NetEase Auto,
+  play/pause/next/previous/seek/restart, lyric refresh, Hide/Keep, and Notch
+  background scenarios with no observed failures
 - Public release remains blocked on real-player, lifecycle, Notch GUI, and
   clean-install QA
 

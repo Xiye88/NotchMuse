@@ -4,7 +4,7 @@ Last Updated: 2026-09-23
 
 ## Current — v0.8 Stability Fix Sprint
 
-Status: DEVELOPMENT MERGED / QA ACTIVE / RELEASE PROHIBITED
+Status: DEVELOPMENT MERGED / FOCUSED QA PASSED WITH BLOCKERS / RELEASE PROHIBITED
 
 Goal: move the existing Spotify, Apple Music, and NetEase candidate from
 feature completion to production-quality behavior and a verified release
@@ -56,6 +56,10 @@ Status: IMPLEMENTED / REAL-PLAYER AND GUI QA PENDING
 
 Exit criteria: automated state checks and focused GUI regression pass across
 Spotify, Apple Music, and NetEase.
+
+Current evidence: automated and real NetEase scope passed with 0 FAIL. Live
+Spotify/Apple, pointer-only UI checks, Sleep/Wake, network recovery, and
+simultaneous-player handoff remain environment-dependent gates.
 
 ### P2 — v0.8 Release Candidate
 

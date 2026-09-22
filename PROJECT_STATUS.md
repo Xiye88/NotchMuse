@@ -4,12 +4,13 @@ Last Updated: 2026-09-23
 
 ## Current Phase
 
-v0.8 Stability Fix Sprint — focused QA active, release prohibited.
+v0.8 Stability Fix Sprint — implementation and focused QA complete; release
+prohibited.
 
 ## Current Goal
 
-Validate the merged NetEase, playback-based Auto Detect, and Settings/Notch UX
-changes against real players and GUI behavior.
+Close the remaining environment-dependent Spotify/Apple, pointer/UI,
+Sleep/Wake, network recovery, and simultaneous-player gates before release.
 
 ## Current Product State
 
@@ -62,6 +63,15 @@ among multiple open players remains part of `07_QA`.
    to hiding lyrics; users may choose to keep the final lyric paused.
 2. Verify lyric-only default presentation, `None / Black / Custom` backgrounds,
    and the Hide lyrics on hover toggle with ON as the default.
+
+### Focused QA — PASS WITH ENVIRONMENT BLOCKERS
+
+Automated builds/self-tests and real NetEase play, pause, next, previous, seek,
+restart, Auto ownership, lyric refresh, Hide/Keep, and Notch background checks
+passed with no observed failures. Live Spotify/Apple playback, pointer Hover,
+direct Settings clicking, Sleep/Wake, network recovery, and simultaneous-player
+handoff remain blocked or pending. See
+`reports/2026-09-23-v08-stability-focused-qa.md`.
 
 ### P2 Release Candidate — NOT STARTED IN THIS SPRINT
 

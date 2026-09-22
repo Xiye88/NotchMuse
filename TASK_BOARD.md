@@ -20,7 +20,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | `04_UX` | ARCHIVED | P1 merged as `46dc4f5`; branch retained |
 | `05_MATCHER` | ARCHIVED | v0.7 evidence gate was NO-GO; Production Matcher remains frozen |
 | `06_DOCS` | ARCHIVED | `00_PM` updates Handoff after each development phase |
-| `07_QA` | ACTIVE | Focused real-player, Settings, Notch, restart, and recovery regression |
+| `07_QA` | ARCHIVED | Focused QA merged as `daff724`; report retained |
 
 ## Sprint Work
 
@@ -31,7 +31,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | `P0-2` | P0 | `01_APP` | IMPLEMENTED | Auto selection uses playback state and freshness, preserves deterministic ownership, and does not select merely because an app is open |
 | `P0-3` | P0 | `01_APP` | IMPLEMENTED | NetEase rejects stale asynchronous state, reused track identifiers, and expired provider data; real-player regression remains |
 | `P1-1` | P1 | `04_UX` | IMPLEMENTED | Background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width are implemented |
-| `QA-GATE` | P1 | `07_QA` | ACTIVE | Report direct PASS/FAIL/BLOCKED evidence for real-player and GUI scenarios |
+| `QA-GATE` | P1 | `07_QA` | PASS WITH BLOCKERS | NetEase and automated scope passed with 0 FAIL; Spotify/Apple and environment-dependent scenarios remain blocked/pending |
 
 ## Current Evidence
 
@@ -48,11 +48,12 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 - Focused Auto Detect runtime: Spotify and Apple Music were closed, NetEase
   was the only running player, MediaRemote owner was `com.netease.163music`
   with `playing=true`, and NotchMuse visibly rendered its current lyric.
+- Focused QA report: `reports/2026-09-23-v08-stability-focused-qa.md`.
 
 ## Physical Worktrees
 
 - PM/integration: `.worktrees/netease-production-candidate` (clean/current).
-- QA: `.worktrees/07_QA` on `codex/v08-stability-qa` (active).
+- QA worktree was removed after its report merged; branch/history remain.
 - APP and UX worktrees were cleanly removed after merge; their branches and
   commit history remain.
 - Legacy experiment root: repository root (dirty; retained until its uncommitted

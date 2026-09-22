@@ -23,7 +23,7 @@ struct NetEaseLyricsSource {
         if let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "NetEase") {
             return index
         }
-        guard (55...65).contains(track.duration) else { return nil }
+        guard track.duration > 0, track.duration <= 65 else { return nil }
         let exactIdentityMatches = candidates.indices.filter { index in
             let candidate = candidates[index]
             let fullDurationTrack = SpotifyTrack(

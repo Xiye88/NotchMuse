@@ -723,6 +723,8 @@ enum SelfTests {
             TrackMatcher.Candidate(title: "彩券（翻唱正式版）", artists: ["零度甜"], durationMs: 275_854)
         ]
         check(source.matchingIndex(for: preview, candidates: previewCandidates) == 0, "matches a unique exact NetEase identity when MediaRemote reports a 60-second preview")
+        let shortPreview = SpotifyTrack(name: "彩券", artist: "薛之谦", album: "天外来物", duration: 30)
+        check(source.matchingIndex(for: shortPreview, candidates: previewCandidates) == 0, "matches a unique exact NetEase identity when MediaRemote reports a 30-second preview")
         let ambiguousPreview = previewCandidates + [
             TrackMatcher.Candidate(title: "彩券", artists: ["薛之谦"], durationMs: 280_000)
         ]

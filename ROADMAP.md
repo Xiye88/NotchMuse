@@ -1,296 +1,78 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-09-11
-
-## Phase 1: GitHub Open Source Beta Release
-
-Status: Completed
-
-- Published `v0.3.0-beta` with a verified DMG and SHA-256.
-- Current support remains macOS 14+, Apple Silicon, and Spotify desktop app.
-
-## Phase 2: Lyrics Quality and Stability
-
-### v0.3.1 - Lyrics Quality Improvement + UX Polish
-
-Status: Released as GitHub Pre-release on 2026-07-26.
-
-Goal: Add safe matcher observability and complete the targeted lyrics UX fix.
-
-Completed:
-
-- Restored VPS access through SSH key authentication.
-- Verified seven healthy daily Benchmark runs.
-- Established a seven-day Coverage baseline of `66.09%`.
-- Audited 216 title mismatch failures from run `11-12`.
-- Completed seven-day Provider Health analysis.
-- Completed an isolated LRCLIB retry experiment; App retry is No-Go.
-- Designed Matcher Decision Logging and passed implementation readiness
-  review.
-- Implemented and verified DEBUG-only Matcher Decision Logging.
-- Confirmed Release builds contain no matcher diagnostic event strings.
-- Implemented forward-only marquee behavior with a `1.2s` delay and endpoint
-  stop.
-- Completed real-device Spotify smoke tests in Status Bar and Notch modes.
-- Built and verified the local `0.3.1` build `4` DMG.
-- Designed the minimum Benchmark Failure Analysis Pipeline.
-- Added GitHub Bug Report and Feature Request templates.
-- Added a README Feedback entry point.
-- Published release commit `3666710` and tag `v0.3.1`.
-- Published and re-downloaded the final DMG; SHA-256 and `hdiutil verify`
-  passed.
-- Added official Status Bar and Notch Mode MP4 demos.
-
-Post-release:
-
-- Keep the transient Notch resume layout switch as a beta known issue.
-- Replace Demo links with native GitHub attachments when upload permission is
-  available.
-- Re-capture the Status Bar screenshot without left-edge lyric cropping.
-- Keep collecting real beta issues and environment data.
-
-Exit Criteria:
-
-- Matcher decisions can be reproduced from DEBUG logs.
-- Release builds emit no candidate metadata.
-- Self-tests, Release build, App launch, DMG verification, and real Spotify
-  smoke tests pass.
-- Repository is clean and the artifact is built from the release commit.
-- Title normalization remains unchanged.
-- Provider priority and App retry remain unchanged.
-
-### v0.4 - Safe Lyrics Quality Improvement
-
-Status: Evidence foundation completed.
-
-Goal: Establish the Failure Analysis Pipeline, then improve matching without
-increasing false positives.
-
-Order:
-
-1. Complete the Evidence Gate using DEBUG-only candidate decision logs.
-2. Separate Provider Health failures from matcher failures.
-3. Parse and import DEBUG matcher logs into the existing Benchmark SQLite.
-4. Run a controlled 50-100 track audit and establish the failure taxonomy.
-5. Use the captured evidence to audit rejected candidates.
-6. Add title or artist normalization only when logs prove a safe gap.
-7. Continue provider-specific experiments in Benchmark.
-8. Reconsider App retry only after a stratified experiment shows second
-   attempt recovery greater than zero.
-
-Validation Gate:
-
-- Swift self-test passes.
-- 100-track live matrix passes.
-- 1000-song Benchmark comparison uses the same dataset.
-- Confirmed false positives remain `0`.
-- p95 latency increase remains within `500ms`.
-- HTTP 403/429 does not increase.
-
-Explicitly Excluded:
-
-- Broad generic retry.
-- Current LRCLIB App retry.
-- Provider priority changes based on Benchmark ranking.
-- Fuzzy title matching by default.
-- Partial-artist acceptance.
-- Relaxing duration tolerance to `12s`.
-- Global provider reordering from aggregate ranking.
-
-### v0.5 - Lyrics Matching Accuracy
-
-Goal: Improve real matching accuracy through bounded evidence while confirmed
-false positives remain zero.
-
-Phases:
-
-1. Phase 1 - Failure Analysis: completed with natural runs `17-18` and an
-   80-song stratified failure dataset.
-2. Phase 2 - Matcher Improvement Proposal: completed; production Matcher is
-   No-Go.
-3. Phase 3 - Evidence Completion and Bounded Validation: completed; second
-   candidate identity capture is deployed for natural run `19+`.
-4. Phase 4 - Matcher Optimization Simulation: in progress. The Benchmark-only
-   simulator and Top Songs proxy baseline are ready. Natural run `19` supplied
-   complete second identity for `489/489` ambiguity rows; `464` strict
-   identity-equivalent rows may enter Benchmark-only simulation. Production
-   remains No-Go pending labeled evidence and manual review.
-5. Phase 4.1 - Existing Provider Recovery: completed and validated. LRCLIB,
-   NetEase, and Kugou parser/endpoint/duplicate-candidate defects were repaired
-   without changing Matcher acceptance. Runs `21-28` average `89.38%`
-   Coverage, compared with `67.4%` on run `20`.
-6. Phase 4.2 - Remaining Coverage Evidence: in progress. Classify Soda's
-   invalid responses, LRCMux 404 semantics, and a labeled sample from the
-   remaining `108` misses before any new Provider or Matcher proposal.
-7. Phase 4.3 - Public Delivery: pending Product Owner version decision. The
-   recovery code is on `main` but is not included in the public `v0.3.1` DMG.
-
-Validation Gate:
-
-- Use the same run `18` dataset and failure pool.
-- Do not change score, threshold, Provider order, retry, or normalization.
-- Prove top and second candidate identity before counting any duplicate pool.
-- Report recovery count only from confirmed identity-equivalent pairs.
-- Manually review every proposed recovery.
-- Confirmed false positives remain `0`.
-- Benchmark simulation latency increase remains negligible.
-- At least one ranking strategy improves manually verified
-  correct-candidate rate without increasing confirmed false positives.
-
-Explicitly Excluded:
-
-- New Providers.
-- Aggregate Coverage maximization as a goal.
-- Production Matcher changes before Phase 4 approval.
-- Title or artist normalization in the current experiment.
-- Album as an acceptance override.
-- Mandatory ISRC identity.
-- Provider priority changes without a separate Provider Health decision.
-
-Deferred:
-
-- Windows.
-- QQ Music and NetEase Cloud Music.
-- Intel Mac / Universal Binary without hardware and demand evidence.
-- Apple Music production integration; its evidence spike moves to v0.6.
-- App Store distribution.
-
-### v0.6 - Multi-Player Architecture and Evidence
-
-Status: DONE / ARCHIVED. v0.6.0 and v0.6.1 are published.
-
-Goal: Add a maintainable player boundary without regressing Spotify, then use
-new metadata as evidence rather than immediately changing production matching.
-
-Order:
-
-1. Publish the already validated Provider recovery.
-2. Wrap SpotifyReader with a neutral adapter and prove exact behavior parity.
-3. Complete the five-song Apple Music matrix and authenticated Spotify parity.
-4. User-triggered email feedback: completed with the approved public address.
-5. Capture and label Track Identity evidence in Benchmark.
-6. Run QQ Music and NetEase diagnostic probes only on current installed apps.
-7. Consider a second production player only after the first two adapters pass.
-
-Final result:
-
-- Apple Music and Spotify production paths are released and pass long-run,
-  network recovery, sleep/wake, and public artifact smoke validation.
-- v0.6.1 fixes the transient Apple Music false Automation permission warning.
-- Email feedback is Ready with no telemetry or background upload.
-- Production Matcher behavior remained unchanged throughout v0.6.
-
-Explicitly Excluded:
-
-- Shipping three new players together.
-- Private MediaRemote in the Release binary.
-- Accessibility/UI scraping as a playback backend.
-- New lyrics Providers.
-- Production Matcher changes without labeled holdout evidence.
-- Large UI redesign, Windows, Intel-first work, or automatic telemetry.
-
-### v0.7 - Lyrics Quality Hardening
-
-Status: Final Production Gate completed - NO-GO.
-
-Goal: Improve user-perceived accuracy by reducing popular-song misses, wrong
-versions, and wrong candidates without optimizing aggregate Coverage alone.
-
-Order:
-
-1. Freeze the latest Overall, Top Songs, and Top 100 baselines.
-2. Build a complete missing dataset for failed popular tracks.
-3. Separate Provider no-result, network, and parser failures from Matcher
-   rejection or ambiguity.
-4. Label Live, Remix, Acoustic, Remastered, Deluxe, OST, feat/with,
-   translation, and cover identity cases.
-5. Run offline candidate-ranking simulations using title, artist, duration,
-   album, and version metadata.
-
-Current result:
-
-- Run 50 Overall is `89.0%`; Top Songs is `90.67%`; Top 100 is `97.0%`.
-- A 50-track unique popular-miss dataset and 40-case ambiguity audit are frozen.
-- Track Identity v1 still has `0/2,568` human labels; album and ISRC candidate
-  evidence are absent.
-- Offline signal selection counts are available, but correctness and confirmed
-  false-positive deltas are not computable.
-- Final Production Gate is `NO-GO`: Ground Truth v1 has 50 explicit labels,
-  but only one indistinguishable duplicate and zero resolved top/second/neither
-  cases. Ranking uplift and a valid false-positive rate cannot be established.
-- Reopen the Gate only after candidate stable ID, ISRC, album, and lyric text
-  produce a labeled training set plus an independent holdout.
-
-Gate:
-
-- Production Matcher remains unchanged until a labeled holdout shows a real
-  correct-selection improvement with confirmed false positives equal to zero.
-- Provider priority does not change from one Benchmark run.
-- No new music platform or lyrics Provider is implemented in this phase.
-
-### v0.7.1 - Lyrics Metadata & Source Intelligence
-
-Status: Evidence audit completed - Production Gate `NO-GO`.
-
-Goal: Test whether existing player and Provider metadata can resolve the
-remaining identity gaps without relaxing Matcher safety.
-
-Result:
-
-- Spotify can expose a native Spotify ID/URL and secondary local metadata;
-  Apple Music can expose persistent/database IDs, release date/year, and album
-  metadata. Neither local scripting interface exposes ISRC.
-- LRCLIB and LRCMux return useful album/source metadata, LRCMux returns ISRC,
-  and several Providers have native IDs that current evidence storage drops.
-- The frozen 49 insufficient-metadata cases contain none of those candidate
-  fields, so confirmed resolution remains `0/49`.
-- Two-Provider consensus makes six provisional selections after version
-  guarding, but correctness, ambiguity reduction, and confirmed false-positive
-  rate remain `N/A`; a three-Provider threshold selects none.
-- Two of the three Top 100 misses have confirmed public synced lyrics, but both
-  require a cross-language catalog identity path that is not available through
-  the current low-maintenance local adapters.
-- Current reasonable target is a validated `92%`, not a commitment to 95-98%.
-
-Gate:
-
-- No Production metadata patch is approved.
-- The only next evidence batch is Benchmark-only Metadata Capture v2 for the
-  28 Top Songs misses, followed by strategy-blind labeling and an independent
-  holdout.
-- If that batch cannot prove real ambiguity resolution with zero confirmed
-  false positives, close deep Matcher/metadata optimization and prioritize
-  user growth.
-
-### v0.8 - NetEase Cloud Music Integration
-
-Status: Production Candidate complete; manual Gate pending.
-
-Goal: Bundle the pinned LyricsX-compatible MediaRemote Bridge and add NetEase
-through the existing Player Adapter boundary without changing lyrics matching.
-
-Current result:
-
-- Pinned BSD-3-Clause Bridge, Bundle-only paths, attribution, signing, and
-  local `0.8.0` build `8` DMG checks pass.
-- Status Bar, Notch Mode, 30 Next actions, 10 pause/resume pairs, three NetEase
-  restarts, and 22 three-player owner transitions pass.
-- Spotify and Apple Music smoke regression passes.
-- Commit `ade26f7` removes the forced-exit Perl orphan; 3/3 checks pass.
-- The 15-song unique-track matrix passes. Continuous 60-minute, Sleep/Wake,
-  and network recovery remain before the final Production Gate.
-
-Gate:
-
-- No push, tag, or GitHub Release before the remaining manual checks.
-- Keep the system `mediaremoteagent` empty-response incident as an explicit
-  private-API maintenance risk.
-- Production Matcher, Provider priority, SpotifyReader, and AppleMusicAdapter
-  remain unchanged.
+Last Updated: 2026-09-22
+
+## Current — v0.8 Production Quality Sprint
+
+Status: ACTIVE / NOT RELEASED
+
+Goal: move the existing Spotify, Apple Music, and NetEase candidate from
+feature completion to production-quality behavior and a verified release
+candidate.
+
+### P0 — Player Ownership and Settings
+
+- Make Auto Detect the recommended default player mode.
+- Detect Spotify (`com.spotify.client`), Apple Music (`com.apple.Music`), and
+  NetEase (`com.netease.163music`).
+- Keep explicit player overrides for all three players.
+- Restore the missing NetEase Settings option and add regression coverage for
+  the complete enum/UI/datasource/adapter path.
+- On player exit, hide lyrics by default and wait for recovery; offer an option
+  to keep the final lyric visible and paused.
+
+Exit criteria: deterministic owner selection, no stale lyric after owner or
+track changes, all four Settings choices persist, and regression checks pass.
+
+### P1 — Lyrics State and Notch UX
+
+- Playing: show lyrics and scroll.
+- Paused: retain lyrics and stop scrolling.
+- Stopped: apply the configured hide-or-hold policy.
+- Track change: clear the old lyric before loading the new lyric.
+- Default to lyric-only presentation with no background.
+- Support Background `None / Black / Custom`.
+- Support Hide lyrics on hover `ON / OFF`, defaulting to ON.
+
+Exit criteria: automated state checks and focused GUI regression pass across
+Spotify, Apple Music, and NetEase.
+
+### P2 — v0.8 Release Candidate
+
+- Run automated tests, real-player smoke tests, lifecycle checks, and a clean
+  install gate proportionate to release risk.
+- Build and verify the DMG and checksum.
+- Verify and document signing/notarization truthfully.
+- Synchronize `PROJECT_STATUS.md`, `TASK_BOARD.md`, `ROADMAP.md`, CHANGELOG,
+  and release notes after the implementation and QA evidence land.
+- Obtain Product Owner confirmation immediately before public push/tag/release.
+
+Exit criteria: a reproducible verified RC with a recorded GO, CONDITIONAL GO,
+or NO-GO decision. This roadmap does not claim the RC is complete.
+
+## Future — Website Distribution
+
+Status: PLANNED / NOT IN DEVELOPMENT
+
+After v0.8, plan `notchmuse.com` with a landing page, download page, and release
+notes. Host only the DMG, checksum, and `latest.json`; do not upload source code
+to the website.
+
+## Completed Milestones
+
+- v0.3.x: open-source beta and initial lyrics UX.
+- v0.4-v0.5: evidence pipeline and bounded Provider recovery.
+- v0.6.0-v0.6.1: Spotify and Apple Music production support, published.
+- v0.7-v0.7.1: Matcher and metadata evidence gates completed with NO-GO for
+  Production behavior changes.
+- v0.8 candidate groundwork: bundled NetEase bridge, adapter, lifecycle work,
+  and local build-14 artifact completed; no public v0.8 release was made.
 
 ## Product Guardrails
 
-- Lyrics Quality and stability take priority over expansion.
-- Benchmark evidence precedes production changes.
-- Coverage gains never justify confirmed wrong matches.
-- One small batch is implemented and validated at a time.
+- Do not modify Production Matcher, thresholds, ranking, or Provider priority
+  without a new independent evidence gate.
+- Do not treat Provider hits as proof of visible, synchronized lyrics.
+- Do not claim signing, clean-install, or public-release completion without
+  direct verification.
+- Do not start website implementation during the v0.8 sprint.

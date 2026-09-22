@@ -1,180 +1,56 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-09-11
+Last Updated: 2026-09-22
 
-## TODO
+## Sprint
 
-| Task | Owner | Priority | Notes |
-| --- | --- | --- | --- |
-| v0.8 manual Production Gate | Product Owner / 04_UX | P0 | 60 min, Sleep/Wake, network recovery |
-| Benchmark-only Metadata Capture v2 | 03_LAB / 05_MATCHER | P0 | Top Songs 28 miss: native ID, album/year/ISRC, lyric-body hash; no Production import |
-| Classify LRCMux HTTP 404 semantics | 03_LAB | P1 | Do not retry until classified |
-| Build strategy-blind labeled holdout | 03_LAB / 05_MATCHER | P0 | Required before reopening Metadata or Matcher Production Gate |
-| Audit Soda invalid-response regression | 03_LAB | P0 | Run 50: `0/1000`, all JSON parse failures; no Matcher changes |
-| Manually listen to Timing Quality priority sample | 03_LAB / 04_UX | P1 | 11 songs; measure start/middle/end error |
-| Stratified LRCLIB retry experiment | 03_LAB | P2 | Benchmark only |
-| Replace Demo links with GitHub native attachments | 06_DOCS | P2 | Requires browser local-file access |
-| Re-capture Status Bar screenshot | 06_DOCS / 04_UX | P2 | Current left lyric edge is cropped |
-| Complete real clean-Mac user journey | 04_UX | P0 | Gatekeeper, TCC, Spotify, lyrics recovery |
-| Run first weekly beta issue triage | 00_PM / 06_DOCS | P1 | Blocked by zero submitted Issues and very low download volume |
-| Label v0.6 frozen ranking cases | 03_LAB / 05_MATCHER | P1 | Strategy-blind labels; every changed decision reviewed |
-| QQ Music current-version field probe | 01_APP | P2 | Requires a Mac with QQ Music installed; private probe only |
-| NetEase current-version field probe | 01_APP | P2 | Stop if timing fields are unstable; no AX production path |
+v0.8 Production Quality Sprint. The release is not published.
 
-## IN PROGRESS
+## Workspace Registry
 
-| Task | Owner | Priority | Notes |
-| --- | --- | --- | --- |
-| v0.8 NetEase Production Candidate | 00_PM / 01_APP | P0 | Implementation and automatic gates pass; manual gate pending |
-| Structured beta feedback intake | 06_DOCS / 00_PM | P1 | Templates ready; collect issues |
-| Remaining Provider semantics | 03_LAB | P1 | Soda invalid response and LRCMux 404 meaning |
-| Controlled early-beta promotion | 00_PM / 06_DOCS | P1 | Use prepared honest beta copy |
+Workspace numbers are unique. A completed workspace moves to `DONE`, then to
+`ARCHIVED` when its result has been merged or handed off.
 
-## BLOCKED
+| Workspace | Status | Current responsibility |
+| --- | --- | --- |
+| `00_PM` | ACTIVE | Sprint coordination, integration, gates, and release decision |
+| `01_APP` | ACTIVE | Player auto detection, state handling, and Settings regression |
+| `02_RELEASE` | ACTIVE | RC build, DMG, checksum, signing assessment, and release preparation |
+| `03_LAB` | ARCHIVED | Benchmark experiments; reopen only with a new evidence question |
+| `04_UX` | ACTIVE | Notch background and hover regression verification |
+| `05_MATCHER` | ARCHIVED | v0.7 evidence gate was NO-GO; Production Matcher remains frozen |
+| `06_DOCS` | ACTIVE | Sprint status, roadmap, task board, and release documentation |
+| `07_QA` | ACTIVE | Automated regression and real-player release gates |
 
-| Task | Owner | Priority | Blocker |
-| --- | --- | --- | --- |
-| Title normalization implementation | 05_MATCHER | P1 | Phase 3 second-candidate evidence takes priority; no safe normalization rule |
-| Production Matcher implementation | 01_APP / 05_MATCHER | P0 | v0.7 closed NO-GO; ranking/threshold/weights stopped |
-| Production metadata enrichment | 01_APP / 05_MATCHER | P0 | 0/49 confirmed resolved; consensus FP and accuracy are N/A |
-| Production Provider expansion | 01_APP / 03_LAB | P0 | Existing Provider health and Benchmark/App parity unresolved |
-| Artist normalization implementation | 05_MATCHER | P1 | Second-candidate identity is required before ranking conclusions |
-| Track Identity album / mandatory ISRC | 05_MATCHER / 01_APP | P1 | Candidate fields incomplete; no safe evidence yet |
-| LRCLIB App retry | 01_APP / 03_LAB | P1 | Second retry success `0/25` |
-| Universal Binary and new platforms | 01_APP / 04_UX | P2 | Deferred by Phase 2 scope |
-| Broad public promotion | 00_PM / 06_DOCS | P1 | Clean-user journey and first issue triage missing |
-| Retention-driven roadmap decisions | 00_PM | P1 | No Issues and only three DMG downloads; insufficient user evidence |
-| QQ Music production integration | 01_APP | P2 | No stable public now-playing API verified |
-| Track Identity enhanced ranking | 03_LAB / 05_MATCHER | P1 | Dataset frozen; human labels 0/2,568 and candidate album/ISRC absent |
-| Candidate deduplication | 03_LAB / 05_MATCHER | P0 | 40-case audit found 1 duplicate and 39 indeterminate cases |
+## Active Work
 
-## DONE
+| ID | Priority | Owner | Status | Deliverable / exit criteria |
+| --- | --- | --- | --- | --- |
+| `P0-1` | P0 | `01_APP` / `07_QA` | ACTIVE | Player setting defaults to Auto Detect; detects active Spotify (`com.spotify.client`), Apple Music (`com.apple.Music`), or NetEase (`com.netease.163music`); deterministic switching and stale-lyric clearing are tested |
+| `P0-2` | P0 | `01_APP` / `07_QA` | ACTIVE | Restore Spotify, Apple Music, and NetEase in Settings; verify `PlayerSource`, `SettingsWindowController`, adapter registration, datasource, persistence, and add a regression test |
+| `P1-1` | P1 | `01_APP` / `07_QA` | ACTIVE | Playing shows and scrolls; Paused holds and stops scrolling; Stopped follows the selected hide/hold policy; track changes clear old lyrics before loading new lyrics |
+| `P1-2` | P1 | `04_UX` / `07_QA` | ACTIVE | Default lyric-only presentation; Background supports None/Black/Custom with None default; Hide lyrics on hover supports ON/OFF with ON default |
+| `P2-1` | P2 | `02_RELEASE` / `07_QA` / `06_DOCS` | ACTIVE | Produce and verify the v0.8 RC DMG and checksum; report actual signing state; update release notes and status documents; obtain final approval before any public release |
 
-| Task | Owner | Priority | Result |
-| --- | --- | --- | --- |
-| Bundled MediaRemote Bridge | 01_APP / 02_RELEASE | P0 | Pinned BSD-3 dependency, Bundle paths, local DMG verified |
-| NetEase runtime and event stress | 01_APP / 04_UX | P0 | 30 Next, 10 pause/resume, 3 restarts, 22 owner changes |
-| NetEase helper orphan fix | 01_APP | P1 | `ade26f7`; forced-exit cleanup 3/3 PASS |
-| Spotify / Apple Music v0.8 smoke regression | 01_APP / 04_UX | P0 | Both existing players retain real lyrics paths |
-| NetEase 15-song unique-track matrix | 01_APP / 04_UX | P0 | Bridge metadata and NotchMuse lyrics converge on all 15 samples |
-| v0.7.1 Metadata & Source Intelligence Gate | 00_PM | P0 | NO-GO; no Production metadata patch approved |
-| Player Metadata Capability Matrix | 01_APP / 05_MATCHER | P0 | Native IDs/secondary fields exist; no local-script ISRC |
-| Provider Metadata Capability Matrix | 03_LAB | P0 | Confirmed discarded metadata; no production order change |
-| Metadata Resolution Opportunity audit | 03_LAB / 05_MATCHER | P0 | 49 eligible for recapture; 0/49 confirmed resolved |
-| Cross-provider consensus experiment | 03_LAB / 05_MATCHER | P0 | 6/49 provisional; accuracy and confirmed FP remain N/A |
-| Top Songs Recovery audit | 03_LAB | P0 | Top 100: 2 opportunities, 0 safe production paths |
-| Feedback data-loop QA | 01_APP / 04_UX | P1 | READY/PASS; release self-test and configured email verified |
-| v0.7 final Production Gate | 00_PM | P0 | NO-GO; no Production Matcher change approved |
-| Candidate Ground Truth v1 | 03_LAB / 05_MATCHER | P0 | 50 cases: 1 indistinguishable, 49 insufficient |
-| Ranking Simulator v3 | 05_MATCHER | P0 | Benchmark-only evaluator; 11 focused tests pass |
-| Run 50 Top Songs ownership | 03_LAB | P0 | Provider 3.57%; Matcher 0%; Metadata 96.43% |
-| Soda endpoint audit | 03_LAB | P0 | REMOVE-CANDIDATE recommendation; production unchanged |
-| v0.7 run 50 baseline | 03_LAB | P0 | Overall 89.0%; Top Songs 90.67%; Top 100 97.0% |
-| v0.7 popular-miss dataset freeze | 03_LAB | P0 | 50 unique tracks with discovery-run provenance |
-| v0.7 Provider Health audit | 03_LAB | P0 | Core/fallback/low-value/unhealthy classified; no order change |
-| v0.7 Track Identity audit | 05_MATCHER | P0 | Album/ISRC absent; version signals remain audit-only |
-| v0.7 Candidate Ambiguity audit | 03_LAB / 05_MATCHER | P0 | 40 cases: A=1, B=0, C=0, D=39; dedup No-Go |
-| v0.7 Ranking Simulation Gate | 05_MATCHER | P0 | Accuracy/FP not computable; Production No-Go |
-| v0.7 Timing Quality snapshot | 03_LAB / 04_UX | P1 | 35 songs/1,830 lines; auditory dimensions pending |
-| v0.7 Feedback and docs QA | 01_APP / 04_UX / 06_DOCS | P1 | READY/PASS; no code or public-doc changes |
-| v0.7 Platform matrix | 00_PM / 01_APP | P2 | Universal Binary first conditional candidate; all platforms deferred |
-| Publish v0.6.1 stability patch | 00_PM / 01_APP / 02_RELEASE | P0 | Release commit `9180b78`; tag, DMG and checksum published |
-| v0.6.1 network recovery | 01_APP / 04_UX | P1 | Apple Music and Spotify recover without stale lyrics |
-| v0.6.1 sleep/wake recovery | 01_APP / 04_UX | P1 | Apple Music Status Bar and Spotify Notch Mode pass |
-| v0.6.1 public artifact validation | 02_RELEASE | P0 | GitHub DMG SHA-256 `c36d5141...f52ed`; install and both player smokes pass |
-| v0.6.0 Apple Music long-run stability | 01_APP / 04_UX | P0 | 60+ min, 20+ changes, restart/recovery and resource checks complete |
-| v0.6.0 Spotify regression stability | 04_UX / 01_APP | P0 | 30 min, ten changes, pause/resume and restart recovery complete |
-| v0.6.0 public artifact revalidation | 02_RELEASE | P0 | GitHub DMG hash, hdiutil, install, launch and both player smokes pass |
-| Apple Music transient state fix | 01_APP / 04_UX | P1 | v0.6.1 build 7 shows Changing song instead of false permission warning |
-| v0.6.1 local patch artifact | 01_APP / 02_RELEASE | P0 | Superseded by the verified public artifact |
-| v0.6 support documentation audit | 06_DOCS | P1 | Signing, Automation, and feedback-draft wording corrected |
-| Publish v0.6.0 GitHub Pre-release | 00_PM / 01_APP / 02_RELEASE | P0 | main, tag, DMG, checksum, Release Notes, and remote artifact verification complete |
-| Package validated Provider recovery publicly | 01_APP / 02_RELEASE | P0 | Included in the v0.6.0 public DMG |
-| Apple Music v0.6 Release gate | 01_APP / 04_UX | P0 | GO: runtime matrix, Automation denial/re-grant, restart recovery, stale clearing, and Spotify regression pass |
-| Self-test language isolation | 01_APP | P1 | English and zh-Hans Release self-tests pass independently |
-| Local Release toolchain recovery | 01_APP / 02_RELEASE | P0 | Swift 6.3.3 clean build passes with installed macOS 15.4 SDK |
-| Apple Music production routing | 01_APP / 04_UX | P0 | Settings selection feeds shared Adapter, LyricsClient, Status Bar and Notch path; automated verification PASS |
-| Apple Music five-song runtime matrix | 01_APP / 04_UX | P0 | PASS: 2 English, 2 Chinese, 1 complex metadata; Status Bar lyrics verified |
-| Apple Music Notch and restart validation | 01_APP / 04_UX | P0 | PASS: Notch lyrics, app restart reconnect, safe Waiting fallback, manual playback recovery |
-| Spotify v0.6 core parity | 01_APP / 04_UX | P0 | PASS: live lyrics for Cruel Summer and track switch to After Hours without stale content |
-| Spotify Adapter implementation | 01_APP | P0 | Minimal wrapper wired; SpotifyReader and lyrics boundary preserved; self-tests pass |
-| Apple Music public API spike code | 01_APP / 04_UX | P0 | State read and parser pass; runtime remains Conditional Go |
-| Track Identity v1 representation | 01_APP / 05_MATCHER | P1 | Neutral metadata and version hints added; production Matcher unchanged |
-| Feedback Email finalization | 01_APP / 04_UX | P1 | READY; single build config, bilingual drafts, no-song, both sources, Cancel and Send verified |
-| Track Identity Dataset v1 freeze | 03_LAB / 05_MATCHER | P1 | Run 32; 2,568 cases; SHA-256 b0bbb940...; Apple Music catalog proxy labeled |
-| Batch 2 Candidate Ranking gate | 03_LAB / 05_MATCHER | P1 | Production NO-GO; 0 human labels means requested deltas are not computable |
-| QQ / NetEase diagnostic probe | 01_APP | P2 | Both production No-Go; no public scripting interface verified |
-| LyricsX UX bounded backlog | 04_UX | P2 | Three near-term recommendations; no UI redesign |
-| GitHub `v0.3.0-beta` release | Project | P0 | Published and verified |
-| GitHub `v0.3.1` release | Project | P0 | Pre-release published; downloaded DMG verified |
-| Freeze v0.3.1 repository diff | 00_PM / 01_APP | P0 | Release commit `3666710` |
-| Rebuild v0.3.1 DMG | 01_APP / 02_RELEASE | P0 | SHA-256 `f8b0efe3...fcedb0` |
-| Push v0.3.1 tag and Release | 02_RELEASE / 00_PM | P0 | DMG and checksum uploaded |
-| Restore VPS access | 03_LAB | P0 | Existing SSH key works |
-| Verify 7-day Benchmark baseline | 03_LAB | P0 | Average Coverage `66.09%` |
-| Verify Daily Benchmark Pipeline | 03_LAB | P0 | Timer enabled/active; 7 runs healthy |
-| Network failure evidence audit | 03_LAB / 05_MATCHER | P1 | Generic retry rejected |
-| Matcher upgrade design | 05_MATCHER | P1 | Safe batches and gates defined |
-| GitHub maintenance templates | 06_DOCS | P1 | Bug and feature templates added |
-| Title mismatch audit | 05_MATCHER | P1 | Drift is `128/216` |
-| Provider health audit | 03_LAB | P1 | LRCMux leads; NetEase unhealthy |
-| LRCLIB retry experiment | 03_LAB | P1 | App retry No-Go |
-| Matcher observability design | 05_MATCHER | P1 | Minimal DEBUG design ready |
-| Implementation readiness review | 01_APP | P0 | Logging-only Go |
-| Matcher Decision Logging implementation | 01_APP / 05_MATCHER | P0 | DEBUG-only; matching behavior unchanged |
-| DEBUG vs Release logging validation | 01_APP | P0 | Self-tests, Release build, boundary scan PASS |
-| NetEase provider priority recommendation | 03_LAB | P1 | Keep unchanged pending controlled decision |
-| Lyrics Marquee behavior fix | 01_APP / 04_UX | P1 | 1.2s delay, forward-only, endpoint stop |
-| Lyrics Animation automated QA | 04_UX | P1 | Automated and static checks PASS |
-| Real-device UX Smoke Test | 04_UX | P0 | PASS with transient Notch known risk |
-| Hide Lyrics / Show Lyrics fix | 01_APP / 04_UX | P0 | Both modes hide and restore current state |
-| Notch / Overlay click-through fix | 01_APP / 04_UX | P0 | Real Spotify target received click |
-| Critical UX smoke test | 04_UX / 00_PM | P0 | PASS; final RC Freeze GO |
-| GitHub Demo video package | 06_DOCS | P1 | Two MP4 demos and README presentation update complete |
-| Release Candidate regression | 01_APP | P0 | Build, tests, launch, logging boundary PASS |
-| Benchmark next-step review | 03_LAB | P1 | Minimum Failure Analysis Pipeline defined |
-| Matcher Release boundary review | 05_MATCHER | P0 | PASS; no production behavior change |
-| Local v0.3.1 RC artifact | 01_APP | P0 | Build 4 DMG verified |
-| Phase 2 Benchmark health check | 03_LAB | P1 | Latest `68.9%`; 7-run average `67.16%` |
-| v0.4 Matcher roadmap | 05_MATCHER | P1 | Evidence Gate first; false positives must remain `0` |
-| Public Beta feedback guide | 06_DOCS | P1 | `FEEDBACK.md` linked from README |
-| GitHub growth audit | 06_DOCS | P1 | Presentation and issue intake PASS |
-| Localization final review | 01_APP / 04_UX | P1 | English default; manual Chinese selection PASS |
-| Platform expansion decision | 01_APP | P2 | Apple Music first future candidate; implementation deferred |
-| Beta promotion package | 00_PM / 06_DOCS | P1 | X, Reddit, and GitHub early-beta drafts ready |
-| Beta User Journey final audit | 04_UX | P0 | PASS WITH RISKS; clean Mac still required |
-| 60-case Failure Taxonomy sample | 03_LAB | P0 | 15 samples in each requested class |
-| v0.4 Provider Health analysis | 03_LAB | P0 | LRCMux/LRCLIB/NetEase root boundaries set |
-| Matcher Evidence readiness | 05_MATCHER | P0 | GO without code changes |
-| Beta Support Package | 06_DOCS | P1 | `SUPPORT.md` and README links ready |
-| v0.5 priority review | 01_APP | P1 | Apple Music first conditional candidate |
-| Bilingual GitHub README | 06_DOCS | P1 | Full Simplified Chinese README and language switch |
-| Bilingual Quick Start | 06_DOCS / 04_UX | P1 | Requirements, install, permission, menu bar entry |
-| Latest VPS evidence check | 03_LAB | P0 | Runs 15-16 healthy; latest Coverage `68.4%` |
-| Next Matcher Evidence Gate | 05_MATCHER | P0 | Normalization NO-GO; candidate alignment defined |
-| Rejected candidate evidence capture | 03_LAB / 05_MATCHER | P0 | Verified locally and deployed to VPS |
-| Bilingual Release usage links | 06_DOCS | P1 | English, Chinese, Support, and menu bar entry |
-| Matcher evidence reporting | 03_LAB / 05_MATCHER | P0 | Verified on natural runs 17-18 |
-| v0.5 Phase 1 Failure Analysis | 03_LAB | P0 | Runs 17-18 verified; 80-song dataset created |
-| v0.5 Phase 2 Matcher Improvement Proposal | 05_MATCHER | P0 | Production NO-GO; second-candidate evidence extension approved |
-| Lyrics Failure UX Audit | 04_UX | P1 | No P0; three P1 copy risks identified |
-| Production Stability Boundary Review | 01_APP | P0 | Benchmark isolated; Release DEBUG logging remains off |
-| Second-candidate evidence extension | 03_LAB / 05_MATCHER | P0 | Commit `08acf82`; deployed and remote tests passed |
-| Offline ranking simulator | 05_MATCHER | P0 | Benchmark-only; four signal groups; 23 tests pass |
-| Top Songs proxy dataset | 03_LAB | P1 | 300 unique tracks; run 18 weighted baseline `72.9%` |
-| Failure-state copy review | 04_UX | P1 | Proposal complete; no Swift or behavior change |
-| Natural run 19 evidence verification | 03_LAB | P0 | 489/489 second identity filled; snapshot hash matched VPS |
-| Phase 3 de-duplication Go/No-Go | 05_MATCHER | P0 | Benchmark-only GO for 464 equivalent rows; production NO-GO |
-| Phase 4 run 19 simulation audit | 03_LAB / 05_MATCHER | P0 | 101-song recovery upper bound; no labeled accuracy claim |
-| Open-source lyrics source landscape | 00_PM / 03_LAB | P0 | Existing-source recovery first; Musixmatch official is conditional |
-| Existing Provider recovery implementation | 01_APP / 03_LAB / 05_MATCHER | P0 | LRCLIB, NetEase, and Kugou repaired without Matcher changes |
-| Top Songs missing-track replay | 03_LAB / 05_MATCHER | P0 | Recovered 6/9; bounded first-100 result 91 to potential 97 |
-| Provider recovery natural validation | 03_LAB / 05_MATCHER | P0 | Runs 21-28 average `89.38%`; latest `89.2%` |
-| Latest Top Songs natural validation | 03_LAB | P0 | Run 28: `277/300` overall and `96/100` first 100 |
-| 2026-08-09 code verification | 01_APP / 03_LAB | P0 | Swift self-tests, Release build, and 26 Python tests passed |
-| LyricsX / LyricFever deep source audit | 01_APP / 04_UX / 05_MATCHER | P0 | Player, lyrics and floating UX boundaries documented |
-| Unified Music Player Layer design | 01_APP / 05_MATCHER | P0 | Progressive Spotify-first migration approved for spike |
-| Apple Music feasibility review | 01_APP | P0 | Public Apple Events path verified; runtime spike pending |
-| QQ / NetEase player feasibility review | 01_APP | P1 | Diagnostic probes only; production paths rejected |
-| v0.6 Track Identity experiment design | 03_LAB / 05_MATCHER | P1 | Benchmark-only gate; production Matcher unchanged |
-| Email feedback UX design | 01_APP / 04_UX | P1 | Native mailto flow became the READY Batch 2 implementation |
+## Product Decisions
+
+- Player selection options: Auto Detect (recommended), Spotify, Apple Music,
+  and NetEase Cloud Music.
+- When the player exits, the default is to hide lyrics and wait for recovery.
+  The alternative keeps the final lyric visible and paused.
+- Production Matcher, thresholds, ranking, and Provider priority remain frozen.
+- Do not push, tag, or publish v0.8 without the final Product Owner approval.
+
+## Future — Not In This Sprint
+
+Plan `notchmuse.com` after v0.8. The public download surface will contain only
+the DMG, checksum, `latest.json`, landing page, and release notes. Source code
+will not be uploaded to the website. No website implementation is authorized
+in this sprint.
+
+## Archived Evidence
+
+- v0.6.0 and v0.6.1 were published with Spotify and Apple Music support.
+- v0.7 and v0.7.1 Matcher/metadata gates ended NO-GO.
+- The prior NetEase candidate reached build 14 and produced a locally verified
+  DMG, but it was not merged, pushed, tagged, or released.

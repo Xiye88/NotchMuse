@@ -84,6 +84,9 @@
 "Font Size" = "字体大小";
 "Animation Speed" = "动画速度";
 "Opacity" = "不透明度";
+"Background" = "背景";
+"Background Color" = "背景颜色";
+"Hide on Hover" = "悬停时隐藏";
 "General" = "通用";
 "Music Player" = "音乐播放器";
 "Language" = "语言";

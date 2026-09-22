@@ -34,11 +34,14 @@ struct NetEaseEventConverger: Sendable {
             return hadNetEaseState ? [.clear] : []
         }
 
+        guard Self.hasUsableMetadata(event) else { return [] }
+
         let identity = Self.identity(of: event)
         if let committed, Self.identity(of: committed) == identity {
-            self.committed = event
+            let stableEvent = Self.updatingPlayback(of: committed, from: event)
+            self.committed = stableEvent
             pending = nil
-            return [.event(event)]
+            return [.event(stableEvent)]
         }
         if let pending, pending.identity == identity {
             committed = event
@@ -58,8 +61,34 @@ struct NetEaseEventConverger: Sendable {
     }
 
     private static func identity(of event: MediaRemoteEvent) -> String {
-        let nativeID = event.contentItemIdentifier ?? event.uniqueIdentifier?.rawValue ?? ""
-        return [nativeID, event.title, event.artist ?? "", event.album ?? "", String(event.duration ?? 0)]
+        if let nativeID = event.contentItemIdentifier ?? event.uniqueIdentifier?.rawValue,
+           !nativeID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "id:\(nativeID)"
+        }
+        return [event.title, event.artist ?? "", String(Int((event.duration ?? 0).rounded()))]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
             .joined(separator: "\u{1F}")
+    }
+
+    private static func hasUsableMetadata(_ event: MediaRemoteEvent) -> Bool {
+        !event.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !(event.artist ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private static func updatingPlayback(of stable: MediaRemoteEvent, from latest: MediaRemoteEvent) -> MediaRemoteEvent {
+        MediaRemoteEvent(
+            bundleIdentifier: stable.bundleIdentifier,
+            parentApplicationBundleIdentifier: stable.parentApplicationBundleIdentifier,
+            playing: latest.playing,
+            title: stable.title,
+            artist: stable.artist,
+            album: stable.album,
+            duration: stable.duration,
+            elapsedTimeNow: latest.elapsedTimeNow,
+            timestamp: latest.timestamp,
+            uniqueIdentifier: stable.uniqueIdentifier,
+            contentItemIdentifier: stable.contentItemIdentifier,
+            mediaType: stable.mediaType
+        )
     }
 }

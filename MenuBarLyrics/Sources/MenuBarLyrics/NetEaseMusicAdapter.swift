@@ -64,6 +64,10 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
     static func snapshot(from event: MediaRemoteEvent?, isRunning: Bool) -> MusicPlayerSnapshot {
         guard isRunning else { return .closed }
         guard let event, event.bundleIdentifier == bundleIdentifier else { return .stopped }
+        guard !event.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !(event.artist ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return .stopped
+        }
         let state: PlayerPlaybackState = event.playing ? .playing : .paused
         let track = NowPlayingTrack(
             title: event.title,
@@ -136,6 +140,9 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
         lock.withLock {
             switch last {
             case let .event(event):
+#if DEBUG
+                print("[NetEase] track=\(event.contentItemIdentifier ?? event.uniqueIdentifier?.rawValue ?? "-") title=\(event.title) artist=\(event.artist ?? "-") timestamp=\(event.timestamp ?? "-")")
+#endif
                 current = Self.snapshot(from: event, isRunning: isRunning())
             case .clear:
                 current = isRunning() ? .stopped : .closed

@@ -84,6 +84,9 @@
 "Font Size" = "Font Size";
 "Animation Speed" = "Animation Speed";
 "Opacity" = "Opacity";
+"Background" = "Background";
+"Background Color" = "Background Color";
+"Hide on Hover" = "Hide on Hover";
 "General" = "General";
 "Music Player" = "Music Player";
 "Language" = "Language";

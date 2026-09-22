@@ -15,13 +15,24 @@ enum AppPreferences {
     static let hasShownFirstLaunchGuideKey = "HasShownFirstLaunchGuide"
     static let languageKey = "AppLanguage"
     static let playerSourceKey = "PlayerSource"
+    static let notchBackgroundEnabledKey = "NotchBackgroundEnabled"
+    static let notchBackgroundColorKey = "NotchBackgroundColor"
+    static let notchHideOnHoverKey = "NotchHideOnHover"
 
     static var language: AppLanguage {
         AppLanguage(rawValue: UserDefaults.standard.string(forKey: languageKey) ?? "") ?? .english
     }
 
     static var playerSource: PlayerSource {
-        normalizedPlayerSource(UserDefaults.standard.string(forKey: playerSourceKey))
+        playerSource(in: .standard)
+    }
+
+    static func playerSource(in defaults: UserDefaults) -> PlayerSource {
+        normalizedPlayerSource(defaults.string(forKey: playerSourceKey))
+    }
+
+    static func setPlayerSource(_ source: PlayerSource, in defaults: UserDefaults = .standard) {
+        defaults.set(source.rawValue, forKey: playerSourceKey)
     }
 
     static func normalizedPlayerSource(_ rawValue: String?) -> PlayerSource {
@@ -83,6 +94,26 @@ enum AppPreferences {
         return stored == 0 ? 500 : min(1000, max(180, stored))
     }
 
+    static var notchBackgroundEnabled: Bool { notchBackgroundEnabled(in: .standard) }
+
+    static func notchBackgroundEnabled(in defaults: UserDefaults) -> Bool {
+        defaults.bool(forKey: notchBackgroundEnabledKey)
+    }
+
+    static var notchHideOnHover: Bool { notchHideOnHover(in: .standard) }
+
+    static func notchHideOnHover(in defaults: UserDefaults) -> Bool {
+        defaults.object(forKey: notchHideOnHoverKey) as? Bool ?? true
+    }
+
+    static var notchBackgroundColor: NSColor {
+        guard let data = UserDefaults.standard.data(forKey: notchBackgroundColorKey),
+              let color = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: data) else {
+            return .black
+        }
+        return color
+    }
+
 }
 
 @MainActor
@@ -104,10 +135,16 @@ final class SettingsWindowController: NSWindowController {
     private let launchAtLoginSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let playerPopUp = NSPopUpButton()
+    private let notchBackgroundSwitch = NSSwitch()
+    private let notchBackgroundColorWell = NSColorWell()
+    private let notchHideOnHoverSwitch = NSSwitch()
     private let contentStack = NSStackView()
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
     private var customWidthRow: NSGridRow?
+    private var notchBackgroundRow: NSGridRow?
+    private var notchBackgroundColorRow: NSGridRow?
+    private var notchHideOnHoverRow: NSGridRow?
     private let onSettingsChange: () -> Void
 
     init(onSettingsChange: @escaping () -> Void) {
@@ -170,6 +207,12 @@ final class SettingsWindowController: NSWindowController {
         animationSpeedSlider.action = #selector(animationSpeedChanged)
         opacitySlider.target = self
         opacitySlider.action = #selector(opacityChanged)
+        notchBackgroundSwitch.target = self
+        notchBackgroundSwitch.action = #selector(notchBackgroundChanged)
+        notchBackgroundColorWell.target = self
+        notchBackgroundColorWell.action = #selector(notchBackgroundColorChanged)
+        notchHideOnHoverSwitch.target = self
+        notchHideOnHoverSwitch.action = #selector(notchHideOnHoverChanged)
         launchAtLoginSwitch.target = self
         launchAtLoginSwitch.action = #selector(launchAtLoginChanged)
         for language in AppLanguage.allCases {
@@ -206,8 +249,14 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Lyrics Color")), colorPopUp],
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue)],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue)],
-            [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue)]
+            [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue)],
+            [label(L10n.text("Background")), notchBackgroundSwitch],
+            [label(L10n.text("Background Color")), notchBackgroundColorWell],
+            [label(L10n.text("Hide on Hover")), notchHideOnHoverSwitch]
         ])
+        notchBackgroundRow = appearanceGrid.row(at: 4)
+        notchBackgroundColorRow = appearanceGrid.row(at: 5)
+        notchHideOnHoverRow = appearanceGrid.row(at: 6)
         contentStack.addArrangedSubview(appearanceGrid)
         contentStack.addArrangedSubview(separator())
         contentStack.addArrangedSubview(sectionTitle(L10n.text("General")))
@@ -296,6 +345,9 @@ final class SettingsWindowController: NSWindowController {
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
         animationSpeedSlider.doubleValue = Double(AppPreferences.animationSpeed)
         opacitySlider.doubleValue = Double(AppPreferences.opacity)
+        notchBackgroundSwitch.state = AppPreferences.notchBackgroundEnabled ? .on : .off
+        notchBackgroundColorWell.color = AppPreferences.notchBackgroundColor
+        notchHideOnHoverSwitch.state = AppPreferences.notchHideOnHover ? .on : .off
         fontSizeValue.stringValue = "\(Int(fontSizeSlider.doubleValue)) pt"
         animationSpeedValue.stringValue = String(format: "%.1fx", animationSpeedSlider.doubleValue)
         opacityValue.stringValue = "\(Int(opacitySlider.doubleValue * 100))%"
@@ -316,6 +368,9 @@ final class SettingsWindowController: NSWindowController {
         positionRow?.isHidden = !statusBarMode
         notchStyleRow?.isHidden = statusBarMode
         customWidthRow?.isHidden = AppPreferences.displayWidth != .custom
+        notchBackgroundRow?.isHidden = statusBarMode
+        notchBackgroundColorRow?.isHidden = statusBarMode || !AppPreferences.notchBackgroundEnabled
+        notchHideOnHoverRow?.isHidden = statusBarMode
         resizeWindowToFit()
     }
 
@@ -393,6 +448,23 @@ final class SettingsWindowController: NSWindowController {
         onSettingsChange()
     }
 
+    @objc private func notchBackgroundChanged() {
+        UserDefaults.standard.set(notchBackgroundSwitch.state == .on, forKey: AppPreferences.notchBackgroundEnabledKey)
+        updateControlAvailability()
+        onSettingsChange()
+    }
+
+    @objc private func notchBackgroundColorChanged() {
+        guard let data = try? NSKeyedArchiver.archivedData(withRootObject: notchBackgroundColorWell.color, requiringSecureCoding: true) else { return }
+        UserDefaults.standard.set(data, forKey: AppPreferences.notchBackgroundColorKey)
+        onSettingsChange()
+    }
+
+    @objc private func notchHideOnHoverChanged() {
+        UserDefaults.standard.set(notchHideOnHoverSwitch.state == .on, forKey: AppPreferences.notchHideOnHoverKey)
+        onSettingsChange()
+    }
+
     @objc private func launchAtLoginChanged() {
         do {
             if launchAtLoginSwitch.state == .on {
@@ -422,6 +494,7 @@ final class SettingsWindowController: NSWindowController {
     @objc private func playerChanged() {
         let sources = PlayerSource.allCases
         guard sources.indices.contains(playerPopUp.indexOfSelectedItem) else { return }
-        save(sources[playerPopUp.indexOfSelectedItem], key: AppPreferences.playerSourceKey)
+        AppPreferences.setPlayerSource(sources[playerPopUp.indexOfSelectedItem])
+        onSettingsChange()
     }
 }

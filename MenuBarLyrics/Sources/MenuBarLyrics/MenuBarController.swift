@@ -82,6 +82,9 @@ final class MenuBarController: NSObject {
     private var progressTimer: Timer?
     private var pollTask: Task<Void, Never>?
     private var pollGeneration = 0
+#if DEBUG
+    private var lyricsRequestCount = 0
+#endif
 
     func start() {
         player = Self.adapter(for: AppPreferences.playerSource)
@@ -246,6 +249,10 @@ final class MenuBarController: NSObject {
 
     private func updateTrackIfNeeded(_ track: SpotifyTrack, force: Bool) async {
         guard force || currentTrack != track else { return }
+#if DEBUG
+        lyricsRequestCount += 1
+        print("[Lyrics] request=\(lyricsRequestCount) source=\(player.source.rawValue) track=\(currentPlayerTrack?.nativeTrackID ?? "-") title=\(track.name) artist=\(track.artist)")
+#endif
         currentTrack = track
         currentLines = []
         setLyricsFeedback(.searching)
@@ -307,6 +314,9 @@ final class MenuBarController: NSObject {
             animationSpeed: AppPreferences.animationSpeed,
             colorPreset: AppPreferences.colorPreset,
             opacity: AppPreferences.opacity,
+            notchBackgroundEnabled: AppPreferences.notchBackgroundEnabled,
+            notchBackgroundColor: AppPreferences.notchBackgroundColor,
+            notchHideOnHover: AppPreferences.notchHideOnHover,
             displayTarget: AppPreferences.displayTarget,
             displayWidth: AppPreferences.displayWidth,
             customWidth: AppPreferences.customWidth

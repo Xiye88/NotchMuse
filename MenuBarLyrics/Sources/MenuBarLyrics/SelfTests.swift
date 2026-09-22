@@ -123,6 +123,13 @@ enum SelfTests {
         check(AppPreferences.normalizedPlayerSource(nil) == .spotify, "defaults to Spotify")
         check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
         check(AppPreferences.normalizedPlayerSource("NetEase Cloud Music") == .netEaseMusic, "persists NetEase selection")
+        let suiteName = "app.notchmuse.self-test.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        AppPreferences.setPlayerSource(.netEaseMusic, in: defaults)
+        check(AppPreferences.playerSource(in: defaults) == .netEaseMusic, "round-trips the NetEase selection through defaults")
+        check(!AppPreferences.notchBackgroundEnabled(in: defaults), "defaults the Notch background to off")
+        check(AppPreferences.notchHideOnHover(in: defaults), "defaults Notch lyrics to hide on hover")
         check(PlayerSource.netEaseMusic.displayName(language: .english) == "NetEase Cloud Music", "shows the English NetEase name")
         check(PlayerSource.netEaseMusic.displayName(language: .simplifiedChinese) == "网易云音乐", "shows the Chinese NetEase name")
     }
@@ -275,6 +282,43 @@ enum SelfTests {
         check(converger.flush(at: 1.29).isEmpty, "does not flush before the quiet interval")
         check(converger.flush(at: 1.3) == [.event(b)], "commits a new identity after the quiet interval")
 
+        let partial = MediaRemoteEvent(
+            bundleIdentifier: NetEaseEventConverger.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: "",
+            artist: nil,
+            album: nil,
+            duration: nil,
+            elapsedTimeNow: nil,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: nil,
+            mediaType: nil
+        )
+        check(converger.consume(partial, at: 1.4).isEmpty, "ignores partial NetEase metadata")
+
+        var albumChange = event("B", position: 12)
+        albumChange = MediaRemoteEvent(
+            bundleIdentifier: albumChange.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: albumChange.title,
+            artist: albumChange.artist,
+            album: "Transient Album",
+            duration: albumChange.duration,
+            elapsedTimeNow: albumChange.elapsedTimeNow,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: albumChange.contentItemIdentifier,
+            mediaType: albumChange.mediaType
+        )
+        guard case let .event(stableAlbumEvent) = converger.consume(albumChange, at: 1.5).first else {
+            check(false, "keeps album-only changes on the confirmed track")
+            return
+        }
+        check(stableAlbumEvent.album == "Album", "does not churn lyrics for transient album metadata")
+
         let foreign = event("Other", owner: "com.spotify.client")
         check(converger.consume(foreign, at: 2) == [.clear], "clears NetEase state when another player owns Now Playing")
         check(converger.consume(foreign, at: 2.1).isEmpty, "does not repeat an identical foreign-owner clear")
@@ -328,6 +372,22 @@ enum SelfTests {
         check(NetEaseMusicAdapter.snapshot(from: foreign, isRunning: true) == .stopped, "rejects a foreign Now Playing owner")
         check(NetEaseMusicAdapter.snapshot(from: nil, isRunning: false) == .closed, "reports a closed NetEase app")
         check(NetEaseMusicAdapter.snapshot(from: nil, isRunning: true) == .stopped, "reports a running NetEase app without a current track")
+        var incomplete = event
+        incomplete = MediaRemoteEvent(
+            bundleIdentifier: incomplete.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: incomplete.title,
+            artist: nil,
+            album: incomplete.album,
+            duration: incomplete.duration,
+            elapsedTimeNow: incomplete.elapsedTimeNow,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: incomplete.contentItemIdentifier,
+            mediaType: incomplete.mediaType
+        )
+        check(NetEaseMusicAdapter.snapshot(from: incomplete, isRunning: true) == .stopped, "rejects incomplete NetEase metadata")
 
         let unavailable = NetEaseMusicAdapter(bridge: nil, isRunning: { true })
         let unavailableSnapshot = await unavailable.snapshot()

@@ -4,7 +4,7 @@ Last Updated: 2026-09-22
 
 ## Sprint
 
-v0.8 Production Quality Sprint. The release is not published.
+v0.8 Candidate Stability + UX Polish Sprint. The release is not published.
 
 ## Workspace Registry
 
@@ -26,6 +26,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 
 | ID | Priority | Owner | Status | Deliverable / exit criteria |
 | --- | --- | --- | --- | --- |
+| `P0.1` | P0 | `00_PM` / `02_RELEASE` / `07_QA` | DONE | Only `/Applications/NotchMuse.app` build 15 remains installed/Spotlight-visible; old build 7/build 14 are in Trash; executable hash, one launch entry, helpers, preferences, and Auto Detect are verified |
 | `P0-1` | P0 | `01_APP` / `07_QA` | DONE | Auto Detect is the default; bundle detection, deterministic priority, owner switching, and stale-result guards have self-test coverage |
 | `P0-2` | P0 | `01_APP` / `07_QA` | DONE | Settings exposes Auto, Spotify, Apple Music, and NetEase; enum, datasource, persistence, bundle IDs, and adapter factory are regression-tested |
 | `P1-1` | P1 | `01_APP` / `07_QA` | QA PENDING | Playing/Paused/Stopped code is implemented; paused marquee stops, stopped hide/hold is configurable, and native identity changes clear old lyrics; real-player regression remains |
@@ -42,6 +43,17 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 - `codesign --verify --deep --strict` and `hdiutil verify`: PASS.
 - Signing: ad-hoc, arm64, no Team ID; Gatekeeper assessment: rejected.
 - GitHub push, tag, and Release: NOT STARTED.
+- Installed app: one `/Applications/NotchMuse.app`, version `0.8.0` build `15`;
+  Spotlight returns one result and Player Source is Auto Detect.
+
+## Physical Worktrees
+
+- PM/integration: `.worktrees/netease-production-candidate` (clean/current).
+- QA: `.worktrees/07_QA` (clean; retained for active build-15 QA).
+- Legacy experiment root: repository root (dirty; retained until its uncommitted
+  evidence is migrated or archived).
+- Four clean duplicate worktrees were deregistered; their branches and Git
+  history remain intact.
 
 ## Product Decisions
 

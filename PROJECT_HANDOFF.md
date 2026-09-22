@@ -2,6 +2,30 @@
 
 Last updated: 2026-09-22 (build 15)
 
+## Current Project State
+
+- Current version: `0.8.0` candidate, build `15`; not publicly released.
+- Current branch: `codex/netease-production-candidate` at `85bdbc1`.
+- Completed: Spotify, Apple Music, and NetEase adapters; Auto Detect default;
+  manual player overrides; deterministic Playing/Paused/Stopped behavior;
+  native-track stale lyric clearing; NetEase Settings regression coverage;
+  Notch `None / Black / Custom` background modes and Hide on Hover setting;
+  verified local DMG and checksum.
+- Completed locally: old build 7 and build 14 app bundles were moved to Trash;
+  `/Applications/NotchMuse.app` is now build 15; Spotlight and LaunchServices
+  expose one primary launch entry; its executable matches the build-15 hash;
+  Player Source is set to Auto Detect.
+- Unfinished: complete build-15 real-player, Notch GUI, lifecycle/resource,
+  and clean-install regression; Developer ID signing/notarization remains
+  unavailable.
+- Current blocker: build 15 is ad-hoc signed and real-player/clean-install QA
+  is incomplete. The local multi-version conflict is resolved.
+- Next phase: run build-15 stability and UX gates. Public push, tag, and GitHub
+  Release still require Product Owner approval.
+
+This section is the canonical current state. Older build-14 details below are
+historical evidence only.
+
 ## Build 15 Update
 
 Current status:
@@ -15,6 +39,9 @@ Current status:
   `215b80865bbfb114a79a75bf9626624b9d3570be8620aaca7c001bfd6930ff76`.
 - The app is arm64 and ad-hoc signed with no Team ID; Gatekeeper rejects it.
 - Public push, tag, and GitHub Release have not started.
+- P0.1 local install conflict is resolved: only
+  `/Applications/NotchMuse.app` build 15 is Spotlight-visible. Old build 7 and
+  build 14 app bundles are recoverable from Trash.
 
 Pending confirmation:
 

@@ -4,12 +4,12 @@ Last Updated: 2026-09-22
 
 ## Current Phase
 
-v0.8 Production Quality Sprint — not released.
+v0.8 Candidate Stability + UX Polish Sprint — not released.
 
 ## Current Goal
 
-Finish real-player, lifecycle, Notch UX, and clean-install QA for the local
-`0.8.0` build `15` candidate before any public release decision.
+Finish real-player, lifecycle, Notch UX, and clean-install QA for the uniquely
+installed local `0.8.0` build `15`.
 
 ## Current Product State
 
@@ -30,6 +30,15 @@ Finish real-player, lifecycle, Notch UX, and clean-install QA for the local
   release candidate has not completed real-player or clean-install QA.
 
 ## Sprint Gates
+
+### P0.1 — DONE
+
+`/Applications/NotchMuse.app` is the only installed and Spotlight-visible copy.
+It is `0.8.0` build `15`, its executable matches the verified build output,
+and LaunchServices has one running entry. Build 7 and build 14 were moved to
+Trash, not permanently deleted. Preferences were preserved and Player Source
+was set to Auto Detect. No login item or orphan helper was found; the current
+watchdog/Perl pair belongs to build 15.
 
 ### P0 — DONE
 

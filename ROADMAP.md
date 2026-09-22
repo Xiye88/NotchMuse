@@ -2,13 +2,29 @@
 
 Last Updated: 2026-09-22
 
-## Current — v0.8 Production Quality Sprint
+## Current — v0.8 Candidate Stability + UX Polish Sprint
 
 Status: ACTIVE / NOT RELEASED
 
 Goal: move the existing Spotify, Apple Music, and NetEase candidate from
 feature completion to production-quality behavior and a verified release
 candidate.
+
+### P0.1 — Single Installed Version
+
+Status: DONE
+
+- Inventory all installed and Spotlight-visible NotchMuse app bundles.
+- Keep one primary build-15 candidate and recoverably archive older installed
+  copies.
+- Verify one launch entry, one running process, shared bundle identity, helper
+  lifecycle, and retained preferences.
+
+Exit criteria: the user cannot accidentally launch an older NotchMuse build.
+
+Result: only `/Applications/NotchMuse.app` build `15` remains installed and
+Spotlight-visible. Old build 7 and build 14 copies are recoverably archived in
+Trash; preferences remain intact and Auto Detect is selected.
 
 ### P0 — Player Ownership and Settings
 

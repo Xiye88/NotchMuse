@@ -1,6 +1,23 @@
 # NotchMuse Thread Registry
 
-Last Updated: 2026-07-18
+Last Updated: 2026-09-22
+
+## Current Registry
+
+| Workspace | Status | Responsibility |
+| --- | --- | --- |
+| `00_PM` | ACTIVE | Single PM/integration entry point |
+| `01_APP` | ARCHIVED | P0 implementation merged into the candidate |
+| `02_RELEASE` | ACTIVE | Build-15 artifact and release gates |
+| `03_LAB` | ARCHIVED | Reopen only for a new evidence question |
+| `04_UX` | ACTIVE | Build-15 Notch and Settings GUI regression |
+| `05_MATCHER` | ARCHIVED | Production Matcher remains frozen |
+| `06_DOCS` | ARCHIVED | Sprint documents synchronized; reopen at release gate |
+| `07_QA` | ACTIVE | Build-15 automated, real-player, and lifecycle QA |
+
+This table supersedes the historical thread statuses below. Reuse these
+numbers; do not create duplicate role workspaces. Archived workspaces keep
+their Git history.
 
 ## Long-Term Thread Map
 

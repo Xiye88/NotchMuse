@@ -1,4 +1,3 @@
-import AppKit
 import Foundation
 
 enum PlayerSource: String, CaseIterable, Equatable, Sendable {
@@ -27,41 +26,54 @@ final class AutoDetectAdapter: @unchecked Sendable, MusicPlayerAdapter {
     let source = PlayerSource.auto
 
     private let adapters: [(PlayerSource, any MusicPlayerAdapter)]
-    private let isRunning: @Sendable (String) -> Bool
     private let lock = NSLock()
     private var selectedSource: PlayerSource?
+    private var observations: [PlayerSource: Observation] = [:]
 
-    convenience init() {
-        self.init(
-            adapters: [
-                (.spotify, SpotifyAdapter()),
-                (.appleMusic, AppleMusicAdapter()),
-                (.netEaseMusic, NetEaseMusicAdapter())
-            ],
-            isRunning: { !NSRunningApplication.runningApplications(withBundleIdentifier: $0).isEmpty }
-        )
+    struct Observation {
+        let snapshot: MusicPlayerSnapshot
+        let sampledAt: TimeInterval
+        let activityAt: TimeInterval?
+        let playbackFreshAt: TimeInterval?
     }
 
-    init(
-        adapters: [(PlayerSource, any MusicPlayerAdapter)],
-        isRunning: @escaping @Sendable (String) -> Bool
-    ) {
+    convenience init() {
+        self.init(adapters: [
+            (.spotify, SpotifyAdapter()),
+            (.appleMusic, AppleMusicAdapter()),
+            (.netEaseMusic, NetEaseMusicAdapter())
+        ])
+    }
+
+    init(adapters: [(PlayerSource, any MusicPlayerAdapter)]) {
         self.adapters = adapters
-        self.isRunning = isRunning
     }
 
     func snapshot() async -> MusicPlayerSnapshot {
         var candidates: [(PlayerSource, MusicPlayerSnapshot)] = []
         for (source, adapter) in adapters {
-            guard let bundleIdentifier = source.bundleIdentifier, isRunning(bundleIdentifier) else {
-                candidates.append((source, .closed))
-                continue
-            }
             candidates.append((source, await adapter.snapshot()))
         }
-        let current = lock.withLock { selectedSource }
-        let selection = Self.select(candidates, current: current)
-        lock.withLock { selectedSource = selection.source }
+        let now = ProcessInfo.processInfo.systemUptime
+        let selection = lock.withLock {
+            for candidate in candidates {
+                observations[candidate.0] = Self.observation(
+                    previous: observations[candidate.0],
+                    snapshot: candidate.1,
+                    at: now
+                )
+            }
+            let activity = observations.mapValues(\.activityAt)
+            let freshPlaying = Set<PlayerSource>(observations.compactMap { source, observation in
+                guard case .playing = observation.snapshot,
+                      let freshAt = observation.playbackFreshAt,
+                      now - freshAt <= 3 else { return nil }
+                return source
+            })
+            let result = Self.select(candidates, current: selectedSource, activity: activity, freshPlaying: freshPlaying)
+            selectedSource = result.source
+            return result
+        }
         return selection.snapshot
     }
 
@@ -71,18 +83,57 @@ final class AutoDetectAdapter: @unchecked Sendable, MusicPlayerAdapter {
 
     static func select(
         _ candidates: [(source: PlayerSource, snapshot: MusicPlayerSnapshot)],
-        current: PlayerSource?
+        current: PlayerSource?,
+        activity: [PlayerSource: TimeInterval?] = [:],
+        freshPlaying: Set<PlayerSource>? = nil
     ) -> (source: PlayerSource?, snapshot: MusicPlayerSnapshot) {
-        for matches in [
-            { if case .playing = $0 { true } else { false } },
-            { if case .paused = $0 { true } else { false } },
-            { if case .stopped = $0 { true } else { false } }
-        ] as [(MusicPlayerSnapshot) -> Bool] {
-            let matches = candidates.filter { matches($0.snapshot) }
-            if let retained = matches.first(where: { $0.source == current }) { return retained }
-            if let first = matches.first { return first }
+        let playing = candidates.filter {
+            guard case .playing = $0.snapshot else { return false }
+            return freshPlaying?.contains($0.source) ?? true
         }
+        if let freshest = playing.max(by: {
+            (activity[$0.source] ?? nil) ?? -.infinity < (activity[$1.source] ?? nil) ?? -.infinity
+        }), let freshestAt = activity[freshest.source] ?? nil {
+            let tied = playing.filter { (activity[$0.source] ?? nil) == freshestAt }
+            if let retained = tied.first(where: { $0.source == current }) { return retained }
+            return freshest
+        }
+        if let retained = playing.first(where: { $0.source == current }) { return retained }
+        if let first = playing.first { return first }
+
+        let paused = candidates.filter { if case .paused = $0.snapshot { true } else { false } }
+        if let retained = paused.first(where: { $0.source == current }) { return retained }
+        if let first = paused.first { return first }
+        if candidates.contains(where: {
+            if case .playing = $0.snapshot { return true }
+            return $0.snapshot == .stopped
+        }) { return (nil, .stopped) }
         return (nil, candidates.contains { $0.snapshot == .unavailable } ? .unavailable : .closed)
+    }
+
+    static func observation(
+        previous: Observation?,
+        snapshot: MusicPlayerSnapshot,
+        at time: TimeInterval
+    ) -> Observation {
+        guard let track = snapshot.currentTrack else {
+            return Observation(snapshot: snapshot, sampledAt: time, activityAt: nil, playbackFreshAt: nil)
+        }
+        guard let previous, let oldTrack = previous.snapshot.currentTrack else {
+            return Observation(snapshot: snapshot, sampledAt: time, activityAt: time, playbackFreshAt: time)
+        }
+        let changedTrack = oldTrack.observationIdentity != track.observationIdentity
+        let changedState = oldTrack.playbackState != track.playbackState
+        let elapsed = max(0, time - previous.sampledAt)
+        let moved = track.playbackPosition > oldTrack.playbackPosition + min(0.25, elapsed / 2)
+        let positionDelta = track.playbackPosition - oldTrack.playbackPosition
+        let seeked = abs(positionDelta) > 0.25 && abs(positionDelta - elapsed) > 2
+        return Observation(
+            snapshot: snapshot,
+            sampledAt: time,
+            activityAt: changedTrack || changedState || seeked ? time : previous.activityAt,
+            playbackFreshAt: changedTrack || changedState || moved ? time : previous.playbackFreshAt
+        )
     }
 }
 

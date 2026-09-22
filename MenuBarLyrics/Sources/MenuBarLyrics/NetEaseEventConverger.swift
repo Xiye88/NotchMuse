@@ -18,6 +18,7 @@ struct NetEaseEventConverger: Sendable {
     private var previousInput: MediaRemoteEvent?
     private var committed: MediaRemoteEvent?
     private var pending: Pending?
+    private var newestTimestamp: String?
 
     init(quietInterval: TimeInterval = 0.3) {
         self.quietInterval = quietInterval
@@ -35,6 +36,8 @@ struct NetEaseEventConverger: Sendable {
         }
 
         guard Self.hasUsableMetadata(event) else { return [] }
+        if let timestamp = event.timestamp, let newestTimestamp, timestamp < newestTimestamp { return [] }
+        if let timestamp = event.timestamp { newestTimestamp = max(newestTimestamp ?? timestamp, timestamp) }
 
         let identity = Self.identity(of: event)
         if let committed, Self.identity(of: committed) == identity {
@@ -63,11 +66,20 @@ struct NetEaseEventConverger: Sendable {
     private static func identity(of event: MediaRemoteEvent) -> String {
         if let nativeID = event.contentItemIdentifier ?? event.uniqueIdentifier?.rawValue,
            !nativeID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return "id:\(nativeID)"
+            return ["id:\(nativeID)", event.title, event.artist ?? ""]
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+                .joined(separator: "\u{1F}")
         }
         return [event.title, event.artist ?? "", String(Int((event.duration ?? 0).rounded()))]
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
             .joined(separator: "\u{1F}")
+    }
+
+    mutating func reset() {
+        previousInput = nil
+        committed = nil
+        pending = nil
+        newestTimestamp = nil
     }
 
     private static func hasUsableMetadata(_ event: MediaRemoteEvent) -> Bool {

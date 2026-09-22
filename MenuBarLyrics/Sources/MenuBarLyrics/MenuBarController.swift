@@ -295,6 +295,14 @@ final class MenuBarController: NSObject {
         force || current != next || currentIdentity != nextIdentity
     }
 
+    static func shouldHideLyrics(
+        isUserHidden: Bool,
+        isPlaying: Bool,
+        stopBehavior: PlayerStopBehavior
+    ) -> Bool {
+        isUserHidden || (!isPlaying && stopBehavior == .hide)
+    }
+
     private func fallbackText() -> String {
         displaySource.isEmpty ? LyricsFeedback.notFound.displayText : displaySource
     }
@@ -318,7 +326,11 @@ final class MenuBarController: NSObject {
     }
 
     private func updateDisplay() {
-        guard !isLyricsHidden, !(isPlayerStopped && AppPreferences.playerStopBehavior == .hide) else {
+        guard !Self.shouldHideLyrics(
+            isUserHidden: isLyricsHidden,
+            isPlaying: !isPlayerStopped && !isPlaybackPaused,
+            stopBehavior: AppPreferences.playerStopBehavior
+        ) else {
             overlay.hide()
             updateScrollTimer(overflows: false)
             return
@@ -475,15 +487,10 @@ final class MenuBarController: NSObject {
             pollGeneration += 1
             player.shutdown()
             player = Self.adapter(for: selectedSource)
-            currentTrack = nil
-            currentTrackIdentity = nil
-            currentPlayerTrack = nil
-            currentLines = []
-            latestPlayerPosition = nil
             latestPlayerUptime = nil
             setPlayerFeedback(.checking)
             setLyricsFeedback(.waiting)
-            setDisplay(L10n.format("Checking %@...", selectedSource.displayName()))
+            handlePlayerStopped(display: L10n.format("Checking %@...", selectedSource.displayName()))
             startPoll(forceLyricsRefresh: true)
         }
         displayMode = AppPreferences.displayMode

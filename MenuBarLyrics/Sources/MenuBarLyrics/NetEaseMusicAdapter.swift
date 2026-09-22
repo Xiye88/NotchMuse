@@ -11,12 +11,15 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
     private let lock = NSLock()
     private var current: MusicPlayerSnapshot = .unavailable
     private var currentUpdatedAt: TimeInterval?
+    private var lastProviderUpdateAt: TimeInterval?
     private var lastPositionRefreshAt: TimeInterval?
     private var converger = NetEaseEventConverger()
     private var started = false
     private var stopped = false
     private var restartCount = 0
     private var lastRunning = false
+    private var lifecycleGeneration = 0
+    private var eventRevision = 0
 
     convenience init() {
         self.init(
@@ -35,35 +38,42 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
     func snapshot() async -> MusicPlayerSnapshot {
         let running = isRunning()
         let now = ProcessInfo.processInfo.systemUptime
-        let action = lock.withLock { () -> (connect: Bool, refresh: Bool, position: Bool) in
+        let action = lock.withLock { () -> (connect: Bool, refresh: Bool, position: Bool, generation: Int, revision: Int) in
             let relaunched = running && !lastRunning
+            if running != lastRunning { lifecycleGeneration += 1 }
             lastRunning = running
             guard running else {
                 current = .stopped
+                currentUpdatedAt = nil
                 lastPositionRefreshAt = nil
-                return (false, false, false)
+                converger.reset()
+                return (false, false, false, lifecycleGeneration, eventRevision)
             }
-            guard !stopped, bridge != nil else { return (false, false, false) }
+            guard !stopped, bridge != nil else { return (false, false, false, lifecycleGeneration, eventRevision) }
             if !started {
                 started = true
                 lastPositionRefreshAt = now
-                return (true, false, false)
+                return (true, false, false, lifecycleGeneration, eventRevision)
             }
             let refreshPosition = Self.shouldRefreshPosition(last: lastPositionRefreshAt, now: now)
             if refreshPosition { lastPositionRefreshAt = now }
-            return (false, relaunched, refreshPosition && !relaunched)
+            return (false, relaunched, refreshPosition && !relaunched, lifecycleGeneration, eventRevision)
         }
 
         guard running else { return .closed }
         if action.connect {
-            await connect()
+            await connect(generation: action.generation, revision: action.revision)
         } else if action.refresh {
-            await refresh()
+            await refresh(generation: action.generation, revision: action.revision)
         } else if action.position {
-            await refreshPosition()
+            await refreshPosition(generation: action.generation, revision: action.revision)
         }
         return lock.withLock {
-            Self.advanced(current, since: currentUpdatedAt, now: ProcessInfo.processInfo.systemUptime)
+            let now = ProcessInfo.processInfo.systemUptime
+            guard Self.isProviderFresh(snapshot: current, lastUpdateAt: lastProviderUpdateAt, now: now) else {
+                return .unavailable
+            }
+            return Self.advanced(current, since: currentUpdatedAt, now: now)
         }
     }
 
@@ -122,7 +132,18 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
         return now - last >= 2
     }
 
-    private func connect() async {
+    static func isProviderFresh(
+        snapshot: MusicPlayerSnapshot,
+        lastUpdateAt: TimeInterval?,
+        now: TimeInterval,
+        staleAfter: TimeInterval = 6
+    ) -> Bool {
+        guard snapshot.currentTrack != nil else { return true }
+        guard let lastUpdateAt else { return false }
+        return now - lastUpdateAt <= staleAfter
+    }
+
+    private func connect(generation: Int, revision: Int) async {
         guard let bridge else {
             lock.withLock { current = .unavailable }
             return
@@ -136,27 +157,38 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
                 return event
             }.value
             lock.withLock {
+                guard lifecycleGeneration == generation, eventRevision == revision, isRunning() else { return }
                 current = Self.snapshot(from: initial, isRunning: isRunning())
                 currentUpdatedAt = ProcessInfo.processInfo.systemUptime
+                if initial != nil { lastProviderUpdateAt = currentUpdatedAt }
+                eventRevision += 1
+                restartCount = 0
             }
         } catch {
-            lock.withLock { current = .unavailable }
+            lock.withLock {
+                guard lifecycleGeneration == generation, eventRevision == revision else { return }
+                current = .unavailable
+            }
         }
     }
 
-    private func refresh() async {
-        guard let bridge else { return }
-        let event = await Task.detached { try? bridge.get() }.value
-        lock.withLock {
-            current = Self.snapshot(from: event, isRunning: isRunning())
-            currentUpdatedAt = ProcessInfo.processInfo.systemUptime
-        }
-    }
-
-    private func refreshPosition() async {
+    private func refresh(generation: Int, revision: Int) async {
         guard let bridge else { return }
         guard let event = await Task.detached(operation: { try? bridge.get() }).value else { return }
-        receive(event)
+        lock.withLock {
+            guard lifecycleGeneration == generation, eventRevision == revision, isRunning() else { return }
+            current = Self.snapshot(from: event, isRunning: isRunning())
+            currentUpdatedAt = ProcessInfo.processInfo.systemUptime
+            lastProviderUpdateAt = currentUpdatedAt
+            eventRevision += 1
+            restartCount = 0
+        }
+    }
+
+    private func refreshPosition(generation: Int, revision: Int) async {
+        guard let bridge else { return }
+        guard let event = await Task.detached(operation: { try? bridge.get() }).value else { return }
+        receive(event, expectedGeneration: generation, expectedRevision: revision)
     }
 
     private func startStream() throws {
@@ -167,11 +199,23 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
         )
     }
 
-    private func receive(_ event: MediaRemoteEvent) {
-        let updates = lock.withLock {
-            converger.consume(event, at: ProcessInfo.processInfo.systemUptime)
+    private func receive(
+        _ event: MediaRemoteEvent,
+        expectedGeneration: Int? = nil,
+        expectedRevision: Int? = nil
+    ) {
+        lock.withLock {
+            if let expectedGeneration, let expectedRevision {
+                guard lifecycleGeneration == expectedGeneration,
+                      eventRevision == expectedRevision,
+                      isRunning() else { return }
+            }
+            if event.bundleIdentifier == Self.bundleIdentifier {
+                lastProviderUpdateAt = ProcessInfo.processInfo.systemUptime
+                restartCount = 0
+            }
+            applyLocked(converger.consume(event, at: ProcessInfo.processInfo.systemUptime))
         }
-        apply(updates)
         Task { [weak self] in
             try? await Task.sleep(for: .milliseconds(300))
             self?.flushConverger()
@@ -179,45 +223,49 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
     }
 
     private func flushConverger() {
-        let updates = lock.withLock {
-            converger.flush(at: ProcessInfo.processInfo.systemUptime)
+        lock.withLock {
+            applyLocked(converger.flush(at: ProcessInfo.processInfo.systemUptime))
         }
-        apply(updates)
     }
 
-    private func apply(_ updates: [NetEaseConvergenceUpdate]) {
+    private func applyLocked(_ updates: [NetEaseConvergenceUpdate]) {
         guard let last = updates.last else { return }
-        lock.withLock {
-            switch last {
-            case let .event(event):
+        switch last {
+        case let .event(event):
 #if DEBUG
-                print("[NetEase] track=\(event.contentItemIdentifier ?? event.uniqueIdentifier?.rawValue ?? "-") title=\(event.title) artist=\(event.artist ?? "-") timestamp=\(event.timestamp ?? "-")")
+            print("[NetEase] track=\(event.contentItemIdentifier ?? event.uniqueIdentifier?.rawValue ?? "-") title=\(event.title) artist=\(event.artist ?? "-") timestamp=\(event.timestamp ?? "-")")
 #endif
-                current = Self.snapshot(from: event, isRunning: isRunning())
-                currentUpdatedAt = ProcessInfo.processInfo.systemUptime
-            case .clear:
-                current = isRunning() ? .stopped : .closed
-                currentUpdatedAt = nil
-            }
+            current = Self.snapshot(from: event, isRunning: isRunning())
+            currentUpdatedAt = ProcessInfo.processInfo.systemUptime
+            eventRevision += 1
+            restartCount = 0
+        case .clear:
+            current = isRunning() ? .stopped : .closed
+            currentUpdatedAt = nil
+            eventRevision += 1
         }
     }
 
     private func recoverStreamOnce() {
-        let shouldRestart = lock.withLock { () -> Bool in
+        let state = lock.withLock { () -> (restart: Bool, generation: Int, revision: Int) in
             guard !stopped, restartCount == 0 else {
                 current = .unavailable
-                return false
+                return (false, lifecycleGeneration, eventRevision)
             }
             restartCount += 1
-            return true
+            return (true, lifecycleGeneration, eventRevision)
         }
-        guard shouldRestart else { return }
+        guard state.restart else { return }
         DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self else { return }
             do {
                 try self.startStream()
             } catch {
-                self.lock.withLock { self.current = .unavailable }
+                self.lock.withLock {
+                    guard self.lifecycleGeneration == state.generation,
+                          self.eventRevision == state.revision else { return }
+                    self.current = .unavailable
+                }
             }
         }
     }

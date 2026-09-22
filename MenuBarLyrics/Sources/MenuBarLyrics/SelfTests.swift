@@ -127,8 +127,10 @@ enum SelfTests {
         let suiteName = "app.notchmuse.self-test.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
-        AppPreferences.setPlayerSource(.netEaseMusic, in: defaults)
-        check(AppPreferences.playerSource(in: defaults) == .netEaseMusic, "round-trips the NetEase selection through defaults")
+        for source in PlayerSource.allCases {
+            AppPreferences.setPlayerSource(source, in: defaults)
+            check(AppPreferences.playerSource(in: defaults) == source, "round-trips the \(source.rawValue) selection through defaults")
+        }
         check(AppPreferences.playerStopBehavior(in: defaults) == .hide, "defaults to hiding lyrics when the player stops")
         check(!AppPreferences.notchBackgroundEnabled(in: defaults), "defaults the Notch background to off")
         check(AppPreferences.notchBackgroundMode(in: defaults) == .none, "labels the default Notch background as None")
@@ -171,7 +173,7 @@ enum SelfTests {
             artist: nowPlaying.artist,
             album: nowPlaying.album,
             duration: nowPlaying.duration,
-            playbackPosition: 99,
+            playbackPosition: 46,
             playbackState: .playing,
             playerSource: nowPlaying.playerSource,
             nativeTrackID: nowPlaying.nativeTrackID,
@@ -190,10 +192,21 @@ enum SelfTests {
         let playing = MusicPlayerSnapshot.playing(nowPlaying)
         check(AutoDetectAdapter.select([(.spotify, paused), (.appleMusic, playing)], current: .spotify).source == .appleMusic, "switches Auto Detect to the playing app")
         check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, playing)], current: .appleMusic).source == .appleMusic, "retains the current app when multiple players report playing")
-        check(AutoDetectAdapter.select([(.spotify, .closed), (.appleMusic, .stopped)], current: .spotify).snapshot == .stopped, "reports a running stopped player")
+        check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, playing)], current: .spotify, activity: [.spotify: 1, .appleMusic: 2]).source == .appleMusic, "uses recent playback activity when multiple players report playing")
+        check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, paused)], current: .spotify, freshPlaying: [.appleMusic]).source == .appleMusic, "does not retain a stale playing provider")
+        let firstObservation = AutoDetectAdapter.observation(previous: nil, snapshot: playing, at: 0)
+        let staleObservation = AutoDetectAdapter.observation(previous: firstObservation, snapshot: playing, at: 4)
+        check(staleObservation.playbackFreshAt == 0, "does not refresh provider freshness when reported playback is frozen")
+        let movingObservation = AutoDetectAdapter.observation(previous: firstObservation, snapshot: .playing(advanced), at: 4)
+        check(movingObservation.playbackFreshAt == 4 && movingObservation.activityAt == 0, "separates live playback freshness from user activity")
+        let stoppedSelection = AutoDetectAdapter.select([(.spotify, .closed), (.appleMusic, .stopped)], current: .spotify)
+        check(stoppedSelection.source == nil && stoppedSelection.snapshot == .stopped, "does not select a player only because its app is open")
         check(MenuBarController.shouldUpdateTrack(current: spotify, currentIdentity: "old", next: spotify, nextIdentity: "new", force: false), "reloads lyrics when native track identity changes")
         check(!MenuBarController.shouldAnimateScroll(overflows: true, isPaused: true), "stops marquee scrolling while paused")
         check(MenuBarController.shouldAnimateScroll(overflows: true, isPaused: false), "keeps marquee scrolling while playing")
+        check(MenuBarController.shouldHideLyrics(isUserHidden: false, isPlaying: false, stopBehavior: .hide), "hides lyrics by default while paused, stopped, closed, or switching players")
+        check(!MenuBarController.shouldHideLyrics(isUserHidden: false, isPlaying: false, stopBehavior: .keep), "keeps the last lyric for non-playing states when configured")
+        check(!MenuBarController.shouldHideLyrics(isUserHidden: false, isPlaying: true, stopBehavior: .hide), "shows lyrics while playing")
         for source in PlayerSource.allCases {
             let adapter = MenuBarController.adapter(for: source)
             check(adapter.source == source, "registers the \(source.rawValue) adapter")
@@ -301,6 +314,24 @@ enum SelfTests {
         let pausedA = event("A", playing: false)
         check(converger.consume(pausedA, at: 0.3) == [.event(pausedA)], "commits same-track playback changes immediately")
 
+        var reusedID = event("Previous")
+        reusedID = MediaRemoteEvent(
+            bundleIdentifier: reusedID.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: reusedID.title,
+            artist: reusedID.artist,
+            album: reusedID.album,
+            duration: reusedID.duration,
+            elapsedTimeNow: reusedID.elapsedTimeNow,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: "A",
+            mediaType: reusedID.mediaType
+        )
+        check(converger.consume(reusedID, at: 0.4).isEmpty, "treats changed metadata with a reused native ID as a new track")
+        check(converger.flush(at: 0.7) == [.event(reusedID)], "converges previous and next actions with reused native IDs")
+
         let b = event("B")
         check(converger.consume(b, at: 1).isEmpty, "holds one new identity")
         check(converger.flush(at: 1.29).isEmpty, "does not flush before the quiet interval")
@@ -395,6 +426,8 @@ enum SelfTests {
         check(NetEaseMusicAdapter.advanced(.playing(unknownDuration), since: 100, now: 105).playbackPosition == 47, "advances NetEase playback when duration is unavailable")
         check(!NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 101), "does not over-poll NetEase playback position")
         check(NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 102), "periodically refreshes NetEase playback position for seeks")
+        check(NetEaseMusicAdapter.isProviderFresh(snapshot: .playing(track), lastUpdateAt: 100, now: 106), "keeps recent NetEase provider data")
+        check(!NetEaseMusicAdapter.isProviderFresh(snapshot: .playing(track), lastUpdateAt: 100, now: 106.1), "expires NetEase playback when stream and position refreshes stop succeeding")
 
         var paused = event
         paused.playing = false

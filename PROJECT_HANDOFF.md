@@ -46,11 +46,13 @@ Last updated: 2026-09-23 (build 15)
   Spotify paused.
 - The live Settings window exposed all four player choices; numeric Enter and
   Auto/Compact/Standard/Wide/Custom width controls passed direct interaction.
+- The six lyric-color choices, Blue/Custom selection, and native macOS color
+  panel opening passed direct interaction.
 
 ## Next Actions
 
-- Remaining gates: live color-panel/preset clicks, pointer Hover, Sleep/Wake,
-  and network recovery.
+- Remaining gates: custom-color change/live-preview/restart-persistence loop,
+  pointer Hover enter/leave, Sleep/Wake, and network recovery.
 - Decide and execute those environment-dependent gates before entering the
   Release Sprint. Do not push, tag, or publish.
 

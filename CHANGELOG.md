@@ -36,6 +36,8 @@
   background scenarios with no observed failures
 - Real Apple Music, Spotify, simultaneous-player Auto handoff, four-player
   Settings, numeric Enter, and all five width modes passed focused QA
+- Six lyric-color choices, Blue/Custom selection, and native macOS color panel
+  opening passed direct Settings QA
 - Public release remains blocked on real-player, lifecycle, Notch GUI, and
   clean-install QA
 

@@ -59,7 +59,8 @@ Spotify, Apple Music, and NetEase.
 
 Current evidence: automated checks plus real NetEase, Apple Music, Spotify,
 simultaneous-player Auto handoff, player Settings, numeric input, and all width
-modes passed with 0 FAIL. Color-panel/preset clicks, pointer Hover, Sleep/Wake,
+modes passed with 0 FAIL. The color popup and native panel opening are also
+verified. Custom-color live preview/persistence, pointer Hover, Sleep/Wake,
 and network recovery remain environment-dependent gates.
 
 ### P2 — v0.8 Release Candidate

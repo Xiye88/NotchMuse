@@ -20,7 +20,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | `04_UX` | ARCHIVED | P1 merged as `46dc4f5`; branch retained |
 | `05_MATCHER` | ARCHIVED | v0.7 evidence gate was NO-GO; Production Matcher remains frozen |
 | `06_DOCS` | ARCHIVED | `00_PM` updates Handoff after each development phase |
-| `07_QA` | ARCHIVED | Focused QA phases merged as `daff724` and `190fee6`; report retained |
+| `07_QA` | ARCHIVED | Focused QA phases merged through `7423dcc`; report retained |
 
 ## Sprint Work
 
@@ -31,7 +31,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | `P0-2` | P0 | `01_APP` | IMPLEMENTED | Auto selection uses playback state and freshness, preserves deterministic ownership, and does not select merely because an app is open |
 | `P0-3` | P0 | `01_APP` | IMPLEMENTED | NetEase rejects stale asynchronous state, reused track identifiers, and expired provider data; real-player regression remains |
 | `P1-1` | P1 | `04_UX` | IMPLEMENTED | Background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width are implemented |
-| `QA-GATE` | P1 | `07_QA` | PASS WITH BLOCKERS | Automated, three-player, Auto handoff, and Settings scope passed with 0 FAIL; color interaction, Hover, Sleep/Wake, and network remain blocked/pending |
+| `QA-GATE` | P1 | `07_QA` | PASS WITH BLOCKERS | Automated, three-player, Auto handoff, Settings, and color popup scope passed with 0 FAIL; custom-color preview/persistence, Hover, Sleep/Wake, and network remain blocked/pending |
 
 ## Current Evidence
 

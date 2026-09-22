@@ -9,8 +9,8 @@ prohibited.
 
 ## Current Goal
 
-Close the remaining color-panel/preset, pointer Hover, Sleep/Wake, and network
-recovery gates before release.
+Close the remaining custom-color preview/persistence, pointer Hover,
+Sleep/Wake, and network recovery gates before release.
 
 ## Current Product State
 
@@ -69,8 +69,9 @@ among multiple open players remains part of `07_QA`.
 Automated builds/self-tests and real NetEase, Apple Music, Spotify, and
 simultaneous-player Auto handoff passed with no observed failures. Direct
 Settings checks passed for all player choices, numeric Enter, and all five
-width modes. Color-panel/preset clicks, pointer Hover, Sleep/Wake, and network
-recovery remain blocked or pending. See
+width modes. The six color choices and native color panel also passed direct
+interaction. Custom-color preview/persistence, pointer Hover, Sleep/Wake, and
+network recovery remain blocked or pending. See
 `reports/2026-09-23-v08-stability-focused-qa.md`.
 
 ### P2 Release Candidate — NOT STARTED IN THIS SPRINT

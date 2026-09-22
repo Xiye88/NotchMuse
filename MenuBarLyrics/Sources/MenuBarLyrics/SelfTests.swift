@@ -708,6 +708,19 @@ enum SelfTests {
         check(request.url?.path == "/api/search/get", "uses the plain NetEase search response endpoint")
         let duplicateSearch = Data(#"{"result":{"songs":[{"id":1,"name":"Song","artists":[{"name":"Artist"}],"duration":200000},{"id":2,"name":"song","artists":[{"name":"ARTIST"}],"duration":200000}]}}"#.utf8)
         check((try! source.parseSearch(duplicateSearch)).count == 1, "deduplicates equivalent NetEase recordings")
+
+        let preview = SpotifyTrack(name: "彩券", artist: "薛之谦", album: "天外来物", duration: 60)
+        let previewCandidates = [
+            TrackMatcher.Candidate(title: "彩券", artists: ["薛之谦"], durationMs: 275_855),
+            TrackMatcher.Candidate(title: "彩券（翻唱正式版）", artists: ["零度甜"], durationMs: 275_854)
+        ]
+        check(source.matchingIndex(for: preview, candidates: previewCandidates) == 0, "matches a unique exact NetEase identity when MediaRemote reports a 60-second preview")
+        let ambiguousPreview = previewCandidates + [
+            TrackMatcher.Candidate(title: "彩券", artists: ["薛之谦"], durationMs: 280_000)
+        ]
+        check(source.matchingIndex(for: preview, candidates: ambiguousPreview) == nil, "rejects ambiguous NetEase preview identities")
+        let wrongArtistPreview = [TrackMatcher.Candidate(title: "彩券", artists: ["Other"], durationMs: 275_855)]
+        check(source.matchingIndex(for: preview, candidates: wrongArtistPreview) == nil, "rejects a wrong-artist NetEase preview candidate")
     }
 
     private static func testLRCLIBFixtures() {

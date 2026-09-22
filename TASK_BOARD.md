@@ -1,6 +1,6 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-09-22
+Last Updated: 2026-09-23
 
 ## Sprint
 
@@ -17,7 +17,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | `01_APP` | ACTIVE | P0 NetEase restoration, Auto Detect, and playback stability |
 | `02_RELEASE` | ARCHIVED | No release work during Stability Fix Sprint |
 | `03_LAB` | ARCHIVED | Benchmark experiments; reopen only with a new evidence question |
-| `04_UX` | ACTIVE | P1 Settings and Notch UX implementation |
+| `04_UX` | DONE | P1 Settings/Notch UX implementation; GUI handoff to `07_QA` |
 | `05_MATCHER` | ARCHIVED | v0.7 evidence gate was NO-GO; Production Matcher remains frozen |
 | `06_DOCS` | ARCHIVED | `00_PM` updates Handoff after each development phase |
 | `07_QA` | ARCHIVED | Start only after P0 and P1 development complete |
@@ -26,12 +26,12 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 
 | ID | Priority | Owner | Status | Deliverable / exit criteria |
 | --- | --- | --- | --- | --- |
-| `P0.1` | P0 | `00_PM` / `02_RELEASE` / `07_QA` | DONE | Only `/Applications/NotchMuse.app` build 15 remains installed/Spotlight-visible; old build 7/build 14 are in Trash; executable hash, one launch entry, helpers, preferences, and Auto Detect are verified |
-| `P0-1` | P0 | `01_APP` | ACTIVE | Permanently retain Auto/Spotify/Apple Music/NetEase Settings options and restart persistence in the single installed build |
-| `P0-2` | P0 | `01_APP` | ACTIVE | Select by real playback state, metadata/event freshness, and deterministic fallback; do not select merely because an app is open |
-| `P0-3` | P0 | `01_APP` | ACTIVE | Stabilize NetEase metadata, lyrics, and timeline across play/pause/previous/next/seek/restart |
-| `P1-1` | P1 | `04_UX` | ACTIVE | Finish background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width |
-| `QA-GATE` | P1 | `07_QA` | BLOCKED | Start only after `01_APP` and `04_UX` are merged and automated checks pass |
+| `P0.1` | P0 | `00_PM` | DONE | Only `/Applications/NotchMuse.app` build 15 remains installed/Spotlight-visible; executable hash, one launch entry, helpers, preferences, and Auto Detect are verified |
+| `P0-1` | P0 | `01_APP` | IMPLEMENTED | Auto/Spotify/Apple Music/NetEase Settings options and restart persistence have regression coverage |
+| `P0-2` | P0 | `01_APP` | IMPLEMENTED | Auto selection uses playback state and freshness, preserves deterministic ownership, and does not select merely because an app is open |
+| `P0-3` | P0 | `01_APP` | IMPLEMENTED | NetEase rejects stale asynchronous state, reused track identifiers, and expired provider data; real-player regression remains |
+| `P1-1` | P1 | `04_UX` | IMPLEMENTED | Background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width are implemented |
+| `QA-GATE` | P1 | `07_QA` | BLOCKED | Start after integrated Debug/Release builds and self-tests pass |
 
 ## Current Evidence
 

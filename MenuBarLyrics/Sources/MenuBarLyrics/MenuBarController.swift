@@ -348,6 +348,7 @@ final class MenuBarController: NSObject {
             fontSize: AppPreferences.fontSize,
             animationSpeed: AppPreferences.animationSpeed,
             colorPreset: AppPreferences.colorPreset,
+            customLyricsColor: AppPreferences.customLyricsColor,
             opacity: AppPreferences.opacity,
             notchBackgroundEnabled: AppPreferences.notchBackgroundEnabled,
             notchBackgroundColor: AppPreferences.notchBackgroundColor,

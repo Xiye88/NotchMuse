@@ -11,6 +11,7 @@
   the final lyric paused
 - Added Notch background modes for None, Black, and Custom Color, plus the Hide
   on Hover toggle
+- Added a persistent custom lyric color alongside the existing color presets
 
 ### Fixed
 
@@ -18,6 +19,9 @@
 - Stopped lyric progress and marquee movement while playback is paused
 - Cleared old lyrics when the active player or native track identity changes
 - Prevented an older asynchronous lyrics response from replacing a newer track
+- Made font size, animation speed, opacity, and Custom Width directly editable
+  with bounded numeric input
+- Applied Custom Width down to the documented 180-point minimum
 
 ### Validation
 

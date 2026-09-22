@@ -27,6 +27,7 @@ enum LyricsColorPreset: String, CaseIterable {
     case blue = "Blue"
     case purple = "Purple"
     case green = "Green"
+    case custom = "Custom"
 }
 
 enum DisplayTarget: String, CaseIterable {
@@ -171,7 +172,7 @@ enum NotchGeometry {
         }
 
         let availableWidth = max(0, visibleFrame.width - 32)
-        let resolvedWidth = min(availableWidth, max(min(240, availableWidth), width))
+        let resolvedWidth = min(availableWidth, max(min(180, availableWidth), width))
         let x = min(max(screenFrame.midX - resolvedWidth / 2, visibleFrame.minX), visibleFrame.maxX - resolvedWidth)
         let y = max(visibleFrame.minY, visibleFrame.maxY - height - 6)
         return NSRect(x: x, y: y, width: resolvedWidth, height: height)
@@ -594,6 +595,7 @@ final class OverlayLyricsWindow: NSObject {
         fontSize: CGFloat,
         animationSpeed: CGFloat,
         colorPreset: LyricsColorPreset,
+        customLyricsColor: NSColor,
         opacity: CGFloat,
         notchBackgroundEnabled: Bool,
         notchBackgroundColor: NSColor,
@@ -603,7 +605,7 @@ final class OverlayLyricsWindow: NSObject {
         customWidth: CGFloat
     ) -> Bool {
         guard let screen = selectedScreen(target: displayTarget, statusItem: statusItem) else { return false }
-        let colors = BrandStyle.gradientColors(for: colorPreset)
+        let colors = BrandStyle.gradientColors(for: colorPreset, customColor: customLyricsColor)
 
         if mode == .notch {
             leftLane.hide()

@@ -5,7 +5,8 @@ Last updated: 2026-09-23 (build 15)
 ## Current Project State
 
 - Current version: `0.8.0` candidate, build `15`; not publicly released.
-- Current branch: `codex/netease-production-candidate` at `8c4c263`.
+- Current branch: `codex/netease-production-candidate`; APP and UX development
+  changes are being integrated and verified.
 - Completed: Spotify, Apple Music, and NetEase adapters; Auto Detect default;
   manual player overrides; deterministic Playing/Paused/Stopped behavior;
   native-track stale lyric clearing; NetEase Settings regression coverage;

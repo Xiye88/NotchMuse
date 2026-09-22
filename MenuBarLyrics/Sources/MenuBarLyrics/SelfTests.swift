@@ -48,6 +48,7 @@ enum SelfTests {
         testSmoothScroll()
         testOverlayGeometry()
         testNotchGeometry()
+        testNumericInput()
         testDisplaySelection()
         check(OverlayLaneGeometry.centeredTextY(laneHeight: 32, lineHeight: 16) == 8, "centers lyrics vertically in the menu bar")
 
@@ -140,6 +141,7 @@ enum SelfTests {
         defaults.set(customBackground, forKey: AppPreferences.notchBackgroundColorKey)
         check(AppPreferences.notchBackgroundMode(in: defaults) == .custom, "labels custom Notch background colors as Custom")
         check(AppPreferences.notchHideOnHover(in: defaults), "defaults Notch lyrics to hide on hover")
+        check(AppPreferences.color(forKey: AppPreferences.customLyricsColorKey, in: defaults) == nil, "leaves custom lyric color unset by default")
         check(L10n.text("None", language: .english) == "None", "localizes the English None background choice")
         check(L10n.text("Black", language: .simplifiedChinese) == "黑色", "localizes the Chinese Black background choice")
         check(PlayerSource.netEaseMusic.displayName(language: .english) == "NetEase Cloud Music", "shows the English NetEase name")
@@ -709,8 +711,17 @@ enum SelfTests {
         check(expanded.height > compact.height, "gives Expanded style room for song details")
         check(compactWidth < normalWidth && normalWidth < wideWidth, "makes Notch width presets visibly different")
         check(WidthGeometry.notchWidth(mode: .custom, availableWidth: 600, style: .lyricOnly, customWidth: 900) == 600, "clips custom Notch width to the selected screen")
+        check(NotchGeometry.frame(screenFrame: screen, visibleFrame: visible, style: .lyricOnly, fontSize: 13, width: 180).width == 180, "applies the minimum custom Notch width without expanding it")
         check(WidthGeometry.statusBarWidth(mode: .compact, availableWidth: 400, customWidth: 300) < WidthGeometry.statusBarWidth(mode: .wide, availableWidth: 400, customWidth: 300), "makes status bar width presets visibly different")
-        check(LyricsColorPreset.allCases.count == 5, "offers five shared lyric color presets")
+        check(LyricsColorPreset.allCases.count == 6, "keeps five lyric color presets plus Custom")
+    }
+
+    private static func testNumericInput() {
+        check(NumericInput.parse("13", minimum: 10, maximum: 26) == 13, "parses numeric Settings input")
+        check(NumericInput.parse(" 0.8 ", minimum: 0.5, maximum: 2) == 0.8, "trims numeric Settings input")
+        check(NumericInput.parse("12", minimum: 30, maximum: 100) == 30, "clamps numeric Settings input to its minimum")
+        check(NumericInput.parse("1200", minimum: 180, maximum: 1000) == 1000, "clamps Custom Width to its maximum")
+        check(NumericInput.parse("wide", minimum: 180, maximum: 1000) == nil, "rejects non-numeric Settings input")
     }
 
     private static func testDisplaySelection() {

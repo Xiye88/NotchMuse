@@ -9,8 +9,8 @@ prohibited.
 
 ## Current Goal
 
-Close the remaining environment-dependent Spotify/Apple, pointer/UI,
-Sleep/Wake, network recovery, and simultaneous-player gates before release.
+Close the remaining color-panel/preset, pointer Hover, Sleep/Wake, and network
+recovery gates before release.
 
 ## Current Product State
 
@@ -57,7 +57,7 @@ among multiple open players remains part of `07_QA`.
 2. Restore and regression-test all three Settings player options.
 3. Clear stale lyrics whenever ownership or track identity changes.
 
-### P1 — IMPLEMENTED / QA PENDING
+### P1 — IMPLEMENTED / FOCUSED QA PASS WITH BLOCKERS
 
 1. Make Playing, Paused, and Stopped behavior deterministic. Stopped defaults
    to hiding lyrics; users may choose to keep the final lyric paused.
@@ -66,11 +66,11 @@ among multiple open players remains part of `07_QA`.
 
 ### Focused QA — PASS WITH ENVIRONMENT BLOCKERS
 
-Automated builds/self-tests and real NetEase play, pause, next, previous, seek,
-restart, Auto ownership, lyric refresh, Hide/Keep, and Notch background checks
-passed with no observed failures. Live Spotify/Apple playback, pointer Hover,
-direct Settings clicking, Sleep/Wake, network recovery, and simultaneous-player
-handoff remain blocked or pending. See
+Automated builds/self-tests and real NetEase, Apple Music, Spotify, and
+simultaneous-player Auto handoff passed with no observed failures. Direct
+Settings checks passed for all player choices, numeric Enter, and all five
+width modes. Color-panel/preset clicks, pointer Hover, Sleep/Wake, and network
+recovery remain blocked or pending. See
 `reports/2026-09-23-v08-stability-focused-qa.md`.
 
 ### P2 Release Candidate — NOT STARTED IN THIS SPRINT

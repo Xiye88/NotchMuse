@@ -6,7 +6,7 @@ Last updated: 2026-09-23 (build 15)
 
 - v0.8 Stability Fix Sprint implementation and focused QA are complete;
   release remains prohibited.
-- Integration branch: `codex/netease-production-candidate` at `daff724` before
+- Integration branch: `codex/netease-production-candidate` at `190fee6` before
   this handoff update.
 - `01_APP`, `04_UX`, and `07_QA` are merged and archived.
 
@@ -40,11 +40,17 @@ Last updated: 2026-09-23 (build 15)
 - Focused QA: PASS with environment blockers; 0 observed FAIL.
 - Real NetEase passed Auto play/pause, natural/manual next, previous, seek,
   restart, metadata/ID/lyric refresh, Hide/Keep, and Notch background checks.
+- Real Apple Music and Spotify playback passed with visible synced lyrics.
+- With both players active, Auto selected the latest Spotify activity and
+  returned to the still-playing Apple Music within about two seconds after
+  Spotify paused.
+- The live Settings window exposed all four player choices; numeric Enter and
+  Auto/Compact/Standard/Wide/Custom width controls passed direct interaction.
 
 ## Next Actions
 
-- Remaining gates: live Spotify/Apple Music, pointer Hover and direct Settings
-  clicking, Sleep/Wake, network recovery, and simultaneous-player Auto handoff.
+- Remaining gates: live color-panel/preset clicks, pointer Hover, Sleep/Wake,
+  and network recovery.
 - Decide and execute those environment-dependent gates before entering the
   Release Sprint. Do not push, tag, or publish.
 

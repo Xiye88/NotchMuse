@@ -57,9 +57,10 @@ Status: IMPLEMENTED / REAL-PLAYER AND GUI QA PENDING
 Exit criteria: automated state checks and focused GUI regression pass across
 Spotify, Apple Music, and NetEase.
 
-Current evidence: automated and real NetEase scope passed with 0 FAIL. Live
-Spotify/Apple, pointer-only UI checks, Sleep/Wake, network recovery, and
-simultaneous-player handoff remain environment-dependent gates.
+Current evidence: automated checks plus real NetEase, Apple Music, Spotify,
+simultaneous-player Auto handoff, player Settings, numeric input, and all width
+modes passed with 0 FAIL. Color-panel/preset clicks, pointer Hover, Sleep/Wake,
+and network recovery remain environment-dependent gates.
 
 ### P2 — v0.8 Release Candidate
 

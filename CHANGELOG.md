@@ -34,6 +34,8 @@
 - Focused stability QA passed automated checks and real NetEase Auto,
   play/pause/next/previous/seek/restart, lyric refresh, Hide/Keep, and Notch
   background scenarios with no observed failures
+- Real Apple Music, Spotify, simultaneous-player Auto handoff, four-player
+  Settings, numeric Enter, and all five width modes passed focused QA
 - Public release remains blocked on real-player, lifecycle, Notch GUI, and
   clean-install QA
 

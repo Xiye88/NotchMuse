@@ -1,11 +1,11 @@
 # NotchMuse Project Handoff
 
-Last updated: 2026-09-22 (build 15)
+Last updated: 2026-09-23 (build 15)
 
 ## Current Project State
 
 - Current version: `0.8.0` candidate, build `15`; not publicly released.
-- Current branch: `codex/netease-production-candidate` at `85bdbc1`.
+- Current branch: `codex/netease-production-candidate` at `8c4c263`.
 - Completed: Spotify, Apple Music, and NetEase adapters; Auto Detect default;
   manual player overrides; deterministic Playing/Paused/Stopped behavior;
   native-track stale lyric clearing; NetEase Settings regression coverage;
@@ -20,8 +20,20 @@ Last updated: 2026-09-22 (build 15)
   unavailable.
 - Current blocker: build 15 is ad-hoc signed and real-player/clean-install QA
   is incomplete. The local multi-version conflict is resolved.
-- Next phase: run build-15 stability and UX gates. Public push, tag, and GitHub
-  Release still require Product Owner approval.
+- Current sprint: v0.8 Stability Fix Sprint. P0 App work must validate and
+  harden NetEase restoration, playback-based Auto Detect, and NetEase state
+  convergence. P1 UX work must finish controls and fix Custom Width.
+- QA is paused until P0 and P1 development tasks merge. Public push, tag, and
+  GitHub Release are prohibited during this sprint.
+
+## Active Execution
+
+- `01_APP`: P0 NetEase settings persistence, playback-based Auto Detect, and
+  NetEase play/pause/previous/next/seek/restart stability.
+- `04_UX`: P1 Notch defaults, Hover Hide, stopped behavior UI, full lyric
+  color picker with presets, editable numeric controls, and Custom Width.
+- `07_QA`: archived until both development workspaces are complete.
+- `00_PM`: integration, verification, and handoff updates.
 
 This section is the canonical current state. Older build-14 details below are
 historical evidence only.

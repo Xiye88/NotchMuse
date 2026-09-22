@@ -2,9 +2,9 @@
 
 Last Updated: 2026-09-22
 
-## Current — v0.8 Candidate Stability + UX Polish Sprint
+## Current — v0.8 Stability Fix Sprint
 
-Status: ACTIVE / NOT RELEASED
+Status: DEVELOPMENT ACTIVE / QA BLOCKED / RELEASE PROHIBITED
 
 Goal: move the existing Spotify, Apple Music, and NetEase candidate from
 feature completion to production-quality behavior and a verified release

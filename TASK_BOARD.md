@@ -4,7 +4,7 @@ Last Updated: 2026-09-22
 
 ## Sprint
 
-v0.8 Candidate Stability + UX Polish Sprint. The release is not published.
+v0.8 Stability Fix Sprint. Development precedes QA; release is prohibited.
 
 ## Workspace Registry
 
@@ -14,24 +14,24 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | Workspace | Status | Current responsibility |
 | --- | --- | --- |
 | `00_PM` | ACTIVE | Sprint coordination, integration, gates, and release decision |
-| `01_APP` | ARCHIVED | P0 implementation merged as `8864f52` |
-| `02_RELEASE` | ACTIVE | RC build, DMG, checksum, signing assessment, and release preparation |
+| `01_APP` | ACTIVE | P0 NetEase restoration, Auto Detect, and playback stability |
+| `02_RELEASE` | ARCHIVED | No release work during Stability Fix Sprint |
 | `03_LAB` | ARCHIVED | Benchmark experiments; reopen only with a new evidence question |
-| `04_UX` | ACTIVE | Notch background and hover regression verification |
+| `04_UX` | ACTIVE | P1 Settings and Notch UX implementation |
 | `05_MATCHER` | ARCHIVED | v0.7 evidence gate was NO-GO; Production Matcher remains frozen |
-| `06_DOCS` | ARCHIVED | Sprint reset merged as `6ae46e0` |
-| `07_QA` | ACTIVE | Automated regression and real-player release gates |
+| `06_DOCS` | ARCHIVED | `00_PM` updates Handoff after each development phase |
+| `07_QA` | ARCHIVED | Start only after P0 and P1 development complete |
 
 ## Sprint Work
 
 | ID | Priority | Owner | Status | Deliverable / exit criteria |
 | --- | --- | --- | --- | --- |
 | `P0.1` | P0 | `00_PM` / `02_RELEASE` / `07_QA` | DONE | Only `/Applications/NotchMuse.app` build 15 remains installed/Spotlight-visible; old build 7/build 14 are in Trash; executable hash, one launch entry, helpers, preferences, and Auto Detect are verified |
-| `P0.2` | P0 | `01_APP` / `07_QA` | IMPLEMENTED | Auto Detect is the default; deterministic selection and stale-result guards have self-test coverage; build 15 detected the only running NetEase player and rendered a visible lyric; multi-player real switching remains in QA |
-| `P0.3` | P0 | `01_APP` / `07_QA` | DONE | Settings exposes Auto, Spotify, Apple Music, and NetEase; enum, datasource, persistence, bundle IDs, and adapter factory are regression-tested |
-| `P1-1` | P1 | `01_APP` / `07_QA` | QA PENDING | Playing/Paused/Stopped code is implemented; paused marquee stops, stopped hide/hold is configurable, and native identity changes clear old lyrics; real-player regression remains |
-| `P1-2` | P1 | `04_UX` / `07_QA` | ACTIVE | Default lyric-only presentation; Background supports None/Black/Custom with None default; Hide lyrics on hover supports ON/OFF with ON default |
-| `P2-1` | P2 | `02_RELEASE` / `07_QA` / `06_DOCS` | QA PENDING | Local `0.8.0` build `15` DMG is verified; real-player/lifecycle/clean-install gates and final approval remain before any public release |
+| `P0-1` | P0 | `01_APP` | ACTIVE | Permanently retain Auto/Spotify/Apple Music/NetEase Settings options and restart persistence in the single installed build |
+| `P0-2` | P0 | `01_APP` | ACTIVE | Select by real playback state, metadata/event freshness, and deterministic fallback; do not select merely because an app is open |
+| `P0-3` | P0 | `01_APP` | ACTIVE | Stabilize NetEase metadata, lyrics, and timeline across play/pause/previous/next/seek/restart |
+| `P1-1` | P1 | `04_UX` | ACTIVE | Finish background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width |
+| `QA-GATE` | P1 | `07_QA` | BLOCKED | Start only after `01_APP` and `04_UX` are merged and automated checks pass |
 
 ## Current Evidence
 
@@ -52,7 +52,8 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 ## Physical Worktrees
 
 - PM/integration: `.worktrees/netease-production-candidate` (clean/current).
-- QA: `.worktrees/07_QA` (clean; retained for active build-15 QA).
+- QA: archived; its old clean worktree is being deregistered until the
+  development gate opens.
 - Legacy experiment root: repository root (dirty; retained until its uncommitted
   evidence is migrated or archived).
 - Four clean duplicate worktrees were deregistered; their branches and Git

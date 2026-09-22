@@ -4,12 +4,12 @@ Last Updated: 2026-09-22
 
 ## Current Phase
 
-v0.8 Candidate Stability + UX Polish Sprint — not released.
+v0.8 Stability Fix Sprint — development active, release prohibited.
 
 ## Current Goal
 
-Finish real-player, lifecycle, Notch UX, and clean-install QA for the uniquely
-installed local `0.8.0` build `15`.
+Fix real NetEase, playback-based Auto Detect, and Settings/Notch UX gaps before
+starting the final QA phase.
 
 ## Current Product State
 

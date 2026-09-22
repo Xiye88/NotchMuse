@@ -377,6 +377,8 @@ enum SelfTests {
             versionHints: nil
         )
         check(NetEaseMusicAdapter.advanced(.playing(unknownDuration), since: 100, now: 105).playbackPosition == 47, "advances NetEase playback when duration is unavailable")
+        check(!NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 101), "does not over-poll NetEase playback position")
+        check(NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 102), "periodically refreshes NetEase playback position for seeks")
 
         var paused = event
         paused.playing = false

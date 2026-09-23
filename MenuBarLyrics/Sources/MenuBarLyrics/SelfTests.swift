@@ -717,11 +717,18 @@ enum SelfTests {
     }
 
     private static func testNumericInput() {
-        check(NumericInput.parse("13", minimum: 10, maximum: 26) == 13, "parses numeric Settings input")
-        check(NumericInput.parse(" 0.8 ", minimum: 0.5, maximum: 2) == 0.8, "trims numeric Settings input")
-        check(NumericInput.parse("12", minimum: 30, maximum: 100) == 30, "clamps numeric Settings input to its minimum")
+        check(NumericInput.parse("24", minimum: 10, maximum: 60) == 24, "parses numeric Settings input")
+        check(NumericInput.parse(" 0.8 ", minimum: 0.1, maximum: 3) == 0.8, "trims numeric Settings input")
+        check(NumericInput.parse("5", minimum: 10, maximum: 100) == 10, "clamps numeric Settings input to its minimum")
         check(NumericInput.parse("1200", minimum: 180, maximum: 1000) == 1000, "clamps Custom Width to its maximum")
         check(NumericInput.parse("wide", minimum: 180, maximum: 1000) == nil, "rejects non-numeric Settings input")
+
+        let suiteName = "app.notchmuse.color-self-test.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let color = NSColor(calibratedRed: 0.2, green: 0.4, blue: 0.6, alpha: 0.8)
+        AppPreferences.setColor(color, forKey: AppPreferences.customLyricsColorKey, in: defaults)
+        check(AppPreferences.color(forKey: AppPreferences.customLyricsColorKey, in: defaults) == color, "persists and restores a custom lyric color")
     }
 
     private static func testDisplaySelection() {

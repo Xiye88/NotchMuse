@@ -80,17 +80,17 @@ enum AppPreferences {
 
     static var fontSize: CGFloat {
         let stored = UserDefaults.standard.double(forKey: fontSizeKey)
-        return stored == 0 ? NSFont.menuBarFont(ofSize: 0).pointSize : min(26, max(10, stored))
+        return stored == 0 ? NSFont.menuBarFont(ofSize: 0).pointSize : min(60, max(10, stored))
     }
 
     static var animationSpeed: CGFloat {
         let stored = UserDefaults.standard.double(forKey: animationSpeedKey)
-        return stored == 0 ? 1 : min(2, max(0.5, stored))
+        return stored == 0 ? 1 : min(3, max(0.1, stored))
     }
 
     static var opacity: CGFloat {
         let stored = UserDefaults.standard.double(forKey: opacityKey)
-        return stored == 0 ? 1 : min(1, max(0.3, stored))
+        return stored == 0 ? 1 : min(1, max(0.1, stored))
     }
 
     static var displayTarget: DisplayTarget {
@@ -134,6 +134,11 @@ enum AppPreferences {
         return try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: data)
     }
 
+    static func setColor(_ color: NSColor, forKey key: String, in defaults: UserDefaults = .standard) {
+        guard let data = try? NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: true) else { return }
+        defaults.set(data, forKey: key)
+    }
+
 }
 
 enum NumericInput {
@@ -166,9 +171,9 @@ final class SettingsWindowController: NSWindowController {
     private let customWidthSlider = NSSlider(value: 500, minValue: 180, maxValue: 1000, target: nil, action: nil)
     private let colorPopUp = NSPopUpButton()
     private let lyricsColorWell = NSColorWell()
-    private let fontSizeSlider = NSSlider(value: 13, minValue: 10, maxValue: 26, target: nil, action: nil)
-    private let animationSpeedSlider = NSSlider(value: 1, minValue: 0.5, maxValue: 2, target: nil, action: nil)
-    private let opacitySlider = NSSlider(value: 1, minValue: 0.3, maxValue: 1, target: nil, action: nil)
+    private let fontSizeSlider = NSSlider(value: 13, minValue: 10, maxValue: 60, target: nil, action: nil)
+    private let animationSpeedSlider = NSSlider(value: 1, minValue: 0.1, maxValue: 3, target: nil, action: nil)
+    private let opacitySlider = NSSlider(value: 1, minValue: 0.1, maxValue: 1, target: nil, action: nil)
     private let fontSizeValue = NSTextField(string: "")
     private let animationSpeedValue = NSTextField(string: "")
     private let opacityValue = NSTextField(string: "")
@@ -193,7 +198,7 @@ final class SettingsWindowController: NSWindowController {
         self.onSettingsChange = onSettingsChange
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 560, height: 590),
+            contentRect: NSRect(x: 0, y: 0, width: 660, height: 590),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -247,14 +252,15 @@ final class SettingsWindowController: NSWindowController {
 
         fontSizeSlider.target = self
         fontSizeSlider.action = #selector(fontSizeChanged)
-        fontSizeSlider.numberOfTickMarks = 17
-        fontSizeSlider.allowsTickMarkValuesOnly = true
+        fontSizeSlider.isContinuous = true
         configureNumericField(fontSizeValue, action: #selector(fontSizeEntered))
         animationSpeedSlider.target = self
         animationSpeedSlider.action = #selector(animationSpeedChanged)
+        animationSpeedSlider.isContinuous = true
         configureNumericField(animationSpeedValue, action: #selector(animationSpeedEntered))
         opacitySlider.target = self
         opacitySlider.action = #selector(opacityChanged)
+        opacitySlider.isContinuous = true
         configureNumericField(opacityValue, action: #selector(opacityEntered))
         for mode in NotchBackgroundMode.allCases {
             notchBackgroundPopUp.addItem(withTitle: L10n.text(mode.rawValue))
@@ -295,7 +301,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Notch Style")), notchStyleControl],
             [label(L10n.text("Display Screen")), displayScreenControl()],
             [label(L10n.text("Lyrics Width")), widthControl],
-            [label(L10n.text("Custom Width")), valueRow(slider: customWidthSlider, value: customWidthValue)]
+            [label(L10n.text("Custom Width")), valueRow(slider: customWidthSlider, value: customWidthValue, unit: "pt")]
         ])
         positionRow = displayGrid.row(at: 1)
         notchStyleRow = displayGrid.row(at: 2)
@@ -305,9 +311,9 @@ final class SettingsWindowController: NSWindowController {
         contentStack.addArrangedSubview(sectionTitle(L10n.text("Appearance")))
         let appearanceGrid = grid([
             [label(L10n.text("Lyrics Color")), NSStackView(views: [colorPopUp, lyricsColorWell])],
-            [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue)],
-            [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue)],
-            [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue)],
+            [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue, unit: "pt")],
+            [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue, unit: "×")],
+            [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
             [label(L10n.text("Background")), notchBackgroundPopUp],
             [label(L10n.text("Background Color")), notchBackgroundColorWell],
             [label(L10n.text("Hide on Hover")), notchHideOnHoverSwitch]
@@ -352,17 +358,19 @@ final class SettingsWindowController: NSWindowController {
         grid.columnSpacing = 18
         grid.column(at: 0).xPlacement = .trailing
         grid.column(at: 1).xPlacement = .fill
-        grid.widthAnchor.constraint(equalToConstant: 504).isActive = true
+        grid.widthAnchor.constraint(equalToConstant: 604).isActive = true
         return grid
     }
 
-    private func valueRow(slider: NSSlider, value: NSTextField) -> NSView {
+    private func valueRow(slider: NSSlider, value: NSTextField, unit: String) -> NSView {
         value.alignment = .right
         value.setContentHuggingPriority(.required, for: .horizontal)
         value.widthAnchor.constraint(equalToConstant: 58).isActive = true
         slider.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 260).isActive = true
-        let stack = NSStackView(views: [slider, value])
+        slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 360).isActive = true
+        let unitLabel = NSTextField(labelWithString: unit)
+        unitLabel.textColor = .secondaryLabelColor
+        let stack = NSStackView(views: [slider, value, unitLabel])
         stack.orientation = .horizontal
         stack.spacing = 10
         return stack
@@ -389,7 +397,7 @@ final class SettingsWindowController: NSWindowController {
     private func separator() -> NSBox {
         let box = NSBox()
         box.boxType = .separator
-        box.widthAnchor.constraint(equalToConstant: 504).isActive = true
+        box.widthAnchor.constraint(equalToConstant: 604).isActive = true
         return box
     }
 
@@ -411,6 +419,7 @@ final class SettingsWindowController: NSWindowController {
         customWidthSlider.doubleValue = Double(AppPreferences.customWidth)
         colorPopUp.selectItem(at: LyricsColorPreset.allCases.firstIndex(of: AppPreferences.colorPreset) ?? 0)
         lyricsColorWell.color = AppPreferences.customLyricsColor
+        updateCustomColorSwatch()
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
         animationSpeedSlider.doubleValue = Double(AppPreferences.animationSpeed)
         opacitySlider.doubleValue = Double(AppPreferences.opacity)
@@ -501,11 +510,14 @@ final class SettingsWindowController: NSWindowController {
     @objc private func colorChanged() {
         let presets = LyricsColorPreset.allCases
         guard presets.indices.contains(colorPopUp.indexOfSelectedItem) else { return }
-        save(presets[colorPopUp.indexOfSelectedItem], key: AppPreferences.colorPresetKey)
+        let preset = presets[colorPopUp.indexOfSelectedItem]
+        save(preset, key: AppPreferences.colorPresetKey)
+        if preset == .custom { lyricsColorWell.activate(true) }
     }
 
     @objc private func lyricsColorChanged() {
-        saveColor(lyricsColorWell.color, key: AppPreferences.customLyricsColorKey)
+        AppPreferences.setColor(lyricsColorWell.color, forKey: AppPreferences.customLyricsColorKey)
+        updateCustomColorSwatch()
         colorPopUp.selectItem(at: LyricsColorPreset.allCases.firstIndex(of: .custom) ?? 0)
         UserDefaults.standard.set(LyricsColorPreset.custom.rawValue, forKey: AppPreferences.colorPresetKey)
         onSettingsChange()
@@ -518,7 +530,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func fontSizeEntered() {
-        commit(fontSizeValue, slider: fontSizeSlider, key: AppPreferences.fontSizeKey, minimum: 10, maximum: 26, format: "%.0f")
+        commit(fontSizeValue, slider: fontSizeSlider, key: AppPreferences.fontSizeKey, minimum: 10, maximum: 60, format: "%.0f")
     }
 
     @objc private func animationSpeedChanged() {
@@ -528,7 +540,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func animationSpeedEntered() {
-        commit(animationSpeedValue, slider: animationSpeedSlider, key: AppPreferences.animationSpeedKey, minimum: 0.5, maximum: 2, format: "%.1f")
+        commit(animationSpeedValue, slider: animationSpeedSlider, key: AppPreferences.animationSpeedKey, minimum: 0.1, maximum: 3, format: "%.1f")
     }
 
     @objc private func opacityChanged() {
@@ -538,7 +550,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func opacityEntered() {
-        guard let percent = NumericInput.parse(opacityValue.stringValue, minimum: 30, maximum: 100) else {
+        guard let percent = NumericInput.parse(opacityValue.stringValue, minimum: 10, maximum: 100) else {
             opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
             NSSound.beep()
             return
@@ -558,20 +570,20 @@ final class SettingsWindowController: NSWindowController {
             UserDefaults.standard.removeObject(forKey: AppPreferences.notchBackgroundColorKey)
         case .custom:
             UserDefaults.standard.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
-            saveColor(notchBackgroundColorWell.color, key: AppPreferences.notchBackgroundColorKey)
+            AppPreferences.setColor(notchBackgroundColorWell.color, forKey: AppPreferences.notchBackgroundColorKey)
         }
         updateControlAvailability()
         onSettingsChange()
     }
 
     @objc private func notchBackgroundColorChanged() {
-        saveColor(notchBackgroundColorWell.color, key: AppPreferences.notchBackgroundColorKey)
+        AppPreferences.setColor(notchBackgroundColorWell.color, forKey: AppPreferences.notchBackgroundColorKey)
         onSettingsChange()
     }
 
-    private func saveColor(_ color: NSColor, key: String) {
-        guard let data = try? NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: true) else { return }
-        UserDefaults.standard.set(data, forKey: key)
+    private func updateCustomColorSwatch() {
+        guard let index = LyricsColorPreset.allCases.firstIndex(of: .custom) else { return }
+        colorPopUp.item(at: index)?.image = swatch(lyricsColorWell.color)
     }
 
     private func commit(

@@ -25,7 +25,8 @@ Sleep/Wake, and network recovery gates before release.
 - Track ownership and native identity changes clear old lyrics before loading;
   stale asynchronous results cannot overwrite a newer track.
 - Notch supports None/Black/Custom backgrounds, hover hiding, arbitrary lyric
-  color, numeric inputs, and functional custom width; GUI QA is active.
+  color, numeric inputs, and functional custom width; focused GUI QA passed
+  with the remaining environment blockers recorded below.
 - The integrated candidate reached local `0.8.0` build `15`. Automated build,
   self-test, deep signature verification, and DMG verification pass, but the
   release candidate has not completed real-player or clean-install QA.
@@ -41,14 +42,15 @@ Trash, not permanently deleted. Preferences were preserved and Player Source
 was set to Auto Detect. No login item or orphan helper was found; the current
 watchdog/Perl pair belongs to build 15.
 
-### P0.2 — IMPLEMENTED / MULTI-PLAYER QA PENDING
+### P0.2 — IMPLEMENTED / MULTI-PLAYER QA PASSED
 
 Auto Detect is selected. In the focused build-15 runtime check, Spotify and
 Apple Music were closed, NetEase was running and playing as
 `com.netease.163music`, and NotchMuse visibly rendered the current lyric.
 Offline checks cover all bundle IDs, selection priority, current-owner
-retention, adapter registration, and stale-result rejection. Real switching
-among multiple open players remains part of `07_QA`.
+retention, adapter registration, and stale-result rejection. Real Apple Music
+and Spotify simultaneous playback switched to the latest activity and returned
+to the still-playing source after pause.
 
 ### P0 — DONE
 
@@ -82,6 +84,23 @@ network recovery remain blocked or pending. See
    signing when the build is ad-hoc signed.
 4. Update release documentation, then request final approval before push, tag,
    or GitHub Release.
+
+## Git Sync Status
+
+- Remote: `https://github.com/Xiye88/NotchMuse.git`.
+- Remote main: `8a45e2254929ee97910ba94d1e698e44d5e2205f`.
+- Development branch: `codex/netease-production-candidate`.
+- Audited implementation/QA tip: `4877b6126f0889d65db65f5b08995be2db90021b`.
+- Push: SUCCESS to `origin/codex/netease-production-candidate`; upstream set.
+- At backup time the candidate was 35 commits ahead and 0 behind `origin/main`.
+- Apple Music is on `origin/main`. NetEase, MediaRemote, Auto Detect, v0.8 UX,
+  and Stability QA are on the remote development branch only.
+- `main`, tags, and Releases were not changed; v0.6.1 remains the latest public
+  release.
+- Exact local-only audit exceptions are recorded in `PROJECT_HANDOFF.md`.
+
+Required future sync record: `Branch`, full `Commit SHA`, `Remote`, and actual
+`Push result`.
 
 ## Release Status
 

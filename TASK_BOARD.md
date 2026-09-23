@@ -35,6 +35,20 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 
 ## Current Evidence
 
+### Git Sync Status
+
+- Branch: `codex/netease-production-candidate`
+- Commit SHA: `4877b6126f0889d65db65f5b08995be2db90021b`
+- Remote: `origin` (`https://github.com/Xiye88/NotchMuse.git`)
+- Push result: SUCCESS; `origin/codex/netease-production-candidate` created and
+  upstream configured.
+- `origin/main`: `8a45e2254929ee97910ba94d1e698e44d5e2205f`;
+  candidate ahead 35, behind 0 at backup time.
+- Main/tag/Release mutation: NONE.
+- Local-only follow-up: dirty experimental root and standalone visible-lyrics
+  validator remain preserved and require separate triage; no Candidate runtime
+  code is missing from the pushed development branch.
+
 - Stability integration commits: `28d7a3b` (App) and `46dc4f5` (UX) on
   `codex/netease-production-candidate`.
 - Release and Debug builds plus self-tests: PASS.
@@ -42,7 +56,8 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
   `215b80865bbfb114a79a75bf9626624b9d3570be8620aaca7c001bfd6930ff76`.
 - `codesign --verify --deep --strict` and `hdiutil verify`: PASS.
 - Signing: ad-hoc, arm64, no Team ID; Gatekeeper assessment: rejected.
-- GitHub push, tag, and Release: NOT STARTED.
+- Development branch push: COMPLETE. Main merge, tag, and GitHub Release: NOT
+  STARTED.
 - Installed app: one `/Applications/NotchMuse.app`, version `0.8.0` build `15`;
   Spotlight returns one result and Player Source is Auto Detect.
 - Focused Auto Detect runtime: Spotify and Apple Music were closed, NetEase

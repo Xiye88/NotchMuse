@@ -6,9 +6,43 @@ Last updated: 2026-09-23 (build 15)
 
 - v0.8 Stability Fix Sprint implementation and focused QA are complete;
   release remains prohibited.
-- Integration branch: `codex/netease-production-candidate` at `190fee6` before
-  this handoff update.
+- Integration branch: `codex/netease-production-candidate`; audited product/QA
+  tip `4877b61` was backed up before this Git Sync documentation update.
 - `01_APP`, `04_UX`, and `07_QA` are merged and archived.
+
+## Git Sync Status
+
+- Remote: `https://github.com/Xiye88/NotchMuse.git`.
+- `origin/main`: `8a45e2254929ee97910ba94d1e698e44d5e2205f`.
+- Development branch: `codex/netease-production-candidate`.
+- Audited candidate commit: `4877b6126f0889d65db65f5b08995be2db90021b`.
+- Remote development branch after backup:
+  `origin/codex/netease-production-candidate` at the same commit.
+- Push result: SUCCESS. Branch and upstream were created on `origin`; `main`,
+  tags, and GitHub Releases were not changed.
+- Candidate versus `origin/main`: ahead 35, behind 0; linear history, no
+  divergence at audit time.
+- Apple Music is already on `origin/main` (`56c9f40`, `39b77b9`, `e3c2e53`).
+- NetEase, bundled MediaRemote, Auto Detect, v0.8 Settings/UX, and Stability QA
+  are pushed only on the development branch, not `main`.
+- Latest public release remains v0.6.1. `main` contains later evidence/docs but
+  no v0.7 or v0.8 public release.
+- Audit evidence found no push to the current `origin` after 2026-08-31 before
+  this backup. Any prior statement that yesterday's v0.8 work was pushed was
+  inaccurate; it was committed locally only.
+- Future PM records must include `Branch`, full `Commit SHA`, `Remote`, and
+  command `Push result`; the word "pushed" alone is not sufficient.
+
+Local-only items intentionally excluded from the Candidate backup:
+
+- Dirty root worktree `codex/netease-experimental-runtime`: four experimental
+  bridge files/comparison notes plus a Wrong Version feedback change and stale
+  September 6 planning-document edits. Preserved unchanged for later triage.
+- `codex/netease-visible-lyrics-e2e` commit `8a3295e`: standalone QA validator;
+  exact commit is local only and is not required by the shipped app runtime.
+- Short-lived APP/UX/QA task branch tips are not remote refs. Their delivered
+  content is integrated and pushed through candidate commits `28d7a3b`,
+  `46dc4f5`, `daff724`, `190fee6`, and `7423dcc`.
 
 ## Completed
 

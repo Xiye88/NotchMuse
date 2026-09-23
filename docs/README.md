@@ -33,6 +33,17 @@ dist.noindex/NotchMuse.app
 dist.noindex/NotchMuse.dmg
 ```
 
+Install a local Release Candidate for manual QA with one command:
+
+```sh
+./scripts/deploy_local_candidate.sh 0.8.0 17
+```
+
+The command builds the app, verifies its version and signature, backs up the
+current `/Applications/NotchMuse.app` under `dist.noindex/local-backups/`,
+installs and launches the new build, then reports its version, build, and Git
+commit.
+
 The default GitHub beta build is unsigned/ad-hoc signed. Manual release steps are tracked in [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md).
 
 ## Lyrics Quality Benchmark

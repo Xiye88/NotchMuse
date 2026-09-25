@@ -23,23 +23,25 @@
 - Rejected stale NetEase bridge results and out-of-order metadata events
 - Handled NetEase track changes that reuse a native media identifier
 - Expired frozen NetEase playback when bridge refreshes stop succeeding
+- Refreshed NetEase playback position every second so lyric timing follows seeks sooner
 - Made font size, animation speed, opacity, and Custom Width directly editable
   with bounded numeric input
 - Applied Custom Width down to the documented 180-point minimum
 
 ### Validation
 
-- Local `0.8.0` build `15` passes Release self-tests, deep code-signature
-  verification, and DMG verification
-- Focused stability QA passed automated checks and real NetEase Auto,
-  play/pause/next/previous/seek/restart, lyric refresh, Hide/Keep, and Notch
-  background scenarios with no observed failures
+- Local `0.8.0` build `18` passes Debug/Release self-tests, deep code-signature
+  verification, localization parity, and DMG verification
+- Product Owner confirms build 18 seek forward/back and final GUI gates PASS; the
+  60-minute continuous-playback soak passed with one app/watchdog/Perl helper
+  each and no crash/restart/orphan
 - Real Apple Music, Spotify, simultaneous-player Auto handoff, four-player
   Settings, numeric Enter, and all five width modes passed focused QA
 - Six lyric-color choices, Blue/Custom selection, and native macOS color panel
   opening passed direct Settings QA
-- Public release remains blocked on real-player, lifecycle, Notch GUI, and
-  clean-install QA
+- Candidate is FROZEN / READY FOR RELEASE REVIEW. Ad-hoc signing/Gatekeeper and
+  clean-new-user distribution risks remain for review; no v0.8 public release
+  has been made
 
 ### Notes
 

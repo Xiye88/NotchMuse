@@ -1,10 +1,10 @@
 # NotchMuse Task Board
 
-Last Updated: 2026-09-23
+Last Updated: 2026-09-25
 
 ## Sprint
 
-v0.8 Stability Fix Sprint. Development precedes QA; release is prohibited.
+v0.8 Stability Fix Sprint. Candidate build 18 is frozen and ready for release review; public release remains a separate approval.
 
 ## Workspace Registry
 
@@ -26,16 +26,38 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 
 | ID | Priority | Owner | Status | Deliverable / exit criteria |
 | --- | --- | --- | --- | --- |
-| `P0.1` | P0 | `00_PM` | DONE | Only `/Applications/NotchMuse.app` build 15 remains installed/Spotlight-visible; executable hash, one launch entry, helpers, preferences, and Auto Detect are verified |
-| `P0-1` | P0 | `01_APP` | IMPLEMENTED | Auto/Spotify/Apple Music/NetEase Settings options and restart persistence have regression coverage |
-| `P0-2` | P0 | `01_APP` | IMPLEMENTED | Auto selection uses playback state and freshness, preserves deterministic ownership, and does not select merely because an app is open |
-| `P0-3` | P0 | `01_APP` | IMPLEMENTED | NetEase rejects stale asynchronous state, reused track identifiers, and expired provider data; real-player regression remains |
-| `P1-1` | P1 | `04_UX` | IMPLEMENTED | Background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width are implemented |
-| `QA-GATE` | P1 | `07_QA` | PASS WITH BLOCKERS | Automated, three-player, Auto handoff, Settings, and color popup scope passed with 0 FAIL; custom-color preview/persistence, Hover, Sleep/Wake, and network remain blocked/pending |
+| `P0.1` | P0 | `00_PM` | DONE | Only `/Applications/NotchMuse.app` build 18 is the installed candidate; executable hash, one launch entry, helper pair, preferences, and Auto Detect are verified |
+| `P0-1` | P0 | `01_APP` | DONE | Auto/Spotify/Apple Music/NetEase Settings options and restart persistence have regression coverage |
+| `P0-2` | P0 | `01_APP` | DONE | Auto selection uses playback state and freshness, preserves deterministic ownership, and does not select merely because an app is open |
+| `P0-3` | P0 | `01_APP` | DONE | NetEase rejects stale asynchronous state, reused track identifiers, and expired provider data; build 18 real-player regression PASS |
+| `P1-1` | P1 | `04_UX` | DONE | Background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width are implemented |
+| `QA-GATE` | P1 | `07_QA` | DONE — FROZEN / READY FOR RELEASE REVIEW | Build 18 automated, package, seek, GUI, Auto Detect, Sleep/Wake, network recovery, and 60-minute continuous-playback gates PASS. Seek timing was not supplied. |
 
 ## Current Evidence
 
-### Git Sync Status
+### 2026-09-25 Final Closure — GO
+
+- Verified startup HEAD and `codex/netease-production-candidate` at
+  `dee834f533812aac3e1dcab83f5d62a008d6a906` after `git fetch`.
+- Installed candidate is `0.8.0` build `18`, arm64, ad-hoc signed (no Team ID);
+  executable SHA-256:
+  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
+- NetEase seek root cause is the two-second adapter position refresh interval
+  combined with the one-second app poll. A one-second refresh adjustment now
+  passes self-tests for large-position lyric resync, stable track identity,
+  and no repeat lyric request. Product Owner confirms seek forward/back passed. Final consolidated GUI confirmation
+  is PASS for Notch/current/restart lyrics, custom color persistence, Hide on Hover,
+  Auto Detect matrix/owner/fallback/stale clearing, Sleep/Wake, and network recovery.
+  No step-level details or durations were supplied.
+- Debug/Release build and self-tests, codesign deep verification, DMG verification,
+  exact 102/102 English/Chinese key parity, and `git diff --check`: PASS. Valid
+  Build 18 continuous-playback soak ran 20:46:21–21:46:24 CST; 15/30/60-minute
+  samples passed with one app/watchdog/Perl each and no crash, restart, or helper
+  orphan. Full evidence: `/tmp/notchmuse-build18-soak.log`. Lyrics/stale GUI checks
+  are covered by the Product Owner final GUI PASS. The 20:40 paused pre-sample is invalid and retained separately. Candidate decision: GO — FROZEN / READY FOR
+  RELEASE REVIEW; this is not authorization to publish.
+
+### Historical Git Sync Snapshot (candidate backup)
 
 - Branch: `codex/netease-production-candidate`
 - Commit SHA: `4877b6126f0889d65db65f5b08995be2db90021b`
@@ -76,14 +98,15 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 - Four clean duplicate worktrees were deregistered; their branches and Git
   history remain intact.
 
-## Product Decisions
+## Product Decisions and Current Freeze
 
 - Player selection options: Auto Detect (recommended), Spotify, Apple Music,
   and NetEase Cloud Music.
 - When the player exits, the default is to hide lyrics and wait for recovery.
   The alternative keeps the final lyric visible and paused.
 - Production Matcher, thresholds, ranking, and Provider priority remain frozen.
-- Do not push, tag, or publish v0.8 without the final Product Owner approval.
+- v0.8 build 18 is FROZEN / READY FOR RELEASE REVIEW. Public release still
+  requires its separate Product Owner approval.
 
 ## Future — Not In This Sprint
 

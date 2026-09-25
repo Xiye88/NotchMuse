@@ -129,7 +129,7 @@ final class NetEaseMusicAdapter: @unchecked Sendable, MusicPlayerAdapter {
 
     static func shouldRefreshPosition(last: TimeInterval?, now: TimeInterval) -> Bool {
         guard let last else { return true }
-        return now - last >= 2
+        return now - last >= 1
     }
 
     static func isProviderFresh(

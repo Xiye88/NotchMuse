@@ -166,6 +166,22 @@ enum SelfTests {
 
         check(nowPlaying.spotifyTrack == spotify, "preserves Spotify metadata at the lyrics boundary")
         check(nowPlaying.versionHints == [.live], "carries version hints without changing matching")
+        let seeked = NowPlayingTrack(
+            title: nowPlaying.title,
+            artist: nowPlaying.artist,
+            album: nowPlaying.album,
+            duration: nowPlaying.duration,
+            playbackPosition: 84,
+            playbackState: .playing,
+            playerSource: nowPlaying.playerSource,
+            nativeTrackID: nowPlaying.nativeTrackID,
+            isrc: nowPlaying.isrc,
+            versionHints: nowPlaying.versionHints
+        )
+        let seekLines = [LyricLine(time: 10, text: "before seek"), LyricLine(time: 80, text: "after seek")]
+        check(seeked.observationIdentity == nowPlaying.observationIdentity, "keeps track identity stable across a position jump")
+        check(LyricClock.currentLine(at: seeked.playbackPosition, in: seekLines) == "after seek", "resynchronizes lyrics to a large position jump")
+        check(!MenuBarController.shouldUpdateTrack(current: nowPlaying.spotifyTrack, currentIdentity: nowPlaying.observationIdentity, next: seeked.spotifyTrack, nextIdentity: seeked.observationIdentity, force: false), "does not request lyrics again after a position jump")
         check(TrackVersionHint.detect(title: "Oliver", album: "Album") == nil, "does not infer Live from a partial word")
         check(TrackVersionHint.detect(title: "Song (feat. Guest)", album: "Deluxe") == [.deluxe, .featuredArtist], "detects bounded version markers")
         check(MusicPlayerSnapshot.playing(nowPlaying).currentTrack == nowPlaying, "exposes the current adapter track")
@@ -426,8 +442,8 @@ enum SelfTests {
             versionHints: nil
         )
         check(NetEaseMusicAdapter.advanced(.playing(unknownDuration), since: 100, now: 105).playbackPosition == 47, "advances NetEase playback when duration is unavailable")
-        check(!NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 101), "does not over-poll NetEase playback position")
-        check(NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 102), "periodically refreshes NetEase playback position for seeks")
+        check(!NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 100.99), "waits for the NetEase seek refresh interval")
+        check(NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 101), "refreshes NetEase playback position within one second for seeks")
         check(NetEaseMusicAdapter.isProviderFresh(snapshot: .playing(track), lastUpdateAt: 100, now: 106), "keeps recent NetEase provider data")
         check(!NetEaseMusicAdapter.isProviderFresh(snapshot: .playing(track), lastUpdateAt: 100, now: 106.1), "expires NetEase playback when stream and position refreshes stop succeeding")
 

@@ -1,10 +1,10 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-09-23
+Last Updated: 2026-09-25 — v0.8.0 build 18
 
-## Current — v0.8 Stability Fix Sprint
+## Current — v0.8 Stability Fix Sprint (build 18 frozen candidate)
 
-Status: DEVELOPMENT MERGED / FOCUSED QA PASSED WITH BLOCKERS / RELEASE PROHIBITED
+Status: FROZEN / READY FOR RELEASE REVIEW
 
 Goal: move the existing Spotify, Apple Music, and NetEase candidate from
 feature completion to production-quality behavior and a verified release
@@ -15,20 +15,19 @@ candidate.
 Status: DONE
 
 - Inventory all installed and Spotlight-visible NotchMuse app bundles.
-- Keep one primary build-15 candidate and recoverably archive older installed
+- Keep one primary build-18 candidate and recoverably archive older installed
   copies.
 - Verify one launch entry, one running process, shared bundle identity, helper
   lifecycle, and retained preferences.
 
 Exit criteria: the user cannot accidentally launch an older NotchMuse build.
 
-Result: only `/Applications/NotchMuse.app` build `15` remains installed and
-Spotlight-visible. Old build 7 and build 14 copies are recoverably archived in
-Trash; preferences remain intact and Auto Detect is selected.
+Result: only `/Applications/NotchMuse.app` build `18` is the installed candidate and
+Spotlight-visible. Historical build 7 and 14 records are retained in handoff; preferences remain intact and Auto Detect is selected.
 
 ### P0 — Player Ownership and Settings
 
-Status: IMPLEMENTED / AUTOMATED CHECKS PASS
+Status: DONE — build 18 Auto Detect final GUI PASS
 
 - Make Auto Detect the recommended default player mode.
 - Detect Spotify (`com.spotify.client`), Apple Music (`com.apple.Music`), and
@@ -44,7 +43,7 @@ track changes, all four Settings choices persist, and regression checks pass.
 
 ### P1 — Lyrics State and Notch UX
 
-Status: IMPLEMENTED / REAL-PLAYER AND GUI QA PENDING
+Status: DONE — Product Owner confirms final GUI PASS
 
 - Playing: show lyrics and scroll.
 - Paused: retain lyrics and stop scrolling.
@@ -57,31 +56,29 @@ Status: IMPLEMENTED / REAL-PLAYER AND GUI QA PENDING
 Exit criteria: automated state checks and focused GUI regression pass across
 Spotify, Apple Music, and NetEase.
 
-Current evidence: automated checks plus real NetEase, Apple Music, Spotify,
-simultaneous-player Auto handoff, player Settings, numeric input, and all width
-modes passed with 0 FAIL. The color popup and native panel opening are also
-verified. Custom-color live preview/persistence, pointer Hover, Sleep/Wake,
-and network recovery remain environment-dependent gates.
+Current build 18 evidence: Product Owner final GUI PASS covers Notch/current/restart
+lyrics, custom-color persistence, Hide on Hover, Auto Detect combinations and
+ownership/fallback/stale clearing, Sleep/Wake, and network recovery. Exact steps
+and durations were not supplied.
 
 ### P2 — v0.8 Release Candidate
 
-Status: DEFERRED UNTIL STABILITY QA COMPLETES
+Status: FROZEN / READY FOR RELEASE REVIEW
 
-- Run automated tests, real-player smoke tests, lifecycle checks, and a clean
-  install gate proportionate to release risk.
-- Build and verify the DMG and checksum.
-- Verify and document signing/notarization truthfully.
-- Synchronize `PROJECT_STATUS.md`, `TASK_BOARD.md`, `ROADMAP.md`, CHANGELOG,
-  and release notes after the implementation and QA evidence land.
-- Obtain Product Owner confirmation immediately before public push/tag/release.
+- Completed build 18 Debug/Release builds and self-tests, real-player and
+  lifecycle checks, final GUI confirmation, and a 60-minute playback soak.
+- Built and verified the arm64 DMG and SHA-256; documented ad-hoc signing and
+  its distribution limitations.
+- Synchronized status, handoff, task board, roadmap, changelog, and closure
+  evidence. Ready for release review; public distribution remains separate.
 
-Current local artifact: `0.8.0` build `15`, SHA-256
-`215b80865bbfb114a79a75bf9626624b9d3570be8620aaca7c001bfd6930ff76`.
-It is arm64 and ad-hoc signed; Gatekeeper rejects it. Real-player, lifecycle,
-Notch GUI, and clean-install gates remain.
-
-Exit criteria: a reproducible verified RC with a recorded GO, CONDITIONAL GO,
-or NO-GO decision. This roadmap does not claim the RC is complete.
+Current local artifact: `0.8.0` build `18`, arm64, ad-hoc signed. Executable SHA-256
+`4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`; DMG SHA-256
+`4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`. All current
+stability, playback, GUI, lifecycle, package, and soak gates are recorded PASS.
+The candidate is FROZEN / READY FOR RELEASE REVIEW. Ad-hoc signing, Gatekeeper
+rejection, notarization, and clean-new-user distribution assessment remain
+known release-review risks. This status does not authorize public release.
 
 ## Future — Website Distribution
 

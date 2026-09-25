@@ -1,8 +1,106 @@
 # NotchMuse Project Handoff
 
-Last updated: 2026-09-23 (build 15)
+## Current Status — Final Closure (2026-09-25)
 
-## Current Status
+- `NetEase`: DONE; `MediaRemote Bridge`: DONE; `Auto Detect`: DONE.
+- v0.8.0 build 18: FROZEN / READY FOR RELEASE REVIEW.
+- Product Owner final GUI confirmation: PASS for current/restart lyrics, Notch
+  Mode, custom color persistence, Hide on Hover, Auto Detect combinations and
+  ownership/fallback/stale clearing, Sleep/Wake, and network recovery. Details
+  and durations were not supplied; no steps or numbers are inferred.
+- Seek forward/back: Manual PASS; no numeric latency supplied.
+- 60-minute continuous-playback soak: PASS for playback/helper stability.
+  Samples at start/15/30/60 minutes; one app, watchdog, and Perl helper; no
+  crash, restart, helper loss, or orphan. Evidence is in
+  `/tmp/notchmuse-build18-soak.log`.
+- Build: arm64, ad-hoc signed, no Team ID. Developer ID/notarization/stapling
+  and clean-new-user distribution assessment remain release-review risks.
+- Executable SHA-256:
+  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
+- DMG SHA-256:
+  `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
+- No merge to main, push, tag, or public release was performed by this task.
+
+## Historical Kickoff Snapshot — 2026-09-25 (build 16)
+
+- Verified requested startup SHA `dee834f533812aac3e1dcab83f5d62a008d6a906`;
+  `codex/netease-production-candidate` resolves to the same commit. This
+  workspace is detached at that SHA and clean at kickoff.
+- Installed `/Applications/NotchMuse.app` is `0.8.0` build `16`, arm64,
+  ad-hoc signed, with no Team ID. Executable SHA-256 is
+  `16606dd8756c0b33f5a173dc9a2d6a5b15aea0d46a72327f2e5359b18ea0ea38`;
+  it is not yet attributable to the requested Git SHA. One NotchMuse process,
+  watchdog, and Perl bridge process are running.
+- A live NetEase sample from the installed app reports `History`, artist
+  `88rising/Rich Brian`, native ID
+  `409DF800-D582-445C-9BC5-742A9D2F45C9`, playing at 64.89s/207.35s; the
+  lyric is visibly rendered. This was the kickoff observation; it is superseded by the final closure at the top of this file.
+- At kickoff no implementation changes had been made. Next: run candidate
+  build/self-tests and available automated checks, inspect installed candidate
+  behavior, then record each GUI/environment gate as PASS or blocked with
+  evidence.
+
+## 2026-09-25 Seek Latency Update
+
+- Root cause: `MenuBarController` polls once per second, while
+  `NetEaseMusicAdapter` refreshes the bridge position only after two seconds.
+  The same-track convergence path immediately accepts playback updates, so the
+  300ms identity debounce is not involved. Lyric display recalculates from the
+  new position as soon as the adapter returns. The observed delay was the
+  two-second refresh threshold plus poll alignment and bridge response time.
+- Measured one-shot bridge `get` cost: 20 calls median 23.4ms / P95 28.8ms / CPU
+  0.320s; a later 30-call sample median 19.6ms / P95 30.2ms / CPU 0.429s.
+  At 60 calls/minute this is about 0.86 CPU seconds/minute; the persistent
+  watchdog and stream helper count is unchanged.
+- TDD regression checks first failed on the existing two-second threshold,
+  then passed after reducing the existing position-refresh interval to one
+  second. They also cover lyric clock resynchronization after a large position
+  jump, stable track identity, and no repeat lyric fetch.
+- Candidate `0.8.0` build `18` was built and installed from source HEAD
+  `dee834f533812aac3e1dcab83f5d62a008d6a906` plus the local seek fix. The
+  executable SHA-256 is
+  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992` and DMG
+  SHA-256 is `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
+  Debug and Release self-tests, deep code-signature verification, DMG verify,
+  localization parity, and `git diff --check` pass. Build is arm64 and
+  ad-hoc-signed without a Team ID.
+- Lifecycle process gate: NetEase and NotchMuse restarted separately on build
+  17, then simultaneously on build 18. The old bridge helpers exited and each
+  restart created exactly one watchdog/Perl pair. After the combined restart,
+  NetEase metadata returned within four seconds as `Night` / `keshi`, native ID
+  `AF0CDF83-FF51-4F08-A048-5A396B8A588B`, paused.
+- Product Owner confirms build 18 forward/back seek Manual PASS; no numeric
+  latency was supplied.
+- Valid Build 18 continuous-playback soak began 2026-09-25 20:46:21 CST after
+  bridge confirmation `playing=true`. Start sample: one NotchMuse (PID 43342),
+  one watchdog (43357), one candidate Perl stream (43358); CPU/RSS:
+  9.5%/38,560 KB, 0.0%/1,552 KB, 0.0%/19,120 KB. NetEase owner is
+  `com.netease.163music`, title `再等冬天(Memories)`, artist `h3R3`, native ID
+  `868213FA-07FD-4729-B4E3-14EBBB607D97`, playing. The 20:40 paused sample is
+  invalid and retained at `/tmp/notchmuse-build18-soak-paused-presample.log`.
+  Lyrics/stale state could not be visually checked because the desktop is in
+  Status Bar Mode and the app surface is obscured. No crash or helper orphan at
+  valid start. Valid sample log: `/tmp/notchmuse-build18-soak.log`; 15-minute sample at
+  21:01:24: one app/watchdog/Perl each, CPU/RSS 5.8%/36,464 KB,
+  0.0%/1,712 KB, 0.0%/19,200 KB. NetEase still playing `Lonely` / Nana, ID
+  `224190D7-032E-4220-9E87-3196544CC388`. No crash, helper loss/orphan, or
+  restart observed. 30-minute sample at 21:16:24: one app/watchdog/Perl each,
+  CPU/RSS 5.5%/42,864 KB, 0.0%/1,728 KB, 0.0%/19,104 KB. NetEase playing
+  `呼吸有害` / 邓智伟, ID `DBE02D7B-B22F-46A1-9D9B-92BECB5F0A05`.
+  60-minute sample at 21:46:24 recorded NotchMuse PID 43342
+  at 6.8% CPU / 38,928 KB RSS, watchdog PID 43357 at 0.1% / 1,728 KB, and
+  Perl PID 43358 at 0.0% / 19,008 KB; one of each, no crash/restart/helper
+  loss/orphan. NetEase was playing `被你改变的那部分我` / 梁森田, native ID
+  `9DC79DE3-1328-429C-855C-4A01CC4F816E`.
+- Product Owner final GUI confirmation: PASS for current/restart lyrics, Notch
+  Mode, custom color persistence, Hide on Hover, Auto Detect combinations and
+  ownership/fallback/stale clearing, Sleep/Wake, and network recovery. No
+  per-step details or durations were supplied. Candidate status: FROZEN / READY
+  FOR RELEASE REVIEW.
+
+Last updated: 2026-09-25 (build 18 final closure)
+
+## Historical Status at build 15 (superseded by Current Status above)
 
 - v0.8 Stability Fix Sprint implementation and focused QA are complete;
   release remains prohibited.
@@ -10,7 +108,7 @@ Last updated: 2026-09-23 (build 15)
   tip `4877b61` was backed up before this Git Sync documentation update.
 - `01_APP`, `04_UX`, and `07_QA` are merged and archived.
 
-## Git Sync Status
+## Historical Git Sync Status at prior backup
 
 - Remote: `https://github.com/Xiye88/NotchMuse.git`.
 - `origin/main`: `8a45e2254929ee97910ba94d1e698e44d5e2205f`.
@@ -65,7 +163,7 @@ Local-only items intentionally excluded from the Candidate backup:
   `BrandStyle.swift`.
 - Regression coverage: `SelfTests.swift`; release notes: `CHANGELOG.md`.
 
-## Verification
+## Verification at focused QA (historical, superseded by final status above)
 
 - Integrated Debug build + self-tests: PASS.
 - Integrated Release build + self-tests: PASS.
@@ -83,14 +181,14 @@ Local-only items intentionally excluded from the Candidate backup:
 - The six lyric-color choices, Blue/Custom selection, and native macOS color
   panel opening passed direct interaction.
 
-## Next Actions
+## Historical Next Actions at build 15
 
 - Remaining gates: custom-color change/live-preview/restart-persistence loop,
   pointer Hover enter/leave, Sleep/Wake, and network recovery.
 - Decide and execute those environment-dependent gates before entering the
   Release Sprint. Do not push, tag, or publish.
 
-## Current Project State
+## Historical Project State at build 15
 
 - Current version: `0.8.0` candidate, build `15`; not publicly released.
 - Current branch: `codex/netease-production-candidate`; APP and UX development
@@ -115,17 +213,17 @@ Local-only items intentionally excluded from the Candidate backup:
 - QA is paused until P0 and P1 development tasks merge. Public push, tag, and
   GitHub Release are prohibited during this sprint.
 
-## Active Execution
+## Historical Active Execution at focused QA (superseded)
 
 - `01_APP`: archived after merge (`28d7a3b`).
 - `04_UX`: archived after merge (`46dc4f5`).
 - `07_QA`: archived after focused QA report (`daff724`).
 - `00_PM`: integration, verification, and handoff updates.
 
-This section is the canonical current state. Older build-14 details below are
-historical evidence only.
+The sections above are historical backup state. Older build-14 details below are
+also historical evidence only; see Current Status at the top for the live state.
 
-## Build 15 Update
+## Historical Build 15 Update
 
 Current status:
 

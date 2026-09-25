@@ -3,8 +3,7 @@
 Task: Complete the post-freeze repository organization and CI work on
 `codex/repository-architecture-cleanup`.
 
-Status: Complete; branch pushed, with CI verification pending for this final
-change set.
+Status: Complete; branch pushed and final CI run passed.
 
 Priority: P1 (repository maintenance)
 
@@ -29,8 +28,9 @@ Priority: P1 (repository maintenance)
 - Local `./scripts/build_release.sh 0.8.0 19`: passed, including packaged
   resource smoke test, code-signature verification, DMG verification, and
   SHA-256 manifest validation.
-- `swift test`, localization parity, vendored bridge integrity, and the final
-  workflow run: see the final branch CI result.
+- `swift test`, localization parity, vendored bridge integrity, Release/DMG
+  packaging, artifact metadata/checksums, and whitespace checks: passed in CI
+  run `36157019064`.
 - Local artifact metadata: arm64, ad-hoc signed, not notarized. It is a
   repository validation artifact and is not a public release.
 

@@ -1,5 +1,16 @@
 # NotchMuse Project Handoff
 
+## Queued Follow-up — 10_SETTINGS_UI
+
+- Status: `QUEUED`; priority: `NEXT`.
+- Blocked by: stable `09_REPO_ARCHITECTURE` source structure.
+- Stable Architecture baseline currently available:
+  `0495971a2ce948289320226cfb67656987352756`.
+- Source handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
+- Do not start during v0.8 Final Engineering. When `00_PM` starts the task,
+  use the latest stable Architecture SHA, read the handoff, keep the approved
+  visual direction, implement directly, and return results to `00_PM`.
+
 ## Repository Architecture Cleanup — Final Handoff (2026-09-25)
 
 - Status: Repository cleanup, CI workflow, tests, documentation, and build

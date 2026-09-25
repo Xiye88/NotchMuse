@@ -1,5 +1,15 @@
 # NotchMuse Task Board
 
+## Queued Next Task
+
+- `10_SETTINGS_UI` — **QUEUED**, priority **NEXT**.
+- Blocked by: stable `09_REPO_ARCHITECTURE` source layout.
+- Dependency baseline is available at
+  `0495971a2ce948289320226cfb67656987352756`, but the task remains queued
+  until `00_PM` starts it after v0.8 Final Engineering closes.
+- Design handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
+- Current action: none. Do not create a branch or modify Settings UI now.
+
 ## Repository Architecture Cleanup — First Round (2026-09-25)
 
 - Workspace: `09_REPO_ARCHITECTURE` — DONE on
@@ -17,8 +27,8 @@
 - Source moves are complete; `AppLocalization.swift` stays at root because it
   locates localized resources relative to `#filePath`.
 - Completion report: `reports/github/09-repository-architecture-cleanup.md`.
-- Next: report final SHA and final CI status to `00_PM`. Do not merge main or
-  publish.
+- Final SHA: `0495971a2ce948289320226cfb67656987352756`; final CI run
+  `36157250718` passed. Handoff to `00_PM` is complete.
 
 Last Updated: 2026-09-25
 

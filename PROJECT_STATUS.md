@@ -1,6 +1,20 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-09-25 — v0.8.0 build 18
+Last Updated: 2026-09-26 — v0.8 Final Engineering
+
+## Final Engineering Status
+
+- `09_REPO_ARCHITECTURE`: DONE on
+  `codex/repository-architecture-cleanup` at
+  `0495971a2ce948289320226cfb67656987352756`.
+- Remote Architecture branch: synchronized; final CI run `36157250718` PASS.
+- Repository structure, Swift package tests, GitHub CI, bilingual README,
+  report indexes, and build artifact manifests: DONE.
+- Engineering validation artifact: `0.8.0` build `19`, arm64, ad-hoc signed,
+  not notarized. DMG SHA-256:
+  `49f6840e4c0c587c2aab862b9036ce0dab5b5a76e7f83a857d5a498e257f774b`.
+- `10_SETTINGS_UI`: QUEUED / NEXT. Registered only; implementation has not
+  started and must not interrupt v0.8 Final Engineering.
 
 ## Current Status
 

@@ -42,6 +42,10 @@
 - Candidate is FROZEN / READY FOR RELEASE REVIEW. Ad-hoc signing/Gatekeeper and
   clean-new-user distribution risks remain for review; no v0.8 public release
   has been made
+- Final Engineering established Swift package tests and macOS CI, organized
+  source responsibilities, refreshed bilingual documentation, and standardized
+  build 19 artifact metadata/checksums without changing player, Matcher,
+  Provider ordering, or Settings behavior
 
 ### Notes
 

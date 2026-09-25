@@ -88,6 +88,15 @@ After v0.8, plan `notchmuse.com` with a landing page, download page, and release
 notes. Host only the DMG, checksum, and `latest.json`; do not upload source code
 to the website.
 
+## Next — 10_SETTINGS_UI
+
+Status: QUEUED / NOT STARTED
+
+The approved Settings UI redesign is the next implementation task after v0.8
+Final Engineering closes. It must start from the latest stable Architecture
+SHA and follow `NotchMuse_Settings_UI_Redesign_PM_Handoff.md` without reopening
+the visual direction. No Settings UI work is part of the current phase.
+
 ## Completed Milestones
 
 - v0.3.x: open-source beta and initial lyrics UX.

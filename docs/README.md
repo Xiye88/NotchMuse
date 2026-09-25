@@ -122,3 +122,10 @@ coverage.
 
 The dated execution reports, their archive, and the current architecture
 cleanup report are indexed in [reports/README.md](../reports/README.md).
+
+## Queued Product Work
+
+The approved Settings redesign handoff is stored at
+[NotchMuse_Settings_UI_Redesign_PM_Handoff.md](project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md).
+It is registered as `10_SETTINGS_UI` and remains queued until `00_PM` opens it
+from the latest stable Architecture SHA.

@@ -6,7 +6,10 @@
   `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.
 - Main integration merge:
   `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
+- Main documentation head:
+  `dbdd422f95178ffb5466e8c9f7304ddb1b3cc52c`; remote verified.
 - Architecture CI `36158185905`: PASS.
+- Main CI `36158606048`: PASS.
 - `09_REPO_ARCHITECTURE`: DONE / ARCHIVED.
 - `10_SETTINGS_UI`: QUEUED / NEXT; not started.
 - No v0.8 tag, GitHub Release, or website publication has been created.

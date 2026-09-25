@@ -95,7 +95,8 @@ Status: QUEUED / NOT STARTED
 The approved Settings UI redesign is the next implementation task after v0.8
 Final Engineering closes. It must start from the latest stable Architecture
 SHA and follow `NotchMuse_Settings_UI_Redesign_PM_Handoff.md` without reopening
-the visual direction. No Settings UI work is part of the current phase.
+the visual direction. It remains queued for an explicit `00_PM` start after
+the completed Final Engineering integration.
 
 ## Completed Milestones
 

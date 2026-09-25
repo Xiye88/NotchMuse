@@ -1,5 +1,15 @@
 # NotchMuse Decisions
 
+## 2026-09-26 - Queue Settings UI Redesign After Final Engineering
+
+- Register `10_SETTINGS_UI` as QUEUED / NEXT.
+- Use the approved design in
+  `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`; do not reopen the
+  visual direction when implementation starts.
+- Start only from the latest stable Architecture baseline after v0.8 Final
+  Engineering is integrated. Do not mix the redesign into the repository
+  cleanup or alter product logic as part of the UI task.
+
 ## 2026-07-26 - v0.3.1 Release and v0.4 Entry Gate
 
 - Publish `v0.3.1` as an unsigned GitHub Pre-release for macOS 14+ on Apple

@@ -5,14 +5,14 @@
 - `10_SETTINGS_UI` — **QUEUED**, priority **NEXT**.
 - Blocked by: stable `09_REPO_ARCHITECTURE` source layout.
 - Dependency baseline is available at
-  `0495971a2ce948289320226cfb67656987352756`, but the task remains queued
+  `d5673b9b5b9e25baff4abb57db2264f30ace19c2`, but the task remains queued
   until `00_PM` starts it after v0.8 Final Engineering closes.
 - Design handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
 - Current action: none. Do not create a branch or modify Settings UI now.
 
 ## Repository Architecture Cleanup — First Round (2026-09-25)
 
-- Workspace: `09_REPO_ARCHITECTURE` — DONE on
+- Workspace: `09_REPO_ARCHITECTURE` — DONE / ARCHIVED on
   `codex/repository-architecture-cleanup`.
 - Start SHA verified: `3fb6946602dd35308d201fe7d5e609e63ebcb42e`; completion
   SHA is the branch tip after this report commit.
@@ -29,6 +29,9 @@
 - Completion report: `reports/github/09-repository-architecture-cleanup.md`.
 - Final SHA: `0495971a2ce948289320226cfb67656987352756`; final CI run
   `36157250718` passed. Handoff to `00_PM` is complete.
+- Final documentation head `d5673b9b5b9e25baff4abb57db2264f30ace19c2`
+  was integrated into `main` by merge commit
+  `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
 
 Last Updated: 2026-09-25
 

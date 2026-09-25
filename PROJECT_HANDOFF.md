@@ -1,11 +1,22 @@
 # NotchMuse Project Handoff
 
+## v0.8 Final Engineering Main Integration
+
+- Architecture final SHA:
+  `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.
+- Main integration merge:
+  `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
+- Architecture CI `36158185905`: PASS.
+- `09_REPO_ARCHITECTURE`: DONE / ARCHIVED.
+- `10_SETTINGS_UI`: QUEUED / NEXT; not started.
+- No v0.8 tag, GitHub Release, or website publication has been created.
+
 ## Queued Follow-up — 10_SETTINGS_UI
 
 - Status: `QUEUED`; priority: `NEXT`.
 - Blocked by: stable `09_REPO_ARCHITECTURE` source structure.
 - Stable Architecture baseline currently available:
-  `0495971a2ce948289320226cfb67656987352756`.
+  `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.
 - Source handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
 - Do not start during v0.8 Final Engineering. When `00_PM` starts the task,
   use the latest stable Architecture SHA, read the handoff, keep the approved
@@ -30,8 +41,9 @@
   failed before compilation on Swift 5.10; the workflow runner was corrected.
   Latest local build 19 and DMG verify with metadata/checksums; the final CI run
   must also pass on the completion commit.
-- Push of the architecture branch is authorized and current; no merge to main,
-  tag, GitHub Release, or website publication has occurred.
+- Architecture branch is pushed and integrated into `main` by merge commit
+  `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`. No tag, GitHub Release, or
+  website publication has occurred.
 - Scope: extract only `LyricParser` and `LyricClock` pure logic for the initial
   formal tests; preserve runtime behavior. Full app self-tests run in Debug;
   Release `--self-test` checks packaged localization and bridge resources. No player,

@@ -4,10 +4,12 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 
 ## Final Engineering Status
 
-- `09_REPO_ARCHITECTURE`: DONE on
+- `09_REPO_ARCHITECTURE`: DONE / ARCHIVED on
   `codex/repository-architecture-cleanup` at
-  `0495971a2ce948289320226cfb67656987352756`.
+  `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.
 - Remote Architecture branch: synchronized; final CI run `36157250718` PASS.
+- Integrated into `main` with merge commit
+  `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
 - Repository structure, Swift package tests, GitHub CI, bilingual README,
   report indexes, and build artifact manifests: DONE.
 - Engineering validation artifact: `0.8.0` build `19`, arm64, ad-hoc signed,
@@ -24,8 +26,8 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - v0.8 Candidate: FROZEN / READY FOR RELEASE REVIEW.
 - Product Owner final GUI confirmation: PASS. Individual GUI steps and timing
   values were not supplied; none are inferred here.
-- No merge to main, push, tag, or public release has been performed by this
-  closure task.
+- Final Engineering is integrated into `main`. No v0.8 tag, GitHub Release, or
+  public website release has been created.
 
 ## Candidate Identity
 

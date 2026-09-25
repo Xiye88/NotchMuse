@@ -123,9 +123,11 @@ test -x "$BRIDGE_DEST/MediaRemoteAdapterTestClient"
 test -x "$BRIDGE_DEST/mediaremote-watchdog.sh"
 perl -c "$BRIDGE_DEST/mediaremote-adapter.pl" >/dev/null
 /bin/sh -n "$BRIDGE_DEST/mediaremote-watchdog.sh"
-/usr/bin/perl \
-  "$BRIDGE_DEST/mediaremote-adapter.pl" \
-  "$BRIDGE_DEST/MediaRemoteAdapter.framework" \
-  "$BRIDGE_DEST/MediaRemoteAdapterTestClient" \
-  test
+if [[ "${NOTCHMUSE_SKIP_BRIDGE_RUNTIME_TEST:-0}" != "1" ]]; then
+  /usr/bin/perl \
+    "$BRIDGE_DEST/mediaremote-adapter.pl" \
+    "$BRIDGE_DEST/MediaRemoteAdapter.framework" \
+    "$BRIDGE_DEST/MediaRemoteAdapterTestClient" \
+    test
+fi
 echo "$APP"

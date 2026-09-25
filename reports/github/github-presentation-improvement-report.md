@@ -14,8 +14,8 @@ Priority: P1
   - `docs/assets/demos/notchmuse-status-bar-demo.mp4`：H.264/AAC，约 19.48s，约 3.7MB。
   - `docs/assets/demos/notchmuse-notch-mode-demo.mp4`：H.264，无音轨，约 16.42s，约 11MB。
 - README 当前使用仓库内 MP4 链接作为 fallback：
-  - `[Watch the Status Bar Mode demo](docs/assets/demos/notchmuse-status-bar-demo.mp4)`
-  - `[Watch the Notch Mode demo](docs/assets/demos/notchmuse-notch-mode-demo.mp4)`
+  - `[Watch the Status Bar Mode demo](../../docs/assets/demos/notchmuse-status-bar-demo.mp4)`
+  - `[Watch the Notch Mode demo](../../docs/assets/demos/notchmuse-notch-mode-demo.mp4)`
 - 当前没有可用的 `https://github.com/user-attachments/...` native video URL；本任务没有伪造 URL。
 - 三张截图已复核：
   - `docs/assets/screenshots/status-bar-mode.png`

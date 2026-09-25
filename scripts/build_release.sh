@@ -2,9 +2,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="${1:-${NOTCHMUSE_VERSION:-0.3.1}}"
-BUILD_NUMBER="${2:-${NOTCHMUSE_BUILD_NUMBER:-4}}"
+VERSION="${1:-${NOTCHMUSE_VERSION:-0.8.0}}"
+BUILD_NUMBER="${2:-${NOTCHMUSE_BUILD_NUMBER:-19}}"
 SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
+DIST="$ROOT/dist.noindex"
 APP="$ROOT/dist.noindex/NotchMuse.app"
 DMG="$ROOT/dist.noindex/NotchMuse.dmg"
 
@@ -37,6 +38,23 @@ codesign --verify --deep --strict "$APP"
 [[ -x "$APP/Contents/Resources/MediaRemoteBridge/mediaremote-watchdog.sh" ]]
 hdiutil verify "$DMG" >/dev/null
 
+SIGNING_KIND="Developer ID"
+[[ "$SIGN_IDENTITY" == "-" ]] && SIGNING_KIND="ad-hoc"
+(
+  cd "$DIST"
+  shasum -a 256 NotchMuse.app/Contents/MacOS/NotchMuse NotchMuse.dmg > SHA256SUMS
+  shasum -a 256 -c SHA256SUMS
+  cat > BUILD-INFO.txt <<EOF_BUILD_INFO
+Product: NotchMuse
+Version: $VERSION
+Build: $BUILD_NUMBER
+Source commit: $(git -C "$ROOT" rev-parse HEAD)
+Architecture: arm64
+Signing: $SIGNING_KIND
+Notarized: no
+EOF_BUILD_INFO
+)
+
 if [[ "$SIGN_IDENTITY" == "-" ]]; then
   echo "Warning: ad-hoc signed GitHub beta; Developer ID signing and notarization are absent." >&2
 else
@@ -44,3 +62,4 @@ else
 fi
 
 echo "Release candidate: $DMG"
+echo "Artifact metadata: $DIST/BUILD-INFO.txt and $DIST/SHA256SUMS"

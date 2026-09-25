@@ -11,8 +11,8 @@ RESOURCES="$CONTENTS/Resources"
 ENTITLEMENTS="$PROJECT/Resources/NotchMuse.entitlements"
 BRIDGE_SOURCE="$PROJECT/Vendor/MediaRemoteBridge"
 BRIDGE_DEST="$RESOURCES/MediaRemoteBridge"
-VERSION="${NOTCHMUSE_VERSION:-0.3.1}"
-BUILD_NUMBER="${NOTCHMUSE_BUILD_NUMBER:-4}"
+VERSION="${NOTCHMUSE_VERSION:-0.8.0}"
+BUILD_NUMBER="${NOTCHMUSE_BUILD_NUMBER:-19}"
 BUNDLE_ID="app.notchmuse.mac"
 SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
 DEFAULT_FEEDBACK_EMAIL="ztongxue3@gmail.com"
@@ -118,6 +118,7 @@ else
   codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --sign "$SIGN_IDENTITY" "$APP" >/dev/null
 fi
 codesign --verify --deep --strict "$APP"
+"$MACOS/NotchMuse" --self-test
 test -x "$BRIDGE_DEST/mediaremote-adapter.pl"
 test -x "$BRIDGE_DEST/MediaRemoteAdapterTestClient"
 test -x "$BRIDGE_DEST/mediaremote-watchdog.sh"

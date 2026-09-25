@@ -1,13 +1,13 @@
 import Foundation
 
-struct LyricMoment: Equatable {
-    let text: String
-    let progress: CGFloat
-    let identity: Int
+public struct LyricMoment: Equatable, Sendable {
+    public let text: String
+    public let progress: CGFloat
+    public let identity: Int
 }
 
-enum LyricClock {
-    static func moment(at position: TimeInterval, in lines: [LyricLine]) -> LyricMoment? {
+public enum LyricClock {
+    public static func moment(at position: TimeInterval, in lines: [LyricLine]) -> LyricMoment? {
         guard !lines.isEmpty else { return nil }
 
         var low = 0
@@ -31,7 +31,7 @@ enum LyricClock {
         return LyricMoment(text: lines[index].text, progress: progress, identity: index)
     }
 
-    static func currentLine(at position: TimeInterval, in lines: [LyricLine]) -> String? {
+    public static func currentLine(at position: TimeInterval, in lines: [LyricLine]) -> String? {
         moment(at: position, in: lines)?.text
     }
 }

@@ -8,6 +8,8 @@ let package = Package(
         .executable(name: "NotchMuse", targets: ["MenuBarLyrics"])
     ],
     targets: [
-        .executableTarget(name: "MenuBarLyrics")
+        .target(name: "LyricsCore"),
+        .executableTarget(name: "MenuBarLyrics", dependencies: ["LyricsCore"]),
+        .testTarget(name: "MenuBarLyricsTests", dependencies: ["LyricsCore"])
     ]
 )

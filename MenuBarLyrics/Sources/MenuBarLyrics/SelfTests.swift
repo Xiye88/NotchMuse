@@ -1,6 +1,8 @@
 import Foundation
 import AppKit
+import LyricsCore
 
+#if DEBUG
 enum SelfTests {
     private static func check(_ condition: @autoclosure () -> Bool, _ message: String) {
         guard condition() else {
@@ -17,35 +19,14 @@ enum SelfTests {
         testSingleInstanceLock()
         testMusicPlayerAdapterModel()
         testAppleMusicResponseParsing()
+        testMediaRemoteBridge()
+        testNetEaseEventConvergence()
         testLyricsIssueReport()
-
-        let parsed = LyricParser.parse("[00:01.50]Hello\n[00:03.00]World")
-        check(parsed == [
-            LyricLine(time: 1.5, text: "Hello"),
-            LyricLine(time: 3.0, text: "World")
-        ], "parses timestamped lines")
-
-        let repeated = LyricParser.parse("[00:01.00][00:02.00]Again")
-        check(repeated == [
-            LyricLine(time: 1.0, text: "Again"),
-            LyricLine(time: 2.0, text: "Again")
-        ], "parses repeated timestamps")
-
-        let progressLines = [
-            LyricLine(time: 1, text: "One"),
-            LyricLine(time: 3, text: "Three"),
-            LyricLine(time: 7, text: "Seven")
-        ]
-        check(LyricClock.moment(at: 0.5, in: progressLines) == nil, "has no lyric before the first line")
-        check(LyricClock.moment(at: 1, in: progressLines)?.progress == 0, "starts lyric progress at zero")
-        check(LyricClock.moment(at: 2, in: progressLines)?.progress == 0.5, "tracks lyric progress between lines")
-        check(LyricClock.moment(at: 3, in: progressLines)?.progress == 0, "resets lyric progress on the next line")
-        check(LyricClock.moment(at: 10, in: progressLines)?.progress == 1, "clamps final lyric progress at one")
-        check(LyricClock.currentLine(at: 3.2, in: parsed) == "World", "selects the current lyric")
 
         testSmoothScroll()
         testOverlayGeometry()
         testNotchGeometry()
+        testNumericInput()
         testDisplaySelection()
         check(OverlayLaneGeometry.centeredTextY(laneHeight: 32, lineHeight: 16) == 8, "centers lyrics vertically in the menu bar")
 
@@ -67,6 +48,7 @@ enum SelfTests {
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
+            await testNetEaseMusicAdapter()
             await testLyricsClient()
             if ProcessInfo.processInfo.environment["LRCLIB_LIVE_TESTS"] == "1" {
                 await testLRCLIBLive()
@@ -117,11 +99,35 @@ enum SelfTests {
         check(L10n.text("Report Lyrics Issue…", language: .english) == "Report Lyrics Issue…", "localizes the English feedback entry")
         check(L10n.text("Report Lyrics Issue…", language: .simplifiedChinese) == "报告歌词问题…", "localizes the Chinese feedback entry")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
-        check(AppPreferences.normalizedPlayerSource(nil) == .spotify, "defaults to Spotify")
+        check(AppPreferences.normalizedPlayerSource(nil) == .auto, "defaults to automatic player detection")
+        check(PlayerSource.allCases == [.auto, .spotify, .appleMusic, .netEaseMusic], "keeps Auto, Spotify, Apple Music, and NetEase in Settings")
         check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
+        check(AppPreferences.normalizedPlayerSource("NetEase Cloud Music") == .netEaseMusic, "persists NetEase selection")
+        let suiteName = "app.notchmuse.self-test.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        for source in PlayerSource.allCases {
+            AppPreferences.setPlayerSource(source, in: defaults)
+            check(AppPreferences.playerSource(in: defaults) == source, "round-trips the \(source.rawValue) selection through defaults")
+        }
+        check(AppPreferences.playerStopBehavior(in: defaults) == .hide, "defaults to hiding lyrics when the player stops")
+        check(!AppPreferences.notchBackgroundEnabled(in: defaults), "defaults the Notch background to off")
+        check(AppPreferences.notchBackgroundMode(in: defaults) == .none, "labels the default Notch background as None")
+        defaults.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
+        check(AppPreferences.notchBackgroundMode(in: defaults) == .black, "labels enabled Notch background without a custom color as Black")
+        let customBackground = try! NSKeyedArchiver.archivedData(withRootObject: NSColor.red, requiringSecureCoding: true)
+        defaults.set(customBackground, forKey: AppPreferences.notchBackgroundColorKey)
+        check(AppPreferences.notchBackgroundMode(in: defaults) == .custom, "labels custom Notch background colors as Custom")
+        check(AppPreferences.notchHideOnHover(in: defaults), "defaults Notch lyrics to hide on hover")
+        check(AppPreferences.color(forKey: AppPreferences.customLyricsColorKey, in: defaults) == nil, "leaves custom lyric color unset by default")
+        check(L10n.text("None", language: .english) == "None", "localizes the English None background choice")
+        check(L10n.text("Black", language: .simplifiedChinese) == "黑色", "localizes the Chinese Black background choice")
+        check(PlayerSource.netEaseMusic.displayName(language: .english) == "NetEase Cloud Music", "shows the English NetEase name")
+        check(PlayerSource.netEaseMusic.displayName(language: .simplifiedChinese) == "网易云音乐", "shows the Chinese NetEase name")
+        check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == ["com.spotify.client", "com.apple.Music", "com.netease.163music"], "registers all supported player bundle identifiers")
     }
 
-    private static func testMusicPlayerAdapterModel() {
+    @MainActor private static func testMusicPlayerAdapterModel() {
         let spotify = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
         let nowPlaying = NowPlayingTrack(
             title: spotify.name,
@@ -138,6 +144,22 @@ enum SelfTests {
 
         check(nowPlaying.spotifyTrack == spotify, "preserves Spotify metadata at the lyrics boundary")
         check(nowPlaying.versionHints == [.live], "carries version hints without changing matching")
+        let seeked = NowPlayingTrack(
+            title: nowPlaying.title,
+            artist: nowPlaying.artist,
+            album: nowPlaying.album,
+            duration: nowPlaying.duration,
+            playbackPosition: 84,
+            playbackState: .playing,
+            playerSource: nowPlaying.playerSource,
+            nativeTrackID: nowPlaying.nativeTrackID,
+            isrc: nowPlaying.isrc,
+            versionHints: nowPlaying.versionHints
+        )
+        let seekLines = [LyricLine(time: 10, text: "before seek"), LyricLine(time: 80, text: "after seek")]
+        check(seeked.observationIdentity == nowPlaying.observationIdentity, "keeps track identity stable across a position jump")
+        check(LyricClock.currentLine(at: seeked.playbackPosition, in: seekLines) == "after seek", "resynchronizes lyrics to a large position jump")
+        check(!MenuBarController.shouldUpdateTrack(current: nowPlaying.spotifyTrack, currentIdentity: nowPlaying.observationIdentity, next: seeked.spotifyTrack, nextIdentity: seeked.observationIdentity, force: false), "does not request lyrics again after a position jump")
         check(TrackVersionHint.detect(title: "Oliver", album: "Album") == nil, "does not infer Live from a partial word")
         check(TrackVersionHint.detect(title: "Song (feat. Guest)", album: "Deluxe") == [.deluxe, .featuredArtist], "detects bounded version markers")
         check(MusicPlayerSnapshot.playing(nowPlaying).currentTrack == nowPlaying, "exposes the current adapter track")
@@ -147,7 +169,7 @@ enum SelfTests {
             artist: nowPlaying.artist,
             album: nowPlaying.album,
             duration: nowPlaying.duration,
-            playbackPosition: 99,
+            playbackPosition: 46,
             playbackState: .playing,
             playerSource: nowPlaying.playerSource,
             nativeTrackID: nowPlaying.nativeTrackID,
@@ -162,6 +184,290 @@ enum SelfTests {
             return
         }
         check(adapted.spotifyTrack == spotify && adapted.playbackPosition == 42, "preserves Spotify track and position")
+        let paused = MusicPlayerSnapshot.paused(nowPlaying)
+        let playing = MusicPlayerSnapshot.playing(nowPlaying)
+        check(AutoDetectAdapter.select([(.spotify, paused), (.appleMusic, playing)], current: .spotify).source == .appleMusic, "switches Auto Detect to the playing app")
+        check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, playing)], current: .appleMusic).source == .appleMusic, "retains the current app when multiple players report playing")
+        check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, playing)], current: .spotify, activity: [.spotify: 1, .appleMusic: 2]).source == .appleMusic, "uses recent playback activity when multiple players report playing")
+        check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, paused)], current: .spotify, freshPlaying: [.appleMusic]).source == .appleMusic, "does not retain a stale playing provider")
+        let firstObservation = AutoDetectAdapter.observation(previous: nil, snapshot: playing, at: 0)
+        let staleObservation = AutoDetectAdapter.observation(previous: firstObservation, snapshot: playing, at: 4)
+        check(staleObservation.playbackFreshAt == 0, "does not refresh provider freshness when reported playback is frozen")
+        let movingObservation = AutoDetectAdapter.observation(previous: firstObservation, snapshot: .playing(advanced), at: 4)
+        check(movingObservation.playbackFreshAt == 4 && movingObservation.activityAt == 0, "separates live playback freshness from user activity")
+        let stoppedSelection = AutoDetectAdapter.select([(.spotify, .closed), (.appleMusic, .stopped)], current: .spotify)
+        check(stoppedSelection.source == nil && stoppedSelection.snapshot == .stopped, "does not select a player only because its app is open")
+        check(MenuBarController.shouldUpdateTrack(current: spotify, currentIdentity: "old", next: spotify, nextIdentity: "new", force: false), "reloads lyrics when native track identity changes")
+        check(!MenuBarController.shouldAnimateScroll(overflows: true, isPaused: true), "stops marquee scrolling while paused")
+        check(MenuBarController.shouldAnimateScroll(overflows: true, isPaused: false), "keeps marquee scrolling while playing")
+        check(MenuBarController.shouldHideLyrics(isUserHidden: false, isPlaying: false, stopBehavior: .hide), "hides lyrics by default while paused, stopped, closed, or switching players")
+        check(!MenuBarController.shouldHideLyrics(isUserHidden: false, isPlaying: false, stopBehavior: .keep), "keeps the last lyric for non-playing states when configured")
+        check(!MenuBarController.shouldHideLyrics(isUserHidden: false, isPlaying: true, stopBehavior: .hide), "shows lyrics while playing")
+        for source in PlayerSource.allCases {
+            let adapter = MenuBarController.adapter(for: source)
+            check(adapter.source == source, "registers the \(source.rawValue) adapter")
+            adapter.shutdown()
+        }
+    }
+
+    private static func testMediaRemoteBridge() {
+        let root = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("notchmuse-bridge-\(UUID().uuidString)")
+        let framework = root.appendingPathComponent("MediaRemoteAdapter.framework")
+        let helper = root.appendingPathComponent("MediaRemoteAdapterTestClient")
+        let script = root.appendingPathComponent("mediaremote-adapter.pl")
+        let watchdog = root.appendingPathComponent("mediaremote-watchdog.sh")
+        try? FileManager.default.createDirectory(at: framework, withIntermediateDirectories: true)
+        FileManager.default.createFile(atPath: helper.path, contents: Data())
+        let fakeBridge = #"""
+        use strict;
+        use warnings;
+        my $command = $ARGV[2] // '';
+        if ($command eq 'test') { sleep 2; exit 0; }
+        if ($command eq 'stream') { sleep 2; exit 0; }
+        print "null\n";
+        """#
+        try? fakeBridge.write(to: script, atomically: true, encoding: .utf8)
+        try? "exec /usr/bin/perl \"$@\"\n".write(to: watchdog, atomically: true, encoding: .utf8)
+        try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: watchdog.path)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let paths = MediaRemoteBridge.Paths(resourceDirectory: root)
+        check(paths.script.path == script.path, "resolves the bridge script relative to resources")
+        check(paths.framework.path == framework.path, "resolves the bridge framework relative to resources")
+        check(paths.testClient.path == helper.path, "resolves the bridge helper relative to resources")
+        check(paths.watchdog.path == watchdog.path, "resolves the bridge watchdog relative to resources")
+
+        let sample = #"{"bundleIdentifier":"com.netease.163music","playing":true,"title":"晴天","uniqueIdentifier":535824739}"#.data(using: .utf8)!
+        let event = try? JSONDecoder().decode(MediaRemoteEvent.self, from: sample)
+        check(event?.uniqueIdentifier?.rawValue == "535824739", "decodes numeric MediaRemote identifiers")
+        let stringID = #"{"bundleIdentifier":"com.netease.163music","playing":true,"title":"Song","uniqueIdentifier":"track-1"}"#.data(using: .utf8)!
+        check((try? JSONDecoder().decode(MediaRemoteEvent.self, from: stringID))?.uniqueIdentifier?.rawValue == "track-1", "decodes string MediaRemote identifiers")
+
+        let streamLine = #"{"type":"data","diff":false,"payload":{"bundleIdentifier":"com.netease.163music","playing":true,"title":"晴天"}}"#.data(using: .utf8)!
+        check((try? MediaRemoteBridge.decodeStreamLine(streamLine))?.title == "晴天", "decodes a stream payload")
+        let empty = #"{"type":"data","diff":false,"payload":{}}"#.data(using: .utf8)!
+        check((try? MediaRemoteBridge.decodeStreamLine(empty)) == nil, "ignores an empty stream payload")
+        check((try? MediaRemoteBridge.decodeStreamLine(Data("not-json".utf8))) == nil, "rejects malformed stream JSON")
+
+        let bridge = MediaRemoteBridge(paths: paths)
+        do {
+            try bridge.healthCheck(timeout: 0.05)
+            check(false, "times out a blocked bridge health check")
+        } catch MediaRemoteBridgeError.timedOut {
+            check(true, "times out a blocked bridge health check")
+        } catch {
+            check(false, "reports the bridge timeout accurately")
+        }
+
+        do {
+            try bridge.startStream(onEvent: { _ in }, onFailure: { _ in })
+            do {
+                try bridge.startStream(onEvent: { _ in }, onFailure: { _ in })
+                check(false, "rejects a duplicate bridge stream")
+            } catch MediaRemoteBridgeError.streamAlreadyRunning {
+                check(true, "rejects a duplicate bridge stream")
+            } catch {
+                check(false, "reports duplicate stream ownership accurately")
+            }
+            bridge.shutdown()
+            check(!bridge.isStreamRunning, "stops the bridge stream synchronously")
+        } catch {
+            check(false, "starts and stops a bridge stream")
+        }
+    }
+
+    private static func testNetEaseEventConvergence() {
+        func event(
+            _ title: String,
+            playing: Bool = true,
+            owner: String = "com.netease.163music",
+            position: TimeInterval = 10
+        ) -> MediaRemoteEvent {
+            MediaRemoteEvent(
+                bundleIdentifier: owner,
+                parentApplicationBundleIdentifier: nil,
+                playing: playing,
+                title: title,
+                artist: "Artist",
+                album: "Album",
+                duration: 200,
+                elapsedTimeNow: position,
+                timestamp: nil,
+                uniqueIdentifier: nil,
+                contentItemIdentifier: title,
+                mediaType: "MRMediaRemoteMediaTypeMusic"
+            )
+        }
+
+        var converger = NetEaseEventConverger(quietInterval: 0.3)
+        let firstA = event("A")
+        let confirmedA = event("A", position: 10.1)
+        check(converger.consume(firstA, at: 0).isEmpty, "waits for a new identity to converge")
+        check(converger.consume(confirmedA, at: 0.1) == [.event(confirmedA)], "commits two matching identities")
+        check(converger.consume(confirmedA, at: 0.2).isEmpty, "drops exact duplicate events")
+
+        let pausedA = event("A", playing: false)
+        check(converger.consume(pausedA, at: 0.3) == [.event(pausedA)], "commits same-track playback changes immediately")
+
+        var reusedID = event("Previous")
+        reusedID = MediaRemoteEvent(
+            bundleIdentifier: reusedID.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: reusedID.title,
+            artist: reusedID.artist,
+            album: reusedID.album,
+            duration: reusedID.duration,
+            elapsedTimeNow: reusedID.elapsedTimeNow,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: "A",
+            mediaType: reusedID.mediaType
+        )
+        check(converger.consume(reusedID, at: 0.4).isEmpty, "treats changed metadata with a reused native ID as a new track")
+        check(converger.flush(at: 0.7) == [.event(reusedID)], "converges previous and next actions with reused native IDs")
+
+        let b = event("B")
+        check(converger.consume(b, at: 1).isEmpty, "holds one new identity")
+        check(converger.flush(at: 1.29).isEmpty, "does not flush before the quiet interval")
+        check(converger.flush(at: 1.3) == [.event(b)], "commits a new identity after the quiet interval")
+
+        let partial = MediaRemoteEvent(
+            bundleIdentifier: NetEaseEventConverger.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: "",
+            artist: nil,
+            album: nil,
+            duration: nil,
+            elapsedTimeNow: nil,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: nil,
+            mediaType: nil
+        )
+        check(converger.consume(partial, at: 1.4).isEmpty, "ignores partial NetEase metadata")
+
+        var albumChange = event("B", position: 12)
+        albumChange = MediaRemoteEvent(
+            bundleIdentifier: albumChange.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: albumChange.title,
+            artist: albumChange.artist,
+            album: "Transient Album",
+            duration: albumChange.duration,
+            elapsedTimeNow: albumChange.elapsedTimeNow,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: albumChange.contentItemIdentifier,
+            mediaType: albumChange.mediaType
+        )
+        guard case let .event(stableAlbumEvent) = converger.consume(albumChange, at: 1.5).first else {
+            check(false, "keeps album-only changes on the confirmed track")
+            return
+        }
+        check(stableAlbumEvent.album == "Album", "does not churn lyrics for transient album metadata")
+
+        let foreign = event("Other", owner: "com.spotify.client")
+        check(converger.consume(foreign, at: 2) == [.clear], "clears NetEase state when another player owns Now Playing")
+        check(converger.consume(foreign, at: 2.1).isEmpty, "does not repeat an identical foreign-owner clear")
+
+        var rapid = NetEaseEventConverger(quietInterval: 0.3)
+        check(rapid.consume(event("A"), at: 0).isEmpty, "holds rapid transition A")
+        check(rapid.consume(event("B"), at: 0.05).isEmpty, "replaces rapid transition A with B")
+        check(rapid.consume(event("C"), at: 0.1).isEmpty, "replaces rapid transition B with C")
+        check(rapid.flush(at: 0.4) == [.event(event("C"))], "commits only the final rapid transition")
+    }
+
+    private static func testNetEaseMusicAdapter() async {
+        let event = MediaRemoteEvent(
+            bundleIdentifier: NetEaseMusicAdapter.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: "晴天",
+            artist: "周杰伦",
+            album: "叶惠美",
+            duration: 269,
+            elapsedTimeNow: 42,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: "track-1",
+            mediaType: "MRMediaRemoteMediaTypeMusic"
+        )
+        guard case let .playing(track) = NetEaseMusicAdapter.snapshot(from: event, isRunning: true) else {
+            check(false, "maps a playing NetEase event")
+            return
+        }
+        check(track.title == "晴天" && track.playerSource == .netEaseMusic, "maps NetEase track metadata")
+        check(track.nativeTrackID == "track-1", "preserves the NetEase native track ID")
+        guard case let .playing(advanced) = NetEaseMusicAdapter.advanced(.playing(track), since: 100, now: 105) else {
+            check(false, "advances a playing NetEase track")
+            return
+        }
+        check(advanced.playbackPosition == 47, "advances cached NetEase playback position between stream events")
+        let unknownDuration = NowPlayingTrack(
+            title: track.title,
+            artist: track.artist,
+            album: track.album,
+            duration: 0,
+            playbackPosition: 42,
+            playbackState: .playing,
+            playerSource: .netEaseMusic,
+            nativeTrackID: track.nativeTrackID,
+            isrc: nil,
+            versionHints: nil
+        )
+        check(NetEaseMusicAdapter.advanced(.playing(unknownDuration), since: 100, now: 105).playbackPosition == 47, "advances NetEase playback when duration is unavailable")
+        check(!NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 100.99), "waits for the NetEase seek refresh interval")
+        check(NetEaseMusicAdapter.shouldRefreshPosition(last: 100, now: 101), "refreshes NetEase playback position within one second for seeks")
+        check(NetEaseMusicAdapter.isProviderFresh(snapshot: .playing(track), lastUpdateAt: 100, now: 106), "keeps recent NetEase provider data")
+        check(!NetEaseMusicAdapter.isProviderFresh(snapshot: .playing(track), lastUpdateAt: 100, now: 106.1), "expires NetEase playback when stream and position refreshes stop succeeding")
+
+        var paused = event
+        paused.playing = false
+        let pausedSnapshot = NetEaseMusicAdapter.snapshot(from: paused, isRunning: true)
+        check(pausedSnapshot.playbackState == .paused, "maps NetEase pause state")
+        check(NetEaseMusicAdapter.advanced(pausedSnapshot, since: 100, now: 105).playbackPosition == 42, "does not advance a paused NetEase track")
+        let foreign = MediaRemoteEvent(
+            bundleIdentifier: "com.spotify.client",
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: "Other",
+            artist: nil,
+            album: nil,
+            duration: nil,
+            elapsedTimeNow: nil,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: nil,
+            mediaType: nil
+        )
+        check(NetEaseMusicAdapter.snapshot(from: foreign, isRunning: true) == .stopped, "rejects a foreign Now Playing owner")
+        check(NetEaseMusicAdapter.snapshot(from: nil, isRunning: false) == .closed, "reports a closed NetEase app")
+        check(NetEaseMusicAdapter.snapshot(from: nil, isRunning: true) == .stopped, "reports a running NetEase app without a current track")
+        var incomplete = event
+        incomplete = MediaRemoteEvent(
+            bundleIdentifier: incomplete.bundleIdentifier,
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: incomplete.title,
+            artist: nil,
+            album: incomplete.album,
+            duration: incomplete.duration,
+            elapsedTimeNow: incomplete.elapsedTimeNow,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: incomplete.contentItemIdentifier,
+            mediaType: incomplete.mediaType
+        )
+        check(NetEaseMusicAdapter.snapshot(from: incomplete, isRunning: true) == .stopped, "rejects incomplete NetEase metadata")
+
+        let unavailable = NetEaseMusicAdapter(bridge: nil, isRunning: { true })
+        let unavailableSnapshot = await unavailable.snapshot()
+        check(unavailableSnapshot == .unavailable, "reports missing bridge resources")
+        unavailable.shutdown()
     }
 
     private static func testAppleMusicResponseParsing() {
@@ -399,8 +705,24 @@ enum SelfTests {
         check(expanded.height > compact.height, "gives Expanded style room for song details")
         check(compactWidth < normalWidth && normalWidth < wideWidth, "makes Notch width presets visibly different")
         check(WidthGeometry.notchWidth(mode: .custom, availableWidth: 600, style: .lyricOnly, customWidth: 900) == 600, "clips custom Notch width to the selected screen")
+        check(NotchGeometry.frame(screenFrame: screen, visibleFrame: visible, style: .lyricOnly, fontSize: 13, width: 180).width == 180, "applies the minimum custom Notch width without expanding it")
         check(WidthGeometry.statusBarWidth(mode: .compact, availableWidth: 400, customWidth: 300) < WidthGeometry.statusBarWidth(mode: .wide, availableWidth: 400, customWidth: 300), "makes status bar width presets visibly different")
-        check(LyricsColorPreset.allCases.count == 5, "offers five shared lyric color presets")
+        check(LyricsColorPreset.allCases.count == 6, "keeps five lyric color presets plus Custom")
+    }
+
+    private static func testNumericInput() {
+        check(NumericInput.parse("24", minimum: 10, maximum: 60) == 24, "parses numeric Settings input")
+        check(NumericInput.parse(" 0.8 ", minimum: 0.1, maximum: 3) == 0.8, "trims numeric Settings input")
+        check(NumericInput.parse("5", minimum: 10, maximum: 100) == 10, "clamps numeric Settings input to its minimum")
+        check(NumericInput.parse("1200", minimum: 180, maximum: 1000) == 1000, "clamps Custom Width to its maximum")
+        check(NumericInput.parse("wide", minimum: 180, maximum: 1000) == nil, "rejects non-numeric Settings input")
+
+        let suiteName = "app.notchmuse.color-self-test.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let color = NSColor(calibratedRed: 0.2, green: 0.4, blue: 0.6, alpha: 0.8)
+        AppPreferences.setColor(color, forKey: AppPreferences.customLyricsColorKey, in: defaults)
+        check(AppPreferences.color(forKey: AppPreferences.customLyricsColorKey, in: defaults) == color, "persists and restores a custom lyric color")
     }
 
     private static func testDisplaySelection() {
@@ -457,6 +779,24 @@ enum SelfTests {
         check(request.url?.path == "/api/search/get", "uses the plain NetEase search response endpoint")
         let duplicateSearch = Data(#"{"result":{"songs":[{"id":1,"name":"Song","artists":[{"name":"Artist"}],"duration":200000},{"id":2,"name":"song","artists":[{"name":"ARTIST"}],"duration":200000}]}}"#.utf8)
         check((try! source.parseSearch(duplicateSearch)).count == 1, "deduplicates equivalent NetEase recordings")
+
+        let preview = SpotifyTrack(name: "彩券", artist: "薛之谦", album: "天外来物", duration: 60)
+        let previewCandidates = [
+            TrackMatcher.Candidate(title: "彩券", artists: ["薛之谦"], durationMs: 275_855),
+            TrackMatcher.Candidate(title: "彩券（翻唱正式版）", artists: ["零度甜"], durationMs: 275_854)
+        ]
+        check(source.matchingIndex(for: preview, candidates: previewCandidates) == 0, "matches a unique exact NetEase identity when MediaRemote reports a 60-second preview")
+        let shortPreview = SpotifyTrack(name: "彩券", artist: "薛之谦", album: "天外来物", duration: 30)
+        check(source.matchingIndex(for: shortPreview, candidates: previewCandidates) == 0, "matches a unique exact NetEase identity when MediaRemote reports a 30-second preview")
+        let multiArtistPreview = SpotifyTrack(name: "I Love You 3000 II", artist: "88rising/Stephanie Poetri/王嘉尔", album: "Head in the Clouds II", duration: 30)
+        let multiArtistCandidates = [TrackMatcher.Candidate(title: "I Love You 3000 II", artists: ["88rising", "Stephanie Poetri", "王嘉尔"], durationMs: 209_642)]
+        check(source.matchingIndex(for: multiArtistPreview, candidates: multiArtistCandidates) == 0, "matches NetEase slash-separated MediaRemote artists")
+        let ambiguousPreview = previewCandidates + [
+            TrackMatcher.Candidate(title: "彩券", artists: ["薛之谦"], durationMs: 280_000)
+        ]
+        check(source.matchingIndex(for: preview, candidates: ambiguousPreview) == nil, "rejects ambiguous NetEase preview identities")
+        let wrongArtistPreview = [TrackMatcher.Candidate(title: "彩券", artists: ["Other"], durationMs: 275_855)]
+        check(source.matchingIndex(for: preview, candidates: wrongArtistPreview) == nil, "rejects a wrong-artist NetEase preview candidate")
     }
 
     private static func testLRCLIBFixtures() {
@@ -1022,7 +1362,6 @@ enum SelfTests {
         check(ambiguous.ambiguityGap < 6, "diagnostics records ambiguity gap")
     }
 }
-
 private actor SourceCalls {
     private(set) var counts = [0, 0, 0]
 
@@ -1058,3 +1397,4 @@ private actor CancellationProbe {
         cancelled
     }
 }
+#endif

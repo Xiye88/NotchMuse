@@ -1,4 +1,5 @@
 import Foundation
+import LyricsCore
 
 struct NetEaseLyricsSource {
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
@@ -6,7 +7,7 @@ struct NetEaseLyricsSource {
         let candidates = songs.map {
             TrackMatcher.Candidate(title: $0.name, artists: $0.artists.map(\.name), durationMs: $0.duration)
         }
-        guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "NetEase") else { return [] }
+        guard let index = matchingIndex(for: track, candidates: candidates) else { return [] }
         let song = songs[index]
 
         var components = URLComponents(string: "https://music.163.com/api/song/lyric")!
@@ -17,6 +18,30 @@ struct NetEaseLyricsSource {
         let (data, response) = try await URLSession.shared.data(for: request(components.url!))
         let lyric = try JSONDecoder().decode(LyricResponse.self, from: LyricsHTTP.validate(data: data, response: response)).lrc?.lyric ?? ""
         return LyricParser.parse(lyric)
+    }
+
+    func matchingIndex(for track: SpotifyTrack, candidates: [TrackMatcher.Candidate]) -> Int? {
+        let matchingTrack = SpotifyTrack(
+            name: track.name,
+            artist: track.artist.replacingOccurrences(of: "/", with: ","),
+            album: track.album,
+            duration: track.duration
+        )
+        if let index = TrackMatcher.bestMatchIndex(for: matchingTrack, candidates: candidates, provider: "NetEase") {
+            return index
+        }
+        guard track.duration > 0, track.duration <= 65 else { return nil }
+        let exactIdentityMatches = candidates.indices.filter { index in
+            let candidate = candidates[index]
+            let fullDurationTrack = SpotifyTrack(
+                name: matchingTrack.name,
+                artist: matchingTrack.artist,
+                album: matchingTrack.album,
+                duration: Double(candidate.durationMs) / 1000
+            )
+            return TrackMatcher.score(fullDurationTrack, candidate: candidate) >= TrackMatcher.acceptanceThreshold
+        }
+        return exactIdentityMatches.count == 1 ? exactIdentityMatches[0] : nil
     }
 
     private func search(_ track: SpotifyTrack) async throws -> [Song] {

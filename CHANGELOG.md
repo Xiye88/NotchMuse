@@ -1,5 +1,58 @@
 # Changelog
 
+## 0.8.0 - Unreleased
+
+### Added
+
+- Added NetEase Cloud Music through the bundled MediaRemote bridge
+- Added Auto Detect as the recommended default for Spotify, Apple Music, and
+  NetEase, while retaining explicit player selection
+- Added configurable stopped-player behavior: hide lyrics by default or keep
+  the final lyric paused
+- Added Notch background modes for None, Black, and Custom Color, plus the Hide
+  on Hover toggle
+- Added a persistent custom lyric color alongside the existing color presets
+
+### Fixed
+
+- Restored and regression-tested the complete four-item player Settings list
+- Stopped lyric progress and marquee movement while playback is paused
+- Cleared old lyrics when the active player or native track identity changes
+- Prevented an older asynchronous lyrics response from replacing a newer track
+- Selected Auto players from fresh playback evidence instead of app-open state
+- Rejected stale NetEase bridge results and out-of-order metadata events
+- Handled NetEase track changes that reuse a native media identifier
+- Expired frozen NetEase playback when bridge refreshes stop succeeding
+- Refreshed NetEase playback position every second so lyric timing follows seeks sooner
+- Made font size, animation speed, opacity, and Custom Width directly editable
+  with bounded numeric input
+- Applied Custom Width down to the documented 180-point minimum
+
+### Validation
+
+- Local `0.8.0` build `18` passes Debug/Release self-tests, deep code-signature
+  verification, localization parity, and DMG verification
+- Product Owner confirms build 18 seek forward/back and final GUI gates PASS; the
+  60-minute continuous-playback soak passed with one app/watchdog/Perl helper
+  each and no crash/restart/orphan
+- Real Apple Music, Spotify, simultaneous-player Auto handoff, four-player
+  Settings, numeric Enter, and all five width modes passed focused QA
+- Six lyric-color choices, Blue/Custom selection, and native macOS color panel
+  opening passed direct Settings QA
+- Candidate is FROZEN / READY FOR RELEASE REVIEW. Ad-hoc signing/Gatekeeper and
+  clean-new-user distribution risks remain for review; no v0.8 public release
+  has been made
+- Final Engineering established Swift package tests and macOS CI, organized
+  source responsibilities, refreshed bilingual documentation, and standardized
+  build 19 artifact metadata/checksums without changing player, Matcher,
+  Provider ordering, or Settings behavior
+
+### Notes
+
+- Production Matcher behavior and Provider order are unchanged
+- The current candidate is an ad-hoc signed arm64 beta; Developer ID signing,
+  notarization, and stapling are absent
+
 ## 0.6.1 - 2026-08-30
 
 ### Fixed

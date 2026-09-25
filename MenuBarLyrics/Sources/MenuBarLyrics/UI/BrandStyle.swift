@@ -7,7 +7,7 @@ enum BrandStyle {
         NSColor(calibratedRed: 150 / 255, green: 58 / 255, blue: 8 / 255, alpha: 1)
     ]
 
-    static func gradientColors(for preset: LyricsColorPreset) -> [NSColor] {
+    static func gradientColors(for preset: LyricsColorPreset, customColor: NSColor = gradientColors[0]) -> [NSColor] {
         switch preset {
         case .orange:
             return gradientColors
@@ -31,6 +31,8 @@ enum BrandStyle {
                 NSColor(calibratedRed: 52 / 255, green: 199 / 255, blue: 89 / 255, alpha: 1),
                 NSColor(calibratedRed: 23 / 255, green: 138 / 255, blue: 67 / 255, alpha: 1)
             ]
+        case .custom:
+            return [customColor, customColor, customColor]
         }
     }
 

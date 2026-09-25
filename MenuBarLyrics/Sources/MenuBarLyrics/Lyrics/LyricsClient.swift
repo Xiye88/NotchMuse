@@ -1,4 +1,5 @@
 import Foundation
+import LyricsCore
 
 enum LyricsClientError: Error, Equatable {
     case networkFailure

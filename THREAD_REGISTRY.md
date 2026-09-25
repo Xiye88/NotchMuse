@@ -1,6 +1,34 @@
 # NotchMuse Thread Registry
 
-Last Updated: 2026-07-18
+Last Updated: 2026-09-26
+
+## v0.8 Final Engineering Workspaces
+
+| Workspace | Status | Priority | Dependency | Responsibility |
+| --- | --- | --- | --- | --- |
+| `09_REPO_ARCHITECTURE` | DONE | CURRENT | Candidate Freeze `3fb6946` | Repository structure, tests, CI, documentation, and artifact standardization. Stable baseline: `0495971a2ce948289320226cfb67656987352756`. |
+| `10_SETTINGS_UI` | QUEUED | NEXT | `09_REPO_ARCHITECTURE` source structure stable | Implement the approved Settings redesign from `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`. Do not start until `00_PM` explicitly opens the task from the latest stable Architecture SHA. |
+
+`10_SETTINGS_UI` is registered only. Its design direction is approved, but no
+implementation, new task, branch, or UI change is authorized in the current
+Final Engineering phase.
+
+## Current Registry
+
+| Workspace | Status | Responsibility |
+| --- | --- | --- |
+| `00_PM` | ACTIVE | Single PM/integration entry point |
+| `01_APP` | ARCHIVED | P0 implementation merged into the candidate |
+| `02_RELEASE` | ACTIVE | Build-15 artifact and release gates |
+| `03_LAB` | ARCHIVED | Reopen only for a new evidence question |
+| `04_UX` | ACTIVE | Build-15 Notch and Settings GUI regression |
+| `05_MATCHER` | ARCHIVED | Production Matcher remains frozen |
+| `06_DOCS` | ARCHIVED | Sprint documents synchronized; reopen at release gate |
+| `07_QA` | ACTIVE | Build-15 automated, real-player, and lifecycle QA |
+
+This table supersedes the historical thread statuses below. Reuse these
+numbers; do not create duplicate role workspaces. Archived workspaces keep
+their Git history.
 
 ## Long-Term Thread Map
 

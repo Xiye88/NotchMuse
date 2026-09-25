@@ -8,23 +8,35 @@ Benchmark coverage, provider health, candidate scores, and Evidence Gate results
 
 NotchMuse is a native Swift macOS menu bar app.
 
-- `AppDelegate` owns startup, single-instance behavior, Settings, and lifecycle coordination.
-- `SpotifyReader` reads current Spotify playback through macOS automation.
-- `LyricsClient` queries lyrics providers and returns synchronized lyrics.
-- `MenuBarController` renders Status Bar lyrics.
-- `OverlayLyricsWindow` renders Notch Mode lyrics.
-- `SettingsWindowController` manages user preferences.
+- `Sources/MenuBarLyrics/App/` contains app lifecycle ownership; `main.swift` remains at the target root as the executable entry point.
+- `Sources/MenuBarLyrics/Players/` contains Spotify, Apple Music, NetEase, shared player-selection, and bundled MediaRemote bridge integration.
+- `Sources/MenuBarLyrics/Lyrics/` contains lyric providers, networking, caching, and matching.
+- `Sources/MenuBarLyrics/UI/` contains menu-bar, Notch, settings, and display components.
+- `Sources/MenuBarLyrics/Support/` contains shared accessibility and logging helpers. `AppLocalization.swift` remains at the target root because its source fallback locates `Resources` relative to `#filePath`.
+- `Sources/LyricsCore/` is the pure logic library target for lyric parsing and clocking; `Tests/MenuBarLyricsTests/` tests that module through SwiftPM.
+- The production executable remains the `MenuBarLyrics` target, with the same product name, bundle identity, and runtime target identity.
+- The v0.8.0 candidate supports Spotify, Apple Music, and NetEase Cloud Music. Auto Detect is the default, with manual player selection retained. NetEase uses the bundled MediaRemote bridge and macOS private APIs.
 - `lyrics-provider-benchmark/` is an independent lab and does not run inside the app.
 
 ## Build and Test
 
 ```sh
+cd MenuBarLyrics
+swift build -c debug
+swift test
+cd ..
 ./scripts/build_app.sh
 ./scripts/build_dmg.sh
-./scripts/build_release.sh 0.3.1 4
+./scripts/build_release.sh 0.8.0 19
 swift run --package-path MenuBarLyrics NotchMuse --self-test
 ./scripts/run_live_matrix.sh
 ```
+
+The v0.8.0 candidate is not publicly released. GitHub Actions CI runs on
+`macos-15` with Swift 6 and verifies Debug/self-test, `swift test`, Release
+packaging, DMG integrity, and repository checks. `build_release.sh` recreates
+`dist.noindex`; do not use it when that directory contains artifacts you need
+to keep.
 
 Build output:
 
@@ -33,7 +45,24 @@ dist.noindex/NotchMuse.app
 dist.noindex/NotchMuse.dmg
 ```
 
-The default GitHub beta build is unsigned/ad-hoc signed. Manual release steps are tracked in [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md).
+Install a local Release Candidate for manual QA with one command:
+
+```sh
+./scripts/deploy_local_candidate.sh 0.8.0 19
+```
+
+The command builds the app, verifies its version and signature, backs up the
+current `/Applications/NotchMuse.app` under `dist.noindex/local-backups/`,
+installs and launches the new build, then reports its version, build, and Git
+commit.
+
+The v0.8.0 candidate is ad-hoc signed and has not been publicly released.
+Manual release steps are tracked in [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md).
+
+`build_release.sh` writes `BUILD-INFO.txt` and `SHA256SUMS` beside the app and
+DMG. The build-info file records the source commit, version/build, architecture,
+signing type, and notarization state; the checksum file covers the executable
+and DMG.
 
 ## Lyrics Quality Benchmark
 
@@ -43,9 +72,10 @@ The independent [Lyrics Provider Benchmark](../lyrics-provider-benchmark/README.
 
 Production matching behavior changes only when evidence shows that the change improves useful matches without introducing confirmed false positives.
 
-v0.5 focuses on bounded Lyrics Matching Accuracy evidence. Production Matcher
-behavior remains unchanged until the Phase 4 Go/No-Go explicitly approves an
-implementation.
+Production Matcher behavior, thresholds, and Provider priority remain frozen
+through the v0.8.0 architecture cleanup. The historical v0.5/v0.7 evidence
+below records earlier matcher gates; it does not describe current player
+support.
 
 Phase 4 uses a Benchmark-only offline simulator to compare duration, exact
 artist, album/version, and bounded title signals. The Top Songs dataset is a
@@ -72,6 +102,10 @@ Normalization and fallback rules are deliberately conservative: accepting the wr
 
 ## Provider Analysis
 
+The v0.8.0 runtime supports NetEase playback through the bundled bridge. The
+benchmark notes below describe historical benchmark health and do not override
+the verified runtime support status.
+
 Provider health is evaluated independently from Matcher quality:
 
 - **LRCMux** is the primary coverage source; no-result responses must remain distinct from network and parser failures.
@@ -83,3 +117,15 @@ Provider priority changes require repeated benchmark evidence. A single run or i
 
 v0.5 does not add Providers and does not optimize for maximum aggregate
 coverage.
+
+## Engineering Evidence
+
+The dated execution reports, their archive, and the current architecture
+cleanup report are indexed in [reports/README.md](../reports/README.md).
+
+## Queued Product Work
+
+The approved Settings redesign handoff is stored at
+[NotchMuse_Settings_UI_Redesign_PM_Handoff.md](project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md).
+It is registered as `10_SETTINGS_UI` and remains queued until `00_PM` opens it
+from the latest stable Architecture SHA.

@@ -24,6 +24,8 @@
 "%@ is not running" = "%@ is not running";
 "Waiting for %@" = "Waiting for %@";
 "Cannot connect to %@. Check Automation permission in System Settings." = "Cannot connect to %@. Check Automation permission in System Settings.";
+"NetEase Cloud Music" = "NetEase Cloud Music";
+"NetEase bridge unavailable. Restart NotchMuse or choose another player." = "NetEase bridge unavailable. Restart NotchMuse or choose another player.";
 "Paused: %@" = "Paused: %@";
 "Song: %@" = "Song: %@";
 "Artist: %@" = "Artist: %@";
@@ -70,6 +72,8 @@
 "Compact" = "Compact";
 "Normal" = "Normal";
 "Wide" = "Wide";
+"None" = "None";
+"Black" = "Black";
 "Custom" = "Custom";
 "Custom Width" = "Custom Width";
 "Appearance" = "Appearance";
@@ -82,8 +86,14 @@
 "Font Size" = "Font Size";
 "Animation Speed" = "Animation Speed";
 "Opacity" = "Opacity";
+"Background" = "Background";
+"Background Color" = "Background Color";
+"Hide on Hover" = "Hide on Hover";
 "General" = "General";
 "Music Player" = "Music Player";
+"When Player Stops" = "When Player Stops";
+"Hide Lyrics and Wait" = "Hide Lyrics and Wait";
+"Keep Last Lyrics and Pause" = "Keep Last Lyrics and Pause";
 "Language" = "Language";
 "Launch at Login" = "Launch at Login";
 "Language Change" = "Language Change";

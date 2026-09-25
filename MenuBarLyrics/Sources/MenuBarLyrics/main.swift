@@ -21,9 +21,16 @@ final class SingleInstanceLock {
 }
 
 if CommandLine.arguments.contains("--self-test") {
+    PackagedSelfTests.run()
+    exit(0)
+}
+
+#if DEBUG
+if CommandLine.arguments.contains("--full-self-test") {
     SelfTests.run()
     exit(0)
 }
+#endif
 
 let bundleIdentifier = Bundle.main.bundleIdentifier ?? "app.notchmuse.mac"
 let lockPath = FileManager.default.temporaryDirectory

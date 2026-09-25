@@ -24,6 +24,8 @@
 "%@ is not running" = "%@ 未运行";
 "Waiting for %@" = "等待 %@";
 "Cannot connect to %@. Check Automation permission in System Settings." = "无法连接 %@。请在“系统设置”中检查“自动化”权限。";
+"NetEase Cloud Music" = "网易云音乐";
+"NetEase bridge unavailable. Restart NotchMuse or choose another player." = "网易云播放桥接不可用。请重启 NotchMuse 或选择其他播放器。";
 "Paused: %@" = "已暂停：%@";
 "Song: %@" = "歌曲：%@";
 "Artist: %@" = "歌手：%@";
@@ -70,6 +72,8 @@
 "Compact" = "紧凑";
 "Normal" = "标准";
 "Wide" = "宽";
+"None" = "无";
+"Black" = "黑色";
 "Custom" = "自定义";
 "Custom Width" = "自定义宽度";
 "Appearance" = "外观";
@@ -82,8 +86,14 @@
 "Font Size" = "字体大小";
 "Animation Speed" = "动画速度";
 "Opacity" = "不透明度";
+"Background" = "背景";
+"Background Color" = "背景颜色";
+"Hide on Hover" = "悬停时隐藏";
 "General" = "通用";
 "Music Player" = "音乐播放器";
+"When Player Stops" = "播放器停止时";
+"Hide Lyrics and Wait" = "隐藏歌词，等待恢复";
+"Keep Last Lyrics and Pause" = "保持最后歌词并暂停";
 "Language" = "语言";
 "Launch at Login" = "登录时启动";
 "Language Change" = "语言更改";

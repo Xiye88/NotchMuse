@@ -1,12 +1,17 @@
 import Foundation
 
-struct LyricLine: Equatable {
-    let time: TimeInterval
-    let text: String
+public struct LyricLine: Equatable, Sendable {
+    public let time: TimeInterval
+    public let text: String
+
+    public init(time: TimeInterval, text: String) {
+        self.time = time
+        self.text = text
+    }
 }
 
-enum LyricParser {
-    static func parse(_ lrc: String) -> [LyricLine] {
+public enum LyricParser {
+    public static func parse(_ lrc: String) -> [LyricLine] {
         lrc.split(whereSeparator: \.isNewline)
             .flatMap(parseLine)
             .sorted { $0.time < $1.time }

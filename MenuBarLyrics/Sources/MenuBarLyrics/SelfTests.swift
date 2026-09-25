@@ -2,6 +2,7 @@ import Foundation
 import AppKit
 import LyricsCore
 
+#if DEBUG
 enum SelfTests {
     private static func check(_ condition: @autoclosure () -> Bool, _ message: String) {
         guard condition() else {
@@ -1361,7 +1362,6 @@ enum SelfTests {
         check(ambiguous.ambiguityGap < 6, "diagnostics records ambiguity gap")
     }
 }
-
 private actor SourceCalls {
     private(set) var counts = [0, 0, 0]
 
@@ -1397,3 +1397,4 @@ private actor CancellationProbe {
         cancelled
     }
 }
+#endif

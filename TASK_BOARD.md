@@ -2,18 +2,23 @@
 
 ## Repository Architecture Cleanup — First Round (2026-09-25)
 
-- Workspace: `09_REPO_ARCHITECTURE` — ACTIVE on
+- Workspace: `09_REPO_ARCHITECTURE` — DONE on
   `codex/repository-architecture-cleanup`.
-- Start SHA verified: `3fb6946602dd35308d201fe7d5e609e63ebcb42e`.
+- Start SHA verified: `3fb6946602dd35308d201fe7d5e609e63ebcb42e`; completion
+  SHA is the branch tip after this report commit.
 - Reviewed audit/CI commit `403feb5` cherry-picked as `19da5a8`.
-- Complete locally: additive CI baseline checks, Debug/Release builds and
-  self-tests, Release app packaging, packaged self-test, signature verification,
-  and `git diff --check`.
-- Blocker: `swift test` cannot load XCTest with this host's Command Line Tools;
-  the macOS 14 CI workflow now runs it. Runtime/player behavior stays frozen.
-- First-round implementation committed as `6c34617`; working tree is clean.
-- Next: report to `00_PM`; defer source/docs moves until CI provides
-  formal-test evidence.
+- Complete locally: CI baseline checks, Debug full self-test, Release packaged
+  resource smoke test, Swift package tests in CI, Release app/DMG build,
+  signature and checksum verification, bilingual docs, and report archive.
+- CI runs through `36153359262` are green on macos-15, including `swift test`;
+  the earlier macos-14 run failed because it defaulted to Swift 5.10.
+- Local CLT still lacks XCTest, but CI covers formal tests. Runtime/player
+  behavior stays frozen.
+- Source moves are complete; `AppLocalization.swift` stays at root because it
+  locates localized resources relative to `#filePath`.
+- Completion report: `reports/github/09-repository-architecture-cleanup.md`.
+- Next: report final SHA and final CI status to `00_PM`. Do not merge main or
+  publish.
 
 Last Updated: 2026-09-25
 

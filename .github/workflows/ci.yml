@@ -56,7 +56,7 @@ jobs:
         run: |
           cd MenuBarLyrics
           swift build -c debug
-          .build/debug/NotchMuse --self-test
+          .build/debug/NotchMuse --full-self-test
       - name: Run Swift package tests
         run: cd MenuBarLyrics && swift test
       - name: Build Release app, package DMG, and run packaged self-test

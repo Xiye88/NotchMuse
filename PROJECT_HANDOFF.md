@@ -1,30 +1,44 @@
 # NotchMuse Project Handoff
 
-## Repository Architecture Cleanup — First Round (2026-09-25)
+## Repository Architecture Cleanup — Final Handoff (2026-09-25)
 
-- Status: Candidate Freeze preserved; work is limited to additive CI and the
-  first pure-logic test extraction.
-- Branch: `codex/repository-architecture-cleanup`; verified start SHA
-  `3fb6946602dd35308d201fe7d5e609e63ebcb42e`.
+- Status: Repository cleanup, CI workflow, tests, documentation, and build
+  artifact standardization are complete on the architecture branch.
+- Branch: `codex/repository-architecture-cleanup`; final SHA recorded after the
+  completion commit. `origin/main` remains
+  `8a45e2254929ee97910ba94d1e698e44d5e2205f`.
+- Verified start SHA: `3fb6946602dd35308d201fe7d5e609e63ebcb42e`.
 - Reviewed audit/CI commit `403feb55027b269f7b7ff967f50722bf5e93596a`
   cherry-picked as `19da5a8`; it contains the CI workflow, audit report, and
   Handoff audit section only.
-- Remote fetch was attempted at kickoff but stalled without output; the local
-  target branch and exact Freeze SHA were present and verified.
-- Latest result: CI syntax/localization/vendor checks pass; Debug and Release
-  builds, Debug/Release executable self-tests, Release app packaging, packaged
-  self-test, signature verification, and `git diff --check` pass. `swift test`
-  cannot compile here because this host's Command Line Tools do not provide
-  XCTest.
+- Latest result: CI runs `36151054620`, `36151541293`, `36151776806`,
+  `36152073006`, `36152329273`, `36152688614`, and `36153359262` passed on
+  `macos-15` (Swift 6), including Debug, `swift test`, Release/DMG, and packaged
+  self-tests. Source files are grouped under App/Players/Lyrics/UI/Support;
+  LyricsCore is a separate library/test target. The initial `macos-14` run
+  failed before compilation on Swift 5.10; the workflow runner was corrected.
+  Latest local build 19 and DMG verify with metadata/checksums; the final CI run
+  must also pass on the completion commit.
+- Push of the architecture branch is authorized and current; no merge to main,
+  tag, GitHub Release, or website publication has occurred.
 - Scope: extract only `LyricParser` and `LyricClock` pure logic for the initial
-  formal tests; preserve runtime behavior and packaged `--self-test`. No player,
+  formal tests; preserve runtime behavior. Full app self-tests run in Debug;
+  Release `--self-test` checks packaged localization and bridge resources. No player,
   matcher, UI, default-setting, or vendor-binary changes.
-- Blocker: local `swift test` needs a full Xcode installation; GitHub workflow
-  execution requires a remote push, which is outside this task's boundary.
-- First-round implementation commit: `6c34617` (`test: add focused lyrics
-  core test target`); working tree is clean.
-- Next: report Status / Latest result / Blocker / Next to `00_PM`; do not start
-  source/docs moves until the formal tests pass in the macOS 14 CI environment.
+- Commits: `6c34617` added the focused lyrics core test target; `2dffbcd`
+  switched CI to the Swift 6 runner; source batches are `1840179`, `914e96e`,
+  `256943e`, `e9424ab`, `1c32ef0`, and `93c03b2`. CI is green. The macos-15
+  image emits a non-blocking `actions/checkout@v4` Node.js 20 deprecation
+  warning.
+- Blocker: none for the authorized branch work. The local CLT limitation does
+  not block formal test execution in CI.
+- Note: `AppLocalization.swift` remains at the target root because its
+  `#filePath` fallback resolves `Resources` from that location. Moving it
+  without the matching path adjustment failed the localization self-test; the
+  attempted move was reverted.
+- Engineering evidence: `reports/github/09-repository-architecture-cleanup.md`.
+- Next: report final branch SHA and CI result to `00_PM`; wait for separate
+  Product Owner decision before any merge or publication.
 
 ## Current Status — Final Closure (2026-09-25)
 

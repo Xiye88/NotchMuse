@@ -44,7 +44,6 @@ mkdir -p "$DIST"
 
 cd "$PROJECT"
 swift build -c release
-"$PROJECT/.build/release/NotchMuse" --self-test
 
 rm -rf "$APP"
 mkdir -p "$MACOS" "$RESOURCES"

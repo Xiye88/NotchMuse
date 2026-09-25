@@ -2,8 +2,9 @@
 
 Task: Audit repository architecture before v0.8 Candidate Freeze
 
-Status: Audit complete; runtime refactor deferred until `00_PM` supplies the
-Candidate Freeze SHA. CI workflow added as an isolated, additive change.
+Status: Historical baseline audit; its deferred source organization was later
+completed after the Candidate Freeze SHA was supplied. See
+[Repository Architecture Cleanup — Completion Report](09-repository-architecture-cleanup.md).
 
 Priority: P1 (architecture readiness)
 

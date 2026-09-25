@@ -62,6 +62,7 @@ locations.
 | — | 06_DOCS / 09_REPO_ARCHITECTURE · GitHub / documentation | [06 Docs Release Package Report](github/06-docs-release-package-report.md) |
 | — | 06_DOCS / 09_REPO_ARCHITECTURE · GitHub / documentation | [06 Docs Release Ready Report](github/06-docs-release-ready-report.md) |
 | — | 06_DOCS / 09_REPO_ARCHITECTURE · GitHub / documentation | [Repository Architecture Audit](github/09-repository-architecture-audit.md) |
+| 2026-09-25 | 09_REPO_ARCHITECTURE · Repository organization / CI | [Repository Architecture Cleanup — Completion Report](github/09-repository-architecture-cleanup.md) |
 | — | 06_DOCS / 09_REPO_ARCHITECTURE · GitHub / documentation | [Final Documentation Ready Report](github/final-documentation-ready-report.md) |
 | — | 06_DOCS / 09_REPO_ARCHITECTURE · GitHub / documentation | [GitHub Documentation Ready Report](github/github-documentation-ready-report.md) |
 | — | 06_DOCS / 09_REPO_ARCHITECTURE · GitHub / documentation | [Github Presentation Improvement Report](github/github-presentation-improvement-report.md) |

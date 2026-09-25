@@ -18,7 +18,7 @@ Workspace: `/Users/carlos/.codex/worktrees/e929/歌词`
   with build `18` after the seek refresh change. Build 16 and 17 bundles remain
   recoverable in `dist.noindex/local-backups/`.
 - Current installed candidate: `0.8.0` build `18`; its code tree is recorded by
-  Candidate Freeze commit `ffc67e69074f93d9036281bb659797be6c880716`,
+  Candidate Freeze commit `3fb6946602dd35308d201fe7d5e609e63ebcb42e`,
   whose audited parent baseline is
   `dee834f533812aac3e1dcab83f5d62a008d6a906`. The executable does not embed a
   Git revision. Executable SHA-256:
@@ -92,4 +92,4 @@ authorized by this freeze. No merge, push, tag, or release was performed.
 
 ## Candidate Freeze SHA
 
-`ffc67e69074f93d9036281bb659797be6c880716`
+`3fb6946602dd35308d201fe7d5e609e63ebcb42e`

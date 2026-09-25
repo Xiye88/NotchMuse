@@ -17,7 +17,7 @@ Last Updated: 2026-09-25 — v0.8.0 build 18
 
 - Version/build: `0.8.0` build `18`.
 - Candidate Freeze commit:
-  `ffc67e69074f93d9036281bb659797be6c880716`.
+  `3fb6946602dd35308d201fe7d5e609e63ebcb42e`.
 - Freeze commit parent / audited startup baseline:
   `dee834f533812aac3e1dcab83f5d62a008d6a906`.
 - Executable SHA-256:

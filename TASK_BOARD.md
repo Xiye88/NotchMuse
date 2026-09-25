@@ -40,7 +40,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 - Verified startup HEAD and `codex/netease-production-candidate` at
   `dee834f533812aac3e1dcab83f5d62a008d6a906` after `git fetch`.
 - Candidate Freeze commit:
-  `ffc67e69074f93d9036281bb659797be6c880716`.
+  `3fb6946602dd35308d201fe7d5e609e63ebcb42e`.
 - Installed candidate is `0.8.0` build `18`, arm64, ad-hoc signed (no Team ID);
   executable SHA-256:
   `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.

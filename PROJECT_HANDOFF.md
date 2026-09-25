@@ -1,5 +1,30 @@
 # NotchMuse Project Handoff
 
+## Repository Architecture Cleanup — First Round (2026-09-25)
+
+- Status: Candidate Freeze preserved; work is limited to additive CI and the
+  first pure-logic test extraction.
+- Branch: `codex/repository-architecture-cleanup`; verified start SHA
+  `3fb6946602dd35308d201fe7d5e609e63ebcb42e`.
+- Reviewed audit/CI commit `403feb55027b269f7b7ff967f50722bf5e93596a`
+  cherry-picked as `19da5a8`; it contains the CI workflow, audit report, and
+  Handoff audit section only.
+- Remote fetch was attempted at kickoff but stalled without output; the local
+  target branch and exact Freeze SHA were present and verified.
+- Latest result: CI syntax/localization/vendor checks pass; Debug and Release
+  builds, Debug/Release executable self-tests, Release app packaging, packaged
+  self-test, signature verification, and `git diff --check` pass. `swift test`
+  cannot compile here because this host's Command Line Tools do not provide
+  XCTest.
+- Scope: extract only `LyricParser` and `LyricClock` pure logic for the initial
+  formal tests; preserve runtime behavior and packaged `--self-test`. No player,
+  matcher, UI, default-setting, or vendor-binary changes.
+- Blocker: local `swift test` needs a full Xcode installation; GitHub workflow
+  execution requires a remote push, which is outside this task's boundary.
+- Next: commit the bounded first round and report Status / Latest result /
+  Blocker / Next to `00_PM`; keep source/docs moves gated on formal-test CI
+  evidence.
+
 ## Current Status — Final Closure (2026-09-25)
 
 - `NetEase`: DONE; `MediaRemote Bridge`: DONE; `Auto Detect`: DONE.

@@ -1,4 +1,5 @@
 import Foundation
+import LyricsCore
 
 struct LRCLIBLyricsSource {
     func request(for track: SpotifyTrack) -> URLRequest {

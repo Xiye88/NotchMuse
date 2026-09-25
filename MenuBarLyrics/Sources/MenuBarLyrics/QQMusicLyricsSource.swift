@@ -1,4 +1,5 @@
 import Foundation
+import LyricsCore
 
 struct QQMusicLyricsSource {
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {

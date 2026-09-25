@@ -1,4 +1,5 @@
 import Foundation
+import LyricsCore
 
 struct SodaMusicLyricsSource {
     private static let userAgent = "LunaPC/2.1.0(12292405)"

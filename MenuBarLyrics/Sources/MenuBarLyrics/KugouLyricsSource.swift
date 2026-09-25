@@ -1,4 +1,5 @@
 import Foundation
+import LyricsCore
 import zlib
 
 struct KugouLyricsSource {

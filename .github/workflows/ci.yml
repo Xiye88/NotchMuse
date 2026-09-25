@@ -52,6 +52,13 @@ jobs:
           a9953e9db2cd3022f3392ee618a8bb76ede264358d34e5e3dc8844a1be1049bd  MediaRemoteAdapterTestClient
           fd6ce4dfd6cbe1578e0effeaf8c38468299a596d055975a1a978c9a6df8e9760  mediaremote-adapter.pl
           EOF_HASHES
+      - name: Build Debug app and run packaged self-test
+        run: |
+          cd MenuBarLyrics
+          swift build -c debug
+          .build/debug/NotchMuse --self-test
+      - name: Run Swift package tests
+        run: cd MenuBarLyrics && swift test
       - name: Build Release app, package DMG, and run packaged self-test
         run: ./scripts/build_release.sh 0.8.0 1
       - name: Check patch whitespace and tracked build output

@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import LyricsCore
 
 enum SelfTests {
     private static func check(_ condition: @autoclosure () -> Bool, _ message: String) {

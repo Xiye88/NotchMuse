@@ -1,4 +1,5 @@
 import Foundation
+import LyricsCore
 
 struct NetEaseLyricsSource {
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {

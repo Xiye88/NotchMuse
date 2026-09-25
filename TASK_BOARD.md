@@ -1,5 +1,19 @@
 # NotchMuse Task Board
 
+## Repository Architecture Cleanup — First Round (2026-09-25)
+
+- Workspace: `09_REPO_ARCHITECTURE` — ACTIVE on
+  `codex/repository-architecture-cleanup`.
+- Start SHA verified: `3fb6946602dd35308d201fe7d5e609e63ebcb42e`.
+- Reviewed audit/CI commit `403feb5` cherry-picked as `19da5a8`.
+- Complete locally: additive CI baseline checks, Debug/Release builds and
+  self-tests, Release app packaging, packaged self-test, signature verification,
+  and `git diff --check`.
+- Blocker: `swift test` cannot load XCTest with this host's Command Line Tools;
+  the macOS 14 CI workflow now runs it. Runtime/player behavior stays frozen.
+- Next: commit first round and report to `00_PM`; defer source/docs moves until
+  CI provides formal-test evidence.
+
 Last Updated: 2026-09-25
 
 ## Sprint

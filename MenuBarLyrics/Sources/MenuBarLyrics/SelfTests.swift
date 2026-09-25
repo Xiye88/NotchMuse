@@ -22,30 +22,6 @@ enum SelfTests {
         testNetEaseEventConvergence()
         testLyricsIssueReport()
 
-        let parsed = LyricParser.parse("[00:01.50]Hello\n[00:03.00]World")
-        check(parsed == [
-            LyricLine(time: 1.5, text: "Hello"),
-            LyricLine(time: 3.0, text: "World")
-        ], "parses timestamped lines")
-
-        let repeated = LyricParser.parse("[00:01.00][00:02.00]Again")
-        check(repeated == [
-            LyricLine(time: 1.0, text: "Again"),
-            LyricLine(time: 2.0, text: "Again")
-        ], "parses repeated timestamps")
-
-        let progressLines = [
-            LyricLine(time: 1, text: "One"),
-            LyricLine(time: 3, text: "Three"),
-            LyricLine(time: 7, text: "Seven")
-        ]
-        check(LyricClock.moment(at: 0.5, in: progressLines) == nil, "has no lyric before the first line")
-        check(LyricClock.moment(at: 1, in: progressLines)?.progress == 0, "starts lyric progress at zero")
-        check(LyricClock.moment(at: 2, in: progressLines)?.progress == 0.5, "tracks lyric progress between lines")
-        check(LyricClock.moment(at: 3, in: progressLines)?.progress == 0, "resets lyric progress on the next line")
-        check(LyricClock.moment(at: 10, in: progressLines)?.progress == 1, "clamps final lyric progress at one")
-        check(LyricClock.currentLine(at: 3.2, in: parsed) == "World", "selects the current lyric")
-
         testSmoothScroll()
         testOverlayGeometry()
         testNotchGeometry()

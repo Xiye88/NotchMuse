@@ -18,9 +18,9 @@
 - Build: arm64, ad-hoc signed, no Team ID. Developer ID/notarization/stapling
   and clean-new-user distribution assessment remain release-review risks.
 - Executable SHA-256:
-  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
+  `bbdf8422c505ef4f02a45e4b6417f6aae7f2436f225bb7593907cf71afae3096`.
 - DMG SHA-256:
-  `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
+  `76ac0da45c0ca0c094f3d73771bdc271a3fcd3ef571baacd235c17566547109d`.
 - No merge to main, push, tag, or public release was performed by this task.
 
 ## Historical Kickoff Snapshot — 2026-09-25 (build 16)
@@ -63,8 +63,8 @@
   `3fb6946602dd35308d201fe7d5e609e63ebcb42e`. Its audited parent baseline is
   `dee834f533812aac3e1dcab83f5d62a008d6a906`. The
   executable SHA-256 is
-  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992` and DMG
-  SHA-256 is `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
+  `bbdf8422c505ef4f02a45e4b6417f6aae7f2436f225bb7593907cf71afae3096` and DMG
+  SHA-256 is `76ac0da45c0ca0c094f3d73771bdc271a3fcd3ef571baacd235c17566547109d`.
   Debug and Release self-tests, deep code-signature verification, DMG verify,
   localization parity, and `git diff --check` pass. Build is arm64 and
   ad-hoc-signed without a Team ID.

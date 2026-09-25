@@ -73,8 +73,8 @@ Status: FROZEN / READY FOR RELEASE REVIEW
   evidence. Ready for release review; public distribution remains separate.
 
 Current local artifact: `0.8.0` build `18`, arm64, ad-hoc signed. Executable SHA-256
-`4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`; DMG SHA-256
-`4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`. All current
+`bbdf8422c505ef4f02a45e4b6417f6aae7f2436f225bb7593907cf71afae3096`; DMG SHA-256
+`76ac0da45c0ca0c094f3d73771bdc271a3fcd3ef571baacd235c17566547109d`. All current
 stability, playback, GUI, lifecycle, package, and soak gates are recorded PASS.
 The candidate is FROZEN / READY FOR RELEASE REVIEW. Ad-hoc signing, Gatekeeper
 rejection, notarization, and clean-new-user distribution assessment remain

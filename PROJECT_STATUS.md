@@ -21,9 +21,9 @@ Last Updated: 2026-09-25 — v0.8.0 build 18
 - Freeze commit parent / audited startup baseline:
   `dee834f533812aac3e1dcab83f5d62a008d6a906`.
 - Executable SHA-256:
-  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
+  `bbdf8422c505ef4f02a45e4b6417f6aae7f2436f225bb7593907cf71afae3096`.
 - DMG: `dist.noindex/NotchMuse.dmg`; SHA-256
-  `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
+  `76ac0da45c0ca0c094f3d73771bdc271a3fcd3ef571baacd235c17566547109d`.
 - Architecture: arm64. Signing: ad-hoc, no Team ID. Developer ID signing,
   notarization, and stapling are not included in this candidate.
 

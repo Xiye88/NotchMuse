@@ -22,9 +22,9 @@ Workspace: `/Users/carlos/.codex/worktrees/e929/歌词`
   whose audited parent baseline is
   `dee834f533812aac3e1dcab83f5d62a008d6a906`. The executable does not embed a
   Git revision. Executable SHA-256:
-  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
+  `bbdf8422c505ef4f02a45e4b6417f6aae7f2436f225bb7593907cf71afae3096`.
 - Candidate DMG: `dist.noindex/NotchMuse.dmg`; SHA-256:
-  `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
+  `76ac0da45c0ca0c094f3d73771bdc271a3fcd3ef571baacd235c17566547109d`.
   App is arm64 and ad-hoc signed, no Team ID.
 
 ## Gate results
@@ -83,8 +83,8 @@ latency measurement remains unavailable.
 
 **GO — FROZEN / READY FOR RELEASE REVIEW.** Build `0.8.0` build `18` is arm64
 and ad-hoc signed with no Team ID. Executable SHA-256:
-`4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`. DMG
-SHA-256: `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
+`bbdf8422c505ef4f02a45e4b6417f6aae7f2436f225bb7593907cf71afae3096`. DMG
+SHA-256: `76ac0da45c0ca0c094f3d73771bdc271a3fcd3ef571baacd235c17566547109d`.
 `codesign --verify --deep --strict` and `hdiutil verify` pass. Known release
 risks: ad-hoc signing/Gatekeeper rejection, no Developer ID/notarization/
 stapling, and no clean-new-user distribution assessment. Public release is not

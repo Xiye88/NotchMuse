@@ -43,7 +43,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
   `3fb6946602dd35308d201fe7d5e609e63ebcb42e`.
 - Installed candidate is `0.8.0` build `18`, arm64, ad-hoc signed (no Team ID);
   executable SHA-256:
-  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
+  `bbdf8422c505ef4f02a45e4b6417f6aae7f2436f225bb7593907cf71afae3096`.
 - NetEase seek root cause is the two-second adapter position refresh interval
   combined with the one-second app poll. A one-second refresh adjustment now
   passes self-tests for large-position lyric resync, stable track identity,

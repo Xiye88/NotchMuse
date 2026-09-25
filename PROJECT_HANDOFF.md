@@ -21,9 +21,10 @@
   matcher, UI, default-setting, or vendor-binary changes.
 - Blocker: local `swift test` needs a full Xcode installation; GitHub workflow
   execution requires a remote push, which is outside this task's boundary.
-- Next: commit the bounded first round and report Status / Latest result /
-  Blocker / Next to `00_PM`; keep source/docs moves gated on formal-test CI
-  evidence.
+- First-round implementation commit: `6c34617` (`test: add focused lyrics
+  core test target`); working tree is clean.
+- Next: report Status / Latest result / Blocker / Next to `00_PM`; do not start
+  source/docs moves until the formal tests pass in the macOS 14 CI environment.
 
 ## Current Status — Final Closure (2026-09-25)
 

@@ -11,8 +11,9 @@
   and `git diff --check`.
 - Blocker: `swift test` cannot load XCTest with this host's Command Line Tools;
   the macOS 14 CI workflow now runs it. Runtime/player behavior stays frozen.
-- Next: commit first round and report to `00_PM`; defer source/docs moves until
-  CI provides formal-test evidence.
+- First-round implementation committed as `6c34617`; working tree is clean.
+- Next: report to `00_PM`; defer source/docs moves until CI provides
+  formal-test evidence.
 
 Last Updated: 2026-09-25
 

@@ -545,3 +545,33 @@ owner policy、暂停优先级、切换 debounce 和 stale clearing；不得依�
 6. 不要重复 build 9-13 的旧失败调查；从 build 14 和 `c2d862b` 继续。
 
 本交接文件创建完成后，原 PM 应停止开发，仅将文件位置和摘要交给 Product Owner。
+
+## Repository Architecture Audit Handoff — 2026-09-25
+
+- Audit baseline verified: `origin/codex/netease-production-candidate` and
+  `HEAD` both resolve to `dee834f533812aac3e1dcab83f5d62a008d6a906` after fetch.
+- Worktree started clean and detached at the requested baseline.
+- Current phase: repository architecture audit; runtime and package structure
+  remain unchanged. CI proposal is additive only.
+- Deliverables in progress: `reports/github/09-repository-architecture-audit.md`
+  and `.github/workflows/ci.yml`.
+- Open boundary: no architectural cleanup until `00_PM` supplies Candidate
+  Freeze SHA; then fetch it and create `codex/repository-architecture-cleanup`
+  from that exact SHA.
+- Do not repeat: baseline SHA/ref verification.
+- Audit report complete with P0-P2 findings, test/CI plan, README proposal,
+  documentation map, migration risks/order, and pre-v0.8 freeze boundaries.
+- Additive CI workflow is in place; local syntax, localization, Vendor hash,
+  and diff-whitespace checks pass. GitHub-hosted build execution is pending.
+- The report is force-added because this machine's `.git/info/exclude`
+  suppresses all `reports/**/*.md`; no exclude rule was changed.
+- Installed and `dist.noindex` artifacts are v0.8.0 build 16; older project
+  status text that still names build 15 is documentation drift. This audit
+  checkout is detached at baseline SHA
+  `dee834f533812aac3e1dcab83f5d62a008d6a906`.
+- Completed verification: `swift build --package-path MenuBarLyrics -c release`
+  and `MenuBarLyrics/.build/release/NotchMuse --self-test` passed; workflow YAML,
+  shell/Perl syntax, 102 localization keys, Vendor hashes, and `git diff --check`
+  passed. Full DMG wrapper not run because it deletes `dist.noindex` first.
+- Next: report CI proposal to `00_PM`; wait for Candidate Freeze SHA before any
+  architecture cleanup. No runtime or Package target changes made.

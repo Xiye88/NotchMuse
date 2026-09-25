@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: |
+          for file in scripts/*.sh; do
+            case "$file" in
+              scripts/build_mediaremote_bridge.sh) bash -n "$file" ;;
+              *) zsh -n "$file" ;;
+            esac
+          done
+          sh -n MenuBarLyrics/Resources/mediaremote-watchdog.sh
+          perl -c MenuBarLyrics/Vendor/MediaRemoteBridge/mediaremote-adapter.pl
+      - name: Check localization key parity
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import re
+          root = pathlib.Path("MenuBarLyrics/Resources")
+          pattern = re.compile(r'^\s*"((?:[^"\\]|\\.)+)"\s*=', re.M)
+          keys = {
+              path.parent.name: set(pattern.findall(path.read_text()))
+              for path in root.glob("*.lproj/Localizable.strings")
+          }
+          if len(keys) != 2:
+              raise SystemExit(f"Expected two Localizable.strings files, found {sorted(keys)}")
+          english, chinese = keys.values()
+          if english != chinese:
+              raise SystemExit(
+                  f"Localization key mismatch: missing in zh-Hans={sorted(english - chinese)}; "
+                  f"missing in en={sorted(chinese - english)}"
+              )
+          print(f"Localization keys match ({len(english)} keys)")
+          PY
+      - name: Verify vendored bridge integrity
+        run: |
+          cd MenuBarLyrics/Vendor/MediaRemoteBridge
+          shasum -a 256 -c <<'EOF_HASHES'
+          e5241c9d92cc5e79fb4d67d9ff029e0781e49b23cbea84018378e5ea888b50b5  MediaRemoteAdapter.framework/MediaRemoteAdapter
+          a9953e9db2cd3022f3392ee618a8bb76ede264358d34e5e3dc8844a1be1049bd  MediaRemoteAdapterTestClient
+          fd6ce4dfd6cbe1578e0effeaf8c38468299a596d055975a1a978c9a6df8e9760  mediaremote-adapter.pl
+          EOF_HASHES
+      - name: Build Release app, package DMG, and run packaged self-test
+        run: ./scripts/build_release.sh 0.8.0 1
+      - name: Check patch whitespace and tracked build output
+        run: |
+          git diff --check

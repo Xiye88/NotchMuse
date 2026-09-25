@@ -4,6 +4,8 @@
 
 - `NetEase`: DONE; `MediaRemote Bridge`: DONE; `Auto Detect`: DONE.
 - v0.8.0 build 18: FROZEN / READY FOR RELEASE REVIEW.
+- Candidate Freeze commit:
+  `ffc67e69074f93d9036281bb659797be6c880716`.
 - Product Owner final GUI confirmation: PASS for current/restart lyrics, Notch
   Mode, custom color persistence, Hide on Hover, Auto Detect combinations and
   ownership/fallback/stale clearing, Sleep/Wake, and network recovery. Details
@@ -56,8 +58,10 @@
   then passed after reducing the existing position-refresh interval to one
   second. They also cover lyric clock resynchronization after a large position
   jump, stable track identity, and no repeat lyric fetch.
-- Candidate `0.8.0` build `18` was built and installed from source HEAD
-  `dee834f533812aac3e1dcab83f5d62a008d6a906` plus the local seek fix. The
+- Candidate `0.8.0` build `18` was built and installed from the code tree
+  recorded by Candidate Freeze commit
+  `ffc67e69074f93d9036281bb659797be6c880716`. Its audited parent baseline is
+  `dee834f533812aac3e1dcab83f5d62a008d6a906`. The
   executable SHA-256 is
   `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992` and DMG
   SHA-256 is `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.

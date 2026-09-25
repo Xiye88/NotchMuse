@@ -17,10 +17,11 @@ Workspace: `/Users/carlos/.codex/worktrees/e929/歌词`
 - Build `17` was installed and used for initial runtime checks, then replaced
   with build `18` after the seek refresh change. Build 16 and 17 bundles remain
   recoverable in `dist.noindex/local-backups/`.
-- Current installed candidate: `0.8.0` build `18`; source `HEAD` is
-  `dee834f533812aac3e1dcab83f5d62a008d6a906` plus the local working-tree
-  changes in `NetEaseMusicAdapter.swift` and `SelfTests.swift`. The executable
-  does not embed a Git revision. Executable SHA-256:
+- Current installed candidate: `0.8.0` build `18`; its code tree is recorded by
+  Candidate Freeze commit `ffc67e69074f93d9036281bb659797be6c880716`,
+  whose audited parent baseline is
+  `dee834f533812aac3e1dcab83f5d62a008d6a906`. The executable does not embed a
+  Git revision. Executable SHA-256:
   `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
 - Candidate DMG: `dist.noindex/NotchMuse.dmg`; SHA-256:
   `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
@@ -30,7 +31,7 @@ Workspace: `/Users/carlos/.codex/worktrees/e929/歌词`
 
 | Gate | Result | Evidence / remaining work |
 | --- | --- | --- |
-| Installed App identity | PASS | Build 18 version/build, executable hash, arm64 architecture, signature type, Team ID absence, and source HEAD/local delta recorded above. |
+| Installed App identity | PASS | Build 18 version/build, executable hash, arm64 architecture, signature type, Team ID absence, and Candidate Freeze commit recorded above. |
 | NetEase playback chain | PASS | Build 17 runtime evidence is historical. Product Owner confirms build 18 forward/back seek and final current/restart lyric GUI checks PASS. No latency value or step-level GUI details were supplied. |
 | Auto Detect matrix | PASS | Product Owner confirms build 18 Auto Detect combinations, ownership/fallback behavior, and stale clearing PASS. No per-combination details were supplied. |
 | Restart and helpers | PASS | Build 18 simultaneous restart recovered; exactly one app/watchdog/Perl stream remained. Product Owner confirms post-restart current lyrics GUI PASS. |
@@ -88,3 +89,7 @@ SHA-256: `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
 risks: ad-hoc signing/Gatekeeper rejection, no Developer ID/notarization/
 stapling, and no clean-new-user distribution assessment. Public release is not
 authorized by this freeze. No merge, push, tag, or release was performed.
+
+## Candidate Freeze SHA
+
+`ffc67e69074f93d9036281bb659797be6c880716`

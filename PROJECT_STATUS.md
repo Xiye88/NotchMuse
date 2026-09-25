@@ -16,8 +16,10 @@ Last Updated: 2026-09-25 — v0.8.0 build 18
 ## Candidate Identity
 
 - Version/build: `0.8.0` build `18`.
-- Candidate Freeze source base: `dee834f533812aac3e1dcab83f5d62a008d6a906`
-  plus this sprint's seek refresh fix and regression tests.
+- Candidate Freeze commit:
+  `ffc67e69074f93d9036281bb659797be6c880716`.
+- Freeze commit parent / audited startup baseline:
+  `dee834f533812aac3e1dcab83f5d62a008d6a906`.
 - Executable SHA-256:
   `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
 - DMG: `dist.noindex/NotchMuse.dmg`; SHA-256

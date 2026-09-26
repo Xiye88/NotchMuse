@@ -186,6 +186,7 @@ final class SettingsWindowController: NSWindowController {
     private let notchBackgroundColorWell = NSColorWell()
     private let notchHideOnHoverSwitch = NSSwitch()
     private let contentStack = NSStackView()
+    private var cards: [NSView] = []
     private let preview = SettingsPreviewView()
     private let previewModeControl = NSSegmentedControl(labels: [L10n.text("Status Bar Preview"), L10n.text("Notch Preview")], trackingMode: .selectOne, target: nil, action: nil)
     private let displayPage = NSStackView()
@@ -205,13 +206,13 @@ final class SettingsWindowController: NSWindowController {
         self.onSettingsChange = onSettingsChange
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 1160, height: 800),
+            contentRect: NSRect(x: 0, y: 0, width: 1040, height: 730),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
         window.title = L10n.text("NotchMuse Settings")
-        window.minSize = NSSize(width: 1160, height: 700)
+        window.minSize = NSSize(width: 900, height: 610)
         window.titlebarAppearsTransparent = true
         window.appearance = NSAppearance(named: .aqua)
         window.isReleasedWhenClosed = false
@@ -372,8 +373,8 @@ final class SettingsWindowController: NSWindowController {
         previewContents.orientation = .vertical
         previewContents.spacing = 16
         let previewCard = card(content: previewContents)
-        preview.widthAnchor.constraint(equalToConstant: 830).isActive = true
-        preview.heightAnchor.constraint(equalToConstant: 226).isActive = true
+        preview.widthAnchor.constraint(equalTo: previewCard.widthAnchor, constant: -40).isActive = true
+        preview.heightAnchor.constraint(equalToConstant: 196).isActive = true
         previewHeader.widthAnchor.constraint(equalTo: preview.widthAnchor).isActive = true
 
         contentStack.orientation = .vertical
@@ -397,11 +398,11 @@ final class SettingsWindowController: NSWindowController {
         scrollView.documentView = document
         contentView.addSubview(sidebarPanel)
         contentView.addSubview(scrollView)
-        NSLayoutConstraint.activate([
+        NSLayoutConstraint.activate(cards.map { $0.widthAnchor.constraint(equalTo: contentStack.widthAnchor) } + [
             sidebarPanel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             sidebarPanel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
             sidebarPanel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -18),
-            sidebarPanel.widthAnchor.constraint(equalToConstant: 220),
+            sidebarPanel.widthAnchor.constraint(equalToConstant: 205),
             sidebar.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 14),
             sidebar.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -14),
             sidebar.topAnchor.constraint(equalTo: sidebarPanel.topAnchor, constant: 24),
@@ -458,7 +459,7 @@ final class SettingsWindowController: NSWindowController {
         button.identifier = NSUserInterfaceItemIdentifier(page.rawValue)
         button.wantsLayer = true
         button.layer?.cornerRadius = 11
-        button.widthAnchor.constraint(equalToConstant: 192).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 177).isActive = true
         button.heightAnchor.constraint(equalToConstant: 62).isActive = true
         button.toolTip = L10n.text(page.help)
         return button
@@ -484,7 +485,7 @@ final class SettingsWindowController: NSWindowController {
             content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -18)
         ])
         box.translatesAutoresizingMaskIntoConstraints = false
-        box.widthAnchor.constraint(equalToConstant: 870).isActive = true
+        cards.append(box)
         return box
     }
 
@@ -495,6 +496,7 @@ final class SettingsWindowController: NSWindowController {
         body.alignment = .leading
         body.spacing = 18
         header.widthAnchor.constraint(equalTo: grid.widthAnchor).isActive = true
+        grid.widthAnchor.constraint(equalTo: body.widthAnchor).isActive = true
         return body
     }
 
@@ -548,7 +550,7 @@ final class SettingsWindowController: NSWindowController {
             button.layer?.borderColor = entry.1.withAlphaComponent(0.25).cgColor
             button.layer?.borderWidth = 1
             button.layer?.cornerRadius = 10
-            button.widthAnchor.constraint(equalToConstant: 190).isActive = true
+            button.widthAnchor.constraint(equalToConstant: 130).isActive = true
             button.heightAnchor.constraint(equalToConstant: 72).isActive = true
             return button
         }
@@ -573,10 +575,9 @@ final class SettingsWindowController: NSWindowController {
         let grid = NSGridView(views: rows)
         grid.rowSpacing = 18
         grid.columnSpacing = 20
-        grid.column(at: 0).width = 170
+        grid.column(at: 0).width = 145
         grid.column(at: 0).xPlacement = .leading
         grid.column(at: 1).xPlacement = .fill
-        grid.widthAnchor.constraint(equalToConstant: 830).isActive = true
         return grid
     }
 
@@ -585,7 +586,7 @@ final class SettingsWindowController: NSWindowController {
         value.setContentHuggingPriority(.required, for: .horizontal)
         value.widthAnchor.constraint(equalToConstant: 58).isActive = true
         slider.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 390).isActive = true
+        slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 180).isActive = true
         let unitLabel = NSTextField(labelWithString: unit)
         unitLabel.textColor = .secondaryLabelColor
         let stack = NSStackView(views: [slider, value, unitLabel])
@@ -667,6 +668,8 @@ final class SettingsWindowController: NSWindowController {
 
     private func sync() {
         displayModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: AppPreferences.displayMode) ?? 0
+        previewModeControl.selectedSegment = displayModeControl.selectedSegment
+        preview.mode = AppPreferences.displayMode == .notch ? .notch : .statusBar
         positionControl.selectedSegment = LyricsPosition.allCases.firstIndex(of: AppPreferences.position) ?? 1
         notchStyleControl.selectedSegment = NotchStyle.allCases.firstIndex(of: AppPreferences.notchStyle) ?? 0
         displayTargetPopUp.selectItem(at: DisplayTarget.allCases.firstIndex(of: AppPreferences.displayTarget) ?? 0)
@@ -712,6 +715,8 @@ final class SettingsWindowController: NSWindowController {
         let modes = DisplayMode.allCases
         guard modes.indices.contains(displayModeControl.selectedSegment) else { return }
         save(modes[displayModeControl.selectedSegment], key: AppPreferences.displayModeKey)
+        previewModeControl.selectedSegment = displayModeControl.selectedSegment
+        preview.mode = modes[displayModeControl.selectedSegment] == .notch ? .notch : .statusBar
         updateControlAvailability()
     }
 
@@ -828,11 +833,13 @@ final class SettingsWindowController: NSWindowController {
         }
         updateControlAvailability()
         onSettingsChange()
+        updatePreview()
     }
 
     @objc private func notchBackgroundColorChanged() {
         AppPreferences.setColor(notchBackgroundColorWell.color, forKey: AppPreferences.notchBackgroundColorKey)
         onSettingsChange()
+        updatePreview()
     }
 
     private func updateCustomColorSwatch() {
@@ -980,11 +987,14 @@ final class SettingsWindowController: NSWindowController {
 
     private func updatePreview() {
         preview.apply(
-            color: BrandStyle.gradientColors(for: AppPreferences.colorPreset, customColor: AppPreferences.customLyricsColor).first ?? .labelColor,
+            colors: BrandStyle.gradientColors(for: AppPreferences.colorPreset, customColor: AppPreferences.customLyricsColor),
             fontSize: AppPreferences.fontSize,
             opacity: AppPreferences.opacity,
             width: AppPreferences.displayWidth,
-            position: AppPreferences.position
+            position: AppPreferences.position,
+            notchStyle: AppPreferences.notchStyle,
+            notchBackground: AppPreferences.notchBackgroundEnabled,
+            notchBackgroundColor: AppPreferences.notchBackgroundColor
         )
     }
 }
@@ -1084,28 +1094,36 @@ private enum SettingsPage: String, CaseIterable {
 private final class SettingsPreviewView: NSView {
     enum Mode { case statusBar, notch }
     var mode: Mode = .statusBar { didSet { needsDisplay = true } }
-    private var lyricColor = NSColor.systemOrange
+    private var lyricColors = BrandStyle.gradientColors
     private var lyricFontSize: CGFloat = 13
     private var lyricOpacity: CGFloat = 1
     private var lyricWidth: DisplayWidth = .auto
     private var position: LyricsPosition = .right
+    private var notchStyle: NotchStyle = .lyricOnly
+    private var notchBackground = false
+    private var notchBackgroundColor = NSColor.black
     private lazy var wallpaper: NSImage? = Bundle.main.path(forResource: "SettingsPreviewWallpaper", ofType: "png")
         .flatMap(NSImage.init(contentsOfFile:))
 
     override var isFlipped: Bool { true }
 
-    func apply(color: NSColor, fontSize: CGFloat, opacity: CGFloat, width: DisplayWidth, position: LyricsPosition) {
-        lyricColor = color
+    func apply(colors: [NSColor], fontSize: CGFloat, opacity: CGFloat, width: DisplayWidth,
+               position: LyricsPosition, notchStyle: NotchStyle, notchBackground: Bool,
+               notchBackgroundColor: NSColor) {
+        lyricColors = colors
         lyricFontSize = fontSize
         lyricOpacity = opacity
         lyricWidth = width
         self.position = position
+        self.notchStyle = notchStyle
+        self.notchBackground = notchBackground
+        self.notchBackgroundColor = notchBackgroundColor
         needsDisplay = true
     }
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        let gap: CGFloat = 16
+        let gap: CGFloat = 12
         let panelWidth = (bounds.width - gap) / 2
         drawPanel(NSRect(x: 0, y: 0, width: panelWidth, height: bounds.height), notch: false)
         drawPanel(NSRect(x: panelWidth + gap, y: 0, width: panelWidth, height: bounds.height), notch: true)
@@ -1117,7 +1135,7 @@ private final class SettingsPreviewView: NSView {
         (title as NSString).draw(in: NSRect(x: rect.minX + 10, y: rect.minY + 2, width: rect.width - 20, height: 22),
                                  withAttributes: [.font: NSFont.systemFont(ofSize: 12, weight: .semibold),
                                                   .foregroundColor: NSColor.secondaryLabelColor])
-        let screen = NSRect(x: rect.minX + 2, y: rect.minY + 28, width: rect.width - 4, height: rect.height - 32)
+        let screen = NSRect(x: rect.minX + 2, y: rect.minY + 26, width: rect.width - 4, height: rect.height - 29)
         NSGraphicsContext.saveGraphicsState()
         NSBezierPath(roundedRect: screen, xRadius: 11, yRadius: 11).addClip()
         if let wallpaper {
@@ -1132,23 +1150,58 @@ private final class SettingsPreviewView: NSView {
         }
 
         if notch {
-            let cutout = NSRect(x: screen.midX - 118, y: screen.minY - 1, width: 236, height: 72)
+            let cutout = NSRect(x: screen.midX - 54, y: screen.minY - 1, width: 108, height: 28)
             NSColor.black.setFill()
-            NSBezierPath(roundedRect: cutout, xRadius: 22, yRadius: 22).fill()
-            let textRect = cutout.insetBy(dx: 14, dy: 25)
-            drawLyric(in: textRect, size: 13)
+            NSBezierPath(roundedRect: cutout, xRadius: 14, yRadius: 14).fill()
+            let lineHeight = ceil(min(lyricFontSize, 17) * 1.3)
+            let overlayWidth = min(screen.width - 22, max(180, WidthGeometry.notchWidth(
+                mode: lyricWidth, availableWidth: screen.width - 22, style: notchStyle, customWidth: 220
+            )))
+            let overlayHeight: CGFloat
+            switch notchStyle {
+            case .lyricOnly: overlayHeight = lineHeight + 14
+            case .songLyric: overlayHeight = lineHeight * 2 + 18
+            case .expanded: overlayHeight = lineHeight * 4 + 22
+            }
+            let overlay = NSRect(x: screen.midX - overlayWidth / 2, y: cutout.maxY + 6,
+                                 width: overlayWidth, height: overlayHeight)
+            if notchBackground {
+                notchBackgroundColor.withAlphaComponent(0.8).setFill()
+                NSBezierPath(roundedRect: overlay, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
+            }
+            if notchStyle == .songLyric {
+                drawText(L10n.text("Preview song · Preview artist"),
+                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
+                                    width: overlay.width - 24, height: lineHeight),
+                         color: .white, size: max(10, min(lyricFontSize - 2, 13)), alignment: .center)
+            } else if notchStyle == .expanded {
+                drawText(L10n.text("Preview song"),
+                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
+                                    width: overlay.width - 24, height: lineHeight),
+                         color: .white, size: max(10, min(lyricFontSize, 13)), alignment: .left)
+                drawText(L10n.text("Preview artist"),
+                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + lineHeight + 4,
+                                    width: overlay.width - 24, height: lineHeight),
+                         color: .white, size: max(10, min(lyricFontSize - 2, 12)), alignment: .left)
+            }
+            drawLyric(in: NSRect(x: overlay.minX + 12, y: overlay.maxY - lineHeight - 7,
+                                width: overlay.width - 24, height: lineHeight), notch: true)
         } else {
-            let bar = NSRect(x: screen.minX, y: screen.minY, width: screen.width, height: 36)
-            NSColor.white.withAlphaComponent(0.84).setFill()
+            let bar = NSRect(x: screen.minX, y: screen.minY, width: screen.width, height: 28)
+            NSColor.white.withAlphaComponent(0.86).setFill()
             NSBezierPath(rect: bar).fill()
-            ("●" as NSString).draw(in: NSRect(x: bar.minX + 14, y: bar.minY + 8, width: 18, height: 20),
-                                    withAttributes: [.font: NSFont.systemFont(ofSize: 16), .foregroundColor: NSColor.black])
-            let widths: [DisplayWidth: CGFloat] = [.compact: 145, .normal: 205, .wide: 260, .custom: 220, .auto: 205]
-            let width = min(widths[lyricWidth] ?? 205, bar.width - 116)
-            let x = position == .left ? bar.minX + 46 : bar.maxX - width - 58
-            drawLyric(in: NSRect(x: x, y: bar.minY + 9, width: width, height: 22), size: 13)
-            ("◕  ◖◗" as NSString).draw(in: NSRect(x: bar.maxX - 50, y: bar.minY + 10, width: 46, height: 20),
-                                       withAttributes: [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.darkGray])
+            NSImage(systemSymbolName: "apple.logo", accessibilityDescription: nil)?
+                .draw(in: NSRect(x: bar.minX + 12, y: bar.minY + 6, width: 16, height: 16))
+            let available = max(80, bar.width - 92)
+            let width = WidthGeometry.statusBarWidth(mode: lyricWidth, availableWidth: available, customWidth: 190)
+            let x = position == .left ? bar.minX + 36 : bar.maxX - width - 48
+            drawLyric(in: NSRect(x: x, y: bar.minY + 5, width: width, height: 20), notch: false)
+            let symbols = ["wifi", "speaker.wave.2.fill", "battery.100percent"]
+            for (index, symbol) in symbols.enumerated() {
+                NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
+                    .draw(in: NSRect(x: bar.maxX - 48 + CGFloat(index) * 14,
+                                     y: bar.minY + 8, width: 12, height: 12))
+            }
         }
         NSGraphicsContext.restoreGraphicsState()
         (selected ? NSColor.systemBlue : NSColor.white.withAlphaComponent(0.85)).setStroke()
@@ -1157,11 +1210,36 @@ private final class SettingsPreviewView: NSView {
         outline.stroke()
     }
 
-    private func drawLyric(in rect: NSRect, size: CGFloat) {
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: min(size, lyricFontSize), weight: .semibold),
-            .foregroundColor: lyricColor.withAlphaComponent(lyricOpacity)
+    private func drawLyric(in rect: NSRect, notch: Bool) {
+        let text = "♪ " + L10n.text("Preview lyric sample")
+        let size = min(lyricFontSize, notch ? 17 : 15)
+        let base = notch ? NSColor.white.withAlphaComponent(0.7) : lyricColors[0].withAlphaComponent(0.72)
+        drawText(text, in: rect, color: base.withAlphaComponent(lyricOpacity), size: size,
+                 alignment: .center, shadow: notch)
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(rect: NSRect(x: rect.minX, y: rect.minY, width: rect.width * 0.58, height: rect.height)).addClip()
+        drawText(text, in: rect, color: lyricColors[min(1, lyricColors.count - 1)].withAlphaComponent(lyricOpacity),
+                 size: size, alignment: .center, shadow: notch)
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    private func drawText(_ text: String, in rect: NSRect, color: NSColor, size: CGFloat,
+                          alignment: NSTextAlignment, shadow: Bool = false) {
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = alignment
+        paragraph.lineBreakMode = .byTruncatingTail
+        var attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: size, weight: .medium),
+            .foregroundColor: color,
+            .paragraphStyle: paragraph
         ]
-        ("♪ The music finds us here" as NSString).draw(in: rect, withAttributes: attributes)
+        if shadow {
+            let textShadow = NSShadow()
+            textShadow.shadowColor = NSColor.black.withAlphaComponent(0.5)
+            textShadow.shadowBlurRadius = 2
+            textShadow.shadowOffset = NSSize(width: 0, height: -1)
+            attributes[.shadow] = textShadow
+        }
+        (text as NSString).draw(in: rect, withAttributes: attributes)
     }
 }

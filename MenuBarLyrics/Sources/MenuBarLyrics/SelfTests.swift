@@ -94,6 +94,8 @@ enum SelfTests {
     private static func testLocalization() {
         check(L10n.text("Settings…", language: .english) == "Settings…", "loads English localization")
         check(L10n.text("Settings…", language: .simplifiedChinese) == "设置…", "loads Simplified Chinese localization")
+        check(L10n.text("Preview lyric sample", language: .english) == "Music in the notch", "localizes the English preview lyric")
+        check(L10n.text("Preview lyric sample", language: .simplifiedChinese) == "让音乐在刘海间流动", "localizes the Chinese preview lyric")
         check(L10n.text("Hide Lyrics", language: .simplifiedChinese) == "隐藏歌词", "localizes the hide lyrics menu item")
         check(L10n.text("Show Lyrics", language: .simplifiedChinese) == "显示歌词", "localizes the show lyrics menu item")
         check(L10n.text("Report Lyrics Issue…", language: .english) == "Report Lyrics Issue…", "localizes the English feedback entry")

@@ -1,5 +1,15 @@
 # NotchMuse Project Handoff
 
+## DMG Settings Shortcut — 2026-09-26
+
+- Added `打开隐私与安全性.inetloc` to the isolated DMG candidate and bilingual guide.
+- The shortcut only navigates to System Settings. No approval, quarantine removal, or security setting modification.
+- Finder activation on this Mac opened Privacy & Security and exposed the NotchMuse Open Anyway entry.
+- Rebuilt candidate `dist.noindex/dmg-polish/NotchMuse.dmg`; image verification and mounted shortcut plist passed.
+- Public beta.1 assets remain unchanged. Cross-macOS shortcut compatibility and downloaded/quarantined shortcut behavior remain unverified; manual steps are retained.
+- Next: release review of the DMG-only candidate; do not silently replace public beta.1.
+
+
 ## DMG Installer Polish — First-Open Guide Update (2026-09-26)
 
 - Baseline: `main` / `origin/main` at `ad24d74be5848026a92944f4efe910c88ef9f15a`;

@@ -22,6 +22,7 @@ uvx --from dmgbuild==1.6.7 \
   -D "application=$APP" \
   -D "background=$BACKGROUND" \
   -D "guide=$ROOT/scripts/assets/安装说明.txt" \
+  -D "security_shortcut=$ROOT/scripts/assets/打开隐私与安全性.inetloc" \
   "NotchMuse" "$DMG"
 
 if [[ "$SIGN_IDENTITY" != "-" ]]; then

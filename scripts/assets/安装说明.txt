@@ -3,6 +3,10 @@ NotchMuse 安装说明 / Installation Guide
 
 English
 -------
+Shortcut: double-click “打开隐私与安全性” in this disk image to open Privacy &
+Security. It only navigates to Settings; it does not approve or launch the app.
+If the shortcut does not work on your macOS version, follow step 4 manually.
+
 This app is not notarized by Apple. Continue only if you trust the source and
 obtained NotchMuse from its official release page.
 
@@ -18,6 +22,10 @@ obtained NotchMuse from its official release page.
 
 中文（简体）
 -----------
+快捷入口：双击镜像中的“打开隐私与安全性”，即可前往设置页面。
+它不会自动放行或启动应用；仍需你亲自确认。若当前系统不支持此快捷入口，
+请按第 4 步手动打开设置。
+
 此应用尚未经过 Apple 公证。请仅在确认来源可信、且从 NotchMuse 官方发布
 页面获取应用后继续。
 

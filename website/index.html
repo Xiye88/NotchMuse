@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b101a">
+  <meta name="description" content="NotchMuse keeps synced lyrics in your Mac menu bar or beside the notch. A native macOS app for Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music." data-i18n-content="metaDescription">
+  <title data-i18n="pageTitle">NotchMuse — Lyrics, right where you need them</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
+  <link rel="stylesheet" href="style.css?v=11">
+</head>
+<body>
+  <header class="site-header wrap">
+    <a class="brand" href="#top" aria-label="NotchMuse home" data-i18n-aria-label="homeLabel"><img class="brand-icon" src="assets/notchmuse-icon.png" alt=""> NotchMuse</a>
+    <nav aria-label="Main navigation" data-i18n-aria-label="mainNavLabel">
+      <a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="#modes" data-i18n="navModes">Modes</a><a href="#faq" data-i18n="navFAQ">FAQ</a>
+      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.2/NotchMuse.dmg"><span data-i18n="navDownload">Download</span></a>
+      <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch to Simplified Chinese"><span aria-hidden="true">🌐</span><span data-language-name>English</span></button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <p class="eyebrow" data-i18n="heroEyebrow">MUSIC BELONGS IN YOUR FLOW</p>
+        <h1><span data-i18n="heroTitleTop">Lyrics, right where</span><br><span data-i18n="heroTitleBottom">you need them.</span></h1>
+        <p class="lead" data-i18n="heroLead">Synced lyrics in your Mac menu bar or beside the notch. Stay in your flow.</p>
+        <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.2/NotchMuse.dmg"><span data-i18n="downloadMac">Download for Mac</span> <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#modes"><span data-i18n="seeHow">See how it works</span></a></div>
+        <p class="beta-notice"><strong data-i18n="betaWarningTitle">Beta 2 is not notarized.</strong> <span data-i18n="betaWarning">macOS may ask you to confirm the first launch.</span></p>
+        <details class="first-launch-guide"><summary data-i18n="launchGuideSummary">First-launch steps</summary><ol><li data-i18n="launchStep1">Open the DMG and drag NotchMuse to Applications.</li><li data-i18n="launchStep2">Try to open NotchMuse. If macOS blocks it, click Done; do not move it to the Trash.</li><li data-i18n="launchStep3">Go to System Settings → Privacy &amp; Security and choose Open Anyway.</li><li data-i18n="launchStep4">Authenticate if macOS asks, then open NotchMuse again.</li></ol></details>
+        <p class="fine" data-i18n="releaseMeta">NotchMuse v0.8.0 Beta 2 · macOS 14+ · Apple silicon · Beta, not notarized</p>
+      </div>
+      <figure class="hero-visual">
+        <div class="mac-demo">
+          <img src="assets/demos/notch-mode-screen.png" alt="Real NotchMuse Notch Mode screen capture" data-i18n-alt="heroImageAlt">
+        </div>
+        <figcaption data-i18n="heroCaption">Actual NotchMuse screen capture</figcaption>
+      </figure>
+    </section>
+
+    <section class="section wrap players" aria-labelledby="players-title">
+      <p class="eyebrow" data-i18n="playersEyebrow">WORKS WITH YOUR MUSIC</p><h2 id="players-title" data-i18n="playersTitle">Your favorite players, supported.</h2>
+      <p class="section-intro" data-i18n="playersIntro">Choose a player. Keep the lyrics in view.</p>
+      <ul class="player-list">
+        <li><img class="player-icon" src="assets/players/spotify.png" alt=""><span><strong>Spotify</strong><small data-i18n="supported">Supported</small></span></li>
+        <li><img class="player-icon" src="assets/players/apple-music.png" alt=""><span><strong>Apple Music</strong><small data-i18n="supported">Supported</small></span></li>
+        <li><img class="player-icon" src="assets/players/netease.png" alt=""><span><strong data-i18n="platformNetease">NetEase Cloud Music</strong><small data-i18n="supported">Supported</small></span></li>
+        <li><img class="player-icon" src="assets/players/qq-music.jpg" alt=""><span><strong data-i18n="platformQQ">QQ Music</strong><small data-i18n="supported">Supported</small></span></li>
+        <li><img class="player-icon" src="assets/players/soda-music.jpg" alt=""><span><strong data-i18n="platformSoda">Soda Music</strong><small data-i18n="supported">Supported</small></span></li>
+      </ul>
+    </section>
+
+    <section class="section wrap" id="modes" aria-labelledby="modes-title">
+      <p class="eyebrow" data-i18n="modesEyebrow">TWO WAYS TO STAY IN SYNC</p><h2 id="modes-title" data-i18n="modesTitle">Lyrics, wherever you look.</h2>
+      <p class="section-intro" data-i18n="modesIntro">Choose the display that fits your Mac and your workflow.</p>
+      <div class="mode-grid">
+        <article class="mode-card">
+          <div><p class="mode-label" data-i18n="notchLabel">01 / REAL APP SCREENSHOT</p><h3 data-i18n="notchTitle">Notch Mode</h3><p data-i18n="notchBody">See NotchMuse’s actual lyric window beside the MacBook notch.</p></div>
+          <div class="capture-frame notch-capture" aria-label="Real NotchMuse Notch Mode screen capture" data-i18n-aria-label="notchMediaLabel">
+            <picture><img src="assets/demos/notch-mode-screen.png" alt="Real NotchMuse Notch Mode screen capture" data-i18n-alt="notchImageAlt"></picture>
+          </div>
+        </article>
+        <article class="mode-card">
+          <div><p class="mode-label" data-i18n="statusLabel">02 / REAL APP SCREENSHOT</p><h3 data-i18n="statusTitle">Status Bar Mode</h3><p data-i18n="statusBody">See a real screen capture of lyrics in the macOS menu bar.</p></div>
+          <div class="capture-frame status-capture" aria-label="Real NotchMuse Status Bar Mode screen capture" data-i18n-aria-label="statusMediaLabel">
+            <picture><img src="assets/demos/status-bar-screen.png" alt="Real NotchMuse Status Bar Mode screen capture" data-i18n-alt="statusImageAlt"></picture>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section wrap how" aria-labelledby="how-title">
+      <p class="eyebrow" data-i18n="howEyebrow">HOW IT WORKS</p><h2 id="how-title" data-i18n="howTitle">Three steps. Then just listen.</h2>
+      <ol class="steps">
+        <li><span>1</span><h3 data-i18n="step1Title">Choose your player</h3><p data-i18n="step1Body">Open Spotify, Apple Music, NetEase Cloud Music, QQ Music, or Soda Music and start a song.</p></li>
+        <li><span>2</span><h3 data-i18n="step2Title">Allow access</h3><p data-i18n="step2Body">Let NotchMuse read playback details when macOS asks.</p></li>
+        <li><span>3</span><h3 data-i18n="step3Title">Keep lyrics in view</h3><p data-i18n="step3Body">Choose Status Bar Mode or Notch Mode in Settings.</p></li>
+      </ol>
+    </section>
+
+    <section class="privacy-panel wrap" id="privacy" aria-labelledby="privacy-title">
+      <div><p class="eyebrow" data-i18n="privacyEyebrow">YOUR PRIVACY COMES FIRST</p><h2 id="privacy-title" data-i18n="privacyTitle">No account. No telemetry. No audio upload.</h2>
+      <p data-i18n="privacyBody">NotchMuse does not collect usage analytics or read your music as audio. Track details such as title and artist may be sent to lyrics providers to find a match.</p></div>
+      <a href="https://github.com/Xiye88/NotchMuse#privacy"><span data-i18n="privacyLink">Read the full privacy details</span> <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <section class="section wrap install" aria-labelledby="install-title">
+      <div><p class="eyebrow" data-i18n="installEyebrow">INSTALLATION &amp; SETUP</p><h2 id="install-title" data-i18n="installTitle">Ready in a few steps.</h2><p data-i18n="installIntro">NotchMuse v0.8.0 Beta 2 requires macOS 14 or later and an Apple silicon Mac. This beta is ad-hoc signed and is not notarized with an Apple Developer ID.</p><ol><li data-i18n="installStep1">Download and open the DMG.</li><li data-i18n="installStep2">Drag NotchMuse to Applications.</li><li data-i18n="installStep3">In Applications, Control-click NotchMuse and choose Open.</li><li data-i18n="installStep4">If macOS blocks it, open System Settings → Privacy &amp; Security → Open Anyway.</li><li data-i18n="installStep5">Grant the requested permissions when prompted.</li></ol><a class="text-link" href="https://github.com/Xiye88/NotchMuse/blob/main/SUPPORT.md"><span data-i18n="setupHelp">Installation and setup help</span> ↗</a></div>
+      <div class="requirements"><div><span aria-hidden="true">⌘</span><strong data-i18n="macVersion">macOS 14+</strong><small data-i18n="macVersionDetail">Sonoma or later</small></div><div><span aria-hidden="true">▣</span><strong data-i18n="appleSilicon">Apple silicon</strong><small data-i18n="siliconDetail">M1, M2, M3, or later</small></div></div>
+    </section>
+
+    <section class="section wrap faq" id="faq" aria-labelledby="faq-title">
+      <p class="eyebrow" data-i18n="faqEyebrow">A FEW QUICK ANSWERS</p><h2 id="faq-title" data-i18n="faqTitle">Frequently asked questions</h2>
+      <details><summary data-i18n="faq1Question">Which music players work with NotchMuse?</summary><p data-i18n="faq1Answer">Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music are supported.</p></details>
+      <details><summary data-i18n="faq2Question">What Mac do I need?</summary><p data-i18n="faq2Answer">NotchMuse currently requires macOS 14 or later and an Apple silicon Mac. The current beta is for arm64 Macs.</p></details>
+      <details><summary data-i18n="faq3Question">Why does macOS ask for permission?</summary><p data-i18n="faq3Answer">NotchMuse needs Automation permission to read the selected player’s current track and playback position. The left-side menu bar layout also needs Accessibility permission.</p></details>
+      <details><summary data-i18n="faq4Question">Does NotchMuse upload or listen to my audio?</summary><p data-i18n="faq4Answer">No. It does not read or upload audio. Track details may be sent to third-party lyrics providers for matching. No NotchMuse account or telemetry is required.</p></details>
+      <details><summary data-i18n="faq5Question">macOS warned me when I opened the beta. What should I do?</summary><p><span data-i18n="faq5BeforeLink">The current beta is not notarized, so macOS may ask you to confirm the first launch. Follow the</span> <a href="https://github.com/Xiye88/NotchMuse/blob/main/SUPPORT.md"><span data-i18n="setupHelpShort">setup help</span></a> <span data-i18n="faq5AfterLink">for the current steps.</span></p></details>
+    </section>
+
+    <section class="closing">
+      <div class="wrap"><p class="eyebrow" data-i18n="closingEyebrow">MUSIC BELONGS IN YOUR FLOW</p><h2 data-i18n="closingTitle">Ready to bring lyrics to your Mac?</h2><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.2/NotchMuse.dmg"><span data-i18n="downloadMac">Download for Mac</span> <span aria-hidden="true">↗</span></a><p class="fine" data-i18n="releaseMeta">NotchMuse v0.8.0 Beta 2 · macOS 14+ · Apple silicon · Beta, not notarized</p></div>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap"><a class="brand" href="#top" aria-label="NotchMuse home" data-i18n-aria-label="homeLabel"><img class="brand-icon" src="assets/notchmuse-icon.png" alt=""> NotchMuse</a><nav aria-label="Footer navigation" data-i18n-aria-label="footerNavLabel"><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="#faq" data-i18n="navFAQ">FAQ</a><a href="#privacy" data-i18n="footerPrivacy">Privacy</a><a href="https://github.com/Xiye88/NotchMuse/blob/main/CHANGELOG.md" data-i18n="footerChangelog">Changelog</a></nav><p data-i18n="copyright">© NotchMuse · A small app for a more musical day.</p></footer>
+
+
+  <script>
+    const chinese = {
+  "metaDescription": "NotchMuse 在 Mac 菜单栏或刘海旁显示同步歌词。支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。",
+  "pageTitle": "NotchMuse — 歌词就在你需要的地方",
+  "homeLabel": "NotchMuse 首页",
+  "mainNavLabel": "主导航",
+  "footerNavLabel": "页脚导航",
+  "navModes": "功能展示",
+  "navFAQ": "常见问题",
+  "navDownload": "下载",
+  "heroEyebrow": "让音乐融入你的节奏",
+  "heroTitleTop": "歌词就在",
+  "heroTitleBottom": "你需要的地方。",
+  "heroLead": "在 Mac 菜单栏或刘海旁查看同步歌词，让音乐陪伴而不打断你的节奏。",
+  "downloadMac": "下载 Mac 版",
+  "seeHow": "了解使用方式",
+  "betaWarningTitle": "Beta 2 版本尚未经过 Apple 公证。",
+  "betaWarning": "首次打开时，macOS 可能会要求你确认。",
+  "launchGuideSummary": "首次打开步骤",
+  "launchStep1": "打开 DMG，将 NotchMuse 拖到“应用程序”。",
+  "launchStep2": "尝试打开 NotchMuse。如果 macOS 阻止打开，请点击“完成”，不要将应用移到废纸篓。",
+  "launchStep3": "打开“系统设置”→“隐私与安全性”，选择“仍要打开”。",
+  "launchStep4": "按 macOS 提示完成认证，然后再次打开 NotchMuse。",
+  "releaseMeta": "NotchMuse v0.8.0 Beta 2 · macOS 14+ · Apple 芯片 · Beta 版，尚未公证",
+  "heroImageAlt": "NotchMuse 刘海模式的实机截图，截取自项目录屏",
+  "heroCaption": "NotchMuse 实际运行截图",
+  "playersEyebrow": "适配你常用的音乐平台",
+  "playersTitle": "你喜欢的音乐平台，均已支持。",
+  "playersIntro": "选择音乐平台，让歌词始终在视线之中。",
+  "supported": "已支持",
+  "platformNetease": "网易云音乐",
+  "platformQQ": "QQ 音乐",
+  "platformSoda": "汽水音乐",
+  "modesEyebrow": "两种方式，随时跟上歌词",
+  "modesTitle": "无论看向哪里，都能看到歌词。",
+  "modesIntro": "选择适合你的 Mac 和使用习惯的歌词显示方式。",
+  "notchLabel": "01 / 应用实机截图",
+  "notchTitle": "刘海模式",
+  "notchBody": "在 MacBook 刘海旁查看 NotchMuse 实际显示的歌词。",
+  "notchMediaLabel": "NotchMuse 刘海模式实机截图",
+  "notchImageAlt": "NotchMuse 刘海模式实机截图",
+  "statusLabel": "02 / 应用实机截图",
+  "statusTitle": "菜单栏模式",
+  "statusBody": "查看 NotchMuse 在实际 macOS 菜单栏中显示歌词的画面。",
+  "statusMediaLabel": "NotchMuse 菜单栏模式实机截图",
+  "statusImageAlt": "NotchMuse 菜单栏模式实机截图",
+  "howEyebrow": "使用方式",
+  "howTitle": "三步设置，然后安心听歌。",
+  "step1Title": "选择音乐平台",
+  "step1Body": "打开 Spotify、Apple Music、网易云音乐、QQ 音乐或汽水音乐，开始播放歌曲。",
+  "step2Title": "授予访问权限",
+  "step2Body": "根据 macOS 提示，允许 NotchMuse 读取播放信息。",
+  "step3Title": "让歌词常驻视线",
+  "step3Body": "在设置中选择菜单栏模式或刘海模式。",
+  "privacyEyebrow": "我们重视你的隐私",
+  "privacyTitle": "无需账户、无遥测、不上传音频。",
+  "privacyBody": "NotchMuse 不会收集使用分析数据，也不会读取音乐音频。为匹配歌词，歌曲名和艺人等曲目信息可能会发送给歌词服务提供方。",
+  "privacyLink": "查看完整隐私说明",
+  "installEyebrow": "安装与设置",
+  "installTitle": "几步即可开始使用。",
+  "installIntro": "NotchMuse v0.8.0 Beta 2 需要 macOS 14 或更新版本，以及 Apple 芯片 Mac。此 Beta 版本采用临时签名，尚未使用 Apple Developer ID 进行公证。",
+  "installStep1": "下载并打开 DMG。",
+  "installStep2": "将 NotchMuse 拖到“应用程序”。",
+  "installStep3": "在“应用程序”中按住 Control 键并点按 NotchMuse，然后选择“打开”。",
+  "installStep4": "如果 macOS 阻止打开，请前往“系统设置”→“隐私与安全性”→“仍要打开”。",
+  "installStep5": "根据提示授予所需权限。",
+  "setupHelp": "安装与设置帮助",
+  "macVersion": "macOS 14+",
+  "macVersionDetail": "Sonoma 或更新版本",
+  "appleSilicon": "Apple 芯片",
+  "siliconDetail": "M1、M2、M3 或更新型号",
+  "faqEyebrow": "常见问题解答",
+  "faqTitle": "常见问题",
+  "faq1Question": "NotchMuse 支持哪些音乐平台？",
+  "faq1Answer": "目前支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。",
+  "faq2Question": "需要什么样的 Mac？",
+  "faq2Answer": "NotchMuse 需要 macOS 14 或更新版本，以及 Apple 芯片 Mac。当前 Beta 版本支持 arm64 架构。",
+  "faq3Question": "为什么 macOS 会请求权限？",
+  "faq3Answer": "NotchMuse 需要“自动化”权限读取所选音乐应用的当前曲目和播放进度。菜单栏左侧布局还需要“辅助功能”权限。",
+  "faq4Question": "NotchMuse 会上传或监听我的音频吗？",
+  "faq4Answer": "不会。应用不会读取或上传音频。为匹配歌词，曲目信息可能会发送给第三方歌词服务提供方。NotchMuse 不需要账户，也不收集遥测数据。",
+  "faq5Question": "macOS 提示无法打开 Beta 版时该怎么办？",
+  "faq5BeforeLink": "当前 Beta 版本尚未公证，首次打开时 macOS 可能需要你确认。请参阅",
+  "setupHelpShort": "安装帮助",
+  "faq5AfterLink": "了解具体步骤。",
+  "closingEyebrow": "让音乐融入你的节奏",
+  "closingTitle": "准备好在 Mac 上查看歌词了吗？",
+  "footerPrivacy": "隐私",
+  "footerChangelog": "更新日志",
+  "copyright": "© NotchMuse · 让每一天的音乐体验更自在。"
+};
+    const translatedText = [...document.querySelectorAll("[data-i18n]")];
+    const englishText = new Map(translatedText.map(element => [element, element.textContent]));
+    const translatableAttributes = ["aria-label", "alt", "content"]
+      .flatMap(attribute => [...document.querySelectorAll(`[data-i18n-${attribute}]`)]
+        .map(element => [element, attribute, element.getAttribute(attribute)]));
+
+    const languageButton = document.querySelector("#language-toggle");
+    const languageName = languageButton.querySelector("[data-language-name]");
+    const translate = language => {
+      const isChinese = language === "zh-Hans";
+      for (const element of translatedText) {
+        element.textContent = isChinese ? chinese[element.dataset.i18n] : englishText.get(element);
+      }
+      for (const [element, attribute, english] of translatableAttributes) {
+        const key = element.getAttribute(`data-i18n-${attribute}`);
+        element.setAttribute(attribute, isChinese ? chinese[key] : english);
+      }
+      document.documentElement.lang = language;
+      document.title = isChinese ? chinese.pageTitle : englishText.get(document.querySelector("title"));
+      languageName.textContent = isChinese ? "简体中文" : "English";
+      languageButton.setAttribute("aria-label", isChinese ? "切换为英文" : "Switch to Simplified Chinese");
+    };
+
+    let selectedLanguage = "en";
+    try {
+      if (localStorage.getItem("notchmuse-language") === "zh-Hans") selectedLanguage = "zh-Hans";
+    } catch {}
+    translate(selectedLanguage);
+    languageButton.addEventListener("click", () => {
+      selectedLanguage = selectedLanguage === "en" ? "zh-Hans" : "en";
+      translate(selectedLanguage);
+      try { localStorage.setItem("notchmuse-language", selectedLanguage); } catch {}
+    });
+  </script>
+</body>
+</html>

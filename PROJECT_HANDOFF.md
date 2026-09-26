@@ -6,10 +6,10 @@
   `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.
 - Main integration merge:
   `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
-- Current main source:
-  `776437a352d8f81ce6915c4779766f91d3142047`; remote verified.
+- Installed build source:
+  `776437a352d8f81ce6915c4779766f91d3142047`; present on remote main.
 - Architecture CI `36158185905`: PASS.
-- Main CI `36214924735`: PASS.
+- Main CI `36217972870`: PASS.
 - `09_REPO_ARCHITECTURE`: DONE / ARCHIVED.
 - `10_SETTINGS_UI`: DONE / ARCHIVED; integrated into main as `279b910`.
 - No v0.8 tag, GitHub Release, or website publication has been created.
@@ -27,8 +27,9 @@
 - Installed NetEase short smoke: Auto Detect, Play, Pause/Resume,
   Next/Previous, seek, and visible lyrics checked. Product Owner separately
   reports approximately 7-8 hours of use as MANUAL PASS.
-- Installed Settings window GUI check remains pending; do not claim final
-  local closure until the window is visibly inspected.
+- Product Owner opened the installed build 21 Settings window and confirmed
+  sidebar, Live Preview, card layout, and presets: GUI PASS. v0.8 main closure
+  is DONE; no tag or GitHub Release was created.
 
 ## Completed Follow-up — 10_SETTINGS_UI
 

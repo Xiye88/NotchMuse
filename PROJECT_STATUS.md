@@ -10,8 +10,8 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - Remote Architecture branch: synchronized; final CI run `36157250718` PASS.
 - Integrated into `main` with merge commit
   `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
-- Main head `776437a352d8f81ce6915c4779766f91d3142047` is synchronized to
-  `origin/main`; CI run `36214924735` PASS.
+- Build source `776437a352d8f81ce6915c4779766f91d3142047` is on
+  `origin/main`; latest main CI run `36217972870` PASS.
 - Repository structure, Swift package tests, GitHub CI, bilingual README,
   report indexes, and build artifact manifests: DONE.
 - Final integrated artifact: `0.8.0` build `21`, arm64, ad-hoc signed,
@@ -32,9 +32,9 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - NetEase: DONE for the v0.8 candidate.
 - MediaRemote Bridge: DONE for the v0.8 candidate.
 - Auto Detect: DONE for Spotify, Apple Music, and NetEase.
-- v0.8 Candidate: build 21 installed; installed Settings GUI verification pending.
-- Product Owner's earlier final GUI confirmation applies to build 18. The
-  installed build 21 Settings window has not yet been visually verified.
+- v0.8 Main Closure: DONE. Build 21 is installed in `/Applications`.
+- Product Owner opened the installed build 21 and confirmed the redesigned
+  Settings sidebar, Live Preview, card layout, and presets: GUI PASS.
 - Final Engineering is integrated into `main`. No v0.8 tag, GitHub Release, or
   public website release has been created.
 
@@ -56,6 +56,7 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - `git diff --check`: PASS.
 - `codesign --verify --deep --strict`: PASS; `hdiutil verify`: PASS.
 - Installed build 21 executable is byte-identical to the verified package.
+  Installed Settings GUI: Product Owner manual PASS on build 21.
   Installed NetEase short smoke confirmed Auto Detect, Play, Pause/Resume,
   Next/Previous, seek, and visible advancing lyrics. Product Owner reports
   approximately 7-8 hours of prior use as MANUAL PASS.

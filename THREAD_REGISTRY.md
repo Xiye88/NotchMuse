@@ -23,7 +23,7 @@ closed. Reopen it only for a verified Settings regression.
 | `04_UX` | ARCHIVED | Settings redesign and final GUI smoke complete |
 | `05_MATCHER` | ARCHIVED | Production Matcher remains frozen |
 | `06_DOCS` | ARCHIVED | Sprint documents synchronized; reopen at release gate |
-| `07_QA` | ACTIVE | Installed build-21 Settings GUI closure pending; NetEase short smoke passed |
+| `07_QA` | ARCHIVED | Installed build-21 Settings GUI manual PASS; NetEase short smoke passed |
 
 This table supersedes the historical thread statuses below. Reuse these
 numbers; do not create duplicate role workspaces. Archived workspaces keep

@@ -37,6 +37,8 @@
 - Installed `/Applications/NotchMuse.app` was updated from build 18 to 21;
   its executable checksum matches the verified main build. NetEase playback,
   transport, seek, Auto Detect, and visible lyrics passed a short smoke check
+- Product Owner opened installed build 21 and confirmed the redesigned
+  Settings sidebar, Live Preview, card layout, and presets: GUI PASS
 - Redesigned Settings passed real-window English and Simplified Chinese GUI
   smoke, section navigation, preview isolation, and branch CI `36213755351`
 - Product Owner confirms build 18 seek forward/back and final GUI gates PASS; the

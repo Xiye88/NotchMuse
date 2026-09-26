@@ -13,8 +13,8 @@
   remains a separate Product Owner decision.
 - Main deployment closure: old `/Applications/NotchMuse.app` build 18 was
   replaced with build 21 from main `776437a`; installed executable checksum
-  matches the Release package. NetEase short smoke passed; installed Settings
-  window GUI check is pending.
+  matches the Release package. NetEase short smoke passed; Product Owner
+  confirmed installed Settings sidebar, Live Preview, cards, and presets: PASS.
 
 ## Repository Architecture Cleanup — First Round (2026-09-25)
 
@@ -43,9 +43,8 @@ Last Updated: 2026-09-26
 
 ## Sprint
 
-v0.8 Final Engineering and Settings UI code are complete. Build 21 is installed
-locally; its Settings GUI check remains pending. Public release remains a
-separate approval.
+v0.8 Main Closure: DONE. Build 21 is installed locally and its Settings GUI
+check passed. Public release remains a separate approval.
 
 ## Workspace Registry
 

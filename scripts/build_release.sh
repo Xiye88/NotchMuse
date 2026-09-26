@@ -21,6 +21,7 @@ DMG="$ROOT/dist.noindex/NotchMuse.dmg"
 rm -rf "$ROOT/dist.noindex"
 swift package --package-path "$ROOT/MenuBarLyrics" clean
 
+NOTCHMUSE_DIST_DIR="$DIST" \
 NOTCHMUSE_VERSION="$VERSION" \
 NOTCHMUSE_BUILD_NUMBER="$BUILD_NUMBER" \
 NOTCHMUSE_SIGN_IDENTITY="$SIGN_IDENTITY" \

@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT="$ROOT/MenuBarLyrics"
-DIST="$ROOT/dist.noindex"
+DIST="${NOTCHMUSE_DIST_DIR:-$ROOT/dist.noindex}"
 APP="$DIST/NotchMuse.app"
 CONTENTS="$APP/Contents"
 MACOS="$CONTENTS/MacOS"

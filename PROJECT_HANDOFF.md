@@ -8,10 +8,12 @@
   `MenuBarController.pollPlayer`: the playing-position sample was timestamped
   only after awaiting network lyric retrieval. The sample is now anchored at
   snapshot time so elapsed playback is included during matching.
-- Timing fix local Debug build and full self-tests: PASS. Next: commit and push
-  to this already-authorized integration branch, wait for macOS CI, then install
-  a fresh local Candidate for brief GUI confirmation. Do not merge main or
-  generate the final `PLAYER_EXPANSION_HANDOFF.md` before that confirmation.
+- Timing fix local Debug build and full self-tests: PASS. Fix commit
+  `63c2ec0065affefb83f5cbdb6298dbefb52099ae` is pushed; macOS CI run
+  `36226306542` passed. Candidate `0.8.0` build `26` is installed and running;
+  executable SHA-256 `5bef23acfe54422cf6adc1bc7b36c93c14ba0906884560ced87318dd32c714e4`.
+  Await brief GUI confirmation of switching delay and lyric timing. Do not merge
+  main or generate the final `PLAYER_EXPANSION_HANDOFF.md` before confirmation.
 
 - Baseline: `main` / `776437a352d8f81ce6915c4779766f91d3142047`, confirmed by
   `00_PM` after Settings UI integration and main CI `36214924735` passed.

@@ -8,13 +8,13 @@
 - Debug self-tests, packaged self-test, localization parity, signature and
   DMG verification: PASS.
 - macOS 15 CI run `36220000743`: PASS. Feature commit `d933c62` pushed to origin.
-- Latest installed local candidate before timing follow-up: build 25, based on
-  `b65b1f1`; CI run `36220531041` passed.
+- Timing fix: `63c2ec0` pushed; macOS CI `36226306542` passed. Candidate build
+  26 is installed and running (SHA-256 recorded in `PROJECT_HANDOFF.md`).
 - Product Owner GUI feedback: QQ Music and Soda Music show correctly matched
   lyrics; timing follow-up is in progress to account for playback during the
   lyric network request. Debug build and full self-tests pass.
-- Remaining gates: push timing fix to the authorized integration branch, macOS
-  CI green, install a fresh Candidate, and obtain brief GUI timing confirmation.
+- Remaining gate: obtain brief GUI timing confirmation for switch delay and
+  lyric playback sync.
 - Do not merge main or generate the final PLAYER_EXPANSION_HANDOFF.md before
   that confirmation.
 - Local `swift test` cannot load XCTest with the active Command Line Tools.

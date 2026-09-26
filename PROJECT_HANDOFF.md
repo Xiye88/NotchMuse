@@ -12,6 +12,30 @@
   26 fixes on its branch, report a tested SHA to PM before unified deployment.
 - Do not repeat: no visual redesign, no build 24 overwrite of installed build
   26, no tag or Release. Older build records below are historical.
+## Player Expansion — Prior Isolated Integration Evidence (2026-09-26)
+
+- Latest main `a5f193832dd7889a3ebf25d1087dae867ff68813` contains the
+  Product-Owner-accepted Settings Visual Polish v2; main CI `36223310974` passed.
+- This isolated branch combines that main state with QQ/Soda support and timing
+  fix `63c2ec0`; no Settings UI, Matcher, or Provider Priority edits were made
+  during this integration. The merge commit is local only; it has not been pushed.
+- Candidate `0.8.0` build `27` was built from the integrated working tree and
+  remains in `dist.noindex/NotchMuse.app`. Executable SHA-256
+  `b91b167c0860af7099acaec7f92d8b7cc63ccd5aeb1d70a27f244c012ce7f0f3`;
+  bundled `SettingsPreviewWallpaper.png` SHA-256
+  `e29bfda3092aacf38774e21ad4cb4c060dee555eed13e83fb0db368ebaade9d2`.
+  `/Applications/NotchMuse.app` was not modified.
+- Debug build/full self-tests, packaged self-test, resource presence, and
+  strict signature verification pass. `swift test` remains unavailable locally
+  because the active Command Line Tools lack XCTest; CI for the integrated
+  merge has not been run.
+- A temporary QA copy launched without touching the installed app and passed
+  its first-launch screen. The computer-use interface could not access the
+  menu-bar-only Settings window afterward, so a visible GUI regression remains
+  pending. QQ/Soda GUI feedback from the prior candidate confirmed correct
+  matching; timing confirmation on the integrated candidate is pending.
+- No push, main merge, tag, or publication. Keep the final
+  `PLAYER_EXPANSION_HANDOFF.md` deferred until acceptance is complete.
 
 ## v0.8 Final Engineering Main Integration
 

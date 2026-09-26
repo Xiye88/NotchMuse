@@ -25,6 +25,8 @@
 "Waiting for %@" = "Waiting for %@";
 "Cannot connect to %@. Check Automation permission in System Settings." = "Cannot connect to %@. Check Automation permission in System Settings.";
 "NetEase Cloud Music" = "NetEase Cloud Music";
+"QQ Music" = "QQ Music";
+"Soda Music" = "Soda Music";
 "NetEase bridge unavailable. Restart NotchMuse or choose another player." = "NetEase bridge unavailable. Restart NotchMuse or choose another player.";
 "Paused: %@" = "Paused: %@";
 "Song: %@" = "Song: %@";

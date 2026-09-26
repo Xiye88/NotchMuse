@@ -5,8 +5,10 @@ enum PlayerSource: String, CaseIterable, Equatable, Sendable {
     case spotify = "Spotify"
     case appleMusic = "Apple Music"
     case netEaseMusic = "NetEase Cloud Music"
+    case qqMusic = "QQ Music"
+    case sodaMusic = "Soda Music"
 
-    static let detectable: [PlayerSource] = [.spotify, .appleMusic, .netEaseMusic]
+    static let detectable: [PlayerSource] = [.spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic]
 
     var bundleIdentifier: String? {
         switch self {
@@ -14,6 +16,8 @@ enum PlayerSource: String, CaseIterable, Equatable, Sendable {
         case .spotify: "com.spotify.client"
         case .appleMusic: "com.apple.Music"
         case .netEaseMusic: "com.netease.163music"
+        case .qqMusic: "com.tencent.QQMusicMac"
+        case .sodaMusic: "com.soda.music"
         }
     }
 
@@ -41,7 +45,9 @@ final class AutoDetectAdapter: @unchecked Sendable, MusicPlayerAdapter {
         self.init(adapters: [
             (.spotify, SpotifyAdapter()),
             (.appleMusic, AppleMusicAdapter()),
-            (.netEaseMusic, NetEaseMusicAdapter())
+            (.netEaseMusic, NetEaseMusicAdapter()),
+            (.qqMusic, MediaRemotePlayerAdapter(source: .qqMusic)),
+            (.sodaMusic, MediaRemotePlayerAdapter(source: .sodaMusic))
         ])
     }
 

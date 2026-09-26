@@ -1,6 +1,21 @@
 # NotchMuse Project Status
 
-Last Updated: 2026-09-26 — v0.8 Final Engineering
+Last Updated: 2026-09-26 — Player expansion integrated with accepted Settings v2
+
+## Current Task — Isolated Player + Settings Integration
+
+- Branch: `codex/player-expansion-integration`; latest main `a5f1938` merged
+  locally, including accepted Settings Visual Polish v2. No push occurred.
+- QQ Music/Soda support and lyric timing fix are retained; no new Settings UI,
+  Matcher, or Provider Priority edits were made.
+- Candidate build 27 is in `dist.noindex/NotchMuse.app`; executable SHA-256
+  `b91b167c0860af7099acaec7f92d8b7cc63ccd5aeb1d70a27f244c012ce7f0f3`.
+  Wallpaper resource presence and strict app signature pass. The installed
+  `/Applications/NotchMuse.app` remains untouched.
+- Debug build, full self-tests, and packaged self-test pass. Local `swift test`
+  is blocked because Command Line Tools do not provide XCTest. Integrated-merge
+  CI is pending; short visible Settings and timing GUI regression remains open.
+- No main push, tag, or publication. Final player handoff awaits acceptance.
 
 ## Final Engineering Status
 

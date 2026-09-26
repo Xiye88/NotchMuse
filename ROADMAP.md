@@ -1,6 +1,24 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-09-26 — v0.8.0 build 20
+Last Updated: 2026-09-26 — QQ Music / Soda Music expansion active
+
+## Current — QQ Music and Soda Music Expansion
+
+Status: IMPLEMENTED / LOCAL CANDIDATE BUILT; QA GATES OPEN
+
+- Add QQ Music and Soda Music to explicit player selection and Auto Detect.
+- Reuse the bundled MediaRemote bridge and existing lyric providers.
+- Keep transport controls, Production Matcher, and Provider priority unchanged.
+- Debug build/full self-tests and Release build 21 packaged self-test pass;
+  the arm64 ad-hoc app and DMG verify locally.
+- Feature commit `d933c62` is pushed; macOS CI run `36220000743` passed. Latest
+  local candidate is build 22, based on `d933c62`.
+- Remaining: Product Owner GUI checks for handoff and visible lyrics, and
+  restart recovery. Local `swift test` is blocked by missing XCTest in the
+  active Command Line Tools installation.
+- Work is isolated on `codex/player-expansion-integration`; no merge to main,
+  tag, or public release has occurred.
+- QA evidence: `PLAYER_EXPANSION_HANDOFF.md`.
 
 ## Current — v0.8 Final Release Candidate (build 20)
 

@@ -1,6 +1,6 @@
 # NotchMuse Task Board
 
-## 10_SETTINGS_UI_VISUAL_POLISH — Second Round
+## Active Integration — QQ Music/Soda Music + Accepted Settings UI
 
 - Status: DONE / Product Owner accepted v2 preview images.
 - Branch: `codex/settings-visual-polish`, based on main `484039f`.
@@ -9,6 +9,25 @@
 - Main UI source: `a5f1938`; build 24 deployment and CI `36223310974` passed.
 - Pending: combine accepted UI with the separate player sprint's build 26
   source before the next local deployment. No public release authorized.
+### Prior Isolated Integration Evidence
+- Workspace: PM integration on `codex/player-expansion-integration`.
+- Settings Visual Polish v2 was accepted by Product Owner and integrated into
+  main at `a5f193832dd7889a3ebf25d1087dae867ff68813`; CI `36223310974` passed.
+- This isolated branch integrates that main state with QQ/Soda support and the
+  playback-clock fix. No Settings UI edits are made on this branch.
+- Baseline before player expansion: `776437a352d8f81ce6915c4779766f91d3142047`.
+- Player implementation commit `d933c62` and timing fix `63c2ec0`; timing-fix
+  CI `36226306542` passed. Local candidate build 26 is installed in
+  `/Applications` from the earlier phase; this integration task must not replace
+  it. The isolated artifact and hash are recorded in `PROJECT_HANDOFF.md`.
+- Product Owner GUI feedback: QQ and Soda lyrics match correctly; check the
+  timing fix alongside the integrated Settings v2 through a temporary isolated
+  app launch.
+- Remaining gate: short Settings smoke and timing confirmation on the isolated
+  candidate. Do not merge main or generate final `PLAYER_EXPANSION_HANDOFF.md`.
+- Local `swift test` cannot load XCTest with the active Command Line Tools.
+- No merge to main, tag, or publication is authorized in this integration.
+- Evidence: interim `PLAYER_EXPANSION_HANDOFF.md`.
 
 ## Completed Next Task
 

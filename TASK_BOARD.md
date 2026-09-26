@@ -7,8 +7,9 @@
 - Scope: Settings sidebar, preview, cards, spacing, and appearance preset tiles.
   No player, NetEase, Matcher, or Provider changes.
 - Main UI source: `a5f1938`; build 24 deployment and CI `36223310974` passed.
-- Pending: combine accepted UI with the separate player sprint's build 26
-  source before the next local deployment. No public release authorized.
+- Combined source: main `22fb8e8`; build 28 App/DMG verified.
+- CI `36228752066` PASS; build 28 installed with matching executable and Preview resource.
+- Pending: user acceptance of unified installed candidate. No public release authorized.
 ### Prior Isolated Integration Evidence
 - Workspace: PM integration on `codex/player-expansion-integration`.
 - Settings Visual Polish v2 was accepted by Product Owner and integrated into

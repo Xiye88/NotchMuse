@@ -8,8 +8,11 @@
 - Pending confirmation: public Release remains a separate decision.
 - Key files: `MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift`,
   `MenuBarLyrics/Resources/SettingsPreviewWallpaper.png`, `scripts/build_app.sh`.
-- Next step: player integration task must combine latest main UI and its build
-  26 fixes on its branch, report a tested SHA to PM before unified deployment.
+- Completed integration: main `22fb8e8`, build 28 App/DMG verified,
+  CI `36228752066` PASS, installed in `/Applications` with matching executable
+  and bundled Preview wallpaper. Build 26 backup is in `dist.noindex/local-backups`.
+- Next step: user acceptance of the unified installed candidate; no claim of
+  a fresh independent installed-GUI interaction test. Public Release is separate.
 - Do not repeat: no visual redesign, no build 24 overwrite of installed build
   26, no tag or Release. Older build records below are historical.
 ## Player Expansion — Prior Isolated Integration Evidence (2026-09-26)

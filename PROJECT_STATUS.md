@@ -2,7 +2,18 @@
 
 Last Updated: 2026-09-26 — Player expansion integrated with accepted Settings v2
 
-## Current Task — Isolated Player + Settings Integration
+## Unified Candidate (Current)
+
+- Main `22fb8e8` integrates accepted Settings v2 and player timing fixes.
+- Build 28 App/DMG, packaged self-test, signature, and checksum verification PASS.
+- Integrated CI `36228752066`: PASS. Build 28 installed and running in
+  `/Applications/NotchMuse.app`; executable matches the verified package,
+  Preview wallpaper is present. Build 26 is backed up under `dist.noindex/local-backups`.
+- Installed Settings GUI interaction is not independently re-tested in this
+  integration; Product Owner accepted v2 preview images before integration.
+- No tag/public Release; ad-hoc signing only. Records below describe prior candidates.
+
+## Prior Task — Isolated Player + Settings Integration
 
 - Branch: `codex/player-expansion-integration`; latest main `a5f1938` merged
   locally, including accepted Settings Visual Polish v2. No push occurred.

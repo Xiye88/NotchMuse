@@ -7,10 +7,10 @@ Last Updated: 2026-09-26
 | Workspace | Status | Priority | Dependency | Responsibility |
 | --- | --- | --- | --- | --- |
 | `09_REPO_ARCHITECTURE` | ARCHIVED | COMPLETED | Candidate Freeze `3fb6946` | Repository structure, tests, CI, documentation, and artifact standardization. Final head `d5673b9b5b9e25baff4abb57db2264f30ace19c2`; integrated into main as `7bc74ac`. |
-| `10_SETTINGS_UI` | ACTIVE | NEXT | Satisfied; stable main `101e550` | Implement the approved Settings redesign from `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md` in an isolated worktree and return results to `00_PM`. |
+| `10_SETTINGS_UI` | ARCHIVED | COMPLETED | Stable main `101e550` | Approved Settings redesign completed at `5d74ce6`, CI `36213755351` passed, and implementation integrated into main as `279b910`. |
 
-`10_SETTINGS_UI` has started after `09_REPO_ARCHITECTURE` completed. Its design
-direction is fixed; the execution task must not reopen visual strategy.
+`10_SETTINGS_UI` started only after `09_REPO_ARCHITECTURE` completed and is now
+closed. Reopen it only for a verified Settings regression.
 
 ## Current Registry
 
@@ -18,12 +18,12 @@ direction is fixed; the execution task must not reopen visual strategy.
 | --- | --- | --- |
 | `00_PM` | ACTIVE | Single PM/integration entry point |
 | `01_APP` | ARCHIVED | P0 implementation merged into the candidate |
-| `02_RELEASE` | ACTIVE | Build-15 artifact and release gates |
+| `02_RELEASE` | ACTIVE | Build-20 local artifact complete; public release awaits Product Owner decision |
 | `03_LAB` | ARCHIVED | Reopen only for a new evidence question |
-| `04_UX` | ACTIVE | Build-15 Notch and Settings GUI regression |
+| `04_UX` | ARCHIVED | Settings redesign and final GUI smoke complete |
 | `05_MATCHER` | ARCHIVED | Production Matcher remains frozen |
 | `06_DOCS` | ARCHIVED | Sprint documents synchronized; reopen at release gate |
-| `07_QA` | ACTIVE | Build-15 automated, real-player, and lifecycle QA |
+| `07_QA` | ARCHIVED | Final Engineering and Settings GUI regression complete |
 
 This table supersedes the historical thread statuses below. Reuse these
 numbers; do not create duplicate role workspaces. Archived workspaces keep

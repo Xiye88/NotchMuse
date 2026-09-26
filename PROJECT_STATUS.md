@@ -14,21 +14,22 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
   is synchronized to `origin/main`; CI run `36158606048` PASS.
 - Repository structure, Swift package tests, GitHub CI, bilingual README,
   report indexes, and build artifact manifests: DONE.
-- Engineering validation artifact: `0.8.0` build `19`, arm64, ad-hoc signed,
+- Final integrated artifact: `0.8.0` build `20`, arm64, ad-hoc signed,
   not notarized. DMG SHA-256:
-  `49f6840e4c0c587c2aab862b9036ce0dab5b5a76e7f83a857d5a498e257f774b`.
-- `10_SETTINGS_UI`: ACTIVE / NEXT from stable main
-  `101e550af4814b34d25b9b8e5f32af3252bb0606`. It runs in an isolated
-  worktree and must not modify player, Matcher, Provider, or release behavior.
+  `0aa060361f5566bcfcb34fe4bde9c17e7d8a08dd1fcbf9fbb22226c32f8b05e3`.
+- `10_SETTINGS_UI`: DONE. The isolated implementation branch ends at
+  `5d74ce67ad25dfd9fa1c0a036cc4f06d05772575`; CI run `36213755351` passed.
+  The implementation was integrated into main as `279b910` without changing
+  player, Matcher, Provider, or release behavior.
 - Developer ID/notarization/stapling: DEFERRED. v0.8.0 tag and GitHub Release:
-  BLOCKED until the Settings redesign and its final short regression finish.
+  NOT AUTHORIZED; awaiting a separate Product Owner release decision.
 
 ## Current Status
 
 - NetEase: DONE for the v0.8 candidate.
 - MediaRemote Bridge: DONE for the v0.8 candidate.
 - Auto Detect: DONE for Spotify, Apple Music, and NetEase.
-- v0.8 Candidate: FROZEN / READY FOR RELEASE REVIEW.
+- v0.8 Candidate: FINAL RC / READY FOR RELEASE DECISION.
 - Product Owner final GUI confirmation: PASS. Individual GUI steps and timing
   values were not supplied; none are inferred here.
 - Final Engineering is integrated into `main`. No v0.8 tag, GitHub Release, or
@@ -36,13 +37,13 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 
 ## Candidate Identity
 
-- Version/build: `0.8.0` build `18`.
-- Candidate Freeze source base: `dee834f533812aac3e1dcab83f5d62a008d6a906`
-  plus this sprint's seek refresh fix and regression tests.
+- Version/build: `0.8.0` build `20`.
+- Candidate implementation commit: `279b910` plus the final project-document
+  synchronization commit.
 - Executable SHA-256:
-  `4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`.
+  `7c52681e81f99d8f77f4778ec2926d334b4d28d0081e8bed4acdc4cc14340334`.
 - DMG: `dist.noindex/NotchMuse.dmg`; SHA-256
-  `4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`.
+  `0aa060361f5566bcfcb34fe4bde9c17e7d8a08dd1fcbf9fbb22226c32f8b05e3`.
 - Architecture: arm64. Signing: ad-hoc, no Team ID. Developer ID signing,
   notarization, and stapling are not included in this candidate.
 

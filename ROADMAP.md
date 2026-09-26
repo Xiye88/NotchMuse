@@ -1,10 +1,10 @@
 # NotchMuse Roadmap
 
-Last Updated: 2026-09-25 — v0.8.0 build 18
+Last Updated: 2026-09-26 — v0.8.0 build 20
 
-## Current — v0.8 Stability Fix Sprint (build 18 frozen candidate)
+## Current — v0.8 Final Release Candidate (build 20)
 
-Status: FROZEN / READY FOR RELEASE REVIEW
+Status: FINAL RC / READY FOR RELEASE DECISION
 
 Goal: move the existing Spotify, Apple Music, and NetEase candidate from
 feature completion to production-quality behavior and a verified release
@@ -63,20 +63,22 @@ and durations were not supplied.
 
 ### P2 — v0.8 Release Candidate
 
-Status: FROZEN / READY FOR RELEASE REVIEW
+Status: FINAL RC / READY FOR RELEASE DECISION
 
-- Completed build 18 Debug/Release builds and self-tests, real-player and
-  lifecycle checks, final GUI confirmation, and a 60-minute playback soak.
+- Completed build 18 real-player, lifecycle, final GUI, and 60-minute playback
+  gates. Build 20 adds only the Settings redesign and passes Debug/Release
+  self-tests plus bilingual real-window Settings smoke.
 - Built and verified the arm64 DMG and SHA-256; documented ad-hoc signing and
   its distribution limitations.
 - Synchronized status, handoff, task board, roadmap, changelog, and closure
   evidence. Ready for release review; public distribution remains separate.
 
-Current local artifact: `0.8.0` build `18`, arm64, ad-hoc signed. Executable SHA-256
-`4b39029a509f05c6d5521781944b1e61e31b1de67c229c9c7f55cc0b2b481992`; DMG SHA-256
-`4a7af27c13a2a0ae90e50aefc6f8484d0162cdc08c3bef0b192e29fdda5968bb`. All current
-stability, playback, GUI, lifecycle, package, and soak gates are recorded PASS.
-The candidate is FROZEN / READY FOR RELEASE REVIEW. Ad-hoc signing, Gatekeeper
+Current local artifact: `0.8.0` build `20`, arm64, ad-hoc signed. Executable SHA-256
+`7c52681e81f99d8f77f4778ec2926d334b4d28d0081e8bed4acdc4cc14340334`; DMG SHA-256
+`0aa060361f5566bcfcb34fe4bde9c17e7d8a08dd1fcbf9fbb22226c32f8b05e3`. Runtime
+evidence from build 18 remains applicable because build 20 changes only Settings
+UI and localization. The candidate is FINAL RC / READY FOR RELEASE DECISION.
+Ad-hoc signing, Gatekeeper
 rejection, notarization, and clean-new-user distribution assessment remain
 known release-review risks. This status does not authorize public release.
 
@@ -88,15 +90,14 @@ After v0.8, plan `notchmuse.com` with a landing page, download page, and release
 notes. Host only the DMG, checksum, and `latest.json`; do not upload source code
 to the website.
 
-## Next — 10_SETTINGS_UI
+## Completed — 10_SETTINGS_UI
 
-Status: ACTIVE
+Status: DONE / ARCHIVED
 
-The approved Settings UI redesign is the next implementation task after v0.8
-Final Engineering closes. It must start from the latest stable Architecture
-SHA and follow `NotchMuse_Settings_UI_Redesign_PM_Handoff.md` without reopening
-the visual direction. It started from stable main `101e550` after Final
-Engineering integration completed.
+The approved Settings UI redesign started from stable main `101e550`, followed
+`NotchMuse_Settings_UI_Redesign_PM_Handoff.md`, passed bilingual GUI and CI
+verification, and was integrated into main as `279b910`. The next action is a
+Product Owner release decision, not additional feature work.
 
 ## Completed Milestones
 

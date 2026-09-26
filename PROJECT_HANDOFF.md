@@ -11,18 +11,24 @@
 - Architecture CI `36158185905`: PASS.
 - Main CI `36158606048`: PASS.
 - `09_REPO_ARCHITECTURE`: DONE / ARCHIVED.
-- `10_SETTINGS_UI`: QUEUED / NEXT; not started.
+- `10_SETTINGS_UI`: DONE / ARCHIVED; integrated into main as `279b910`.
 - No v0.8 tag, GitHub Release, or website publication has been created.
 
-## Active Follow-up — 10_SETTINGS_UI
+## Completed Follow-up — 10_SETTINGS_UI
 
-- Status: `ACTIVE`; priority: `NEXT`.
+- Status: `DONE / ARCHIVED`.
 - Blocked by: stable `09_REPO_ARCHITECTURE` source structure.
 - Starting baseline: stable main
   `101e550af4814b34d25b9b8e5f32af3252bb0606`.
 - Source handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
-- Work is isolated from main. Keep the approved visual direction, implement
-  directly, and return results to `00_PM` before integration.
+- Isolated branch head: `5d74ce67ad25dfd9fa1c0a036cc4f06d05772575`;
+  CI run `36213755351` passed. English and Simplified Chinese GUI smoke verified
+  the real Settings window, all three sections, live previews, presets, and
+  localized Auto Detect. Main build `20` passed full self-test, ad-hoc signing,
+  and DMG verification.
+- The remaining Product Owner decision is whether to create the v0.8.0 tag and
+  GitHub Release. Developer ID signing, notarization, and stapling remain
+  intentionally deferred.
 
 ## Repository Architecture Cleanup — Final Handoff (2026-09-25)
 

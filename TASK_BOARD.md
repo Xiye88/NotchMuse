@@ -1,14 +1,16 @@
 # NotchMuse Task Board
 
-## Active Next Task
+## Completed Next Task
 
-- `10_SETTINGS_UI` — **ACTIVE**, priority **NEXT**.
+- `10_SETTINGS_UI` — **DONE / ARCHIVED**.
 - Blocked by: stable `09_REPO_ARCHITECTURE` source layout.
-- Dependency gate is satisfied. Implementation starts from stable main
-  `101e550af4814b34d25b9b8e5f32af3252bb0606` in an isolated worktree.
+- Dependency gate was satisfied. Implementation started from stable main
+  `101e550af4814b34d25b9b8e5f32af3252bb0606` in an isolated worktree and
+  was integrated into main as `279b910`.
 - Design handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
-- Current action: implement and verify the approved Settings redesign; return
-  the result to `00_PM` before any main merge or Release work.
+- Result: Debug/full self-test, English/Simplified Chinese GUI smoke, branch CI,
+  Release build, ad-hoc signature, and DMG verification passed. Public release
+  remains a separate Product Owner decision.
 
 ## Repository Architecture Cleanup — First Round (2026-09-25)
 
@@ -33,11 +35,12 @@
   was integrated into `main` by merge commit
   `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
 
-Last Updated: 2026-09-25
+Last Updated: 2026-09-26
 
 ## Sprint
 
-v0.8 Stability Fix Sprint. Candidate build 18 is frozen and ready for release review; public release remains a separate approval.
+v0.8 Final Engineering and Settings UI are complete. Build 20 is the local
+final Release Candidate; public release remains a separate approval.
 
 ## Workspace Registry
 
@@ -64,7 +67,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 | `P0-2` | P0 | `01_APP` | DONE | Auto selection uses playback state and freshness, preserves deterministic ownership, and does not select merely because an app is open |
 | `P0-3` | P0 | `01_APP` | DONE | NetEase rejects stale asynchronous state, reused track identifiers, and expired provider data; build 18 real-player regression PASS |
 | `P1-1` | P1 | `04_UX` | DONE | Background/hover/stopped behavior, arbitrary lyric color with presets, numeric inputs, and functional Custom Width are implemented |
-| `QA-GATE` | P1 | `07_QA` | DONE — FROZEN / READY FOR RELEASE REVIEW | Build 18 automated, package, seek, GUI, Auto Detect, Sleep/Wake, network recovery, and 60-minute continuous-playback gates PASS. Seek timing was not supplied. |
+| `QA-GATE` | P1 | `07_QA` | DONE — FINAL RC | Build 18 runtime gates remain PASS; build 20 adds the verified Settings-only redesign and passes full self-test, bilingual GUI smoke, signing, and DMG verification. |
 
 ## Current Evidence
 

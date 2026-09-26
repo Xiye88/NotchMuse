@@ -10,8 +10,8 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - Remote Architecture branch: synchronized; final CI run `36157250718` PASS.
 - Integrated into `main` with merge commit
   `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
-- Main documentation head `dbdd422f95178ffb5466e8c9f7304ddb1b3cc52c`
-  is synchronized to `origin/main`; CI run `36158606048` PASS.
+- Settings integration head `7ddba8c7d0fdc4ad7313ba67aab5673de0c4410d`
+  is synchronized to `origin/main`; CI run `36214824933` PASS.
 - Repository structure, Swift package tests, GitHub CI, bilingual README,
   report indexes, and build artifact manifests: DONE.
 - Final integrated artifact: `0.8.0` build `20`, arm64, ad-hoc signed,

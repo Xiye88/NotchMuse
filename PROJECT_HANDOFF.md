@@ -1,5 +1,15 @@
 # NotchMuse Project Handoff
 
+## Local Reinstall Test — 2026-09-26
+
+- Product Owner requested uninstall before manually downloading and testing.
+- `/Applications/NotchMuse.app` removed; running App/watchdog/Perl exited.
+- NotchMuse preferences/caches cleared and `tccutil reset All app.notchmuse.mac` succeeded.
+- Source worktrees and release backups retained; this is not a pristine new Mac.
+- Public beta.1 now additionally provides `NotchMuse.dmg` and `NotchMuse.dmg.sha256`, byte-identical to versioned assets. Download filename header verified as `NotchMuse.dmg`.
+- Do not reinstall automatically: Product Owner will perform the download/install test.
+
+
 ## Current Public Beta — 2026-09-26
 
 - Public Beta: **v0.8.0-beta.1**, build **29**; published as a prerelease.

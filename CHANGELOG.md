@@ -32,8 +32,11 @@
 
 ### Validation
 
-- Local `0.8.0` build `20` passes Debug/Release self-tests, deep code-signature
+- Local `0.8.0` build `21` passes Debug/Release self-tests, deep code-signature
   verification, localization parity, and DMG verification
+- Installed `/Applications/NotchMuse.app` was updated from build 18 to 21;
+  its executable checksum matches the verified main build. NetEase playback,
+  transport, seek, Auto Detect, and visible lyrics passed a short smoke check
 - Redesigned Settings passed real-window English and Simplified Chinese GUI
   smoke, section navigation, preview isolation, and branch CI `36213755351`
 - Product Owner confirms build 18 seek forward/back and final GUI gates PASS; the

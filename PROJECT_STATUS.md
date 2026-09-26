@@ -10,13 +10,16 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - Remote Architecture branch: synchronized; final CI run `36157250718` PASS.
 - Integrated into `main` with merge commit
   `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
-- Settings integration head `7ddba8c7d0fdc4ad7313ba67aab5673de0c4410d`
-  is synchronized to `origin/main`; CI run `36214824933` PASS.
+- Main head `776437a352d8f81ce6915c4779766f91d3142047` is synchronized to
+  `origin/main`; CI run `36214924735` PASS.
 - Repository structure, Swift package tests, GitHub CI, bilingual README,
   report indexes, and build artifact manifests: DONE.
-- Final integrated artifact: `0.8.0` build `20`, arm64, ad-hoc signed,
+- Final integrated artifact: `0.8.0` build `21`, arm64, ad-hoc signed,
   not notarized. DMG SHA-256:
-  `0aa060361f5566bcfcb34fe4bde9c17e7d8a08dd1fcbf9fbb22226c32f8b05e3`.
+  `ea1d037ec22ceb646627b2ecf78104e3ae029395767b6dadc94ef6718727e4b6`.
+- The old `/Applications/NotchMuse.app` was build 18. It was replaced with
+  build 21 from the verified main SHA; the old bundle remains recoverable at
+  `/tmp/NotchMuse-build18-before-settings-20260926.app`.
 - `10_SETTINGS_UI`: DONE. The isolated implementation branch ends at
   `5d74ce67ad25dfd9fa1c0a036cc4f06d05772575`; CI run `36213755351` passed.
   The implementation was integrated into main as `279b910` without changing
@@ -29,21 +32,20 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - NetEase: DONE for the v0.8 candidate.
 - MediaRemote Bridge: DONE for the v0.8 candidate.
 - Auto Detect: DONE for Spotify, Apple Music, and NetEase.
-- v0.8 Candidate: FINAL RC / READY FOR RELEASE DECISION.
-- Product Owner final GUI confirmation: PASS. Individual GUI steps and timing
-  values were not supplied; none are inferred here.
+- v0.8 Candidate: build 21 installed; installed Settings GUI verification pending.
+- Product Owner's earlier final GUI confirmation applies to build 18. The
+  installed build 21 Settings window has not yet been visually verified.
 - Final Engineering is integrated into `main`. No v0.8 tag, GitHub Release, or
   public website release has been created.
 
 ## Candidate Identity
 
-- Version/build: `0.8.0` build `20`.
-- Candidate implementation commit: `279b910` plus the final project-document
-  synchronization commit.
+- Version/build: `0.8.0` build `21`.
+- Source commit: `776437a352d8f81ce6915c4779766f91d3142047`.
 - Executable SHA-256:
-  `7c52681e81f99d8f77f4778ec2926d334b4d28d0081e8bed4acdc4cc14340334`.
+  `cda3bcbf805519e7b9a51c7ecdd90fec76be1b5aa61d00221c483ad3aa51aa13`.
 - DMG: `dist.noindex/NotchMuse.dmg`; SHA-256
-  `0aa060361f5566bcfcb34fe4bde9c17e7d8a08dd1fcbf9fbb22226c32f8b05e3`.
+  `ea1d037ec22ceb646627b2ecf78104e3ae029395767b6dadc94ef6718727e4b6`.
 - Architecture: arm64. Signing: ad-hoc, no Team ID. Developer ID signing,
   notarization, and stapling are not included in this candidate.
 
@@ -53,6 +55,10 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - Localization key parity: 102 English / 102 Simplified Chinese, exact parity.
 - `git diff --check`: PASS.
 - `codesign --verify --deep --strict`: PASS; `hdiutil verify`: PASS.
+- Installed build 21 executable is byte-identical to the verified package.
+  Installed NetEase short smoke confirmed Auto Detect, Play, Pause/Resume,
+  Next/Previous, seek, and visible advancing lyrics. Product Owner reports
+  approximately 7-8 hours of prior use as MANUAL PASS.
 - Product Owner confirms build 18 seek forward/back, Notch Mode/current and
   restart lyrics, custom color persistence, Hide on Hover, Auto Detect player
   combinations/ownership/fallback/stale clearing, Sleep/Wake, and network
@@ -74,6 +80,6 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 
 ## Historical Evidence
 
-Build 7, 14, 15, 16, and 17 observations are historical only. The current
-status above is based on build 18 closure. Prior backup Git sync and install
+Build 7, 14, 15, 16, 17, and 18 observations are historical for the installed
+build 21. Prior backup Git sync and install
 snapshots remain in `PROJECT_HANDOFF.md` as historical evidence.

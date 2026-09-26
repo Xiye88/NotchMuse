@@ -11,6 +11,10 @@
 - Result: Debug/full self-test, English/Simplified Chinese GUI smoke, branch CI,
   Release build, ad-hoc signature, and DMG verification passed. Public release
   remains a separate Product Owner decision.
+- Main deployment closure: old `/Applications/NotchMuse.app` build 18 was
+  replaced with build 21 from main `776437a`; installed executable checksum
+  matches the Release package. NetEase short smoke passed; installed Settings
+  window GUI check is pending.
 
 ## Repository Architecture Cleanup — First Round (2026-09-25)
 
@@ -39,8 +43,9 @@ Last Updated: 2026-09-26
 
 ## Sprint
 
-v0.8 Final Engineering and Settings UI are complete. Build 20 is the local
-final Release Candidate; public release remains a separate approval.
+v0.8 Final Engineering and Settings UI code are complete. Build 21 is installed
+locally; its Settings GUI check remains pending. Public release remains a
+separate approval.
 
 ## Workspace Registry
 

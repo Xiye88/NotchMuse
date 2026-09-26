@@ -18,12 +18,12 @@ closed. Reopen it only for a verified Settings regression.
 | --- | --- | --- |
 | `00_PM` | ACTIVE | Single PM/integration entry point |
 | `01_APP` | ARCHIVED | P0 implementation merged into the candidate |
-| `02_RELEASE` | ACTIVE | Build-20 local artifact complete; public release awaits Product Owner decision |
+| `02_RELEASE` | ACTIVE | Build-21 installed artifact verified; public release awaits Product Owner decision |
 | `03_LAB` | ARCHIVED | Reopen only for a new evidence question |
 | `04_UX` | ARCHIVED | Settings redesign and final GUI smoke complete |
 | `05_MATCHER` | ARCHIVED | Production Matcher remains frozen |
 | `06_DOCS` | ARCHIVED | Sprint documents synchronized; reopen at release gate |
-| `07_QA` | ARCHIVED | Final Engineering and Settings GUI regression complete |
+| `07_QA` | ACTIVE | Installed build-21 Settings GUI closure pending; NetEase short smoke passed |
 
 This table supersedes the historical thread statuses below. Reuse these
 numbers; do not create duplicate role workspaces. Archived workspaces keep

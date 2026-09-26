@@ -6,13 +6,29 @@
   `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.
 - Main integration merge:
   `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
-- Settings integration head:
-  `7ddba8c7d0fdc4ad7313ba67aab5673de0c4410d`; remote verified.
+- Current main source:
+  `776437a352d8f81ce6915c4779766f91d3142047`; remote verified.
 - Architecture CI `36158185905`: PASS.
-- Main Settings integration CI `36214824933`: PASS.
+- Main CI `36214924735`: PASS.
 - `09_REPO_ARCHITECTURE`: DONE / ARCHIVED.
 - `10_SETTINGS_UI`: DONE / ARCHIVED; integrated into main as `279b910`.
 - No v0.8 tag, GitHub Release, or website publication has been created.
+
+## Installed Build Closure — 2026-09-26
+
+- Root cause of the reported old Settings UI: `/Applications/NotchMuse.app`
+  still contained build 18 even though the redesign was on remote main.
+- Rebuilt main as `0.8.0` build 21. The installed executable SHA-256 is
+  `cda3bcbf805519e7b9a51c7ecdd90fec76be1b5aa61d00221c483ad3aa51aa13`,
+  identical to the new package. DMG SHA-256 is
+  `ea1d037ec22ceb646627b2ecf78104e3ae029395767b6dadc94ef6718727e4b6`.
+- Old build 18 remains recoverable at
+  `/tmp/NotchMuse-build18-before-settings-20260926.app`.
+- Installed NetEase short smoke: Auto Detect, Play, Pause/Resume,
+  Next/Previous, seek, and visible lyrics checked. Product Owner separately
+  reports approximately 7-8 hours of use as MANUAL PASS.
+- Installed Settings window GUI check remains pending; do not claim final
+  local closure until the window is visibly inspected.
 
 ## Completed Follow-up — 10_SETTINGS_UI
 
@@ -24,7 +40,7 @@
 - Isolated branch head: `5d74ce67ad25dfd9fa1c0a036cc4f06d05772575`;
   CI run `36213755351` passed. English and Simplified Chinese GUI smoke verified
   the real Settings window, all three sections, live previews, presets, and
-  localized Auto Detect. Main build `20` passed full self-test, ad-hoc signing,
+  localized Auto Detect. Main build `21` passed full self-test, ad-hoc signing,
   and DMG verification.
 - The remaining Product Owner decision is whether to create the v0.8.0 tag and
   GitHub Release. Developer ID signing, notarization, and stapling remain

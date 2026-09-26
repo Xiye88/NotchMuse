@@ -6,16 +6,19 @@ Last Updated: 2026-09-26 — QQ Music / Soda Music expansion active
 
 - Integration branch: `codex/player-expansion-integration`, based on stable
   `main` at `776437a352d8f81ce6915c4779766f91d3142047`.
+- Feature commit `d933c62d0d9641598db61601a3ba1b1754179c43` is pushed to
+  `origin/codex/player-expansion-integration`; macOS CI run `36220000743` PASS.
 - QQ Music and Soda Music are registered as explicit and Auto Detect sources;
   the existing MediaRemote bridge supplies now-playing state, and existing
   QQ/Soda lyric providers remain in place.
-- Local candidate: `0.8.0` build `21`, arm64, ad-hoc signed. Release app build,
+- Local candidate: `0.8.0` build `22`, arm64, ad-hoc signed. Release app build,
   packaged self-test, DMG verification, and SHA-256 checks passed.
 - Debug build and full app self-tests pass. Localization parity is 119/119;
   `git diff --check` passes.
 - Local `swift test` is blocked because the active Command Line Tools toolchain
-  does not provide XCTest. macOS 15 CI and Product Owner GUI checks remain open.
-- No merge, push, tag, or public release has occurred. Matcher and provider
+  does not provide XCTest; macOS CI supplied the formal green run. Product
+  Owner GUI checks remain open.
+- No merge to main, tag, or public release has occurred. Matcher and provider
   priority remain unchanged.
 - QA record: `PLAYER_EXPANSION_HANDOFF.md`.
 

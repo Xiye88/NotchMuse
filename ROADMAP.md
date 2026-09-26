@@ -11,10 +11,12 @@ Status: IMPLEMENTED / LOCAL CANDIDATE BUILT; QA GATES OPEN
 - Keep transport controls, Production Matcher, and Provider priority unchanged.
 - Debug build/full self-tests and Release build 21 packaged self-test pass;
   the arm64 ad-hoc app and DMG verify locally.
-- Remaining: macOS 15 CI, Product Owner GUI checks for handoff and visible
-  lyrics, and restart recovery. Local `swift test` is blocked by missing XCTest
-  in the active Command Line Tools installation.
-- Work is isolated on `codex/player-expansion-integration`; no merge, push,
+- Feature commit `d933c62` is pushed; macOS CI run `36220000743` passed. Latest
+  local candidate is build 22, based on `d933c62`.
+- Remaining: Product Owner GUI checks for handoff and visible lyrics, and
+  restart recovery. Local `swift test` is blocked by missing XCTest in the
+  active Command Line Tools installation.
+- Work is isolated on `codex/player-expansion-integration`; no merge to main,
   tag, or public release has occurred.
 - QA evidence: `PLAYER_EXPANSION_HANDOFF.md`.
 

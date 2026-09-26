@@ -31,8 +31,14 @@
 - Candidate: `0.8.0` build `21`, arm64, ad-hoc signed, not notarized. Executable
   SHA-256 `213b1c5a9f026f7284cc573ee9b4a74d67a576b46f893ee193e85da8c587d398`;
   DMG SHA-256 `5fd7d51a5e885a1adb69436d184d3acc45acdc32a5174e75c8a0bfd8983624bd`.
-- QA evidence: `PLAYER_EXPANSION_HANDOFF.md`. No merge, push,
-  tag, or publication has occurred.
+- Feature commit `d933c62d0d9641598db61601a3ba1b1754179c43` is pushed to origin;
+  macOS CI run `36220000743` passed. Current installable candidate is build 22
+  from that feature commit, arm64/ad-hoc signed; app SHA-256
+  `be4e7030768c7b7ab8069895b2c16521c0f035d3d21378770fab61a654688f61`, DMG
+  SHA-256 `41f70d515d9bea67d3c7d586ccad3a242c55e84b9cd0f1e5212029de5681dc7d`.
+- `PLAYER_EXPANSION_HANDOFF.md` is interim QA and acceptance preparation.
+  Generate the final `00_PM` handoff only after Product Owner GUI acceptance.
+  No merge to main, tag, or publication has occurred.
 
 ## v0.8 Final Engineering Main Integration
 

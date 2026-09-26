@@ -7,7 +7,9 @@
 - Implementation and local Release candidate build: DONE.
 - Debug self-tests, packaged self-test, localization parity, signature and
   DMG verification: PASS.
-- Remaining gates: macOS 15 CI, Product Owner GUI checks for player switching,
+- macOS 15 CI run `36220000743`: PASS. Feature commit `d933c62` pushed to origin.
+- Latest local candidate: build 22, based on `d933c62`.
+- Remaining gates: Product Owner GUI checks for player switching,
   visible synchronized lyrics, pause/resume, and restart recovery.
 - Local `swift test` cannot load XCTest with the active Command Line Tools.
 - No merge, push, tag, or publication is authorized by this task.

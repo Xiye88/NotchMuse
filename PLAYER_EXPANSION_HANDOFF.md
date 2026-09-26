@@ -2,10 +2,15 @@
 
 Date: 2026-09-26
 
+Status: INTERIM — prepared for Product Owner GUI acceptance; final handoff to
+`00_PM` will be written only after that acceptance.
+
 ## Scope
 
 - Baseline: `main` / `776437a352d8f81ce6915c4779766f91d3142047`.
 - Branch: `codex/player-expansion-integration`.
+- Feature commit: `d933c62d0d9641598db61601a3ba1b1754179c43`; pushed to `origin`.
+- macOS CI run `36220000743`: PASS (all jobs and checks green).
 - Add QQ Music (`com.tencent.QQMusicMac`) and Soda Music (`com.soda.music`) to
   explicit selection and Auto Detect using the existing MediaRemote bridge.
 - Keep existing QQ/Soda lyric providers. No Production Matcher, provider
@@ -25,6 +30,11 @@ Date: 2026-09-26
 - Debug build: PASS.
 - Debug `--full-self-test`: PASS.
 - Release candidate `0.8.0` build `21`: PASS, arm64, ad-hoc signed.
+- Latest installable candidate is build `22`, based on feature commit `d933c62`.
+  App SHA-256:
+  `be4e7030768c7b7ab8069895b2c16521c0f035d3d21378770fab61a654688f61`.
+  DMG SHA-256:
+  `41f70d515d9bea67d3c7d586ccad3a242c55e84b9cd0f1e5212029de5681dc7d`.
 - Packaged `--self-test`: PASS.
 - `codesign --verify --deep --strict`: PASS.
 - `hdiutil verify`: PASS.
@@ -52,4 +62,5 @@ Date: 2026-09-26
 - The backend uses a private macOS framework and may require maintenance if
   macOS changes its behavior.
 
-No merge to `main`, push, tag, or public release was performed.
+No merge to `main`, tag, or public release was performed. GUI acceptance and
+final handoff to `00_PM` remain pending.

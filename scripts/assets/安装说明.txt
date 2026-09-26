@@ -1,0 +1,30 @@
+NotchMuse 安装说明 / Installation Guide
+======================================
+
+English
+-------
+This app is not notarized by Apple. Continue only if you trust the source and
+obtained NotchMuse from its official release page.
+
+1. Drag NotchMuse to the Applications folder.
+2. Open Applications and double-click NotchMuse.
+3. If macOS says it cannot check NotchMuse for malicious software, click Done.
+   Do not click Move to Trash.
+4. Open System Settings > Privacy & Security. Under Security, click Open Anyway
+   next to NotchMuse. This option is available for about one hour after the
+   first launch attempt.
+5. When the warning appears again, click Open to confirm. macOS may ask for
+   your account password.
+
+中文（简体）
+-----------
+此应用尚未经过 Apple 公证。请仅在确认来源可信、且从 NotchMuse 官方发布
+页面获取应用后继续。
+
+1. 将 NotchMuse 拖到 Applications 文件夹。
+2. 打开 Applications，双击 NotchMuse。
+3. 如果 macOS 提示无法检查 NotchMuse 是否包含恶意软件，请点“完成”，
+   不要点“移到废纸篓”。
+4. 打开“系统设置”>“隐私与安全性”，在“安全性”区域找到 NotchMuse，点
+   “仍要打开”。此选项通常会在首次尝试打开应用后保留约一小时。
+5. 警告再次出现时，点“打开”确认；macOS 可能会要求输入账户密码。

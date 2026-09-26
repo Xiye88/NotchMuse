@@ -36,10 +36,11 @@ arrow.line(to: NSPoint(x: size.width * 0.535, y: size.height * 0.455))
 NSColor(calibratedRed: 1, green: 0.59, blue: 0.25, alpha: 0.96).setStroke()
 arrow.stroke()
 
-drawCentered("Drag NotchMuse to Applications", y: 152, size: 32, color: .white)
-drawCentered("将 NotchMuse 拖到 Applications 文件夹", y: 112, size: 29, color: .white)
-drawCentered("Not notarized. If blocked: System Settings → Privacy & Security → Open Anyway.", y: 65, size: 18, color: NSColor(white: 0.86, alpha: 1))
-drawCentered("应用尚未公证。若被阻止：系统设置 → 隐私与安全性 → 仍要打开。", y: 34, size: 18, color: NSColor(white: 0.86, alpha: 1))
+drawCentered("Drag to Applications · Open NotchMuse · If warned, click Done", y: 174, size: 24, color: .white)
+drawCentered("拖入 Applications · 打开 NotchMuse · 若提示，点“完成”", y: 143, size: 24, color: .white)
+drawCentered("Don't choose Move to Trash · System Settings → Privacy & Security → Open Anyway", y: 101, size: 17, color: NSColor(white: 0.88, alpha: 1))
+drawCentered("不要选“移到废纸篓” · 系统设置 → 隐私与安全性 → 仍要打开", y: 72, size: 17, color: NSColor(white: 0.88, alpha: 1))
+drawCentered("Not notarized · 应用尚未公证 · Full steps / 完整步骤: 安装说明.txt", y: 35, size: 16, color: NSColor(white: 0.72, alpha: 1))
 
 image.unlockFocus()
 guard let tiff = image.tiffRepresentation,

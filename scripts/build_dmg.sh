@@ -5,15 +5,13 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIST="${NOTCHMUSE_DIST_DIR:-$ROOT/dist.noindex}"
 APP="$DIST/NotchMuse.app"
 DMG="$DIST/NotchMuse.dmg"
-STAGING="$(mktemp -d "${TMPDIR:-/tmp}/notchmuse-dmg.XXXXXX")"
+BACKGROUND="$DIST/NotchMuse-DMG-Background.png"
 SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
-
-trap 'rm -rf "$STAGING"' EXIT
 
 NOTCHMUSE_DIST_DIR="$DIST" "$ROOT/scripts/build_app.sh"
 swift "$ROOT/scripts/render_dmg_background.swift" \
   "$ROOT/scripts/assets/notchmuse-dmg-wave-source.png" \
-  "$STAGING/background.png"
+  "$BACKGROUND"
 
 rm -f "$DMG"
 uvx --from dmgbuild==1.6.7 \
@@ -22,7 +20,8 @@ uvx --from dmgbuild==1.6.7 \
   dmgbuild \
   -s "$ROOT/scripts/notchmuse_dmg.py" \
   -D "application=$APP" \
-  -D "background=$STAGING/background.png" \
+  -D "background=$BACKGROUND" \
+  -D "guide=$ROOT/scripts/assets/安装说明.txt" \
   "NotchMuse" "$DMG"
 
 if [[ "$SIGN_IDENTITY" != "-" ]]; then

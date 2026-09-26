@@ -1,6 +1,6 @@
 # NotchMuse Project Handoff
 
-## DMG Installer Polish — Local Candidate Ready (2026-09-26)
+## DMG Installer Polish — First-Open Guide Update (2026-09-26)
 
 - Baseline: `main` / `origin/main` at `ad24d74be5848026a92944f4efe910c88ef9f15a`;
   clean at start. Work is isolated on `codex/dmg-polish` in this existing
@@ -10,8 +10,8 @@
   modify or replace published beta.1 files or perform release/Gatekeeper actions.
 - Scope: polish only the mounted Finder installer presentation: compact window,
   NotchMuse at left, Applications at right, clear drag arrow, music-led bitmap
-  background, and concise English/Simplified Chinese installation and
-  Gatekeeper help. App functionality and signing are unchanged.
+  background, and concise English/Simplified Chinese first-open and Gatekeeper
+  help. App functionality and signing are unchanged.
 - Completed: baseline and clean worktree verified; music-wave background,
   native bilingual copy/arrow renderer, and pinned offline `dmgbuild`/`.DS_Store`
   tooling (`dmgbuild 1.6.7`, `ds_store 1.3.3`, `mac_alias 2.2.3`) added.
@@ -19,11 +19,19 @@
   release builds remain on the existing default path. Candidate
   `dist.noindex/dmg-polish/NotchMuse.dmg` was built as
   `0.8.0-beta.1-dmg-polish` / build 30; app self-test/signature, DMG integrity,
-  and `.DS_Store` package/layout checks pass. SHA-256:
-  `53565c36e9f070c0cf8fe084a57a8c39048774dd87250948c30095d6205fe091`.
+  and `.DS_Store` package/layout checks pass. The image includes bilingual
+  `安装说明.txt`, with the first-open “Done, not Move to Trash” and
+  `Privacy & Security → Open Anyway` flow. SHA-256:
+  `78c39591c07ead92bdadfdfa534d0701b2f67c0e2e609be2097ad2e6f6f6d71db0`.
+- Viewable background: `dist.noindex/dmg-polish/NotchMuse-DMG-Background.png`
+  (1536×1024), SHA-256
+  `b410920f4126b0b4691785530b4cb3efe137ce1ce6ec5bdeaf0936faf7003f1f`.
+  No quarantine-removal script was added; beta.1 remains untouched.
 - Open verification: `.DS_Store` entries are validated offline, but Finder's
   actual rendered window still needs a screenshot when the Mac is unlocked;
   Gatekeeper behavior is PM-owned and outside this work.
+- Follow-up completed: clearer first-open steps are in the background and
+  bilingual `安装说明.txt`; no quarantine-removal script or public release.
 
 ## Local Reinstall Test — 2026-09-26
 

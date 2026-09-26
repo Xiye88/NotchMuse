@@ -169,7 +169,7 @@ final class SettingsWindowController: NSWindowController {
     private let displayTargetPopUp = NSPopUpButton()
     private let widthControl = NSSegmentedControl(labels: DisplayWidth.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let customWidthSlider = NSSlider(value: 500, minValue: 180, maxValue: 1000, target: nil, action: nil)
-    private let colorPopUp = NSPopUpButton()
+    private var colorButtons: [NSButton] = []
     private let lyricsColorWell = NSColorWell()
     private let fontSizeSlider = NSSlider(value: 13, minValue: 10, maxValue: 60, target: nil, action: nil)
     private let animationSpeedSlider = NSSlider(value: 1, minValue: 0.1, maxValue: 3, target: nil, action: nil)
@@ -250,12 +250,6 @@ final class SettingsWindowController: NSWindowController {
         customWidthSlider.action = #selector(customWidthChanged)
         configureNumericField(customWidthValue, action: #selector(customWidthEntered))
 
-        for preset in LyricsColorPreset.allCases {
-            colorPopUp.addItem(withTitle: L10n.text(preset.rawValue))
-            colorPopUp.lastItem?.image = swatch(BrandStyle.gradientColors(for: preset)[0])
-        }
-        colorPopUp.target = self
-        colorPopUp.action = #selector(colorChanged)
         lyricsColorWell.target = self
         lyricsColorWell.action = #selector(lyricsColorChanged)
         lyricsColorWell.isContinuous = true
@@ -317,7 +311,7 @@ final class SettingsWindowController: NSWindowController {
         configure(page: displayPage)
         configure(page: appearancePage)
         let appearanceGrid = grid([
-            [label(L10n.text("Lyrics Color")), NSStackView(views: [colorPopUp, lyricsColorWell])],
+            [label(L10n.text("Lyrics Color")), colorPalette()],
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue, unit: "pt")],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue, unit: "×")],
             [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
@@ -366,6 +360,9 @@ final class SettingsWindowController: NSWindowController {
         sidebarPanel.layer?.borderColor = NSColor.white.withAlphaComponent(0.65).cgColor
         sidebarPanel.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebar)
+        let sidebarFooter = SettingsSidebarFooterView()
+        sidebarFooter.translatesAutoresizingMaskIntoConstraints = false
+        sidebarPanel.addSubview(sidebarFooter)
 
         let previewHeader = NSStackView(views: [sectionTitle(L10n.text("Live Preview")), previewModeControl])
         previewHeader.orientation = .horizontal
@@ -408,6 +405,10 @@ final class SettingsWindowController: NSWindowController {
             sidebar.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 14),
             sidebar.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -14),
             sidebar.topAnchor.constraint(equalTo: sidebarPanel.topAnchor, constant: 24),
+            sidebarFooter.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 14),
+            sidebarFooter.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -14),
+            sidebarFooter.bottomAnchor.constraint(equalTo: sidebarPanel.bottomAnchor, constant: -14),
+            sidebarFooter.heightAnchor.constraint(equalToConstant: 172),
             scrollView.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: 18),
             scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
@@ -618,11 +619,48 @@ final class SettingsWindowController: NSWindowController {
         return box
     }
 
+    private var paletteColors: [(String, NSColor, LyricsColorPreset?)] {
+        [("Orange", .systemOrange, .orange),
+         ("Red", .systemRed, nil),
+         ("Pink", .systemPink, nil),
+         ("Purple", .systemPurple, .purple),
+         ("Blue", .systemBlue, .blue),
+         ("Cyan", .systemTeal, nil),
+         ("Green", .systemGreen, .green),
+         ("Yellow", .systemYellow, nil),
+         ("White", .white, .white)]
+    }
+
+    private func colorPalette() -> NSView {
+        let buttons = paletteColors.enumerated().map { index, entry in
+            let button = NSButton(image: swatch(entry.1), target: self, action: #selector(colorChanged(_:)))
+            button.isBordered = false
+            button.tag = index
+            button.toolTip = L10n.text(entry.0)
+            button.setAccessibilityLabel(L10n.text(entry.0))
+            button.wantsLayer = true
+            button.layer?.cornerRadius = 18
+            button.widthAnchor.constraint(equalToConstant: 36).isActive = true
+            button.heightAnchor.constraint(equalToConstant: 36).isActive = true
+            return button
+        }
+        colorButtons = buttons
+        lyricsColorWell.toolTip = L10n.text("Custom")
+        lyricsColorWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        let row = NSStackView(views: buttons + [lyricsColorWell])
+        row.orientation = .horizontal
+        row.spacing = 7
+        row.alignment = .centerY
+        return row
+    }
+
     private func swatch(_ color: NSColor) -> NSImage {
-        let image = NSImage(size: NSSize(width: 12, height: 12))
+        let image = NSImage(size: NSSize(width: 30, height: 30))
         image.lockFocus()
         color.setFill()
-        NSBezierPath(ovalIn: NSRect(x: 1, y: 1, width: 10, height: 10)).fill()
+        NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24)).fill()
+        NSColor.black.withAlphaComponent(0.12).setStroke()
+        NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24)).stroke()
         image.unlockFocus()
         return image
     }
@@ -634,7 +672,6 @@ final class SettingsWindowController: NSWindowController {
         displayTargetPopUp.selectItem(at: DisplayTarget.allCases.firstIndex(of: AppPreferences.displayTarget) ?? 0)
         widthControl.selectedSegment = DisplayWidth.allCases.firstIndex(of: AppPreferences.displayWidth) ?? 0
         customWidthSlider.doubleValue = Double(AppPreferences.customWidth)
-        colorPopUp.selectItem(at: LyricsColorPreset.allCases.firstIndex(of: AppPreferences.colorPreset) ?? 0)
         lyricsColorWell.color = AppPreferences.customLyricsColor
         updateCustomColorSwatch()
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
@@ -716,21 +753,25 @@ final class SettingsWindowController: NSWindowController {
         commit(customWidthValue, slider: customWidthSlider, key: AppPreferences.customWidthKey, minimum: 180, maximum: 1000, format: "%.0f")
     }
 
-    @objc private func colorChanged() {
-        let presets = LyricsColorPreset.allCases
-        guard presets.indices.contains(colorPopUp.indexOfSelectedItem) else { return }
-        let preset = presets[colorPopUp.indexOfSelectedItem]
-        save(preset, key: AppPreferences.colorPresetKey)
-        if preset == .custom { lyricsColorWell.activate(true) }
+    @objc private func colorChanged(_ sender: NSButton) {
+        guard paletteColors.indices.contains(sender.tag) else { return }
+        let selection = paletteColors[sender.tag]
+        if let preset = selection.2 {
+            save(preset, key: AppPreferences.colorPresetKey)
+        } else {
+            lyricsColorWell.color = selection.1
+            lyricsColorChanged()
+        }
+        updateCustomColorSwatch()
     }
 
     @objc private func lyricsColorChanged() {
         AppPreferences.setColor(lyricsColorWell.color, forKey: AppPreferences.customLyricsColorKey)
         updateCustomColorSwatch()
-        colorPopUp.selectItem(at: LyricsColorPreset.allCases.firstIndex(of: .custom) ?? 0)
         UserDefaults.standard.set(LyricsColorPreset.custom.rawValue, forKey: AppPreferences.colorPresetKey)
         onSettingsChange()
         updatePreview()
+        updateCustomColorSwatch()
     }
 
     @objc private func fontSizeChanged() {
@@ -795,8 +836,14 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func updateCustomColorSwatch() {
-        guard let index = LyricsColorPreset.allCases.firstIndex(of: .custom) else { return }
-        colorPopUp.item(at: index)?.image = swatch(lyricsColorWell.color)
+        for (index, button) in colorButtons.enumerated() {
+            let color = paletteColors[index]
+            let selected = color.2 == AppPreferences.colorPreset ||
+                (color.2 == nil && AppPreferences.colorPreset == .custom &&
+                 color.1.usingColorSpace(.deviceRGB) == lyricsColorWell.color.usingColorSpace(.deviceRGB))
+            button.layer?.borderWidth = selected ? 2 : 0
+            button.layer?.borderColor = NSColor.systemBlue.cgColor
+        }
     }
 
     private func commit(
@@ -949,6 +996,63 @@ private final class SettingsBackdropView: NSView {
             .draw(in: bounds, angle: 18)
         NSColor.white.withAlphaComponent(0.22).setFill()
         NSBezierPath(roundedRect: bounds.insetBy(dx: 8, dy: 8), xRadius: 18, yRadius: 18).fill()
+    }
+}
+
+private final class SettingsSidebarFooterView: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.cornerRadius = 18
+        layer?.masksToBounds = true
+        layer?.borderWidth = 1
+        layer?.borderColor = NSColor.white.withAlphaComponent(0.85).cgColor
+
+        let symbol = NSImageView(image: NSImage(systemSymbolName: "music.note", accessibilityDescription: "NotchMuse") ?? NSImage())
+        symbol.contentTintColor = NSColor.systemPurple
+        symbol.wantsLayer = true
+        symbol.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.82).cgColor
+        symbol.layer?.cornerRadius = 12
+        symbol.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(symbol)
+
+        let slogan = NSTextField(wrappingLabelWithString: L10n.text("Let music flow through the notch"))
+        slogan.font = .systemFont(ofSize: 17, weight: .semibold)
+        slogan.textColor = NSColor(calibratedRed: 0.13, green: 0.18, blue: 0.31, alpha: 1)
+        slogan.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(slogan)
+
+        NSLayoutConstraint.activate([
+            symbol.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 22),
+            symbol.topAnchor.constraint(equalTo: topAnchor, constant: 20),
+            symbol.widthAnchor.constraint(equalToConstant: 42),
+            symbol.heightAnchor.constraint(equalToConstant: 42),
+            slogan.leadingAnchor.constraint(equalTo: symbol.leadingAnchor),
+            slogan.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
+            slogan.topAnchor.constraint(equalTo: symbol.bottomAnchor, constant: 10)
+        ])
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func draw(_ dirtyRect: NSRect) {
+        NSGradient(starting: NSColor(calibratedRed: 0.97, green: 0.95, blue: 1, alpha: 1),
+                   ending: NSColor(calibratedRed: 0.82, green: 0.88, blue: 1, alpha: 1))?
+            .draw(in: bounds, angle: 45)
+        for (offset, color) in [(0.0, NSColor.systemPurple.withAlphaComponent(0.12)),
+                                (13.0, NSColor.systemBlue.withAlphaComponent(0.12)),
+                                (26.0, NSColor.white.withAlphaComponent(0.32))] {
+            let wave = NSBezierPath()
+            wave.move(to: NSPoint(x: -16, y: 20 + offset))
+            wave.curve(to: NSPoint(x: bounds.maxX + 16, y: 26 + offset),
+                       controlPoint1: NSPoint(x: bounds.midX * 0.7, y: 76 + offset),
+                       controlPoint2: NSPoint(x: bounds.midX * 1.5, y: -12 + offset))
+            wave.line(to: NSPoint(x: bounds.maxX + 16, y: 0))
+            wave.line(to: NSPoint(x: -16, y: 0))
+            wave.close()
+            color.setFill()
+            wave.fill()
+        }
     }
 }
 

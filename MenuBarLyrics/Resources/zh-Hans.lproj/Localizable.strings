@@ -77,6 +77,11 @@
 "None" = "无";
 "Black" = "黑色";
 "Custom" = "自定义";
+"Red" = "红色";
+"Pink" = "粉色";
+"Cyan" = "青色";
+"Yellow" = "黄色";
+"Let music flow through the notch" = "让音乐在刘海间流动";
 "Custom Width" = "自定义宽度";
 "Appearance" = "外观";
 "Lyrics Color" = "歌词颜色";
@@ -105,6 +110,10 @@
 "Live Preview" = "实时预览";
 "Status Bar Preview" = "状态栏预览";
 "Notch Preview" = "刘海预览";
+"Preview lyric sample" = "让音乐在刘海间流动";
+"Preview song · Preview artist" = "示例歌曲 · 示例歌手";
+"Preview song" = "示例歌曲";
+"Preview artist" = "示例歌手";
 "Restore Defaults" = "恢复默认";
 "Warm Orange" = "暖橙动感";
 "Fresh Minimal" = "清新简约";

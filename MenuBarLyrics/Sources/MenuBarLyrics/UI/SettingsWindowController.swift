@@ -169,7 +169,7 @@ final class SettingsWindowController: NSWindowController {
     private let displayTargetPopUp = NSPopUpButton()
     private let widthControl = NSSegmentedControl(labels: DisplayWidth.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let customWidthSlider = NSSlider(value: 500, minValue: 180, maxValue: 1000, target: nil, action: nil)
-    private let colorPopUp = NSPopUpButton()
+    private var colorButtons: [NSButton] = []
     private let lyricsColorWell = NSColorWell()
     private let fontSizeSlider = NSSlider(value: 13, minValue: 10, maxValue: 60, target: nil, action: nil)
     private let animationSpeedSlider = NSSlider(value: 1, minValue: 0.1, maxValue: 3, target: nil, action: nil)
@@ -186,9 +186,9 @@ final class SettingsWindowController: NSWindowController {
     private let notchBackgroundColorWell = NSColorWell()
     private let notchHideOnHoverSwitch = NSSwitch()
     private let contentStack = NSStackView()
+    private var cards: [NSView] = []
     private let preview = SettingsPreviewView()
     private let previewModeControl = NSSegmentedControl(labels: [L10n.text("Status Bar Preview"), L10n.text("Notch Preview")], trackingMode: .selectOne, target: nil, action: nil)
-    private let presetPopUp = NSPopUpButton()
     private let displayPage = NSStackView()
     private let appearancePage = NSStackView()
     private let generalPage = NSStackView()
@@ -206,13 +206,15 @@ final class SettingsWindowController: NSWindowController {
         self.onSettingsChange = onSettingsChange
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 1080, height: 760),
+            contentRect: NSRect(x: 0, y: 0, width: 1040, height: 730),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
         window.title = L10n.text("NotchMuse Settings")
-        window.minSize = NSSize(width: 1040, height: 700)
+        window.minSize = NSSize(width: 900, height: 610)
+        window.titlebarAppearsTransparent = true
+        window.appearance = NSAppearance(named: .aqua)
         window.isReleasedWhenClosed = false
         window.center()
         super.init(window: window)
@@ -249,12 +251,6 @@ final class SettingsWindowController: NSWindowController {
         customWidthSlider.action = #selector(customWidthChanged)
         configureNumericField(customWidthValue, action: #selector(customWidthEntered))
 
-        for preset in LyricsColorPreset.allCases {
-            colorPopUp.addItem(withTitle: L10n.text(preset.rawValue))
-            colorPopUp.lastItem?.image = swatch(BrandStyle.gradientColors(for: preset)[0])
-        }
-        colorPopUp.target = self
-        colorPopUp.action = #selector(colorChanged)
         lyricsColorWell.target = self
         lyricsColorWell.action = #selector(lyricsColorChanged)
         lyricsColorWell.isContinuous = true
@@ -302,13 +298,6 @@ final class SettingsWindowController: NSWindowController {
         previewModeControl.target = self
         previewModeControl.action = #selector(previewModeChanged)
         previewModeControl.selectedSegment = 0
-        presetPopUp.addItem(withTitle: L10n.text("Quick Presets"))
-        for title in ["Warm Orange", "Fresh Minimal", "Dreamy Soft", "Pure"] {
-            presetPopUp.addItem(withTitle: L10n.text(title))
-        }
-        presetPopUp.target = self
-        presetPopUp.action = #selector(presetChanged)
-
         let displayGrid = grid([
             [label(L10n.text("Display Mode")), displayModeControl],
             [label(L10n.text("Status Bar Position")), positionControl],
@@ -323,7 +312,7 @@ final class SettingsWindowController: NSWindowController {
         configure(page: displayPage)
         configure(page: appearancePage)
         let appearanceGrid = grid([
-            [label(L10n.text("Lyrics Color")), NSStackView(views: [colorPopUp, lyricsColorWell])],
+            [label(L10n.text("Lyrics Color")), colorPalette()],
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue, unit: "pt")],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue, unit: "×")],
             [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
@@ -334,10 +323,8 @@ final class SettingsWindowController: NSWindowController {
         notchBackgroundRow = appearanceGrid.row(at: 4)
         notchBackgroundColorRow = appearanceGrid.row(at: 5)
         notchHideOnHoverRow = appearanceGrid.row(at: 6)
-        let appearanceActions = NSStackView(views: [presetPopUp, resetButton(for: .appearance)])
-        appearanceActions.orientation = .horizontal
-        appearanceActions.spacing = 8
-        appearancePage.addArrangedSubview(card(content: cardBody(title: "Appearance", subtitle: "Customize the look of your lyrics.", grid: appearanceGrid, trailing: appearanceActions)))
+        appearancePage.addArrangedSubview(card(content: cardBody(title: "Appearance", subtitle: "Customize the look of your lyrics.", grid: appearanceGrid, trailing: resetButton(for: .appearance))))
+        appearancePage.addArrangedSubview(quickPresetsCard())
         configure(page: generalPage)
         let generalGrid = grid([
             [label(L10n.text("Music Player")), playerPopUp],
@@ -350,19 +337,33 @@ final class SettingsWindowController: NSWindowController {
         displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: "Choose how and where lyrics appear.", grid: displayGrid, trailing: resetButton(for: .display))))
 
         guard let contentView = window?.contentView else { return }
+        let backdrop = SettingsBackdropView(frame: contentView.bounds)
+        backdrop.autoresizingMask = [.width, .height]
+        contentView.addSubview(backdrop)
         let sidebar = NSStackView()
         sidebar.orientation = .vertical
         sidebar.alignment = .leading
-        sidebar.spacing = 6
+        sidebar.spacing = 10
         sidebar.translatesAutoresizingMaskIntoConstraints = false
         sidebar.addArrangedSubview(sidebarTitle())
+        sidebar.setCustomSpacing(28, after: sidebar.arrangedSubviews[0])
         for page in SettingsPage.allCases {
             let button = sidebarButton(for: page)
             sidebarButtons[page] = button
             sidebar.addArrangedSubview(button)
         }
         updateSidebarSelection()
-        sidebar.addArrangedSubview(NSView())
+        let sidebarPanel = NSView()
+        sidebarPanel.wantsLayer = true
+        sidebarPanel.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.46).cgColor
+        sidebarPanel.layer?.cornerRadius = 14
+        sidebarPanel.layer?.borderWidth = 1
+        sidebarPanel.layer?.borderColor = NSColor.white.withAlphaComponent(0.65).cgColor
+        sidebarPanel.translatesAutoresizingMaskIntoConstraints = false
+        sidebarPanel.addSubview(sidebar)
+        let sidebarFooter = SettingsSidebarFooterView()
+        sidebarFooter.translatesAutoresizingMaskIntoConstraints = false
+        sidebarPanel.addSubview(sidebarFooter)
 
         let previewHeader = NSStackView(views: [sectionTitle(L10n.text("Live Preview")), previewModeControl])
         previewHeader.orientation = .horizontal
@@ -370,13 +371,15 @@ final class SettingsWindowController: NSWindowController {
         previewHeader.alignment = .centerY
         let previewContents = NSStackView(views: [previewHeader, preview])
         previewContents.orientation = .vertical
-        previewContents.spacing = 12
+        previewContents.spacing = 16
         let previewCard = card(content: previewContents)
-        preview.heightAnchor.constraint(equalToConstant: 160).isActive = true
+        preview.widthAnchor.constraint(equalTo: previewCard.widthAnchor, constant: -40).isActive = true
+        preview.heightAnchor.constraint(equalToConstant: 196).isActive = true
+        previewHeader.widthAnchor.constraint(equalTo: preview.widthAnchor).isActive = true
 
         contentStack.orientation = .vertical
         contentStack.alignment = .leading
-        contentStack.spacing = 16
+        contentStack.spacing = 18
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentStack.addArrangedSubview(previewCard)
         contentStack.addArrangedSubview(displayPage)
@@ -384,21 +387,44 @@ final class SettingsWindowController: NSWindowController {
         contentStack.addArrangedSubview(generalPage)
         appearancePage.isHidden = true
         generalPage.isHidden = true
-        contentView.addSubview(sidebar)
-        contentView.addSubview(contentStack)
-        NSLayoutConstraint.activate([
-            sidebar.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 22),
-            sidebar.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 28),
-            sidebar.widthAnchor.constraint(equalToConstant: 170),
-            contentStack.leadingAnchor.constraint(equalTo: sidebar.trailingAnchor, constant: 24),
-            contentStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -28),
-            contentStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24)
+        let scrollView = NSScrollView()
+        scrollView.drawsBackground = false
+        scrollView.hasVerticalScroller = true
+        scrollView.autohidesScrollers = true
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        let document = FlippedSettingsDocumentView()
+        document.translatesAutoresizingMaskIntoConstraints = false
+        document.addSubview(contentStack)
+        scrollView.documentView = document
+        contentView.addSubview(sidebarPanel)
+        contentView.addSubview(scrollView)
+        NSLayoutConstraint.activate(cards.map { $0.widthAnchor.constraint(equalTo: contentStack.widthAnchor) } + [
+            sidebarPanel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            sidebarPanel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
+            sidebarPanel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -18),
+            sidebarPanel.widthAnchor.constraint(equalToConstant: 205),
+            sidebar.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 14),
+            sidebar.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -14),
+            sidebar.topAnchor.constraint(equalTo: sidebarPanel.topAnchor, constant: 24),
+            sidebarFooter.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 14),
+            sidebarFooter.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -14),
+            sidebarFooter.bottomAnchor.constraint(equalTo: sidebarPanel.bottomAnchor, constant: -14),
+            sidebarFooter.heightAnchor.constraint(equalToConstant: 172),
+            scrollView.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: 18),
+            scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
+            scrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -18),
+            document.widthAnchor.constraint(equalTo: scrollView.contentView.widthAnchor),
+            contentStack.leadingAnchor.constraint(equalTo: document.leadingAnchor),
+            contentStack.topAnchor.constraint(equalTo: document.topAnchor),
+            contentStack.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -8),
+            contentStack.bottomAnchor.constraint(equalTo: document.bottomAnchor, constant: -18)
         ])
     }
 
     private func sectionTitle(_ title: String) -> NSTextField {
         let label = NSTextField(labelWithString: title)
-        label.font = .systemFont(ofSize: 13, weight: .semibold)
+        label.font = .systemFont(ofSize: 17, weight: .semibold)
         return label
     }
 
@@ -408,21 +434,33 @@ final class SettingsWindowController: NSWindowController {
         page.spacing = 12
     }
 
-    private func sidebarTitle() -> NSTextField {
+    private func sidebarTitle() -> NSView {
         let title = NSTextField(labelWithString: "NotchMuse")
-        title.font = .systemFont(ofSize: 18, weight: .semibold)
-        return title
+        title.font = .systemFont(ofSize: 20, weight: .bold)
+        title.textColor = NSColor(calibratedRed: 0.10, green: 0.27, blue: 0.51, alpha: 1)
+        let icon = NSImageView(image: NSImage(systemSymbolName: "waveform", accessibilityDescription: "NotchMuse") ?? NSImage())
+        icon.contentTintColor = .systemBlue
+        icon.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        let row = NSStackView(views: [icon, title])
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 10
+        return row
     }
 
     private func sidebarButton(for page: SettingsPage) -> NSButton {
         let button = NSButton(title: L10n.text(page.title), target: self, action: #selector(pageChanged))
-        button.bezelStyle = .rounded
+        button.isBordered = false
         button.setButtonType(.toggle)
+        button.cell?.wraps = true
         button.alignment = .left
         button.image = NSImage(systemSymbolName: page.symbol, accessibilityDescription: L10n.text(page.title))
         button.imagePosition = .imageLeading
         button.identifier = NSUserInterfaceItemIdentifier(page.rawValue)
-        button.widthAnchor.constraint(equalToConstant: 164).isActive = true
+        button.wantsLayer = true
+        button.layer?.cornerRadius = 11
+        button.widthAnchor.constraint(equalToConstant: 177).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 62).isActive = true
         button.toolTip = L10n.text(page.help)
         return button
     }
@@ -430,42 +468,62 @@ final class SettingsWindowController: NSWindowController {
     private func card(content: NSView) -> NSView {
         let box = NSView()
         box.wantsLayer = true
-        box.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
-        box.layer?.borderColor = NSColor.separatorColor.cgColor
+        box.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.73).cgColor
+        box.layer?.borderColor = NSColor.white.withAlphaComponent(0.8).cgColor
         box.layer?.borderWidth = 1
-        box.layer?.cornerRadius = 8
+        box.layer?.cornerRadius = 14
+        box.layer?.shadowColor = NSColor(calibratedRed: 0.19, green: 0.31, blue: 0.53, alpha: 1).cgColor
+        box.layer?.shadowOpacity = 0.12
+        box.layer?.shadowRadius = 14
+        box.layer?.shadowOffset = CGSize(width: 0, height: -4)
         box.addSubview(content)
         content.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 18),
-            content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -18),
-            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 16),
-            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -16)
+            content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 20),
+            content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -20),
+            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 18),
+            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -18)
         ])
         box.translatesAutoresizingMaskIntoConstraints = false
-        box.widthAnchor.constraint(equalToConstant: 796).isActive = true
+        cards.append(box)
         return box
     }
 
     private func cardBody(title: String, subtitle: String, grid: NSGridView, trailing: NSView) -> NSStackView {
-        let body = NSStackView(views: [cardHeader(title: title, subtitle: subtitle, trailing: trailing), grid])
+        let header = cardHeader(title: title, subtitle: subtitle, trailing: trailing)
+        let body = NSStackView(views: [header, grid])
         body.orientation = .vertical
         body.alignment = .leading
-        body.spacing = 14
+        body.spacing = 18
+        header.widthAnchor.constraint(equalTo: grid.widthAnchor).isActive = true
+        grid.widthAnchor.constraint(equalTo: body.widthAnchor).isActive = true
         return body
     }
 
     private func cardHeader(title: String, subtitle: String, trailing: NSView) -> NSStackView {
         let heading = NSTextField(labelWithString: L10n.text(title))
-        heading.font = .systemFont(ofSize: 15, weight: .semibold)
+        heading.font = .systemFont(ofSize: 17, weight: .semibold)
         let detail = NSTextField(labelWithString: L10n.text(subtitle))
         detail.textColor = .secondaryLabelColor
-        detail.font = .systemFont(ofSize: 12)
+        detail.font = .systemFont(ofSize: 13)
+        let symbol: String
+        switch title {
+        case "Display": symbol = "rectangle.on.rectangle"
+        case "Appearance": symbol = "sparkles"
+        default: symbol = "gearshape"
+        }
+        let icon = NSImageView(image: NSImage(systemSymbolName: symbol, accessibilityDescription: L10n.text(title)) ?? NSImage())
+        icon.contentTintColor = .systemBlue
+        icon.widthAnchor.constraint(equalToConstant: 22).isActive = true
         let labels = NSStackView(views: [heading, detail])
         labels.orientation = .vertical
         labels.alignment = .leading
         labels.spacing = 2
-        let header = NSStackView(views: [labels, trailing])
+        let headingGroup = NSStackView(views: [icon, labels])
+        headingGroup.orientation = .horizontal
+        headingGroup.spacing = 10
+        headingGroup.alignment = .centerY
+        let header = NSStackView(views: [headingGroup, trailing])
         header.orientation = .horizontal
         header.distribution = .equalSpacing
         header.alignment = .top
@@ -476,19 +534,50 @@ final class SettingsWindowController: NSWindowController {
         NSButton(title: L10n.text("Restore Defaults"), target: self, action: #selector(resetSection))
     }
 
+    private func quickPresetsCard() -> NSView {
+        let titles = ["Warm Orange", "Fresh Minimal", "Dreamy Soft", "Pure"]
+        let colors: [NSColor] = [.systemOrange, .systemTeal, .systemPurple, .systemGreen]
+        let tiles = zip(titles, colors).enumerated().map { index, entry in
+            let button = NSButton(title: L10n.text(entry.0), target: self, action: #selector(presetButtonChanged))
+            button.tag = index + 1
+            button.isBordered = false
+            button.image = NSImage(systemSymbolName: "waveform", accessibilityDescription: L10n.text(entry.0))
+            button.imagePosition = .imageAbove
+            button.contentTintColor = entry.1
+            button.font = .systemFont(ofSize: 12, weight: .medium)
+            button.wantsLayer = true
+            button.layer?.backgroundColor = entry.1.withAlphaComponent(0.09).cgColor
+            button.layer?.borderColor = entry.1.withAlphaComponent(0.25).cgColor
+            button.layer?.borderWidth = 1
+            button.layer?.cornerRadius = 10
+            button.widthAnchor.constraint(equalToConstant: 130).isActive = true
+            button.heightAnchor.constraint(equalToConstant: 72).isActive = true
+            return button
+        }
+        let row = NSStackView(views: tiles)
+        row.orientation = .horizontal
+        row.spacing = 12
+        let contents = NSStackView(views: [sectionTitle(L10n.text("Quick Presets")), row])
+        contents.orientation = .vertical
+        contents.alignment = .leading
+        contents.spacing = 14
+        return card(content: contents)
+    }
+
     private func label(_ title: String) -> NSTextField {
         let label = NSTextField(labelWithString: title)
-        label.alignment = .right
+        label.alignment = .left
+        label.font = .systemFont(ofSize: 13, weight: .medium)
         return label
     }
 
     private func grid(_ rows: [[NSView]]) -> NSGridView {
         let grid = NSGridView(views: rows)
-        grid.rowSpacing = 14
-        grid.columnSpacing = 18
-        grid.column(at: 0).xPlacement = .trailing
+        grid.rowSpacing = 18
+        grid.columnSpacing = 20
+        grid.column(at: 0).width = 145
+        grid.column(at: 0).xPlacement = .leading
         grid.column(at: 1).xPlacement = .fill
-        grid.widthAnchor.constraint(equalToConstant: 760).isActive = true
         return grid
     }
 
@@ -497,7 +586,7 @@ final class SettingsWindowController: NSWindowController {
         value.setContentHuggingPriority(.required, for: .horizontal)
         value.widthAnchor.constraint(equalToConstant: 58).isActive = true
         slider.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 440).isActive = true
+        slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 180).isActive = true
         let unitLabel = NSTextField(labelWithString: unit)
         unitLabel.textColor = .secondaryLabelColor
         let stack = NSStackView(views: [slider, value, unitLabel])
@@ -531,23 +620,61 @@ final class SettingsWindowController: NSWindowController {
         return box
     }
 
+    private var paletteColors: [(String, NSColor, LyricsColorPreset?)] {
+        [("Orange", .systemOrange, .orange),
+         ("Red", .systemRed, nil),
+         ("Pink", .systemPink, nil),
+         ("Purple", .systemPurple, .purple),
+         ("Blue", .systemBlue, .blue),
+         ("Cyan", .systemTeal, nil),
+         ("Green", .systemGreen, .green),
+         ("Yellow", .systemYellow, nil),
+         ("White", .white, .white)]
+    }
+
+    private func colorPalette() -> NSView {
+        let buttons = paletteColors.enumerated().map { index, entry in
+            let button = NSButton(image: swatch(entry.1), target: self, action: #selector(colorChanged(_:)))
+            button.isBordered = false
+            button.tag = index
+            button.toolTip = L10n.text(entry.0)
+            button.setAccessibilityLabel(L10n.text(entry.0))
+            button.wantsLayer = true
+            button.layer?.cornerRadius = 18
+            button.widthAnchor.constraint(equalToConstant: 36).isActive = true
+            button.heightAnchor.constraint(equalToConstant: 36).isActive = true
+            return button
+        }
+        colorButtons = buttons
+        lyricsColorWell.toolTip = L10n.text("Custom")
+        lyricsColorWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        let row = NSStackView(views: buttons + [lyricsColorWell])
+        row.orientation = .horizontal
+        row.spacing = 7
+        row.alignment = .centerY
+        return row
+    }
+
     private func swatch(_ color: NSColor) -> NSImage {
-        let image = NSImage(size: NSSize(width: 12, height: 12))
+        let image = NSImage(size: NSSize(width: 30, height: 30))
         image.lockFocus()
         color.setFill()
-        NSBezierPath(ovalIn: NSRect(x: 1, y: 1, width: 10, height: 10)).fill()
+        NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24)).fill()
+        NSColor.black.withAlphaComponent(0.12).setStroke()
+        NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24)).stroke()
         image.unlockFocus()
         return image
     }
 
     private func sync() {
         displayModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: AppPreferences.displayMode) ?? 0
+        previewModeControl.selectedSegment = displayModeControl.selectedSegment
+        preview.mode = AppPreferences.displayMode == .notch ? .notch : .statusBar
         positionControl.selectedSegment = LyricsPosition.allCases.firstIndex(of: AppPreferences.position) ?? 1
         notchStyleControl.selectedSegment = NotchStyle.allCases.firstIndex(of: AppPreferences.notchStyle) ?? 0
         displayTargetPopUp.selectItem(at: DisplayTarget.allCases.firstIndex(of: AppPreferences.displayTarget) ?? 0)
         widthControl.selectedSegment = DisplayWidth.allCases.firstIndex(of: AppPreferences.displayWidth) ?? 0
         customWidthSlider.doubleValue = Double(AppPreferences.customWidth)
-        colorPopUp.selectItem(at: LyricsColorPreset.allCases.firstIndex(of: AppPreferences.colorPreset) ?? 0)
         lyricsColorWell.color = AppPreferences.customLyricsColor
         updateCustomColorSwatch()
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
@@ -588,6 +715,8 @@ final class SettingsWindowController: NSWindowController {
         let modes = DisplayMode.allCases
         guard modes.indices.contains(displayModeControl.selectedSegment) else { return }
         save(modes[displayModeControl.selectedSegment], key: AppPreferences.displayModeKey)
+        previewModeControl.selectedSegment = displayModeControl.selectedSegment
+        preview.mode = modes[displayModeControl.selectedSegment] == .notch ? .notch : .statusBar
         updateControlAvailability()
     }
 
@@ -629,21 +758,25 @@ final class SettingsWindowController: NSWindowController {
         commit(customWidthValue, slider: customWidthSlider, key: AppPreferences.customWidthKey, minimum: 180, maximum: 1000, format: "%.0f")
     }
 
-    @objc private func colorChanged() {
-        let presets = LyricsColorPreset.allCases
-        guard presets.indices.contains(colorPopUp.indexOfSelectedItem) else { return }
-        let preset = presets[colorPopUp.indexOfSelectedItem]
-        save(preset, key: AppPreferences.colorPresetKey)
-        if preset == .custom { lyricsColorWell.activate(true) }
+    @objc private func colorChanged(_ sender: NSButton) {
+        guard paletteColors.indices.contains(sender.tag) else { return }
+        let selection = paletteColors[sender.tag]
+        if let preset = selection.2 {
+            save(preset, key: AppPreferences.colorPresetKey)
+        } else {
+            lyricsColorWell.color = selection.1
+            lyricsColorChanged()
+        }
+        updateCustomColorSwatch()
     }
 
     @objc private func lyricsColorChanged() {
         AppPreferences.setColor(lyricsColorWell.color, forKey: AppPreferences.customLyricsColorKey)
         updateCustomColorSwatch()
-        colorPopUp.selectItem(at: LyricsColorPreset.allCases.firstIndex(of: .custom) ?? 0)
         UserDefaults.standard.set(LyricsColorPreset.custom.rawValue, forKey: AppPreferences.colorPresetKey)
         onSettingsChange()
         updatePreview()
+        updateCustomColorSwatch()
     }
 
     @objc private func fontSizeChanged() {
@@ -700,16 +833,24 @@ final class SettingsWindowController: NSWindowController {
         }
         updateControlAvailability()
         onSettingsChange()
+        updatePreview()
     }
 
     @objc private func notchBackgroundColorChanged() {
         AppPreferences.setColor(notchBackgroundColorWell.color, forKey: AppPreferences.notchBackgroundColorKey)
         onSettingsChange()
+        updatePreview()
     }
 
     private func updateCustomColorSwatch() {
-        guard let index = LyricsColorPreset.allCases.firstIndex(of: .custom) else { return }
-        colorPopUp.item(at: index)?.image = swatch(lyricsColorWell.color)
+        for (index, button) in colorButtons.enumerated() {
+            let color = paletteColors[index]
+            let selected = color.2 == AppPreferences.colorPreset ||
+                (color.2 == nil && AppPreferences.colorPreset == .custom &&
+                 color.1.usingColorSpace(.deviceRGB) == lyricsColorWell.color.usingColorSpace(.deviceRGB))
+            button.layer?.borderWidth = selected ? 2 : 0
+            button.layer?.borderColor = NSColor.systemBlue.cgColor
+        }
     }
 
     private func commit(
@@ -785,15 +926,31 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func updateSidebarSelection() {
-        sidebarButtons.forEach { $0.value.state = $0.key == selectedPage ? .on : .off }
+        sidebarButtons.forEach { page, button in
+            let selected = page == selectedPage
+            button.state = selected ? .on : .off
+            button.layer?.backgroundColor = selected
+                ? NSColor(calibratedRed: 0.17, green: 0.48, blue: 0.93, alpha: 1).cgColor
+                : NSColor.clear.cgColor
+            button.contentTintColor = selected ? .white : NSColor(calibratedRed: 0.30, green: 0.38, blue: 0.53, alpha: 1)
+            let text = NSMutableAttributedString(string: L10n.text(page.title) + "\n" + L10n.text(page.help))
+            text.addAttributes([.font: NSFont.systemFont(ofSize: 15, weight: .semibold),
+                                .foregroundColor: selected ? NSColor.white : NSColor.labelColor],
+                               range: NSRange(location: 0, length: L10n.text(page.title).utf16.count))
+            let subtitleStart = L10n.text(page.title).utf16.count + 1
+            text.addAttributes([.font: NSFont.systemFont(ofSize: 11),
+                                .foregroundColor: selected ? NSColor.white.withAlphaComponent(0.82) : NSColor.secondaryLabelColor],
+                               range: NSRange(location: subtitleStart, length: text.length - subtitleStart))
+            button.attributedTitle = text
+        }
     }
 
     @objc private func previewModeChanged() {
         preview.mode = previewModeControl.selectedSegment == 1 ? .notch : .statusBar
     }
 
-    @objc private func presetChanged() {
-        switch presetPopUp.indexOfSelectedItem {
+    @objc private func presetButtonChanged(_ sender: NSButton) {
+        switch sender.tag {
         case 1: applyPreset(.orange, fontSize: 16, speed: 1.3, opacity: 1, width: .wide)
         case 2: applyPreset(.green, fontSize: 13, speed: 1, opacity: 1, width: .normal)
         case 3: applyPreset(.purple, fontSize: 18, speed: 0.8, opacity: 0.9, width: .wide)
@@ -809,7 +966,6 @@ final class SettingsWindowController: NSWindowController {
         UserDefaults.standard.set(opacity, forKey: AppPreferences.opacityKey)
         UserDefaults.standard.set(width.rawValue, forKey: AppPreferences.displayWidthKey)
         sync()
-        presetPopUp.selectItem(at: 0)
         onSettingsChange()
     }
 
@@ -826,19 +982,92 @@ final class SettingsWindowController: NSWindowController {
         }
         keys.forEach(UserDefaults.standard.removeObject(forKey:))
         sync()
-        presetPopUp.selectItem(at: 0)
         onSettingsChange()
     }
 
     private func updatePreview() {
         preview.apply(
-            color: BrandStyle.gradientColors(for: AppPreferences.colorPreset, customColor: AppPreferences.customLyricsColor).first ?? .labelColor,
+            colors: BrandStyle.gradientColors(for: AppPreferences.colorPreset, customColor: AppPreferences.customLyricsColor),
             fontSize: AppPreferences.fontSize,
             opacity: AppPreferences.opacity,
             width: AppPreferences.displayWidth,
-            position: AppPreferences.position
+            position: AppPreferences.position,
+            notchStyle: AppPreferences.notchStyle,
+            notchBackground: AppPreferences.notchBackgroundEnabled,
+            notchBackgroundColor: AppPreferences.notchBackgroundColor
         )
     }
+}
+
+private final class SettingsBackdropView: NSView {
+    override func draw(_ dirtyRect: NSRect) {
+        NSGradient(starting: NSColor(calibratedRed: 1, green: 0.91, blue: 0.88, alpha: 1),
+                   ending: NSColor(calibratedRed: 0.79, green: 0.87, blue: 1, alpha: 1))?
+            .draw(in: bounds, angle: 18)
+        NSColor.white.withAlphaComponent(0.22).setFill()
+        NSBezierPath(roundedRect: bounds.insetBy(dx: 8, dy: 8), xRadius: 18, yRadius: 18).fill()
+    }
+}
+
+private final class SettingsSidebarFooterView: NSView {
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.cornerRadius = 18
+        layer?.masksToBounds = true
+        layer?.borderWidth = 1
+        layer?.borderColor = NSColor.white.withAlphaComponent(0.85).cgColor
+
+        let symbol = NSImageView(image: NSImage(systemSymbolName: "music.note", accessibilityDescription: "NotchMuse") ?? NSImage())
+        symbol.contentTintColor = NSColor.systemPurple
+        symbol.wantsLayer = true
+        symbol.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.82).cgColor
+        symbol.layer?.cornerRadius = 12
+        symbol.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(symbol)
+
+        let slogan = NSTextField(wrappingLabelWithString: L10n.text("Let music flow through the notch"))
+        slogan.font = .systemFont(ofSize: 17, weight: .semibold)
+        slogan.textColor = NSColor(calibratedRed: 0.13, green: 0.18, blue: 0.31, alpha: 1)
+        slogan.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(slogan)
+
+        NSLayoutConstraint.activate([
+            symbol.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 22),
+            symbol.topAnchor.constraint(equalTo: topAnchor, constant: 20),
+            symbol.widthAnchor.constraint(equalToConstant: 42),
+            symbol.heightAnchor.constraint(equalToConstant: 42),
+            slogan.leadingAnchor.constraint(equalTo: symbol.leadingAnchor),
+            slogan.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
+            slogan.topAnchor.constraint(equalTo: symbol.bottomAnchor, constant: 10)
+        ])
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func draw(_ dirtyRect: NSRect) {
+        NSGradient(starting: NSColor(calibratedRed: 0.97, green: 0.95, blue: 1, alpha: 1),
+                   ending: NSColor(calibratedRed: 0.82, green: 0.88, blue: 1, alpha: 1))?
+            .draw(in: bounds, angle: 45)
+        for (offset, color) in [(0.0, NSColor.systemPurple.withAlphaComponent(0.12)),
+                                (13.0, NSColor.systemBlue.withAlphaComponent(0.12)),
+                                (26.0, NSColor.white.withAlphaComponent(0.32))] {
+            let wave = NSBezierPath()
+            wave.move(to: NSPoint(x: -16, y: 20 + offset))
+            wave.curve(to: NSPoint(x: bounds.maxX + 16, y: 26 + offset),
+                       controlPoint1: NSPoint(x: bounds.midX * 0.7, y: 76 + offset),
+                       controlPoint2: NSPoint(x: bounds.midX * 1.5, y: -12 + offset))
+            wave.line(to: NSPoint(x: bounds.maxX + 16, y: 0))
+            wave.line(to: NSPoint(x: -16, y: 0))
+            wave.close()
+            color.setFill()
+            wave.fill()
+        }
+    }
+}
+
+private final class FlippedSettingsDocumentView: NSView {
+    override var isFlipped: Bool { true }
 }
 
 private enum SettingsPage: String, CaseIterable {
@@ -865,45 +1094,152 @@ private enum SettingsPage: String, CaseIterable {
 private final class SettingsPreviewView: NSView {
     enum Mode { case statusBar, notch }
     var mode: Mode = .statusBar { didSet { needsDisplay = true } }
-    private var lyricColor = NSColor.labelColor
+    private var lyricColors = BrandStyle.gradientColors
     private var lyricFontSize: CGFloat = 13
     private var lyricOpacity: CGFloat = 1
     private var lyricWidth: DisplayWidth = .auto
     private var position: LyricsPosition = .right
+    private var notchStyle: NotchStyle = .lyricOnly
+    private var notchBackground = false
+    private var notchBackgroundColor = NSColor.black
+    private lazy var wallpaper: NSImage? = Bundle.main.path(forResource: "SettingsPreviewWallpaper", ofType: "png")
+        .flatMap(NSImage.init(contentsOfFile:))
 
     override var isFlipped: Bool { true }
 
-    func apply(color: NSColor, fontSize: CGFloat, opacity: CGFloat, width: DisplayWidth, position: LyricsPosition) {
-        lyricColor = color
+    func apply(colors: [NSColor], fontSize: CGFloat, opacity: CGFloat, width: DisplayWidth,
+               position: LyricsPosition, notchStyle: NotchStyle, notchBackground: Bool,
+               notchBackgroundColor: NSColor) {
+        lyricColors = colors
         lyricFontSize = fontSize
         lyricOpacity = opacity
         lyricWidth = width
         self.position = position
+        self.notchStyle = notchStyle
+        self.notchBackground = notchBackground
+        self.notchBackgroundColor = notchBackgroundColor
         needsDisplay = true
     }
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        let canvas = bounds.insetBy(dx: 8, dy: 8)
-        NSColor.windowBackgroundColor.setFill()
-        NSBezierPath(roundedRect: canvas, xRadius: 8, yRadius: 8).fill()
-        if mode == .notch {
-            let notch = NSRect(x: canvas.midX - 116, y: canvas.minY + 16, width: 232, height: 82)
-            NSColor.black.setFill()
-            NSBezierPath(roundedRect: notch, xRadius: 20, yRadius: 20).fill()
-            drawLyric(in: notch.insetBy(dx: 14, dy: 25))
-        } else {
-            NSColor.controlBackgroundColor.setFill()
-            NSBezierPath(rect: NSRect(x: canvas.minX, y: canvas.minY, width: canvas.width, height: 28)).fill()
-            let widths: [DisplayWidth: CGFloat] = [.compact: 180, .normal: 260, .wide: 360, .custom: 320, .auto: 260]
-            let width = min(widths[lyricWidth] ?? 260, canvas.width - 32)
-            let x = position == .left ? canvas.minX + 16 : canvas.maxX - width - 16
-            drawLyric(in: NSRect(x: x, y: canvas.minY + 4, width: width, height: 20))
-        }
+        let gap: CGFloat = 12
+        let panelWidth = (bounds.width - gap) / 2
+        drawPanel(NSRect(x: 0, y: 0, width: panelWidth, height: bounds.height), notch: false)
+        drawPanel(NSRect(x: panelWidth + gap, y: 0, width: panelWidth, height: bounds.height), notch: true)
     }
 
-    private func drawLyric(in rect: NSRect) {
-        let attributes: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: min(22, lyricFontSize), weight: .medium), .foregroundColor: lyricColor.withAlphaComponent(lyricOpacity)]
-        ("♪ The music finds us here" as NSString).draw(in: rect, withAttributes: attributes)
+    private func drawPanel(_ rect: NSRect, notch: Bool) {
+        let selected = (mode == .notch) == notch
+        let title = L10n.text(notch ? "Notch Preview" : "Status Bar Preview")
+        (title as NSString).draw(in: NSRect(x: rect.minX + 10, y: rect.minY + 2, width: rect.width - 20, height: 22),
+                                 withAttributes: [.font: NSFont.systemFont(ofSize: 12, weight: .semibold),
+                                                  .foregroundColor: NSColor.secondaryLabelColor])
+        let screen = NSRect(x: rect.minX + 2, y: rect.minY + 26, width: rect.width - 4, height: rect.height - 29)
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(roundedRect: screen, xRadius: 11, yRadius: 11).addClip()
+        if let wallpaper {
+            let cropHeight = wallpaper.size.width * screen.height / screen.width
+            let crop = NSRect(x: 0, y: (wallpaper.size.height - cropHeight) / 2,
+                              width: wallpaper.size.width, height: cropHeight)
+            wallpaper.draw(in: screen, from: crop, operation: .sourceOver, fraction: 1,
+                           respectFlipped: true, hints: nil)
+        } else {
+            NSGradient(starting: NSColor.systemOrange, ending: NSColor.systemBlue)?
+                .draw(in: screen, angle: -18)
+        }
+
+        if notch {
+            let cutout = NSRect(x: screen.midX - 54, y: screen.minY - 1, width: 108, height: 28)
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: cutout, xRadius: 14, yRadius: 14).fill()
+            let lineHeight = ceil(min(lyricFontSize, 17) * 1.3)
+            let overlayWidth = min(screen.width - 22, max(180, WidthGeometry.notchWidth(
+                mode: lyricWidth, availableWidth: screen.width - 22, style: notchStyle, customWidth: 220
+            )))
+            let overlayHeight: CGFloat
+            switch notchStyle {
+            case .lyricOnly: overlayHeight = lineHeight + 14
+            case .songLyric: overlayHeight = lineHeight * 2 + 18
+            case .expanded: overlayHeight = lineHeight * 4 + 22
+            }
+            let overlay = NSRect(x: screen.midX - overlayWidth / 2, y: cutout.maxY + 6,
+                                 width: overlayWidth, height: overlayHeight)
+            if notchBackground {
+                notchBackgroundColor.withAlphaComponent(0.8).setFill()
+                NSBezierPath(roundedRect: overlay, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
+            }
+            if notchStyle == .songLyric {
+                drawText(L10n.text("Preview song · Preview artist"),
+                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
+                                    width: overlay.width - 24, height: lineHeight),
+                         color: .white, size: max(10, min(lyricFontSize - 2, 13)), alignment: .center)
+            } else if notchStyle == .expanded {
+                drawText(L10n.text("Preview song"),
+                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
+                                    width: overlay.width - 24, height: lineHeight),
+                         color: .white, size: max(10, min(lyricFontSize, 13)), alignment: .left)
+                drawText(L10n.text("Preview artist"),
+                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + lineHeight + 4,
+                                    width: overlay.width - 24, height: lineHeight),
+                         color: .white, size: max(10, min(lyricFontSize - 2, 12)), alignment: .left)
+            }
+            drawLyric(in: NSRect(x: overlay.minX + 12, y: overlay.maxY - lineHeight - 7,
+                                width: overlay.width - 24, height: lineHeight), notch: true)
+        } else {
+            let bar = NSRect(x: screen.minX, y: screen.minY, width: screen.width, height: 28)
+            NSColor.white.withAlphaComponent(0.86).setFill()
+            NSBezierPath(rect: bar).fill()
+            NSImage(systemSymbolName: "apple.logo", accessibilityDescription: nil)?
+                .draw(in: NSRect(x: bar.minX + 12, y: bar.minY + 6, width: 16, height: 16))
+            let available = max(80, bar.width - 92)
+            let width = WidthGeometry.statusBarWidth(mode: lyricWidth, availableWidth: available, customWidth: 190)
+            let x = position == .left ? bar.minX + 36 : bar.maxX - width - 48
+            drawLyric(in: NSRect(x: x, y: bar.minY + 5, width: width, height: 20), notch: false)
+            let symbols = ["wifi", "speaker.wave.2.fill", "battery.100percent"]
+            for (index, symbol) in symbols.enumerated() {
+                NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
+                    .draw(in: NSRect(x: bar.maxX - 48 + CGFloat(index) * 14,
+                                     y: bar.minY + 8, width: 12, height: 12))
+            }
+        }
+        NSGraphicsContext.restoreGraphicsState()
+        (selected ? NSColor.systemBlue : NSColor.white.withAlphaComponent(0.85)).setStroke()
+        let outline = NSBezierPath(roundedRect: screen.insetBy(dx: 0.5, dy: 0.5), xRadius: 11, yRadius: 11)
+        outline.lineWidth = selected ? 2.5 : 1.5
+        outline.stroke()
+    }
+
+    private func drawLyric(in rect: NSRect, notch: Bool) {
+        let text = "♪ " + L10n.text("Preview lyric sample")
+        let size = min(lyricFontSize, notch ? 17 : 15)
+        let base = notch ? NSColor.white.withAlphaComponent(0.7) : lyricColors[0].withAlphaComponent(0.72)
+        drawText(text, in: rect, color: base.withAlphaComponent(lyricOpacity), size: size,
+                 alignment: .center, shadow: notch)
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(rect: NSRect(x: rect.minX, y: rect.minY, width: rect.width * 0.58, height: rect.height)).addClip()
+        drawText(text, in: rect, color: lyricColors[min(1, lyricColors.count - 1)].withAlphaComponent(lyricOpacity),
+                 size: size, alignment: .center, shadow: notch)
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    private func drawText(_ text: String, in rect: NSRect, color: NSColor, size: CGFloat,
+                          alignment: NSTextAlignment, shadow: Bool = false) {
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = alignment
+        paragraph.lineBreakMode = .byTruncatingTail
+        var attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: size, weight: .medium),
+            .foregroundColor: color,
+            .paragraphStyle: paragraph
+        ]
+        if shadow {
+            let textShadow = NSShadow()
+            textShadow.shadowColor = NSColor.black.withAlphaComponent(0.5)
+            textShadow.shadowBlurRadius = 2
+            textShadow.shadowOffset = NSSize(width: 0, height: -1)
+            attributes[.shadow] = textShadow
+        }
+        (text as NSString).draw(in: rect, withAttributes: attributes)
     }
 }

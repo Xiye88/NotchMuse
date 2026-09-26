@@ -77,6 +77,11 @@
 "None" = "None";
 "Black" = "Black";
 "Custom" = "Custom";
+"Red" = "Red";
+"Pink" = "Pink";
+"Cyan" = "Cyan";
+"Yellow" = "Yellow";
+"Let music flow through the notch" = "Let music flow through the notch";
 "Custom Width" = "Custom Width";
 "Appearance" = "Appearance";
 "Lyrics Color" = "Lyrics Color";
@@ -105,6 +110,10 @@
 "Live Preview" = "Live Preview";
 "Status Bar Preview" = "Status Bar Preview";
 "Notch Preview" = "Notch Preview";
+"Preview lyric sample" = "Music in the notch";
+"Preview song · Preview artist" = "Sample Song · Sample Artist";
+"Preview song" = "Sample Song";
+"Preview artist" = "Sample Artist";
 "Restore Defaults" = "Restore Defaults";
 "Warm Orange" = "Warm Orange";
 "Fresh Minimal" = "Fresh Minimal";

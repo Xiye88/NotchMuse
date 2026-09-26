@@ -1,26 +1,25 @@
 # NotchMuse Task Board
 
-## Active Task — QQ Music and Soda Music Expansion
+## Active Integration — QQ Music/Soda Music + Accepted Settings UI
 
 - Workspace: PM integration on `codex/player-expansion-integration`.
-- Baseline: `776437a352d8f81ce6915c4779766f91d3142047`.
-- Implementation and local Release candidate build: DONE.
-- Debug self-tests, packaged self-test, localization parity, signature and
-  DMG verification: PASS.
-- macOS 15 CI run `36220000743`: PASS. Feature commit `d933c62` pushed to origin.
-- Timing fix: `63c2ec0` pushed; macOS CI `36226306542` passed. Candidate build
-  26 is installed and running (SHA-256 recorded in `PROJECT_HANDOFF.md`).
-- Product Owner GUI feedback: QQ Music and Soda Music show correctly matched
-  lyrics; timing follow-up is in progress to account for playback during the
-  lyric network request. Debug build and full self-tests pass.
-- Remaining gate: obtain brief GUI timing confirmation for switch delay and
-  lyric playback sync.
-- Do not merge main or generate the final PLAYER_EXPANSION_HANDOFF.md before
-  that confirmation.
+- Settings Visual Polish v2 was accepted by Product Owner and integrated into
+  main at `a5f193832dd7889a3ebf25d1087dae867ff68813`; CI `36223310974` passed.
+- This isolated branch integrates that main state with QQ/Soda support and the
+  playback-clock fix. No Settings UI edits are made on this branch.
+- Baseline before player expansion: `776437a352d8f81ce6915c4779766f91d3142047`.
+- Player implementation commit `d933c62` and timing fix `63c2ec0`; timing-fix
+  CI `36226306542` passed. Local candidate build 26 is installed in
+  `/Applications` from the earlier phase; this integration task must not replace
+  it. The isolated artifact and hash are recorded in `PROJECT_HANDOFF.md`.
+- Product Owner GUI feedback: QQ and Soda lyrics match correctly; check the
+  timing fix alongside the integrated Settings v2 through a temporary isolated
+  app launch.
+- Remaining gate: short Settings smoke and timing confirmation on the isolated
+  candidate. Do not merge main or generate final `PLAYER_EXPANSION_HANDOFF.md`.
 - Local `swift test` cannot load XCTest with the active Command Line Tools.
-- No merge, tag, or publication is authorized by this task. Product Owner
-  previously authorized pushing this integration branch and running its CI.
-- Evidence: `PLAYER_EXPANSION_HANDOFF.md`.
+- No merge to main, tag, or publication is authorized in this integration.
+- Evidence: interim `PLAYER_EXPANSION_HANDOFF.md`.
 
 ## Completed Next Task
 
@@ -33,6 +32,10 @@
 - Result: Debug/full self-test, English/Simplified Chinese GUI smoke, branch CI,
   Release build, ad-hoc signature, and DMG verification passed. Public release
   remains a separate Product Owner decision.
+- Main deployment closure: old `/Applications/NotchMuse.app` build 18 was
+  replaced with build 21 from main `776437a`; installed executable checksum
+  matches the Release package. NetEase short smoke passed; Product Owner
+  confirmed installed Settings sidebar, Live Preview, cards, and presets: PASS.
 
 ## Repository Architecture Cleanup — First Round (2026-09-25)
 
@@ -61,8 +64,8 @@ Last Updated: 2026-09-26
 
 ## Sprint
 
-v0.8 Final Engineering and Settings UI are complete. Build 20 is the local
-final Release Candidate; public release remains a separate approval.
+v0.8 Main Closure: DONE. Build 21 is installed locally and its Settings GUI
+check passed. Public release remains a separate approval.
 
 ## Workspace Registry
 

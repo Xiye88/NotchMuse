@@ -1,57 +1,29 @@
 # NotchMuse Project Handoff
 
-## Player Expansion — Active (2026-09-26)
+## Player Expansion — Active Integration (2026-09-26)
 
-- Latest Product Owner GUI feedback: QQ Music and Soda Music both match the
-  correct lyrics. Reported issues are delayed lyric switching and slight
-  playback/lyric timing drift. Root cause confirmed in
-  `MenuBarController.pollPlayer`: the playing-position sample was timestamped
-  only after awaiting network lyric retrieval. The sample is now anchored at
-  snapshot time so elapsed playback is included during matching.
-- Timing fix local Debug build and full self-tests: PASS. Fix commit
-  `63c2ec0065affefb83f5cbdb6298dbefb52099ae` is pushed; macOS CI run
-  `36226306542` passed. Candidate `0.8.0` build `26` is installed and running;
-  executable SHA-256 `5bef23acfe54422cf6adc1bc7b36c93c14ba0906884560ced87318dd32c714e4`.
-  Await brief GUI confirmation of switching delay and lyric timing. Do not merge
-  main or generate the final `PLAYER_EXPANSION_HANDOFF.md` before confirmation.
-
-- Baseline: `main` / `776437a352d8f81ce6915c4779766f91d3142047`, confirmed by
-  `00_PM` after Settings UI integration and main CI `36214924735` passed.
-- Integration branch: `codex/player-expansion-integration`.
-- Runtime probes: QQ Music `com.tencent.QQMusicMac` v11.10.0 and Soda Music
-  `com.soda.music` v3.8.0 both publish title, artist, album, duration, current
-  position, playback state, and owner through the bundled MediaRemote bridge.
-- Scope decision: this user-authorized expansion supersedes the 2026-08-13
-  MediaRemote production exclusion for these two player adapters. The backend
-  remains macOS-private-API dependent. Next/Previous/Seek mean observing
-  external playback changes; the existing NotchMuse adapter protocol is
-  read-only and will not gain transport controls in this work.
-- Manual brief checks passed for QQ play/pause/position and Soda play/pause/
-  advancing position. Candidate lifecycle, real lyric retrieval, runtime Auto
-  Detect handoff, and Product Owner GUI checks remain open.
-- Implementation: explicit Settings selection and Auto Detect now route QQ and
-  Soda through `MediaRemotePlayerAdapter`; the existing QQ/Soda lyric providers
-  remain wired. Provider priority and Production Matcher are unchanged.
-- Validation: Debug build and full self-tests PASS; Release candidate build 21,
-  packaged self-test, ad-hoc signature verification, DMG verification, and
-  checksums PASS. Localization key parity is 119/119 and `git diff --check`
-  passes. The active Command Line Tools installation lacks XCTest, so local
-  `swift test` cannot run; macOS 15 CI remains open.
-- Current read-only probe: both client processes are running and Soda currently
-  owns MediaRemote with complete playing metadata. QQ-specific live playback
-  had been probed earlier; this turn did not interrupt Soda to force QQ to take
-  ownership. Product Owner GUI validation remains pending.
-- Candidate: `0.8.0` build `21`, arm64, ad-hoc signed, not notarized. Executable
-  SHA-256 `213b1c5a9f026f7284cc573ee9b4a74d67a576b46f893ee193e85da8c587d398`;
-  DMG SHA-256 `5fd7d51a5e885a1adb69436d184d3acc45acdc32a5174e75c8a0bfd8983624bd`.
-- Feature commit `d933c62d0d9641598db61601a3ba1b1754179c43` is pushed to origin;
-  macOS CI run `36220000743` passed. Current installable candidate is build 22
-  from that feature commit, arm64/ad-hoc signed; app SHA-256
-  `be4e7030768c7b7ab8069895b2c16521c0f035d3d21378770fab61a654688f61`, DMG
-  SHA-256 `41f70d515d9bea67d3c7d586ccad3a242c55e84b9cd0f1e5212029de5681dc7d`.
-- `PLAYER_EXPANSION_HANDOFF.md` is interim QA and acceptance preparation.
-  Generate the final `00_PM` handoff only after Product Owner GUI acceptance.
-  No merge to main, tag, or publication has occurred.
+- Latest main `a5f193832dd7889a3ebf25d1087dae867ff68813` contains the
+  Product-Owner-accepted Settings Visual Polish v2; main CI `36223310974` passed.
+- This isolated branch combines that main state with QQ/Soda support and timing
+  fix `63c2ec0`; no Settings UI, Matcher, or Provider Priority edits were made
+  during this integration. The merge commit is local only; it has not been pushed.
+- Candidate `0.8.0` build `27` was built from the integrated working tree and
+  remains in `dist.noindex/NotchMuse.app`. Executable SHA-256
+  `b91b167c0860af7099acaec7f92d8b7cc63ccd5aeb1d70a27f244c012ce7f0f3`;
+  bundled `SettingsPreviewWallpaper.png` SHA-256
+  `e29bfda3092aacf38774e21ad4cb4c060dee555eed13e83fb0db368ebaade9d2`.
+  `/Applications/NotchMuse.app` was not modified.
+- Debug build/full self-tests, packaged self-test, resource presence, and
+  strict signature verification pass. `swift test` remains unavailable locally
+  because the active Command Line Tools lack XCTest; CI for the integrated
+  merge has not been run.
+- A temporary QA copy launched without touching the installed app and passed
+  its first-launch screen. The computer-use interface could not access the
+  menu-bar-only Settings window afterward, so a visible GUI regression remains
+  pending. QQ/Soda GUI feedback from the prior candidate confirmed correct
+  matching; timing confirmation on the integrated candidate is pending.
+- No push, main merge, tag, or publication. Keep the final
+  `PLAYER_EXPANSION_HANDOFF.md` deferred until acceptance is complete.
 
 ## v0.8 Final Engineering Main Integration
 
@@ -59,13 +31,30 @@
   `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.
 - Main integration merge:
   `7bc74acd9abe8f6c4b5eb185b3dd5dd51c273ff0`.
-- Settings integration head:
-  `7ddba8c7d0fdc4ad7313ba67aab5673de0c4410d`; remote verified.
+- Installed build source:
+  `776437a352d8f81ce6915c4779766f91d3142047`; present on remote main.
 - Architecture CI `36158185905`: PASS.
-- Main Settings integration CI `36214824933`: PASS.
+- Main CI `36217972870`: PASS.
 - `09_REPO_ARCHITECTURE`: DONE / ARCHIVED.
 - `10_SETTINGS_UI`: DONE / ARCHIVED; integrated into main as `279b910`.
 - No v0.8 tag, GitHub Release, or website publication has been created.
+
+## Installed Build Closure — 2026-09-26
+
+- Root cause of the reported old Settings UI: `/Applications/NotchMuse.app`
+  still contained build 18 even though the redesign was on remote main.
+- Rebuilt main as `0.8.0` build 21. The installed executable SHA-256 is
+  `cda3bcbf805519e7b9a51c7ecdd90fec76be1b5aa61d00221c483ad3aa51aa13`,
+  identical to the new package. DMG SHA-256 is
+  `ea1d037ec22ceb646627b2ecf78104e3ae029395767b6dadc94ef6718727e4b6`.
+- Old build 18 remains recoverable at
+  `/tmp/NotchMuse-build18-before-settings-20260926.app`.
+- Installed NetEase short smoke: Auto Detect, Play, Pause/Resume,
+  Next/Previous, seek, and visible lyrics checked. Product Owner separately
+  reports approximately 7-8 hours of use as MANUAL PASS.
+- Product Owner opened the installed build 21 Settings window and confirmed
+  sidebar, Live Preview, card layout, and presets: GUI PASS. v0.8 main closure
+  is DONE; no tag or GitHub Release was created.
 
 ## Completed Follow-up — 10_SETTINGS_UI
 
@@ -77,7 +66,7 @@
 - Isolated branch head: `5d74ce67ad25dfd9fa1c0a036cc4f06d05772575`;
   CI run `36213755351` passed. English and Simplified Chinese GUI smoke verified
   the real Settings window, all three sections, live previews, presets, and
-  localized Auto Detect. Main build `20` passed full self-test, ad-hoc signing,
+  localized Auto Detect. Main build `21` passed full self-test, ad-hoc signing,
   and DMG verification.
 - The remaining Product Owner decision is whether to create the v0.8.0 tag and
   GitHub Release. Developer ID signing, notarization, and stapling remain

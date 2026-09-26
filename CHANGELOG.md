@@ -4,6 +4,8 @@
 
 ### Added
 
+- Redesigned Settings with native section navigation, live display previews,
+  appearance presets, and per-section defaults
 - Added NetEase Cloud Music through the bundled MediaRemote bridge
 - Added Auto Detect as the recommended default for Spotify, Apple Music, and
   NetEase, while retaining explicit player selection

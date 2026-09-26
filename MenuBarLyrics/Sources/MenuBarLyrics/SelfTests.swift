@@ -124,6 +124,7 @@ enum SelfTests {
         check(L10n.text("Black", language: .simplifiedChinese) == "黑色", "localizes the Chinese Black background choice")
         check(PlayerSource.netEaseMusic.displayName(language: .english) == "NetEase Cloud Music", "shows the English NetEase name")
         check(PlayerSource.netEaseMusic.displayName(language: .simplifiedChinese) == "网易云音乐", "shows the Chinese NetEase name")
+        check(PlayerSource.auto.displayName(language: .simplifiedChinese) == "自动检测（推荐）", "localizes the recommended player option")
         check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == ["com.spotify.client", "com.apple.Music", "com.netease.163music"], "registers all supported player bundle identifiers")
     }
 

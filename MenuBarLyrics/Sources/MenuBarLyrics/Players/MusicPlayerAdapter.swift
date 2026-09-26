@@ -18,7 +18,7 @@ enum PlayerSource: String, CaseIterable, Equatable, Sendable {
     }
 
     func displayName(language: AppLanguage = AppPreferences.language) -> String {
-        self == .netEaseMusic ? L10n.text(rawValue, language: language) : rawValue
+        L10n.text(rawValue, language: language)
     }
 }
 

@@ -233,11 +233,11 @@ final class MenuBarController: NSObject {
             let track = nowPlaying.spotifyTrack
             let position = nowPlaying.playbackPosition
             currentPlayerTrack = nowPlaying
+            latestPlayerPosition = position
+            latestPlayerUptime = ProcessInfo.processInfo.systemUptime
             setPlayerFeedback(.connected)
             setTrackInfo(track)
             await updateTrackIfNeeded(track, identity: nowPlaying.observationIdentity, force: forceLyricsRefresh)
-            latestPlayerPosition = position
-            latestPlayerUptime = ProcessInfo.processInfo.systemUptime
             updatePlayingDisplay()
         }
     }

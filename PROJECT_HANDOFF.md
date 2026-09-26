@@ -2,6 +2,17 @@
 
 ## Player Expansion — Active (2026-09-26)
 
+- Latest Product Owner GUI feedback: QQ Music and Soda Music both match the
+  correct lyrics. Reported issues are delayed lyric switching and slight
+  playback/lyric timing drift. Root cause confirmed in
+  `MenuBarController.pollPlayer`: the playing-position sample was timestamped
+  only after awaiting network lyric retrieval. The sample is now anchored at
+  snapshot time so elapsed playback is included during matching.
+- Timing fix local Debug build and full self-tests: PASS. Next: commit and push
+  to this already-authorized integration branch, wait for macOS CI, then install
+  a fresh local Candidate for brief GUI confirmation. Do not merge main or
+  generate the final `PLAYER_EXPANSION_HANDOFF.md` before that confirmation.
+
 - Baseline: `main` / `776437a352d8f81ce6915c4779766f91d3142047`, confirmed by
   `00_PM` after Settings UI integration and main CI `36214924735` passed.
 - Integration branch: `codex/player-expansion-integration`.

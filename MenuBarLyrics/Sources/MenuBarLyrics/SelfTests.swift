@@ -48,6 +48,7 @@ enum SelfTests {
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
+            await testMediaRemotePlayerAdapter()
             await testNetEaseMusicAdapter()
             await testLyricsClient()
             if ProcessInfo.processInfo.environment["LRCLIB_LIVE_TESTS"] == "1" {
@@ -100,9 +101,11 @@ enum SelfTests {
         check(L10n.text("Report Lyrics Issue…", language: .simplifiedChinese) == "报告歌词问题…", "localizes the Chinese feedback entry")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
         check(AppPreferences.normalizedPlayerSource(nil) == .auto, "defaults to automatic player detection")
-        check(PlayerSource.allCases == [.auto, .spotify, .appleMusic, .netEaseMusic], "keeps Auto, Spotify, Apple Music, and NetEase in Settings")
+        check(PlayerSource.allCases == [.auto, .spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic], "keeps all five players and Auto Detect in Settings")
         check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
         check(AppPreferences.normalizedPlayerSource("NetEase Cloud Music") == .netEaseMusic, "persists NetEase selection")
+        check(AppPreferences.normalizedPlayerSource("QQ Music") == .qqMusic, "persists QQ Music selection")
+        check(AppPreferences.normalizedPlayerSource("Soda Music") == .sodaMusic, "persists Soda Music selection")
         let suiteName = "app.notchmuse.self-test.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
@@ -124,8 +127,12 @@ enum SelfTests {
         check(L10n.text("Black", language: .simplifiedChinese) == "黑色", "localizes the Chinese Black background choice")
         check(PlayerSource.netEaseMusic.displayName(language: .english) == "NetEase Cloud Music", "shows the English NetEase name")
         check(PlayerSource.netEaseMusic.displayName(language: .simplifiedChinese) == "网易云音乐", "shows the Chinese NetEase name")
+        check(PlayerSource.qqMusic.bundleIdentifier == "com.tencent.QQMusicMac", "uses the QQ Music bundle identifier")
+        check(PlayerSource.sodaMusic.bundleIdentifier == "com.soda.music", "uses the Soda Music bundle identifier")
+        check(PlayerSource.qqMusic.displayName(language: .simplifiedChinese) == "QQ音乐", "shows the Chinese QQ Music name")
+        check(PlayerSource.sodaMusic.displayName(language: .simplifiedChinese) == "汽水音乐", "shows the Chinese Soda Music name")
         check(PlayerSource.auto.displayName(language: .simplifiedChinese) == "自动检测（推荐）", "localizes the recommended player option")
-        check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == ["com.spotify.client", "com.apple.Music", "com.netease.163music"], "registers all supported player bundle identifiers")
+        check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == ["com.spotify.client", "com.apple.Music", "com.netease.163music", "com.tencent.QQMusicMac", "com.soda.music"], "registers all supported player bundle identifiers")
     }
 
     @MainActor private static func testMusicPlayerAdapterModel() {
@@ -188,6 +195,8 @@ enum SelfTests {
         let paused = MusicPlayerSnapshot.paused(nowPlaying)
         let playing = MusicPlayerSnapshot.playing(nowPlaying)
         check(AutoDetectAdapter.select([(.spotify, paused), (.appleMusic, playing)], current: .spotify).source == .appleMusic, "switches Auto Detect to the playing app")
+        check(AutoDetectAdapter.select([(.spotify, paused), (.qqMusic, playing)], current: .spotify).source == .qqMusic, "selects QQ Music when it takes playback ownership")
+        check(AutoDetectAdapter.select([(.qqMusic, paused), (.sodaMusic, playing)], current: .qqMusic).source == .sodaMusic, "switches from QQ Music to Soda Music when ownership changes")
         check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, playing)], current: .appleMusic).source == .appleMusic, "retains the current app when multiple players report playing")
         check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, playing)], current: .spotify, activity: [.spotify: 1, .appleMusic: 2]).source == .appleMusic, "uses recent playback activity when multiple players report playing")
         check(AutoDetectAdapter.select([(.spotify, playing), (.appleMusic, paused)], current: .spotify, freshPlaying: [.appleMusic]).source == .appleMusic, "does not retain a stale playing provider")
@@ -209,6 +218,57 @@ enum SelfTests {
             check(adapter.source == source, "registers the \(source.rawValue) adapter")
             adapter.shutdown()
         }
+    }
+
+    private static func testMediaRemotePlayerAdapter() async {
+        let event = MediaRemoteEvent(
+            bundleIdentifier: "com.tencent.QQMusicMac",
+            parentApplicationBundleIdentifier: nil,
+            playing: true,
+            title: "一半一半",
+            artist: "Top Barry",
+            album: "一半一半",
+            duration: 235,
+            elapsedTimeNow: 42,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: "qq-track-1",
+            mediaType: "MRMediaRemoteMediaTypeMusic"
+        )
+        guard case let .playing(qqTrack) = MediaRemotePlayerAdapter.snapshot(from: event, source: .qqMusic, isRunning: true) else {
+            check(false, "maps a playing QQ Music event")
+            return
+        }
+        check(qqTrack.playerSource == .qqMusic && qqTrack.playbackPosition == 42, "maps QQ Music playback identity and position")
+        check(qqTrack.duration == 235 && qqTrack.nativeTrackID == "qq-track-1", "maps QQ Music duration and native ID")
+
+        let sodaEvent = MediaRemoteEvent(
+            bundleIdentifier: "com.soda.music",
+            parentApplicationBundleIdentifier: nil,
+            playing: false,
+            title: "周旋",
+            artist: "王以太, 艾热 AIR",
+            album: "太热爱",
+            duration: 290,
+            elapsedTimeNow: 67,
+            timestamp: nil,
+            uniqueIdentifier: nil,
+            contentItemIdentifier: "soda-track-1",
+            mediaType: "MRMediaRemoteMediaTypeMusic"
+        )
+        guard case let .paused(sodaTrack) = MediaRemotePlayerAdapter.snapshot(from: sodaEvent, source: .sodaMusic, isRunning: true) else {
+            check(false, "maps a paused Soda Music event")
+            return
+        }
+        check(sodaTrack.playerSource == .sodaMusic && sodaTrack.playbackPosition == 67, "maps Soda Music playback identity and position")
+        check(MediaRemotePlayerAdapter.snapshot(from: event, source: .sodaMusic, isRunning: true) == .stopped, "rejects metadata owned by another player")
+        check(MediaRemotePlayerAdapter.snapshot(from: nil, source: .qqMusic, isRunning: false) == .closed, "reports a closed MediaRemote player")
+        check(MediaRemotePlayerAdapter.snapshot(from: nil, source: .sodaMusic, isRunning: true) == .stopped, "reports a running player without owned metadata as stopped")
+
+        let unavailable = MediaRemotePlayerAdapter(source: .qqMusic, bridge: nil, isRunning: { true })
+        let unavailableSnapshot = await unavailable.snapshot()
+        check(unavailableSnapshot == .unavailable, "reports missing MediaRemote resources")
+        unavailable.shutdown()
     }
 
     private static func testMediaRemoteBridge() {

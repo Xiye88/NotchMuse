@@ -25,6 +25,8 @@
 "Waiting for %@" = "等待 %@";
 "Cannot connect to %@. Check Automation permission in System Settings." = "无法连接 %@。请在“系统设置”中检查“自动化”权限。";
 "NetEase Cloud Music" = "网易云音乐";
+"QQ Music" = "QQ音乐";
+"Soda Music" = "汽水音乐";
 "NetEase bridge unavailable. Restart NotchMuse or choose another player." = "网易云播放桥接不可用。请重启 NotchMuse 或选择其他播放器。";
 "Paused: %@" = "已暂停：%@";
 "Song: %@" = "歌曲：%@";

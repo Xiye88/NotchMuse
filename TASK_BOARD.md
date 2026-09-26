@@ -1,5 +1,18 @@
 # NotchMuse Task Board
 
+## Active Task — QQ Music and Soda Music Expansion
+
+- Workspace: PM integration on `codex/player-expansion-integration`.
+- Baseline: `776437a352d8f81ce6915c4779766f91d3142047`.
+- Implementation and local Release candidate build: DONE.
+- Debug self-tests, packaged self-test, localization parity, signature and
+  DMG verification: PASS.
+- Remaining gates: macOS 15 CI, Product Owner GUI checks for player switching,
+  visible synchronized lyrics, pause/resume, and restart recovery.
+- Local `swift test` cannot load XCTest with the active Command Line Tools.
+- No merge, push, tag, or publication is authorized by this task.
+- Evidence: `PLAYER_EXPANSION_HANDOFF.md`.
+
 ## Completed Next Task
 
 - `10_SETTINGS_UI` — **DONE / ARCHIVED**.

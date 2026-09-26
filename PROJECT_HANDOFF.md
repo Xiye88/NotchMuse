@@ -1,5 +1,39 @@
 # NotchMuse Project Handoff
 
+## Player Expansion — Active (2026-09-26)
+
+- Baseline: `main` / `776437a352d8f81ce6915c4779766f91d3142047`, confirmed by
+  `00_PM` after Settings UI integration and main CI `36214924735` passed.
+- Integration branch: `codex/player-expansion-integration`.
+- Runtime probes: QQ Music `com.tencent.QQMusicMac` v11.10.0 and Soda Music
+  `com.soda.music` v3.8.0 both publish title, artist, album, duration, current
+  position, playback state, and owner through the bundled MediaRemote bridge.
+- Scope decision: this user-authorized expansion supersedes the 2026-08-13
+  MediaRemote production exclusion for these two player adapters. The backend
+  remains macOS-private-API dependent. Next/Previous/Seek mean observing
+  external playback changes; the existing NotchMuse adapter protocol is
+  read-only and will not gain transport controls in this work.
+- Manual brief checks passed for QQ play/pause/position and Soda play/pause/
+  advancing position. Candidate lifecycle, real lyric retrieval, runtime Auto
+  Detect handoff, and Product Owner GUI checks remain open.
+- Implementation: explicit Settings selection and Auto Detect now route QQ and
+  Soda through `MediaRemotePlayerAdapter`; the existing QQ/Soda lyric providers
+  remain wired. Provider priority and Production Matcher are unchanged.
+- Validation: Debug build and full self-tests PASS; Release candidate build 21,
+  packaged self-test, ad-hoc signature verification, DMG verification, and
+  checksums PASS. Localization key parity is 119/119 and `git diff --check`
+  passes. The active Command Line Tools installation lacks XCTest, so local
+  `swift test` cannot run; macOS 15 CI remains open.
+- Current read-only probe: both client processes are running and Soda currently
+  owns MediaRemote with complete playing metadata. QQ-specific live playback
+  had been probed earlier; this turn did not interrupt Soda to force QQ to take
+  ownership. Product Owner GUI validation remains pending.
+- Candidate: `0.8.0` build `21`, arm64, ad-hoc signed, not notarized. Executable
+  SHA-256 `213b1c5a9f026f7284cc573ee9b4a74d67a576b46f893ee193e85da8c587d398`;
+  DMG SHA-256 `5fd7d51a5e885a1adb69436d184d3acc45acdc32a5174e75c8a0bfd8983624bd`.
+- QA evidence: `PLAYER_EXPANSION_HANDOFF.md`. No merge, push,
+  tag, or publication has occurred.
+
 ## v0.8 Final Engineering Main Integration
 
 - Architecture final SHA:

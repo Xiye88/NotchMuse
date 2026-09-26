@@ -512,6 +512,7 @@ final class MenuBarController: NSObject {
         case .spotify: SpotifyAdapter()
         case .appleMusic: AppleMusicAdapter()
         case .netEaseMusic: NetEaseMusicAdapter()
+        case .qqMusic, .sodaMusic: MediaRemotePlayerAdapter(source: source)
         }
     }
 

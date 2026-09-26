@@ -1,5 +1,18 @@
 # NotchMuse Project Handoff
 
+## Settings discoverability follow-up (build 33)
+
+Current status: local candidate only; no push or release.
+Completed: top mode selector now changes the actual display mode; background
+controls stay visible; custom-width inputs stay visible and are enabled in Custom.
+Debug `--settings-interaction-self-test` reproduced the old selector failure and
+passes after the fix; `--full-self-test` also passes.
+Pending confirmation: Product Owner GUI acceptance of build 33.
+Key files: `MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift`,
+`MenuBarLyrics/Sources/MenuBarLyrics/main.swift`.
+Next step: use `/Applications/NotchMuse Candidate.app` for GUI acceptance.
+Do not repeat: replace the stable app, change player/matcher logic, or publish.
+
 ## Settings / Display Follow-up — Local Candidate (2026-09-26)
 
 - Baseline: `main` / `origin/main` at `ecb631e4f02cd4329a6f8595be8f561ad5d353ea`;

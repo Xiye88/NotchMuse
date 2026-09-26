@@ -26,6 +26,10 @@ if CommandLine.arguments.contains("--self-test") {
 }
 
 #if DEBUG
+if CommandLine.arguments.contains("--settings-interaction-self-test") {
+    SettingsWindowController.testModeControls()
+    exit(0)
+}
 if CommandLine.arguments.contains("--full-self-test") {
     SelfTests.run()
     exit(0)

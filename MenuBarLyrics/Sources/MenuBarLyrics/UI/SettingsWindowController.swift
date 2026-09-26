@@ -235,7 +235,7 @@ final class SettingsWindowController: NSWindowController {
     private let contentStack = NSStackView()
     private var cards: [NSView] = []
     private let preview = SettingsPreviewView()
-    private let previewModeControl = NSSegmentedControl(labels: [L10n.text("Status Bar Preview"), L10n.text("Notch Preview")], trackingMode: .selectOne, target: nil, action: nil)
+    private let previewModeControl = NSSegmentedControl(labels: DisplayMode.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let displayPage = NSStackView()
     private let appearancePage = NSStackView()
     private let generalPage = NSStackView()
@@ -279,6 +279,39 @@ final class SettingsWindowController: NSWindowController {
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
     }
+
+    #if DEBUG
+    static func testModeControls() {
+        _ = NSApplication.shared
+        let defaults = UserDefaults.standard
+        let keys = [AppPreferences.displayModeKey, AppPreferences.displayWidthKey]
+        let saved = keys.map { defaults.object(forKey: $0) }
+        defer {
+            for (key, value) in zip(keys, saved) {
+                if let value { defaults.set(value, forKey: key) }
+                else { defaults.removeObject(forKey: key) }
+            }
+        }
+        defaults.set(DisplayMode.statusBar.rawValue, forKey: AppPreferences.displayModeKey)
+        defaults.set(DisplayWidth.auto.rawValue, forKey: AppPreferences.displayWidthKey)
+        let controller = SettingsWindowController(onSettingsChange: {})
+        controller.sync()
+        controller.previewModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: .notch)!
+        controller.previewModeChanged()
+        precondition(AppPreferences.displayMode == .notch, "Top mode selector must update actual display mode")
+        precondition(controller.notchBackgroundRow?.isHidden == false, "Background toggle must be discoverable")
+        precondition(controller.notchBackgroundColorRow?.isHidden == false, "Background colors must remain visible")
+        precondition(controller.customWidthRow?.isHidden == false, "Width control must remain visible")
+        precondition(!controller.customWidthSlider.isEnabled, "Preset width must disable custom input")
+        controller.widthControl.selectedSegment = DisplayWidth.allCases.firstIndex(of: .custom)!
+        controller.widthChanged()
+        precondition(controller.customWidthSlider.isEnabled, "Custom width must enable input")
+        controller.displayModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: .statusBar)!
+        controller.displayModeChanged()
+        precondition(controller.previewModeControl.selectedSegment == controller.displayModeControl.selectedSegment, "Mode selectors must stay synchronized")
+        print("Settings interaction self-test passed")
+    }
+    #endif
 
     private func buildContent() {
         displayModeControl.target = self
@@ -780,9 +813,11 @@ final class SettingsWindowController: NSWindowController {
         positionRow?.isHidden = !statusBarMode
         statusBarOffsetRow?.isHidden = !statusBarMode
         notchStyleRow?.isHidden = statusBarMode
-        customWidthRow?.isHidden = AppPreferences.displayWidth != .custom
-        notchBackgroundRow?.isHidden = statusBarMode
-        notchBackgroundColorRow?.isHidden = statusBarMode || !AppPreferences.notchBackgroundEnabled
+        customWidthRow?.isHidden = false
+        customWidthSlider.isEnabled = AppPreferences.displayWidth == .custom
+        customWidthValue.isEnabled = customWidthSlider.isEnabled
+        notchBackgroundRow?.isHidden = false
+        notchBackgroundColorRow?.isHidden = false
         notchBackgroundColorWell.isHidden = NotchBackgroundPreset.allCases.indices.contains(notchBackgroundPresetPopUp.indexOfSelectedItem)
             ? NotchBackgroundPreset.allCases[notchBackgroundPresetPopUp.indexOfSelectedItem] != .custom
             : true
@@ -1044,7 +1079,8 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func previewModeChanged() {
-        preview.mode = previewModeControl.selectedSegment == 1 ? .notch : .statusBar
+        displayModeControl.selectedSegment = previewModeControl.selectedSegment
+        displayModeChanged()
     }
 
     @objc private func presetButtonChanged(_ sender: NSButton) {

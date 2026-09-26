@@ -11,10 +11,20 @@
   preview, presets, per-section resets, conditional controls, and bilingual
   localization. Resetting General does not change Login Item registration;
   preview mode remains independent of the saved display mode.
-- GUI QA: English and Simplified Chinese, navigation, preview isolation,
-  persistence, conditional controls, presets, and section resets. Screenshots:
+- GUI QA: PASS against an isolated `com.notchmuse.settingsqa` app. CUA AX
+  confirmed the Settings window title and controls in English and Simplified
+  Chinese; screenshots were then captured by that window's macOS window ID:
   `/tmp/notchmuse-settings-ui-en.png` and
   `/tmp/notchmuse-settings-ui-zh-Hans.png`.
+- Interactions verified: all three sidebar pages; Notch preview toggle left the
+  saved Display Mode at `Notch Mode`; `Fresh Minimal` persisted Green / 13 pt /
+  speed 1 / opacity 1 / Normal width; Appearance Restore Defaults removed its
+  overrides; Display settings survived app restart and page changes. Window
+  resized to its 1040 pt minimum width (measured 1040×792 pt) with controls
+  visible and uncut. Login at Startup remained off; General reset clears
+  preference keys and does not call `SMAppService` register/unregister.
+- The earlier unverified screenshot files have been replaced with captures of
+  the actual Settings window; do not use previous desktop captures as evidence.
 - Verification: Debug build and `--full-self-test` PASS; packaged Release
   `--self-test`, deep code-signature verification, DMG verification, and SHA-256
   checks PASS. Artifact files are under `dist.noindex/`; hashes are recorded in

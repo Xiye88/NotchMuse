@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://notchmuse.com"><strong>官方网站</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.1/NotchMuse-v0.8.0-beta.1-arm64.dmg"><strong>直接下载 v0.8.0 Beta 1</strong></a>
+  <a href="https://notchmuse.com"><strong>官方网站</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.2/NotchMuse.dmg"><strong>直接下载 v0.8.0 Beta 2</strong></a>
   ·
   <a href="https://github.com/Xiye88/NotchMuse/issues">报告问题</a>
 </p>
@@ -27,7 +27,7 @@
   macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐
 </p>
 
-> **当前公开 Beta：** [v0.8.0-beta.1](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.1)，build 29。支持五个播放器、Auto Detect 和新版双语 Settings。ad-hoc 签名，尚未公证。可从 [notchmuse.com](https://notchmuse.com) 直接下载。
+> **当前公开 Beta：** [v0.8.0-beta.2](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.2)，build 31。支持五个播放器、Auto Detect 和新版双语 Settings。新增美化安装包、双语首次打开指引和“隐私与安全性”快捷入口。ad-hoc 签名，尚未公证。可从 [notchmuse.com](https://notchmuse.com) 直接下载。
 
 ## 演示
 
@@ -85,9 +85,9 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 
 ## 快速开始
 
-当前公开的 v0.8.0 Beta 1 支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。
+当前公开的 v0.8.0 Beta 2 支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。
 
-1. 访问 [官网](https://notchmuse.com)，或[直接下载 Beta 1 DMG](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.1/NotchMuse-v0.8.0-beta.1-arm64.dmg)。
+1. 访问 [官网](https://notchmuse.com)，或[直接下载 Beta 2 DMG](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.2/NotchMuse.dmg)。
 2. 打开 DMG，把 `NotchMuse.app` 拖到 `Applications`。
 3. 这个 beta 尚未 notarize：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
 4. 打开五个支持的桌面播放器之一并播放歌曲。
@@ -146,7 +146,7 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 
 ## 路线图
 
-- 当前公开 Beta：v0.8.0-beta.1，五平台、Auto Detect 和 Settings UI v2
+- 当前公开 Beta：v0.8.0-beta.2，五平台、Auto Detect、Settings UI v2 和新版安装包
 - 下一阶段：新设备验证，以及真实 Beta 用户反馈修复
 - 后续分发与兼容性工作根据验证结果决定
 

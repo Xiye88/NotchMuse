@@ -1,5 +1,16 @@
 # NotchMuse Project Handoff
 
+## Release Closure Handoff
+
+Current status: Beta 2 public release and website deployment verified; final documentation synchronized with this commit.
+Completed: source pushed, CI PASS, build 31, tag/prerelease, public DMG/checksum verified.
+Pending confirmation: none for this approved release; future releases require fresh approval.
+Key files: `scripts/build_dmg.sh`, `scripts/notchmuse_dmg.py`, `scripts/assets/安装说明.txt`, `scripts/assets/打开隐私与安全性.inetloc`, `README.md`, `README.zh-CN.md`.
+Next step: await Product Owner download/install feedback; ask before the next sync/publication.
+Do not repeat: player long tests, local reinstall, security-setting changes, or Beta 1 asset replacement.
+
+The candidate/local-install sections immediately below are historical. See Current Public Beta for the published build.
+
 ## DMG Settings Shortcut — 2026-09-26
 
 - Added `打开隐私与安全性.inetloc` to the isolated DMG candidate and bilingual guide.
@@ -55,20 +66,21 @@
 
 ## Current Public Beta — 2026-09-26
 
-- Public Beta: **v0.8.0-beta.1**, build **29**; published as a prerelease.
-- Release tag / binary source: `v0.8.0-beta.1` / `47fe9fafd31d58bdebf1cb242ec141489cede01f`.
-- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.1
-- Download: https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.1/NotchMuse-v0.8.0-beta.1-arm64.dmg
-- DMG SHA-256: `74546ec6f371caeb0d31b15949f902ee94a7b06b307d81b8aaa5f1d0b6cf6660`.
-- Architecture / signing: arm64, ad-hoc, not notarized; macOS 14+.
-- Release build, packaged self-test, signature, DMG, public download checksum: PASS.
-- Source CI: `36229154287`, PASS.
-- Five-player focused smoke and Settings basic smoke: Product Owner **MANUAL PASS** ("一切正常"); not independently instrumented per-step evidence.
-- QQ/Soda visible lyrics and NetEase 7–8 hour stability: Product Owner MANUAL PASS.
-- Website: UPDATED / VERIFIED; all three download links fixed to beta.1, version and installation notice live (deployment 20260926-04).
-- Next gate: clean-device beta validation by Product Owner, explicitly post-release.
-- Freeze feature/UI/Matcher/provider expansion; address P0/P1 and real beta feedback only. A blocking issue proceeds to beta.2.
-- Installed local app remains build 28; public release artifact is build 29 from the same functional source, with Beta version metadata.
+- Public Beta: **v0.8.0-beta.2**, build **31**; published as a prerelease with Product Owner approval.
+- Release tag / binary source: `v0.8.0-beta.2` / `c606f185efb114a3d7a1fac78eafc5e925bc9b01`.
+- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.2
+- Download: https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.2/NotchMuse.dmg
+- DMG SHA-256: `1017d81bc80d15244fef3f3ff1d1988d8430c619ce8394cd4ec3e480c00d3e68`.
+- Changes: music-themed installer layout, bilingual first-open guide, Privacy & Security navigation shortcut, pinned CI packaging tooling.
+- App runtime source is unchanged from Beta 1; no player, Matcher, or provider priority changes.
+- Architecture / signing: arm64, ad-hoc, not notarized; macOS 14+. Shortcut does not bypass Gatekeeper or approve the app.
+- Release build, packaged full self-test, signature, DMG integrity, mounted files, public download checksum and attachment filename: PASS.
+- Source CI: `36245300979`, PASS. Beta 1 assets preserved.
+- Five-player/Settings short smoke and NetEase 7–8 hour stability remain prior Product Owner MANUAL PASS; not newly repeated for this packaging-only release.
+- Website: VERIFIED, deployment `20260926-08`; apex/www serve three fixed Beta 2 download links, bilingual first-open guidance, and HTML no-cache headers.
+- Remaining risks: cross-macOS/download-quarantine shortcut behavior and clean-device onboarding need broader beta feedback; latest Finder visual capture unavailable through CUA.
+- Local installed app was not replaced in this release task; Product Owner controls the download/install test.
+- Further sync/publication requires a new explicit approval. Freeze feature/Matcher/provider expansion.
 
 All older candidate/build/pending-release sections below are historical and are superseded by this block.
 

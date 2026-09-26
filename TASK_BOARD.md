@@ -1,5 +1,25 @@
 # NotchMuse Task Board
 
+## Current Task — Settings / Display Follow-up
+
+- Status: **LOCAL CANDIDATE READY; GUI ACCEPTANCE BLOCKED**.
+- Baseline: `main` / `origin/main` at
+  `ecb631e4f02cd4329a6f8595be8f561ad5d353ea`; branch
+  `codex/settings-display-followup`.
+- Completed: lyric background toggle/presets/custom color; safe-clamped Status
+  Bar offset for the whole lane; scaled preview and runtime custom width;
+  confirmed AppIcon at both Settings brand locations. Existing background
+  preference keys are reused. No player, Matcher, or Provider Priority changes.
+- Local candidate target: `dist.noindex/settings-display-followup/`, version
+  `0.8.0-settings-display-followup`, build `32`; no public release or website work.
+- Verification: Debug `--full-self-test` and packaged Release `--self-test`
+  PASS; Release build/signature PASS with bridge runtime check skipped after its
+  normal exit 4; `swift test` unavailable because XCTest is missing.
+- GUI acceptance is pending because CUA timed out repeatedly. No screenshot was
+  captured; verify drag behavior, safe-area clamps, presets/contrast, preview
+  widths, and both icons against the actual running app when the GUI is available.
+- Next: Product Owner performs actual-app GUI acceptance. No push or release.
+
 ## Historical Candidate — DMG Installer Polish (superseded by Beta 2 below)
 
 - Status: **LOCAL CANDIDATE READY**, Finder screenshot and PM Gatekeeper check

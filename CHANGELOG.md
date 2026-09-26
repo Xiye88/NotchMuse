@@ -32,8 +32,10 @@ All older candidate/build/pending-release sections below are historical and are 
   NetEase, while retaining explicit player selection
 - Added configurable stopped-player behavior: hide lyrics by default or keep
   the final lyric paused
-- Added Notch background modes for None, Black, and Custom Color, plus the Hide
-  on Hover toggle
+- Added a Notch background toggle with Orange, Black, White, Soft Gray, Blue,
+  and Custom colors, plus the Hide on Hover toggle
+- Added safe-clamped Status Bar horizontal offset and connected custom width to
+  both the live preview and runtime lyric lanes
 - Added a persistent custom lyric color alongside the existing color presets
 
 ### Fixed

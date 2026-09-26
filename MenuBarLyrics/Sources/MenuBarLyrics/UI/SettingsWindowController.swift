@@ -13,6 +13,7 @@ enum AppPreferences {
     static let displayTargetKey = "DisplayTarget"
     static let displayWidthKey = "DisplayWidth"
     static let customWidthKey = "CustomWidth"
+    static let statusBarOffsetKey = "StatusBarHorizontalOffset"
     static let hasShownFirstLaunchGuideKey = "HasShownFirstLaunchGuide"
     static let languageKey = "AppLanguage"
     static let playerSourceKey = "PlayerSource"
@@ -108,6 +109,10 @@ enum AppPreferences {
         return stored == 0 ? 500 : min(1000, max(180, stored))
     }
 
+    static var statusBarOffset: CGFloat {
+        min(200, max(-200, UserDefaults.standard.double(forKey: statusBarOffsetKey)))
+    }
+
     static var notchBackgroundEnabled: Bool { notchBackgroundEnabled(in: .standard) }
 
     static func notchBackgroundEnabled(in defaults: UserDefaults) -> Bool {
@@ -127,6 +132,11 @@ enum AppPreferences {
 
     static var notchBackgroundColor: NSColor {
         color(forKey: notchBackgroundColorKey) ?? .black
+    }
+
+    static func notchBackgroundPreset(in defaults: UserDefaults = .standard) -> NotchBackgroundPreset {
+        guard let color = color(forKey: notchBackgroundColorKey, in: defaults) else { return .black }
+        return NotchBackgroundPreset.matching(color)
     }
 
     static func color(forKey key: String, in defaults: UserDefaults = .standard) -> NSColor? {
@@ -161,6 +171,40 @@ enum NotchBackgroundMode: String, CaseIterable {
     case custom = "Custom"
 }
 
+enum NotchBackgroundPreset: String, CaseIterable {
+    case orange = "Orange"
+    case black = "Black"
+    case white = "White"
+    case softGray = "Soft Gray"
+    case blue = "Blue"
+    case custom = "Custom"
+
+    var color: NSColor? {
+        switch self {
+        case .orange: NSColor(calibratedRed: 0.96, green: 0.34, blue: 0.12, alpha: 1)
+        case .black: .black
+        case .white: .white
+        case .softGray: NSColor(calibratedWhite: 0.34, alpha: 1)
+        case .blue: NSColor(calibratedRed: 0.12, green: 0.32, blue: 0.72, alpha: 1)
+        case .custom: nil
+        }
+    }
+
+    static func matching(_ color: NSColor) -> NotchBackgroundPreset {
+        allCases.first { preset in
+            guard let presetColor = preset.color,
+                  let lhs = presetColor.usingColorSpace(.deviceRGB),
+                  let rhs = color.usingColorSpace(.deviceRGB) else { return false }
+            return lhs == rhs
+        } ?? .custom
+    }
+}
+
+private func notchMuseAppIcon() -> NSImage {
+    Bundle.main.url(forResource: "AppIcon", withExtension: "icns")
+        .flatMap(NSImage.init(contentsOf:)) ?? NSImage()
+}
+
 @MainActor
 final class SettingsWindowController: NSWindowController {
     private let displayModeControl = NSSegmentedControl(labels: DisplayMode.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
@@ -169,6 +213,7 @@ final class SettingsWindowController: NSWindowController {
     private let displayTargetPopUp = NSPopUpButton()
     private let widthControl = NSSegmentedControl(labels: DisplayWidth.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let customWidthSlider = NSSlider(value: 500, minValue: 180, maxValue: 1000, target: nil, action: nil)
+    private let statusBarOffsetSlider = NSSlider(value: 0, minValue: -200, maxValue: 200, target: nil, action: nil)
     private var colorButtons: [NSButton] = []
     private let lyricsColorWell = NSColorWell()
     private let fontSizeSlider = NSSlider(value: 13, minValue: 10, maxValue: 60, target: nil, action: nil)
@@ -178,11 +223,13 @@ final class SettingsWindowController: NSWindowController {
     private let animationSpeedValue = NSTextField(string: "")
     private let opacityValue = NSTextField(string: "")
     private let customWidthValue = NSTextField(string: "")
+    private let statusBarOffsetValue = NSTextField(string: "")
     private let launchAtLoginSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let playerPopUp = NSPopUpButton()
     private let playerStopBehaviorPopUp = NSPopUpButton()
-    private let notchBackgroundPopUp = NSPopUpButton()
+    private let notchBackgroundSwitch = NSSwitch()
+    private let notchBackgroundPresetPopUp = NSPopUpButton()
     private let notchBackgroundColorWell = NSColorWell()
     private let notchHideOnHoverSwitch = NSSwitch()
     private let contentStack = NSStackView()
@@ -197,6 +244,7 @@ final class SettingsWindowController: NSWindowController {
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
     private var customWidthRow: NSGridRow?
+    private var statusBarOffsetRow: NSGridRow?
     private var notchBackgroundRow: NSGridRow?
     private var notchBackgroundColorRow: NSGridRow?
     private var notchHideOnHoverRow: NSGridRow?
@@ -249,7 +297,13 @@ final class SettingsWindowController: NSWindowController {
         widthControl.action = #selector(widthChanged)
         customWidthSlider.target = self
         customWidthSlider.action = #selector(customWidthChanged)
+        customWidthSlider.isContinuous = true
         configureNumericField(customWidthValue, action: #selector(customWidthEntered))
+        statusBarOffsetSlider.target = self
+        statusBarOffsetSlider.action = #selector(statusBarOffsetChanged)
+        statusBarOffsetSlider.isContinuous = true
+        statusBarOffsetSlider.toolTip = L10n.text("Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement.")
+        configureNumericField(statusBarOffsetValue, action: #selector(statusBarOffsetEntered))
 
         lyricsColorWell.target = self
         lyricsColorWell.action = #selector(lyricsColorChanged)
@@ -267,11 +321,13 @@ final class SettingsWindowController: NSWindowController {
         opacitySlider.action = #selector(opacityChanged)
         opacitySlider.isContinuous = true
         configureNumericField(opacityValue, action: #selector(opacityEntered))
-        for mode in NotchBackgroundMode.allCases {
-            notchBackgroundPopUp.addItem(withTitle: L10n.text(mode.rawValue))
+        notchBackgroundSwitch.target = self
+        notchBackgroundSwitch.action = #selector(notchBackgroundToggled)
+        for preset in NotchBackgroundPreset.allCases {
+            notchBackgroundPresetPopUp.addItem(withTitle: L10n.text(preset.rawValue))
         }
-        notchBackgroundPopUp.target = self
-        notchBackgroundPopUp.action = #selector(notchBackgroundChanged)
+        notchBackgroundPresetPopUp.target = self
+        notchBackgroundPresetPopUp.action = #selector(notchBackgroundPresetChanged)
         notchBackgroundColorWell.target = self
         notchBackgroundColorWell.action = #selector(notchBackgroundColorChanged)
         notchBackgroundColorWell.isContinuous = true
@@ -301,14 +357,16 @@ final class SettingsWindowController: NSWindowController {
         let displayGrid = grid([
             [label(L10n.text("Display Mode")), displayModeControl],
             [label(L10n.text("Status Bar Position")), positionControl],
+            [label(L10n.text("Horizontal Offset")), valueRow(slider: statusBarOffsetSlider, value: statusBarOffsetValue, unit: "pt")],
             [label(L10n.text("Notch Style")), notchStyleControl],
             [label(L10n.text("Display Screen")), displayScreenControl()],
             [label(L10n.text("Lyrics Width")), widthControl],
             [label(L10n.text("Custom Width")), valueRow(slider: customWidthSlider, value: customWidthValue, unit: "pt")]
         ])
         positionRow = displayGrid.row(at: 1)
-        notchStyleRow = displayGrid.row(at: 2)
-        customWidthRow = displayGrid.row(at: 5)
+        statusBarOffsetRow = displayGrid.row(at: 2)
+        notchStyleRow = displayGrid.row(at: 3)
+        customWidthRow = displayGrid.row(at: 6)
         configure(page: displayPage)
         configure(page: appearancePage)
         let appearanceGrid = grid([
@@ -316,8 +374,8 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue, unit: "pt")],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue, unit: "×")],
             [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
-            [label(L10n.text("Background")), notchBackgroundPopUp],
-            [label(L10n.text("Background Color")), notchBackgroundColorWell],
+            [label(L10n.text("Notch Background")), notchBackgroundSwitch],
+            [label(L10n.text("Background Color")), backgroundColorControls()],
             [label(L10n.text("Hide on Hover")), notchHideOnHoverSwitch]
         ])
         notchBackgroundRow = appearanceGrid.row(at: 4)
@@ -334,7 +392,7 @@ final class SettingsWindowController: NSWindowController {
         ])
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
 
-        displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: "Choose how and where lyrics appear.", grid: displayGrid, trailing: resetButton(for: .display))))
+        displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how lyrics appear. Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement."), grid: displayGrid, trailing: resetButton(for: .display))))
 
         guard let contentView = window?.contentView else { return }
         let backdrop = SettingsBackdropView(frame: contentView.bounds)
@@ -438,9 +496,10 @@ final class SettingsWindowController: NSWindowController {
         let title = NSTextField(labelWithString: "NotchMuse")
         title.font = .systemFont(ofSize: 20, weight: .bold)
         title.textColor = NSColor(calibratedRed: 0.10, green: 0.27, blue: 0.51, alpha: 1)
-        let icon = NSImageView(image: NSImage(systemSymbolName: "waveform", accessibilityDescription: "NotchMuse") ?? NSImage())
-        icon.contentTintColor = .systemBlue
+        let icon = NSImageView(image: notchMuseAppIcon())
+        icon.setAccessibilityLabel("NotchMuse")
         icon.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 24).isActive = true
         let row = NSStackView(views: [icon, title])
         row.orientation = .horizontal
         row.alignment = .centerY
@@ -655,6 +714,18 @@ final class SettingsWindowController: NSWindowController {
         return row
     }
 
+    private func backgroundColorControls() -> NSView {
+        notchBackgroundPresetPopUp.widthAnchor.constraint(equalToConstant: 160).isActive = true
+        notchBackgroundPresetPopUp.toolTip = L10n.text("Choose a preset or Custom")
+        notchBackgroundColorWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        let row = NSStackView(views: [notchBackgroundPresetPopUp, notchBackgroundColorWell])
+        row.orientation = .horizontal
+        row.spacing = 8
+        row.alignment = .centerY
+        row.setAccessibilityLabel(L10n.text("Background Color"))
+        return row
+    }
+
     private func swatch(_ color: NSColor) -> NSImage {
         let image = NSImage(size: NSSize(width: 30, height: 30))
         image.lockFocus()
@@ -675,18 +746,21 @@ final class SettingsWindowController: NSWindowController {
         displayTargetPopUp.selectItem(at: DisplayTarget.allCases.firstIndex(of: AppPreferences.displayTarget) ?? 0)
         widthControl.selectedSegment = DisplayWidth.allCases.firstIndex(of: AppPreferences.displayWidth) ?? 0
         customWidthSlider.doubleValue = Double(AppPreferences.customWidth)
+        statusBarOffsetSlider.doubleValue = Double(AppPreferences.statusBarOffset)
         lyricsColorWell.color = AppPreferences.customLyricsColor
         updateCustomColorSwatch()
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
         animationSpeedSlider.doubleValue = Double(AppPreferences.animationSpeed)
         opacitySlider.doubleValue = Double(AppPreferences.opacity)
-        notchBackgroundPopUp.selectItem(at: NotchBackgroundMode.allCases.firstIndex(of: AppPreferences.notchBackgroundMode()) ?? 0)
+        notchBackgroundSwitch.state = AppPreferences.notchBackgroundEnabled ? .on : .off
+        notchBackgroundPresetPopUp.selectItem(at: NotchBackgroundPreset.allCases.firstIndex(of: AppPreferences.notchBackgroundPreset()) ?? 1)
         notchBackgroundColorWell.color = AppPreferences.notchBackgroundColor
         notchHideOnHoverSwitch.state = AppPreferences.notchHideOnHover ? .on : .off
         fontSizeValue.stringValue = String(format: "%.0f", fontSizeSlider.doubleValue)
         animationSpeedValue.stringValue = String(format: "%.1f", animationSpeedSlider.doubleValue)
         opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
         customWidthValue.stringValue = String(format: "%.0f", customWidthSlider.doubleValue)
+        statusBarOffsetValue.stringValue = String(format: "%.0f", statusBarOffsetSlider.doubleValue)
         launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
         playerPopUp.selectItem(at: PlayerSource.allCases.firstIndex(of: AppPreferences.playerSource) ?? 0)
         playerStopBehaviorPopUp.selectItem(at: PlayerStopBehavior.allCases.firstIndex(of: AppPreferences.playerStopBehavior) ?? 0)
@@ -704,10 +778,14 @@ final class SettingsWindowController: NSWindowController {
     private func updateControlAvailability() {
         let statusBarMode = AppPreferences.displayMode == .statusBar
         positionRow?.isHidden = !statusBarMode
+        statusBarOffsetRow?.isHidden = !statusBarMode
         notchStyleRow?.isHidden = statusBarMode
         customWidthRow?.isHidden = AppPreferences.displayWidth != .custom
         notchBackgroundRow?.isHidden = statusBarMode
-        notchBackgroundColorRow?.isHidden = statusBarMode || AppPreferences.notchBackgroundMode() != .custom
+        notchBackgroundColorRow?.isHidden = statusBarMode || !AppPreferences.notchBackgroundEnabled
+        notchBackgroundColorWell.isHidden = NotchBackgroundPreset.allCases.indices.contains(notchBackgroundPresetPopUp.indexOfSelectedItem)
+            ? NotchBackgroundPreset.allCases[notchBackgroundPresetPopUp.indexOfSelectedItem] != .custom
+            : true
         notchHideOnHoverRow?.isHidden = statusBarMode
     }
 
@@ -756,6 +834,18 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func customWidthEntered() {
         commit(customWidthValue, slider: customWidthSlider, key: AppPreferences.customWidthKey, minimum: 180, maximum: 1000, format: "%.0f")
+    }
+
+    @objc private func statusBarOffsetChanged() {
+        UserDefaults.standard.set(statusBarOffsetSlider.doubleValue, forKey: AppPreferences.statusBarOffsetKey)
+        statusBarOffsetValue.stringValue = String(format: "%.0f", statusBarOffsetSlider.doubleValue)
+        onSettingsChange()
+        updatePreview()
+    }
+
+    @objc private func statusBarOffsetEntered() {
+        commit(statusBarOffsetValue, slider: statusBarOffsetSlider, key: AppPreferences.statusBarOffsetKey,
+               minimum: -200, maximum: 200, format: "%.0f")
     }
 
     @objc private func colorChanged(_ sender: NSButton) {
@@ -818,19 +908,22 @@ final class SettingsWindowController: NSWindowController {
         opacityChanged()
     }
 
-    @objc private func notchBackgroundChanged() {
-        let modes = NotchBackgroundMode.allCases
-        guard modes.indices.contains(notchBackgroundPopUp.indexOfSelectedItem) else { return }
-        switch modes[notchBackgroundPopUp.indexOfSelectedItem] {
-        case .none:
-            UserDefaults.standard.set(false, forKey: AppPreferences.notchBackgroundEnabledKey)
-        case .black:
-            UserDefaults.standard.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
-            UserDefaults.standard.removeObject(forKey: AppPreferences.notchBackgroundColorKey)
-        case .custom:
-            UserDefaults.standard.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
-            AppPreferences.setColor(notchBackgroundColorWell.color, forKey: AppPreferences.notchBackgroundColorKey)
+    @objc private func notchBackgroundToggled() {
+        UserDefaults.standard.set(notchBackgroundSwitch.state == .on, forKey: AppPreferences.notchBackgroundEnabledKey)
+        updateControlAvailability()
+        onSettingsChange()
+        updatePreview()
+    }
+
+    @objc private func notchBackgroundPresetChanged() {
+        let presets = NotchBackgroundPreset.allCases
+        guard presets.indices.contains(notchBackgroundPresetPopUp.indexOfSelectedItem) else { return }
+        UserDefaults.standard.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
+        notchBackgroundSwitch.state = .on
+        if let color = presets[notchBackgroundPresetPopUp.indexOfSelectedItem].color {
+            AppPreferences.setColor(color, forKey: AppPreferences.notchBackgroundColorKey)
         }
+        notchBackgroundColorWell.color = AppPreferences.notchBackgroundColor
         updateControlAvailability()
         onSettingsChange()
         updatePreview()
@@ -838,6 +931,10 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func notchBackgroundColorChanged() {
         AppPreferences.setColor(notchBackgroundColorWell.color, forKey: AppPreferences.notchBackgroundColorKey)
+        UserDefaults.standard.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
+        notchBackgroundSwitch.state = .on
+        notchBackgroundPresetPopUp.selectItem(at: NotchBackgroundPreset.allCases.firstIndex(of: .custom) ?? 0)
+        updateControlAvailability()
         onSettingsChange()
         updatePreview()
     }
@@ -870,6 +967,7 @@ final class SettingsWindowController: NSWindowController {
         UserDefaults.standard.set(value, forKey: key)
         field.stringValue = String(format: format, value)
         onSettingsChange()
+        updatePreview()
     }
 
     @objc private func notchHideOnHoverChanged() {
@@ -974,7 +1072,7 @@ final class SettingsWindowController: NSWindowController {
         let keys: [String]
         switch page {
         case .display:
-            keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.notchStyleKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey]
+            keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.statusBarOffsetKey, AppPreferences.notchStyleKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey]
         case .appearance:
             keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchHideOnHoverKey]
         case .general:
@@ -994,7 +1092,9 @@ final class SettingsWindowController: NSWindowController {
             position: AppPreferences.position,
             notchStyle: AppPreferences.notchStyle,
             notchBackground: AppPreferences.notchBackgroundEnabled,
-            notchBackgroundColor: AppPreferences.notchBackgroundColor
+            notchBackgroundColor: AppPreferences.notchBackgroundColor,
+            customWidth: AppPreferences.customWidth,
+            statusBarOffset: AppPreferences.statusBarOffset
         )
     }
 }
@@ -1018,8 +1118,8 @@ private final class SettingsSidebarFooterView: NSView {
         layer?.borderWidth = 1
         layer?.borderColor = NSColor.white.withAlphaComponent(0.85).cgColor
 
-        let symbol = NSImageView(image: NSImage(systemSymbolName: "music.note", accessibilityDescription: "NotchMuse") ?? NSImage())
-        symbol.contentTintColor = NSColor.systemPurple
+        let symbol = NSImageView(image: notchMuseAppIcon())
+        symbol.setAccessibilityLabel("NotchMuse")
         symbol.wantsLayer = true
         symbol.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.82).cgColor
         symbol.layer?.cornerRadius = 12
@@ -1098,6 +1198,8 @@ private final class SettingsPreviewView: NSView {
     private var lyricFontSize: CGFloat = 13
     private var lyricOpacity: CGFloat = 1
     private var lyricWidth: DisplayWidth = .auto
+    private var customWidth: CGFloat = 500
+    private var statusBarOffset: CGFloat = 0
     private var position: LyricsPosition = .right
     private var notchStyle: NotchStyle = .lyricOnly
     private var notchBackground = false
@@ -1109,11 +1211,13 @@ private final class SettingsPreviewView: NSView {
 
     func apply(colors: [NSColor], fontSize: CGFloat, opacity: CGFloat, width: DisplayWidth,
                position: LyricsPosition, notchStyle: NotchStyle, notchBackground: Bool,
-               notchBackgroundColor: NSColor) {
+               notchBackgroundColor: NSColor, customWidth: CGFloat, statusBarOffset: CGFloat) {
         lyricColors = colors
         lyricFontSize = fontSize
         lyricOpacity = opacity
         lyricWidth = width
+        self.customWidth = customWidth
+        self.statusBarOffset = statusBarOffset
         self.position = position
         self.notchStyle = notchStyle
         self.notchBackground = notchBackground
@@ -1150,12 +1254,14 @@ private final class SettingsPreviewView: NSView {
         }
 
         if notch {
+            let previewScale = WidthGeometry.previewScale(screenWidth: screen.width)
             let cutout = NSRect(x: screen.midX - 54, y: screen.minY - 1, width: 108, height: 28)
             NSColor.black.setFill()
             NSBezierPath(roundedRect: cutout, xRadius: 14, yRadius: 14).fill()
             let lineHeight = ceil(min(lyricFontSize, 17) * 1.3)
-            let overlayWidth = min(screen.width - 22, max(180, WidthGeometry.notchWidth(
-                mode: lyricWidth, availableWidth: screen.width - 22, style: notchStyle, customWidth: 220
+            let availableWidth = max(0, screen.width - 22)
+            let overlayWidth = min(availableWidth, max(min(180 * previewScale, availableWidth), WidthGeometry.notchWidth(
+                mode: lyricWidth, availableWidth: availableWidth, style: notchStyle, customWidth: customWidth * previewScale
             )))
             let overlayHeight: CGFloat
             switch notchStyle {
@@ -1166,36 +1272,44 @@ private final class SettingsPreviewView: NSView {
             let overlay = NSRect(x: screen.midX - overlayWidth / 2, y: cutout.maxY + 6,
                                  width: overlayWidth, height: overlayHeight)
             if notchBackground {
-                notchBackgroundColor.withAlphaComponent(0.8).setFill()
+                notchBackgroundColor.withAlphaComponent(notchStyle == .lyricOnly ? 0.76 : 0.82).setFill()
                 NSBezierPath(roundedRect: overlay, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
             }
             if notchStyle == .songLyric {
                 drawText(L10n.text("Preview song · Preview artist"),
                          in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
                                     width: overlay.width - 24, height: lineHeight),
-                         color: .white, size: max(10, min(lyricFontSize - 2, 13)), alignment: .center)
+                         color: notchPreviewForeground, size: max(10, min(lyricFontSize - 2, 13)), alignment: .center)
             } else if notchStyle == .expanded {
                 drawText(L10n.text("Preview song"),
                          in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
                                     width: overlay.width - 24, height: lineHeight),
-                         color: .white, size: max(10, min(lyricFontSize, 13)), alignment: .left)
+                         color: notchPreviewForeground, size: max(10, min(lyricFontSize, 13)), alignment: .left)
                 drawText(L10n.text("Preview artist"),
                          in: NSRect(x: overlay.minX + 12, y: overlay.minY + lineHeight + 4,
                                     width: overlay.width - 24, height: lineHeight),
-                         color: .white, size: max(10, min(lyricFontSize - 2, 12)), alignment: .left)
+                         color: notchPreviewForeground, size: max(10, min(lyricFontSize - 2, 12)), alignment: .left)
             }
             drawLyric(in: NSRect(x: overlay.minX + 12, y: overlay.maxY - lineHeight - 7,
-                                width: overlay.width - 24, height: lineHeight), notch: true)
+                                width: overlay.width - 24, height: lineHeight), notch: true,
+                      backgroundColor: notchBackground ? notchBackgroundColor : nil)
         } else {
             let bar = NSRect(x: screen.minX, y: screen.minY, width: screen.width, height: 28)
             NSColor.white.withAlphaComponent(0.86).setFill()
             NSBezierPath(rect: bar).fill()
             NSImage(systemSymbolName: "apple.logo", accessibilityDescription: nil)?
                 .draw(in: NSRect(x: bar.minX + 12, y: bar.minY + 6, width: 16, height: 16))
-            let available = max(80, bar.width - 92)
-            let width = WidthGeometry.statusBarWidth(mode: lyricWidth, availableWidth: available, customWidth: 190)
-            let x = position == .left ? bar.minX + 36 : bar.maxX - width - 48
-            drawLyric(in: NSRect(x: x, y: bar.minY + 5, width: width, height: 20), notch: false)
+            let previewScale = WidthGeometry.previewScale(screenWidth: screen.width)
+            let leftMinX = bar.minX + 328 * previewScale
+            let rightMaxX = bar.maxX - 368 * previewScale
+            let centerGap = 8 * previewScale
+            let safeLane = position == .left
+                ? NSRect(x: leftMinX, y: bar.minY + 5, width: max(0, bar.midX - leftMinX - centerGap), height: 20)
+                : NSRect(x: bar.midX + centerGap, y: bar.minY + 5, width: max(0, rightMaxX - bar.midX - centerGap), height: 20)
+            let width = WidthGeometry.statusBarWidth(mode: lyricWidth, availableWidth: safeLane.width, customWidth: customWidth * previewScale)
+            let baseFrame = WidthGeometry.constrainedFrame(safeLane, width: width, alignToTrailingEdge: position == .left)
+            let frame = OverlayLaneGeometry.offsetFrame(baseFrame, within: safeLane, by: statusBarOffset * previewScale)
+            drawLyric(in: frame, notch: false)
             let symbols = ["wifi", "speaker.wave.2.fill", "battery.100percent"]
             for (index, symbol) in symbols.enumerated() {
                 NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
@@ -1210,15 +1324,20 @@ private final class SettingsPreviewView: NSView {
         outline.stroke()
     }
 
-    private func drawLyric(in rect: NSRect, notch: Bool) {
+    private var notchPreviewForeground: NSColor {
+        notchBackground ? NotchBackgroundContrast.foreground(on: notchBackgroundColor) : .white
+    }
+
+    private func drawLyric(in rect: NSRect, notch: Bool, backgroundColor: NSColor? = nil) {
         let text = "♪ " + L10n.text("Preview lyric sample")
         let size = min(lyricFontSize, notch ? 17 : 15)
-        let base = notch ? NSColor.white.withAlphaComponent(0.7) : lyricColors[0].withAlphaComponent(0.72)
+        let colors = backgroundColor.map { NotchBackgroundContrast.adjusted(lyricColors, on: $0) } ?? lyricColors
+        let base = notch ? notchPreviewForeground.withAlphaComponent(0.7) : lyricColors[0].withAlphaComponent(0.72)
         drawText(text, in: rect, color: base.withAlphaComponent(lyricOpacity), size: size,
                  alignment: .center, shadow: notch)
         NSGraphicsContext.saveGraphicsState()
         NSBezierPath(rect: NSRect(x: rect.minX, y: rect.minY, width: rect.width * 0.58, height: rect.height)).addClip()
-        drawText(text, in: rect, color: lyricColors[min(1, lyricColors.count - 1)].withAlphaComponent(lyricOpacity),
+        drawText(text, in: rect, color: colors[min(1, colors.count - 1)].withAlphaComponent(lyricOpacity),
                  size: size, alignment: .center, shadow: notch)
         NSGraphicsContext.restoreGraphicsState()
     }

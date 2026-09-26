@@ -95,6 +95,12 @@
 "Opacity" = "不透明度";
 "Background" = "背景";
 "Background Color" = "背景颜色";
+"Horizontal Offset" = "水平偏移";
+"Notch Background" = "刘海背景";
+"Soft Gray" = "柔和灰";
+"Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement." = "偏移范围受菜单栏安全区域限制；选择“紧凑”或较小的自定义宽度可获得更大移动空间。";
+"Choose how lyrics appear. Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement." = "选择歌词的显示方式与位置。偏移范围受菜单栏安全区域限制；选择“紧凑”或较小的自定义宽度可获得更大移动空间。";
+"Choose a preset or Custom" = "选择预设或自定义颜色";
 "Hide on Hover" = "悬停时隐藏";
 "General" = "通用";
 "Music Player" = "音乐播放器";

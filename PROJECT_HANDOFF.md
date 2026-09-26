@@ -1,5 +1,38 @@
 # NotchMuse Project Handoff
 
+## Settings / Display Follow-up — Local Candidate (2026-09-26)
+
+- Baseline: `main` / `origin/main` at `ecb631e4f02cd4329a6f8595be8f561ad5d353ea`;
+  verified clean before switching from the completed DMG branch. That branch and
+  its ignored artifacts remain preserved.
+- Work branch: `codex/settings-display-followup`, created from that exact main
+  SHA. No push, tag, website change, or public release is authorized.
+- Scope completed: Appearance lyric-background toggle with Orange, Black,
+  White, Soft Gray, Blue, and Custom colors; safe-clamped Status Bar horizontal
+  offset; custom width in preview/runtime; confirmed `AppIcon` in both Settings
+  brand locations. Existing `NotchBackgroundEnabled` / `NotchBackgroundColor`
+  keys remain in use. No player/Matcher/provider changes.
+- Local candidate target: `0.8.0-settings-display-followup`, build `32`, under
+  `dist.noindex/settings-display-followup/` to avoid existing release artifacts.
+- PM root causes addressed: previews now use scaled preferences instead of
+  hard-coded widths, custom-width drag updates continuously, and numeric edits
+  refresh previews. Status Bar offset translates the full lyric window (including
+  scrolling content) but clamps to the selected safe lane. Background preview
+  and runtime share contrast handling for light colors. Settings brand marks
+  load the bundled AppIcon.
+- Verification: Debug `--full-self-test` PASS; Release candidate and packaged
+  `--self-test` PASS with codesign verification; localization plists and
+  `git diff --check` PASS. `swift test` cannot compile because this host lacks
+  the XCTest module. The normal bridge runtime health step returned exit 4;
+  candidate rebuild with `NOTCHMUSE_SKIP_BRIDGE_RUNTIME_TEST=1` passed, and no
+  bridge production files were changed.
+- GUI acceptance: **BLOCKED** by repeated CUA timeout. No actual-app screenshot
+  was captured; do not substitute an offscreen preview. Product Owner should
+  verify real dragging, safe clamps, custom-width changes, all background
+  presets/contrast, and both AppIcon locations when GUI access is available.
+- Next: perform the Product Owner GUI acceptance on the local candidate; no
+  push, tag, website change, or public release is authorized.
+
 ## Release Closure Handoff
 
 Current status: Beta 2 public release and website deployment verified; final documentation synchronized with this commit.

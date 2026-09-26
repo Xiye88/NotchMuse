@@ -95,6 +95,12 @@
 "Opacity" = "Opacity";
 "Background" = "Background";
 "Background Color" = "Background Color";
+"Horizontal Offset" = "Horizontal Offset";
+"Notch Background" = "Notch Background";
+"Soft Gray" = "Soft Gray";
+"Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement." = "Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement.";
+"Choose how lyrics appear. Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement." = "Choose how lyrics appear. Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement.";
+"Choose a preset or Custom" = "Choose a preset or Custom";
 "Hide on Hover" = "Hide on Hover";
 "General" = "General";
 "Music Player" = "Music Player";

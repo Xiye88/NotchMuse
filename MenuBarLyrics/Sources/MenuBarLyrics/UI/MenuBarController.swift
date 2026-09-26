@@ -356,7 +356,8 @@ final class MenuBarController: NSObject {
             notchHideOnHover: AppPreferences.notchHideOnHover,
             displayTarget: AppPreferences.displayTarget,
             displayWidth: AppPreferences.displayWidth,
-            customWidth: AppPreferences.customWidth
+            customWidth: AppPreferences.customWidth,
+            statusBarOffset: AppPreferences.statusBarOffset
         )
         updateScrollTimer(overflows: overflows)
     }

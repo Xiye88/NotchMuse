@@ -59,13 +59,17 @@ enum ScreenSelection {
 }
 
 enum WidthGeometry {
+    static func previewScale(screenWidth: CGFloat) -> CGFloat {
+        screenWidth / 1470
+    }
+
     static func statusBarWidth(mode: DisplayWidth, availableWidth: CGFloat, customWidth: CGFloat) -> CGFloat {
         let fraction: CGFloat
         switch mode {
         case .compact: fraction = 0.48
         case .normal: fraction = 0.72
         case .auto, .wide: fraction = 1
-        case .custom: return min(availableWidth, customWidth)
+        case .custom: return min(max(0, availableWidth), max(0, customWidth))
         }
         return floor(availableWidth * fraction)
     }
@@ -81,7 +85,7 @@ enum WidthGeometry {
         case .compact: fraction = 0.28
         case .normal: fraction = 0.40
         case .wide: fraction = 0.54
-        case .custom: return min(availableWidth, customWidth)
+        case .custom: return min(max(0, availableWidth), max(0, customWidth))
         case .auto:
             switch style {
             case .lyricOnly: fraction = 0.34
@@ -106,6 +110,13 @@ enum OverlayMousePolicy {
 enum OverlayLaneGeometry {
     static func centeredTextY(laneHeight: CGFloat, lineHeight: CGFloat) -> CGFloat {
         floor((laneHeight - lineHeight) / 2)
+    }
+
+    static func offsetFrame(_ frame: NSRect, within bounds: NSRect, by offset: CGFloat) -> NSRect {
+        let width = min(max(0, frame.width), max(0, bounds.width))
+        let maxX = max(bounds.minX, bounds.maxX - width)
+        let x = min(max(frame.minX + offset, bounds.minX), maxX)
+        return NSRect(x: x, y: frame.minY, width: width, height: frame.height)
     }
 
     static func frames(
@@ -149,6 +160,35 @@ enum OverlayLaneGeometry {
             NSRect(x: leftMinX, y: leftArea.minY, width: leftArea.maxX - leftMinX, height: leftArea.height),
             NSRect(x: rightMinX, y: rightArea.minY, width: rightMaxX - rightMinX, height: rightArea.height)
         )
+    }
+}
+
+enum NotchBackgroundContrast {
+    static func foreground(on background: NSColor) -> NSColor {
+        guard let color = background.usingColorSpace(.deviceRGB) else { return .white }
+        let red = color.redComponent
+        let green = color.greenComponent
+        let blue = color.blueComponent
+        let luminance = 0.2126 * linear(red) + 0.7152 * linear(green) + 0.0722 * linear(blue)
+        return (luminance + 0.05) / 0.05 > 4.5 ? .black : .white
+    }
+
+    static func adjusted(_ colors: [NSColor], on background: NSColor) -> [NSColor] {
+        colors.map { color in
+            contrastRatio(color, background) >= 3 ? color : foreground(on: background)
+        }
+    }
+
+    private static func contrastRatio(_ first: NSColor, _ second: NSColor) -> CGFloat {
+        guard let lhs = first.usingColorSpace(.deviceRGB),
+              let rhs = second.usingColorSpace(.deviceRGB) else { return 1 }
+        let left = 0.2126 * linear(lhs.redComponent) + 0.7152 * linear(lhs.greenComponent) + 0.0722 * linear(lhs.blueComponent)
+        let right = 0.2126 * linear(rhs.redComponent) + 0.7152 * linear(rhs.greenComponent) + 0.0722 * linear(rhs.blueComponent)
+        return (max(left, right) + 0.05) / (min(left, right) + 0.05)
+    }
+
+    private static func linear(_ component: CGFloat) -> CGFloat {
+        component <= 0.04045 ? component / 12.92 : pow((component + 0.055) / 1.055, 2.4)
     }
 }
 
@@ -340,6 +380,7 @@ final class OverlayLyricsWindow: NSObject {
         var lyricTextRect = NSRect.zero
         var lyricWraps = false
         var drawsBackground = false
+        var backgroundColor = NSColor.black
 
         override func draw(_ dirtyRect: NSRect) {
             let cornerRadius = style == .lyricOnly ? bounds.height / 2 : min(16, bounds.height * 0.28)
@@ -377,7 +418,7 @@ final class OverlayLyricsWindow: NSObject {
             paragraph.lineBreakMode = .byTruncatingTail
             (text as NSString).draw(in: rect, withAttributes: [
                 .font: font,
-                .foregroundColor: NSColor.white.withAlphaComponent(0.88),
+                .foregroundColor: (drawsBackground ? NotchBackgroundContrast.foreground(on: backgroundColor) : NSColor.white).withAlphaComponent(0.88),
                 .paragraphStyle: paragraph
             ])
         }
@@ -387,7 +428,7 @@ final class OverlayLyricsWindow: NSObject {
             NSBezierPath(rect: lyricViewport).addClip()
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
-                .foregroundColor: NSColor.white.withAlphaComponent(0.62),
+                .foregroundColor: (drawsBackground ? NotchBackgroundContrast.foreground(on: backgroundColor) : NSColor.white).withAlphaComponent(0.62),
                 .shadow: textShadow()
             ]
             drawLyricText(attributes: attributes)
@@ -401,7 +442,9 @@ final class OverlayLyricsWindow: NSObject {
                 )).addClip()
                 drawLyricText(attributes: [
                     .font: font,
-                    .foregroundColor: colors[min(1, colors.count - 1)],
+                    .foregroundColor: drawsBackground
+                        ? NotchBackgroundContrast.adjusted(colors, on: backgroundColor)[min(1, colors.count - 1)]
+                        : colors[min(1, colors.count - 1)],
                     .shadow: textShadow()
                 ])
             }
@@ -524,6 +567,7 @@ final class OverlayLyricsWindow: NSObject {
             view.font = font
             view.style = style
             view.colors = colors
+            view.backgroundColor = backgroundColor
             view.lyricViewport = viewport
             view.lyricTextRect = NSRect(x: textX, y: lyricY, width: textWidth, height: viewport.height)
             view.lyricWraps = lyricWraps
@@ -602,7 +646,8 @@ final class OverlayLyricsWindow: NSObject {
         notchHideOnHover: Bool,
         displayTarget: DisplayTarget,
         displayWidth: DisplayWidth,
-        customWidth: CGFloat
+        customWidth: CGFloat,
+        statusBarOffset: CGFloat
     ) -> Bool {
         guard let screen = selectedScreen(target: displayTarget, statusItem: statusItem) else { return false }
         let colors = BrandStyle.gradientColors(for: colorPreset, customColor: customLyricsColor)
@@ -674,10 +719,12 @@ final class OverlayLyricsWindow: NSObject {
         switch position {
         case .left:
             rightLane.hide()
-            return showSingle(text: statusText, progress: progress, font: font, colors: colors, opacity: opacity, textWidth: textWidth, frame: frames.left, lane: leftLane, scroll: scroll, animationSpeed: animationSpeed)
+            let frame = OverlayLaneGeometry.offsetFrame(frames.left, within: availableFrames.left, by: statusBarOffset)
+            return showSingle(text: statusText, progress: progress, font: font, colors: colors, opacity: opacity, textWidth: textWidth, frame: frame, lane: leftLane, scroll: scroll, animationSpeed: animationSpeed)
         case .right:
             leftLane.hide()
-            return showSingle(text: statusText, progress: progress, font: font, colors: colors, opacity: opacity, textWidth: textWidth, frame: frames.right, lane: rightLane, scroll: scroll, animationSpeed: animationSpeed)
+            let frame = OverlayLaneGeometry.offsetFrame(frames.right, within: availableFrames.right, by: statusBarOffset)
+            return showSingle(text: statusText, progress: progress, font: font, colors: colors, opacity: opacity, textWidth: textWidth, frame: frame, lane: rightLane, scroll: scroll, animationSpeed: animationSpeed)
         }
     }
 

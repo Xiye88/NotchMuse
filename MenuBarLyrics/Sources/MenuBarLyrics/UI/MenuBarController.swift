@@ -353,6 +353,7 @@ final class MenuBarController: NSObject {
             opacity: AppPreferences.opacity,
             notchBackgroundEnabled: AppPreferences.notchBackgroundEnabled,
             notchBackgroundColor: AppPreferences.notchBackgroundColor,
+            notchBackgroundPadding: AppPreferences.notchBackgroundPadding,
             notchHideOnHover: AppPreferences.notchHideOnHover,
             displayTarget: AppPreferences.displayTarget,
             displayWidth: AppPreferences.displayWidth,

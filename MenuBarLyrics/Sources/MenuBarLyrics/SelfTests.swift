@@ -132,6 +132,8 @@ enum SelfTests {
         defaults.set(customBackground, forKey: AppPreferences.notchBackgroundColorKey)
         check(AppPreferences.notchBackgroundMode(in: defaults) == .custom, "labels custom Notch background colors as Custom")
         check(AppPreferences.notchHideOnHover(in: defaults), "defaults Notch lyrics to hide on hover")
+        defaults.set(false, forKey: AppPreferences.notchHideOnHoverKey)
+        check(!AppPreferences.notchHideOnHover(in: defaults), "restores the user's choice to keep lyrics visible on hover")
         check(AppPreferences.color(forKey: AppPreferences.customLyricsColorKey, in: defaults) == nil, "leaves custom lyric color unset by default")
         check(L10n.text("None", language: .english) == "None", "localizes the English None background choice")
         check(L10n.text("Black", language: .simplifiedChinese) == "黑色", "localizes the Chinese Black background choice")
@@ -762,6 +764,13 @@ enum SelfTests {
     }
 
     private static func testNotchGeometry() {
+        let backgroundBounds = NSRect(x: 0, y: 0, width: 600, height: 40)
+        check(NotchGeometry.backgroundRect(in: backgroundBounds, contentWidth: 200, padding: 40).width == 280,
+              "fits notch background to lyrics plus per-side padding")
+        check(NotchGeometry.backgroundRect(in: backgroundBounds, contentWidth: 200, padding: 80).width == 360,
+              "resizes notch background when padding changes")
+        check(NotchGeometry.backgroundRect(in: backgroundBounds, contentWidth: 700, padding: 40).width == 600,
+              "clips notch background to the lyric window")
         let screen = NSRect(x: 0, y: 0, width: 1470, height: 956)
         let visible = NSRect(x: 0, y: 0, width: 1470, height: 924)
         let compactWidth = WidthGeometry.notchWidth(mode: .compact, availableWidth: visible.width, style: .lyricOnly, customWidth: 500)

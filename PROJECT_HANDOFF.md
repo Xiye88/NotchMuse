@@ -1,5 +1,29 @@
 # NotchMuse Project Handoff
 
+## Notch Background Size Follow-up (local candidate)
+
+Current status: build 35 installed at `/Applications/NotchMuse Candidate.app`
+and running locally; not pushed or released. Stable app was not replaced.
+Completed: the background follows the current lyric/metadata width with
+two-font-size side padding by default; Appearance offers a 0–120 pt per-side
+padding control. Orange/blue presets are lighter and the new unset-color
+default is charcoal gray. Existing saved colors are preserved. The existing
+Hide on Hover setting remains user-selectable, and its hover hit area now
+tracks the smaller background rectangle.
+Verification: Debug full self-test, Settings interaction self-test, packaged
+Release self-test, and ad-hoc codesign verification passed. The build used
+`NOTCHMUSE_SKIP_BRIDGE_RUNTIME_TEST=1` because the existing bridge health check
+fails on this host; no bridge files changed.
+Pending confirmation: Product Owner visual and live-lyrics check, plus decision
+on a separate four-position/vertical-layout follow-up. No position behavior
+was changed in this patch.
+Key files: `MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift`,
+`MenuBarLyrics/Sources/MenuBarLyrics/UI/OverlayLyricsWindow.swift`,
+`MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarController.swift`.
+Next step: inspect the independently installed Candidate app; keep stable
+`/Applications/NotchMuse.app` untouched. Ask before any GitHub sync/release.
+Do not repeat: player, Matcher, Provider, or website changes.
+
 ## Settings discoverability follow-up (build 33)
 
 Current status: local candidate only; no push or release.

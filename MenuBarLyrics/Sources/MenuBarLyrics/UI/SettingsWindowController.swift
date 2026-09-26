@@ -20,6 +20,7 @@ enum AppPreferences {
     static let playerStopBehaviorKey = "PlayerStopBehavior"
     static let notchBackgroundEnabledKey = "NotchBackgroundEnabled"
     static let notchBackgroundColorKey = "NotchBackgroundColor"
+    static let notchBackgroundPaddingKey = "NotchBackgroundPadding"
     static let notchHideOnHoverKey = "NotchHideOnHover"
 
     static var language: AppLanguage {
@@ -131,11 +132,16 @@ enum AppPreferences {
     }
 
     static var notchBackgroundColor: NSColor {
-        color(forKey: notchBackgroundColorKey) ?? .black
+        color(forKey: notchBackgroundColorKey) ?? NotchBackgroundPreset.softGray.color!
+    }
+
+    static var notchBackgroundPadding: CGFloat {
+        let value = UserDefaults.standard.object(forKey: notchBackgroundPaddingKey) as? Double
+        return min(120, max(0, value.map { CGFloat($0) } ?? fontSize * 2))
     }
 
     static func notchBackgroundPreset(in defaults: UserDefaults = .standard) -> NotchBackgroundPreset {
-        guard let color = color(forKey: notchBackgroundColorKey, in: defaults) else { return .black }
+        guard let color = color(forKey: notchBackgroundColorKey, in: defaults) else { return .softGray }
         return NotchBackgroundPreset.matching(color)
     }
 
@@ -181,11 +187,11 @@ enum NotchBackgroundPreset: String, CaseIterable {
 
     var color: NSColor? {
         switch self {
-        case .orange: NSColor(calibratedRed: 0.96, green: 0.34, blue: 0.12, alpha: 1)
-        case .black: .black
-        case .white: .white
-        case .softGray: NSColor(calibratedWhite: 0.34, alpha: 1)
-        case .blue: NSColor(calibratedRed: 0.12, green: 0.32, blue: 0.72, alpha: 1)
+        case .orange: NSColor(calibratedRed: 0.94, green: 0.58, blue: 0.38, alpha: 1)
+        case .black: NSColor(calibratedWhite: 0.22, alpha: 1)
+        case .white: NSColor(calibratedWhite: 0.94, alpha: 1)
+        case .softGray: NSColor(calibratedWhite: 0.36, alpha: 1)
+        case .blue: NSColor(calibratedRed: 0.38, green: 0.56, blue: 0.72, alpha: 1)
         case .custom: nil
         }
     }
@@ -231,6 +237,8 @@ final class SettingsWindowController: NSWindowController {
     private let notchBackgroundSwitch = NSSwitch()
     private let notchBackgroundPresetPopUp = NSPopUpButton()
     private let notchBackgroundColorWell = NSColorWell()
+    private let notchBackgroundPaddingSlider = NSSlider(value: 40, minValue: 0, maxValue: 120, target: nil, action: nil)
+    private let notchBackgroundPaddingValue = NSTextField(string: "")
     private let notchHideOnHoverSwitch = NSSwitch()
     private let contentStack = NSStackView()
     private var cards: [NSView] = []
@@ -364,6 +372,10 @@ final class SettingsWindowController: NSWindowController {
         notchBackgroundColorWell.target = self
         notchBackgroundColorWell.action = #selector(notchBackgroundColorChanged)
         notchBackgroundColorWell.isContinuous = true
+        notchBackgroundPaddingSlider.target = self
+        notchBackgroundPaddingSlider.action = #selector(notchBackgroundPaddingChanged)
+        notchBackgroundPaddingSlider.isContinuous = true
+        configureNumericField(notchBackgroundPaddingValue, action: #selector(notchBackgroundPaddingEntered))
         notchHideOnHoverSwitch.target = self
         notchHideOnHoverSwitch.action = #selector(notchHideOnHoverChanged)
         launchAtLoginSwitch.target = self
@@ -409,11 +421,12 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
             [label(L10n.text("Notch Background")), notchBackgroundSwitch],
             [label(L10n.text("Background Color")), backgroundColorControls()],
+            [label(L10n.text("Background Side Padding")), valueRow(slider: notchBackgroundPaddingSlider, value: notchBackgroundPaddingValue, unit: "pt")],
             [label(L10n.text("Hide on Hover")), notchHideOnHoverSwitch]
         ])
         notchBackgroundRow = appearanceGrid.row(at: 4)
         notchBackgroundColorRow = appearanceGrid.row(at: 5)
-        notchHideOnHoverRow = appearanceGrid.row(at: 6)
+        notchHideOnHoverRow = appearanceGrid.row(at: 7)
         appearancePage.addArrangedSubview(card(content: cardBody(title: "Appearance", subtitle: "Customize the look of your lyrics.", grid: appearanceGrid, trailing: resetButton(for: .appearance))))
         appearancePage.addArrangedSubview(quickPresetsCard())
         configure(page: generalPage)
@@ -788,6 +801,8 @@ final class SettingsWindowController: NSWindowController {
         notchBackgroundSwitch.state = AppPreferences.notchBackgroundEnabled ? .on : .off
         notchBackgroundPresetPopUp.selectItem(at: NotchBackgroundPreset.allCases.firstIndex(of: AppPreferences.notchBackgroundPreset()) ?? 1)
         notchBackgroundColorWell.color = AppPreferences.notchBackgroundColor
+        notchBackgroundPaddingSlider.doubleValue = Double(AppPreferences.notchBackgroundPadding)
+        notchBackgroundPaddingValue.stringValue = String(format: "%.0f", notchBackgroundPaddingSlider.doubleValue)
         notchHideOnHoverSwitch.state = AppPreferences.notchHideOnHover ? .on : .off
         fontSizeValue.stringValue = String(format: "%.0f", fontSizeSlider.doubleValue)
         animationSpeedValue.stringValue = String(format: "%.1f", animationSpeedSlider.doubleValue)
@@ -974,6 +989,18 @@ final class SettingsWindowController: NSWindowController {
         updatePreview()
     }
 
+    @objc private func notchBackgroundPaddingChanged() {
+        UserDefaults.standard.set(notchBackgroundPaddingSlider.doubleValue, forKey: AppPreferences.notchBackgroundPaddingKey)
+        notchBackgroundPaddingValue.stringValue = String(format: "%.0f", notchBackgroundPaddingSlider.doubleValue)
+        onSettingsChange()
+        updatePreview()
+    }
+
+    @objc private func notchBackgroundPaddingEntered() {
+        commit(notchBackgroundPaddingValue, slider: notchBackgroundPaddingSlider,
+               key: AppPreferences.notchBackgroundPaddingKey, minimum: 0, maximum: 120, format: "%.0f")
+    }
+
     private func updateCustomColorSwatch() {
         for (index, button) in colorButtons.enumerated() {
             let color = paletteColors[index]
@@ -1110,7 +1137,7 @@ final class SettingsWindowController: NSWindowController {
         case .display:
             keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.statusBarOffsetKey, AppPreferences.notchStyleKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey]
         case .appearance:
-            keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchHideOnHoverKey]
+            keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchBackgroundPaddingKey, AppPreferences.notchHideOnHoverKey]
         case .general:
             keys = [AppPreferences.playerSourceKey, AppPreferences.playerStopBehaviorKey, AppPreferences.languageKey]
         }
@@ -1129,6 +1156,7 @@ final class SettingsWindowController: NSWindowController {
             notchStyle: AppPreferences.notchStyle,
             notchBackground: AppPreferences.notchBackgroundEnabled,
             notchBackgroundColor: AppPreferences.notchBackgroundColor,
+            notchBackgroundPadding: AppPreferences.notchBackgroundPadding,
             customWidth: AppPreferences.customWidth,
             statusBarOffset: AppPreferences.statusBarOffset
         )
@@ -1239,7 +1267,8 @@ private final class SettingsPreviewView: NSView {
     private var position: LyricsPosition = .right
     private var notchStyle: NotchStyle = .lyricOnly
     private var notchBackground = false
-    private var notchBackgroundColor = NSColor.black
+    private var notchBackgroundColor = NotchBackgroundPreset.softGray.color!
+    private var notchBackgroundPadding: CGFloat = 40
     private lazy var wallpaper: NSImage? = Bundle.main.path(forResource: "SettingsPreviewWallpaper", ofType: "png")
         .flatMap(NSImage.init(contentsOfFile:))
 
@@ -1247,7 +1276,7 @@ private final class SettingsPreviewView: NSView {
 
     func apply(colors: [NSColor], fontSize: CGFloat, opacity: CGFloat, width: DisplayWidth,
                position: LyricsPosition, notchStyle: NotchStyle, notchBackground: Bool,
-               notchBackgroundColor: NSColor, customWidth: CGFloat, statusBarOffset: CGFloat) {
+               notchBackgroundColor: NSColor, notchBackgroundPadding: CGFloat, customWidth: CGFloat, statusBarOffset: CGFloat) {
         lyricColors = colors
         lyricFontSize = fontSize
         lyricOpacity = opacity
@@ -1258,6 +1287,7 @@ private final class SettingsPreviewView: NSView {
         self.notchStyle = notchStyle
         self.notchBackground = notchBackground
         self.notchBackgroundColor = notchBackgroundColor
+        self.notchBackgroundPadding = notchBackgroundPadding
         needsDisplay = true
     }
 
@@ -1307,9 +1337,15 @@ private final class SettingsPreviewView: NSView {
             }
             let overlay = NSRect(x: screen.midX - overlayWidth / 2, y: cutout.maxY + 6,
                                  width: overlayWidth, height: overlayHeight)
+            let previewText = "♪ " + L10n.text("Preview lyric sample")
+            let previewFont = NSFont.systemFont(ofSize: min(lyricFontSize, 17), weight: .medium)
+            let previewTextWidth = (previewText as NSString).size(withAttributes: [.font: previewFont]).width
+            let previewMetadataWidth = notchStyle == .lyricOnly ? 0 : (L10n.text("Preview song · Preview artist") as NSString).size(withAttributes: [.font: previewFont]).width
+            let background = NotchGeometry.backgroundRect(in: overlay, contentWidth: max(previewTextWidth, previewMetadataWidth), padding: notchBackgroundPadding)
+                .offsetBy(dx: overlay.minX, dy: overlay.minY)
             if notchBackground {
                 notchBackgroundColor.withAlphaComponent(notchStyle == .lyricOnly ? 0.76 : 0.82).setFill()
-                NSBezierPath(roundedRect: overlay, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
+                NSBezierPath(roundedRect: background, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
             }
             if notchStyle == .songLyric {
                 drawText(L10n.text("Preview song · Preview artist"),

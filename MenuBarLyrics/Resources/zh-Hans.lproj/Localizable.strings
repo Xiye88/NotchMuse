@@ -95,6 +95,7 @@
 "Opacity" = "不透明度";
 "Background" = "背景";
 "Background Color" = "背景颜色";
+"Background Side Padding" = "背景左右留白";
 "Horizontal Offset" = "水平偏移";
 "Notch Background" = "刘海背景";
 "Soft Gray" = "柔和灰";

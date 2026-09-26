@@ -95,6 +95,7 @@
 "Opacity" = "Opacity";
 "Background" = "Background";
 "Background Color" = "Background Color";
+"Background Side Padding" = "Background Side Padding";
 "Horizontal Offset" = "Horizontal Offset";
 "Notch Background" = "Notch Background";
 "Soft Gray" = "Soft Gray";

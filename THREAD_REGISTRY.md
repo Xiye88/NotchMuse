@@ -7,7 +7,7 @@ Last Updated: 2026-09-26
 | Workspace | Status | Priority | Dependency | Responsibility |
 | --- | --- | --- | --- | --- |
 | `09_REPO_ARCHITECTURE` | ARCHIVED | COMPLETED | Candidate Freeze `3fb6946` | Repository structure, tests, CI, documentation, and artifact standardization. Final head `d5673b9b5b9e25baff4abb57db2264f30ace19c2`; integrated into main as `7bc74ac`. |
-| `10_SETTINGS_UI` | ACTIVE | VISUAL POLISH | Stable main `484039f` | Second-round visual polish in `codex/settings-visual-polish`; functional redesign remains on main. Await Product Owner review of polished candidate. |
+| `10_SETTINGS_UI` | DONE | VISUAL POLISH v2 ACCEPTED | Main `a5f1938` | Product Owner accepted preview images; CI passed. Unified packaging with the separate player candidate is pending. |
 
 `10_SETTINGS_UI` started after `09_REPO_ARCHITECTURE` completed. Its second
 round is visual-only; keep player and lyrics logic unchanged.

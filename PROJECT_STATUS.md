@@ -4,9 +4,12 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 
 ## Final Engineering Status
 
-- Settings functional integration remains complete on main. A visual-only
-  second round, `10_SETTINGS_UI_VISUAL_POLISH`, is active in isolated branch
-  `codex/settings-visual-polish`; build 22 awaits Product Owner acceptance.
+- Settings Visual Polish v2: Product Owner accepted the preview images.
+  Production UI source is main `a5f193832dd7889a3ebf25d1087dae867ff68813`;
+  CI `36223310974` passed. Build 24 was deployed and verified.
+- The installed app is now the separate player sprint's build 26, without
+  `SettingsPreviewWallpaper.png`. Unified packaging is pending; do not replace
+  it with build 24 or treat build 26 as the accepted Settings artifact.
 
 - `09_REPO_ARCHITECTURE`: DONE / ARCHIVED on
   `codex/repository-architecture-cleanup` at

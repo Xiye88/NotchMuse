@@ -17,6 +17,10 @@
 
 ### Fixed
 
+- Reduced Settings window sizing constraints and made cards resize with the window
+- Localized preview samples in English and Simplified Chinese and aligned
+  previews with transparent notch lyrics, background options, and display mode
+
 - Restored and regression-tested the complete four-item player Settings list
 - Stopped lyric progress and marquee movement while playback is paused
 - Cleared old lyrics when the active player or native track identity changes

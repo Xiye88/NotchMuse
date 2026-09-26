@@ -1,5 +1,18 @@
 # NotchMuse Project Handoff
 
+## Current Handoff: Accepted Settings v2
+
+- Current status: Product Owner accepted Settings v2 preview images.
+- Completed: UI merged/pushed at `a5f1938`; build 24 installed; CI
+  `36223310974` passed. Screenshots were offscreen renders, not installed GUI captures.
+- Pending confirmation: public Release remains a separate decision.
+- Key files: `MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift`,
+  `MenuBarLyrics/Resources/SettingsPreviewWallpaper.png`, `scripts/build_app.sh`.
+- Next step: player integration task must combine latest main UI and its build
+  26 fixes on its branch, report a tested SHA to PM before unified deployment.
+- Do not repeat: no visual redesign, no build 24 overwrite of installed build
+  26, no tag or Release. Older build records below are historical.
+
 ## v0.8 Final Engineering Main Integration
 
 - Architecture final SHA:

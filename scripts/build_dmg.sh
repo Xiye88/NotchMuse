@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DIST="$ROOT/dist.noindex"
+DIST="${NOTCHMUSE_DIST_DIR:-$ROOT/dist.noindex}"
 APP="$DIST/NotchMuse.app"
 DMG="$DIST/NotchMuse.dmg"
 STAGING="$(mktemp -d "${TMPDIR:-/tmp}/notchmuse-dmg.XXXXXX")"
@@ -10,17 +10,20 @@ SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
 
 trap 'rm -rf "$STAGING"' EXIT
 
-"$ROOT/scripts/build_app.sh"
-ditto "$APP" "$STAGING/NotchMuse.app"
-ln -s /Applications "$STAGING/Applications"
+NOTCHMUSE_DIST_DIR="$DIST" "$ROOT/scripts/build_app.sh"
+swift "$ROOT/scripts/render_dmg_background.swift" \
+  "$ROOT/scripts/assets/notchmuse-dmg-wave-source.png" \
+  "$STAGING/background.png"
 
 rm -f "$DMG"
-hdiutil create \
-  -volname "NotchMuse" \
-  -srcfolder "$STAGING" \
-  -format UDZO \
-  -ov \
-  "$DMG" >/dev/null
+uvx --from dmgbuild==1.6.7 \
+  --with ds_store==1.3.3 \
+  --with mac_alias==2.2.3 \
+  dmgbuild \
+  -s "$ROOT/scripts/notchmuse_dmg.py" \
+  -D "application=$APP" \
+  -D "background=$STAGING/background.png" \
+  "NotchMuse" "$DMG"
 
 if [[ "$SIGN_IDENTITY" != "-" ]]; then
   codesign --force --timestamp --sign "$SIGN_IDENTITY" "$DMG" >/dev/null

@@ -1,5 +1,30 @@
 # NotchMuse Project Handoff
 
+## DMG Installer Polish — Local Candidate Ready (2026-09-26)
+
+- Baseline: `main` / `origin/main` at `ad24d74be5848026a92944f4efe910c88ef9f15a`;
+  clean at start. Work is isolated on `codex/dmg-polish` in this existing
+  worktree; the previous Settings branch is preserved.
+- Product context: public `v0.8.0-beta.1`, build 29, arm64/ad-hoc signed and
+  not notarized. This task builds a separate local DMG candidate only; do not
+  modify or replace published beta.1 files or perform release/Gatekeeper actions.
+- Scope: polish only the mounted Finder installer presentation: compact window,
+  NotchMuse at left, Applications at right, clear drag arrow, music-led bitmap
+  background, and concise English/Simplified Chinese installation and
+  Gatekeeper help. App functionality and signing are unchanged.
+- Completed: baseline and clean worktree verified; music-wave background,
+  native bilingual copy/arrow renderer, and pinned offline `dmgbuild`/`.DS_Store`
+  tooling (`dmgbuild 1.6.7`, `ds_store 1.3.3`, `mac_alias 2.2.3`) added.
+  `build_app.sh` / `build_dmg.sh` now support isolated output while
+  release builds remain on the existing default path. Candidate
+  `dist.noindex/dmg-polish/NotchMuse.dmg` was built as
+  `0.8.0-beta.1-dmg-polish` / build 30; app self-test/signature, DMG integrity,
+  and `.DS_Store` package/layout checks pass. SHA-256:
+  `53565c36e9f070c0cf8fe084a57a8c39048774dd87250948c30095d6205fe091`.
+- Open verification: `.DS_Store` entries are validated offline, but Finder's
+  actual rendered window still needs a screenshot when the Mac is unlocked;
+  Gatekeeper behavior is PM-owned and outside this work.
+
 ## Local Reinstall Test — 2026-09-26
 
 - Product Owner requested uninstall before manually downloading and testing.

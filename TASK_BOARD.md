@@ -1,5 +1,20 @@
 # NotchMuse Task Board
 
+## Current Task — DMG Installer Polish
+
+- Status: **LOCAL CANDIDATE READY**, Finder screenshot and PM Gatekeeper check
+  remain manual; no release action taken.
+- Baseline: `main` / `origin/main` at
+  `ad24d74be5848026a92944f4efe910c88ef9f15a`; branch `codex/dmg-polish`.
+- Scope: Finder DMG presentation/background and bilingual installation help;
+  preserve app behavior and the published beta.1 asset.
+- Done: offline background, bilingual native copy/arrow, and pinned offline
+  `.DS_Store` layout generation are implemented. Candidate:
+  `dist.noindex/dmg-polish/NotchMuse.dmg` (`0.8.0-beta.1-dmg-polish`, build 30),
+  SHA-256 `53565c36e9f070c0cf8fe084a57a8c39048774dd87250948c30095d6205fe091`.
+  Finder's rendered view still needs a screenshot after unlock; PM retains
+  Gatekeeper/system-settings actions.
+
 ## Current Public Beta — 2026-09-26
 
 - Public Beta: **v0.8.0-beta.1**, build **29**; published as a prerelease.

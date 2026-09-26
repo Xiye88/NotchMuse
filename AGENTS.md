@@ -30,3 +30,10 @@ a task changes state.
 
 Building and verifying a local candidate is autonomous. Pushing, tagging, or
 publishing a public release requires final Product Owner approval.
+
+After each update, explicitly tell the Product Owner what changed and whether
+it exists only locally, is synchronized to GitHub, or is publicly downloadable.
+Ask separately whether to synchronize to GitHub and whether to publish/update
+the website download. Do not treat approval of a local implementation as
+approval to push, tag, publish, or replace public download assets. Prior release
+approval does not carry forward to later updates.

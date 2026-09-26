@@ -7,10 +7,10 @@ Last Updated: 2026-09-26
 | Workspace | Status | Priority | Dependency | Responsibility |
 | --- | --- | --- | --- | --- |
 | `09_REPO_ARCHITECTURE` | ARCHIVED | COMPLETED | Candidate Freeze `3fb6946` | Repository structure, tests, CI, documentation, and artifact standardization. Final head `d5673b9b5b9e25baff4abb57db2264f30ace19c2`; integrated into main as `7bc74ac`. |
-| `10_SETTINGS_UI` | ARCHIVED | COMPLETED | Stable main `101e550` | Approved Settings redesign completed at `5d74ce6`, CI `36213755351` passed, and implementation integrated into main as `279b910`. |
+| `10_SETTINGS_UI` | ACTIVE | VISUAL POLISH | Stable main `484039f` | Second-round visual polish in `codex/settings-visual-polish`; functional redesign remains on main. Await Product Owner review of polished candidate. |
 
-`10_SETTINGS_UI` started only after `09_REPO_ARCHITECTURE` completed and is now
-closed. Reopen it only for a verified Settings regression.
+`10_SETTINGS_UI` started after `09_REPO_ARCHITECTURE` completed. Its second
+round is visual-only; keep player and lyrics logic unchanged.
 
 ## Current Registry
 

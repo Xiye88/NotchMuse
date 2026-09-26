@@ -1,5 +1,15 @@
 # NotchMuse Task Board
 
+## 10_SETTINGS_UI_VISUAL_POLISH — Second Round
+
+- Status: ACTIVE / awaiting Product Owner visual acceptance.
+- Branch: `codex/settings-visual-polish`, based on main `484039f`.
+- Scope: Settings sidebar, preview, cards, spacing, and appearance preset tiles.
+  No player, NetEase, Matcher, or Provider changes.
+- Candidate: local `0.8.0` build 22 in `dist.noindex/NotchMuse.app`; package
+  self-test and strict code-signature verification passed. Main and the
+  installed build 21 remain unchanged until acceptance.
+
 ## Completed Next Task
 
 - `10_SETTINGS_UI` — **DONE / ARCHIVED**.

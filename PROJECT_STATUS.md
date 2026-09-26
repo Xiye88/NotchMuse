@@ -4,6 +4,10 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 
 ## Final Engineering Status
 
+- Settings functional integration remains complete on main. A visual-only
+  second round, `10_SETTINGS_UI_VISUAL_POLISH`, is active in isolated branch
+  `codex/settings-visual-polish`; build 22 awaits Product Owner acceptance.
+
 - `09_REPO_ARCHITECTURE`: DONE / ARCHIVED on
   `codex/repository-architecture-cleanup` at
   `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.

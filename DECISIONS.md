@@ -10,6 +10,16 @@
   Engineering is integrated. Do not mix the redesign into the repository
   cleanup or alter product logic as part of the UI task.
 
+## 2026-09-26 - v0.8 Release And Signing Boundary
+
+- Continue using ad-hoc signing for the current engineering cycle.
+- Defer Developer ID signing, notarization, and stapling until direct public
+  DMG distribution is evaluated.
+- Do not create the v0.8.0 tag or GitHub Release until `10_SETTINGS_UI`, its
+  final short regression, and PM documentation sync are complete.
+- `09_REPO_ARCHITECTURE` is complete, so its dependency gate is satisfied and
+  `10_SETTINGS_UI` may start from stable main `101e550`.
+
 ## 2026-07-26 - v0.3.1 Release and v0.4 Entry Gate
 
 - Publish `v0.3.1` as an unsigned GitHub Pre-release for macOS 14+ on Apple

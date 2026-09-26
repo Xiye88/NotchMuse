@@ -1,14 +1,14 @@
 # NotchMuse Task Board
 
-## Queued Next Task
+## Active Next Task
 
-- `10_SETTINGS_UI` — **QUEUED**, priority **NEXT**.
+- `10_SETTINGS_UI` — **ACTIVE**, priority **NEXT**.
 - Blocked by: stable `09_REPO_ARCHITECTURE` source layout.
-- Dependency baseline is available at
-  `d5673b9b5b9e25baff4abb57db2264f30ace19c2`, but the task remains queued
-  until `00_PM` starts it after v0.8 Final Engineering closes.
+- Dependency gate is satisfied. Implementation starts from stable main
+  `101e550af4814b34d25b9b8e5f32af3252bb0606` in an isolated worktree.
 - Design handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
-- Current action: none. Do not create a branch or modify Settings UI now.
+- Current action: implement and verify the approved Settings redesign; return
+  the result to `00_PM` before any main merge or Release work.
 
 ## Repository Architecture Cleanup — First Round (2026-09-25)
 

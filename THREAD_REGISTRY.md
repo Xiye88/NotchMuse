@@ -7,10 +7,10 @@ Last Updated: 2026-09-26
 | Workspace | Status | Priority | Dependency | Responsibility |
 | --- | --- | --- | --- | --- |
 | `09_REPO_ARCHITECTURE` | ARCHIVED | COMPLETED | Candidate Freeze `3fb6946` | Repository structure, tests, CI, documentation, and artifact standardization. Final head `d5673b9b5b9e25baff4abb57db2264f30ace19c2`; integrated into main as `7bc74ac`. |
-| `10_SETTINGS_UI` | QUEUED | NEXT | `09_REPO_ARCHITECTURE` source structure stable at `d5673b9` | Implement the approved Settings redesign from `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`. Do not start until `00_PM` explicitly opens the task from the latest stable Architecture SHA. |
+| `10_SETTINGS_UI` | ACTIVE | NEXT | Satisfied; stable main `101e550` | Implement the approved Settings redesign from `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md` in an isolated worktree and return results to `00_PM`. |
 
-`10_SETTINGS_UI` is registered only. Its design direction is approved, but no
-implementation, new task, branch, or UI change has started.
+`10_SETTINGS_UI` has started after `09_REPO_ARCHITECTURE` completed. Its design
+direction is fixed; the execution task must not reopen visual strategy.
 
 ## Current Registry
 

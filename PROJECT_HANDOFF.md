@@ -14,16 +14,15 @@
 - `10_SETTINGS_UI`: QUEUED / NEXT; not started.
 - No v0.8 tag, GitHub Release, or website publication has been created.
 
-## Queued Follow-up — 10_SETTINGS_UI
+## Active Follow-up — 10_SETTINGS_UI
 
-- Status: `QUEUED`; priority: `NEXT`.
+- Status: `ACTIVE`; priority: `NEXT`.
 - Blocked by: stable `09_REPO_ARCHITECTURE` source structure.
-- Stable Architecture baseline currently available:
-  `d5673b9b5b9e25baff4abb57db2264f30ace19c2`.
+- Starting baseline: stable main
+  `101e550af4814b34d25b9b8e5f32af3252bb0606`.
 - Source handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
-- Do not start during v0.8 Final Engineering. When `00_PM` starts the task,
-  use the latest stable Architecture SHA, read the handoff, keep the approved
-  visual direction, implement directly, and return results to `00_PM`.
+- Work is isolated from main. Keep the approved visual direction, implement
+  directly, and return results to `00_PM` before integration.
 
 ## Repository Architecture Cleanup — Final Handoff (2026-09-25)
 

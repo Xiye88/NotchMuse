@@ -17,8 +17,11 @@ Last Updated: 2026-09-26 — v0.8 Final Engineering
 - Engineering validation artifact: `0.8.0` build `19`, arm64, ad-hoc signed,
   not notarized. DMG SHA-256:
   `49f6840e4c0c587c2aab862b9036ce0dab5b5a76e7f83a857d5a498e257f774b`.
-- `10_SETTINGS_UI`: QUEUED / NEXT. Registered only; implementation has not
-  started and must not interrupt v0.8 Final Engineering.
+- `10_SETTINGS_UI`: ACTIVE / NEXT from stable main
+  `101e550af4814b34d25b9b8e5f32af3252bb0606`. It runs in an isolated
+  worktree and must not modify player, Matcher, Provider, or release behavior.
+- Developer ID/notarization/stapling: DEFERRED. v0.8.0 tag and GitHub Release:
+  BLOCKED until the Settings redesign and its final short regression finish.
 
 ## Current Status
 

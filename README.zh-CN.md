@@ -18,16 +18,16 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.1"><strong>最新公开 beta：v0.6.1</strong></a>
+  <a href="https://notchmuse.com"><strong>官方网站</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.1/NotchMuse-v0.8.0-beta.1-arm64.dmg"><strong>直接下载 v0.8.0 Beta 1</strong></a>
   ·
   <a href="https://github.com/Xiye88/NotchMuse/issues">报告问题</a>
 </p>
 
 <p align="center">
-  macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐
+  macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐
 </p>
 
-> **发布状态：** v0.8.0 尚未公开发布，当前公开下载仍是 v0.6.1。本文介绍的 v0.8.0 候选版本新增网易云音乐和 Auto Detect。
+> **当前公开 Beta：** [v0.8.0-beta.1](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.1)，build 29。支持五个播放器、Auto Detect 和新版双语 Settings。ad-hoc 签名，尚未公证。可从 [notchmuse.com](https://notchmuse.com) 直接下载。
 
 ## 演示
 
@@ -53,9 +53,9 @@
 
 | **播放器检测** | **刘海歌词** |
 | --- | --- |
-| v0.8.0 候选版本可检测 Spotify、Apple Music 和网易云音乐的实际播放状态。默认使用 Auto Detect，也可手动选择播放器。 | 在刘海附近选择 Lyric Only、Song + Lyric 或 Expanded 布局。 |
-| **内置网易云音乐 bridge** | **重视隐私** |
-| MediaRemote bridge 已随应用打包，无需安装 Homebrew。网易云音乐支持依赖 macOS 私有 MediaRemote API，macOS 或播放器更新后可能失效。 | 不需要账号，不收集遥测数据，不上传音频。内置 English 和简体中文。 |
+| 支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。默认使用 Auto Detect，也可手动选择播放器。 | 在刘海附近选择 Lyric Only、Song + Lyric 或 Expanded 布局。 |
+| **内置播放信息 bridge** | **重视隐私** |
+| MediaRemote bridge 已随应用打包，无需安装 Homebrew。网易云、QQ 音乐和汽水音乐依赖 macOS 私有 MediaRemote API，系统或播放器更新后可能需要适配。 | 不需要账号，不收集遥测数据，不上传音频。内置 English 和简体中文。 |
 
 ## 截图
 
@@ -79,19 +79,19 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 
 ### Settings
 
-选择显示模式，并调整宽度、颜色、字号、动画速度、透明度和开机启动行为。
+新版 Settings 包含 Sidebar、状态栏/刘海实时预览、外观预设及显示设置。下图为早期版本截图。
 
 ![Settings](docs/assets/screenshots/settings-window.png)
 
 ## 快速开始
 
-当前公开的 v0.6.1 beta 支持 Spotify 和 Apple Music。尚未发布的 v0.8.0 候选版本还支持网易云音乐和 Auto Detect。
+当前公开的 v0.8.0 Beta 1 支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。
 
-1. 从 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases/tag/v0.6.1) 下载 `NotchMuse.dmg`。
+1. 访问 [官网](https://notchmuse.com)，或[直接下载 Beta 1 DMG](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.1/NotchMuse-v0.8.0-beta.1-arm64.dmg)。
 2. 打开 DMG，把 `NotchMuse.app` 拖到 `Applications`。
 3. 这个 beta 尚未 notarize：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
-4. 使用公开版 v0.6.1 时，打开 Spotify 或 Apple Music 播放歌曲。尚未发布的 v0.8.0 候选版也支持网易云音乐。
-5. 在 Settings 中选择 Music Player；Spotify 或 Apple Music 提示权限时，请允许 macOS Automation。v0.8.0 候选版新增 Auto Detect 和网易云音乐选项。
+4. 打开五个支持的桌面播放器之一并播放歌曲。
+5. 在 Settings 保留 Auto Detect 或手动选择播放器；Spotify 或 Apple Music 提示权限时，允许 macOS Automation。
 6. 在菜单栏里找到橙色音符图标。
 7. 打开 Settings，选择 Status Bar Mode 或 Notch Mode。
 
@@ -101,13 +101,13 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 
 - macOS 14.0 或更高版本
 - Apple Silicon Mac
-- Spotify macOS 桌面应用、Apple Music，或（v0.8.0 候选版）网易云音乐
+- Spotify、Apple Music、网易云音乐、QQ 音乐或汽水音乐桌面应用
 
-当前公开版 v0.6.1 和 v0.8.0 候选版均仅支持 `arm64`。Intel Mac 和 Universal Binary 支持计划在后续阶段处理。
+当前 Beta 仅支持 `arm64`，暂不支持 Intel Mac。
 
-v0.8.0 候选版已内置 MediaRemote bridge，无需另行安装 Homebrew。网易云音乐支持使用 macOS 私有 MediaRemote API；Apple 或网易云音乐更新可能改变这些 API 并中断支持。
+应用已内置 MediaRemote bridge，无需另装 Homebrew 或 helper。网易云、QQ 音乐和汽水音乐依赖私有 MediaRemote API，系统或播放器更新后可能需要适配。
 
-1. 从 GitHub Releases 下载 `NotchMuse.dmg`。
+1. 从[官网](https://notchmuse.com)下载带版本号的 DMG。
 2. 打开 DMG。
 3. 把 `NotchMuse.app` 拖到 `Applications`。
 4. 从 `Applications` 打开 NotchMuse。
@@ -126,7 +126,7 @@ v0.8.0 候选版已内置 MediaRemote bridge，无需另行安装 Homebrew。网
 
 如果 macOS 仍然拦截，前往 `System Settings > Privacy & Security`，为 NotchMuse 选择 `Open Anyway`。
 
-Developer ID signing 和 Apple notarization 已推迟到未来 Distribution Phase。v0.8.0 尚未公开发布；v0.6.1 下载链接不是 v0.8.0 下载。
+Developer ID 签名和 Apple 公证暂未配置。当前版本为面向用户测试的公开 Beta。
 
 如果安装、Gatekeeper、音乐播放器 Automation permission 或歌词查询失败，请查看 [SUPPORT.md](SUPPORT.md)。
 
@@ -138,7 +138,7 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 
 - beta 尚未使用 Apple Developer ID 签名或 notarize，因此 macOS Gatekeeper 警告是预期行为。
 - 歌词覆盖率依赖第三方 provider。
-- v0.8.0 候选版的网易云音乐支持依赖 macOS 私有 MediaRemote API，macOS 或网易云音乐更新后可能需要适配。
+- 网易云、QQ 音乐和汽水音乐依赖 macOS 私有 MediaRemote API，系统或播放器更新后可能需要适配。
 - 不保证逐字歌词；多数 provider 返回的是逐行时间轴。
 - Left Status Bar mode 需要 Accessibility permission。
 - 其他菜单栏管理工具可能隐藏 NotchMuse 图标。
@@ -146,24 +146,24 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 
 ## 路线图
 
-- 最新公开 beta：v0.6.1，支持 Spotify 和 Apple Music
-- 尚未公开发布的 v0.8.0 候选版：支持 Spotify、Apple Music、网易云音乐和 Auto Detect
-- 后续：歌词质量、signed distribution 和更广泛的 Mac 兼容性
+- 当前公开 Beta：v0.8.0-beta.1，五平台、Auto Detect 和 Settings UI v2
+- 下一阶段：新设备验证，以及真实 Beta 用户反馈修复
+- 后续分发与兼容性工作根据验证结果决定
 
 ## 使用
 
-1. 打开支持的播放器并播放歌曲：v0.6.1 支持 Spotify 或 Apple Music；尚未公开发布的 v0.8.0 候选版也支持网易云音乐。
+1. 打开 Spotify、Apple Music、网易云音乐、QQ 音乐或汽水音乐并播放歌曲。
 2. 打开 NotchMuse。
 3. 歌词会显示在菜单栏或刘海区域。
 4. 使用菜单栏音符图标打开控制菜单。
-5. 在 v0.8.0 候选版中，可保留 Auto Detect 或选择 Spotify、Apple Music、网易云音乐。打开 Settings 更改显示模式、位置、颜色、宽度、字号、动画速度、透明度和启动行为。
+5. 保留 Auto Detect 或手动选择五个播放器之一。打开 Settings 调整显示与外观设置。
 
 如果菜单栏整理工具隐藏了 NotchMuse 图标，请展开隐藏的菜单栏项目，或重新打开 NotchMuse 让菜单回来。
 
 ## 权限
 
 - Automation / Spotify 或 Apple Music：读取当前曲目、播放状态和播放位置。
-- 网易云音乐（v0.8.0 候选版）：通过内置 bridge 读取播放信息；该 bridge 使用 macOS 私有 MediaRemote API。
+- 网易云音乐、QQ 音乐、汽水音乐：通过内置私有 MediaRemote bridge 读取播放信息。
 - Accessibility：仅 Left Status Bar 布局需要，用于避开当前应用的菜单项。
 - Network：为当前歌曲查询公开歌词 provider。
 
@@ -174,7 +174,7 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 ## 隐私
 
 - 不需要 NotchMuse 账号。
-- NotchMuse 不读取或上传 Spotify、Apple Music 或网易云音乐音频。
+- NotchMuse 不读取或上传任何支持播放器的音频。
 - NotchMuse 不收集遥测数据、使用分析或个人资料。
 - 曲名、artist、album 和时长可能会发送给第三方歌词 provider 用于匹配。
 - 设置使用 `UserDefaults` 保存在本地。
@@ -187,4 +187,4 @@ NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很�
 
 NotchMuse 使用 MIT License 发布。第三方声明列在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-v0.8.0 候选版内置 BSD-3-Clause 许可的 MediaRemote Adapter bridge；固定源码版本与署名信息记录在第三方声明中，无需安装 Homebrew。
+当前 Beta 内置 BSD-3-Clause 许可的 MediaRemote Adapter bridge；固定源码版本与署名信息记录在第三方声明中，无需安装 Homebrew。

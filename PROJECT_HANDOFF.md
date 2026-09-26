@@ -1,5 +1,35 @@
 # NotchMuse Project Handoff
 
+## 10_SETTINGS_UI — Complete / Awaiting PM Handoff (2026-09-26)
+
+- Version/build: `0.8.0` / `19`; detached worktree at implementation commit
+  `97c1cfc2c1d80cedf2cee3852a18b9d4166b64ef`, from verified baseline
+  `101e550af4814b34d25b9b8e5f32af3252bb0606` (no push, merge, tag, or release).
+- Scope: approved native Settings redesign. Player adapters beyond display-name
+  localization, matching, provider priority, and runtime behavior are unchanged.
+- Completed: native sidebar/pages, settings cards, live status bar/Notch
+  preview, presets, per-section resets, conditional controls, and bilingual
+  localization. Resetting General does not change Login Item registration;
+  preview mode remains independent of the saved display mode.
+- GUI QA: English and Simplified Chinese, navigation, preview isolation,
+  persistence, conditional controls, presets, and section resets. Screenshots:
+  `/tmp/notchmuse-settings-ui-en.png` and
+  `/tmp/notchmuse-settings-ui-zh-Hans.png`.
+- Verification: Debug build and `--full-self-test` PASS; packaged Release
+  `--self-test`, deep code-signature verification, DMG verification, and SHA-256
+  checks PASS. Artifact files are under `dist.noindex/`; hashes are recorded in
+  `dist.noindex/SHA256SUMS`. The optional bridge runtime integration test was
+  skipped with `NOTCHMUSE_SKIP_BRIDGE_RUNTIME_TEST=1`.
+- Build 19 SHA-256: app executable
+  `3fb71849dcee845bd47abf9a18ed10b8006843ba02521795a87ec9de39ad1bb8`; DMG
+  `45b348fb665015e1e4f86e20b878e2da2f7cf6518ac55c850bd2a33372abd01d`.
+- Limits: local `swift test` cannot import XCTest in this Command Line Tools
+  image; CI on macOS 15 remains the formal package-test gate. Build 19 is
+  arm64/ad-hoc signed and not notarized; Developer ID signing and notarization
+  remain release-review requirements.
+- Open implementation issues: none. Next: `00_PM` review and normal integration
+  decision; no public release action is authorized by this task.
+
 ## v0.8 Final Engineering Main Integration
 
 - Architecture final SHA:
@@ -11,10 +41,11 @@
 - Architecture CI `36158185905`: PASS.
 - Main CI `36158606048`: PASS.
 - `09_REPO_ARCHITECTURE`: DONE / ARCHIVED.
-- `10_SETTINGS_UI`: QUEUED / NEXT; not started.
+- `10_SETTINGS_UI`: complete in isolated commit
+  `97c1cfc2c1d80cedf2cee3852a18b9d4166b64ef`; awaiting PM integration review.
 - No v0.8 tag, GitHub Release, or website publication has been created.
 
-## Queued Follow-up — 10_SETTINGS_UI
+## Historical Queue Snapshot — 10_SETTINGS_UI
 
 - Status: `QUEUED`; priority: `NEXT`.
 - Blocked by: stable `09_REPO_ARCHITECTURE` source structure.

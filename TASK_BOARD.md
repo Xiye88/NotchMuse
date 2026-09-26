@@ -1,5 +1,25 @@
 # NotchMuse Task Board
 
+## Current Public Beta — 2026-09-26
+
+- Public Beta: **v0.8.0-beta.1**, build **29**; published as a prerelease.
+- Release tag / binary source: `v0.8.0-beta.1` / `47fe9fafd31d58bdebf1cb242ec141489cede01f`.
+- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.1
+- Download: https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.1/NotchMuse-v0.8.0-beta.1-arm64.dmg
+- DMG SHA-256: `74546ec6f371caeb0d31b15949f902ee94a7b06b307d81b8aaa5f1d0b6cf6660`.
+- Architecture / signing: arm64, ad-hoc, not notarized; macOS 14+.
+- Release build, packaged self-test, signature, DMG, public download checksum: PASS.
+- Source CI: `36229154287`, PASS.
+- Five-player focused smoke and Settings basic smoke: Product Owner **MANUAL PASS** ("一切正常"); not independently instrumented per-step evidence.
+- QQ/Soda visible lyrics and NetEase 7–8 hour stability: Product Owner MANUAL PASS.
+- Website: UPDATED / VERIFIED; all three download links fixed to beta.1, version and installation notice live (deployment 20260926-04).
+- Next gate: clean-device beta validation by Product Owner, explicitly post-release.
+- Freeze feature/UI/Matcher/provider expansion; address P0/P1 and real beta feedback only. A blocking issue proceeds to beta.2.
+- Installed local app remains build 28; public release artifact is build 29 from the same functional source, with Beta version metadata.
+
+All older candidate/build/pending-release sections below are historical and are superseded by this block.
+
+
 ## Active Integration — QQ Music/Soda Music + Accepted Settings UI
 
 - Status: DONE / Product Owner accepted v2 preview images.

@@ -1,5 +1,57 @@
 # NotchMuse Project Handoff
 
+## Current Public Beta — 2026-09-26
+
+- Public Beta: **v0.8.0-beta.1**, build **29**; published as a prerelease.
+- Release tag / binary source: `v0.8.0-beta.1` / `47fe9fafd31d58bdebf1cb242ec141489cede01f`.
+- Release: https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.1
+- Download: https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.1/NotchMuse-v0.8.0-beta.1-arm64.dmg
+- DMG SHA-256: `74546ec6f371caeb0d31b15949f902ee94a7b06b307d81b8aaa5f1d0b6cf6660`.
+- Architecture / signing: arm64, ad-hoc, not notarized; macOS 14+.
+- Release build, packaged self-test, signature, DMG, public download checksum: PASS.
+- Source CI: `36229154287`, PASS.
+- Five-player focused smoke and Settings basic smoke: Product Owner **MANUAL PASS** ("一切正常"); not independently instrumented per-step evidence.
+- QQ/Soda visible lyrics and NetEase 7–8 hour stability: Product Owner MANUAL PASS.
+- Website: UPDATED / VERIFIED; all three download links fixed to beta.1, version and installation notice live (deployment 20260926-04).
+- Next gate: clean-device beta validation by Product Owner, explicitly post-release.
+- Freeze feature/UI/Matcher/provider expansion; address P0/P1 and real beta feedback only. A blocking issue proceeds to beta.2.
+- Installed local app remains build 28; public release artifact is build 29 from the same functional source, with Beta version metadata.
+
+All older candidate/build/pending-release sections below are historical and are superseded by this block.
+
+
+## Beta 1 Release Closure Checkpoint — 2026-09-26
+
+Current status: release authorized; final short runtime verification pending.
+Do not describe beta.1 as publicly released until the draft is published and verified.
+
+Completed:
+- Frozen source: `47fe9fafd31d58bdebf1cb242ec141489cede01f`, clean and equal to origin/main before build.
+- Release version `0.8.0-beta.1`, build `29`, arm64, ad-hoc signed, not notarized.
+- Release build, packaged self-test, signature, DMG and checksum checks PASS.
+- Source CI `36229154287` PASS.
+- Executable SHA-256: `73d10769af1dc3c0ae684382cd03e7b68669f01cf1eba6f52e3db4e9f5ef2a7d`.
+- DMG SHA-256: `74546ec6f371caeb0d31b15949f902ee94a7b06b307d81b8aaa5f1d0b6cf6660`.
+- QQ/Soda visible lyrics and NetEase 7–8 hour stability retain Product Owner MANUAL PASS evidence.
+
+Pending confirmation: current short playback and Settings smoke. QQ play controls
+did not respond to one accessibility and one coordinate attempt; this is an
+automation blocker, not proof of a player defect or a successful test.
+
+Key files:
+- `dist.noindex/RELEASE_NOTES.md`
+- `dist.noindex/NotchMuse-v0.8.0-beta.1-arm64.dmg`
+- `dist.noindex/NotchMuse-v0.8.0-beta.1-arm64.dmg.sha256`
+- `/tmp/notchmuse-beta1-website-handoff.md`
+- `/tmp/notchmuse-beta1-smoke-handoff.md`
+
+Next step: record actual short-smoke results, publish the prerelease at the frozen
+SHA, verify public assets, dispatch prepared website deployment, then synchronize
+all six project documents with the actual public release and stop.
+Clean-device validation is explicitly post-release; no new notarization gate.
+Do not repeat: build, source CI, long soak, UI polish, or Matcher work.
+
+
 ## Current Handoff: Accepted Settings v2
 
 - Current status: Product Owner accepted Settings v2 preview images.

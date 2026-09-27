@@ -5,6 +5,7 @@ enum AppPreferences {
     static let displayModeKey = "DisplayMode"
     static let positionKey = "LyricsPosition"
     static let notchStyleKey = "NotchStyle"
+    static let notchPlacementKey = "NotchPlacement"
     static let colorPresetKey = "LyricsColorPreset"
     static let customLyricsColorKey = "CustomLyricsColor"
     static let customLyricsEndColorKey = "CustomLyricsEndColor"
@@ -72,6 +73,10 @@ enum AppPreferences {
 
     static var notchStyle: NotchStyle {
         NotchStyle(rawValue: UserDefaults.standard.string(forKey: notchStyleKey) ?? "") ?? .lyricOnly
+    }
+
+    static var notchPlacement: NotchPlacement {
+        NotchPlacement(rawValue: UserDefaults.standard.string(forKey: notchPlacementKey) ?? "") ?? .top
     }
 
     static var colorPreset: LyricsColorPreset {
@@ -235,12 +240,17 @@ final class SettingsWindowController: NSWindowController {
     private let displayModeControl = NSSegmentedControl(labels: DisplayMode.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let positionControl = NSSegmentedControl(labels: LyricsPosition.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let notchStyleControl = NSSegmentedControl(labels: NotchStyle.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
+    private let notchPlacementControl = NSSegmentedControl(labels: NotchPlacement.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let displayTargetPopUp = NSPopUpButton()
     private let widthControl = NSSegmentedControl(labels: DisplayWidth.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let customWidthSlider = NSSlider(value: 500, minValue: 180, maxValue: 1000, target: nil, action: nil)
     private let statusBarOffsetSlider = NSSlider(value: 0, minValue: -200, maxValue: 200, target: nil, action: nil)
     private var colorButtons: [NSButton] = []
+    private let colorModeControl = NSSegmentedControl(labels: [L10n.text("Solid"), L10n.text("Gradient")], trackingMode: .selectOne, target: nil, action: nil)
+    private let solidPalette = NSStackView()
+    private let gradientPalette = NSStackView()
     private let lyricsColorWell = NSColorWell()
+    private let gradientStartWell = NSColorWell()
     private let lyricsColorEndWell = NSColorWell()
     private let fontSizeSlider = NSSlider(value: 13, minValue: 10, maxValue: 60, target: nil, action: nil)
     private let animationSpeedSlider = NSSlider(value: 1, minValue: 0.1, maxValue: 3, target: nil, action: nil)
@@ -272,6 +282,7 @@ final class SettingsWindowController: NSWindowController {
     private var sidebarButtons: [SettingsPage: NSButton] = [:]
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
+    private var notchPlacementRow: NSGridRow?
     private var customWidthRow: NSGridRow?
     private var statusBarOffsetRow: NSGridRow?
     private var notchBackgroundRow: NSGridRow?
@@ -313,7 +324,7 @@ final class SettingsWindowController: NSWindowController {
     static func testModeControls() {
         _ = NSApplication.shared
         let defaults = UserDefaults.standard
-        let keys = [AppPreferences.displayModeKey, AppPreferences.displayWidthKey]
+        let keys = [AppPreferences.displayModeKey, AppPreferences.displayWidthKey, AppPreferences.colorPresetKey, AppPreferences.notchPlacementKey]
         let saved = keys.map { defaults.object(forKey: $0) }
         defer {
             for (key, value) in zip(keys, saved) {
@@ -335,6 +346,20 @@ final class SettingsWindowController: NSWindowController {
         controller.widthControl.selectedSegment = DisplayWidth.allCases.firstIndex(of: .custom)!
         controller.widthChanged()
         precondition(controller.customWidthSlider.isEnabled, "Custom width must enable input")
+        for (index, placement) in NotchPlacement.allCases.enumerated() {
+            controller.notchPlacementControl.selectedSegment = index
+            controller.notchPlacementChanged()
+            precondition(AppPreferences.notchPlacement == placement, "Placement must persist")
+        }
+        controller.colorModeControl.selectedSegment = 1
+        controller.colorModeChanged()
+        precondition(AppPreferences.colorPreset.isGradient && controller.solidPalette.isHidden && !controller.gradientPalette.isHidden,
+                     "Gradient mode shows only gradient controls")
+        controller.colorModeControl.selectedSegment = 0
+        controller.colorModeChanged()
+        controller.colorChanged(controller.colorButtons[1])
+        precondition(AppPreferences.colorPreset == .red && !controller.solidPalette.isHidden && controller.gradientPalette.isHidden,
+                     "Solid color selection remains solid in Notch mode")
         controller.displayModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: .statusBar)!
         controller.displayModeChanged()
         precondition(controller.previewModeControl.selectedSegment == controller.displayModeControl.selectedSegment, "Mode selectors must stay synchronized")
@@ -349,6 +374,10 @@ final class SettingsWindowController: NSWindowController {
         positionControl.action = #selector(positionChanged)
         notchStyleControl.target = self
         notchStyleControl.action = #selector(notchStyleChanged)
+        notchPlacementControl.target = self
+        notchPlacementControl.action = #selector(notchPlacementChanged)
+        colorModeControl.target = self
+        colorModeControl.action = #selector(colorModeChanged)
 
         for target in DisplayTarget.allCases {
             displayTargetPopUp.addItem(withTitle: L10n.text(target.rawValue))
@@ -370,6 +399,9 @@ final class SettingsWindowController: NSWindowController {
         lyricsColorWell.target = self
         lyricsColorWell.action = #selector(lyricsColorChanged)
         lyricsColorWell.isContinuous = true
+        gradientStartWell.target = self
+        gradientStartWell.action = #selector(gradientStartChanged)
+        gradientStartWell.isContinuous = true
         lyricsColorEndWell.target = self
         lyricsColorEndWell.action = #selector(lyricsColorEndChanged)
         lyricsColorEndWell.isContinuous = true
@@ -428,6 +460,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Status Bar Position")), positionControl],
             [label(L10n.text("Horizontal Offset")), valueRow(slider: statusBarOffsetSlider, value: statusBarOffsetValue, unit: "pt")],
             [label(L10n.text("Notch Style")), notchStyleControl],
+            [label(L10n.text("Notch Position")), notchPlacementControl],
             [label(L10n.text("Display Screen")), displayScreenControl()],
             [label(L10n.text("Lyrics Width")), widthControl],
             [label(L10n.text("Custom Width")), valueRow(slider: customWidthSlider, value: customWidthValue, unit: "pt")]
@@ -435,7 +468,8 @@ final class SettingsWindowController: NSWindowController {
         positionRow = displayGrid.row(at: 1)
         statusBarOffsetRow = displayGrid.row(at: 2)
         notchStyleRow = displayGrid.row(at: 3)
-        customWidthRow = displayGrid.row(at: 6)
+        notchPlacementRow = displayGrid.row(at: 4)
+        customWidthRow = displayGrid.row(at: 7)
         configure(page: displayPage)
         configure(page: appearancePage)
         let appearanceGrid = grid([
@@ -770,28 +804,15 @@ final class SettingsWindowController: NSWindowController {
         return box
     }
 
-    private var paletteColors: [(String, NSColor, LyricsColorPreset?)] {
-        [("Orange", .systemOrange, .orange),
-         ("Red", .systemRed, nil),
-         ("Pink", .systemPink, nil),
-         ("Purple", .systemPurple, .purple),
-         ("Blue", .systemBlue, .blue),
-         ("Cyan", .systemTeal, nil),
-         ("Green", .systemGreen, .green),
-         ("Yellow", .systemYellow, nil),
-         ("White", .white, .white),
-         ("Mint Glow", BrandStyle.gradientColors(for: .mintGradient)[0], .mintGradient),
-         ("Sunset Glow", BrandStyle.gradientColors(for: .sunsetGradient)[0], .sunsetGradient)]
-    }
-
     private func colorPalette() -> NSView {
-        let buttons = paletteColors.enumerated().map { index, entry in
-            let colors = entry.2.map { BrandStyle.gradientColors(for: $0) } ?? [entry.1]
-            let button = NSButton(image: swatch(colors), target: self, action: #selector(colorChanged(_:)))
+        let presets = LyricsColorPreset.solidPresets + LyricsColorPreset.gradientPresets
+        let buttons = presets.enumerated().map { index, preset in
+            let colors = BrandStyle.gradientColors(for: preset)
+            let button = NSButton(image: swatch(preset.isGradient ? colors : [colors[min(1, colors.count - 1)]]), target: self, action: #selector(colorChanged(_:)))
             button.isBordered = false
             button.tag = index
-            button.toolTip = L10n.text(entry.0)
-            button.setAccessibilityLabel(L10n.text(entry.0))
+            button.toolTip = L10n.text(preset.rawValue)
+            button.setAccessibilityLabel(L10n.text(preset.rawValue))
             button.wantsLayer = true
             button.layer?.cornerRadius = 18
             button.widthAnchor.constraint(equalToConstant: 36).isActive = true
@@ -799,20 +820,39 @@ final class SettingsWindowController: NSWindowController {
             return button
         }
         colorButtons = buttons
-        lyricsColorWell.toolTip = L10n.text("Custom")
+        lyricsColorWell.toolTip = L10n.text("Custom Color / Gradient Start")
         lyricsColorWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        gradientStartWell.toolTip = L10n.text("Custom Gradient Start")
+        gradientStartWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
         lyricsColorEndWell.toolTip = L10n.text("Custom Gradient End")
         lyricsColorEndWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        let solids = NSStackView(views: Array(buttons.prefix(9)))
-        solids.orientation = .horizontal
-        solids.spacing = 7
-        let gradients = NSStackView(views: Array(buttons.dropFirst(9)) + [lyricsColorWell, lyricsColorEndWell])
-        gradients.orientation = .horizontal
-        gradients.spacing = 7
-        let palette = NSStackView(views: [solids, gradients])
+        func rows(_ controls: [NSView], in stack: NSStackView) {
+            stack.orientation = .vertical
+            stack.alignment = .leading
+            stack.spacing = 5
+            for offset in stride(from: 0, to: controls.count, by: 6) {
+                let row = NSStackView(views: Array(controls[offset..<min(offset + 6, controls.count)]))
+                row.orientation = .horizontal
+                row.spacing = 7
+                stack.addArrangedSubview(row)
+            }
+        }
+        rows(Array(buttons.prefix(LyricsColorPreset.solidPresets.count)), in: solidPalette)
+        rows(Array(buttons.dropFirst(LyricsColorPreset.solidPresets.count)), in: gradientPalette)
+        let customSolid = NSStackView(views: [label(L10n.text("Custom")), lyricsColorWell])
+        let customGradient = NSStackView(views: [label(L10n.text("Custom Gradient Start")), gradientStartWell,
+                                                label(L10n.text("Custom Gradient End")), lyricsColorEndWell])
+        for row in [customSolid, customGradient] {
+            row.orientation = .horizontal
+            row.alignment = .centerY
+            row.spacing = 8
+        }
+        solidPalette.addArrangedSubview(customSolid)
+        gradientPalette.addArrangedSubview(customGradient)
+        let palette = NSStackView(views: [colorModeControl, solidPalette, gradientPalette])
         palette.orientation = .vertical
         palette.alignment = .leading
-        palette.spacing = 6
+        palette.spacing = 8
         return palette
     }
 
@@ -851,11 +891,14 @@ final class SettingsWindowController: NSWindowController {
         preview.mode = AppPreferences.displayMode == .notch ? .notch : .statusBar
         positionControl.selectedSegment = LyricsPosition.allCases.firstIndex(of: AppPreferences.position) ?? 1
         notchStyleControl.selectedSegment = NotchStyle.allCases.firstIndex(of: AppPreferences.notchStyle) ?? 0
+        notchPlacementControl.selectedSegment = NotchPlacement.allCases.firstIndex(of: AppPreferences.notchPlacement) ?? 0
+        colorModeControl.selectedSegment = AppPreferences.colorPreset.isGradient ? 1 : 0
         displayTargetPopUp.selectItem(at: DisplayTarget.allCases.firstIndex(of: AppPreferences.displayTarget) ?? 0)
         widthControl.selectedSegment = DisplayWidth.allCases.firstIndex(of: AppPreferences.displayWidth) ?? 0
         customWidthSlider.doubleValue = Double(AppPreferences.customWidth)
         statusBarOffsetSlider.doubleValue = Double(AppPreferences.statusBarOffset)
         lyricsColorWell.color = AppPreferences.customLyricsColor
+        gradientStartWell.color = AppPreferences.customLyricsColor
         lyricsColorEndWell.color = AppPreferences.customLyricsEndColor
         updateCustomColorSwatch()
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
@@ -896,6 +939,9 @@ final class SettingsWindowController: NSWindowController {
         positionRow?.isHidden = !statusBarMode
         statusBarOffsetRow?.isHidden = !statusBarMode
         notchStyleRow?.isHidden = statusBarMode
+        notchPlacementRow?.isHidden = statusBarMode
+        solidPalette.isHidden = colorModeControl.selectedSegment == 1
+        gradientPalette.isHidden = colorModeControl.selectedSegment != 1
         customWidthRow?.isHidden = false
         customWidthSlider.isEnabled = AppPreferences.displayWidth == .custom
         customWidthValue.isEnabled = customWidthSlider.isEnabled
@@ -928,6 +974,19 @@ final class SettingsWindowController: NSWindowController {
         let styles = NotchStyle.allCases
         guard styles.indices.contains(notchStyleControl.selectedSegment) else { return }
         save(styles[notchStyleControl.selectedSegment], key: AppPreferences.notchStyleKey)
+    }
+
+    @objc private func notchPlacementChanged() {
+        let placements = NotchPlacement.allCases
+        guard placements.indices.contains(notchPlacementControl.selectedSegment) else { return }
+        save(placements[notchPlacementControl.selectedSegment], key: AppPreferences.notchPlacementKey)
+    }
+
+    @objc private func colorModeChanged() {
+        save(colorModeControl.selectedSegment == 1 ? LyricsColorPreset.mintGradient : .orange,
+             key: AppPreferences.colorPresetKey)
+        updateControlAvailability()
+        updateCustomColorSwatch()
     }
 
     @objc private func displayTargetChanged() {
@@ -967,22 +1026,16 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func colorChanged(_ sender: NSButton) {
-        guard paletteColors.indices.contains(sender.tag) else { return }
-        let selection = paletteColors[sender.tag]
-        if let preset = selection.2 {
-            save(preset, key: AppPreferences.colorPresetKey)
-        } else {
-            lyricsColorWell.color = selection.1
-            lyricsColorChanged()
-        }
+        let presets = LyricsColorPreset.solidPresets + LyricsColorPreset.gradientPresets
+        guard presets.indices.contains(sender.tag) else { return }
+        save(presets[sender.tag], key: AppPreferences.colorPresetKey)
         updateCustomColorSwatch()
     }
 
     @objc private func lyricsColorChanged() {
         AppPreferences.setColor(lyricsColorWell.color, forKey: AppPreferences.customLyricsColorKey)
         updateCustomColorSwatch()
-        let preset: LyricsColorPreset = AppPreferences.colorPreset == .customGradient ? .customGradient : .custom
-        UserDefaults.standard.set(preset.rawValue, forKey: AppPreferences.colorPresetKey)
+        UserDefaults.standard.set(LyricsColorPreset.custom.rawValue, forKey: AppPreferences.colorPresetKey)
         onSettingsChange()
         updatePreview()
         updateCustomColorSwatch()
@@ -990,6 +1043,14 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func lyricsColorEndChanged() {
         AppPreferences.setColor(lyricsColorEndWell.color, forKey: AppPreferences.customLyricsEndColorKey)
+        UserDefaults.standard.set(LyricsColorPreset.customGradient.rawValue, forKey: AppPreferences.colorPresetKey)
+        updateCustomColorSwatch()
+        onSettingsChange()
+        updatePreview()
+    }
+
+    @objc private func gradientStartChanged() {
+        AppPreferences.setColor(gradientStartWell.color, forKey: AppPreferences.customLyricsColorKey)
         UserDefaults.standard.set(LyricsColorPreset.customGradient.rawValue, forKey: AppPreferences.colorPresetKey)
         updateCustomColorSwatch()
         onSettingsChange()
@@ -1081,11 +1142,9 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func updateCustomColorSwatch() {
+        let presets = LyricsColorPreset.solidPresets + LyricsColorPreset.gradientPresets
         for (index, button) in colorButtons.enumerated() {
-            let color = paletteColors[index]
-            let selected = color.2 == AppPreferences.colorPreset ||
-                (color.2 == nil && AppPreferences.colorPreset == .custom &&
-                 color.1.usingColorSpace(.deviceRGB) == lyricsColorWell.color.usingColorSpace(.deviceRGB))
+            let selected = presets[index] == AppPreferences.colorPreset
             button.layer?.borderWidth = selected ? 2 : 0
             button.layer?.borderColor = NSColor.systemBlue.cgColor
         }
@@ -1214,7 +1273,7 @@ final class SettingsWindowController: NSWindowController {
         let keys: [String]
         switch page {
         case .display:
-            keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.statusBarOffsetKey, AppPreferences.notchStyleKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey]
+            keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.statusBarOffsetKey, AppPreferences.notchStyleKey, AppPreferences.notchPlacementKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey]
         case .appearance:
             keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.customLyricsEndColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchBackgroundOpacityKey, AppPreferences.notchBackgroundPaddingKey, AppPreferences.notchHideOnHoverKey]
         case .general:
@@ -1235,6 +1294,7 @@ final class SettingsWindowController: NSWindowController {
             width: AppPreferences.displayWidth,
             position: AppPreferences.position,
             notchStyle: AppPreferences.notchStyle,
+            notchPlacement: AppPreferences.notchPlacement,
             notchBackground: AppPreferences.notchBackgroundEnabled,
             notchBackgroundColor: AppPreferences.notchBackgroundColor,
             notchBackgroundPadding: AppPreferences.notchBackgroundPadding,
@@ -1349,6 +1409,7 @@ private final class SettingsPreviewView: NSView {
     private var statusBarOffset: CGFloat = 0
     private var position: LyricsPosition = .right
     private var notchStyle: NotchStyle = .lyricOnly
+    private var notchPlacement: NotchPlacement = .top
     private var notchBackground = false
     private var notchBackgroundColor = NotchBackgroundPreset.softGray.color!
     private var notchBackgroundPadding: CGFloat = 40
@@ -1358,7 +1419,7 @@ private final class SettingsPreviewView: NSView {
     override var isFlipped: Bool { true }
 
     func apply(colors: [NSColor], usesGradient: Bool, fontSize: CGFloat, opacity: CGFloat, backgroundOpacity: CGFloat, width: DisplayWidth,
-               position: LyricsPosition, notchStyle: NotchStyle, notchBackground: Bool,
+               position: LyricsPosition, notchStyle: NotchStyle, notchPlacement: NotchPlacement, notchBackground: Bool,
                notchBackgroundColor: NSColor, notchBackgroundPadding: CGFloat, customWidth: CGFloat, statusBarOffset: CGFloat) {
         lyricColors = colors
         self.usesGradient = usesGradient
@@ -1370,6 +1431,7 @@ private final class SettingsPreviewView: NSView {
         self.statusBarOffset = statusBarOffset
         self.position = position
         self.notchStyle = notchStyle
+        self.notchPlacement = notchPlacement
         self.notchBackground = notchBackground
         self.notchBackgroundColor = notchBackgroundColor
         self.notchBackgroundPadding = notchBackgroundPadding
@@ -1420,19 +1482,37 @@ private final class SettingsPreviewView: NSView {
             case .songLyric: overlayHeight = lineHeight * 2 + 18
             case .expanded: overlayHeight = lineHeight * 4 + 22
             }
-            let overlay = NSRect(x: screen.midX - overlayWidth / 2, y: cutout.maxY + 6,
-                                 width: overlayWidth, height: overlayHeight)
+            let overlay: NSRect
+            switch notchPlacement {
+            case .top: overlay = NSRect(x: screen.midX - overlayWidth / 2, y: cutout.maxY + 6, width: overlayWidth, height: overlayHeight)
+            case .bottom: overlay = NSRect(x: screen.midX - overlayWidth / 2, y: screen.maxY - overlayHeight - 8, width: overlayWidth, height: overlayHeight)
+            case .left, .right:
+                let sideWidth: CGFloat = 54
+                let sideHeight = screen.height * 0.72
+                overlay = NSRect(x: notchPlacement == .left ? screen.minX + 8 : screen.maxX - sideWidth - 8,
+                                 y: screen.midY - sideHeight / 2, width: sideWidth, height: sideHeight)
+            }
             let previewText = "♪ " + L10n.text("Preview lyric sample")
             let previewFont = NSFont.systemFont(ofSize: min(lyricFontSize, 17), weight: .medium)
             let previewTextWidth = (previewText as NSString).size(withAttributes: [.font: previewFont]).width
             let previewMetadataWidth = notchStyle == .lyricOnly ? 0 : (L10n.text("Preview song · Preview artist") as NSString).size(withAttributes: [.font: previewFont]).width
-            let background = NotchGeometry.backgroundRect(in: overlay, contentWidth: max(previewTextWidth, previewMetadataWidth), padding: notchBackgroundPadding)
+            let background = (notchPlacement.isVertical ? NSRect(origin: .zero, size: overlay.size) : NotchGeometry.backgroundRect(in: overlay, contentWidth: max(previewTextWidth, previewMetadataWidth), padding: notchBackgroundPadding))
                 .offsetBy(dx: overlay.minX, dy: overlay.minY)
             if notchBackground {
                 notchBackgroundColor.withAlphaComponent(backgroundOpacity).setFill()
                 NSBezierPath(roundedRect: background, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
             }
-            if notchStyle == .songLyric {
+            if notchPlacement.isVertical {
+                let sample = Array(L10n.text("Preview lyric sample"))
+                let cell: CGFloat = 16
+                let rows = max(1, Int((overlay.height - 12) / cell))
+                for (index, glyph) in sample.prefix(rows * 2).enumerated() {
+                    let color = usesGradient ? lyricColors[min(index * lyricColors.count / max(1, sample.count), lyricColors.count - 1)] : lyricColors[min(1, lyricColors.count - 1)]
+                    drawText(String(glyph), in: NSRect(x: overlay.minX + CGFloat(index / rows) * overlay.width / 2,
+                                                       y: overlay.minY + 6 + CGFloat(index % rows) * cell,
+                                                       width: overlay.width / 2, height: cell), color: color, size: 12, alignment: .center)
+                }
+            } else if notchStyle == .songLyric {
                 drawText(L10n.text("Preview song · Preview artist"),
                          in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
                                     width: overlay.width - 24, height: lineHeight),
@@ -1447,9 +1527,11 @@ private final class SettingsPreviewView: NSView {
                                     width: overlay.width - 24, height: lineHeight),
                          color: notchPreviewForeground, size: max(10, min(lyricFontSize - 2, 12)), alignment: .left)
             }
-            drawLyric(in: NSRect(x: overlay.minX + 12, y: overlay.maxY - lineHeight - 7,
-                                width: overlay.width - 24, height: lineHeight), notch: true,
-                      backgroundColor: notchBackground ? notchBackgroundColor : nil)
+            if !notchPlacement.isVertical {
+                drawLyric(in: NSRect(x: overlay.minX + 12, y: overlay.maxY - lineHeight - 7,
+                                    width: overlay.width - 24, height: lineHeight), notch: true,
+                          backgroundColor: notchBackground ? notchBackgroundColor : nil)
+            }
         } else {
             let bar = NSRect(x: screen.minX, y: screen.minY, width: screen.width, height: 28)
             NSColor.white.withAlphaComponent(0.86).setFill()
@@ -1488,8 +1570,8 @@ private final class SettingsPreviewView: NSView {
     private func drawLyric(in rect: NSRect, notch: Bool, backgroundColor: NSColor? = nil) {
         let text = "♪ " + L10n.text("Preview lyric sample")
         let size = min(lyricFontSize, notch ? 17 : 15)
-        let colors = backgroundColor.map { NotchBackgroundContrast.adjusted(lyricColors, on: $0) } ?? lyricColors
-        let base = notch ? notchPreviewForeground.withAlphaComponent(0.7) : lyricColors[0].withAlphaComponent(0.72)
+        let colors = lyricColors
+        let base = colors[min(1, colors.count - 1)].withAlphaComponent(0.72)
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .center
         if usesGradient {

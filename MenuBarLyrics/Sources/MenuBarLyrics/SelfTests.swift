@@ -782,6 +782,15 @@ enum SelfTests {
         check(compact.midX == screen.midX, "centers Notch Mode on screen")
         check(compact.maxY <= visible.maxY, "keeps Notch Mode below the menu bar")
         check(visible.contains(compact), "keeps Notch Mode inside the visible screen")
+        for placement in NotchPlacement.allCases {
+            let frame = NotchGeometry.frame(screenFrame: screen, visibleFrame: visible, style: .lyricOnly,
+                                            fontSize: 13, width: compactWidth, placement: placement)
+            check(visible.contains(frame), "keeps \(placement.rawValue) lyrics inside the visible screen")
+            if placement.isVertical { check(frame.height > frame.width, "uses a vertical side panel") }
+        }
+        check(NotchGeometry.frame(screenFrame: screen, visibleFrame: visible, style: .lyricOnly,
+                                  fontSize: 13, width: compactWidth, placement: .bottom).minY < compact.minY,
+              "places bottom lyrics above the Dock")
         check(expanded.height > compact.height, "gives Expanded style room for song details")
         check(compactWidth < normalWidth && normalWidth < wideWidth, "makes Notch width presets visibly different")
         check(WidthGeometry.notchWidth(mode: .custom, availableWidth: 600, style: .lyricOnly, customWidth: 900) == 600, "clips custom Notch width to the selected screen")
@@ -808,7 +817,10 @@ enum SelfTests {
         check(WidthGeometry.previewScale(screenWidth: 500) == 500.0 / 1470, "scales preview offsets with the preview screen")
         check(NotchBackgroundContrast.foreground(on: .white) == .black, "uses dark notch text on a white background")
         check(NotchBackgroundContrast.adjusted([.white], on: .white) == [.black], "keeps white lyric colors readable on white backgrounds")
-        check(LyricsColorPreset.allCases.count == 9, "includes solid, gradient, and custom lyric colors")
+        check(LyricsColorPreset.solidPresets.count >= 10 && LyricsColorPreset.gradientPresets.count >= 10,
+              "offers at least ten solid and gradient lyric colors")
+        check(LyricsColorPreset.solidPresets.allSatisfy { !$0.isGradient } &&
+              LyricsColorPreset.gradientPresets.allSatisfy(\.isGradient), "separates solid and gradient palettes")
         let gradient = BrandStyle.gradientLyric("ab", colors: [.white, .black], attributes: [:])
         check(gradient.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor == .white,
               "starts the lyric gradient at its first color")

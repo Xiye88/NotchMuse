@@ -21,6 +21,15 @@ enum NotchStyle: String, CaseIterable {
     case expanded = "Expanded"
 }
 
+enum NotchPlacement: String, CaseIterable {
+    case top = "Top"
+    case bottom = "Bottom"
+    case left = "Left Side"
+    case right = "Right Side"
+
+    var isVertical: Bool { self == .left || self == .right }
+}
+
 enum LyricsColorPreset: String, CaseIterable {
     case orange = "Orange"
     case white = "White"
@@ -31,9 +40,27 @@ enum LyricsColorPreset: String, CaseIterable {
     case sunsetGradient = "Sunset Glow"
     case custom = "Custom"
     case customGradient = "Custom Gradient"
+    case red = "Red"
+    case pink = "Pink"
+    case cyan = "Cyan"
+    case yellow = "Yellow"
+    case silver = "Silver"
+    case coral = "Coral"
+    case lavender = "Lavender"
+    case oceanGradient = "Ocean Glow"
+    case auroraGradient = "Aurora Glow"
+    case roseGradient = "Rose Glow"
+    case violetGradient = "Violet Glow"
+    case peachGradient = "Peach Glow"
+    case skyGradient = "Sky Glow"
+    case limeGradient = "Lime Glow"
+    case goldGradient = "Gold Glow"
+
+    static let solidPresets: [Self] = [.orange, .red, .pink, .purple, .blue, .cyan, .green, .yellow, .white, .silver, .coral, .lavender]
+    static let gradientPresets: [Self] = [.mintGradient, .sunsetGradient, .oceanGradient, .auroraGradient, .roseGradient, .violetGradient, .peachGradient, .skyGradient, .limeGradient, .goldGradient]
 
     var isGradient: Bool {
-        self == .mintGradient || self == .sunsetGradient || self == .customGradient
+        Self.gradientPresets.contains(self) || self == .customGradient
     }
 }
 
@@ -210,7 +237,8 @@ enum NotchGeometry {
         visibleFrame: NSRect,
         style: NotchStyle,
         fontSize: CGFloat,
-        width: CGFloat
+        width: CGFloat,
+        placement: NotchPlacement = .top
     ) -> NSRect {
         let lineHeight = ceil(fontSize * 1.3)
         let height: CGFloat
@@ -223,10 +251,16 @@ enum NotchGeometry {
             height = lineHeight * 4 + 22
         }
 
+        if placement.isVertical {
+            let sideWidth = min(140, max(78, visibleFrame.width * 0.16))
+            let sideHeight = min(visibleFrame.height - 16, max(240, fontSize * 18))
+            let x = placement == .left ? visibleFrame.minX + 8 : visibleFrame.maxX - sideWidth - 8
+            return NSRect(x: x, y: visibleFrame.midY - sideHeight / 2, width: sideWidth, height: sideHeight)
+        }
         let availableWidth = max(0, visibleFrame.width - 32)
         let resolvedWidth = min(availableWidth, max(min(180, availableWidth), width))
         let x = min(max(screenFrame.midX - resolvedWidth / 2, visibleFrame.minX), visibleFrame.maxX - resolvedWidth)
-        let y = max(visibleFrame.minY, visibleFrame.maxY - height - 6)
+        let y = placement == .bottom ? visibleFrame.minY + 8 : max(visibleFrame.minY, visibleFrame.maxY - height - 6)
         return NSRect(x: x, y: y, width: resolvedWidth, height: height)
     }
 }
@@ -405,18 +439,24 @@ final class OverlayLyricsWindow: NSObject {
         var lyricViewport = NSRect.zero
         var lyricTextRect = NSRect.zero
         var lyricWraps = false
+        var vertical = false
         var drawsBackground = false
         var backgroundRect = NSRect.zero
         var backgroundColor = NSColor.black
 
         override func draw(_ dirtyRect: NSRect) {
-            let cornerRadius = style == .lyricOnly ? bounds.height / 2 : min(16, bounds.height * 0.28)
+            let cornerRadius = vertical ? 16 : style == .lyricOnly ? bounds.height / 2 : min(16, bounds.height * 0.28)
             if drawsBackground {
                 NSColor.white.withAlphaComponent(0.12).setStroke()
                 NSBezierPath(roundedRect: backgroundRect.insetBy(dx: 0.5, dy: 0.5), xRadius: cornerRadius, yRadius: cornerRadius).stroke()
             }
 
             let lineHeight = ceil(font.pointSize * 1.3)
+
+            if vertical {
+                drawVerticalLyric()
+                return
+            }
 
             switch style {
             case .lyricOnly:
@@ -453,13 +493,13 @@ final class OverlayLyricsWindow: NSObject {
         private func drawLyric() {
             NSGraphicsContext.saveGraphicsState()
             NSBezierPath(rect: lyricViewport).addClip()
-            let activeColors = drawsBackground ? NotchBackgroundContrast.adjusted(colors, on: backgroundColor) : colors
+            let activeColors = colors
             if usesGradient {
                 drawGradientLyric(colors: activeColors.map { $0.withAlphaComponent(0.58) })
             } else {
                 drawLyricText(attributes: [
                     .font: font,
-                    .foregroundColor: (drawsBackground ? NotchBackgroundContrast.foreground(on: backgroundColor) : NSColor.white).withAlphaComponent(0.62),
+                    .foregroundColor: activeColors[min(1, activeColors.count - 1)].withAlphaComponent(0.62),
                     .shadow: textShadow()
                 ])
             }
@@ -482,6 +522,37 @@ final class OverlayLyricsWindow: NSObject {
                 }
             }
             NSGraphicsContext.restoreGraphicsState()
+        }
+
+        private func drawVerticalLyric() {
+            let glyphs = lyric.map(String.init)
+            guard !glyphs.isEmpty else { return }
+            let cell = ceil(font.pointSize * 1.45)
+            let rows = max(1, Int(lyricViewport.height / cell))
+            let start = glyphs.count > rows * 2 ? min(glyphs.count - rows * 2, Int(CGFloat(glyphs.count - rows * 2) * min(max(progress, 0), 1))) : 0
+            let visible = Array(glyphs.dropFirst(start).prefix(rows * 2))
+            let columnWidth = lyricViewport.width / 2
+            for (index, glyph) in visible.enumerated() {
+                let originalIndex = start + index
+                let color: NSColor
+                if usesGradient, colors.count > 1 {
+                    let position = CGFloat(originalIndex) / CGFloat(max(1, glyphs.count - 1)) * CGFloat(colors.count - 1)
+                    let left = min(colors.count - 2, Int(position))
+                    color = colors[left].blended(withFraction: position - CGFloat(left), of: colors[left + 1]) ?? colors[left]
+                } else {
+                    color = colors[min(1, colors.count - 1)]
+                }
+                let column = index / rows
+                let row = index % rows
+                let paragraph = NSMutableParagraphStyle()
+                paragraph.alignment = .center
+                (glyph as NSString).draw(in: NSRect(x: lyricViewport.minX + CGFloat(column) * columnWidth,
+                                                    y: lyricViewport.maxY - CGFloat(row + 1) * cell,
+                                                    width: columnWidth, height: cell), withAttributes: [
+                    .font: font, .foregroundColor: color.withAlphaComponent(CGFloat(originalIndex) / CGFloat(glyphs.count) <= progress ? 1 : 0.7),
+                    .paragraphStyle: paragraph, .shadow: textShadow()
+                ])
+            }
         }
 
         private func drawGradientLyric(colors: [NSColor]) {
@@ -560,6 +631,7 @@ final class OverlayLyricsWindow: NSObject {
             artist: String,
             progress: CGFloat,
             style requestedStyle: NotchStyle,
+            placement: NotchPlacement,
             fontSize: CGFloat,
             colors: [NSColor],
             usesGradient: Bool,
@@ -578,7 +650,7 @@ final class OverlayLyricsWindow: NSObject {
             let lyricY: CGFloat = style == .lyricOnly ? floor((frame.height - ceil(fontSize * 1.3)) / 2) : 6
             let lyricWraps = style == .expanded
             let lineHeight = ceil(fontSize * 1.3)
-            let viewport = NSRect(
+            let viewport = placement.isVertical ? NSRect(x: 8, y: 8, width: frame.width - 16, height: frame.height - 16) : NSRect(
                 x: horizontalInset,
                 y: lyricY,
                 width: max(0, frame.width - horizontalInset * 2),
@@ -586,7 +658,7 @@ final class OverlayLyricsWindow: NSObject {
             )
             let measuredWidth = ceil((displayLyric as NSString).size(withAttributes: [.font: font]).width)
             let metadataWidth: CGFloat = style == .lyricOnly ? 0 : ceil(("\(song) · \(artist)" as NSString).size(withAttributes: [.font: font]).width)
-            let backgroundRect = NotchGeometry.backgroundRect(
+            let backgroundRect = placement.isVertical ? NSRect(origin: .zero, size: frame.size) : NotchGeometry.backgroundRect(
                 in: NSRect(origin: .zero, size: frame.size),
                 contentWidth: max(measuredWidth, metadataWidth),
                 padding: backgroundPadding
@@ -594,7 +666,7 @@ final class OverlayLyricsWindow: NSObject {
             let textWidth = lyricWraps ? viewport.width : measuredWidth
             let overflows = !lyricWraps && textWidth > viewport.width
             let offset = overflows ? scroll.offset(contentWidth: textWidth, viewportWidth: viewport.width, speedMultiplier: animationSpeed) : 0
-            let needsScrolling = overflows && !scroll.isFinished(contentWidth: textWidth, viewportWidth: viewport.width, speedMultiplier: animationSpeed)
+            let needsScrolling = !placement.isVertical && overflows && !scroll.isFinished(contentWidth: textWidth, viewportWidth: viewport.width, speedMultiplier: animationSpeed)
             let textX = lyricWraps ? viewport.minX : overflows ? viewport.minX - offset : viewport.midX - textWidth / 2
 
             if window.frame != frame {
@@ -602,7 +674,7 @@ final class OverlayLyricsWindow: NSObject {
             }
             containerView.frame = NSRect(origin: .zero, size: frame.size)
             materialView.frame = backgroundRect
-            materialView.layer?.cornerRadius = style == .lyricOnly ? frame.height / 2 : min(16, frame.height * 0.28)
+            materialView.layer?.cornerRadius = placement.isVertical ? 16 : style == .lyricOnly ? frame.height / 2 : min(16, frame.height * 0.28)
             materialView.layer?.masksToBounds = true
             materialView.isHidden = !backgroundEnabled
             tintView.frame = backgroundRect
@@ -618,6 +690,7 @@ final class OverlayLyricsWindow: NSObject {
             view.progress = progress
             view.font = font
             view.style = style
+            view.vertical = placement.isVertical
             view.colors = colors
             view.usesGradient = usesGradient
             view.backgroundColor = backgroundColor
@@ -689,6 +762,7 @@ final class OverlayLyricsWindow: NSObject {
         mode: DisplayMode,
         position: LyricsPosition,
         notchStyle: NotchStyle,
+        notchPlacement: NotchPlacement,
         song: String,
         artist: String,
         statusItem: NSStatusItem,
@@ -729,7 +803,8 @@ final class OverlayLyricsWindow: NSObject {
                 visibleFrame: screen.visibleFrame,
                 style: effectiveStyle,
                 fontSize: fontSize,
-                width: width
+                width: width,
+                placement: notchPlacement
             )
             return notchLane.show(
                 frame: frame,
@@ -738,6 +813,7 @@ final class OverlayLyricsWindow: NSObject {
                 artist: artist,
                 progress: progress,
                 style: effectiveStyle,
+                placement: notchPlacement,
                 fontSize: fontSize,
                 colors: colors,
                 usesGradient: colorPreset.isGradient,

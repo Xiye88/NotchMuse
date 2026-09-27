@@ -43,6 +43,21 @@ enum BrandStyle {
             return [customColor, customColor, customColor]
         case .customGradient:
             return [customColor, customEndColor]
+        case .red: return [.systemRed]
+        case .pink: return [.systemPink]
+        case .cyan: return [.systemTeal]
+        case .yellow: return [.systemYellow]
+        case .silver: return [NSColor(white: 0.85, alpha: 1)]
+        case .coral: return [NSColor(calibratedRed: 1, green: 0.46, blue: 0.36, alpha: 1)]
+        case .lavender: return [NSColor(calibratedRed: 0.72, green: 0.58, blue: 0.96, alpha: 1)]
+        case .oceanGradient: return [.systemTeal, .systemBlue]
+        case .auroraGradient: return [.systemGreen, .systemTeal, .systemBlue]
+        case .roseGradient: return [.systemPink, .systemPurple]
+        case .violetGradient: return [.systemPurple, .systemBlue]
+        case .peachGradient: return [.systemOrange, .systemPink]
+        case .skyGradient: return [.white, .systemCyan, .systemBlue]
+        case .limeGradient: return [.systemYellow, .systemGreen]
+        case .goldGradient: return [.white, .systemYellow, .systemOrange]
         }
     }
 

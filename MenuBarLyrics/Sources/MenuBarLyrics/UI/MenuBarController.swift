@@ -342,6 +342,7 @@ final class MenuBarController: NSObject {
             mode: displayMode,
             position: position,
             notchStyle: notchStyle,
+            notchPlacement: AppPreferences.notchPlacement,
             song: currentTrack?.name ?? "",
             artist: currentTrack?.artist ?? "",
             statusItem: statusItem,
@@ -540,7 +541,7 @@ final class MenuBarController: NSObject {
         NSWorkspace.shared.open(url)
     }
 
-    @objc private func showSettings() {
+    @objc func showSettings() {
         if settingsWindowController == nil {
             settingsWindowController = SettingsWindowController { [weak self] in
                 self?.reloadSettings()

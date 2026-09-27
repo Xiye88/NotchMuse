@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://notchmuse.com"><strong>Website</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.2/NotchMuse.dmg"><strong>Download v0.8.0 Beta 2</strong></a>
+  <a href="https://notchmuse.com"><strong>Website</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.3/NotchMuse.dmg"><strong>Download v0.8.0 Beta 3</strong></a>
   ·
   <a href="https://github.com/Xiye88/NotchMuse/issues">Report an issue</a>
 </p>
@@ -27,7 +27,7 @@
   macOS 14+ · Apple Silicon · Spotify · Apple Music · NetEase Cloud Music · QQ Music · Soda Music
 </p>
 
-> **Public beta:** [v0.8.0-beta.2](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.2), build 31. Supports all five players, Auto Detect, and redesigned bilingual Settings. Includes a refreshed installer, bilingual first-open guide, and Privacy & Security shortcut. Ad-hoc signed, not notarized. Download directly from [notchmuse.com](https://notchmuse.com).
+> **Public beta:** [v0.8.0-beta.3](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.3), build 38. Supports all five players, Auto Detect, and redesigned bilingual Settings. Includes a refreshed installer, bilingual first-open guide, and Privacy & Security shortcut. Ad-hoc signed, not notarized. Download directly from [notchmuse.com](https://notchmuse.com).
 
 ## Demo
 
@@ -85,9 +85,9 @@ Redesigned Settings includes a sidebar, live Status Bar/Notch previews, appearan
 
 ## Quick Start
 
-The public v0.8.0 Beta 2 supports Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music.
+The public v0.8.0 Beta 3 supports Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music.
 
-1. Visit [notchmuse.com](https://notchmuse.com) or [download the Beta 2 DMG directly](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.2/NotchMuse.dmg).
+1. Visit [notchmuse.com](https://notchmuse.com) or [download the Beta 3 DMG directly](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.3/NotchMuse.dmg).
 2. Open the DMG and drag `NotchMuse.app` to `Applications`.
 3. Because this beta is not notarized, Control-click `NotchMuse.app`, choose `Open`, then confirm `Open`.
 4. Open any of the five supported desktop players and play a song.
@@ -146,7 +146,7 @@ NotchMuse does not require a menu bar organizer. If your menu bar is already cro
 
 ## Roadmap
 
-- Current public beta: v0.8.0-beta.2, five players, Auto Detect, Settings UI v2, and refreshed installer
+- Current public beta: v0.8.0-beta.3, five players, Auto Detect, Settings UI v2, and refreshed installer
 - Next: clean-device validation and fixes based on real Beta feedback
 - Future distribution and compatibility work will follow validation
 

@@ -1,5 +1,15 @@
 # NotchMuse Thread Registry
 
+## Beta 3 Release Approval - 2026-09-27
+
+- Product Owner accepted Candidate Build 38 and authorized GitHub sync/publication.
+- Target: v0.8.0-beta.3, Build 38; implementation commit `1b2d191`.
+- Added four anchored lyric positions, 12 solid and 10 gradient presets, labeled custom colors; fixed Notch solid-color rendering and background opacity controls.
+- Debug/Release builds, full self-tests and Settings interaction checks passed; user GUI acceptance PASS.
+- Release packaging, remote CI and website deployment verification are in progress. Earlier candidate/Beta 2 sections below are historical.
+- Ad-hoc signing remains; no notarization. Stable local installation remains untouched.
+
+
 ## Current Public Beta — 2026-09-26
 
 - Public Beta: **v0.8.0-beta.2**, build **31**; published as a prerelease with Product Owner approval.

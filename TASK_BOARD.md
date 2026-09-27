@@ -6,7 +6,9 @@
 - Target: v0.8.0-beta.3, Build 38; implementation commit `1b2d191`.
 - Added four anchored lyric positions, 12 solid and 10 gradient presets, labeled custom colors; fixed Notch solid-color rendering and background opacity controls.
 - Debug/Release builds, full self-tests and Settings interaction checks passed; user GUI acceptance PASS.
-- Release packaging, remote CI and website deployment verification are in progress. Earlier candidate/Beta 2 sections below are historical.
+- GitHub main source SHA `149e75f001e8fbe70a489a0e0fc0d797877c0c5e`; CI run `36328894758` PASS. Beta 3 prerelease: https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.3
+- Public DMG: https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.3/NotchMuse.dmg; SHA-256 `5f8e8c2a487d31bae69bc230a22bf17c3fe0f8c05a515732ce20e51117397cee`. Public download matches locally verified DMG.
+- Website: https://notchmuse.com and https://www.notchmuse.com each verified with three Beta 3 download links. The former Beta 2 index is backed up on the origin. Earlier candidate/Beta 2 sections below are historical.
 - Ad-hoc signing remains; no notarization. Stable local installation remains untouched.
 
 

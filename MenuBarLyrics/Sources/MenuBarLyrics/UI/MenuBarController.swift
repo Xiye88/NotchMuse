@@ -56,6 +56,7 @@ final class MenuBarController: NSObject {
         return item
     }()
     private let overlay = OverlayLyricsWindow()
+    private let menuBarSpace = MenuBarSpaceController()
     private let lyricsClient = LyricsClient()
     private var player: any MusicPlayerAdapter = SpotifyAdapter()
     private var displayMode = AppPreferences.displayMode
@@ -97,6 +98,8 @@ final class MenuBarController: NSObject {
         displaySource = L10n.format("Checking %@...", player.source.displayName())
         setupButton()
         setupMenu()
+        menuBarSpace.onChange = { [weak self] in self?.updateDisplay() }
+        menuBarSpace.start()
         reloadSettings()
         Task { @MainActor [weak self] in
             self?.showFirstLaunchGuideIfNeeded()
@@ -127,6 +130,7 @@ final class MenuBarController: NSObject {
         pollTask = nil
         player.shutdown()
         overlay.hide()
+        menuBarSpace.stop()
         statusItem.menu = nil
         NSStatusBar.system.removeStatusItem(statusItem)
     }
@@ -356,7 +360,9 @@ final class MenuBarController: NSObject {
             notchHideOnHover: AppPreferences.notchHideOnHover,
             displayTarget: AppPreferences.displayTarget,
             displayWidth: AppPreferences.displayWidth,
-            customWidth: AppPreferences.customWidth
+            customWidth: AppPreferences.customWidth,
+            menuBarSpaceBoundaryX: menuBarSpace.safeBoundary(on: statusItem.button?.window?.screen),
+            autoPosition: menuBarSpace.isActive && UserDefaults.standard.object(forKey: AppPreferences.positionKey) == nil
         )
         updateScrollTimer(overflows: overflows)
     }
@@ -536,9 +542,9 @@ final class MenuBarController: NSObject {
         NSWorkspace.shared.open(url)
     }
 
-    @objc private func showSettings() {
+    @objc func showSettings() {
         if settingsWindowController == nil {
-            settingsWindowController = SettingsWindowController { [weak self] in
+            settingsWindowController = SettingsWindowController(menuBarSpace: menuBarSpace) { [weak self] in
                 self?.reloadSettings()
             }
         }

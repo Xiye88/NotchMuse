@@ -1,5 +1,15 @@
 # NotchMuse Project Handoff
 
+## v0.9 Menu Bar Space — Active (2026-09-27)
+
+Current status: local implementation and candidate under QA; real item movement is not yet verified.
+Completed: fetched `origin/main` and created isolated `codex/menu-bar-space` from `ecb631e4f02cd4329a6f8595be8f561ad5d353ea`. On macOS 26.5.2, `AXExtrasMenuBar` exposes third-party and system items, and status-item positions are readable but not settable. Implemented default-off controller, Accessibility flow, three separators/zones, native drag Settings page, icon presets/custom image thumbnail, persistence/reset, and lyrics safe-boundary clamp. Debug build/full self-tests and Release candidate build/package self-test/signature pass. GUI confirmed page opens, enable works, and items appear; a crash in the initial page layout was fixed. Control Center duplicates were filtered.
+Pending confirmation: actual ⌘-drag item movement, hide/reveal/always-hidden behavior, reset, lyrics runtime layout, macOS 14/15 compatibility, and final candidate acceptance. GUI automation was interrupted by Mac lock before drag completed. Thaw was restored and the test candidate stopped; the production app was untouched. Do not report unverified gates as passed.
+Key files: `MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarSpaceController.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarSpaceSettingsView.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarController.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/OverlayLyricsWindow.swift`, and this handoff.
+Next step: when the Mac is unlocked, temporarily quit Thaw, rebuild the isolated candidate, resume the focused drag/reveal/reset GUI test, fix failures, then restore Thaw and finish the handoff.
+Do not repeat: player, matcher, provider, unrelated Settings redesign, main merge, tag, or public release.
+
+
 ## Release Closure Handoff
 
 Current status: Beta 2 public release and website deployment verified; final documentation synchronized with this commit.

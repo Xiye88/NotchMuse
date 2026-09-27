@@ -104,6 +104,12 @@ enum OverlayMousePolicy {
 }
 
 enum OverlayLaneGeometry {
+    static func preferredPosition(leftWidth: CGFloat, rightWidth: CGFloat, previous: LyricsPosition) -> LyricsPosition {
+        if leftWidth > rightWidth + 80 { return .left }
+        if rightWidth > leftWidth + 80 { return .right }
+        return previous
+    }
+
     static func centeredTextY(laneHeight: CGFloat, lineHeight: CGFloat) -> CGFloat {
         floor((laneHeight - lineHeight) / 2)
     }
@@ -181,6 +187,7 @@ enum NotchGeometry {
 
 @MainActor
 final class OverlayLyricsWindow: NSObject {
+    private var automaticPosition: LyricsPosition = .right
     @MainActor
     private final class GradientLyricView: NSView {
         var text = "" {
@@ -602,7 +609,9 @@ final class OverlayLyricsWindow: NSObject {
         notchHideOnHover: Bool,
         displayTarget: DisplayTarget,
         displayWidth: DisplayWidth,
-        customWidth: CGFloat
+        customWidth: CGFloat,
+        menuBarSpaceBoundaryX: CGFloat? = nil,
+        autoPosition: Bool = false
     ) -> Bool {
         guard let screen = selectedScreen(target: displayTarget, statusItem: statusItem) else { return false }
         let colors = BrandStyle.gradientColors(for: colorPreset, customColor: customLyricsColor)
@@ -651,8 +660,8 @@ final class OverlayLyricsWindow: NSObject {
             screenFrame: screen.frame,
             auxiliaryTopLeftArea: screen.auxiliaryTopLeftArea,
             auxiliaryTopRightArea: screen.auxiliaryTopRightArea,
-            statusItemX: statusItem.button?.window?.screen == screen ? statusItemScreenMinX(statusItem) : nil,
-            foregroundMenuMaxX: position == .left ? MenuBarSafety.foregroundMenuMaxX() : nil,
+            statusItemX: [statusItem.button?.window?.screen == screen ? statusItemScreenMinX(statusItem) : nil, menuBarSpaceBoundaryX].compactMap { $0 }.min(),
+            foregroundMenuMaxX: position == .left || autoPosition ? MenuBarSafety.foregroundMenuMaxX() : nil,
             menuBarHeight: NSStatusBar.system.thickness
         )
         let frames = (
@@ -671,7 +680,13 @@ final class OverlayLyricsWindow: NSObject {
         let font = NSFont.menuBarFont(ofSize: fontSize)
         let textWidth = ceil((statusText as NSString).size(withAttributes: [.font: font]).width)
 
-        switch position {
+        if autoPosition {
+            automaticPosition = OverlayLaneGeometry.preferredPosition(
+                leftWidth: frames.left.width, rightWidth: frames.right.width, previous: automaticPosition
+            )
+        }
+        let effectivePosition = autoPosition ? automaticPosition : position
+        switch effectivePosition {
         case .left:
             rightLane.hide()
             return showSingle(text: statusText, progress: progress, font: font, colors: colors, opacity: opacity, textWidth: textWidth, frame: frames.left, lane: leftLane, scroll: scroll, animationSpeed: animationSpeed)

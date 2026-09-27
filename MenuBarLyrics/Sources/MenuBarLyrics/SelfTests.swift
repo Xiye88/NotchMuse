@@ -25,6 +25,7 @@ enum SelfTests {
 
         testSmoothScroll()
         testOverlayGeometry()
+        testMenuBarSpaceModel()
         testNotchGeometry()
         testNumericInput()
         testDisplaySelection()
@@ -699,6 +700,40 @@ enum SelfTests {
         let second = LyricClock.moment(at: 2.1, in: repeated)
         check(first?.text == second?.text, "keeps repeated lyric text unchanged")
         check(first?.identity != second?.identity, "distinguishes repeated lyric lines by identity")
+    }
+
+    @MainActor private static func testMenuBarSpaceModel() {
+        let defaults = UserDefaults(suiteName: "notchmuse.menu-space-self-test.\(UUID().uuidString)")!
+        check(!MenuBarSpaceController.isEnabled(in: defaults), "keeps menu bar space off by default")
+        defaults.set(true, forKey: MenuBarSpaceController.enabledKey)
+        check(MenuBarSpaceController.isEnabled(in: defaults), "persists the opt-in state")
+        check(!MenuBarSpaceController.canStart(enabled: false, trusted: true, hasConflict: false), "does not manage the menu bar while disabled")
+        check(!MenuBarSpaceController.canStart(enabled: true, trusted: false, hasConflict: false), "waits for Accessibility permission")
+        check(!MenuBarSpaceController.canStart(enabled: true, trusted: true, hasConflict: true), "avoids a competing menu bar manager")
+        check(MenuBarSpaceController.canStart(enabled: true, trusted: true, hasConflict: false), "starts only after opt-in and permission")
+        let hidden = MenuBarSpaceController.savedZones([:], id: "app:single", zone: .hidden)
+        check(MenuBarSpaceController.resolvedZone(id: "app:single", protected: false, saved: hidden) == .hidden, "persists the hidden zone")
+        let always = MenuBarSpaceController.savedZones(hidden, id: "app:single", zone: .alwaysHidden)
+        check(MenuBarSpaceController.resolvedZone(id: "app:single", protected: false, saved: always) == .alwaysHidden, "persists the always-hidden zone")
+        check(MenuBarSpaceController.resolvedZone(id: "app:single", protected: true, saved: always) == .visible, "protects system-managed items")
+        check(MenuBarSpaceController.savedZones(always, id: "app:single", zone: .visible).isEmpty, "resetting an item removes its hidden classification")
+        check(MenuBarSpaceController.resolvedZone(id: "new:single", protected: false, saved: always) == .visible, "new items default to visible")
+        check(MenuBarSpaceIcon.allCases.count == 6 && MenuBarSpaceIcon(rawValue: "invalid") == nil, "keeps icon choices recoverable")
+        let space = MenuBarSpaceController()
+        let acceptedInvalidImage = space.setCustomIcon(Data([0, 1, 2]))
+        check(!acceptedInvalidImage, "rejects invalid custom images without changing the icon")
+        let bounds = OverlayLaneGeometry.frames(
+            screenFrame: NSRect(x: 0, y: 0, width: 1470, height: 956),
+            auxiliaryTopLeftArea: NSRect(x: 0, y: 924, width: 646, height: 32),
+            auxiliaryTopRightArea: NSRect(x: 825, y: 924, width: 645, height: 32),
+            statusItemX: 1050,
+            foregroundMenuMaxX: nil,
+            menuBarHeight: 32
+        )
+        check(bounds.right.maxX <= 1042, "clips lyrics before a newly visible menu bar boundary")
+        check(WidthGeometry.statusBarWidth(mode: .wide, availableWidth: bounds.right.width, customWidth: 900) <= bounds.right.width, "respects width preference within safe menu bar space")
+        check(OverlayLaneGeometry.preferredPosition(leftWidth: 300, rightWidth: 150, previous: .right) == .left, "uses the wider lyric lane")
+        check(OverlayLaneGeometry.preferredPosition(leftWidth: 220, rightWidth: 180, previous: .left) == .left, "avoids position jitter around similar lane widths")
     }
 
     private static func testOverlayGeometry() {

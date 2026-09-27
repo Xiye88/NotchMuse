@@ -188,10 +188,14 @@ final class SettingsWindowController: NSWindowController {
     private let contentStack = NSStackView()
     private var cards: [NSView] = []
     private let preview = SettingsPreviewView()
+    private var previewCard: NSView?
     private let previewModeControl = NSSegmentedControl(labels: [L10n.text("Status Bar Preview"), L10n.text("Notch Preview")], trackingMode: .selectOne, target: nil, action: nil)
     private let displayPage = NSStackView()
     private let appearancePage = NSStackView()
     private let generalPage = NSStackView()
+    private let menuBarSpacePage = NSStackView()
+    private let menuBarSpace: MenuBarSpaceController
+    private var menuBarSpaceView: MenuBarSpaceSettingsView?
     private var selectedPage: SettingsPage = .display
     private var sidebarButtons: [SettingsPage: NSButton] = [:]
     private var positionRow: NSGridRow?
@@ -202,7 +206,8 @@ final class SettingsWindowController: NSWindowController {
     private var notchHideOnHoverRow: NSGridRow?
     private let onSettingsChange: () -> Void
 
-    init(onSettingsChange: @escaping () -> Void) {
+    init(menuBarSpace: MenuBarSpaceController, onSettingsChange: @escaping () -> Void) {
+        self.menuBarSpace = menuBarSpace
         self.onSettingsChange = onSettingsChange
 
         let window = NSWindow(
@@ -227,6 +232,7 @@ final class SettingsWindowController: NSWindowController {
 
     func show() {
         sync()
+        menuBarSpaceView?.reload()
         showWindow(nil)
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
@@ -334,6 +340,11 @@ final class SettingsWindowController: NSWindowController {
         ])
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
 
+        configure(page: menuBarSpacePage)
+        let spaceView = MenuBarSpaceSettingsView(space: menuBarSpace, onChange: onSettingsChange)
+        menuBarSpaceView = spaceView
+        menuBarSpacePage.addArrangedSubview(card(content: spaceView))
+
         displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: "Choose how and where lyrics appear.", grid: displayGrid, trailing: resetButton(for: .display))))
 
         guard let contentView = window?.contentView else { return }
@@ -373,6 +384,7 @@ final class SettingsWindowController: NSWindowController {
         previewContents.orientation = .vertical
         previewContents.spacing = 16
         let previewCard = card(content: previewContents)
+        self.previewCard = previewCard
         preview.widthAnchor.constraint(equalTo: previewCard.widthAnchor, constant: -40).isActive = true
         preview.heightAnchor.constraint(equalToConstant: 196).isActive = true
         previewHeader.widthAnchor.constraint(equalTo: preview.widthAnchor).isActive = true
@@ -385,8 +397,10 @@ final class SettingsWindowController: NSWindowController {
         contentStack.addArrangedSubview(displayPage)
         contentStack.addArrangedSubview(appearancePage)
         contentStack.addArrangedSubview(generalPage)
+        contentStack.addArrangedSubview(menuBarSpacePage)
         appearancePage.isHidden = true
         generalPage.isHidden = true
+        menuBarSpacePage.isHidden = true
         let scrollView = NSScrollView()
         scrollView.drawsBackground = false
         scrollView.hasVerticalScroller = true
@@ -922,6 +936,9 @@ final class SettingsWindowController: NSWindowController {
         displayPage.isHidden = page != .display
         appearancePage.isHidden = page != .appearance
         generalPage.isHidden = page != .general
+        menuBarSpacePage.isHidden = page != .menuBarSpace
+        previewCard?.isHidden = page == .menuBarSpace
+        if page == .menuBarSpace { menuBarSpace.start(); menuBarSpace.refresh(); menuBarSpaceView?.reload() }
         DispatchQueue.main.async { self.updateSidebarSelection() }
     }
 
@@ -979,6 +996,8 @@ final class SettingsWindowController: NSWindowController {
             keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchHideOnHoverKey]
         case .general:
             keys = [AppPreferences.playerSourceKey, AppPreferences.playerStopBehaviorKey, AppPreferences.languageKey]
+        case .menuBarSpace:
+            return
         }
         keys.forEach(UserDefaults.standard.removeObject(forKey:))
         sync()
@@ -1071,14 +1090,15 @@ private final class FlippedSettingsDocumentView: NSView {
 }
 
 private enum SettingsPage: String, CaseIterable {
-    case display, appearance, general
+    case display, appearance, general, menuBarSpace
 
-    var title: String { rawValue.capitalized }
+    var title: String { self == .menuBarSpace ? "Menu Bar Space" : rawValue.capitalized }
     var symbol: String {
         switch self {
         case .display: return "display"
         case .appearance: return "paintpalette"
         case .general: return "gearshape"
+        case .menuBarSpace: return "menubar.rectangle"
         }
     }
     var help: String {
@@ -1086,6 +1106,7 @@ private enum SettingsPage: String, CaseIterable {
         case .display: return "Lyrics display mode, position, and screen."
         case .appearance: return "Lyrics color, typography, and motion."
         case .general: return "Player selection and system behavior."
+        case .menuBarSpace: return "Make room for status bar lyrics."
         }
     }
 }

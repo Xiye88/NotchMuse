@@ -1,5 +1,13 @@
 # NotchMuse Task Board
 
+## Active v0.9 — Menu Bar Space (2026-09-27)
+
+- Owner: this isolated PM/implementation task; branch `codex/menu-bar-space` from `origin/main` `ecb631e4f02cd4329a6f8595be8f561ad5d353ea`.
+- Status: IMPLEMENTED LOCALLY / QA OPEN. macOS 26 item discovery, Settings UI, Debug/self-tests and Release package pass; actual item movement, reveal, reset and cross-version behavior remain unverified. Mac lock paused GUI QA; Thaw was restored.
+- Exit: default-off permission flow; three functional zones with drag, persistence, reset and control icon; safe automatic lyric width; bilingual UI; focused tests and separate candidate. Report any OS compatibility limit honestly.
+- Boundaries: no changes to players, Matcher, providers, other Settings pages, main, or public release.
+
+
 ## Historical Candidate — DMG Installer Polish (superseded by Beta 2 below)
 
 - Status: **LOCAL CANDIDATE READY**, Finder screenshot and PM Gatekeeper check

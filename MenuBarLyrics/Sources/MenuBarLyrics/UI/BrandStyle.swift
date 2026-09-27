@@ -7,7 +7,7 @@ enum BrandStyle {
         NSColor(calibratedRed: 150 / 255, green: 58 / 255, blue: 8 / 255, alpha: 1)
     ]
 
-    static func gradientColors(for preset: LyricsColorPreset, customColor: NSColor = gradientColors[0]) -> [NSColor] {
+    static func gradientColors(for preset: LyricsColorPreset, customColor: NSColor = gradientColors[0], customEndColor: NSColor = .systemTeal) -> [NSColor] {
         switch preset {
         case .orange:
             return gradientColors
@@ -31,9 +31,34 @@ enum BrandStyle {
                 NSColor(calibratedRed: 52 / 255, green: 199 / 255, blue: 89 / 255, alpha: 1),
                 NSColor(calibratedRed: 23 / 255, green: 138 / 255, blue: 67 / 255, alpha: 1)
             ]
+        case .mintGradient:
+            return [NSColor(calibratedRed: 0.89, green: 1, blue: 0.98, alpha: 1),
+                    NSColor(calibratedRed: 0.56, green: 0.98, blue: 0.96, alpha: 1),
+                    NSColor(calibratedRed: 0.23, green: 0.77, blue: 0.88, alpha: 1)]
+        case .sunsetGradient:
+            return [NSColor(calibratedRed: 1, green: 0.88, blue: 0.68, alpha: 1),
+                    NSColor(calibratedRed: 1, green: 0.60, blue: 0.59, alpha: 1),
+                    NSColor(calibratedRed: 0.83, green: 0.55, blue: 0.95, alpha: 1)]
         case .custom:
             return [customColor, customColor, customColor]
+        case .customGradient:
+            return [customColor, customEndColor]
         }
+    }
+
+    static func gradientLyric(_ text: String, colors: [NSColor], attributes: [NSAttributedString.Key: Any]) -> NSAttributedString {
+        let result = NSMutableAttributedString(string: text, attributes: attributes)
+        let length = (text as NSString).length
+        guard colors.count > 1, length > 0 else { return result }
+        (text as NSString).enumerateSubstrings(in: NSRange(location: 0, length: length), options: .byComposedCharacterSequences) { _, range, _, _ in
+            let position = CGFloat(range.location) / CGFloat(max(1, length - 1)) * CGFloat(colors.count - 1)
+            let index = min(colors.count - 2, Int(position))
+            let fraction = position - CGFloat(index)
+            let color = fraction == 0 ? colors[index] : fraction == 1 ? colors[index + 1]
+                : (colors[index].blended(withFraction: fraction, of: colors[index + 1]) ?? colors[index])
+            result.addAttribute(.foregroundColor, value: color, range: range)
+        }
+        return result
     }
 
     static func noteImage() -> NSImage {

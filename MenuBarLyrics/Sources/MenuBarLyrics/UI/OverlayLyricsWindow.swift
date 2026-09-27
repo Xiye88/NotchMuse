@@ -27,7 +27,14 @@ enum LyricsColorPreset: String, CaseIterable {
     case blue = "Blue"
     case purple = "Purple"
     case green = "Green"
+    case mintGradient = "Mint Glow"
+    case sunsetGradient = "Sunset Glow"
     case custom = "Custom"
+    case customGradient = "Custom Gradient"
+
+    var isGradient: Bool {
+        self == .mintGradient || self == .sunsetGradient || self == .customGradient
+    }
 }
 
 enum DisplayTarget: String, CaseIterable {
@@ -253,17 +260,26 @@ final class OverlayLyricsWindow: NSObject {
         var gradientColors = BrandStyle.gradientColors {
             didSet { needsDisplay = true }
         }
+        var usesGradient = false { didSet { needsDisplay = true } }
         override func draw(_ dirtyRect: NSRect) {
-            let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: baseColor]
-            (text as NSString).draw(in: bounds, withAttributes: attributes)
+            if usesGradient {
+                BrandStyle.gradientLyric(text, colors: gradientColors.map { $0.withAlphaComponent(0.58) }, attributes: [.font: font])
+                    .draw(in: bounds)
+            } else {
+                (text as NSString).draw(in: bounds, withAttributes: [.font: font, .foregroundColor: baseColor])
+            }
 
             guard progress > 0 else { return }
             NSGraphicsContext.saveGraphicsState()
             NSBezierPath(rect: NSRect(x: 0, y: 0, width: bounds.width * min(progress, 1), height: bounds.height)).addClip()
-            (text as NSString).draw(in: bounds, withAttributes: [
-                .font: font,
-                .foregroundColor: gradientColors[min(1, gradientColors.count - 1)]
-            ])
+            if usesGradient {
+                BrandStyle.gradientLyric(text, colors: gradientColors, attributes: [.font: font]).draw(in: bounds)
+            } else {
+                (text as NSString).draw(in: bounds, withAttributes: [
+                    .font: font,
+                    .foregroundColor: gradientColors[min(1, gradientColors.count - 1)]
+                ])
+            }
             NSGraphicsContext.restoreGraphicsState()
         }
     }
@@ -302,6 +318,7 @@ final class OverlayLyricsWindow: NSObject {
             progress: CGFloat,
             font: NSFont,
             colors: [NSColor],
+            usesGradient: Bool,
             opacity: CGFloat,
             textX: CGFloat,
             textWidth: CGFloat,
@@ -330,6 +347,9 @@ final class OverlayLyricsWindow: NSObject {
             }
             if label.gradientColors != colors {
                 label.gradientColors = colors
+            }
+            if label.usesGradient != usesGradient {
+                label.usesGradient = usesGradient
             }
             if window.alphaValue != opacity {
                 window.alphaValue = opacity
@@ -381,6 +401,7 @@ final class OverlayLyricsWindow: NSObject {
         var font = NSFont.systemFont(ofSize: 13, weight: .medium)
         var style = NotchStyle.lyricOnly
         var colors = BrandStyle.gradientColors
+        var usesGradient = false
         var lyricViewport = NSRect.zero
         var lyricTextRect = NSRect.zero
         var lyricWraps = false
@@ -432,12 +453,16 @@ final class OverlayLyricsWindow: NSObject {
         private func drawLyric() {
             NSGraphicsContext.saveGraphicsState()
             NSBezierPath(rect: lyricViewport).addClip()
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: (drawsBackground ? NotchBackgroundContrast.foreground(on: backgroundColor) : NSColor.white).withAlphaComponent(0.62),
-                .shadow: textShadow()
-            ]
-            drawLyricText(attributes: attributes)
+            let activeColors = drawsBackground ? NotchBackgroundContrast.adjusted(colors, on: backgroundColor) : colors
+            if usesGradient {
+                drawGradientLyric(colors: activeColors.map { $0.withAlphaComponent(0.58) })
+            } else {
+                drawLyricText(attributes: [
+                    .font: font,
+                    .foregroundColor: (drawsBackground ? NotchBackgroundContrast.foreground(on: backgroundColor) : NSColor.white).withAlphaComponent(0.62),
+                    .shadow: textShadow()
+                ])
+            }
 
             if progress > 0 {
                 NSBezierPath(rect: NSRect(
@@ -446,15 +471,26 @@ final class OverlayLyricsWindow: NSObject {
                     width: lyricTextRect.width * min(progress, 1),
                     height: lyricTextRect.height
                 )).addClip()
-                drawLyricText(attributes: [
-                    .font: font,
-                    .foregroundColor: drawsBackground
-                        ? NotchBackgroundContrast.adjusted(colors, on: backgroundColor)[min(1, colors.count - 1)]
-                        : colors[min(1, colors.count - 1)],
-                    .shadow: textShadow()
-                ])
+                if usesGradient {
+                    drawGradientLyric(colors: activeColors)
+                } else {
+                    drawLyricText(attributes: [
+                        .font: font,
+                        .foregroundColor: activeColors[min(1, activeColors.count - 1)],
+                        .shadow: textShadow()
+                    ])
+                }
             }
             NSGraphicsContext.restoreGraphicsState()
+        }
+
+        private func drawGradientLyric(colors: [NSColor]) {
+            let text = BrandStyle.gradientLyric(lyric, colors: colors, attributes: [.font: font, .shadow: textShadow()])
+            if lyricWraps {
+                text.draw(with: lyricTextRect, options: [.usesLineFragmentOrigin, .usesFontLeading, .truncatesLastVisibleLine])
+            } else {
+                text.draw(in: lyricTextRect)
+            }
         }
 
         private func drawLyricText(attributes: [NSAttributedString.Key: Any]) {
@@ -526,9 +562,10 @@ final class OverlayLyricsWindow: NSObject {
             style requestedStyle: NotchStyle,
             fontSize: CGFloat,
             colors: [NSColor],
-            opacity: CGFloat,
+            usesGradient: Bool,
             backgroundEnabled: Bool,
             backgroundColor: NSColor,
+            backgroundOpacity: CGFloat,
             backgroundPadding: CGFloat,
             hideOnHover: Bool,
             scroll: ScrollState,
@@ -570,9 +607,10 @@ final class OverlayLyricsWindow: NSObject {
             materialView.isHidden = !backgroundEnabled
             tintView.frame = backgroundRect
             tintView.layer?.cornerRadius = materialView.layer?.cornerRadius ?? 0
-            tintView.layer?.backgroundColor = backgroundColor.withAlphaComponent(style == .lyricOnly ? 0.76 : 0.82).cgColor
+            materialView.alphaValue = backgroundOpacity * 0.35
+            tintView.layer?.backgroundColor = backgroundColor.withAlphaComponent(backgroundOpacity).cgColor
             tintView.isHidden = !backgroundEnabled
-            window.hasShadow = backgroundEnabled
+            window.hasShadow = backgroundEnabled && backgroundOpacity > 0
             view.frame = NSRect(origin: .zero, size: frame.size)
             view.lyric = displayLyric
             view.song = song
@@ -581,18 +619,19 @@ final class OverlayLyricsWindow: NSObject {
             view.font = font
             view.style = style
             view.colors = colors
+            view.usesGradient = usesGradient
             view.backgroundColor = backgroundColor
             view.lyricViewport = viewport
             view.lyricTextRect = NSRect(x: textX, y: lyricY, width: textWidth, height: viewport.height)
             view.lyricWraps = lyricWraps
-            view.drawsBackground = backgroundEnabled
+            view.drawsBackground = backgroundEnabled && backgroundOpacity > 0
             view.backgroundRect = backgroundRect
             view.needsDisplay = true
             window.ignoresMouseEvents = OverlayMousePolicy.ignoresMouseEvents
             hoverFrame = backgroundEnabled
                 ? backgroundRect.offsetBy(dx: frame.minX, dy: frame.minY)
                 : frame
-            configuredOpacity = opacity
+            configuredOpacity = 1
             hidesOnHover = hideOnHover
             updateHoverTimer()
             applyHoverVisibility()
@@ -658,9 +697,11 @@ final class OverlayLyricsWindow: NSObject {
         animationSpeed: CGFloat,
         colorPreset: LyricsColorPreset,
         customLyricsColor: NSColor,
+        customLyricsEndColor: NSColor,
         opacity: CGFloat,
         notchBackgroundEnabled: Bool,
         notchBackgroundColor: NSColor,
+        notchBackgroundOpacity: CGFloat,
         notchBackgroundPadding: CGFloat,
         notchHideOnHover: Bool,
         displayTarget: DisplayTarget,
@@ -669,7 +710,7 @@ final class OverlayLyricsWindow: NSObject {
         statusBarOffset: CGFloat
     ) -> Bool {
         guard let screen = selectedScreen(target: displayTarget, statusItem: statusItem) else { return false }
-        let colors = BrandStyle.gradientColors(for: colorPreset, customColor: customLyricsColor)
+        let colors = BrandStyle.gradientColors(for: colorPreset, customColor: customLyricsColor, customEndColor: customLyricsEndColor)
 
         if mode == .notch {
             leftLane.hide()
@@ -699,9 +740,10 @@ final class OverlayLyricsWindow: NSObject {
                 style: effectiveStyle,
                 fontSize: fontSize,
                 colors: colors,
-                opacity: opacity,
+                usesGradient: colorPreset.isGradient,
                 backgroundEnabled: notchBackgroundEnabled,
                 backgroundColor: notchBackgroundColor,
+                backgroundOpacity: notchBackgroundOpacity,
                 backgroundPadding: notchBackgroundPadding,
                 hideOnHover: notchHideOnHover,
                 scroll: scroll,
@@ -740,11 +782,11 @@ final class OverlayLyricsWindow: NSObject {
         case .left:
             rightLane.hide()
             let frame = OverlayLaneGeometry.offsetFrame(frames.left, within: availableFrames.left, by: statusBarOffset)
-            return showSingle(text: statusText, progress: progress, font: font, colors: colors, opacity: opacity, textWidth: textWidth, frame: frame, lane: leftLane, scroll: scroll, animationSpeed: animationSpeed)
+            return showSingle(text: statusText, progress: progress, font: font, colors: colors, usesGradient: colorPreset.isGradient, opacity: opacity, textWidth: textWidth, frame: frame, lane: leftLane, scroll: scroll, animationSpeed: animationSpeed)
         case .right:
             leftLane.hide()
             let frame = OverlayLaneGeometry.offsetFrame(frames.right, within: availableFrames.right, by: statusBarOffset)
-            return showSingle(text: statusText, progress: progress, font: font, colors: colors, opacity: opacity, textWidth: textWidth, frame: frame, lane: rightLane, scroll: scroll, animationSpeed: animationSpeed)
+            return showSingle(text: statusText, progress: progress, font: font, colors: colors, usesGradient: colorPreset.isGradient, opacity: opacity, textWidth: textWidth, frame: frame, lane: rightLane, scroll: scroll, animationSpeed: animationSpeed)
         }
     }
 
@@ -779,6 +821,7 @@ final class OverlayLyricsWindow: NSObject {
         progress: CGFloat,
         font: NSFont,
         colors: [NSColor],
+        usesGradient: Bool,
         opacity: CGFloat,
         textWidth: CGFloat,
         frame: NSRect,
@@ -790,7 +833,7 @@ final class OverlayLyricsWindow: NSObject {
         let offset = overflows ? scroll.offset(contentWidth: textWidth, viewportWidth: frame.width, speedMultiplier: animationSpeed) : 0
         let needsScrolling = overflows && !scroll.isFinished(contentWidth: textWidth, viewportWidth: frame.width, speedMultiplier: animationSpeed)
         let x = overflows ? -offset : (frame.width - textWidth) / 2
-        lane.show(frame: frame, text: text, progress: progress, font: font, colors: colors, opacity: opacity, textX: x, textWidth: textWidth)
+        lane.show(frame: frame, text: text, progress: progress, font: font, colors: colors, usesGradient: usesGradient, opacity: opacity, textX: x, textWidth: textWidth)
         return needsScrolling
     }
 

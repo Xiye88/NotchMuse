@@ -93,6 +93,12 @@
 "Font Size" = "Font Size";
 "Animation Speed" = "Animation Speed";
 "Opacity" = "Opacity";
+"Lyrics Opacity" = "Lyrics Opacity";
+"Background Opacity" = "Background Opacity";
+"Mint Glow" = "Mint Glow";
+"Sunset Glow" = "Sunset Glow";
+"Custom Gradient" = "Custom Gradient";
+"Custom Gradient End" = "Custom Gradient End";
 "Background" = "Background";
 "Background Color" = "Background Color";
 "Background Side Padding" = "Background Side Padding";

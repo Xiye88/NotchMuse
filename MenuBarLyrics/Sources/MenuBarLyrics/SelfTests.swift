@@ -808,7 +808,12 @@ enum SelfTests {
         check(WidthGeometry.previewScale(screenWidth: 500) == 500.0 / 1470, "scales preview offsets with the preview screen")
         check(NotchBackgroundContrast.foreground(on: .white) == .black, "uses dark notch text on a white background")
         check(NotchBackgroundContrast.adjusted([.white], on: .white) == [.black], "keeps white lyric colors readable on white backgrounds")
-        check(LyricsColorPreset.allCases.count == 6, "keeps five lyric color presets plus Custom")
+        check(LyricsColorPreset.allCases.count == 9, "includes solid, gradient, and custom lyric colors")
+        let gradient = BrandStyle.gradientLyric("ab", colors: [.white, .black], attributes: [:])
+        check(gradient.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor == .white,
+              "starts the lyric gradient at its first color")
+        check(gradient.attribute(.foregroundColor, at: 1, effectiveRange: nil) as? NSColor == .black,
+              "ends the lyric gradient at its second color")
     }
 
     private static func testNumericInput() {
@@ -825,10 +830,15 @@ enum SelfTests {
         AppPreferences.setColor(color, forKey: AppPreferences.customLyricsColorKey, in: defaults)
         check(AppPreferences.color(forKey: AppPreferences.customLyricsColorKey, in: defaults) == color, "persists and restores a custom lyric color")
         check(AppPreferences.notchBackgroundMode(in: defaults) == .none, "keeps notch background disabled by default")
+        check(AppPreferences.notchBackgroundOpacity(in: defaults) == 0.82, "defaults the notch backdrop opacity independently")
+        defaults.set(0.25, forKey: AppPreferences.notchBackgroundOpacityKey)
+        check(AppPreferences.notchBackgroundOpacity(in: defaults) == 0.25, "persists the notch backdrop opacity")
         defaults.set(true, forKey: AppPreferences.notchBackgroundEnabledKey)
         check(AppPreferences.notchBackgroundMode(in: defaults) == .black, "keeps legacy enabled backgrounds black by default")
         AppPreferences.setColor(NotchBackgroundPreset.orange.color!, forKey: AppPreferences.notchBackgroundColorKey, in: defaults)
         check(AppPreferences.notchBackgroundPreset(in: defaults) == .orange, "restores a selected notch background preset")
+        check(NotchBackgroundPreset.matching(NSColor(calibratedWhite: 0.36, alpha: 1)) == .softGray,
+              "recognizes the previous soft gray background preset")
         let customBackground = NSColor(calibratedRed: 0.23, green: 0.41, blue: 0.63, alpha: 1)
         AppPreferences.setColor(customBackground, forKey: AppPreferences.notchBackgroundColorKey, in: defaults)
         check(AppPreferences.notchBackgroundPreset(in: defaults) == .custom, "recognizes a custom notch background color")

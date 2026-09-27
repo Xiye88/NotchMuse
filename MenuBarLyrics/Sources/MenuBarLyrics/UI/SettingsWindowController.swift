@@ -7,6 +7,7 @@ enum AppPreferences {
     static let notchStyleKey = "NotchStyle"
     static let colorPresetKey = "LyricsColorPreset"
     static let customLyricsColorKey = "CustomLyricsColor"
+    static let customLyricsEndColorKey = "CustomLyricsEndColor"
     static let fontSizeKey = "LyricsFontSize"
     static let animationSpeedKey = "LyricsAnimationSpeed"
     static let opacityKey = "LyricsOpacity"
@@ -20,6 +21,7 @@ enum AppPreferences {
     static let playerStopBehaviorKey = "PlayerStopBehavior"
     static let notchBackgroundEnabledKey = "NotchBackgroundEnabled"
     static let notchBackgroundColorKey = "NotchBackgroundColor"
+    static let notchBackgroundOpacityKey = "NotchBackgroundOpacity"
     static let notchBackgroundPaddingKey = "NotchBackgroundPadding"
     static let notchHideOnHoverKey = "NotchHideOnHover"
 
@@ -80,6 +82,10 @@ enum AppPreferences {
         color(forKey: customLyricsColorKey) ?? BrandStyle.gradientColors[0]
     }
 
+    static var customLyricsEndColor: NSColor {
+        color(forKey: customLyricsEndColorKey) ?? .systemTeal
+    }
+
     static var fontSize: CGFloat {
         let stored = UserDefaults.standard.double(forKey: fontSizeKey)
         return stored == 0 ? NSFont.menuBarFont(ofSize: 0).pointSize : min(60, max(10, stored))
@@ -132,7 +138,17 @@ enum AppPreferences {
     }
 
     static var notchBackgroundColor: NSColor {
-        color(forKey: notchBackgroundColorKey) ?? NotchBackgroundPreset.softGray.color!
+        guard let stored = color(forKey: notchBackgroundColorKey) else { return NotchBackgroundPreset.softGray.color! }
+        let oldDefault = NSColor(calibratedWhite: 0.36, alpha: 1)
+        return stored.usingColorSpace(.deviceRGB) == oldDefault.usingColorSpace(.deviceRGB)
+            ? NotchBackgroundPreset.softGray.color! : stored
+    }
+
+    static var notchBackgroundOpacity: CGFloat { notchBackgroundOpacity(in: .standard) }
+
+    static func notchBackgroundOpacity(in defaults: UserDefaults) -> CGFloat {
+        let stored = defaults.object(forKey: notchBackgroundOpacityKey) as? Double
+        return min(1, max(0, stored.map { CGFloat($0) } ?? 0.82))
     }
 
     static var notchBackgroundPadding: CGFloat {
@@ -190,14 +206,17 @@ enum NotchBackgroundPreset: String, CaseIterable {
         case .orange: NSColor(calibratedRed: 0.94, green: 0.58, blue: 0.38, alpha: 1)
         case .black: NSColor(calibratedWhite: 0.22, alpha: 1)
         case .white: NSColor(calibratedWhite: 0.94, alpha: 1)
-        case .softGray: NSColor(calibratedWhite: 0.36, alpha: 1)
+        case .softGray: NSColor(calibratedWhite: 0.27, alpha: 1)
         case .blue: NSColor(calibratedRed: 0.38, green: 0.56, blue: 0.72, alpha: 1)
         case .custom: nil
         }
     }
 
     static func matching(_ color: NSColor) -> NotchBackgroundPreset {
-        allCases.first { preset in
+        if color.usingColorSpace(.deviceRGB) == NSColor(calibratedWhite: 0.36, alpha: 1).usingColorSpace(.deviceRGB) {
+            return .softGray
+        }
+        return allCases.first { preset in
             guard let presetColor = preset.color,
                   let lhs = presetColor.usingColorSpace(.deviceRGB),
                   let rhs = color.usingColorSpace(.deviceRGB) else { return false }
@@ -222,9 +241,11 @@ final class SettingsWindowController: NSWindowController {
     private let statusBarOffsetSlider = NSSlider(value: 0, minValue: -200, maxValue: 200, target: nil, action: nil)
     private var colorButtons: [NSButton] = []
     private let lyricsColorWell = NSColorWell()
+    private let lyricsColorEndWell = NSColorWell()
     private let fontSizeSlider = NSSlider(value: 13, minValue: 10, maxValue: 60, target: nil, action: nil)
     private let animationSpeedSlider = NSSlider(value: 1, minValue: 0.1, maxValue: 3, target: nil, action: nil)
     private let opacitySlider = NSSlider(value: 1, minValue: 0.1, maxValue: 1, target: nil, action: nil)
+    private let opacityLabel = NSTextField(labelWithString: "")
     private let fontSizeValue = NSTextField(string: "")
     private let animationSpeedValue = NSTextField(string: "")
     private let opacityValue = NSTextField(string: "")
@@ -349,6 +370,9 @@ final class SettingsWindowController: NSWindowController {
         lyricsColorWell.target = self
         lyricsColorWell.action = #selector(lyricsColorChanged)
         lyricsColorWell.isContinuous = true
+        lyricsColorEndWell.target = self
+        lyricsColorEndWell.action = #selector(lyricsColorEndChanged)
+        lyricsColorEndWell.isContinuous = true
 
         fontSizeSlider.target = self
         fontSizeSlider.action = #selector(fontSizeChanged)
@@ -418,7 +442,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Lyrics Color")), colorPalette()],
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue, unit: "pt")],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue, unit: "×")],
-            [label(L10n.text("Opacity")), valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
+            [opacityLabel, valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
             [label(L10n.text("Notch Background")), notchBackgroundSwitch],
             [label(L10n.text("Background Color")), backgroundColorControls()],
             [label(L10n.text("Background Side Padding")), valueRow(slider: notchBackgroundPaddingSlider, value: notchBackgroundPaddingValue, unit: "pt")],
@@ -643,21 +667,42 @@ final class SettingsWindowController: NSWindowController {
         let titles = ["Warm Orange", "Fresh Minimal", "Dreamy Soft", "Pure"]
         let colors: [NSColor] = [.systemOrange, .systemTeal, .systemPurple, .systemGreen]
         let tiles = zip(titles, colors).enumerated().map { index, entry in
-            let button = NSButton(title: L10n.text(entry.0), target: self, action: #selector(presetButtonChanged))
+            let tile = NSView()
+            tile.wantsLayer = true
+            tile.layer?.backgroundColor = entry.1.withAlphaComponent(0.09).cgColor
+            tile.layer?.borderColor = entry.1.withAlphaComponent(0.25).cgColor
+            tile.layer?.borderWidth = 1
+            tile.layer?.cornerRadius = 10
+            tile.widthAnchor.constraint(equalToConstant: 130).isActive = true
+            tile.heightAnchor.constraint(equalToConstant: 72).isActive = true
+            let icon = NSImageView(image: NSImage(systemSymbolName: "waveform", accessibilityDescription: nil) ?? NSImage())
+            icon.contentTintColor = entry.1
+            let title = NSTextField(labelWithString: L10n.text(entry.0))
+            title.font = .systemFont(ofSize: 12, weight: .medium)
+            title.textColor = entry.1
+            let content = NSStackView(views: [icon, title])
+            content.orientation = .vertical
+            content.alignment = .centerX
+            content.spacing = 7
+            tile.addSubview(content)
+            content.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                content.centerXAnchor.constraint(equalTo: tile.centerXAnchor),
+                content.centerYAnchor.constraint(equalTo: tile.centerYAnchor, constant: 4)
+            ])
+            let button = NSButton(title: "", target: self, action: #selector(presetButtonChanged))
             button.tag = index + 1
             button.isBordered = false
-            button.image = NSImage(systemSymbolName: "waveform", accessibilityDescription: L10n.text(entry.0))
-            button.imagePosition = .imageAbove
-            button.contentTintColor = entry.1
-            button.font = .systemFont(ofSize: 12, weight: .medium)
-            button.wantsLayer = true
-            button.layer?.backgroundColor = entry.1.withAlphaComponent(0.09).cgColor
-            button.layer?.borderColor = entry.1.withAlphaComponent(0.25).cgColor
-            button.layer?.borderWidth = 1
-            button.layer?.cornerRadius = 10
-            button.widthAnchor.constraint(equalToConstant: 130).isActive = true
-            button.heightAnchor.constraint(equalToConstant: 72).isActive = true
-            return button
+            button.setAccessibilityLabel(L10n.text(entry.0))
+            tile.addSubview(button)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                button.leadingAnchor.constraint(equalTo: tile.leadingAnchor),
+                button.trailingAnchor.constraint(equalTo: tile.trailingAnchor),
+                button.topAnchor.constraint(equalTo: tile.topAnchor),
+                button.bottomAnchor.constraint(equalTo: tile.bottomAnchor)
+            ])
+            return tile
         }
         let row = NSStackView(views: tiles)
         row.orientation = .horizontal
@@ -734,12 +779,15 @@ final class SettingsWindowController: NSWindowController {
          ("Cyan", .systemTeal, nil),
          ("Green", .systemGreen, .green),
          ("Yellow", .systemYellow, nil),
-         ("White", .white, .white)]
+         ("White", .white, .white),
+         ("Mint Glow", BrandStyle.gradientColors(for: .mintGradient)[0], .mintGradient),
+         ("Sunset Glow", BrandStyle.gradientColors(for: .sunsetGradient)[0], .sunsetGradient)]
     }
 
     private func colorPalette() -> NSView {
         let buttons = paletteColors.enumerated().map { index, entry in
-            let button = NSButton(image: swatch(entry.1), target: self, action: #selector(colorChanged(_:)))
+            let colors = entry.2.map { BrandStyle.gradientColors(for: $0) } ?? [entry.1]
+            let button = NSButton(image: swatch(colors), target: self, action: #selector(colorChanged(_:)))
             button.isBordered = false
             button.tag = index
             button.toolTip = L10n.text(entry.0)
@@ -753,11 +801,19 @@ final class SettingsWindowController: NSWindowController {
         colorButtons = buttons
         lyricsColorWell.toolTip = L10n.text("Custom")
         lyricsColorWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        let row = NSStackView(views: buttons + [lyricsColorWell])
-        row.orientation = .horizontal
-        row.spacing = 7
-        row.alignment = .centerY
-        return row
+        lyricsColorEndWell.toolTip = L10n.text("Custom Gradient End")
+        lyricsColorEndWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        let solids = NSStackView(views: Array(buttons.prefix(9)))
+        solids.orientation = .horizontal
+        solids.spacing = 7
+        let gradients = NSStackView(views: Array(buttons.dropFirst(9)) + [lyricsColorWell, lyricsColorEndWell])
+        gradients.orientation = .horizontal
+        gradients.spacing = 7
+        let palette = NSStackView(views: [solids, gradients])
+        palette.orientation = .vertical
+        palette.alignment = .leading
+        palette.spacing = 6
+        return palette
     }
 
     private func backgroundColorControls() -> NSView {
@@ -772,11 +828,17 @@ final class SettingsWindowController: NSWindowController {
         return row
     }
 
-    private func swatch(_ color: NSColor) -> NSImage {
+    private func swatch(_ colors: [NSColor]) -> NSImage {
         let image = NSImage(size: NSSize(width: 30, height: 30))
         image.lockFocus()
-        color.setFill()
-        NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24)).fill()
+        let circle = NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24))
+        circle.addClip()
+        if colors.count > 1 {
+            NSGradient(colors: colors)?.draw(in: NSRect(x: 3, y: 3, width: 24, height: 24), angle: 0)
+        } else {
+            (colors.first ?? .white).setFill()
+            circle.fill()
+        }
         NSColor.black.withAlphaComponent(0.12).setStroke()
         NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24)).stroke()
         image.unlockFocus()
@@ -794,6 +856,7 @@ final class SettingsWindowController: NSWindowController {
         customWidthSlider.doubleValue = Double(AppPreferences.customWidth)
         statusBarOffsetSlider.doubleValue = Double(AppPreferences.statusBarOffset)
         lyricsColorWell.color = AppPreferences.customLyricsColor
+        lyricsColorEndWell.color = AppPreferences.customLyricsEndColor
         updateCustomColorSwatch()
         fontSizeSlider.doubleValue = Double(AppPreferences.fontSize)
         animationSpeedSlider.doubleValue = Double(AppPreferences.animationSpeed)
@@ -825,6 +888,11 @@ final class SettingsWindowController: NSWindowController {
 
     private func updateControlAvailability() {
         let statusBarMode = AppPreferences.displayMode == .statusBar
+        opacityLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        opacityLabel.stringValue = L10n.text(statusBarMode ? "Lyrics Opacity" : "Background Opacity")
+        opacitySlider.minValue = statusBarMode ? 0.1 : 0
+        opacitySlider.doubleValue = Double(statusBarMode ? AppPreferences.opacity : AppPreferences.notchBackgroundOpacity)
+        opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
         positionRow?.isHidden = !statusBarMode
         statusBarOffsetRow?.isHidden = !statusBarMode
         notchStyleRow?.isHidden = statusBarMode
@@ -913,10 +981,19 @@ final class SettingsWindowController: NSWindowController {
     @objc private func lyricsColorChanged() {
         AppPreferences.setColor(lyricsColorWell.color, forKey: AppPreferences.customLyricsColorKey)
         updateCustomColorSwatch()
-        UserDefaults.standard.set(LyricsColorPreset.custom.rawValue, forKey: AppPreferences.colorPresetKey)
+        let preset: LyricsColorPreset = AppPreferences.colorPreset == .customGradient ? .customGradient : .custom
+        UserDefaults.standard.set(preset.rawValue, forKey: AppPreferences.colorPresetKey)
         onSettingsChange()
         updatePreview()
         updateCustomColorSwatch()
+    }
+
+    @objc private func lyricsColorEndChanged() {
+        AppPreferences.setColor(lyricsColorEndWell.color, forKey: AppPreferences.customLyricsEndColorKey)
+        UserDefaults.standard.set(LyricsColorPreset.customGradient.rawValue, forKey: AppPreferences.colorPresetKey)
+        updateCustomColorSwatch()
+        onSettingsChange()
+        updatePreview()
     }
 
     @objc private func fontSizeChanged() {
@@ -942,14 +1019,16 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func opacityChanged() {
-        UserDefaults.standard.set(opacitySlider.doubleValue, forKey: AppPreferences.opacityKey)
+        let key = AppPreferences.displayMode == .notch ? AppPreferences.notchBackgroundOpacityKey : AppPreferences.opacityKey
+        UserDefaults.standard.set(opacitySlider.doubleValue, forKey: key)
         opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
         onSettingsChange()
         updatePreview()
     }
 
     @objc private func opacityEntered() {
-        guard let percent = NumericInput.parse(opacityValue.stringValue, minimum: 10, maximum: 100) else {
+        let minimum: Double = AppPreferences.displayMode == .notch ? 0 : 10
+        guard let percent = NumericInput.parse(opacityValue.stringValue, minimum: minimum, maximum: 100) else {
             opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
             NSSound.beep()
             return
@@ -1137,7 +1216,7 @@ final class SettingsWindowController: NSWindowController {
         case .display:
             keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.statusBarOffsetKey, AppPreferences.notchStyleKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey]
         case .appearance:
-            keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchBackgroundPaddingKey, AppPreferences.notchHideOnHoverKey]
+            keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.customLyricsEndColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchBackgroundOpacityKey, AppPreferences.notchBackgroundPaddingKey, AppPreferences.notchHideOnHoverKey]
         case .general:
             keys = [AppPreferences.playerSourceKey, AppPreferences.playerStopBehaviorKey, AppPreferences.languageKey]
         }
@@ -1148,9 +1227,11 @@ final class SettingsWindowController: NSWindowController {
 
     private func updatePreview() {
         preview.apply(
-            colors: BrandStyle.gradientColors(for: AppPreferences.colorPreset, customColor: AppPreferences.customLyricsColor),
+            colors: BrandStyle.gradientColors(for: AppPreferences.colorPreset, customColor: AppPreferences.customLyricsColor, customEndColor: AppPreferences.customLyricsEndColor),
+            usesGradient: AppPreferences.colorPreset.isGradient,
             fontSize: AppPreferences.fontSize,
             opacity: AppPreferences.opacity,
+            backgroundOpacity: AppPreferences.notchBackgroundOpacity,
             width: AppPreferences.displayWidth,
             position: AppPreferences.position,
             notchStyle: AppPreferences.notchStyle,
@@ -1259,8 +1340,10 @@ private final class SettingsPreviewView: NSView {
     enum Mode { case statusBar, notch }
     var mode: Mode = .statusBar { didSet { needsDisplay = true } }
     private var lyricColors = BrandStyle.gradientColors
+    private var usesGradient = false
     private var lyricFontSize: CGFloat = 13
     private var lyricOpacity: CGFloat = 1
+    private var backgroundOpacity: CGFloat = 0.82
     private var lyricWidth: DisplayWidth = .auto
     private var customWidth: CGFloat = 500
     private var statusBarOffset: CGFloat = 0
@@ -1274,12 +1357,14 @@ private final class SettingsPreviewView: NSView {
 
     override var isFlipped: Bool { true }
 
-    func apply(colors: [NSColor], fontSize: CGFloat, opacity: CGFloat, width: DisplayWidth,
+    func apply(colors: [NSColor], usesGradient: Bool, fontSize: CGFloat, opacity: CGFloat, backgroundOpacity: CGFloat, width: DisplayWidth,
                position: LyricsPosition, notchStyle: NotchStyle, notchBackground: Bool,
                notchBackgroundColor: NSColor, notchBackgroundPadding: CGFloat, customWidth: CGFloat, statusBarOffset: CGFloat) {
         lyricColors = colors
+        self.usesGradient = usesGradient
         lyricFontSize = fontSize
         lyricOpacity = opacity
+        self.backgroundOpacity = backgroundOpacity
         lyricWidth = width
         self.customWidth = customWidth
         self.statusBarOffset = statusBarOffset
@@ -1344,7 +1429,7 @@ private final class SettingsPreviewView: NSView {
             let background = NotchGeometry.backgroundRect(in: overlay, contentWidth: max(previewTextWidth, previewMetadataWidth), padding: notchBackgroundPadding)
                 .offsetBy(dx: overlay.minX, dy: overlay.minY)
             if notchBackground {
-                notchBackgroundColor.withAlphaComponent(notchStyle == .lyricOnly ? 0.76 : 0.82).setFill()
+                notchBackgroundColor.withAlphaComponent(backgroundOpacity).setFill()
                 NSBezierPath(roundedRect: background, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
             }
             if notchStyle == .songLyric {
@@ -1405,12 +1490,26 @@ private final class SettingsPreviewView: NSView {
         let size = min(lyricFontSize, notch ? 17 : 15)
         let colors = backgroundColor.map { NotchBackgroundContrast.adjusted(lyricColors, on: $0) } ?? lyricColors
         let base = notch ? notchPreviewForeground.withAlphaComponent(0.7) : lyricColors[0].withAlphaComponent(0.72)
-        drawText(text, in: rect, color: base.withAlphaComponent(lyricOpacity), size: size,
-                 alignment: .center, shadow: notch)
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+        if usesGradient {
+            BrandStyle.gradientLyric(text, colors: colors.map { $0.withAlphaComponent(0.58 * (notch ? 1 : lyricOpacity)) }, attributes: [
+                .font: NSFont.systemFont(ofSize: size, weight: .medium), .paragraphStyle: paragraph
+            ]).draw(in: rect)
+        } else {
+            drawText(text, in: rect, color: base.withAlphaComponent(notch ? 0.7 : lyricOpacity), size: size,
+                     alignment: .center, shadow: notch)
+        }
         NSGraphicsContext.saveGraphicsState()
         NSBezierPath(rect: NSRect(x: rect.minX, y: rect.minY, width: rect.width * 0.58, height: rect.height)).addClip()
-        drawText(text, in: rect, color: colors[min(1, colors.count - 1)].withAlphaComponent(lyricOpacity),
-                 size: size, alignment: .center, shadow: notch)
+        if usesGradient {
+            BrandStyle.gradientLyric(text, colors: colors.map { $0.withAlphaComponent(notch ? 1 : lyricOpacity) }, attributes: [
+                .font: NSFont.systemFont(ofSize: size, weight: .medium), .paragraphStyle: paragraph
+            ]).draw(in: rect)
+        } else {
+            drawText(text, in: rect, color: colors[min(1, colors.count - 1)].withAlphaComponent(notch ? 1 : lyricOpacity),
+                     size: size, alignment: .center, shadow: notch)
+        }
         NSGraphicsContext.restoreGraphicsState()
     }
 

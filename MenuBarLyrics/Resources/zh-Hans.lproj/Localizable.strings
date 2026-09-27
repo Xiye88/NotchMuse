@@ -93,6 +93,12 @@
 "Font Size" = "字体大小";
 "Animation Speed" = "动画速度";
 "Opacity" = "不透明度";
+"Lyrics Opacity" = "歌词不透明度";
+"Background Opacity" = "背景不透明度";
+"Mint Glow" = "薄荷微光";
+"Sunset Glow" = "落日渐变";
+"Custom Gradient" = "自定义渐变";
+"Custom Gradient End" = "自定义渐变终点";
 "Background" = "背景";
 "Background Color" = "背景颜色";
 "Background Side Padding" = "背景左右留白";

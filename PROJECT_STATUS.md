@@ -6,6 +6,7 @@
 - Implemented locally: separate Preview identity/preferences, Settings-on-launch/Dock behavior, Sparkle 2.10.0 update plumbing with user-controlled checks, Settings polish, Support page, and release-preparation tooling. Native lyrics extension is deferred. No public website, GitHub Release, or appcast change.
 - Verified: Debug and Release builds, packaged self-test, full self-test, Settings interaction test, ad-hoc signature, DMG integrity, QR payloads. Pending: GUI/real-player checks while Mac is locked, signed staged appcast (Keychain access), staged update install, and Product Owner acceptance. Local `swift test` lacks XCTest.
 - Publication remains gated. Beta 3 is the latest public release, and earlier beta users cannot receive an updater retroactively.
+- 06:45 continuation: rebuilt Preview/stable candidate Build 40 after limiting Support's EVM address to confirmed BEP20. Added bilingual README support QR/address section; both new USDT QR images decode correctly. Packaged self-test, codesign, DMG verify and website language test PASS. Mac still locked, so GUI-dependent self-test/visual smoke and Keychain-signed staged appcast remain pending. No push or public download change.
 
 ## Menu Bar Space Decision - 2026-10-02
 

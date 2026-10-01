@@ -37,7 +37,7 @@ final class SupportWindowController: NSWindowController {
         methods.addArrangedSubview(paymentCard(title: L10n.text("WeChat Pay"),
                                                 detail: "", image: NSImage(contentsOfFile: Bundle.main.path(forResource: "WeChatSupport", ofType: "jpg") ?? ""),
                                                 address: nil))
-        methods.addArrangedSubview(paymentCard(title: "USDT · EVM", detail: "Ethereum · BNB Smart Chain · Arbitrum · Optimism",
+        methods.addArrangedSubview(paymentCard(title: "USDT · BNB Smart Chain", detail: "BEP20",
                                                 image: Self.qrImage(Self.evmAddress), address: Self.evmAddress))
         methods.addArrangedSubview(paymentCard(title: "USDT · TRON", detail: "TRC20",
                                                 image: Self.qrImage(Self.tronAddress), address: Self.tronAddress))

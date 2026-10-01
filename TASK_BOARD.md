@@ -8,6 +8,7 @@
 - Menu Bar Space stays PAUSED / BACKLOG; no code from that branch enters this candidate.
 - Build 40 Preview is installed separately. Debug/Release builds, full self-test, Settings interaction test, packaged self-test, signature, and DMG verify PASS. QR payloads match the supplied addresses. Native lyrics extension is DEFERRED for lack of a stable permitted source.
 - Pending: unlocked-Mac GUI and player smoke, Keychain-unblocked signed appcast generation, staged update install, Product Owner acceptance. `swift test` is blocked locally by missing XCTest. No push or public release yet.
+- 06:45: Support network wording narrowed to verified BEP20; bilingual README and scannable USDT QR assets prepared. Preview/stable candidate Build 40 rebuilt and packaged self-test/signature/DMG checks passed. GUI-dependent repeat self-test paused on locked Mac; await unlock before visual smoke and Keychain/staged updater work.
 
 ## Menu Bar Space - PAUSED / BACKLOG (2026-10-02)
 

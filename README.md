@@ -181,6 +181,19 @@ If a menu bar organizer hides the NotchMuse icon, expand hidden menu bar items o
 
 For setup help, read [SUPPORT.md](SUPPORT.md). For feedback, read [FEEDBACK.md](FEEDBACK.md), then use [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues). Choose **Bug report** for reproducible problems and **Feature request** for focused use cases or improvements.
 
+## Support NotchMuse
+
+The upcoming v0.8.0 app includes a Support page. You can also use these QR codes:
+
+| WeChat Pay | USDT · BNB Smart Chain (BEP20) | USDT · TRON (TRC20) |
+| --- | --- | --- |
+| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="WeChat Pay QR code" width="150"> | <img src="docs/support/usdt-bep20.png" alt="USDT BEP20 address QR code" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRC20 address QR code" width="150"> |
+
+- BNB Smart Chain: `0x6c0275e975818e99d078ee2348576e2d9608f6d6`
+- TRON: `TCTrNcvTD3QE7opC61mKoTyUmRkKos6jan`
+
+Check the network before sending USDT. The supplied EVM deposit screenshot confirms **BEP20 only**; Ethereum, Arbitrum, and Optimism are not verified. The [supporters list](docs/support/supporters.json) includes only people who consent to public credit.
+
 ## Privacy
 
 - No NotchMuse account is required.

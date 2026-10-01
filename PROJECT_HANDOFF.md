@@ -1,5 +1,13 @@
 # NotchMuse Project Handoff
 
+## v0.8.0 Productization Candidate - 2026-10-02
+
+Current status: PARTIAL on `codex/v0.8.0-productization`, based on `origin/main` `cf62b032fce7ff0c901104b913174182f8c72507`. Public release remains v0.8.0 Beta 3, build 38; `/Applications/NotchMuse.app` is untouched. Build 40 Preview is installed at `/Applications/NotchMuse Preview.app` with separate bundle ID/preferences and no automatic update or login launch.
+
+Completed: app activation and Settings-on-launch wiring, Preview/stable packaging, Sparkle 2.10.0 embedded with EdDSA public key, Settings update controls and Support page, QR payload verification, Live Preview card interaction, native-lyrics feasibility check, Debug/Release builds, packaged self-test, full self-test, Settings interaction test, codesign/DMG checks. The private update key is in macOS Keychain, not this repo. Current local `swift test` is blocked by missing XCTest in Command Line Tools.
+
+Pending confirmation: Mac is locked, so Preview GUI, support QR appearance, Dock/reopen behavior, and real player regression are not visually checked. Sparkle `generate_appcast` stalled while locked, likely awaiting Keychain access; it was interrupted without publishing. After unlock, check GUI, sign a staged appcast, then validate a non-public lower-to-higher update. Only after Product Owner acceptance decide whether to push, publish, and replace public Beta 3. No release, website download, or feed has changed. Do not repeat or merge the archived Menu Bar Space experiment.
+
 ## Menu Bar Space Experiment - Paused (2026-10-02)
 
 Current status: **EXPERIMENTAL / PAUSED**. The experiment is backed up on `origin/codex/menu-bar-space` at `62b47067a601fb48a6292efdfcee10e8c92d4036`; remote and local SHA were verified equal. Read `MENU_BAR_SPACE_HANDOFF.md` from that branch before any future work. The branch and worktree remain locally, but the thread is archived. Nothing was merged into `main` or released, and no further development or GUI acceptance is scheduled.

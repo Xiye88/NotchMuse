@@ -12,6 +12,9 @@ enum SelfTests {
     }
 
     @MainActor static func run() {
+        check(LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: [:], isPreview: false), "fresh stable install opts into login launch")
+        check(!LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: ["Language": "en"], isPreview: false), "existing preferences are preserved")
+        check(!LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: [:], isPreview: true), "Preview never opts into login launch")
         testBrandStyle()
         testMenuBarSafety()
         testStatusFeedback()

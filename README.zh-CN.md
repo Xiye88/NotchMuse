@@ -53,9 +53,11 @@
 
 | **播放器检测** | **刘海歌词** |
 | --- | --- |
-| 支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。默认使用 Auto Detect，也可手动选择播放器。 | 在刘海附近选择 Lyric Only、Song + Lyric 或 Expanded 布局。 |
+| 支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。默认使用 Auto Detect，也可手动选择播放器。 | 可选择 Lyric Only、Song + Lyric 或 Expanded 布局；歌词可放在顶部、Dock 上方、屏幕左侧或右侧。 |
 | **内置播放信息 bridge** | **重视隐私** |
 | MediaRemote bridge 已随应用打包，无需安装 Homebrew。网易云、QQ 音乐和汽水音乐依赖 macOS 私有 MediaRemote API，系统或播放器更新后可能需要适配。 | 不需要账号，不收集遥测数据，不上传音频。内置 English 和简体中文。 |
+
+外观设置包括纯色、渐变和自定义歌词颜色，以及背景颜色、透明度和留白。Settings 还可调整显示宽度、位置和目标屏幕。
 
 ## 截图
 
@@ -113,7 +115,7 @@ Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
 4. 从 `Applications` 打开 NotchMuse。
 5. 当 macOS 询问是否允许控制当前音乐播放器时，选择允许。
 
-### Beta 签名说明
+### 签名说明
 
 这个 GitHub beta 已进行 ad-hoc signing，但尚未使用 Apple Developer ID 签名或 notarize。macOS 首次启动时可能会要求你确认。
 
@@ -133,6 +135,14 @@ Developer ID 签名和 Apple 公证暂未配置。当前版本为面向用户测
 ## 可选菜单栏设置
 
 NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很拥挤，可以选择 Ice、Thaw 或 Bartender 等工具，为 Status Bar Mode 腾出空间。
+
+NotchMuse 本身不管理其他菜单栏图标。
+
+## 常见问题
+
+**某首歌没有歌词？** 歌词取决于第三方 provider 的覆盖范围；支持该播放器不代表每首歌都有匹配结果。排查方法见 [SUPPORT.md](SUPPORT.md)。
+
+**Beta 3 会自动更新吗？** 当前公开 Beta 3 未宣称支持自动更新。请查看 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases) 是否有新公开版本。自动更新是后续版本计划，不是已发布功能。
 
 ## 已知问题
 

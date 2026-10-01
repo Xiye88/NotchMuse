@@ -27,3 +27,10 @@ script to read the macOS Now Playing state for supported music players:
 The complete BSD 3-Clause License text is distributed alongside the bundled
 framework in `MediaRemoteBridge/LICENSE`. NotchMuse does not copy LyricsX
 source code.
+
+NotchMuse bundles Sparkle 2 for optional application update checks and installs:
+
+- Sparkle
+  - https://github.com/sparkle-project/Sparkle
+  - Version: 2.10.0 (pinned in `MenuBarLyrics/Package.swift`)
+  - Licensed under the Sparkle license included in `LICENSES/Sparkle.txt`

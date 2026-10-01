@@ -262,6 +262,7 @@ final class SettingsWindowController: NSWindowController {
     private let customWidthValue = NSTextField(string: "")
     private let statusBarOffsetValue = NSTextField(string: "")
     private let launchAtLoginSwitch = NSSwitch()
+    private let automaticUpdateSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let playerPopUp = NSPopUpButton()
     private let playerStopBehaviorPopUp = NSPopUpButton()
@@ -280,6 +281,7 @@ final class SettingsWindowController: NSWindowController {
     private let generalPage = NSStackView()
     private var selectedPage: SettingsPage = .display
     private var sidebarButtons: [SettingsPage: NSButton] = [:]
+    private var supportWindow: SupportWindowController?
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
     private var notchPlacementRow: NSGridRow?
@@ -299,7 +301,7 @@ final class SettingsWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = L10n.text("NotchMuse Settings")
+        window.title = "NotchMuse"
         window.minSize = NSSize(width: 900, height: 610)
         window.titlebarAppearsTransparent = true
         window.appearance = NSAppearance(named: .aqua)
@@ -363,6 +365,10 @@ final class SettingsWindowController: NSWindowController {
         controller.displayModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: .statusBar)!
         controller.displayModeChanged()
         precondition(controller.previewModeControl.selectedSegment == controller.displayModeControl.selectedSegment, "Mode selectors must stay synchronized")
+        controller.preview.onModeClick?(.notch)
+        precondition(AppPreferences.displayMode == .notch && controller.previewModeControl.selectedSegment == controller.displayModeControl.selectedSegment,
+                     "Preview card must update both mode selectors")
+        precondition(SupportWindowController().window?.contentView is NSStackView, "Support page must build")
         print("Settings interaction self-test passed")
     }
     #endif
@@ -436,6 +442,8 @@ final class SettingsWindowController: NSWindowController {
         notchHideOnHoverSwitch.action = #selector(notchHideOnHoverChanged)
         launchAtLoginSwitch.target = self
         launchAtLoginSwitch.action = #selector(launchAtLoginChanged)
+        automaticUpdateSwitch.target = self
+        automaticUpdateSwitch.action = #selector(automaticUpdateChanged)
         for language in AppLanguage.allCases {
             languagePopUp.addItem(withTitle: language.displayName)
         }
@@ -455,6 +463,11 @@ final class SettingsWindowController: NSWindowController {
         previewModeControl.target = self
         previewModeControl.action = #selector(previewModeChanged)
         previewModeControl.selectedSegment = 0
+        preview.onModeClick = { [weak self] mode in
+            guard let self else { return }
+            self.previewModeControl.selectedSegment = mode == .notch ? 1 : 0
+            self.previewModeChanged()
+        }
         let displayGrid = grid([
             [label(L10n.text("Display Mode")), displayModeControl],
             [label(L10n.text("Status Bar Position")), positionControl],
@@ -492,9 +505,13 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Music Player")), playerPopUp],
             [label(L10n.text("When Player Stops")), playerStopBehaviorPopUp],
             [label(L10n.text("Language")), languagePopUp],
-            [label(L10n.text("Launch at Login")), launchAtLoginSwitch]
+            [label(L10n.text("Launch at Login")), launchAtLoginSwitch],
+            [label(L10n.text("Automatically Check for Updates")), automaticUpdateSwitch]
         ])
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
+        let checkUpdates = NSButton(title: L10n.text("Check for Updates…"), target: self, action: #selector(checkForUpdates))
+        checkUpdates.isEnabled = UpdateController.shared.isAvailable
+        generalPage.addArrangedSubview(checkUpdates)
 
         displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how lyrics appear. Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement."), grid: displayGrid, trailing: resetButton(for: .display))))
 
@@ -524,6 +541,7 @@ final class SettingsWindowController: NSWindowController {
         sidebarPanel.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebar)
         let sidebarFooter = SettingsSidebarFooterView()
+        sidebarFooter.onSupport = { [weak self] in self?.showSupport() }
         sidebarFooter.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebarFooter)
 
@@ -621,9 +639,10 @@ final class SettingsWindowController: NSWindowController {
         button.imagePosition = .imageLeading
         button.identifier = NSUserInterfaceItemIdentifier(page.rawValue)
         button.wantsLayer = true
-        button.layer?.cornerRadius = 11
+        button.layer?.cornerRadius = 9
         button.widthAnchor.constraint(equalToConstant: 177).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 62).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 66).isActive = true
+        button.image = button.image?.withSymbolConfiguration(.init(pointSize: 18, weight: .regular))
         button.toolTip = L10n.text(page.help)
         return button
     }
@@ -916,6 +935,9 @@ final class SettingsWindowController: NSWindowController {
         customWidthValue.stringValue = String(format: "%.0f", customWidthSlider.doubleValue)
         statusBarOffsetValue.stringValue = String(format: "%.0f", statusBarOffsetSlider.doubleValue)
         launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
+        launchAtLoginSwitch.isEnabled = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool != true
+        automaticUpdateSwitch.state = UpdateController.shared.automaticallyChecksForUpdates ? .on : .off
+        automaticUpdateSwitch.isEnabled = UpdateController.shared.isAvailable
         playerPopUp.selectItem(at: PlayerSource.allCases.firstIndex(of: AppPreferences.playerSource) ?? 0)
         playerStopBehaviorPopUp.selectItem(at: PlayerStopBehavior.allCases.firstIndex(of: AppPreferences.playerStopBehavior) ?? 0)
         languagePopUp.selectItem(at: AppLanguage.allCases.firstIndex(of: AppPreferences.language) ?? 0)
@@ -1182,12 +1204,27 @@ final class SettingsWindowController: NSWindowController {
             } else {
                 try SMAppService.mainApp.unregister()
             }
+            LoginAtLaunchPolicy.markUserChoice()
         } catch {
             launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
             let alert = NSAlert(error: error)
             alert.messageText = L10n.text("Could not update Launch at Login")
             alert.runModal()
         }
+    }
+
+    @objc private func automaticUpdateChanged() {
+        UpdateController.shared.automaticallyChecksForUpdates = automaticUpdateSwitch.state == .on
+    }
+
+    @objc private func checkForUpdates() {
+        UpdateController.shared.checkForUpdates()
+    }
+
+    private func showSupport() {
+        if supportWindow == nil { supportWindow = SupportWindowController() }
+        supportWindow?.showWindow(nil)
+        supportWindow?.window?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func languageChanged() {
@@ -1228,16 +1265,19 @@ final class SettingsWindowController: NSWindowController {
             let selected = page == selectedPage
             button.state = selected ? .on : .off
             button.layer?.backgroundColor = selected
-                ? NSColor(calibratedRed: 0.17, green: 0.48, blue: 0.93, alpha: 1).cgColor
+                ? NSColor.controlAccentColor.withAlphaComponent(0.13).cgColor
                 : NSColor.clear.cgColor
-            button.contentTintColor = selected ? .white : NSColor(calibratedRed: 0.30, green: 0.38, blue: 0.53, alpha: 1)
+            button.contentTintColor = selected ? .controlAccentColor : NSColor.secondaryLabelColor
             let text = NSMutableAttributedString(string: L10n.text(page.title) + "\n" + L10n.text(page.help))
-            text.addAttributes([.font: NSFont.systemFont(ofSize: 15, weight: .semibold),
-                                .foregroundColor: selected ? NSColor.white : NSColor.labelColor],
+            let paragraph = NSMutableParagraphStyle()
+            paragraph.lineSpacing = 4
+            text.addAttribute(.paragraphStyle, value: paragraph, range: NSRange(location: 0, length: text.length))
+            text.addAttributes([.font: NSFont.systemFont(ofSize: 16, weight: .semibold),
+                                .foregroundColor: NSColor.labelColor],
                                range: NSRange(location: 0, length: L10n.text(page.title).utf16.count))
             let subtitleStart = L10n.text(page.title).utf16.count + 1
             text.addAttributes([.font: NSFont.systemFont(ofSize: 11),
-                                .foregroundColor: selected ? NSColor.white.withAlphaComponent(0.82) : NSColor.secondaryLabelColor],
+                                .foregroundColor: NSColor.secondaryLabelColor],
                                range: NSRange(location: subtitleStart, length: text.length - subtitleStart))
             button.attributedTitle = text
         }
@@ -1315,6 +1355,8 @@ private final class SettingsBackdropView: NSView {
 }
 
 private final class SettingsSidebarFooterView: NSView {
+    var onSupport: (() -> Void)?
+
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
@@ -1325,17 +1367,19 @@ private final class SettingsSidebarFooterView: NSView {
 
         let symbol = NSImageView(image: notchMuseAppIcon())
         symbol.setAccessibilityLabel("NotchMuse")
-        symbol.wantsLayer = true
-        symbol.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.82).cgColor
-        symbol.layer?.cornerRadius = 12
         symbol.translatesAutoresizingMaskIntoConstraints = false
         addSubview(symbol)
 
-        let slogan = NSTextField(wrappingLabelWithString: L10n.text("Let music flow through the notch"))
+        let slogan = NSTextField(wrappingLabelWithString: L10n.text("Music plays on. Lyrics stay with you."))
         slogan.font = .systemFont(ofSize: 17, weight: .semibold)
         slogan.textColor = NSColor(calibratedRed: 0.13, green: 0.18, blue: 0.31, alpha: 1)
         slogan.translatesAutoresizingMaskIntoConstraints = false
         addSubview(slogan)
+
+        let support = NSButton(title: L10n.text("Support NotchMuse"), target: self, action: #selector(openSupport))
+        support.bezelStyle = .inline
+        support.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(support)
 
         NSLayoutConstraint.activate([
             symbol.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 22),
@@ -1344,9 +1388,13 @@ private final class SettingsSidebarFooterView: NSView {
             symbol.heightAnchor.constraint(equalToConstant: 42),
             slogan.leadingAnchor.constraint(equalTo: symbol.leadingAnchor),
             slogan.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
-            slogan.topAnchor.constraint(equalTo: symbol.bottomAnchor, constant: 10)
+            slogan.topAnchor.constraint(equalTo: symbol.bottomAnchor, constant: 10),
+            support.leadingAnchor.constraint(equalTo: slogan.leadingAnchor),
+            support.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
         ])
     }
+
+    @objc private func openSupport() { onSupport?() }
 
     required init?(coder: NSCoder) { nil }
 
@@ -1399,6 +1447,9 @@ private enum SettingsPage: String, CaseIterable {
 private final class SettingsPreviewView: NSView {
     enum Mode { case statusBar, notch }
     var mode: Mode = .statusBar { didSet { needsDisplay = true } }
+    var onModeClick: ((Mode) -> Void)?
+    private var hoveredMode: Mode? { didSet { if hoveredMode != oldValue { needsDisplay = true } } }
+    private var hoverTrackingArea: NSTrackingArea?
     private var lyricColors = BrandStyle.gradientColors
     private var usesGradient = false
     private var lyricFontSize: CGFloat = 13
@@ -1417,6 +1468,42 @@ private final class SettingsPreviewView: NSView {
         .flatMap(NSImage.init(contentsOfFile:))
 
     override var isFlipped: Bool { true }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let hoverTrackingArea { removeTrackingArea(hoverTrackingArea) }
+        let area = NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self)
+        hoverTrackingArea = area
+        addTrackingArea(area)
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        hoveredMode = mode(at: convert(event.locationInWindow, from: nil))
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        hoveredMode = mode(at: convert(event.locationInWindow, from: nil))
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        hoveredMode = nil
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        if let clickedMode = mode(at: convert(event.locationInWindow, from: nil)) {
+            onModeClick?(clickedMode)
+        }
+    }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+
+    private func mode(at point: NSPoint) -> Mode? {
+        guard bounds.contains(point) else { return nil }
+        return point.x < bounds.midX ? .statusBar : .notch
+    }
 
     func apply(colors: [NSColor], usesGradient: Bool, fontSize: CGFloat, opacity: CGFloat, backgroundOpacity: CGFloat, width: DisplayWidth,
                position: LyricsPosition, notchStyle: NotchStyle, notchPlacement: NotchPlacement, notchBackground: Bool,
@@ -1448,6 +1535,9 @@ private final class SettingsPreviewView: NSView {
 
     private func drawPanel(_ rect: NSRect, notch: Bool) {
         let selected = (mode == .notch) == notch
+        let hovered = hoveredMode == (notch ? .notch : .statusBar)
+        (selected || hovered ? NSColor.controlAccentColor.withAlphaComponent(hovered ? 0.10 : 0.05) : NSColor.clear).setFill()
+        NSBezierPath(roundedRect: rect, xRadius: 11, yRadius: 11).fill()
         let title = L10n.text(notch ? "Notch Preview" : "Status Bar Preview")
         (title as NSString).draw(in: NSRect(x: rect.minX + 10, y: rect.minY + 2, width: rect.width - 20, height: 22),
                                  withAttributes: [.font: NSFont.systemFont(ofSize: 12, weight: .semibold),
@@ -1557,10 +1647,14 @@ private final class SettingsPreviewView: NSView {
             }
         }
         NSGraphicsContext.restoreGraphicsState()
-        (selected ? NSColor.systemBlue : NSColor.white.withAlphaComponent(0.85)).setStroke()
+        (selected ? NSColor.controlAccentColor : NSColor.white.withAlphaComponent(0.85)).setStroke()
         let outline = NSBezierPath(roundedRect: screen.insetBy(dx: 0.5, dy: 0.5), xRadius: 11, yRadius: 11)
-        outline.lineWidth = selected ? 2.5 : 1.5
+        outline.lineWidth = selected ? 2.5 : hoveredMode == (notch ? .notch : .statusBar) ? 2 : 1.5
         outline.stroke()
+        (selected ? NSColor.controlAccentColor : hovered ? NSColor.controlAccentColor.withAlphaComponent(0.7) : NSColor.clear).setStroke()
+        let cardOutline = NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 11, yRadius: 11)
+        cardOutline.lineWidth = selected ? 2 : 1.5
+        cardOutline.stroke()
     }
 
     private var notchPreviewForeground: NSColor {

@@ -18,7 +18,8 @@ DMG="$ROOT/dist.noindex/NotchMuse.dmg"
   exit 1
 }
 
-rm -rf "$ROOT/dist.noindex"
+rm -rf "$APP"
+rm -f "$DMG" "$DIST/SHA256SUMS" "$DIST/BUILD-INFO.txt"
 swift package --package-path "$ROOT/MenuBarLyrics" clean
 
 NOTCHMUSE_DIST_DIR="$DIST" \

@@ -49,6 +49,8 @@
 "Unknown" = "未知";
 "What happened?" = "请描述遇到的问题：";
 "Settings…" = "设置…";
+"Open NotchMuse" = "打开 NotchMuse";
+"Check for Updates…" = "检查更新…";
 "Quit" = "退出";
 "Welcome to NotchMuse 🎵" = "欢迎使用 NotchMuse 🎵";
 "First Launch Guide" = "NotchMuse 会在 Mac 状态栏或刘海区域显示同步歌词。\n\n1. 在设置中选择 Spotify 或 Apple Music，然后播放歌曲。\n2. 选择状态栏或刘海模式。\n3. 调整歌词颜色、字体大小和宽度。\n\nmacOS 请求读取所选播放器时，请允许“自动化”权限。只有选择状态栏左侧位置时才需要辅助功能权限。点击菜单栏中的橙色音符即可打开设置。";
@@ -101,7 +103,7 @@
 "Pink" = "粉色";
 "Cyan" = "青色";
 "Yellow" = "黄色";
-"Let music flow through the notch" = "让音乐在刘海间流动";
+"Music plays on. Lyrics stay with you." = "音乐继续，歌词常在。";
 "Custom Width" = "自定义宽度";
 "Appearance" = "外观";
 "Lyrics Color" = "歌词颜色";
@@ -159,3 +161,11 @@
 "Lyrics display mode, position, and screen." = "歌词显示方式、位置与屏幕。";
 "Lyrics color, typography, and motion." = "歌词颜色、字体与动画效果。";
 "Player selection and system behavior." = "播放器与系统行为。";
+"Automatically Check for Updates" = "自动检查更新";
+"Support NotchMuse" = "请作者喝杯咖啡";
+"Your support helps keep NotchMuse improving." = "感谢你支持 NotchMuse 持续改进。";
+"WeChat Pay" = "微信支付";
+"Copy Address" = "复制地址";
+"Check the selected network and send USDT only." = "请确认转账网络与所选网络一致，仅发送 USDT。";
+"Supporters" = "感谢支持者";
+"Thanks to everyone supporting NotchMuse." = "感谢每一位支持 NotchMuse 的朋友。";

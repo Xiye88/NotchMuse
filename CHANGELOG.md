@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased v0.8.0 Preview Candidate - 2026-10-02
+
+- Local Build 40 adds an isolated Preview app, Settings-on-launch/Dock activation, clickable Live Preview cards, optional Sparkle update checks, and a Support page with verified payment QR payloads.
+- Debug/Release builds and local self-tests pass. GUI, staged updater, and Product Owner acceptance remain open. No public release or website/feed switch has occurred; Beta 3 remains current.
+
 ## Beta 3 Release Approval - 2026-09-27
 
 - Product Owner accepted Candidate Build 38 and authorized GitHub sync/publication.
@@ -12,7 +17,7 @@
 - Ad-hoc signing remains; no notarization. Stable local installation remains untouched.
 
 
-## Current Public Beta — 2026-09-26
+## Historical Public Beta 2 — 2026-09-26
 
 - Public Beta: **v0.8.0-beta.2**, build **31**; published as a prerelease with Product Owner approval.
 - Release tag / binary source: `v0.8.0-beta.2` / `c606f185efb114a3d7a1fac78eafc5e925bc9b01`.

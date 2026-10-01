@@ -4,16 +4,25 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT="$ROOT/MenuBarLyrics"
 DIST="${NOTCHMUSE_DIST_DIR:-$ROOT/dist.noindex}"
-APP="$DIST/NotchMuse.app"
+PREVIEW="${NOTCHMUSE_PREVIEW:-0}"
+APP_NAME="NotchMuse"
+BUNDLE_ID="app.notchmuse.mac"
+FEED_URL="https://notchmuse.com/appcast.xml"
+if [[ "$PREVIEW" == "1" ]]; then
+  APP_NAME="NotchMuse Preview"
+  BUNDLE_ID="app.notchmuse.mac.preview"
+  FEED_URL="https://invalid.localhost/appcast.xml"
+fi
+APP="$DIST/$APP_NAME.app"
 CONTENTS="$APP/Contents"
 MACOS="$CONTENTS/MacOS"
 RESOURCES="$CONTENTS/Resources"
+FRAMEWORKS="$CONTENTS/Frameworks"
 ENTITLEMENTS="$PROJECT/Resources/NotchMuse.entitlements"
 BRIDGE_SOURCE="$PROJECT/Vendor/MediaRemoteBridge"
 BRIDGE_DEST="$RESOURCES/MediaRemoteBridge"
 VERSION="${NOTCHMUSE_VERSION:-0.8.0}"
 BUILD_NUMBER="${NOTCHMUSE_BUILD_NUMBER:-19}"
-BUNDLE_ID="app.notchmuse.mac"
 SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
 DEFAULT_FEEDBACK_EMAIL="ztongxue3@gmail.com"
 FEEDBACK_EMAIL="${FEEDBACK_EMAIL:-$DEFAULT_FEEDBACK_EMAIL}"
@@ -46,10 +55,13 @@ cd "$PROJECT"
 swift build -c release
 
 rm -rf "$APP"
-mkdir -p "$MACOS" "$RESOURCES"
+mkdir -p "$MACOS" "$RESOURCES" "$FRAMEWORKS"
 cp "$PROJECT/.build/release/NotchMuse" "$MACOS/NotchMuse"
+ditto "$PROJECT/.build/release/Sparkle.framework" "$FRAMEWORKS/Sparkle.framework"
+install_name_tool -add_rpath '@executable_path/../Frameworks' "$MACOS/NotchMuse"
 cp "$PROJECT/Resources/AppIcon.icns" "$RESOURCES/AppIcon.icns"
 cp "$PROJECT/Resources/SettingsPreviewWallpaper.png" "$RESOURCES/SettingsPreviewWallpaper.png"
+cp "$PROJECT/Resources/WeChatSupport.jpg" "$RESOURCES/WeChatSupport.jpg"
 cp -R "$PROJECT/Resources/en.lproj" "$PROJECT/Resources/zh-Hans.lproj" "$RESOURCES/"
 cp -R "$BRIDGE_SOURCE" "$BRIDGE_DEST"
 cp "$PROJECT/Resources/mediaremote-watchdog.sh" "$BRIDGE_DEST/mediaremote-watchdog.sh"
@@ -57,6 +69,7 @@ chmod 755 "$BRIDGE_DEST/mediaremote-adapter.pl" "$BRIDGE_DEST/MediaRemoteAdapter
 cp "$ROOT/THIRD_PARTY_NOTICES.md" "$RESOURCES/THIRD_PARTY_NOTICES.md"
 mkdir -p "$RESOURCES/LICENSES"
 cp "$ROOT/LICENSES/Apache-2.0.txt" "$RESOURCES/LICENSES/Apache-2.0.txt"
+cp "$PROJECT/.build/checkouts/sparkle/LICENSE" "$RESOURCES/LICENSES/Sparkle.txt"
 
 cat > "$CONTENTS/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -75,9 +88,9 @@ cat > "$CONTENTS/Info.plist" <<PLIST
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>NotchMuse</string>
+  <string>$APP_NAME</string>
   <key>CFBundleDisplayName</key>
-  <string>NotchMuse</string>
+  <string>$APP_NAME</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
@@ -86,10 +99,22 @@ cat > "$CONTENTS/Info.plist" <<PLIST
   <string>$BUILD_NUMBER</string>
   <key>FeedbackEmail</key>
   <string>$FEEDBACK_EMAIL</string>
+  <key>NotchMusePreview</key>
+  <$([[ "$PREVIEW" == "1" ]] && echo true || echo false)/>
+  <key>SUFeedURL</key>
+  <string>$FEED_URL</string>
+  <key>SUPublicEDKey</key>
+  <string>ccBh4EpD4c0P2f18HDHmZuxFAg0q06cSxpLH+7mlNjk=</string>
+  <key>SUEnableAutomaticChecks</key>
+  <$([[ "$PREVIEW" == "1" ]] && echo false || echo true)/>
+  <key>SUAllowsAutomaticUpdates</key>
+  <false/>
+  <key>SUVerifyUpdateBeforeExtraction</key>
+  <true/>
   <key>LSMinimumSystemVersion</key>
   <string>14.0</string>
   <key>LSUIElement</key>
-  <true/>
+  <false/>
   <key>NSAppTransportSecurity</key>
   <dict>
     <key>NSExceptionDomains</key>
@@ -109,10 +134,12 @@ PLIST
 
 plutil -lint "$CONTENTS/Info.plist" >/dev/null
 if [[ "$SIGN_IDENTITY" == "-" ]]; then
+  codesign --force --deep --sign - "$FRAMEWORKS/Sparkle.framework" >/dev/null
   codesign --force --sign - "$BRIDGE_DEST/MediaRemoteAdapter.framework" >/dev/null
   codesign --force --sign - "$BRIDGE_DEST/MediaRemoteAdapterTestClient" >/dev/null
   codesign --force --entitlements "$ENTITLEMENTS" --sign - "$APP" >/dev/null
 else
+  codesign --force --deep --options runtime --timestamp --sign "$SIGN_IDENTITY" "$FRAMEWORKS/Sparkle.framework" >/dev/null
   codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$BRIDGE_DEST/MediaRemoteAdapter.framework" >/dev/null
   codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$BRIDGE_DEST/MediaRemoteAdapterTestClient" >/dev/null
   codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --sign "$SIGN_IDENTITY" "$APP" >/dev/null

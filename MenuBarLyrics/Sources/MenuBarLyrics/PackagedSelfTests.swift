@@ -9,6 +9,9 @@ enum PackagedSelfTests {
         for path in [
             "en.lproj/Localizable.strings",
             "zh-Hans.lproj/Localizable.strings",
+            "WeChatSupport.jpg",
+            "LICENSES/Sparkle.txt",
+            "../Frameworks/Sparkle.framework/Sparkle",
             "MediaRemoteBridge/MediaRemoteAdapter.framework/MediaRemoteAdapter",
             "MediaRemoteBridge/MediaRemoteAdapterTestClient",
             "MediaRemoteBridge/mediaremote-adapter.pl",

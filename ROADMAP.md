@@ -1,10 +1,17 @@
 # NotchMuse Roadmap
 
+## Current - v0.8.0 Preview Candidate
+
+1. P0: finish Build 40 Preview GUI, activation, Settings, Support QR, and five-player short regression on an unlocked Mac.
+2. P0: generate a signed staged appcast from Keychain and exercise a non-public update; do not change the public feed before verification.
+3. P1: Product Owner accepts Preview and publication separately; then publish a coherent v0.8.0 DMG, appcast, release notes, website download, and checksum. Beta 3 remains current until then.
+4. P2: Developer ID signing/notarization and broader clean-Mac testing before wide promotion. Native lyrics probing is deferred; Menu Bar Space remains paused.
+
 ## Backlog - Menu Bar Space (2026-10-02)
 
 Status: **EXPERIMENTAL / PAUSED**. No current release scope or active development. Native menu bar icon movement/hiding is deferred because its macOS-level complexity outweighs current value. Resume only by a new product decision from `origin/codex/menu-bar-space` @ `62b47067a601fb48a6292efdfcee10e8c92d4036` and its `MENU_BAR_SPACE_HANDOFF.md`. Consider Thaw/Ice guidance in future help documentation, not as a built-in feature.
 
-## Current Public Beta — 2026-09-26
+## Historical Public Beta 2 — 2026-09-26
 
 - Public Beta: **v0.8.0-beta.2**, build **31**; published as a prerelease with Product Owner approval.
 - Release tag / binary source: `v0.8.0-beta.2` / `c606f185efb114a3d7a1fac78eafc5e925bc9b01`.

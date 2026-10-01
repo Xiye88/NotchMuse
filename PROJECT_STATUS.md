@@ -1,5 +1,12 @@
 # NotchMuse Project Status
 
+## v0.8.0 Productization Preview - 2026-10-02
+
+- Candidate: local `codex/v0.8.0-productization` based on `cf62b032fce7ff0c901104b913174182f8c72507`; Build 40 Preview is installed at `/Applications/NotchMuse Preview.app`. Stable `/Applications/NotchMuse.app` remains public Beta 3 Build 38 and is untouched.
+- Implemented locally: separate Preview identity/preferences, Settings-on-launch/Dock behavior, Sparkle 2.10.0 update plumbing with user-controlled checks, Settings polish, Support page, and release-preparation tooling. Native lyrics extension is deferred. No public website, GitHub Release, or appcast change.
+- Verified: Debug and Release builds, packaged self-test, full self-test, Settings interaction test, ad-hoc signature, DMG integrity, QR payloads. Pending: GUI/real-player checks while Mac is locked, signed staged appcast (Keychain access), staged update install, and Product Owner acceptance. Local `swift test` lacks XCTest.
+- Publication remains gated. Beta 3 is the latest public release, and earlier beta users cannot receive an updater retroactively.
+
 ## Menu Bar Space Decision - 2026-10-02
 
 - Menu Bar Space: **EXPERIMENTAL / PAUSED**. It is not a current NotchMuse feature and is excluded from the current release.
@@ -19,7 +26,7 @@
 - Ad-hoc signing remains; no notarization. Stable local installation remains untouched.
 
 
-## Current Public Beta — 2026-09-26
+## Historical Public Beta 2 — 2026-09-26
 
 - Public Beta: **v0.8.0-beta.2**, build **31**; published as a prerelease with Product Owner approval.
 - Release tag / binary source: `v0.8.0-beta.2` / `c606f185efb114a3d7a1fac78eafc5e925bc9b01`.

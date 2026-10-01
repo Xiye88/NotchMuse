@@ -1,5 +1,14 @@
 # NotchMuse Task Board
 
+## v0.8.0 Productization - IN PROGRESS (2026-10-02)
+
+- Branch: `codex/v0.8.0-productization` from `origin/main` `cf62b032fce7ff0c901104b913174182f8c72507`.
+- Preserve `/Applications/NotchMuse.app` build 38. Build and validate only `/Applications/NotchMuse Preview.app` until Product Owner acceptance.
+- Work: App activation/login policy, Stable/Preview identity, Sparkle update plumbing, Settings polish, Support, release tooling/docs, and focused regression. Public release and website/appcast updates remain gated.
+- Menu Bar Space stays PAUSED / BACKLOG; no code from that branch enters this candidate.
+- Build 40 Preview is installed separately. Debug/Release builds, full self-test, Settings interaction test, packaged self-test, signature, and DMG verify PASS. QR payloads match the supplied addresses. Native lyrics extension is DEFERRED for lack of a stable permitted source.
+- Pending: unlocked-Mac GUI and player smoke, Keychain-unblocked signed appcast generation, staged update install, Product Owner acceptance. `swift test` is blocked locally by missing XCTest. No push or public release yet.
+
 ## Menu Bar Space - PAUSED / BACKLOG (2026-10-02)
 
 - No active implementation, GUI acceptance, merge, or release task.
@@ -18,7 +27,7 @@
 - Ad-hoc signing remains; no notarization. Stable local installation remains untouched.
 
 
-## Current Task — Settings / Display Follow-up
+## Historical Task — Settings / Display Follow-up
 
 - Status: **LOCAL CANDIDATE READY; GUI ACCEPTANCE BLOCKED**.
 - Baseline: `main` / `origin/main` at

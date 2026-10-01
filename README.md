@@ -53,9 +53,11 @@ Song information and synchronized lyrics appear below the MacBook notch.
 
 | **Player detection** | **Notch Mode** |
 | --- | --- |
-| Detects active playback from Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music. Auto Detect is the default; you can select a player manually. | Choose Lyric Only, Song + Lyric, or Expanded layouts near the notch. |
+| Detects active playback from Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music. Auto Detect is the default; you can select a player manually. | Choose Lyric Only, Song + Lyric, or Expanded layouts. Place lyrics at the top, above the Dock, or on the left or right side. |
 | **Bundled playback bridge** | **Private by design** |
 | The MediaRemote bridge is included; no Homebrew installation is needed. NetEase, QQ Music, and Soda Music rely on macOS private MediaRemote APIs and may need updates after macOS or player changes. | No account, telemetry, or audio upload. English and Simplified Chinese are built in. |
+
+Appearance controls include solid and gradient lyric colors, custom colors, and background color, opacity, and padding. Settings also provides display width, position, and screen controls.
 
 ## Screenshots
 
@@ -113,7 +115,7 @@ The beta bundles its MediaRemote bridge; no separate Homebrew or helper installa
 4. Open NotchMuse from `Applications`.
 5. When macOS asks for permission to control the selected music player, allow it.
 
-### Beta Signing Notice
+### Signing Notice
 
 This GitHub beta is ad-hoc signed, but it is not signed with Apple Developer ID or notarized. macOS may ask you to confirm the first launch.
 
@@ -133,6 +135,14 @@ If installation, Gatekeeper, music player Automation permission, or lyrics looku
 ## Optional Menu Bar Setup
 
 NotchMuse does not require a menu bar organizer. If your menu bar is already crowded, an optional tool such as Ice, Thaw, or Bartender can free up space for Status Bar Mode.
+
+NotchMuse does not manage other menu bar icons itself.
+
+## FAQ
+
+**No lyrics for a song?** Lyrics depend on third-party provider coverage; a supported player does not guarantee a match. See [SUPPORT.md](SUPPORT.md) for troubleshooting.
+
+**Does Beta 3 update itself?** No automatic update is advertised for the current public Beta 3. Check the [releases page](https://github.com/Xiye88/NotchMuse/releases) for a newer public build. Auto-update is planned for a future release, not a published capability.
 
 ## Known Issues
 

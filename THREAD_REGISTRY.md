@@ -1,5 +1,15 @@
 # NotchMuse Thread Registry
 
+## Active - v0.8.0 Productization (2026-10-02)
+
+| Workspace | Status | Scope |
+| --- | --- | --- |
+| 00_PM | ACTIVE | Integrate isolated Build 40 Preview, verify gates, and request final publication decision. |
+| 01_APP | DONE | Settings polish and Preview interaction changes returned to this branch. |
+| 06_DOCS | DONE | Native lyrics feasibility and accurate current README returned to this branch. |
+
+Preview GUI and staged update verification remain pending; the public Beta 3 and archived Menu Bar Space thread are unchanged.
+
 ## Archived Experiment - Menu Bar Space (2026-10-02)
 
 | Thread | Status | Source | Boundary |
@@ -20,7 +30,7 @@ This is an archived experiment, not an additional numbered workspace or a curren
 - Ad-hoc signing remains; no notarization. Stable local installation remains untouched.
 
 
-## Current Public Beta — 2026-09-26
+## Historical Public Beta 2 — 2026-09-26
 
 - Public Beta: **v0.8.0-beta.2**, build **31**; published as a prerelease with Product Owner approval.
 - Release tag / binary source: `v0.8.0-beta.2` / `c606f185efb114a3d7a1fac78eafc5e925bc9b01`.

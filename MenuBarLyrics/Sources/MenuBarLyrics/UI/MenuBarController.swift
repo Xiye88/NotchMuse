@@ -113,10 +113,6 @@ final class MenuBarController: NSObject {
         startPoll(forceLyricsRefresh: true)
     }
 
-    func reveal() {
-        showMenu()
-    }
-
     func stop() {
         pollTimer?.invalidate()
         pollTimer = nil
@@ -160,8 +156,12 @@ final class MenuBarController: NSObject {
         menu.addItem(positionMenuItem)
 
         menu.addItem(NSMenuItem(title: L10n.text("Refresh Lyrics"), action: #selector(refreshLyrics), keyEquivalent: "r"))
+        if UpdateController.shared.isAvailable {
+            menu.addItem(NSMenuItem(title: L10n.text("Check for Updates…"), action: #selector(checkForUpdates), keyEquivalent: ""))
+        }
         menu.addItem(NSMenuItem(title: L10n.text("Report Lyrics Issue…"), action: #selector(reportLyricsIssue), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: L10n.text("Settings…"), action: #selector(showSettings), keyEquivalent: ","))
+        menu.insertItem(NSMenuItem(title: L10n.text("Open NotchMuse"), action: #selector(showSettings), keyEquivalent: ","), at: 0)
+        menu.insertItem(NSMenuItem.separator(), at: 1)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: L10n.text("Quit"), action: #selector(quit), keyEquivalent: "q"))
 
@@ -395,10 +395,6 @@ final class MenuBarController: NSObject {
         UserDefaults.standard.set(true, forKey: AppPreferences.hasShownFirstLaunchGuideKey)
     }
 
-    private func showMenu() {
-        statusItem.menu?.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
-    }
-
     private func updateScrollTimer(overflows: Bool) {
         if Self.shouldAnimateScroll(overflows: overflows, isPaused: isPlaybackPaused) {
             guard scrollTimer == nil else { return }
@@ -548,6 +544,10 @@ final class MenuBarController: NSObject {
             }
         }
         settingsWindowController?.show()
+    }
+
+    @objc private func checkForUpdates() {
+        UpdateController.shared.checkForUpdates()
     }
 
     @objc private func quit() {

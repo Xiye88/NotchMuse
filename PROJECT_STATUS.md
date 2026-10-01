@@ -1,5 +1,12 @@
 # NotchMuse Project Status
 
+## Menu Bar Space Decision - 2026-10-02
+
+- Menu Bar Space: **EXPERIMENTAL / PAUSED**. It is not a current NotchMuse feature and is excluded from the current release.
+- Experiment backup: `origin/codex/menu-bar-space` at `62b47067a601fb48a6292efdfcee10e8c92d4036` (remote/local SHA verified). No merge to `main` and no release.
+- Source of truth for any future reassessment: `MENU_BAR_SPACE_HANDOFF.md` on that branch. The local branch and worktree are retained; development and GUI acceptance have stopped.
+- Product decision: native menu bar icon moving/hiding has too much macOS-level complexity for its current user value. Help documentation may later suggest Thaw or Ice for users short of menu bar space.
+
 ## Beta 3 Release Approval - 2026-09-27
 
 - Product Owner accepted Candidate Build 38 and authorized GitHub sync/publication.

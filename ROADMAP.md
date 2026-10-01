@@ -1,5 +1,9 @@
 # NotchMuse Roadmap
 
+## Backlog - Menu Bar Space (2026-10-02)
+
+Status: **EXPERIMENTAL / PAUSED**. No current release scope or active development. Native menu bar icon movement/hiding is deferred because its macOS-level complexity outweighs current value. Resume only by a new product decision from `origin/codex/menu-bar-space` @ `62b47067a601fb48a6292efdfcee10e8c92d4036` and its `MENU_BAR_SPACE_HANDOFF.md`. Consider Thaw/Ice guidance in future help documentation, not as a built-in feature.
+
 ## Current Public Beta — 2026-09-26
 
 - Public Beta: **v0.8.0-beta.2**, build **31**; published as a prerelease with Product Owner approval.

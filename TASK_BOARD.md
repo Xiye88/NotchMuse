@@ -1,5 +1,11 @@
 # NotchMuse Task Board
 
+## Menu Bar Space - PAUSED / BACKLOG (2026-10-02)
+
+- No active implementation, GUI acceptance, merge, or release task.
+- Remote backup: `origin/codex/menu-bar-space` at `62b47067a601fb48a6292efdfcee10e8c92d4036`; local branch/worktree retained.
+- Resume only after a new product decision, using `MENU_BAR_SPACE_HANDOFF.md` from that branch. Do not restart the investigation from scratch.
+
 ## Beta 3 Release Approval - 2026-09-27
 
 - Product Owner accepted Candidate Build 38 and authorized GitHub sync/publication.

@@ -1,5 +1,13 @@
 # NotchMuse Thread Registry
 
+## Archived Experiment - Menu Bar Space (2026-10-02)
+
+| Thread | Status | Source | Boundary |
+| --- | --- | --- | --- |
+| Menu Bar Space experiment | ARCHIVED | `origin/codex/menu-bar-space` @ `62b47067a601fb48a6292efdfcee10e8c92d4036`; `MENU_BAR_SPACE_HANDOFF.md` on that branch | EXPERIMENTAL / PAUSED; local branch/worktree retained; not merged or released |
+
+This is an archived experiment, not an additional numbered workspace or a current product feature.
+
 ## Beta 3 Release Approval - 2026-09-27
 
 - Product Owner accepted Candidate Build 38 and authorized GitHub sync/publication.

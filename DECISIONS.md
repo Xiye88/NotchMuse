@@ -1,5 +1,12 @@
 # NotchMuse Decisions
 
+## 2026-10-02 - Pause In-App Menu Bar Management
+
+- Decision: keep Menu Bar Space **EXPERIMENTAL / PAUSED** in the backlog; do not merge or release it as a NotchMuse feature.
+- Reason: moving/hiding macOS menu bar icons is a high-complexity system-level capability, and the current result does not justify the implementation and maintenance cost.
+- Preserve `origin/codex/menu-bar-space` @ `62b47067a601fb48a6292efdfcee10e8c92d4036` and its `MENU_BAR_SPACE_HANDOFF.md` for any future reassessment. The local branch/worktree stay in place; the experiment thread is archived.
+- Future help documentation may suggest Thaw or Ice when users need more menu bar space. This does not create a new active task.
+
 ## 2026-09-26 - Queue Settings UI Redesign After Final Engineering
 
 - Register `10_SETTINGS_UI` as QUEUED / NEXT.

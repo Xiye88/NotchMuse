@@ -719,6 +719,17 @@ enum SelfTests {
         check(MenuBarSpaceController.savedZones(always, id: "app:single", zone: .visible).isEmpty, "resetting an item removes its hidden classification")
         check(MenuBarSpaceController.resolvedZone(id: "new:single", protected: false, saved: always) == .visible, "new items default to visible")
         check(MenuBarSpaceIcon.allCases.count == 6 && MenuBarSpaceIcon(rawValue: "invalid") == nil, "keeps icon choices recoverable")
+        let hiddenFrame = CGRect(x: 500, y: 0, width: 34, height: 33)
+        let alwaysFrame = CGRect(x: 400, y: 0, width: 34, height: 33)
+        for (x, expected) in [(350.0, MenuBarSpaceZone.alwaysHidden), (450.0, .hidden), (550.0, .visible)] {
+            check(MenuBarSpaceController.physicalZone(item: CGRect(x: x, y: 0, width: 24, height: 33), hidden: hiddenFrame, always: alwaysFrame) == expected,
+                  "classifies actual menu bar positions from one snapshot")
+        }
+        let window = MenuBarItemWindow(id: 10, pid: 20, frame: CGRect(x: 100, y: 0, width: 38, height: 33))
+        check(MenuBarItemWindow.matching(CGRect(x: 107, y: 4.5, width: 24, height: 24), in: [window])?.id == 10,
+              "maps inset AX bounds to the real menu bar window")
+        check(MenuBarItemWindow.matching(CGRect(x: 200, y: 4.5, width: 24, height: 24), in: [window]) == nil,
+              "does not address a different menu bar window")
         let space = MenuBarSpaceController()
         let acceptedInvalidImage = space.setCustomIcon(Data([0, 1, 2]))
         check(!acceptedInvalidImage, "rejects invalid custom images without changing the icon")

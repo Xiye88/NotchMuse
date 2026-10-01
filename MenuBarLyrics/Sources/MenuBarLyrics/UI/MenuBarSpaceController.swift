@@ -43,6 +43,7 @@ final class MenuBarSpaceController: NSObject {
     var onChange: (() -> Void)?
     private(set) var items: [MenuBarSpaceItem] = []
     private(set) var isRevealed = false
+    private var isMoving = false
     private var control: NSStatusItem?
     private var hiddenDivider: NSStatusItem?
     private var alwaysDivider: NSStatusItem?
@@ -155,7 +156,7 @@ final class MenuBarSpaceController: NSObject {
     }
 
     private func applyVisibility() {
-        guard let control, let screen = control.button?.window?.screen else { return }
+        guard !isMoving, let control, let screen = control.button?.window?.screen else { return }
         let width = min(10_000, max(2_000, screen.frame.width * 2))
         alwaysDivider?.length = width
         hiddenDivider?.length = isRevealed ? 18 : width
@@ -163,7 +164,7 @@ final class MenuBarSpaceController: NSObject {
     }
 
     func refresh() {
-        guard isActive, AXIsProcessTrusted() else { return }
+        guard isActive, !isMoving, AXIsProcessTrusted() else { return }
         let zones = UserDefaults.standard.dictionary(forKey: Self.zonesKey) as? [String: String] ?? [:]
         var found: [MenuBarSpaceItem] = []
         for app in NSWorkspace.shared.runningApplications where app.processIdentifier > 0 {
@@ -193,9 +194,15 @@ final class MenuBarSpaceController: NSObject {
     func setZone(_ zone: MenuBarSpaceZone, for id: String) async -> Bool {
         guard isActive, let index = items.firstIndex(where: { $0.id == id }), items[index].movable else { return false }
         guard await move(items[index].element, to: zone) else { return false }
-        items[index].zone = zone
+        guard let currentIndex = items.firstIndex(where: { $0.id == id }) else { return false }
+        items[currentIndex].zone = zone
         let zones = Self.savedZones(UserDefaults.standard.dictionary(forKey: Self.zonesKey) as? [String: String] ?? [:], id: id, zone: zone)
         UserDefaults.standard.set(zones, forKey: Self.zonesKey)
+        if zone == .visible {
+            for other in items where other.id != id && other.movable && other.zone != .visible {
+                _ = await move(other.element, to: other.zone)
+            }
+        }
         onChange?()
         return true
     }
@@ -209,55 +216,115 @@ final class MenuBarSpaceController: NSObject {
     }
 
     private func move(_ element: AXUIElement, to zone: MenuBarSpaceZone) async -> Bool {
+        guard !isMoving else { return false }
+        isMoving = true
         let wasRevealed = isRevealed
         hiddenDivider?.length = 18
         alwaysDivider?.length = 18
-        defer { isRevealed = wasRevealed; applyVisibility() }
+        defer { isMoving = false; isRevealed = wasRevealed; applyVisibility() }
         try? await Task.sleep(for: .milliseconds(150))
-        guard let source = Self.frame(element),
-              let hidden = Self.ownFrame(Self.hiddenID),
-              let always = Self.ownFrame(Self.alwaysID),
-              let control = Self.ownFrame(Self.controlID),
-              let screen = self.control?.button?.window?.screen,
-              source.minX >= screen.frame.minX, source.maxX <= screen.frame.maxX,
-              abs(source.midY - hidden.midY) < 6,
-              hidden.minX >= 0, always.minX >= 0 else { return false }
-        let current: MenuBarSpaceZone = source.midX < always.midX ? .alwaysHidden
-            : source.midX < hidden.midX ? .hidden : .visible
-        if current == zone { return true }
-        let x: CGFloat
-        switch zone {
-        case .visible: x = (hidden.maxX + control.minX) / 2
-        case .hidden: x = (always.maxX + hidden.minX) / 2
-        case .alwaysHidden: x = always.minX - 8
+        guard let sourceFrame = Self.frame(element),
+              let hiddenFrame = Self.ownFrame(Self.hiddenID),
+              let alwaysFrame = Self.ownFrame(Self.alwaysID) else { return false }
+        var windows = MenuBarItemWindow.snapshot()
+        guard let source = MenuBarItemWindow.matching(sourceFrame, in: windows),
+              let hidden = MenuBarItemWindow.matching(hiddenFrame, in: windows),
+              let always = MenuBarItemWindow.matching(alwaysFrame, in: windows),
+              always.frame.midX < hidden.frame.midX else { return false }
+        for _ in 0..<4 {
+            guard let item = windows.first(where: { $0.id == source.id }),
+                  let h = windows.first(where: { $0.id == hidden.id }),
+                  let a = windows.first(where: { $0.id == always.id }) else { return false }
+            if Self.physicalZone(item: item.frame, hidden: h.frame, always: a.frame) == zone { return true }
+            let anchor = zone == .visible ? item : a
+            let moved = zone == .visible ? h : item
+            let left = zone == .visible || zone == .alwaysHidden
+            _ = await Task.detached(priority: .userInitiated) {
+                MenuBarItemMover.move(moved, beside: anchor, left: left)
+            }.value
+            try? await Task.sleep(for: .milliseconds(150))
+            windows = MenuBarItemWindow.snapshot()
+            if zone == .visible,
+               let boundary = windows.first(where: { $0.id == hidden.id }),
+               let permanent = windows.first(where: { $0.id == always.id }),
+               permanent.frame.midX >= boundary.frame.midX {
+                _ = await Task.detached(priority: .userInitiated) {
+                    MenuBarItemMover.move(permanent, beside: boundary, left: true)
+                }.value
+                try? await Task.sleep(for: .milliseconds(150))
+                windows = MenuBarItemWindow.snapshot()
+            }
+            if zone == .hidden,
+               let moved = windows.first(where: { $0.id == source.id }),
+               let boundary = windows.first(where: { $0.id == always.id }),
+               moved.frame.midX < boundary.frame.midX {
+                _ = await Task.detached(priority: .userInitiated) {
+                    MenuBarItemMover.move(boundary, beside: moved, left: true)
+                }.value
+                try? await Task.sleep(for: .milliseconds(150))
+                windows = MenuBarItemWindow.snapshot()
+            }
         }
-        let from = CGPoint(x: source.midX, y: source.midY)
-        let to = CGPoint(x: x, y: source.midY)
-        guard x >= 0, abs(from.x - to.x) > 2 else { return false }
-        Self.postDrag(from: from, to: to)
-        try? await Task.sleep(for: .milliseconds(250))
-        guard let result = Self.frame(element), let h = Self.ownFrame(Self.hiddenID), let a = Self.ownFrame(Self.alwaysID) else { return false }
-        switch zone {
-        case .visible: return result.midX > h.midX
-        case .hidden: return result.midX > a.midX && result.midX < h.midX
-        case .alwaysHidden: return result.midX < a.midX
-        }
+        guard let result = windows.first(where: { $0.id == source.id }),
+              let h = windows.first(where: { $0.id == hidden.id }),
+              let a = windows.first(where: { $0.id == always.id }) else { return false }
+        return Self.physicalZone(item: result.frame, hidden: h.frame, always: a.frame) == zone
+    }
+
+    nonisolated static func physicalZone(item: CGRect, hidden: CGRect, always: CGRect) -> MenuBarSpaceZone {
+        item.midX < always.midX ? .alwaysHidden : item.midX < hidden.midX ? .hidden : .visible
     }
 
     func reset() async -> Bool {
+        guard isActive, !isMoving else { return false }
+        isMoving = true
         hiddenDivider?.length = 18
         alwaysDivider?.length = 18
         isRevealed = true
-        var failed: [String: String] = [:]
-        for item in items where item.movable && item.zone != .visible {
-            if await move(item.element, to: .visible) == false {
-                failed[item.id] = item.zone.rawValue
+        defer { isMoving = false; applyVisibility(); refresh() }
+        let managed = items.filter { $0.movable && $0.zone != .visible }
+        if managed.isEmpty {
+            UserDefaults.standard.removeObject(forKey: Self.zonesKey)
+            return true
+        }
+        try? await Task.sleep(for: .milliseconds(150))
+        guard let hiddenFrame = Self.ownFrame(Self.hiddenID),
+              let alwaysFrame = Self.ownFrame(Self.alwaysID) else { return false }
+        var windows = MenuBarItemWindow.snapshot()
+        guard let hidden = MenuBarItemWindow.matching(hiddenFrame, in: windows),
+              let always = MenuBarItemWindow.matching(alwaysFrame, in: windows) else { return false }
+        let ids = managed.compactMap { item -> CGWindowID? in
+            guard let frame = Self.frame(item.element) else { return nil }
+            return MenuBarItemWindow.matching(frame, in: windows)?.id
+        }
+        guard ids.count == managed.count else { return false }
+        for _ in 0..<4 {
+            guard let h = windows.first(where: { $0.id == hidden.id }),
+                  let a = windows.first(where: { $0.id == always.id }) else { return false }
+            let targets = ids.compactMap { id in windows.first(where: { $0.id == id }) }
+            guard targets.count == ids.count, let leftmost = targets.min(by: { $0.frame.midX < $1.frame.midX }) else { return false }
+            if a.frame.midX < h.frame.midX && targets.allSatisfy({ $0.frame.midX > h.frame.midX }) {
+                UserDefaults.standard.removeObject(forKey: Self.zonesKey)
+                return true
+            }
+            if h.frame.midX > leftmost.frame.midX {
+                _ = await Task.detached(priority: .userInitiated) {
+                    MenuBarItemMover.move(h, beside: leftmost, left: true)
+                }.value
+                try? await Task.sleep(for: .milliseconds(150))
+                windows = MenuBarItemWindow.snapshot()
+            }
+            guard let currentHidden = windows.first(where: { $0.id == hidden.id }),
+                  let currentAlways = windows.first(where: { $0.id == always.id }) else { return false }
+            if currentAlways.frame.midX >= currentHidden.frame.midX {
+                _ = await Task.detached(priority: .userInitiated) {
+                    MenuBarItemMover.move(currentAlways, beside: currentHidden, left: true)
+                }.value
+                try? await Task.sleep(for: .milliseconds(150))
+                windows = MenuBarItemWindow.snapshot()
             }
         }
-        UserDefaults.standard.set(failed, forKey: Self.zonesKey)
-        refresh()
-        onChange?()
-        return failed.isEmpty
+        return false
     }
 
     func setIcon(_ value: MenuBarSpaceIcon) {
@@ -325,18 +392,4 @@ final class MenuBarSpaceController: NSObject {
         return frame(item)
     }
 
-    private static func postDrag(from: CGPoint, to: CGPoint) {
-        guard let down = CGEvent(mouseEventSource: nil, mouseType: .leftMouseDown, mouseCursorPosition: from, mouseButton: .left),
-              let move = CGEvent(mouseEventSource: nil, mouseType: .leftMouseDragged, mouseCursorPosition: to, mouseButton: .left),
-              let up = CGEvent(mouseEventSource: nil, mouseType: .leftMouseUp, mouseCursorPosition: to, mouseButton: .left) else { return }
-        for event in [down, move, up] { event.flags = .maskCommand }
-        down.post(tap: .cghidEventTap)
-        for step in 1...12 {
-            let progress = CGFloat(step) / 12
-            move.location = CGPoint(x: from.x + (to.x - from.x) * progress, y: from.y)
-            move.post(tap: .cghidEventTap)
-            usleep(12_000)
-        }
-        up.post(tap: .cghidEventTap)
-    }
 }

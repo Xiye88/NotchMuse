@@ -156,6 +156,7 @@ private final class MenuBarSpaceDropZone: NSStackView {
     private let zone: MenuBarSpaceZone
     private let onDrop: (String, MenuBarSpaceZone) -> Void
     private let list = NSStackView()
+    private let strip = NSScrollView()
 
     init(zone: MenuBarSpaceZone, onDrop: @escaping (String, MenuBarSpaceZone) -> Void) {
         self.zone = zone
@@ -163,19 +164,29 @@ private final class MenuBarSpaceDropZone: NSStackView {
         super.init(frame: .zero)
         orientation = .vertical
         alignment = .leading
-        spacing = 6
-        edgeInsets = NSEdgeInsets(top: 12, left: 14, bottom: 12, right: 14)
-        wantsLayer = true
-        layer?.backgroundColor = NSColor.white.withAlphaComponent(0.65).cgColor
-        layer?.cornerRadius = 12
+        spacing = 8
         let heading = NSTextField(labelWithString: L10n.text(zone.rawValue))
-        heading.font = .systemFont(ofSize: 16, weight: .semibold)
+        heading.font = .systemFont(ofSize: 14, weight: .semibold)
         addArrangedSubview(heading)
-        list.orientation = .vertical
-        list.alignment = .leading
+        strip.drawsBackground = true
+        strip.backgroundColor = NSColor(calibratedRed: 0.54, green: 0.61, blue: 0.71, alpha: 0.9)
+        strip.wantsLayer = true
+        strip.layer?.cornerRadius = 10
+        strip.hasHorizontalScroller = true
+        strip.autohidesScrollers = true
+        strip.hasVerticalScroller = false
+        list.orientation = .horizontal
+        list.alignment = .centerY
         list.spacing = 4
-        addArrangedSubview(list)
-        list.widthAnchor.constraint(equalTo: widthAnchor, constant: -28).isActive = true
+        list.edgeInsets = NSEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        strip.documentView = list
+        addArrangedSubview(strip)
+        list.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            strip.widthAnchor.constraint(equalTo: widthAnchor),
+            strip.heightAnchor.constraint(equalToConstant: 58),
+            list.heightAnchor.constraint(equalToConstant: 54)
+        ])
         registerForDraggedTypes([menuBarSpaceDragType])
     }
 
@@ -184,23 +195,32 @@ private final class MenuBarSpaceDropZone: NSStackView {
     func setItems(_ items: [MenuBarSpaceItem]) {
         for row in list.arrangedSubviews { list.removeArrangedSubview(row); row.removeFromSuperview() }
         if items.isEmpty {
-            list.addArrangedSubview(NSTextField(labelWithString: L10n.text("Drag menu bar icons here")))
+            let hint = NSTextField(labelWithString: L10n.text("Drag menu bar icons here"))
+            hint.textColor = .white.withAlphaComponent(0.8)
+            list.addArrangedSubview(hint)
         } else {
-            for item in items {
-                let row = MenuBarSpaceDragRow(item: item)
-                list.addArrangedSubview(row)
-                row.widthAnchor.constraint(equalTo: list.widthAnchor).isActive = true
-            }
+            for item in items { list.addArrangedSubview(MenuBarSpaceDragRow(item: item)) }
         }
     }
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        sender.draggingPasteboard.string(forType: menuBarSpaceDragType) == nil ? [] : .move
+        let accepted = sender.draggingPasteboard.string(forType: menuBarSpaceDragType) != nil
+        strip.layer?.borderWidth = accepted ? 2 : 0
+        strip.layer?.borderColor = NSColor.controlAccentColor.cgColor
+        return accepted ? .move : []
     }
 
+    override func draggingExited(_ sender: NSDraggingInfo?) { strip.layer?.borderWidth = 0 }
+    override func concludeDragOperation(_ sender: NSDraggingInfo?) { strip.layer?.borderWidth = 0 }
+
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        strip.layer?.borderWidth = 0
         guard let id = sender.draggingPasteboard.string(forType: menuBarSpaceDragType) else { return false }
-        onDrop(id, zone)
+        // Let the native drag session release its mouse capture before moving the real item.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.onDrop(id, self.zone)
+        }
         return true
     }
 }
@@ -210,27 +230,30 @@ private final class MenuBarSpaceDragRow: NSView, NSDraggingSource {
 
     init(item: MenuBarSpaceItem) {
         self.item = item
-        super.init(frame: NSRect(x: 0, y: 0, width: 440, height: 32))
+        super.init(frame: NSRect(x: 0, y: 0, width: 26, height: 34))
         let icon = NSImageView(image: item.icon ?? NSImage(systemSymbolName: "app", accessibilityDescription: nil) ?? NSImage())
         icon.imageScaling = .scaleProportionallyDown
-        let label = NSTextField(labelWithString: item.name + (item.movable ? "" : " · " + L10n.text("System Managed")))
-        label.textColor = item.movable ? .labelColor : .secondaryLabelColor
-        for view in [icon, label] { view.translatesAutoresizingMaskIntoConstraints = false; addSubview(view) }
+        icon.alphaValue = item.movable ? 1 : 0.5
+        toolTip = item.name + (item.movable ? "" : " · " + L10n.text("System Managed"))
+        setAccessibilityElement(true)
+        setAccessibilityRole(.image)
+        setAccessibilityLabel(toolTip)
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(icon)
         NSLayoutConstraint.activate([
-            heightAnchor.constraint(equalToConstant: 32),
-            icon.leadingAnchor.constraint(equalTo: leadingAnchor), icon.centerYAnchor.constraint(equalTo: centerYAnchor),
-            icon.widthAnchor.constraint(equalToConstant: 20), icon.heightAnchor.constraint(equalToConstant: 20),
-            label.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 8),
-            label.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor), label.centerYAnchor.constraint(equalTo: centerYAnchor)
+            widthAnchor.constraint(equalToConstant: 26), heightAnchor.constraint(equalToConstant: 34),
+            icon.centerXAnchor.constraint(equalTo: centerXAnchor), icon.centerYAnchor.constraint(equalTo: centerYAnchor),
+            icon.widthAnchor.constraint(equalToConstant: 20), icon.heightAnchor.constraint(equalToConstant: 20)
         ])
     }
 
     required init?(coder: NSCoder) { nil }
-
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     override func hitTest(_ point: NSPoint) -> NSView? {
         bounds.contains(convert(point, from: superview)) ? self : nil
     }
 
+    override func mouseDown(with event: NSEvent) { }
     override func mouseDragged(with event: NSEvent) {
         guard item.movable else { return }
         let pasteboardItem = NSPasteboardItem()

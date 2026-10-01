@@ -1,6 +1,49 @@
 # NotchMuse Project Handoff
 
-## v0.9 Menu Bar Space — Active (2026-09-27)
+## Menu Bar Space — EXPERIMENTAL / PAUSED (2026-10-01)
+
+Current status: archived on branch `codex/menu-bar-space` for source backup; **not READY**. See `MENU_BAR_SPACE_HANDOFF.md` for build 39, short-test evidence, and the unresolved installed-app Accessibility/GUI gate. No further implementation or testing is authorized in this paused phase. Do not merge `main`, tag, or publish v0.9. Preserve the branch and worktree after push verification.
+
+## v0.9 Menu Bar Space — Candidate build 39 installed (2026-09-28)
+
+Current status: **candidate installed; final installed-app GUI permission/acceptance pending**. Branch `codex/menu-bar-space`, base `81e754090692ec11846d524694aa233a09fab149`. The installed app is `/Applications/NotchMuse Menu Bar Space Candidate.app`, version `0.9.0-menu-bar-space-candidate`, build 39, executable SHA-256 `19e4279cbded8f32c905060a204792044ce6f45c3f23a8709e8b68adfc41ec0f`. The nonfunctional build 38 was preserved in `dist.noindex/menu-bar-space-final/installed-build38-backup.app` and replaced at the same Applications path. PM's `/Applications/NotchMuse Candidate.app` was not changed.
+Completed: the Settings page now has three horizontal icon strips, hover app names, native drag/drop, enable switch, icon choices and custom image. A trusted, separately bundled GUI probe performed real drag Visible → Always Hidden → Hidden → Visible, reset, icon selection and custom-image selection. A live two-item probe verified that expanding reveals Hidden while Always Hidden remains offscreen; the safe lyric boundary changes with expansion. With two items, individual return to Visible and Reset succeeded after moving dividers; restart restored saved Hidden placement. Debug build/full self-tests, Release build/packaged self-test, strict signature and `git diff --check` passed. No long soak was run.
+Pending confirmation: the **installed build 39** has not received effective Accessibility permission or passed its own GUI acceptance. After the user unlocked the Mac and enabled the visible Candidate switch, System Settings showed it on, but two launches of build 39 created only the regular status item, with no three space controls. `NSWorkspace` reported no running Thaw instance and `MenuBarSpaceEnabled` remained true, so the old ad-hoc authorization entry is the likely blocker. Re-add the exact installed build 39 in Accessibility, then restart and verify the controls before GUI acceptance. `security find-identity -v -p codesigning` finds no valid signing certificate. Also pending: installed-app lyrics runtime space check, final commit/push/CI, `MENU_BAR_SPACE_HANDOFF.md`, and Candidate READY mark. No main merge, tag or public v0.9 release.
+Key files: `/Users/carlos/.codex/worktrees/menu-bar-space/歌词/MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarSpaceSettingsView.swift`, `/Users/carlos/.codex/worktrees/menu-bar-space/歌词/MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarSpaceController.swift`, `/Users/carlos/.codex/worktrees/menu-bar-space/歌词/MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarItemMover.swift`, this handoff, and `TASK_BOARD.md`.
+Next step: user unlocks Mac and grants Accessibility to the installed build 39, then perform the short installed GUI/lyrics acceptance. Only after those gates pass, finalize commit, push `codex/menu-bar-space`, run CI, write `MENU_BAR_SPACE_HANDOFF.md`, and mark Candidate READY.
+Do not repeat: Thaw source investigation, drag-event experiments, player/matcher/provider work, or long soak. Earlier build 38 notes below are historical.
+
+### Reference-driven closure resumed
+
+User explicitly requested following Thaw's GitHub implementation and the same three-row interaction: icon hover labels, drag between zones, and feature enable/disable. Investigate the installed Thaw **2.0.1** tag rather than relying on development HEAD. NotchMuse remains MIT; Thaw is GPL-3.0, so keep the comparison at the behavioral/API level rather than importing its code into the MIT source. No new preview should be installed before a working system move is demonstrated. No valid code-signing identities are currently installed; final signing/permission continuity remains a separate gate.
+
+### Build 38 user regression — 2026-09-27
+
+- User opened installed build 38 and saw the Accessibility permission message with all three strips absent. This is a new installation regression in addition to the unresolved drag bug.
+- Read-only verification: running process points to `/Applications/NotchMuse Menu Bar Space Candidate.app`; installed version `0.9.0-layout-preview`, build 38. Its designated code requirement is cdhash-only (`3d11c513e6eb81a3060862e471ecbfcac1ca36e8`). Ad-hoc build identity is not stable across rebuilt binaries; prior diagnostic AX trust does not establish trust for the installed replacement.
+- The earlier statement that no new authorization would be needed was not verified for the installed app and must not be repeated. Do not reset TCC or bypass macOS permission checks.
+- Do not deploy another cosmetic preview as a functional fix. Resolve stable candidate signing/identity and actual drag transport before the next user acceptance build.
+
+### Local artifact and checks
+
+- Installed UI preview: `/Applications/NotchMuse Menu Bar Space Candidate.app`, version `0.9.0-layout-preview`, build **38**. This is explicitly **not a drag-fix candidate / not READY**; the production controller is unchanged from `81e7540`.
+- Executable SHA-256: `11c38713e744fcf32b965a318fd81c65007a69867d476d02bb5c6091a42379ae`.
+- Final Debug build and full self-tests passed. Release build, package self-test and installed deep/strict signature verification passed. `git diff --check` passed. Live bridge runtime test was skipped; players were not part of this change.
+- Diagnostic app stopped. Thaw restored (PID 94579 at verification); PM's `/Applications/NotchMuse Candidate.app` remained running and untouched. The UI preview was installed but left stopped to avoid competing menu bar managers.
+- Changes exist only in the local worktree; no final commit or push. The remaining blocker is actual macOS 26 item movement, not user permission. No further user action is requested for this already reproduced bug.
+
+### Short-test evidence
+
+- macOS 26.5.2; 1470×956 point main display. Thaw was stopped during tests. AX permission true; session on-console and logged in.
+- WindowServer reports third-party status windows under Control Center PID 570, while AX items belong to the individual app. AX rectangles are inset 7 points from their CG window rectangles.
+- XApp window 28784: AX `(406,4.5,24,24)`; separators Always `(444,4.5,20,24)` and Hidden `(478,4.5,20,24)`. PID + window-addressed session relay confirmed down/drag/up delivery but did not change the final zone.
+- ChatGPT window 114350: routing a continuous command-drag to the app process moved the item from x=551 to x=407, **to the wrong zone**. The attempt returned false and saved no zone preference.
+- In another held drag ChatGPT AX became `(515,20.5,24,24)` while Hidden AX jumped from x=516 to x=114. Following the live divider coordinate did not produce a successful drop. The exact coordinate/transport cause remains unresolved; do not state the hypothesis as a proven fix.
+- Both the owner-PID relay and source-PID teleport experiments failed final frame verification. Temporary reference implementations are in `/tmp/notchmuse-space-window-owner-probe.swift` and `/tmp/notchmuse-space-source-process-probe.swift`; do not ship them.
+- One CUA GUI drag on ChatGPT produced no AX change. Programmatic backend probes are separate evidence and are not a passed GUI test.
+- Tests altered XApp/ChatGPT ordering during failed moves; no saved zone classification was accepted. Restoring Thaw returns menu-bar management to the existing manager, but does not prove exact prior item order.
+
+## Prior v0.9 Candidate Snapshot
 
 Current status: local implementation and candidate under QA; real item movement is not yet verified.
 Completed: fetched `origin/main` and created isolated `codex/menu-bar-space` from `ecb631e4f02cd4329a6f8595be8f561ad5d353ea`. On macOS 26.5.2, `AXExtrasMenuBar` exposes third-party and system items, and status-item positions are readable but not settable. Implemented default-off controller, Accessibility flow, three separators/zones, native drag Settings page, icon presets/custom image thumbnail, persistence/reset, and lyrics safe-boundary clamp. Debug build/full self-tests and Release candidate build/package self-test/signature pass. GUI confirmed page opens, enable works, and items appear; a crash in the initial page layout was fixed. Control Center duplicates were filtered.

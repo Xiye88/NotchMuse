@@ -1,9 +1,9 @@
 # NotchMuse Task Board
 
-## Active v0.9 — Menu Bar Space (2026-09-27)
+## Paused v0.9 — Menu Bar Space (2026-10-01)
 
 - Owner: this isolated PM/implementation task; branch `codex/menu-bar-space` from `origin/main` `ecb631e4f02cd4329a6f8595be8f561ad5d353ea`.
-- Status: IMPLEMENTED LOCALLY / QA OPEN. macOS 26 item discovery, Settings UI, Debug/self-tests and Release package pass; actual item movement, reveal, reset and cross-version behavior remain unverified. Mac lock paused GUI QA; Thaw was restored.
+- Status: **EXPERIMENTAL / PAUSED**. Existing code and build 39 evidence are archived on `codex/menu-bar-space`. Installed build 39 has not passed effective Accessibility or GUI acceptance; the prior ad-hoc permission entry is a suspected blocker. No further development, main merge, tag, or public release. See `MENU_BAR_SPACE_HANDOFF.md`.
 - Exit: default-off permission flow; three functional zones with drag, persistence, reset and control icon; safe automatic lyric width; bilingual UI; focused tests and separate candidate. Report any OS compatibility limit honestly.
 - Boundaries: no changes to players, Matcher, providers, other Settings pages, main, or public release.
 

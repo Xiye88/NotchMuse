@@ -7,7 +7,7 @@
 - Work: App activation/login policy, Stable/Preview identity, Sparkle update plumbing, Settings polish, Support, release tooling/docs, and focused regression. Public release and website/appcast updates remain gated.
 - Menu Bar Space stays PAUSED / BACKLOG; no code from that branch enters this candidate.
 - Build 41 Preview is installed separately. Earlier Debug/Release builds, full self-test, Settings interaction test, packaged self-test, signature, and DMG verify PASS. QR payloads match the supplied addresses. Native lyrics extension is DEFERRED for lack of a stable permitted source.
-- Build 40 main-window/Support GUI smoke PASS; Product Owner confirmed all four EVM networks, corrected in Build 41. Isolated staged-update lower/higher apps and local DMG are prepared. Pending: Build 41 GUI and five-player smoke, Keychain-unblocked signed appcast, staged update install, Product Owner acceptance. `swift test` is blocked locally by missing XCTest. Branch push `54a0f3a` and CI `36969610080` PASS; no merge or public release.
+- Build 41 Settings and Support windows opened; all four confirmed EVM networks visible. Support address wrapping still needs polish. Isolated staged-update lower/higher apps and local DMG are prepared. Pending: Dock and five-player smoke (Mac locked), Keychain authorization PENDING_PO, signed appcast, staged update install, Product Owner acceptance. `swift test` is blocked locally by missing XCTest. Branch push and CI PASS; no merge or public release.
 
 ## Menu Bar Space - PAUSED / BACKLOG (2026-10-02)
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIST="$ROOT/dist.noindex/preview"
-BUILD_NUMBER="${1:-40}"
+BUILD_NUMBER="${1:-41}"
 
 NOTCHMUSE_PREVIEW=1 \
 NOTCHMUSE_DIST_DIR="$DIST" \

@@ -37,7 +37,7 @@ final class SupportWindowController: NSWindowController {
         methods.addArrangedSubview(paymentCard(title: L10n.text("WeChat Pay"),
                                                 detail: "", image: NSImage(contentsOfFile: Bundle.main.path(forResource: "WeChatSupport", ofType: "jpg") ?? ""),
                                                 address: nil))
-        methods.addArrangedSubview(paymentCard(title: "USDT · BNB Smart Chain", detail: "BEP20",
+        methods.addArrangedSubview(paymentCard(title: "USDT · EVM", detail: "Ethereum · BNB Smart Chain (BEP20) · Arbitrum · Optimism",
                                                 image: Self.qrImage(Self.evmAddress), address: Self.evmAddress))
         methods.addArrangedSubview(paymentCard(title: "USDT · TRON", detail: "TRC20",
                                                 image: Self.qrImage(Self.tronAddress), address: Self.tronAddress))
@@ -101,9 +101,9 @@ final class SupportWindowController: NSWindowController {
         guard let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
         filter.setValue(Data(value.utf8), forKey: "inputMessage")
         filter.setValue("H", forKey: "inputCorrectionLevel")
-        guard let image = filter.outputImage,
+        guard let image = filter.outputImage?.transformed(by: CGAffineTransform(scaleX: 4, y: 4)),
               let cgImage = CIContext().createCGImage(image, from: image.extent) else { return nil }
-        return NSImage(cgImage: cgImage, size: NSSize(width: 180, height: 180))
+        return NSImage(cgImage: cgImage, size: image.extent.size)
     }
 
     @objc private func copyAddress(_ sender: NSButton) {

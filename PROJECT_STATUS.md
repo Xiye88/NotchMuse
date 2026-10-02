@@ -2,11 +2,11 @@
 
 ## v0.8.0 Productization Preview - 2026-10-02
 
-- Candidate: local `codex/v0.8.0-productization` based on `cf62b032fce7ff0c901104b913174182f8c72507`; Build 40 Preview is installed at `/Applications/NotchMuse Preview.app`. Stable `/Applications/NotchMuse.app` remains public Beta 3 Build 38 and is untouched.
+- Candidate: local `codex/v0.8.0-productization` based on `cf62b032fce7ff0c901104b913174182f8c72507`; Build 41 Preview is installed at `/Applications/NotchMuse Preview.app`. Stable `/Applications/NotchMuse.app` remains public Beta 3 Build 38 and is untouched.
 - Implemented locally: separate Preview identity/preferences, Settings-on-launch/Dock behavior, Sparkle 2.10.0 update plumbing with user-controlled checks, Settings polish, Support page, and release-preparation tooling. Native lyrics extension is deferred. No public website, GitHub Release, or appcast change.
 - Verified: Debug and Release builds, packaged self-test, full self-test, Settings interaction test, ad-hoc signature, DMG integrity, QR payloads. Pending: GUI/real-player checks while Mac is locked, signed staged appcast (Keychain access), staged update install, and Product Owner acceptance. Local `swift test` lacks XCTest.
 - Publication remains gated. Beta 3 is the latest public release, and earlier beta users cannot receive an updater retroactively.
-- 06:45 continuation: rebuilt Preview/stable candidate Build 40 after limiting Support's EVM address to confirmed BEP20. Added bilingual README support QR/address section; both new USDT QR images decode correctly. Packaged self-test, codesign, DMG verify and website language test PASS. Mac still locked, so GUI-dependent self-test/visual smoke and Keychain-signed staged appcast remain pending. No push or public download change.
+- 06:45 continuation: Build 40 packaged self-test, codesign, DMG verify and website language test PASS. Main window, preview selector, General page and Support QR layout were visually inspected after unlock. Product Owner then confirmed four EVM networks; corrected Build 41 Preview is installed, with sharper QR rendering and shortened Settings labels. The Mac relocked before final Build 41/five-player smoke or Keychain-signed staged update. No public download change.
 
 ## Menu Bar Space Decision - 2026-10-02
 

@@ -506,14 +506,14 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("When Player Stops")), playerStopBehaviorPopUp],
             [label(L10n.text("Language")), languagePopUp],
             [label(L10n.text("Launch at Login")), launchAtLoginSwitch],
-            [label(L10n.text("Automatically Check for Updates")), automaticUpdateSwitch]
+            [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch]
         ])
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
         let checkUpdates = NSButton(title: L10n.text("Check for Updates…"), target: self, action: #selector(checkForUpdates))
         checkUpdates.isEnabled = UpdateController.shared.isAvailable
         generalPage.addArrangedSubview(checkUpdates)
 
-        displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how lyrics appear. Offset is clamped to safe menu bar space; Compact or smaller Custom widths allow more movement."), grid: displayGrid, trailing: resetButton(for: .display))))
+        displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how and where lyrics appear."), grid: displayGrid, trailing: resetButton(for: .display))))
 
         guard let contentView = window?.contentView else { return }
         let backdrop = SettingsBackdropView(frame: contentView.bounds)

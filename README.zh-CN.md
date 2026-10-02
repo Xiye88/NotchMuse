@@ -185,14 +185,14 @@ NotchMuse 本身不管理其他菜单栏图标。
 
 即将推出的 v0.8.0 应用内有支持页面，也可以使用以下二维码：
 
-| 微信支付 | USDT · BNB Smart Chain (BEP20) | USDT · TRON (TRC20) |
+| 微信支付 | USDT · EVM | USDT · TRON (TRC20) |
 | --- | --- | --- |
-| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="微信支付收款二维码" width="150"> | <img src="docs/support/usdt-bep20.png" alt="USDT BEP20 地址二维码" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRC20 地址二维码" width="150"> |
+| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="微信支付收款二维码" width="150"> | <img src="docs/support/usdt-evm.png" alt="USDT EVM 地址二维码" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRC20 地址二维码" width="150"> |
 
-- BNB Smart Chain：`0x6c0275e975818e99d078ee2348576e2d9608f6d6`
+- Ethereum、BNB Smart Chain (BEP20)、Arbitrum、Optimism：`0x6c0275e975818e99d078ee2348576e2d9608f6d6`
 - TRON：`TCTrNcvTD3QE7opC61mKoTyUmRkKos6jan`
 
-转账前请核对网络，并且只发送 USDT。用户提供的 EVM 充值截图**只确认 BEP20**，尚不能证明 Ethereum、Arbitrum、Optimism 可用。[支持者名单](docs/support/supporters.json)只展示已同意公开的信息。
+转账前请核对网络，并且只发送 USDT。Product Owner 已确认以上四条 EVM 网络；TRON 使用单独地址。[支持者名单](docs/support/supporters.json)只展示已同意公开的信息。
 
 ## 隐私
 

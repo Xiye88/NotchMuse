@@ -2,8 +2,8 @@
 
 ## Unreleased v0.8.0 Preview Candidate - 2026-10-02
 
-- Local Build 40 adds an isolated Preview app, Settings-on-launch/Dock activation, clickable Live Preview cards, optional Sparkle update checks, and a Support page with verified payment QR payloads.
-- Debug/Release builds and local self-tests pass. GUI, staged updater, and Product Owner acceptance remain open. No public release or website/feed switch has occurred; Beta 3 remains current.
+- Local Build 40 added an isolated Preview app, Settings-on-launch/Dock activation, clickable Live Preview cards, optional Sparkle update checks, and a Support page with verified payment QR payloads. Build 41 restores the four Product Owner-confirmed EVM networks, sharpens QR rendering, and shortens two clipped Settings labels.
+- Debug/Release builds and local self-tests passed before the Build 41 edit. Build 40 main-window/Support GUI smoke passed; five-player smoke, signed staged updater, Build 41 GUI, and Product Owner acceptance remain open. No public release or website/feed switch has occurred; Beta 3 remains current.
 
 ## Beta 3 Release Approval - 2026-09-27
 

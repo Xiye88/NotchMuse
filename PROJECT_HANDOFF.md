@@ -4,7 +4,7 @@
 
 Current status: PARTIAL. `/Applications/NotchMuse Preview.app` is Build 45 using the localhost staged feed; `/Applications/NotchMuse.app` remains public Beta 3 Build 38. No main merge or public publication.
 Completed: unified overlay/idle-hidden Settings scroll behavior; concise Dock/menu labels; manual update check independent of automatic checks; pixel-exact WeChat QR crop; compact Support card layout. Focused installed-app GUI showed all three Settings pages, temporary scrolling indicator, up-to-date dialog with automatic checks OFF, and three intact Support cards. EVM copy returned the complete address. QR desktop decoding and packaged Settings self-test passed.
-Pending confirmation: `WeChat QR Scan: PENDING_PO` on a real phone; TRON copy GUI test was interrupted by Mac lock. Full Sparkle install-and-relaunch remains PARTIAL because auto-relaunch was not observed in the earlier isolated staged test. Product Owner final Preview acceptance is required before release.
+Pending confirmation: `WeChat QR Scan: PENDING_PO` on a real phone. EVM and TRON complete-address copy both passed after unlock. Full Sparkle install-and-relaunch remains PARTIAL because auto-relaunch was not observed in the earlier isolated staged test. Product Owner final Preview acceptance is required before release. Development CI `37101557484` passed at `5d4d58638cabb54ce66fd8df711377b0f3e6945a`.
 Key files: `MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/SupportWindowController.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/App/UpdateController.swift`, `scripts/build_app.sh`.
 Next step: finish only those pending gate checks; do not add features, repeat player soak, merge main, or publish official v0.8.0 yet.
 

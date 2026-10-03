@@ -5,9 +5,9 @@
 - [x] Installed Build 45 Preview; stable Beta 3 Build 38 untouched.
 - [x] Display/Appearance/General share idle-hidden overlay scroller; focused GUI scrolling and layout check PASS.
 - [x] Dock/menu labels fit; manual staged update check remains enabled with auto-check OFF and shows up-to-date result.
-- [x] WeChat QR pixel crop and desktop decode PASS; EVM full-address copy PASS; three Support cards visually checked.
+- [x] WeChat QR pixel crop and desktop decode PASS; EVM and TRON full-address copy PASS; three Support cards visually checked.
 - [ ] `WeChat QR Scan: PENDING_PO` on a real phone; no payment needed.
-- [ ] TRON copy focused GUI check after Mac unlock.
+- [x] Branch CI `37101557484` PASS at `5d4d58638cabb54ce66fd8df711377b0f3e6945a`.
 - [ ] Sparkle full update E2E automatic relaunch unresolved; previous staged install/checksum/signature passed.
 - [ ] Product Owner Preview PASS before official v0.8.0 release actions. No new feature work.
 

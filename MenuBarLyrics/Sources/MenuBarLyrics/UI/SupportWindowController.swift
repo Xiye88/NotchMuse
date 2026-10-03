@@ -54,16 +54,14 @@ final class SupportWindowController: NSWindowController {
     }
 
     private func paymentCard(title: String, detail: String, image: NSImage?, address: String?) -> NSView {
-        let card = NSStackView()
+        let card = SupportCardView()
         card.orientation = .vertical
         card.alignment = .centerX
         card.spacing = 9
         card.edgeInsets = NSEdgeInsets(top: 14, left: 10, bottom: 14, right: 10)
         card.wantsLayer = true
         card.layer?.cornerRadius = 10
-        card.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
         card.layer?.borderWidth = 1
-        card.layer?.borderColor = NSColor.separatorColor.cgColor
         card.heightAnchor.constraint(equalToConstant: 350).isActive = true
         card.addArrangedSubview(heading(title, size: 14))
         if let image {
@@ -132,6 +130,25 @@ final class SupportWindowController: NSWindowController {
             guard let (data, _) = try? await URLSession.shared.data(from: url),
                   let people = try? JSONDecoder().decode([Supporter].self, from: data), !people.isEmpty else { return }
             supporters.stringValue = people.map { "\($0.name) · \($0.displayAmount)" }.joined(separator: "\n")
+        }
+    }
+}
+
+private final class SupportCardView: NSStackView {
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshColors()
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        refreshColors()
+    }
+
+    private func refreshColors() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+            layer?.borderColor = NSColor.separatorColor.cgColor
         }
     }
 }

@@ -1,5 +1,14 @@
 # NotchMuse Project Handoff
 
+## Active final corrections - 2026-10-03
+
+Current status: IN PROGRESS on `codex/v0.8.0-productization`. Installed Preview is Build 45; stable Beta 3 Build 38 is unchanged.
+Completed: Product Owner confirmed real-phone `WeChat QR Scan: PASS`; preserve the accepted QR crop. Update error root cause is the stopped localhost appcast server, not an up-to-date response.
+Pending confirmation: full staged automatic/manual update and install/relaunch; real Login Item ON/OFF; unchanged Settings frame; System/Light/Dark and Support appearance; final Preview acceptance.
+Key files: `MenuBarLyrics/Sources/MenuBarLyrics/App/UpdateController.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/App/LoginAtLaunchPolicy.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/SupportWindowController.swift`.
+Next step: finish these final focused corrections, deploy only Preview, synchronize development branch and CI as authorized. No main merge or public release before Product Owner PASS.
+Do not repeat: WeChat QR changes, long player tests, archived Menu Bar Space, or completed baseline build checks.
+
 ## Current gate - Build 45 Preview, 2026-10-03
 
 Current status: PARTIAL. `/Applications/NotchMuse Preview.app` is Build 45 using the localhost staged feed; `/Applications/NotchMuse.app` remains public Beta 3 Build 38. No main merge or public publication.

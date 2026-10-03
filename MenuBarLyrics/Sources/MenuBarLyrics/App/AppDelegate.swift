@@ -4,6 +4,9 @@ import AppKit
     private var controller: MenuBarController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Detect a fresh install before startup writes any preferences.
+        LoginAtLaunchPolicy.configureIfNeeded()
+        AppAppearanceController.apply()
         let mainMenu = NSMenu()
         let applicationItem = NSMenuItem()
         let applicationMenu = NSMenu()
@@ -20,7 +23,6 @@ import AppKit
         UpdateController.shared.startIfStable()
         controller = MenuBarController()
         controller?.start()
-        LoginAtLaunchPolicy.configureIfNeeded()
         controller?.showSettings()
         DistributedNotificationCenter.default().addObserver(
             self, selector: #selector(reopenFromSecondLaunch(_:)),

@@ -138,7 +138,11 @@
 "Hide Lyrics and Wait" = "隐藏歌词，等待恢复";
 "Keep Last Lyrics and Pause" = "保持最后歌词并暂停";
 "Language" = "语言";
-"Launch at Login" = "登录时启动";
+"Launch at Login" = "开机自动启动";
+"System" = "跟随系统";
+"Appearance Mode" = "外观模式";
+"Light" = "浅色";
+"Dark" = "深色";
 "Show NotchMuse in Dock" = "在 Dock 中显示 NotchMuse";
 "Show in Dock" = "显示 Dock 图标";
 "Show Menu Bar Icon" = "显示菜单栏图标";

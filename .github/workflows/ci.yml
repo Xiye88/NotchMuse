@@ -64,6 +64,10 @@ jobs:
           .build/debug/NotchMuse --full-self-test
       - name: Run Swift package tests
         run: cd MenuBarLyrics && swift test
+      - name: Verify login-at-launch preference policy
+        run: |
+          swiftc -parse-as-library MenuBarLyrics/Sources/MenuBarLyrics/App/LoginAtLaunchPolicy.swift MenuBarLyrics/Tests/LoginAtLaunchPolicyTests.swift -o "$RUNNER_TEMP/login-policy-tests"
+          "$RUNNER_TEMP/login-policy-tests"
       - name: Build Release app, package DMG, and run packaged self-test
         run: NOTCHMUSE_SKIP_BRIDGE_RUNTIME_TEST=1 ./scripts/build_release.sh 0.8.0 19
       - name: Verify release metadata and hashes

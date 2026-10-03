@@ -282,6 +282,7 @@ final class SettingsWindowController: NSWindowController {
     private let showMenuBarIconSwitch = NSSwitch()
     private let automaticUpdateSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
+    private let appAppearanceControl = NSSegmentedControl(labels: AppAppearance.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let playerPopUp = NSPopUpButton()
     private let playerStopBehaviorPopUp = NSPopUpButton()
     private let notchBackgroundSwitch = NSSwitch()
@@ -323,11 +324,13 @@ final class SettingsWindowController: NSWindowController {
         window.title = "NotchMuse"
         window.minSize = NSSize(width: 900, height: 610)
         window.titlebarAppearsTransparent = true
-        window.appearance = NSAppearance(named: .aqua)
         window.isReleasedWhenClosed = false
         window.center()
+        window.setFrameAutosaveName("NotchMuseSettings")
+        let restoredFrame = window.frame
         super.init(window: window)
         buildContent()
+        window.setFrame(restoredFrame, display: false)
     }
 
     required init?(coder: NSCoder) {
@@ -345,13 +348,16 @@ final class SettingsWindowController: NSWindowController {
     static func testModeControls() {
         _ = NSApplication.shared
         let defaults = UserDefaults.standard
-        let keys = [AppPreferences.displayModeKey, AppPreferences.displayWidthKey, AppPreferences.colorPresetKey, AppPreferences.notchPlacementKey]
+        let keys = [AppPreferences.displayModeKey, AppPreferences.displayWidthKey, AppPreferences.colorPresetKey, AppPreferences.notchPlacementKey,
+                    AppAppearanceController.preferenceKey, "NSWindow Frame NotchMuseSettings"]
         let saved = keys.map { defaults.object(forKey: $0) }
+        let savedAppearance = NSApp.appearance
         defer {
             for (key, value) in zip(keys, saved) {
                 if let value { defaults.set(value, forKey: key) }
                 else { defaults.removeObject(forKey: key) }
             }
+            NSApp.appearance = savedAppearance
         }
         defaults.set(DisplayMode.statusBar.rawValue, forKey: AppPreferences.displayModeKey)
         defaults.set(DisplayWidth.auto.rawValue, forKey: AppPreferences.displayWidthKey)
@@ -387,6 +393,45 @@ final class SettingsWindowController: NSWindowController {
         controller.preview.onModeClick?(.notch)
         precondition(AppPreferences.displayMode == .notch && controller.previewModeControl.selectedSegment == controller.displayModeControl.selectedSegment,
                      "Preview card must update both mode selectors")
+        let lyricsKeys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey,
+                          AppPreferences.customLyricsEndColorKey, AppPreferences.notchBackgroundColorKey,
+                          AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundOpacityKey]
+        let lyricsBefore = lyricsKeys.map { defaults.object(forKey: $0) as? NSObject }
+        let testFrame = NSRect(x: 90, y: 90, width: 1100, height: 800)
+        controller.show()
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.05))
+        controller.window!.setFrame(testFrame, display: false)
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.05))
+        let manualFrame = controller.window!.frame
+        precondition(manualFrame == testFrame, "Manual Settings size must be accepted: \(manualFrame)")
+        for (index, appearance) in AppAppearance.allCases.enumerated() {
+            controller.appAppearanceControl.selectedSegment = index
+            controller.appAppearanceChanged()
+            precondition(AppAppearanceController.selection == appearance, "App appearance must persist")
+            precondition(NSApp.appearance?.name == appearance.appearance?.name, "NSApp must apply selected appearance")
+            for page in SettingsPage.allCases {
+                controller.pageChanged(controller.sidebarButtons[page]!)
+                RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.02))
+                precondition(controller.window!.frame == manualFrame, "Page \(page) must preserve exact window frame: \(controller.window!.frame) != \(manualFrame)")
+            }
+        }
+        let lyricsAfter = lyricsKeys.map { defaults.object(forKey: $0) as? NSObject }
+        precondition(lyricsBefore == lyricsAfter, "App appearance must not change lyrics colors or background")
+        precondition(controller.launchAtLoginSwitch.isEnabled, "Login toggle must remain enabled, including Preview")
+        precondition(L10n.text("Launch at Login", language: .simplifiedChinese) == "开机自动启动", "Login label must match requested Chinese")
+        var surfaceColors: [CGFloat] = []
+        for name: NSAppearance.Name in [.aqua, .darkAqua] {
+            NSAppearance(named: name)!.performAsCurrentDrawingAppearance {
+                surfaceColors.append(AppearanceSurfaceColors.card.usingColorSpace(.deviceRGB)!.redComponent)
+            }
+        }
+        precondition(surfaceColors[0] > surfaceColors[1], "Cards must adapt between Light and Dark")
+        controller.window!.saveFrame(usingName: "NotchMuseSettings")
+        let restoredController = SettingsWindowController(onSettingsChange: {})
+        precondition(restoredController.window!.frame == manualFrame, "Manual window frame must restore")
+        precondition(restoredController.window!.appearance == nil, "Settings must inherit global appearance")
+        restoredController.window?.close()
+        controller.window?.close()
         precondition(SupportWindowController().window?.contentView is NSStackView, "Support page must build")
         print("Settings interaction self-test passed")
     }
@@ -472,6 +517,8 @@ final class SettingsWindowController: NSWindowController {
         }
         languagePopUp.target = self
         languagePopUp.action = #selector(languageChanged)
+        appAppearanceControl.target = self
+        appAppearanceControl.action = #selector(appAppearanceChanged)
         for source in PlayerSource.allCases {
             playerPopUp.addItem(withTitle: source.displayName())
         }
@@ -531,6 +578,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Show in Dock")), showInDockSwitch],
             [label(L10n.text("Show Menu Bar Icon")), showMenuBarIconSwitch],
             [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch],
+            [label(L10n.text("Appearance Mode")), appAppearanceControl],
             [label(L10n.text("Language")), languagePopUp]
         ])
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
@@ -542,6 +590,7 @@ final class SettingsWindowController: NSWindowController {
 
         guard let contentView = window?.contentView else { return }
         let backdrop = SettingsBackdropView(frame: contentView.bounds)
+        backdrop.onAppearanceChange = { [weak self] in self?.updateSidebarSelection() }
         backdrop.autoresizingMask = [.width, .height]
         contentView.addSubview(backdrop)
         let sidebar = NSStackView()
@@ -557,12 +606,11 @@ final class SettingsWindowController: NSWindowController {
             sidebar.addArrangedSubview(button)
         }
         updateSidebarSelection()
-        let sidebarPanel = NSView()
+        let sidebarPanel = AppearanceSurfaceView()
         sidebarPanel.wantsLayer = true
-        sidebarPanel.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.46).cgColor
+        sidebarPanel.surfaceColor = AppearanceSurfaceColors.sidebar
         sidebarPanel.layer?.cornerRadius = 14
         sidebarPanel.layer?.borderWidth = 1
-        sidebarPanel.layer?.borderColor = NSColor.white.withAlphaComponent(0.65).cgColor
         sidebarPanel.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebar)
         let sidebarFooter = SettingsSidebarFooterView()
@@ -601,7 +649,6 @@ final class SettingsWindowController: NSWindowController {
         scrollView.hasHorizontalScroller = false
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         let document = FlippedSettingsDocumentView()
-        document.translatesAutoresizingMaskIntoConstraints = false
         document.addSubview(contentStack)
         scrollView.documentView = document
         contentView.addSubview(sidebarPanel)
@@ -622,11 +669,10 @@ final class SettingsWindowController: NSWindowController {
             scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
             scrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -18),
-            document.widthAnchor.constraint(equalTo: scrollView.contentView.widthAnchor),
             contentStack.leadingAnchor.constraint(equalTo: document.leadingAnchor),
             contentStack.topAnchor.constraint(equalTo: document.topAnchor),
             contentStack.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -8),
-            contentStack.bottomAnchor.constraint(equalTo: document.bottomAnchor, constant: -18)
+            contentStack.bottomAnchor.constraint(lessThanOrEqualTo: document.bottomAnchor, constant: -18)
         ])
         DispatchQueue.main.async { scrollView.hideIdleScroller() }
     }
@@ -646,7 +692,7 @@ final class SettingsWindowController: NSWindowController {
     private func sidebarTitle() -> NSView {
         let title = NSTextField(labelWithString: "NotchMuse")
         title.font = .systemFont(ofSize: 20, weight: .bold)
-        title.textColor = NSColor(calibratedRed: 0.10, green: 0.27, blue: 0.51, alpha: 1)
+        title.textColor = .labelColor
         let icon = NSImageView(image: notchMuseAppIcon())
         icon.setAccessibilityLabel("NotchMuse")
         icon.widthAnchor.constraint(equalToConstant: 24).isActive = true
@@ -677,10 +723,9 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func card(content: NSView) -> NSView {
-        let box = NSView()
+        let box = AppearanceSurfaceView()
         box.wantsLayer = true
-        box.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.73).cgColor
-        box.layer?.borderColor = NSColor.white.withAlphaComponent(0.8).cgColor
+        box.surfaceColor = AppearanceSurfaceColors.card
         box.layer?.borderWidth = 1
         box.layer?.cornerRadius = 14
         box.layer?.shadowColor = NSColor(calibratedRed: 0.19, green: 0.31, blue: 0.53, alpha: 1).cgColor
@@ -749,13 +794,13 @@ final class SettingsWindowController: NSWindowController {
         let titles = ["Warm Orange", "Fresh Minimal", "Dreamy Soft", "Pure"]
         let colors: [NSColor] = [.systemOrange, .systemTeal, .systemPurple, .systemGreen]
         let tiles = zip(titles, colors).enumerated().map { index, entry in
-            let tile = NSView()
+            let tile = AppearanceSurfaceView()
             tile.wantsLayer = true
-            tile.layer?.backgroundColor = entry.1.withAlphaComponent(0.09).cgColor
-            tile.layer?.borderColor = entry.1.withAlphaComponent(0.25).cgColor
+            tile.surfaceColor = entry.1.withAlphaComponent(0.09)
+            tile.surfaceBorderColor = entry.1.withAlphaComponent(0.25)
             tile.layer?.borderWidth = 1
             tile.layer?.cornerRadius = 10
-            tile.widthAnchor.constraint(equalToConstant: 130).isActive = true
+            tile.widthAnchor.constraint(greaterThanOrEqualToConstant: 130).isActive = true
             tile.heightAnchor.constraint(equalToConstant: 72).isActive = true
             let icon = NSImageView(image: NSImage(systemSymbolName: "waveform", accessibilityDescription: nil) ?? NSImage())
             icon.contentTintColor = entry.1
@@ -788,11 +833,15 @@ final class SettingsWindowController: NSWindowController {
         }
         let row = NSStackView(views: tiles)
         row.orientation = .horizontal
+        row.distribution = .fillEqually
+        row.setHuggingPriority(.defaultLow, for: .horizontal)
         row.spacing = 12
         let contents = NSStackView(views: [sectionTitle(L10n.text("Quick Presets")), row])
         contents.orientation = .vertical
         contents.alignment = .leading
         contents.spacing = 14
+        contents.setHuggingPriority(.defaultLow, for: .horizontal)
+        row.widthAnchor.constraint(equalTo: contents.widthAnchor).isActive = true
         return card(content: contents)
     }
 
@@ -964,7 +1013,8 @@ final class SettingsWindowController: NSWindowController {
         customWidthValue.stringValue = String(format: "%.0f", customWidthSlider.doubleValue)
         statusBarOffsetValue.stringValue = String(format: "%.0f", statusBarOffsetSlider.doubleValue)
         launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
-        launchAtLoginSwitch.isEnabled = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool != true
+        launchAtLoginSwitch.isEnabled = true
+        appAppearanceControl.selectedSegment = AppAppearance.allCases.firstIndex(of: AppAppearanceController.selection)!
         showInDockSwitch.state = AppPreferences.showInDock ? .on : .off
         showMenuBarIconSwitch.state = AppPreferences.showMenuBarIcon ? .on : .off
         automaticUpdateSwitch.state = UpdateController.shared.automaticallyChecksForUpdates ? .on : .off
@@ -1310,6 +1360,8 @@ final class SettingsWindowController: NSWindowController {
         displayPage.isHidden = page != .display
         appearancePage.isHidden = page != .appearance
         generalPage.isHidden = page != .general
+        window?.contentView?.layoutSubtreeIfNeeded()
+        settingsScrollView?.layoutDocument()
         DispatchQueue.main.async {
             self.updateSidebarSelection()
             self.settingsScrollView?.hideIdleScroller()
@@ -1317,6 +1369,8 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func updateSidebarSelection() {
+        guard let window else { return }
+        window.effectiveAppearance.performAsCurrentDrawingAppearance {
         sidebarButtons.forEach { page, button in
             let selected = page == selectedPage
             button.state = selected ? .on : .off
@@ -1337,6 +1391,13 @@ final class SettingsWindowController: NSWindowController {
                                range: NSRange(location: subtitleStart, length: text.length - subtitleStart))
             button.attributedTitle = text
         }
+        }
+    }
+
+    @objc private func appAppearanceChanged() {
+        guard AppAppearance.allCases.indices.contains(appAppearanceControl.selectedSegment) else { return }
+        AppAppearanceController.select(AppAppearance.allCases[appAppearanceControl.selectedSegment])
+        updateSidebarSelection()
     }
 
     @objc private func previewModeChanged() {
@@ -1374,10 +1435,11 @@ final class SettingsWindowController: NSWindowController {
             keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.customLyricsEndColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchBackgroundOpacityKey, AppPreferences.notchBackgroundPaddingKey, AppPreferences.notchHideOnHoverKey]
         case .general:
             keys = [AppPreferences.playerSourceKey, AppPreferences.playerStopBehaviorKey, AppPreferences.languageKey,
-                    AppPreferences.showInDockKey, AppPreferences.showMenuBarIconKey]
+                    AppPreferences.showInDockKey, AppPreferences.showMenuBarIconKey, AppAppearanceController.preferenceKey]
         }
         keys.forEach(UserDefaults.standard.removeObject(forKey:))
         if page == .general {
+            AppAppearanceController.apply()
             UserDefaults.standard.set(false, forKey: AppPreferences.showInDockKey)
             UserDefaults.standard.set(true, forKey: AppPreferences.showMenuBarIconKey)
         }
@@ -1405,17 +1467,20 @@ final class SettingsWindowController: NSWindowController {
     }
 }
 
-private final class SettingsBackdropView: NSView {
+private final class SettingsBackdropView: AppearanceSurfaceView {
+    override var wantsUpdateLayer: Bool { false }
+
     override func draw(_ dirtyRect: NSRect) {
-        NSGradient(starting: NSColor(calibratedRed: 1, green: 0.91, blue: 0.88, alpha: 1),
-                   ending: NSColor(calibratedRed: 0.79, green: 0.87, blue: 1, alpha: 1))?
+        NSGradient(starting: AppearanceSurfaceColors.backdropStart,
+                   ending: AppearanceSurfaceColors.backdropEnd)?
             .draw(in: bounds, angle: 18)
-        NSColor.white.withAlphaComponent(0.22).setFill()
+        AppearanceSurfaceColors.sidebar.withAlphaComponent(0.22).setFill()
         NSBezierPath(roundedRect: bounds.insetBy(dx: 8, dy: 8), xRadius: 18, yRadius: 18).fill()
     }
 }
 
-private final class SettingsSidebarFooterView: NSView {
+private final class SettingsSidebarFooterView: AppearanceSurfaceView {
+    override var wantsUpdateLayer: Bool { false }
     var onSupport: (() -> Void)?
 
     override init(frame frameRect: NSRect) {
@@ -1424,7 +1489,6 @@ private final class SettingsSidebarFooterView: NSView {
         layer?.cornerRadius = 18
         layer?.masksToBounds = true
         layer?.borderWidth = 1
-        layer?.borderColor = NSColor.white.withAlphaComponent(0.85).cgColor
 
         let symbol = NSImageView(image: notchMuseAppIcon())
         symbol.setAccessibilityLabel("NotchMuse")
@@ -1433,7 +1497,7 @@ private final class SettingsSidebarFooterView: NSView {
 
         let slogan = NSTextField(wrappingLabelWithString: L10n.text("Lyrics, right where you look."))
         slogan.font = .systemFont(ofSize: 17, weight: .semibold)
-        slogan.textColor = NSColor(calibratedRed: 0.13, green: 0.18, blue: 0.31, alpha: 1)
+        slogan.textColor = .labelColor
         slogan.translatesAutoresizingMaskIntoConstraints = false
         addSubview(slogan)
 
@@ -1460,8 +1524,9 @@ private final class SettingsSidebarFooterView: NSView {
     required init?(coder: NSCoder) { nil }
 
     override func draw(_ dirtyRect: NSRect) {
-        NSGradient(starting: NSColor(calibratedRed: 0.97, green: 0.95, blue: 1, alpha: 1),
-                   ending: NSColor(calibratedRed: 0.82, green: 0.88, blue: 1, alpha: 1))?
+        layer?.borderColor = AppearanceSurfaceColors.border.cgColor
+        NSGradient(starting: AppearanceSurfaceColors.card,
+                   ending: AppearanceSurfaceColors.backdropEnd)?
             .draw(in: bounds, angle: 45)
         for (offset, color) in [(0.0, NSColor.systemPurple.withAlphaComponent(0.12)),
                                 (13.0, NSColor.systemBlue.withAlphaComponent(0.12)),
@@ -1482,6 +1547,19 @@ private final class SettingsSidebarFooterView: NSView {
 
 private final class SettingsScrollView: NSScrollView {
     private var hideTask: DispatchWorkItem?
+
+    override func layout() {
+        super.layout()
+        layoutDocument()
+    }
+
+    func layoutDocument() {
+        guard let documentView, let content = documentView.subviews.first else { return }
+        // Document fitting changes scroll extent, never the window's content size.
+        let size = NSSize(width: contentView.bounds.width,
+                          height: max(contentView.bounds.height, content.fittingSize.height + 18))
+        if documentView.frame.size != size { documentView.setFrameSize(size) }
+    }
 
     func hideIdleScroller() {
         verticalScroller?.isHidden = true

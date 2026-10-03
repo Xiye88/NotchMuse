@@ -14,7 +14,9 @@ final class UpdateController {
     }
 
     func startIfStable() {
-        guard Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool != true else { return }
+        let isPreview = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+        let feed = Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as? String ?? ""
+        guard !isPreview || URL(string: feed)?.host == "127.0.0.1" else { return }
         controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
     }
 

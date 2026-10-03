@@ -11,7 +11,11 @@ FEED_URL="https://notchmuse.com/appcast.xml"
 if [[ "$PREVIEW" == "1" ]]; then
   APP_NAME="NotchMuse Preview"
   BUNDLE_ID="app.notchmuse.mac.preview"
-  FEED_URL="https://invalid.localhost/appcast.xml"
+  FEED_URL="${NOTCHMUSE_PREVIEW_FEED_URL:-https://invalid.localhost/appcast.xml}"
+  if [[ "$FEED_URL" != "https://invalid.localhost/appcast.xml" && "$FEED_URL" != http://127.0.0.1:*/appcast.xml ]]; then
+    echo "Preview feed must be a localhost staged appcast" >&2
+    exit 1
+  fi
 fi
 APP="$DIST/$APP_NAME.app"
 CONTENTS="$APP/Contents"

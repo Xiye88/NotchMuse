@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased v0.8.0 Final Preview Gate - 2026-10-03
+
+- Build 45 Preview standardizes Settings scrolling, shortens the Dock label, keeps manual Sparkle checks available when automatic checks are off, and displays a pixel-preserving cropped WeChat payment QR alongside aligned USDT cards. No stable installation or public release changed.
+
 ## Unreleased v0.8.0 Productization Candidate - 2026-10-03
 
 - Preview Build 43 adds Dock/menu visibility controls and recovery, Cmd+Q handling, compact Support cards, Sidebar B polish and the selected bilingual slogan. The stable public installation is unchanged.

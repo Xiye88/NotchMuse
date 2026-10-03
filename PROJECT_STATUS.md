@@ -1,5 +1,13 @@
 # NotchMuse Project Status
 
+## v0.8.0 Final Preview UI / Update Gate - 2026-10-03
+
+- Build 45 is installed at `/Applications/NotchMuse Preview.app` with an explicit localhost staged feed. Stable `/Applications/NotchMuse.app` remains Beta 3 Build 38 and was not replaced. No main merge or public release/feed/website change.
+- Focused GUI PASS: one Settings scroll container across Display/Appearance/General; long pages hide the overlay scroller while idle and show it temporarily while scrolling. General labels read `显示 Dock 图标` / `显示菜单栏图标` without truncation; controls remain aligned. Manual `检查更新…` stayed enabled with automatic checks OFF and returned the localized up-to-date result from the signed staged feed.
+- Support: the source WeChat QR is displayed as an unresampled 640x640 pixel crop with its quiet zone; Vision detected one QR payload. All three card titles, QR codes, network labels and shortened addresses are visible. EVM copy yielded the full confirmed address. **WeChat phone scan and TRON copy are PENDING_PO/GUI** after the Mac locked; a desktop decoder is not a phone-scan PASS.
+- Preview signature and packaged Settings interaction self-test PASS. The previous staged Build 40 to 41 update installed with signature verification but did not visibly auto-relaunch; full Sparkle update E2E remains PARTIAL, not release-approved.
+- Stop feature development after this focused gate. Product Owner Preview acceptance and unresolved updater/phone-scan gates precede any `main` merge, official v0.8.0 Release, appcast/website switch or stable-app replacement.
+
 ## v0.8.0 Productization Preview - 2026-10-03
 
 - `codex/v0.8.0-productization` is the only active productization branch. Build 43 is installed at `/Applications/NotchMuse Preview.app`; stable `/Applications/NotchMuse.app` remains public Beta 3 Build 38, untouched. No `main` merge or public website, Release, or appcast publication.

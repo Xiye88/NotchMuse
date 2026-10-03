@@ -1,5 +1,6 @@
 import AppKit
 import CoreImage
+import ImageIO
 
 @MainActor
 final class SupportWindowController: NSWindowController {
@@ -35,7 +36,7 @@ final class SupportWindowController: NSWindowController {
         methods.spacing = 18
         methods.distribution = .fillEqually
         methods.addArrangedSubview(paymentCard(title: L10n.text("WeChat Pay"),
-                                                detail: "", image: NSImage(contentsOfFile: Bundle.main.path(forResource: "WeChatSupport", ofType: "jpg") ?? ""),
+                                                detail: "", image: Self.weChatQRImage(),
                                                 address: nil))
         methods.addArrangedSubview(paymentCard(title: "USDT · EVM", detail: "ETH · BSC · Arbitrum · Optimism",
                                                 image: Self.qrImage(Self.evmAddress), address: Self.evmAddress))
@@ -66,7 +67,7 @@ final class SupportWindowController: NSWindowController {
         card.heightAnchor.constraint(equalToConstant: 350).isActive = true
         card.addArrangedSubview(heading(title, size: 14))
         if let image {
-            let imageView = NSImageView(image: image)
+            let imageView = PixelSharpImageView(image: image)
             imageView.imageScaling = .scaleProportionallyDown
             imageView.widthAnchor.constraint(equalToConstant: 180).isActive = true
             imageView.heightAnchor.constraint(equalToConstant: 180).isActive = true
@@ -107,6 +108,14 @@ final class SupportWindowController: NSWindowController {
         return NSImage(cgImage: cgImage, size: image.extent.size)
     }
 
+    private static func weChatQRImage() -> NSImage? {
+        guard let url = Bundle.main.url(forResource: "WeChatSupport", withExtension: "jpg"),
+              let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let original = CGImageSourceCreateImageAtIndex(source, 0, nil),
+              let cropped = original.cropping(to: CGRect(x: 300, y: 382, width: 640, height: 640)) else { return nil }
+        return NSImage(cgImage: cropped, size: NSSize(width: cropped.width, height: cropped.height))
+    }
+
     @objc private func copyAddress(_ sender: NSButton) {
         guard let address = sender.identifier?.rawValue else { return }
         NSPasteboard.general.clearContents()
@@ -124,6 +133,13 @@ final class SupportWindowController: NSWindowController {
                   let people = try? JSONDecoder().decode([Supporter].self, from: data), !people.isEmpty else { return }
             supporters.stringValue = people.map { "\($0.name) · \($0.displayAmount)" }.joined(separator: "\n")
         }
+    }
+}
+
+private final class PixelSharpImageView: NSImageView {
+    override func draw(_ dirtyRect: NSRect) {
+        NSGraphicsContext.current?.imageInterpolation = .none
+        super.draw(dirtyRect)
     }
 }
 

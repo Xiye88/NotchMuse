@@ -1,5 +1,16 @@
 # NotchMuse Task Board
 
+## v0.8.0 Final Preview Gate - Build 45 (2026-10-03)
+
+- [x] Installed Build 45 Preview; stable Beta 3 Build 38 untouched.
+- [x] Display/Appearance/General share idle-hidden overlay scroller; focused GUI scrolling and layout check PASS.
+- [x] Dock/menu labels fit; manual staged update check remains enabled with auto-check OFF and shows up-to-date result.
+- [x] WeChat QR pixel crop and desktop decode PASS; EVM full-address copy PASS; three Support cards visually checked.
+- [ ] `WeChat QR Scan: PENDING_PO` on a real phone; no payment needed.
+- [ ] TRON copy focused GUI check after Mac unlock.
+- [ ] Sparkle full update E2E automatic relaunch unresolved; previous staged install/checksum/signature passed.
+- [ ] Product Owner Preview PASS before official v0.8.0 release actions. No new feature work.
+
 ## v0.8.0 Productization - CURRENT (2026-10-03)
 
 - [x] Build 43 Preview in `/Applications/NotchMuse Preview.app`; stable Beta 3 Build 38 untouched.

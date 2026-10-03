@@ -298,6 +298,7 @@ final class SettingsWindowController: NSWindowController {
     private let appearancePage = NSStackView()
     private let generalPage = NSStackView()
     private var selectedPage: SettingsPage = .display
+    private weak var settingsScrollView: SettingsScrollView?
     private var sidebarButtons: [SettingsPage: NSButton] = [:]
     private var supportWindow: SupportWindowController?
     private var positionRow: NSGridRow?
@@ -527,7 +528,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Music Player")), playerPopUp],
             [label(L10n.text("When Player Stops")), playerStopBehaviorPopUp],
             [label(L10n.text("Launch at Login")), launchAtLoginSwitch],
-            [label(L10n.text("Show NotchMuse in Dock")), showInDockSwitch],
+            [label(L10n.text("Show in Dock")), showInDockSwitch],
             [label(L10n.text("Show Menu Bar Icon")), showMenuBarIconSwitch],
             [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch],
             [label(L10n.text("Language")), languagePopUp]
@@ -591,10 +592,13 @@ final class SettingsWindowController: NSWindowController {
         contentStack.addArrangedSubview(generalPage)
         appearancePage.isHidden = true
         generalPage.isHidden = true
-        let scrollView = NSScrollView()
+        let scrollView = SettingsScrollView()
+        settingsScrollView = scrollView
         scrollView.drawsBackground = false
         scrollView.hasVerticalScroller = true
         scrollView.autohidesScrollers = true
+        scrollView.scrollerStyle = .overlay
+        scrollView.hasHorizontalScroller = false
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         let document = FlippedSettingsDocumentView()
         document.translatesAutoresizingMaskIntoConstraints = false
@@ -624,6 +628,7 @@ final class SettingsWindowController: NSWindowController {
             contentStack.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -8),
             contentStack.bottomAnchor.constraint(equalTo: document.bottomAnchor, constant: -18)
         ])
+        DispatchQueue.main.async { scrollView.hideIdleScroller() }
     }
 
     private func sectionTitle(_ title: String) -> NSTextField {
@@ -1305,7 +1310,10 @@ final class SettingsWindowController: NSWindowController {
         displayPage.isHidden = page != .display
         appearancePage.isHidden = page != .appearance
         generalPage.isHidden = page != .general
-        DispatchQueue.main.async { self.updateSidebarSelection() }
+        DispatchQueue.main.async {
+            self.updateSidebarSelection()
+            self.settingsScrollView?.hideIdleScroller()
+        }
     }
 
     private func updateSidebarSelection() {
@@ -1469,6 +1477,23 @@ private final class SettingsSidebarFooterView: NSView {
             color.setFill()
             wave.fill()
         }
+    }
+}
+
+private final class SettingsScrollView: NSScrollView {
+    private var hideTask: DispatchWorkItem?
+
+    func hideIdleScroller() {
+        verticalScroller?.isHidden = true
+    }
+
+    override func scrollWheel(with event: NSEvent) {
+        hideTask?.cancel()
+        verticalScroller?.isHidden = false
+        super.scrollWheel(with: event)
+        let task = DispatchWorkItem { [weak self] in self?.hideIdleScroller() }
+        hideTask = task
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: task)
     }
 }
 

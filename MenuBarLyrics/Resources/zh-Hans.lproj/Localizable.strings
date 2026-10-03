@@ -140,6 +140,7 @@
 "Language" = "语言";
 "Launch at Login" = "登录时启动";
 "Show NotchMuse in Dock" = "在 Dock 中显示 NotchMuse";
+"Show in Dock" = "显示 Dock 图标";
 "Show Menu Bar Icon" = "显示菜单栏图标";
 "NotchMuse keeps running in the background" = "NotchMuse 将继续在后台运行";
 "Open it again from Applications or Spotlight to show this window." = "从“应用程序”或 Spotlight 再次打开 NotchMuse，即可显示此窗口。";

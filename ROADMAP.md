@@ -50,7 +50,7 @@ Status: IMPLEMENTED / LOCAL CANDIDATE BUILT; QA GATES OPEN
   active Command Line Tools installation.
 - Work is isolated on `codex/player-expansion-integration`; no merge to main,
   tag, or public release has occurred.
-- QA evidence: `PLAYER_EXPANSION_HANDOFF.md`.
+- QA evidence: `docs/archive/PLAYER_EXPANSION_HANDOFF.md`.
 
 ## Current — v0.8 Final Release Candidate (build 20)
 

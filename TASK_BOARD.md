@@ -1,5 +1,16 @@
 # NotchMuse Task Board
 
+## v0.8.0 Productization - CURRENT (2026-10-03)
+
+- [x] Build 43 Preview in `/Applications/NotchMuse Preview.app`; stable Beta 3 Build 38 untouched.
+- [x] Dock/menu visibility, both-hidden recovery, Cmd+Q, compact Support, Sidebar B and slogan option 1 implemented and locally checked.
+- [x] Signed local staged appcast: discovery, release notes, download, install, signature verification.
+- [ ] Sparkle auto-relaunch: not observed on two staged attempts; investigate before public release.
+- [ ] Five-player visible-lyrics smoke: NetEase metadata/playback checked; Spotify hit an ad; other players not freshly verified on Build 43.
+- [ ] New final UI screenshot gallery (`SCREENSHOTS_PENDING_PO`) and Product Owner Preview acceptance.
+- [ ] Push this branch, run CI; do not merge main or publicly publish yet.
+- [x] Prepare formal v0.8.0 README/website copy and archive historical root documents; retain canonical PM files at root.
+
 ## v0.8.0 Productization - IN PROGRESS (2026-10-02)
 
 - Branch: `codex/v0.8.0-productization` from `origin/main` `cf62b032fce7ff0c901104b913174182f8c72507`.
@@ -113,7 +124,7 @@ All older candidate/build/pending-release sections below are historical and are 
   candidate. Do not merge main or generate final `PLAYER_EXPANSION_HANDOFF.md`.
 - Local `swift test` cannot load XCTest with the active Command Line Tools.
 - No merge to main, tag, or publication is authorized in this integration.
-- Evidence: interim `PLAYER_EXPANSION_HANDOFF.md`.
+- Evidence: archived `docs/archive/PLAYER_EXPANSION_HANDOFF.md`.
 
 ## Completed Next Task
 

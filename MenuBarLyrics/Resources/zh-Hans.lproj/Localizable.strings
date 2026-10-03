@@ -104,6 +104,7 @@
 "Cyan" = "青色";
 "Yellow" = "黄色";
 "Music plays on. Lyrics stay with you." = "音乐继续，歌词常在。";
+"Lyrics, right where you look." = "歌词，恰在眼前。";
 "Custom Width" = "自定义宽度";
 "Appearance" = "外观";
 "Lyrics Color" = "歌词颜色";
@@ -138,6 +139,10 @@
 "Keep Last Lyrics and Pause" = "保持最后歌词并暂停";
 "Language" = "语言";
 "Launch at Login" = "登录时启动";
+"Show NotchMuse in Dock" = "在 Dock 中显示 NotchMuse";
+"Show Menu Bar Icon" = "显示菜单栏图标";
+"NotchMuse keeps running in the background" = "NotchMuse 将继续在后台运行";
+"Open it again from Applications or Spotlight to show this window." = "从“应用程序”或 Spotlight 再次打开 NotchMuse，即可显示此窗口。";
 "Language Change" = "语言更改";
 "Restart NotchMuse to apply the new language." = "重新启动 NotchMuse 后将应用新语言。";
 "OK" = "好";
@@ -168,6 +173,7 @@
 "Your support helps keep NotchMuse improving." = "感谢你支持 NotchMuse 持续改进。";
 "WeChat Pay" = "微信支付";
 "Copy Address" = "复制地址";
+"Copied" = "已复制";
 "Check the selected network and send USDT only." = "请确认转账网络与所选网络一致，仅发送 USDT。";
 "Supporters" = "感谢支持者";
 "Thanks to everyone supporting NotchMuse." = "感谢每一位支持 NotchMuse 的朋友。";

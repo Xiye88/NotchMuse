@@ -15,7 +15,7 @@ NotchMuse is a native Swift macOS menu bar app.
 - `Sources/MenuBarLyrics/Support/` contains shared accessibility and logging helpers. `AppLocalization.swift` remains at the target root because its source fallback locates `Resources` relative to `#filePath`.
 - `Sources/LyricsCore/` is the pure logic library target for lyric parsing and clocking; `Tests/MenuBarLyricsTests/` tests that module through SwiftPM.
 - The production executable remains the `MenuBarLyrics` target, with the same product name, bundle identity, and runtime target identity.
-- The v0.8.0 candidate supports Spotify, Apple Music, and NetEase Cloud Music. Auto Detect is the default, with manual player selection retained. NetEase uses the bundled MediaRemote bridge and macOS private APIs.
+- The current app supports Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music. Auto Detect is the default, with manual player selection retained. The latter three use the bundled MediaRemote bridge.
 - `lyrics-provider-benchmark/` is an independent lab and does not run inside the app.
 
 ## Build and Test
@@ -32,7 +32,7 @@ swift run --package-path MenuBarLyrics NotchMuse --self-test
 ./scripts/run_live_matrix.sh
 ```
 
-The v0.8.0 candidate is not publicly released. GitHub Actions CI runs on
+The next v0.8.0 build is being prepared on a development branch. GitHub Actions CI runs on
 `macos-15` with Swift 6 and verifies Debug/self-test, `swift test`, Release
 packaging, DMG integrity, and repository checks. `build_release.sh` recreates
 `dist.noindex`; do not use it when that directory contains artifacts you need
@@ -56,7 +56,7 @@ current `/Applications/NotchMuse.app` under `dist.noindex/local-backups/`,
 installs and launches the new build, then reports its version, build, and Git
 commit.
 
-The v0.8.0 candidate is ad-hoc signed and has not been publicly released.
+The current distribution is ad-hoc signed; v0.8.0 is not yet publicly released.
 Manual release steps are tracked in [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md).
 
 `build_release.sh` writes `BUILD-INFO.txt` and `SHA256SUMS` beside the app and

@@ -37,18 +37,25 @@ if CommandLine.arguments.contains("--full-self-test") {
 #endif
 
 let bundleIdentifier = Bundle.main.bundleIdentifier ?? "app.notchmuse.mac"
+let reopenNotification = Notification.Name("\(bundleIdentifier).reopen")
 let lockPath = FileManager.default.temporaryDirectory
     .appendingPathComponent("\(bundleIdentifier).lock").path
 
-guard let instanceLock = SingleInstanceLock(path: lockPath) else {
+func reopenExistingApp() {
+    DistributedNotificationCenter.default().post(name: reopenNotification, object: nil)
     NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier)
         .first(where: { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier })?
         .activate(options: .activateAllWindows)
+}
+
+guard let instanceLock = SingleInstanceLock(path: lockPath) else {
+    reopenExistingApp()
     exit(0)
 }
 
 if let runningApp = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier)
     .first(where: { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier }) {
+    DistributedNotificationCenter.default().post(name: reopenNotification, object: nil)
     runningApp.activate(options: .activateAllWindows)
     exit(0)
 }
@@ -56,7 +63,7 @@ if let runningApp = NSRunningApplication.runningApplications(withBundleIdentifie
 let app = NSApplication.shared
 let delegate = AppDelegate()
 app.delegate = delegate
-app.setActivationPolicy(.regular)
+app.setActivationPolicy(AppPreferences.showInDock ? .regular : .accessory)
 withExtendedLifetime(instanceLock) {
     app.run()
 }

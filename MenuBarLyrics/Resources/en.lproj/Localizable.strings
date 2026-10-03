@@ -104,6 +104,7 @@
 "Cyan" = "Cyan";
 "Yellow" = "Yellow";
 "Music plays on. Lyrics stay with you." = "Music plays on. Lyrics stay with you.";
+"Lyrics, right where you look." = "Lyrics, right where you look.";
 "Custom Width" = "Custom Width";
 "Appearance" = "Appearance";
 "Lyrics Color" = "Lyrics Color";
@@ -138,6 +139,10 @@
 "Keep Last Lyrics and Pause" = "Keep Last Lyrics and Pause";
 "Language" = "Language";
 "Launch at Login" = "Launch at Login";
+"Show NotchMuse in Dock" = "Show NotchMuse in Dock";
+"Show Menu Bar Icon" = "Show Menu Bar Icon";
+"NotchMuse keeps running in the background" = "NotchMuse keeps running in the background";
+"Open it again from Applications or Spotlight to show this window." = "Open it again from Applications or Spotlight to show this window.";
 "Language Change" = "Language Change";
 "Restart NotchMuse to apply the new language." = "Restart NotchMuse to apply the new language.";
 "OK" = "OK";
@@ -168,6 +173,7 @@
 "Your support helps keep NotchMuse improving." = "Your support helps keep NotchMuse improving.";
 "WeChat Pay" = "WeChat Pay";
 "Copy Address" = "Copy Address";
+"Copied" = "Copied";
 "Check the selected network and send USDT only." = "Check the selected network and send USDT only.";
 "Supporters" = "Supporters";
 "Thanks to everyone supporting NotchMuse." = "Thanks to everyone supporting NotchMuse.";

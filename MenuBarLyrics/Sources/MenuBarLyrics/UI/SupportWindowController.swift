@@ -37,9 +37,9 @@ final class SupportWindowController: NSWindowController {
         methods.addArrangedSubview(paymentCard(title: L10n.text("WeChat Pay"),
                                                 detail: "", image: NSImage(contentsOfFile: Bundle.main.path(forResource: "WeChatSupport", ofType: "jpg") ?? ""),
                                                 address: nil))
-        methods.addArrangedSubview(paymentCard(title: "USDT · EVM", detail: "Ethereum · BNB Smart Chain (BEP20) · Arbitrum · Optimism",
+        methods.addArrangedSubview(paymentCard(title: "USDT · EVM", detail: "ETH · BSC · Arbitrum · Optimism",
                                                 image: Self.qrImage(Self.evmAddress), address: Self.evmAddress))
-        methods.addArrangedSubview(paymentCard(title: "USDT · TRON", detail: "TRC20",
+        methods.addArrangedSubview(paymentCard(title: "USDT · TRON", detail: "TRON · TRC20",
                                                 image: Self.qrImage(Self.tronAddress), address: Self.tronAddress))
         body.addArrangedSubview(methods)
         methods.widthAnchor.constraint(equalTo: body.widthAnchor, constant: -56).isActive = true
@@ -63,18 +63,19 @@ final class SupportWindowController: NSWindowController {
         card.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
         card.layer?.borderWidth = 1
         card.layer?.borderColor = NSColor.separatorColor.cgColor
+        card.heightAnchor.constraint(equalToConstant: 350).isActive = true
         card.addArrangedSubview(heading(title, size: 14))
         if let image {
             let imageView = NSImageView(image: image)
             imageView.imageScaling = .scaleProportionallyDown
-            imageView.widthAnchor.constraint(equalToConstant: 170).isActive = true
-            imageView.heightAnchor.constraint(equalToConstant: 230).isActive = true
+            imageView.widthAnchor.constraint(equalToConstant: 180).isActive = true
+            imageView.heightAnchor.constraint(equalToConstant: 180).isActive = true
             card.addArrangedSubview(imageView)
         }
+        card.addArrangedSubview(NSView())
         if !detail.isEmpty { card.addArrangedSubview(label(detail)) }
         if let address {
-            let addressLabel = label(address)
-            addressLabel.lineBreakMode = .byCharWrapping
+            let addressLabel = label(String(address.prefix(4)) + "…" + String(address.suffix(4)))
             addressLabel.alignment = .center
             card.addArrangedSubview(addressLabel)
             let copy = NSButton(title: L10n.text("Copy Address"), target: self, action: #selector(copyAddress(_:)))
@@ -110,6 +111,10 @@ final class SupportWindowController: NSWindowController {
         guard let address = sender.identifier?.rawValue else { return }
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(address, forType: .string)
+        sender.title = L10n.text("Copied")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak sender] in
+            sender?.title = L10n.text("Copy Address")
+        }
     }
 
     private func loadSupporters() {

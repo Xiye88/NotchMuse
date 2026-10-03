@@ -841,6 +841,14 @@ enum SelfTests {
         let suiteName = "app.notchmuse.color-self-test.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defer { defaults.removePersistentDomain(forName: suiteName) }
+        check(!AppPreferences.showInDock(in: defaults), "new installs stay out of the Dock")
+        check(AppPreferences.showMenuBarIcon(in: defaults), "menu bar control stays visible by default")
+        defaults.set(true, forKey: AppPreferences.hasShownFirstLaunchGuideKey)
+        check(AppPreferences.showInDock(in: defaults), "existing installs keep their Dock behavior")
+        defaults.set(false, forKey: AppPreferences.showInDockKey)
+        defaults.set(false, forKey: AppPreferences.showMenuBarIconKey)
+        check(!AppPreferences.showInDock(in: defaults) && !AppPreferences.showMenuBarIcon(in: defaults),
+              "explicit visibility choices persist independently")
         let color = NSColor(calibratedRed: 0.2, green: 0.4, blue: 0.6, alpha: 0.8)
         AppPreferences.setColor(color, forKey: AppPreferences.customLyricsColorKey, in: defaults)
         check(AppPreferences.color(forKey: AppPreferences.customLyricsColorKey, in: defaults) == color, "persists and restores a custom lyric color")

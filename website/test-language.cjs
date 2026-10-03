@@ -5,7 +5,7 @@ const html = fs.readFileSync(`${__dirname}/index.html`, 'utf8');
 const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const markup = html.split('<script>')[0];
 assert(!/[\u3400-\u9fff]/.test(markup), 'Default markup must be English');
-assert.equal((markup.match(/href="https:\/\/github.com\/Xiye88\/NotchMuse\/releases\/download\/v0.8.0-beta.3\/NotchMuse.dmg"/g) || []).length, 3);
+assert.equal((markup.match(/href="https:\/\/github.com\/Xiye88\/NotchMuse\/releases\/download\/v0.8.0\/NotchMuse.dmg"/g) || []).length, 3);
 
 for (const stored of [null, 'zh-Hans', 'invalid', 'unavailable']) {
   const elements = [...markup.matchAll(/<([\w-]+)\b([^>]*\bdata-i18n[^>]*)>([^<]*)/g)].map(match => {
@@ -36,4 +36,4 @@ for (const stored of [null, 'zh-Hans', 'invalid', 'unavailable']) {
   assert.equal(document.documentElement.lang, initial);
   if (stored !== 'unavailable') assert.equal(saved, initial);
 }
-console.log('PASS: default English, translation keys/attributes, toggling, saved preference, blocked storage, Beta 3 links');
+console.log('PASS: default English, translation keys/attributes, toggling, saved preference, blocked storage, v0.8.0 links');

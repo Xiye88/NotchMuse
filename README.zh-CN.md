@@ -1,213 +1,67 @@
-<p align="center">
-  <a href="README.md">English</a> | 简体中文
-</p>
+<p align="center"><a href="README.md">English</a> | 简体中文</p>
 
-<h1 align="center">NotchMuse</h1>
+<h1 align="center">NotchMuse v0.8.0</h1>
 
-<p align="center">
-  <strong>一款原生 macOS 应用，把同步歌词放到菜单栏和刘海区域。</strong>
-  <br>
-  歌词在你需要的位置出现，不打断当前工作流。
-</p>
+<p align="center">把同步歌词放在 Mac 菜单栏、刘海旁，或屏幕边缘。</p>
 
-<p align="center">
-  <a href="https://github.com/Xiye88/NotchMuse/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Xiye88/NotchMuse?include_prereleases&label=release"></a>
-  <img alt="macOS 14 or later" src="https://img.shields.io/badge/macOS-14.0%2B-black?logo=apple&logoColor=white">
-  <img alt="Swift" src="https://img.shields.io/badge/Swift-native-F05138?logo=swift&logoColor=white">
-  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/Xiye88/NotchMuse"></a>
-</p>
+<p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐</p>
 
-<p align="center">
-  <a href="https://notchmuse.com"><strong>官方网站</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.3/NotchMuse.dmg"><strong>直接下载 v0.8.0 Beta 3</strong></a>
-  ·
-  <a href="https://github.com/Xiye88/NotchMuse/issues">报告问题</a>
-</p>
+<p align="center"><a href="https://notchmuse.com"><strong>官网下载</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases"><strong>GitHub Release</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>报告问题</strong></a></p>
 
-<p align="center">
-  macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐
-</p>
+## 支持的播放器
 
-> **当前公开 Beta：** [v0.8.0-beta.3](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0-beta.3)，build 38。支持五个播放器、Auto Detect 和新版双语 Settings。新增美化安装包、双语首次打开指引和“隐私与安全性”快捷入口。ad-hoc 签名，尚未公证。可从 [notchmuse.com](https://notchmuse.com) 直接下载。
+Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐。可以手动选择，也可以让自动检测跟随当前正在播放的应用。
 
-## 演示
+## 核心功能
 
-### Status Bar Mode
+| 歌词位置 | 个性化 | 日常使用 |
+| --- | --- | --- |
+| 菜单栏、刘海歌词 | 纯色与渐变色 | 自动检测播放器 |
+| 屏幕左侧或右侧 | 背景、透明度、宽度 | 简体中文与 English |
+| Dock 上方歌词 | 外观预设 | 应用内更新设置 |
 
-使用其他应用时，歌词会保持显示在 macOS 菜单栏中。
+网易云、QQ 音乐和汽水音乐使用随应用打包的 MediaRemote bridge，无需 Homebrew 或额外安装 helper。macOS 或播放器升级后可能需要兼容性更新。
 
-[![Status Bar Mode demo](docs/assets/demos/notchmuse-status-bar-demo.gif)](docs/assets/demos/notchmuse-status-bar-demo.mp4)
+## 界面截图
 
-### Notch Mode
+<!-- SCREENSHOTS_PENDING_PO: 最终 UI 验收后补入 v0.8.0 Settings、菜单栏、刘海、侧边和 Dock 新截图；不得复用旧 Settings 截图。 -->
 
-歌曲信息和同步歌词会显示在 MacBook 刘海下方。
+最终界面图集将在 UI 验收后补齐。目前可先看[菜单栏演示](docs/assets/demos/notchmuse-status-bar-demo.mp4)和[刘海演示](docs/assets/demos/notchmuse-notch-mode-demo.mp4)。
 
-[![Notch Mode demo](docs/assets/demos/notchmuse-notch-mode-demo.gif)](docs/assets/demos/notchmuse-notch-mode-demo.mp4)
+## 三步开始
 
-## 为什么是 NotchMuse？
+1. 从[官网](https://notchmuse.com)下载 DMG，打开后将应用拖入“应用程序”。
+2. 用任一支持的桌面播放器播放歌曲；Spotify 或 Apple Music 请求自动化权限时请允许。
+3. 打开 NotchMuse，保留“自动检测”，在设置中选择歌词位置。
 
-- 工作时保持同步歌词可见，不需要切换到单独的歌词窗口。
-- 可选择紧凑菜单栏显示，也可选择 MacBook 刘海布局。
-- 原生、轻量，不需要 NotchMuse 账号，也不收集遥测数据。
+## 安装与安全提示
 
-## 功能
+NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Developer ID 签名与公证。因此 macOS 首次打开时可能出现安全提示。这属于分发签名状态，与版本状态无关。
 
-| **播放器检测** | **刘海歌词** |
-| --- | --- |
-| 支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。默认使用 Auto Detect，也可手动选择播放器。 | 可选择 Lyric Only、Song + Lyric 或 Expanded 布局；歌词可放在顶部、Dock 上方、屏幕左侧或右侧。 |
-| **内置播放信息 bridge** | **重视隐私** |
-| MediaRemote bridge 已随应用打包，无需安装 Homebrew。网易云、QQ 音乐和汽水音乐依赖 macOS 私有 MediaRemote API，系统或播放器更新后可能需要适配。 | 不需要账号，不收集遥测数据，不上传音频。内置 English 和简体中文。 |
+如果系统拦截，请打开 **系统设置 → 隐私与安全性 → 仍要打开**，按提示认证后再次启动。安装和权限问题见[使用支持](SUPPORT.md)。目前不支持 Intel Mac。
 
-外观设置包括纯色、渐变和自定义歌词颜色，以及背景颜色、透明度和留白。Settings 还可调整显示宽度、位置和目标屏幕。
+## 自动更新
 
-## 截图
-
-### 完整 Mac 场景
-
-Spotify 播放时，NotchMuse 可以在真实 macOS 工作区中保持可见。
-
-![NotchMuse in a macOS workspace](docs/assets/screenshots/full-mac-context.png)
-
-### Status Bar Mode
-
-工作时，同步歌词保持显示在 macOS 菜单栏中。
-
-![Status Bar Mode](docs/assets/screenshots/status-bar-mode.png)
-
-### Notch Mode
-
-歌词以紧凑、可扫视的布局显示在 MacBook 刘海附近。
-
-![Notch Mode](docs/assets/screenshots/notch-mode-crop.png)
-
-### Settings
-
-新版 Settings 包含 Sidebar、状态栏/刘海实时预览、外观预设及显示设置。下图为早期版本截图。
-
-![Settings](docs/assets/screenshots/settings-window.png)
-
-## 快速开始
-
-当前公开的 v0.8.0 Beta 3 支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。
-
-1. 访问 [官网](https://notchmuse.com)，或[直接下载 Beta 3 DMG](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0-beta.3/NotchMuse.dmg)。
-2. 打开 DMG，把 `NotchMuse.app` 拖到 `Applications`。
-3. 这个 beta 尚未 notarize：按住 Control 点击 `NotchMuse.app`，选择 `Open`，再确认 `Open`。
-4. 打开五个支持的桌面播放器之一并播放歌曲。
-5. 在 Settings 保留 Auto Detect 或手动选择播放器；Spotify 或 Apple Music 提示权限时，允许 macOS Automation。
-6. 在菜单栏里找到橙色音符图标。
-7. 打开 Settings，选择 Status Bar Mode 或 Notch Mode。
-
-## 安装
-
-### 系统要求
-
-- macOS 14.0 或更高版本
-- Apple Silicon Mac
-- Spotify、Apple Music、网易云音乐、QQ 音乐或汽水音乐桌面应用
-
-当前 Beta 仅支持 `arm64`，暂不支持 Intel Mac。
-
-应用已内置 MediaRemote bridge，无需另装 Homebrew 或 helper。网易云、QQ 音乐和汽水音乐依赖私有 MediaRemote API，系统或播放器更新后可能需要适配。
-
-1. 从[官网](https://notchmuse.com)下载带版本号的 DMG。
-2. 打开 DMG。
-3. 把 `NotchMuse.app` 拖到 `Applications`。
-4. 从 `Applications` 打开 NotchMuse。
-5. 当 macOS 询问是否允许控制当前音乐播放器时，选择允许。
-
-### 签名说明
-
-这个 GitHub beta 已进行 ad-hoc signing，但尚未使用 Apple Developer ID 签名或 notarize。macOS 首次启动时可能会要求你确认。
-
-打开方式：
-
-1. 在 Finder 中打开 `Applications`。
-2. 按住 Control 点击 `NotchMuse.app`。
-3. 选择 `Open`。
-4. 再次确认 `Open`。
-
-如果 macOS 仍然拦截，前往 `System Settings > Privacy & Security`，为 NotchMuse 选择 `Open Anyway`。
-
-Developer ID 签名和 Apple 公证暂未配置。当前版本为面向用户测试的公开 Beta。
-
-如果安装、Gatekeeper、音乐播放器 Automation permission 或歌词查询失败，请查看 [SUPPORT.md](SUPPORT.md)。
-
-## 可选菜单栏设置
-
-NotchMuse 不要求安装菜单栏整理工具。如果你的菜单栏已经很拥挤，可以选择 Ice、Thaw 或 Bartender 等工具，为 Status Bar Mode 腾出空间。
-
-NotchMuse 本身不管理其他菜单栏图标。
+v0.8.0 候选版已提供设置中的更新控制。更新包必须经过签名验证才能安装；完整端到端更新流程仍是发布门槛。通过前，请在 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases) 查看较新的公开版本。
 
 ## 常见问题
 
-**某首歌没有歌词？** 歌词取决于第三方 provider 的覆盖范围；支持该播放器不代表每首歌都有匹配结果。排查方法见 [SUPPORT.md](SUPPORT.md)。
+**某首歌没有歌词？** 歌词取决于第三方歌词来源覆盖率；支持播放器不代表每首歌都能匹配。
 
-**Beta 3 会自动更新吗？** 当前公开 Beta 3 未宣称支持自动更新。请查看 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases) 是否有新公开版本。自动更新是后续版本计划，不是已发布功能。
+**会上传音频吗？** 不会。应用读取播放元数据，可能将歌名、歌手、专辑和时长发送给歌词来源用于匹配；不收集遥测，也不要求注册账号。
 
-## 已知问题
-
-- beta 尚未使用 Apple Developer ID 签名或 notarize，因此 macOS Gatekeeper 警告是预期行为。
-- 歌词覆盖率依赖第三方 provider。
-- 网易云、QQ 音乐和汽水音乐依赖 macOS 私有 MediaRemote API，系统或播放器更新后可能需要适配。
-- 不保证逐字歌词；多数 provider 返回的是逐行时间轴。
-- Left Status Bar mode 需要 Accessibility permission。
-- 其他菜单栏管理工具可能隐藏 NotchMuse 图标。
-- 当前 beta 不支持 Intel Mac。
-
-## 路线图
-
-- 当前公开 Beta：v0.8.0-beta.3，五平台、Auto Detect、Settings UI v2 和新版安装包
-- 下一阶段：新设备验证，以及真实 Beta 用户反馈修复
-- 后续分发与兼容性工作根据验证结果决定
-
-## 使用
-
-1. 打开 Spotify、Apple Music、网易云音乐、QQ 音乐或汽水音乐并播放歌曲。
-2. 打开 NotchMuse。
-3. 歌词会显示在菜单栏或刘海区域。
-4. 使用菜单栏音符图标打开控制菜单。
-5. 保留 Auto Detect 或手动选择五个播放器之一。打开 Settings 调整显示与外观设置。
-
-如果菜单栏整理工具隐藏了 NotchMuse 图标，请展开隐藏的菜单栏项目，或重新打开 NotchMuse 让菜单回来。
-
-## 权限
-
-- Automation / Spotify 或 Apple Music：读取当前曲目、播放状态和播放位置。
-- 网易云音乐、QQ 音乐、汽水音乐：通过内置私有 MediaRemote bridge 读取播放信息。
-- Accessibility：仅 Left Status Bar 布局需要，用于避开当前应用的菜单项。
-- Network：为当前歌曲查询公开歌词 provider。
-
-## 反馈
-
-安装和使用问题请先查看 [SUPPORT.md](SUPPORT.md)。反馈请阅读 [FEEDBACK.md](FEEDBACK.md)，然后使用 [GitHub Issues](https://github.com/Xiye88/NotchMuse/issues)。可复现问题请选择 **Bug report**，具体使用场景或改进建议请选择 **Feature request**。
+**菜单栏图标不见了？** 其他菜单栏工具可能将它隐藏。NotchMuse 不管理其他应用的菜单栏图标。
 
 ## 支持 NotchMuse
 
-即将推出的 v0.8.0 应用内有支持页面，也可以使用以下二维码：
+应用内提供 Support 页面，也可以使用以下二维码：
 
-| 微信支付 | USDT · EVM | USDT · TRON (TRC20) |
+| 微信支付 | USDT · EVM | USDT · TRON |
 | --- | --- | --- |
-| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="微信支付收款二维码" width="150"> | <img src="docs/support/usdt-evm.png" alt="USDT EVM 地址二维码" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRC20 地址二维码" width="150"> |
+| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="微信支付二维码" width="150"> | <img src="docs/support/usdt-evm.png" alt="USDT EVM 二维码" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRON 二维码" width="150"> |
 
-- Ethereum、BNB Smart Chain (BEP20)、Arbitrum、Optimism：`0x6c0275e975818e99d078ee2348576e2d9608f6d6`
-- TRON：`TCTrNcvTD3QE7opC61mKoTyUmRkKos6jan`
+EVM 地址支持 Ethereum、BNB Smart Chain (BEP20)、Arbitrum 和 Optimism；TRON 使用独立 TRC20 地址。转账前请核对网络，并且只发送 USDT。[支持者名单](docs/support/supporters.json)仅展示已同意公开的信息。
 
-转账前请核对网络，并且只发送 USDT。Product Owner 已确认以上四条 EVM 网络；TRON 使用单独地址。[支持者名单](docs/support/supporters.json)只展示已同意公开的信息。
+## 许可与反馈
 
-## 隐私
-
-- 不需要 NotchMuse 账号。
-- NotchMuse 不读取或上传任何支持播放器的音频。
-- NotchMuse 不收集遥测数据、使用分析或个人资料。
-- 曲名、artist、album 和时长可能会发送给第三方歌词 provider 用于匹配。
-- 设置使用 `UserDefaults` 保存在本地。
-
-## 开发者文档
-
-架构、构建与测试、Lyrics Quality Benchmark、Evidence Gate、Matcher 设计和 Provider 分析统一收录在 [Developer Documentation](docs/README.md)。
-
-## 许可证
-
-NotchMuse 使用 MIT License 发布。第三方声明列在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
-
-当前 Beta 内置 BSD-3-Clause 许可的 MediaRemote Adapter bridge；固定源码版本与署名信息记录在第三方声明中，无需安装 Homebrew。
+NotchMuse 使用 MIT License；内置第三方组件见[第三方声明](THIRD_PARTY_NOTICES.md)。使用问题请看[支持文档](SUPPORT.md)和[反馈指南](FEEDBACK.md)，或直接[提交 Issue](https://github.com/Xiye88/NotchMuse/issues)。架构与构建文档见 [docs/README.md](docs/README.md)。

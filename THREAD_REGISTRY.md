@@ -1,5 +1,15 @@
 # NotchMuse Thread Registry
 
+## Active - v0.8.0 Productization (2026-10-03)
+
+| Workspace | Status | Scope |
+| --- | --- | --- |
+| 00_PM | ACTIVE | Build 43 Preview integration, branch CI, Sparkle relaunch gate, and final Product Owner acceptance. |
+| 01_APP | DONE | Dock/menu visibility, app lifecycle and Cmd+Q fixes integrated into Preview. |
+| 06_DOCS | DONE | Formal v0.8.0 copy and historical document archive prepared on the branch only. |
+
+Full Sparkle E2E is PARTIAL because automatic relaunch was not observed. The public Beta 3 app and archived Menu Bar Space experiment are unchanged.
+
 ## Active - v0.8.0 Productization (2026-10-02)
 
 | Workspace | Status | Scope |

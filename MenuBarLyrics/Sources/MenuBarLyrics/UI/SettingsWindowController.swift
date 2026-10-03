@@ -25,6 +25,22 @@ enum AppPreferences {
     static let notchBackgroundOpacityKey = "NotchBackgroundOpacity"
     static let notchBackgroundPaddingKey = "NotchBackgroundPadding"
     static let notchHideOnHoverKey = "NotchHideOnHover"
+    static let showInDockKey = "ShowInDock"
+    static let showMenuBarIconKey = "ShowMenuBarIcon"
+    static let hiddenControlsNoticeKey = "HiddenControlsNoticeShown"
+
+    static var showInDock: Bool { showInDock(in: .standard) }
+
+    static func showInDock(in defaults: UserDefaults) -> Bool {
+        if let saved = defaults.object(forKey: showInDockKey) as? Bool { return saved }
+        return defaults.object(forKey: hasShownFirstLaunchGuideKey) != nil
+    }
+
+    static var showMenuBarIcon: Bool { showMenuBarIcon(in: .standard) }
+
+    static func showMenuBarIcon(in defaults: UserDefaults) -> Bool {
+        defaults.object(forKey: showMenuBarIconKey) as? Bool ?? true
+    }
 
     static var language: AppLanguage {
         AppLanguage(rawValue: UserDefaults.standard.string(forKey: languageKey) ?? "") ?? .english
@@ -262,6 +278,8 @@ final class SettingsWindowController: NSWindowController {
     private let customWidthValue = NSTextField(string: "")
     private let statusBarOffsetValue = NSTextField(string: "")
     private let launchAtLoginSwitch = NSSwitch()
+    private let showInDockSwitch = NSSwitch()
+    private let showMenuBarIconSwitch = NSSwitch()
     private let automaticUpdateSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let playerPopUp = NSPopUpButton()
@@ -442,6 +460,10 @@ final class SettingsWindowController: NSWindowController {
         notchHideOnHoverSwitch.action = #selector(notchHideOnHoverChanged)
         launchAtLoginSwitch.target = self
         launchAtLoginSwitch.action = #selector(launchAtLoginChanged)
+        showInDockSwitch.target = self
+        showInDockSwitch.action = #selector(showInDockChanged)
+        showMenuBarIconSwitch.target = self
+        showMenuBarIconSwitch.action = #selector(showMenuBarIconChanged)
         automaticUpdateSwitch.target = self
         automaticUpdateSwitch.action = #selector(automaticUpdateChanged)
         for language in AppLanguage.allCases {
@@ -504,9 +526,11 @@ final class SettingsWindowController: NSWindowController {
         let generalGrid = grid([
             [label(L10n.text("Music Player")), playerPopUp],
             [label(L10n.text("When Player Stops")), playerStopBehaviorPopUp],
-            [label(L10n.text("Language")), languagePopUp],
             [label(L10n.text("Launch at Login")), launchAtLoginSwitch],
-            [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch]
+            [label(L10n.text("Show NotchMuse in Dock")), showInDockSwitch],
+            [label(L10n.text("Show Menu Bar Icon")), showMenuBarIconSwitch],
+            [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch],
+            [label(L10n.text("Language")), languagePopUp]
         ])
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
         let checkUpdates = NSButton(title: L10n.text("Check for Updates…"), target: self, action: #selector(checkForUpdates))
@@ -641,8 +665,8 @@ final class SettingsWindowController: NSWindowController {
         button.wantsLayer = true
         button.layer?.cornerRadius = 9
         button.widthAnchor.constraint(equalToConstant: 177).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 66).isActive = true
-        button.image = button.image?.withSymbolConfiguration(.init(pointSize: 18, weight: .regular))
+        button.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        button.image = button.image?.withSymbolConfiguration(.init(pointSize: 17, weight: .regular))
         button.toolTip = L10n.text(page.help)
         return button
     }
@@ -936,6 +960,8 @@ final class SettingsWindowController: NSWindowController {
         statusBarOffsetValue.stringValue = String(format: "%.0f", statusBarOffsetSlider.doubleValue)
         launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
         launchAtLoginSwitch.isEnabled = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool != true
+        showInDockSwitch.state = AppPreferences.showInDock ? .on : .off
+        showMenuBarIconSwitch.state = AppPreferences.showMenuBarIcon ? .on : .off
         automaticUpdateSwitch.state = UpdateController.shared.automaticallyChecksForUpdates ? .on : .off
         automaticUpdateSwitch.isEnabled = UpdateController.shared.isAvailable
         playerPopUp.selectItem(at: PlayerSource.allCases.firstIndex(of: AppPreferences.playerSource) ?? 0)
@@ -1197,6 +1223,28 @@ final class SettingsWindowController: NSWindowController {
         onSettingsChange()
     }
 
+    @objc private func showInDockChanged() {
+        UserDefaults.standard.set(showInDockSwitch.state == .on, forKey: AppPreferences.showInDockKey)
+        onSettingsChange()
+        warnIfControlsHidden()
+    }
+
+    @objc private func showMenuBarIconChanged() {
+        UserDefaults.standard.set(showMenuBarIconSwitch.state == .on, forKey: AppPreferences.showMenuBarIconKey)
+        onSettingsChange()
+        warnIfControlsHidden()
+    }
+
+    private func warnIfControlsHidden() {
+        guard !AppPreferences.showInDock, !AppPreferences.showMenuBarIcon,
+              !UserDefaults.standard.bool(forKey: AppPreferences.hiddenControlsNoticeKey) else { return }
+        let alert = NSAlert()
+        alert.messageText = L10n.text("NotchMuse keeps running in the background")
+        alert.informativeText = L10n.text("Open it again from Applications or Spotlight to show this window.")
+        alert.runModal()
+        UserDefaults.standard.set(true, forKey: AppPreferences.hiddenControlsNoticeKey)
+    }
+
     @objc private func launchAtLoginChanged() {
         do {
             if launchAtLoginSwitch.state == .on {
@@ -1265,14 +1313,14 @@ final class SettingsWindowController: NSWindowController {
             let selected = page == selectedPage
             button.state = selected ? .on : .off
             button.layer?.backgroundColor = selected
-                ? NSColor.controlAccentColor.withAlphaComponent(0.13).cgColor
+                ? NSColor.controlAccentColor.withAlphaComponent(0.09).cgColor
                 : NSColor.clear.cgColor
             button.contentTintColor = selected ? .controlAccentColor : NSColor.secondaryLabelColor
             let text = NSMutableAttributedString(string: L10n.text(page.title) + "\n" + L10n.text(page.help))
             let paragraph = NSMutableParagraphStyle()
             paragraph.lineSpacing = 4
             text.addAttribute(.paragraphStyle, value: paragraph, range: NSRange(location: 0, length: text.length))
-            text.addAttributes([.font: NSFont.systemFont(ofSize: 16, weight: .semibold),
+            text.addAttributes([.font: NSFont.systemFont(ofSize: 15, weight: .semibold),
                                 .foregroundColor: NSColor.labelColor],
                                range: NSRange(location: 0, length: L10n.text(page.title).utf16.count))
             let subtitleStart = L10n.text(page.title).utf16.count + 1
@@ -1317,9 +1365,14 @@ final class SettingsWindowController: NSWindowController {
         case .appearance:
             keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.customLyricsEndColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchBackgroundOpacityKey, AppPreferences.notchBackgroundPaddingKey, AppPreferences.notchHideOnHoverKey]
         case .general:
-            keys = [AppPreferences.playerSourceKey, AppPreferences.playerStopBehaviorKey, AppPreferences.languageKey]
+            keys = [AppPreferences.playerSourceKey, AppPreferences.playerStopBehaviorKey, AppPreferences.languageKey,
+                    AppPreferences.showInDockKey, AppPreferences.showMenuBarIconKey]
         }
         keys.forEach(UserDefaults.standard.removeObject(forKey:))
+        if page == .general {
+            UserDefaults.standard.set(false, forKey: AppPreferences.showInDockKey)
+            UserDefaults.standard.set(true, forKey: AppPreferences.showMenuBarIconKey)
+        }
         sync()
         onSettingsChange()
     }
@@ -1370,7 +1423,7 @@ private final class SettingsSidebarFooterView: NSView {
         symbol.translatesAutoresizingMaskIntoConstraints = false
         addSubview(symbol)
 
-        let slogan = NSTextField(wrappingLabelWithString: L10n.text("Music plays on. Lyrics stay with you."))
+        let slogan = NSTextField(wrappingLabelWithString: L10n.text("Lyrics, right where you look."))
         slogan.font = .systemFont(ofSize: 17, weight: .semibold)
         slogan.textColor = NSColor(calibratedRed: 0.13, green: 0.18, blue: 0.31, alpha: 1)
         slogan.translatesAutoresizingMaskIntoConstraints = false

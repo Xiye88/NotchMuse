@@ -13,7 +13,7 @@ STAGING="$ROOT/dist.noindex/appcast-staging/$VERSION-$BUILD"
 [[ "$VERSION" =~ '^[0-9]+\.[0-9]+\.[0-9]+$' ]]
 mkdir -p "$STAGING"
 cp "$DMG" "$STAGING/NotchMuse.dmg"
-cp "$ROOT/RELEASE_NOTES_v$VERSION.md" "$STAGING/NotchMuse.md"
+cp "$ROOT/docs/releases/RELEASE_NOTES_v$VERSION.md" "$STAGING/NotchMuse.md"
 "$SPARKLE" --account notchmuse --maximum-deltas 0 \
   --download-url-prefix "https://github.com/Xiye88/NotchMuse/releases/download/v$VERSION/" \
   --link "https://notchmuse.com/" \

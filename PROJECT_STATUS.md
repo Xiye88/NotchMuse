@@ -1,5 +1,13 @@
 # NotchMuse Project Status
 
+## v0.8.0 Productization Preview - 2026-10-03
+
+- `codex/v0.8.0-productization` is the only active productization branch. Build 43 is installed at `/Applications/NotchMuse Preview.app`; stable `/Applications/NotchMuse.app` remains public Beta 3 Build 38, untouched. No `main` merge or public website, Release, or appcast publication.
+- Preview GUI: Settings, Dock/menu icon switches and their both-hidden warning, compact Support cards and four confirmed EVM networks were inspected. Cmd+Q now quits the Preview app and it can be reopened. The Sidebar B polish and slogan option 1 are implemented; A/C and slogans 2-5 are mock/options only.
+- Non-public Sparkle staged Build 40 to 41: update discovery, release notes, signed appcast/DMG download, installation and signature verification passed. Automatic relaunch was not observed on two attempts, so full updater E2E remains **PARTIAL** and blocks public v0.8.0 approval. The update private key remains in Keychain.
+- Debug/Release Build 43 and packaged full self-test passed; local XCTest remains unavailable in Command Line Tools. NetEase metadata/playback short smoke passed. Spotify playback met an advertisement; five-player visible-lyrics smoke is not yet fully verified.
+- Formal v0.8.0 README and website copy are prepared on this branch only, with notarization status separated from version status. New screenshot gallery remains `SCREENSHOTS_PENDING_PO`. Historical release notes and completed handoffs were archived under `docs/`; canonical PM documents stay at root to preserve workflow references.
+
 ## v0.8.0 Productization Preview - 2026-10-02
 
 - Candidate: local `codex/v0.8.0-productization` based on `cf62b032fce7ff0c901104b913174182f8c72507`; Build 41 Preview is installed at `/Applications/NotchMuse Preview.app`. Stable `/Applications/NotchMuse.app` remains public Beta 3 Build 38 and is untouched.

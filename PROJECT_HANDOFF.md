@@ -1,5 +1,13 @@
 # NotchMuse Project Handoff
 
+## Current handoff - v0.8.0 productization, 2026-10-03
+
+Current status: PARTIAL on `codex/v0.8.0-productization`; Build 43 Preview is at `/Applications/NotchMuse Preview.app`. Public Beta 3 Build 38 remains at `/Applications/NotchMuse.app` and is untouched. No main merge, public Release, website deployment or public appcast switch.
+Completed: Dock/menu-bar icon preferences, reopen and Cmd+Q behavior, Sidebar B visual polish, slogan option 1, compact Support with ETH/BSC/Arbitrum/Optimism shared EVM address and separate TRON address, Debug/Release build and packaged self-test. The signed local staged appcast discovered Build 41, displayed release notes, downloaded and installed it; signature verification passed. Branch-only formal v0.8.0 README/website copy and archive layout are prepared; canonical PM files remain at root.
+Pending confirmation: Sparkle **automatic relaunch** was not observed after either staged installation attempt, so the full E2E is not PASS. Five-player visible-lyrics smoke remains partial (NetEase playback metadata checked; Spotify served an ad). New README UI screenshots are `SCREENSHOTS_PENDING_PO`; Product Owner Preview GUI acceptance is still required. Local XCTest is unavailable under Command Line Tools; run CI after branch push.
+Key files: `MenuBarLyrics/Sources/MenuBarLyrics/App/AppDelegate.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift`, `MenuBarLyrics/Sources/MenuBarLyrics/UI/SupportWindowController.swift`, `README.md`, `README.zh-CN.md`, `website/index.html`, `docs/design/sidebar-variants.html`, `docs/design/slogan-options.md`.
+Next step: push only the productization branch and verify CI; investigate Sparkle relaunch before any public release. Do not merge main or publish until Product Owner Preview PASS and updater gate resolution. Do not repeat Direct MediaRemote or long player soak.
+
 ## v0.8.0 Productization Candidate - 2026-10-02
 
 Current status: PARTIAL on `codex/v0.8.0-productization`, based on `origin/main` `cf62b032fce7ff0c901104b913174182f8c72507`. Candidate code `54a0f3ada20f70139ea3edcb1c53641769142f76` was pushed to the same remote branch; CI `36969610080` passed. Public release remains v0.8.0 Beta 3, build 38; `/Applications/NotchMuse.app` is untouched. Build 41 Preview is installed at `/Applications/NotchMuse Preview.app` with separate bundle ID/preferences and no automatic update or login launch.

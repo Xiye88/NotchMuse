@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased v0.8.0 Productization Candidate - 2026-10-03
+
+- Preview Build 43 adds Dock/menu visibility controls and recovery, Cmd+Q handling, compact Support cards, Sidebar B polish and the selected bilingual slogan. The stable public installation is unchanged.
+- Prepared formal v0.8.0 README and website copy on the development branch; archived historical release notes and completed handoffs. No public documentation or release was changed.
+- Local signed Sparkle staged update passed discovery, release notes, download, install and signature verification, but automatic relaunch was not observed; full update E2E remains open. NetEase short playback metadata passed; five-player visible-lyrics smoke and final Product Owner acceptance remain open.
+
 ## Unreleased v0.8.0 Preview Candidate - 2026-10-02
 
 - Local Build 40 added an isolated Preview app, Settings-on-launch/Dock activation, clickable Live Preview cards, optional Sparkle update checks, and a Support page with verified payment QR payloads. Build 41 restores the four Product Owner-confirmed EVM networks, sharpens QR rendering, and shortens two clipped Settings labels.

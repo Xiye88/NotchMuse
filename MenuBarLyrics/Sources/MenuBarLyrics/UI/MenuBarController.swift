@@ -483,6 +483,8 @@ final class MenuBarController: NSObject {
     }
 
     private func reloadSettings() {
+        NSApp.setActivationPolicy(AppPreferences.showInDock ? .regular : .accessory)
+        statusItem.isVisible = AppPreferences.showMenuBarIcon
         let selectedSource = AppPreferences.playerSource
         if selectedSource != player.source {
             pollTask?.cancel()

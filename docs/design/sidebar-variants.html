@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NotchMuse Sidebar Variants</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 44px; background: #e8edf6; color: #1e293b; font: 15px -apple-system, BlinkMacSystemFont, sans-serif; }
+  h1 { margin: 0 0 8px; font-size: 26px; }
+  p { margin: 0 0 28px; color: #64748b; }
+  main { display: grid; grid-template-columns: repeat(3, minmax(230px, 1fr)); gap: 24px; max-width: 1120px; }
+  section { min-height: 440px; padding: 24px; border: 1px solid #fff; border-radius: 18px; background: linear-gradient(145deg, #faf9fb, #f2f6ff); box-shadow: 0 16px 42px #35466d18; }
+  h2 { margin: 0 0 5px; font-size: 17px; }
+  small { display: block; margin-bottom: 30px; color: #718096; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 35px; color: #22518c; font-size: 19px; font-weight: 700; }
+  .logo { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; background: white; color: #f58225; box-shadow: 0 2px 5px #0002; }
+  .row { display: flex; align-items: center; gap: 14px; margin: 8px 0; padding: 12px 14px; border-radius: 11px; }
+  .row b { display: block; font-size: 15px; font-weight: 600; }
+  .row em { display: block; margin-top: 3px; color: #718096; font-size: 11px; font-style: normal; }
+  .icon { width: 22px; text-align: center; color: #61718b; font-size: 19px; }
+  .selected .icon { color: #2087ef; }
+  .a .row { min-height: 42px; padding: 8px 12px; }
+  .a .selected { background: #dfeeff; }
+  .b .row { min-height: 60px; }
+  .b .selected { background: #dfeafbc7; box-shadow: inset 0 0 0 1px #d1e0f3; }
+  .c .row { min-height: 54px; border-left: 3px solid transparent; border-radius: 5px; }
+  .c .selected { border-left-color: #2087ef; background: #eff5ff; }
+  .c .selected b { color: #235991; }
+  @media (max-width: 820px) { main { grid-template-columns: 1fr; } }
+</style>
+<h1>NotchMuse Sidebar</h1>
+<p>Visual mock only. Variant B is the current Preview direction.</p>
+<main>
+  <section class="a"><h2>A · Apple Settings Minimal</h2><small>最原生 / 最低视觉噪音</small><div class="brand"><span class="logo">♫</span>NotchMuse</div><div class="row selected"><span class="icon">▣</span><b>显示</b></div><div class="row"><span class="icon">◉</span><b>外观</b></div><div class="row"><span class="icon">⚙</span><b>通用</b></div></section>
+  <section class="b"><h2>B · Control Center Card</h2><small>推荐 / 当前 Preview 方向</small><div class="brand"><span class="logo">♫</span>NotchMuse</div><div class="row selected"><span class="icon">▣</span><div><b>显示</b><em>歌词位置与屏幕</em></div></div><div class="row"><span class="icon">◉</span><div><b>外观</b><em>颜色、字体与动画</em></div></div><div class="row"><span class="icon">⚙</span><div><b>通用</b><em>播放器与系统行为</em></div></div></section>
+  <section class="c"><h2>C · Brand Navigation</h2><small>品牌感 / 克制的蓝色强调</small><div class="brand"><span class="logo">♫</span>NotchMuse</div><div class="row selected"><span class="icon">▣</span><b>显示</b></div><div class="row"><span class="icon">◉</span><b>外观</b></div><div class="row"><span class="icon">⚙</span><b>通用</b></div></section>
+</main>

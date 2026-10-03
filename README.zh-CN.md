@@ -19,14 +19,15 @@ Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐。可以�
 | 菜单栏、刘海歌词 | 纯色与渐变色 | 自动检测播放器 |
 | 屏幕左侧或右侧 | 背景、透明度、宽度 | 简体中文与 English |
 | Dock 上方歌词 | 外观预设 | 应用内更新设置 |
+| 自定义宽度与位置 | 跟随系统、浅色与深色外观 | 开机自动启动；Dock 与菜单栏图标控制 |
 
 网易云、QQ 音乐和汽水音乐使用随应用打包的 MediaRemote bridge，无需 Homebrew 或额外安装 helper。macOS 或播放器升级后可能需要兼容性更新。
 
 ## 界面截图
 
-<!-- SCREENSHOTS_PENDING_PO: 最终 UI 验收后补入 v0.8.0 Settings、菜单栏、刘海、侧边和 Dock 新截图；不得复用旧 Settings 截图。 -->
+<!-- SCREENSHOT_REFRESH_PENDING_PO: 补入 v0.8.0 Settings、菜单栏、刘海、侧边和 Dock 新截图；不得复用旧 Settings 截图。 -->
 
-最终界面图集将在 UI 验收后补齐。目前可先看[菜单栏演示](docs/assets/demos/notchmuse-status-bar-demo.mp4)和[刘海演示](docs/assets/demos/notchmuse-notch-mode-demo.mp4)。
+新版图集正在整理。目前可先看[菜单栏演示](docs/assets/demos/notchmuse-status-bar-demo.mp4)和[刘海演示](docs/assets/demos/notchmuse-notch-mode-demo.mp4)。
 
 ## 三步开始
 
@@ -42,7 +43,9 @@ NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Develop
 
 ## 自动更新
 
-v0.8.0 候选版已提供设置中的更新控制。更新包必须经过签名验证才能安装；完整端到端更新流程仍是发布门槛。通过前，请在 [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases) 查看较新的公开版本。
+从 v0.8.0 开始，在 **设置 → 通用 → 检查更新…** 中发现、下载并安装签名更新。关闭自动检查不会禁用手动检查。Sparkle 在安装和重启前验证更新包的 EdDSA 签名。
+
+如果你正在使用 Beta 3 或更早版本，请手动下载安装一次 v0.8.0。旧版本不包含更新器。
 
 ## 常见问题
 

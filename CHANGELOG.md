@@ -1,6 +1,19 @@
 # Changelog
 
-## Unreleased Final Preview Corrections - 2026-10-03
+## 0.8.0 - 2026-10-04
+
+- In-app Sparkle updates with signed packages, release notes, installation and relaunch; manual checks work independently of automatic checking.
+- Persisted System/Light/Dark appearance for Settings and Support, stable Settings window frame, and compact Support cards.
+- Launch at Login preserves existing preferences; new stable installs default ON. Dock/menu bar visibility and Settings reopening controls.
+- Five supported players, Status Bar lyrics, four overlay positions, custom width, solid/gradient colors and background controls.
+- English and Simplified Chinese; historical release notes and completed handoffs archived without deleting history.
+- Users of Beta 3 or earlier need a one-time manual installation. Ad-hoc signing remains separate from release status; Apple notarization is not configured.
+
+## Historical Candidate Checkpoints
+
+The following checkpoints record development history, not the current public status.
+
+### Final Preview Corrections - 2026-10-03
 
 - Add persisted System/Light/Dark app appearance, including Support and adaptive Settings surfaces, without changing lyric colors or backgrounds.
 - Enable Preview Launch at Login, preserve existing choices, and apply the Stable fresh-install default before other startup preferences are written.
@@ -8,17 +21,17 @@
 - Keep the local-only staged appcast available through a loopback launchd service; add update lifecycle diagnostics and idle hiding after programmatic scrolling.
 - Build 48 is prepared locally; running Preview is Build 46 awaiting staged 47 final install/relaunch. These changes are not publicly released. Accepted WeChat QR and stable Build 38 remain unchanged.
 
-## Unreleased v0.8.0 Final Preview Gate - 2026-10-03
+### v0.8.0 Final Preview Gate - 2026-10-03
 
 - Build 45 Preview standardizes Settings scrolling, shortens the Dock label, keeps manual Sparkle checks available when automatic checks are off, and displays a pixel-preserving cropped WeChat payment QR alongside aligned USDT cards. No stable installation or public release changed.
 
-## Unreleased v0.8.0 Productization Candidate - 2026-10-03
+### v0.8.0 Productization Candidate - 2026-10-03
 
 - Preview Build 43 adds Dock/menu visibility controls and recovery, Cmd+Q handling, compact Support cards, Sidebar B polish and the selected bilingual slogan. The stable public installation is unchanged.
 - Prepared formal v0.8.0 README and website copy on the development branch; archived historical release notes and completed handoffs. No public documentation or release was changed.
 - Local signed Sparkle staged update passed discovery, release notes, download, install and signature verification, but automatic relaunch was not observed; full update E2E remains open. NetEase short playback metadata passed; five-player visible-lyrics smoke and final Product Owner acceptance remain open.
 
-## Unreleased v0.8.0 Preview Candidate - 2026-10-02
+### v0.8.0 Preview Candidate - 2026-10-02
 
 - Local Build 40 added an isolated Preview app, Settings-on-launch/Dock activation, clickable Live Preview cards, optional Sparkle update checks, and a Support page with verified payment QR payloads. Build 41 restores the four Product Owner-confirmed EVM networks, sharpens QR rendering, and shortens two clipped Settings labels.
 - Debug/Release builds and local self-tests passed before the Build 41 edit. Build 40 main-window/Support GUI smoke passed; five-player smoke, signed staged updater, Build 41 GUI, and Product Owner acceptance remain open. No public release or website/feed switch has occurred; Beta 3 remains current.

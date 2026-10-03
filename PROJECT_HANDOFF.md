@@ -1,5 +1,14 @@
 # NotchMuse Project Handoff
 
+## Official Release Gate - 2026-10-04
+
+Current status: RELEASE IN PROGRESS. Product Owner accepted installed Preview Build 47 and explicitly authorized branch push, main merge, CI, official v0.8.0 publication, website/appcast and stable installation.
+Completed: diff sanity check identifies 50 changed paths including six content-identical documentation moves and no deleted production source/resource/build/website files. Accepted runtime source is `5761310f7d7b664eedafb68bb099ee6c66fc7e32`; the later unaccepted Build 48 scroller patch is excluded from the release. Bilingual notes and final public copy are prepared.
+Pending confirmation: none for this authorized release. Actual public URLs, main CI, signature/checksum and stable deployment must pass before RELEASED is recorded. Screenshot refresh is non-blocking.
+Key files: `docs/releases/RELEASE_NOTES_v0.8.0.md`, `scripts/build_release.sh`, `scripts/prepare_appcast.sh`, `website/index.html`, `README.md`, `README.zh-CN.md`.
+Next step: commit and push final branch, fast-forward main, await main CI; package stable Version 0.8.0 Build 47 with the official HTTPS feed, sign appcast, publish assets before feed/website, deploy stable and verify.
+Do not repeat: Preview feature development, GUI/player soak, WeChat QR changes, Menu Bar Space or baseline investigations. Preview remains separate; no third Candidate.
+
 ## Verified staged installation - 2026-10-03
 
 Current status: Preview staged installation COMPLETE. `/Applications/NotchMuse Preview.app` is Version 0.8.0, Build 47; PID 21948 started at 18:24:08 and runs its installed `Contents/MacOS/NotchMuse`. The previous updater/host connection ended at that time. No additional reinstall was needed after the user's instruction to continue installation.

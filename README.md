@@ -19,14 +19,15 @@ Spotify · Apple Music · NetEase Cloud Music · QQ Music · Soda Music. Choose 
 | Status Bar and Notch lyrics | Solid and gradient colors | Auto Detect |
 | Left or right side lyrics | Background, opacity, and width | English and Simplified Chinese |
 | Lyrics above the Dock | Appearance presets | In-app update controls |
+| Custom width and position | System, Light, and Dark appearance | Launch at Login; Dock and menu bar icon controls |
 
 NetEase, QQ Music, and Soda Music use the bundled MediaRemote bridge. No Homebrew or separate helper installation is needed. Compatibility can change after a macOS or player update.
 
 ## Screenshots
 
-<!-- SCREENSHOTS_PENDING_PO: Replace with final v0.8.0 Settings, Status Bar, Notch, side, and Dock screenshots after UI acceptance. Do not reuse the older Settings capture. -->
+<!-- SCREENSHOT_REFRESH_PENDING_PO: Add final v0.8.0 Settings, Status Bar, Notch, side, and Dock screenshots. Do not reuse the older Settings capture. -->
 
-The final v0.8.0 gallery will be added after UI acceptance. Until then, see the [Status Bar demo](docs/assets/demos/notchmuse-status-bar-demo.mp4) and [Notch demo](docs/assets/demos/notchmuse-notch-mode-demo.mp4).
+The refreshed gallery is being prepared. See the [Status Bar demo](docs/assets/demos/notchmuse-status-bar-demo.mp4) and [Notch demo](docs/assets/demos/notchmuse-notch-mode-demo.mp4).
 
 ## Quick Start
 
@@ -42,7 +43,9 @@ If macOS blocks the app, open **System Settings → Privacy & Security → Open 
 
 ## Automatic Updates
 
-The v0.8.0 candidate includes update controls in Settings. Updates must be signed and verified before installation. The end-to-end update flow remains a release gate; until it passes, use [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases) to check for a newer public build.
+Starting with v0.8.0, use **Settings → General → Check for Updates…** to discover, download, and install signed updates. Manual checks work even when automatic checks are disabled. Sparkle verifies updates with EdDSA before installation and relaunch.
+
+If you're using Beta 3 or an earlier version, install v0.8.0 manually once. Those older builds do not include the updater.
 
 ## FAQ
 

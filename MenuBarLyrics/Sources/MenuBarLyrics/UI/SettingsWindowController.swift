@@ -1548,17 +1548,6 @@ private final class SettingsSidebarFooterView: AppearanceSurfaceView {
 private final class SettingsScrollView: NSScrollView {
     private var hideTask: DispatchWorkItem?
 
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-        contentView.postsBoundsChangedNotifications = true
-        NotificationCenter.default.addObserver(self, selector: #selector(didScroll),
-                                               name: NSView.boundsDidChangeNotification, object: contentView)
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    deinit { NotificationCenter.default.removeObserver(self) }
-
     override func layout() {
         super.layout()
         layoutDocument()
@@ -1573,20 +1562,13 @@ private final class SettingsScrollView: NSScrollView {
     }
 
     func hideIdleScroller() {
-        hideTask?.cancel()
-        hideTask = nil
         verticalScroller?.isHidden = true
     }
 
     override func scrollWheel(with event: NSEvent) {
-        super.scrollWheel(with: event)
-        didScroll()
-    }
-
-    @objc private func didScroll() {
         hideTask?.cancel()
-        scrollerStyle = .overlay
         verticalScroller?.isHidden = false
+        super.scrollWheel(with: event)
         let task = DispatchWorkItem { [weak self] in self?.hideIdleScroller() }
         hideTask = task
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: task)

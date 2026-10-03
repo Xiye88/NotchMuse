@@ -58,7 +58,7 @@ EOF_BUILD_INFO
 )
 
 if [[ "$SIGN_IDENTITY" == "-" ]]; then
-  echo "Warning: ad-hoc signed GitHub beta; Developer ID signing and notarization are absent." >&2
+  echo "Warning: ad-hoc signed release; Developer ID signing and notarization are absent." >&2
 else
   spctl --assess --type execute --verbose=2 "$APP"
 fi

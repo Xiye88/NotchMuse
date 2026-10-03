@@ -2,6 +2,8 @@
 
 This area contains implementation and quality-engineering information. Product usage, demos, installation, and support remain in the main [README](../README.md).
 
+New project managers should start with the [Master Handoff](project/NOTCHMUSE_MASTER_HANDOFF.md); current PM files live in `project/`, historical checkpoints in `archive/`, and execution evidence in `reports/`.
+
 Benchmark coverage, provider health, candidate scores, and Evidence Gate results are engineering diagnostics. They are not user-experience ratings and do not predict lyrics availability for an individual song.
 
 ## Architecture
@@ -16,7 +18,7 @@ NotchMuse is a native Swift macOS menu bar app.
 - `Sources/LyricsCore/` is the pure logic library target for lyric parsing and clocking; `Tests/MenuBarLyricsTests/` tests that module through SwiftPM.
 - The production executable remains the `MenuBarLyrics` target, with the same product name, bundle identity, and runtime target identity.
 - The current app supports Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music. Auto Detect is the default, with manual player selection retained. The latter three use the bundled MediaRemote bridge.
-- `lyrics-provider-benchmark/` is an independent lab and does not run inside the app.
+- `tools/lyrics-provider-benchmark/` is an independent lab and does not run inside the app.
 
 ## Build and Test
 
@@ -57,7 +59,7 @@ installs and launches the new build, then reports its version, build, and Git
 commit.
 
 The current distribution is ad-hoc signed, without Apple Developer ID notarization.
-Manual release steps are tracked in [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md).
+Manual release steps are tracked in [RELEASE_CHECKLIST.md](project/RELEASE_CHECKLIST.md).
 
 `build_release.sh` writes `BUILD-INFO.txt` and `SHA256SUMS` beside the app and
 DMG. The build-info file records the source commit, version/build, architecture,
@@ -66,7 +68,7 @@ and DMG.
 
 ## Lyrics Quality Benchmark
 
-The independent [Lyrics Provider Benchmark](../lyrics-provider-benchmark/README.md) measures coverage, provider contribution, latency, and failure reasons against a repeatable dataset. Benchmark results are engineering evidence, not a promise that every track will have lyrics.
+The independent [Lyrics Provider Benchmark](../tools/lyrics-provider-benchmark/README.md) measures coverage, provider contribution, latency, and failure reasons against a repeatable dataset. Benchmark results are engineering evidence, not a promise that every track will have lyrics.
 
 ## Evidence Gate
 
@@ -121,11 +123,11 @@ coverage.
 ## Engineering Evidence
 
 The dated execution reports, their archive, and the current architecture
-cleanup report are indexed in [reports/README.md](../reports/README.md).
+cleanup report are indexed in [reports/README.md](reports/README.md).
 
 ## Design History
 
 The approved Settings redesign handoff is stored at
-[NotchMuse_Settings_UI_Redesign_PM_Handoff.md](project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md).
+[NotchMuse_Settings_UI_Redesign_PM_Handoff.md](archive/NotchMuse_Settings_UI_Redesign_PM_Handoff.md).
 `10_SETTINGS_UI` and its accepted visual follow-ups are implemented in v0.8.0.
 The handoff is retained as design history, not a queued release task.

@@ -8,7 +8,7 @@ Priority: P1
 
 ## Findings
 
-- Benchmark Dataset: `lyrics-provider-benchmark/datasets/extended_1000.tsv`.
+- Benchmark Dataset: `tools/lyrics-provider-benchmark/datasets/extended_1000.tsv`.
 - Dataset size: `1000` tracks plus header.
 - Dataset categories include `english_pop`, `chinese_pop`, `japanese`, `korean`, `independent`, and `spotify_hot`.
 - Latest verified VPS 1000-song benchmark snapshot: run `6`, dataset `extended_1000`.

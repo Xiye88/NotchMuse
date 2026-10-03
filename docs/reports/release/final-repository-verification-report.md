@@ -12,7 +12,7 @@ Priority: P0
 - 当前 HEAD：`a01ad39 Update final beta artifact checksum`
 - NotchMuse App Beta RC 必要文件已进入 Git tracking：
   - `CHANGELOG.md`
-  - `RELEASE_CHECKLIST.md`
+  - `docs/project/RELEASE_CHECKLIST.md`
   - `RELEASE_NOTES_0.3.0-beta.md`
   - `scripts/build_dmg.sh`
   - `scripts/build_release.sh`
@@ -24,7 +24,7 @@ Priority: P0
   - `MenuBarLyrics/Sources/MenuBarLyrics/DebugLog.swift`
   - `MenuBarLyrics/Sources/MenuBarLyrics/SettingsWindowController.swift`
   - `MenuBarLyrics/Sources/MenuBarLyrics/SodaMusicLyricsSource.swift`
-  - `reports/release/01-app-final-build-verification-report.md`
+  - `docs/reports/release/01-app-final-build-verification-report.md`
 - 当前 App build dependency 简单：
   - Swift Package Manager
   - Apple Command Line Tools
@@ -73,4 +73,4 @@ Priority: P0
 - 是否接受 `0.3.0-beta` build `3` 作为最终 GitHub Beta build？
 - 是否接受 ad-hoc signed DMG 发布，还是必须先完成 Developer ID signing + notarization？
 - `docs/assets/*.png` 是否纳入 GitHub Release docs commit？
-- `lyrics-provider-benchmark/` 是否作为独立项目另行开源，而不是放入 NotchMuse App release？
+- `tools/lyrics-provider-benchmark/` 是否作为独立项目另行开源，而不是放入 NotchMuse App release？

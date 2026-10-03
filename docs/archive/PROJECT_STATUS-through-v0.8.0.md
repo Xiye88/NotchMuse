@@ -221,4 +221,4 @@ Last Updated: 2026-09-26 — Player expansion integrated with accepted Settings 
 
 Build 7, 14, 15, 16, 17, and 18 observations are historical for the installed
 build 21. Prior backup Git sync and install
-snapshots remain in `PROJECT_HANDOFF.md` as historical evidence.
+snapshots remain in `docs/project/PROJECT_HANDOFF.md` as historical evidence.

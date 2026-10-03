@@ -288,8 +288,8 @@ Action: Archive
 5. Any new long-term thread must:
    - Receive a stable number.
    - Define its role.
-   - Be written into `THREAD_REGISTRY.md`.
-   - Update `PROJECT_STATUS.md`.
+   - Be written into `docs/project/THREAD_REGISTRY.md`.
+   - Update `docs/project/PROJECT_STATUS.md`.
 
 ## Beta Release Thread Usage
 

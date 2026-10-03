@@ -181,7 +181,7 @@ All older candidate/build/pending-release sections below are historical and are 
 - Player implementation commit `d933c62` and timing fix `63c2ec0`; timing-fix
   CI `36226306542` passed. Local candidate build 26 is installed in
   `/Applications` from the earlier phase; this integration task must not replace
-  it. The isolated artifact and hash are recorded in `PROJECT_HANDOFF.md`.
+  it. The isolated artifact and hash are recorded in `docs/project/PROJECT_HANDOFF.md`.
 - Product Owner GUI feedback: QQ and Soda lyrics match correctly; check the
   timing fix alongside the integrated Settings v2 through a temporary isolated
   app launch.
@@ -198,7 +198,7 @@ All older candidate/build/pending-release sections below are historical and are 
 - Dependency gate was satisfied. Implementation started from stable main
   `101e550af4814b34d25b9b8e5f32af3252bb0606` in an isolated worktree and
   was integrated into main as `279b910`.
-- Design handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
+- Design handoff: `docs/archive/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
 - Result: Debug/full self-test, English/Simplified Chinese GUI smoke, branch CI,
   Release build, ad-hoc signature, and DMG verification passed. Public release
   remains a separate Product Owner decision.
@@ -223,7 +223,7 @@ All older candidate/build/pending-release sections below are historical and are 
   behavior stays frozen.
 - Source moves are complete; `AppLocalization.swift` stays at root because it
   locates localized resources relative to `#filePath`.
-- Completion report: `reports/github/09-repository-architecture-cleanup.md`.
+- Completion report: `docs/reports/github/09-repository-architecture-cleanup.md`.
 - Final SHA: `0495971a2ce948289320226cfb67656987352756`; final CI run
   `36157250718` passed. Handoff to `00_PM` is complete.
 - Final documentation head `d5673b9b5b9e25baff4abb57db2264f30ace19c2`
@@ -316,7 +316,7 @@ Workspace numbers are unique. A completed workspace moves to `DONE`, then to
 - Focused Auto Detect runtime: Spotify and Apple Music were closed, NetEase
   was the only running player, MediaRemote owner was `com.netease.163music`
   with `playing=true`, and NotchMuse visibly rendered its current lyric.
-- Focused QA report: `reports/2026-09-23-v08-stability-focused-qa.md`.
+- Focused QA report: `docs/reports/2026-09-23-v08-stability-focused-qa.md`.
 
 ## Physical Worktrees
 

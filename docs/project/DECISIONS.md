@@ -1,5 +1,11 @@
 # NotchMuse Decisions
 
+## 2026-10-04 - Canonical Project Documentation
+
+- The single PM entry point is `docs/project/NOTCHMUSE_MASTER_HANDOFF.md`; current status, task board, registry, roadmap, decisions, and release checklist remain in `docs/project/`.
+- Public support/feedback belong in `docs/community/`; release notes in `docs/releases/`; execution evidence in `docs/reports/`; superseded PM snapshots and completed handoffs in `docs/archive/`.
+- The executable lyrics benchmark lives in `tools/lyrics-provider-benchmark/`, separate from the app runtime. This is repository documentation cleanup only, not a new public version.
+
 ## 2026-10-04 - Official v0.8.0 Release Authorization
 
 - Product Owner accepted installed Preview Build 47 and authorized branch/main sync, CI, official release, appcast, website and stable deployment without further confirmation unless a P0 appears.
@@ -19,7 +25,7 @@
 
 - Register `10_SETTINGS_UI` as QUEUED / NEXT.
 - Use the approved design in
-  `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`; do not reopen the
+  `docs/archive/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`; do not reopen the
   visual direction when implementation starts.
 - Start only from the latest stable Architecture baseline after v0.8 Final
   Engineering is integrated. Do not mix the redesign into the repository
@@ -106,7 +112,7 @@ Reason:
 
 ### 2026-07-18: Use project documents as status source
 
-Decision: `PROJECT_STATUS.md`, `TASK_BOARD.md`, `DECISIONS.md`, and `ROADMAP.md` become the project status system.
+Decision: `docs/project/PROJECT_STATUS.md`, `docs/project/TASK_BOARD.md`, `docs/project/DECISIONS.md`, and `docs/project/ROADMAP.md` become the project status system.
 
 Reason:
 - Chat threads are useful for execution, but not reliable as the only project memory.

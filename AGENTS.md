@@ -14,8 +14,9 @@ publishing a public release.
 
 ## Project Handoff
 
-Start with `PROJECT_STATUS.md`, `PROJECT_HANDOFF.md`, `ROADMAP.md`,
-`TASK_BOARD.md`, and `CHANGELOG.md`. Update `PROJECT_HANDOFF.md` with the
+Start with `docs/project/NOTCHMUSE_MASTER_HANDOFF.md`, `docs/project/PROJECT_STATUS.md`,
+`docs/project/PROJECT_HANDOFF.md`, `docs/project/ROADMAP.md`,
+`docs/project/TASK_BOARD.md`, and `CHANGELOG.md`. Update `docs/project/PROJECT_HANDOFF.md` with the
 current version, branch, build, completed work, open issues, blockers, and next
 phase before implementation.
 
@@ -23,7 +24,7 @@ phase before implementation.
 
 Use only `00_PM` through `07_QA`. Reuse an existing responsibility workspace;
 do not create duplicate numbered workspaces. Archive completed or obsolete
-registrations without deleting their Git history. Update `TASK_BOARD.md` when
+registrations without deleting their Git history. Update `docs/project/TASK_BOARD.md` when
 a task changes state.
 
 ## Release Boundary
@@ -37,3 +38,11 @@ Ask separately whether to synchronize to GitHub and whether to publish/update
 the website download. Do not treat approval of a local implementation as
 approval to push, tag, publish, or replace public download assets. Prior release
 approval does not carry forward to later updates.
+
+## Canonical Documentation
+
+Keep `docs/project/NOTCHMUSE_MASTER_HANDOFF.md`, `docs/project/PROJECT_STATUS.md`,
+`docs/project/TASK_BOARD.md`, and `docs/project/THREAD_REGISTRY.md` synchronized
+after major features, releases, architecture or product-policy changes, and
+thread archival. Historical checkpoints belong in `docs/archive/` or
+`docs/reports/`, not in a second root-level PM document.

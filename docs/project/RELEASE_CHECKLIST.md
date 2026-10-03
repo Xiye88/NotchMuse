@@ -47,4 +47,4 @@ coverage gaps below are non-blocking future work, not freshly repeated tests.
 - [x] Stable `/Applications/NotchMuse.app` deployed and running; separate Preview retained
 
 Public release complete. New screenshot gallery and broader clean-Mac coverage
-remain non-blocking. See `reports/v0.8.0-release-verification.md`.
+remain non-blocking. See `docs/reports/v0.8.0-release-verification.md`.

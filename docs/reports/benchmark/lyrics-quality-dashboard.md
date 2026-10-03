@@ -13,7 +13,7 @@ Priority: P1
 - Live matrix latency snapshot: median 446 ms, p95 1715 ms, max 8849 ms.
 - Provider count: 6.
 - Provider names: LRCLIB, NetEase, LRCMux, QQ, Kugou, Soda.
-- Benchmark dataset capacity: `lyrics-provider-benchmark/datasets/extended_1000.tsv` has 1000 tracks plus header. `default.tsv` has 100 tracks plus header. `scripts/fixtures/live_tracks.tsv` has 100 tracks plus header.
+- Benchmark dataset capacity: `tools/lyrics-provider-benchmark/datasets/extended_1000.tsv` has 1000 tracks plus header. `default.tsv` has 100 tracks plus header. `scripts/fixtures/live_tracks.tsv` has 100 tracks plus header.
 - Benchmark storage/reporting capacity: SQLite schema exists for songs, providers, benchmark runs, provider results, missing lyrics, and failed tracks. CLI supports init, run, and report commands.
 - Benchmark reporting capacity: `latest.md`, `latest.json`, history reports, provider ranking, unique provider contribution, duplicate coverage via per-song provider results, failure reasons, failed song details, 7-day average coverage, latency, provider strategy, language matrix, matching simulation, retry analysis, recommendation, and coverage history are implemented in the benchmark package.
 - Failure reason labels supported by the benchmark: `no_lyrics_found`, `matching_failed`, `api_unavailable`, `invalid_response`, `version_mismatch`, `timeout`, `unknown_error`.

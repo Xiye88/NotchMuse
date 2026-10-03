@@ -56,7 +56,7 @@
 **Files:**
 - Modify: `README.md`
 - Modify: `CHANGELOG.md`
-- Modify: `RELEASE_CHECKLIST.md`
+- Modify: `docs/project/RELEASE_CHECKLIST.md`
 
 - [ ] Ensure README covers product intro, features, DMG install, Gatekeeper, Apple Silicon only, Intel unsupported, Universal Binary future, screenshots placeholders.
 - [ ] Record `v0.3.0-beta` in CHANGELOG.

@@ -31,7 +31,7 @@ Priority: P0
 - P0: Fresh clone / clean checkout is not release-ready because the Git index does not contain the full current beta source state.
 - Missing from tracked `HEAD` in the fresh checkout:
   - `CHANGELOG.md`
-  - `RELEASE_CHECKLIST.md`
+  - `docs/project/RELEASE_CHECKLIST.md`
   - `scripts/build_dmg.sh`
   - `scripts/build_release.sh`
   - `MenuBarLyrics/Resources/NotchMuse.entitlements`
@@ -42,7 +42,7 @@ Priority: P0
   - `MenuBarLyrics/Sources/MenuBarLyrics/DebugLog.swift`
   - `MenuBarLyrics/Sources/MenuBarLyrics/SettingsWindowController.swift`
   - `MenuBarLyrics/Sources/MenuBarLyrics/SodaMusicLyricsSource.swift`
-  - `reports/release/01-app-build-verification-report.md`
+  - `docs/reports/release/01-app-build-verification-report.md`
 - Current-permission clean build verification could not complete inside this delegated thread:
   - Command: `swift run --package-path MenuBarLyrics NotchMuse --self-test`
   - Failure: SwiftPM manifest compilation failed with `sandbox-exec: sandbox_apply: Operation not permitted`
@@ -63,6 +63,6 @@ Priority: P0
 ## Need PM Decision
 
 - Decide whether all current untracked RC files should be included in the GitHub beta release commit.
-- Decide whether `lyrics-provider-benchmark/` belongs in the same open source release or should remain a separate lab/tooling area.
+- Decide whether `tools/lyrics-provider-benchmark/` belongs in the same open source release or should remain a separate lab/tooling area.
 - Confirm final build number for `0.3.0-beta` before generating the public GitHub release artifact.
 - Confirm whether to proceed with an unsigned/ad-hoc GitHub beta artifact or require Developer ID signing and notarization before public release.

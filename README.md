@@ -39,7 +39,7 @@ The refreshed gallery is being prepared. See the [Status Bar demo](docs/assets/d
 
 NotchMuse is distributed directly through the website and GitHub. Apple Developer ID signing and notarization are not configured yet, so macOS may show a first-launch security warning. This is a distribution-signing limitation, not a version status.
 
-If macOS blocks the app, open **System Settings → Privacy & Security → Open Anyway** for NotchMuse, authenticate if asked, then open it again. See [Support](SUPPORT.md) for installation and permission help. Intel Macs are not supported.
+If macOS blocks the app, open **System Settings → Privacy & Security → Open Anyway** for NotchMuse, authenticate if asked, then open it again. See [Support](docs/community/SUPPORT.md) for installation and permission help. Intel Macs are not supported.
 
 ## Automatic Updates
 
@@ -67,4 +67,4 @@ The EVM address supports Ethereum, BNB Smart Chain (BEP20), Arbitrum, and Optimi
 
 ## License and Feedback
 
-NotchMuse is MIT-licensed; bundled third-party components are documented in [Third-Party Notices](THIRD_PARTY_NOTICES.md). Read [Support](SUPPORT.md) and [Feedback](FEEDBACK.md), or [open an issue](https://github.com/Xiye88/NotchMuse/issues). Developer and build documentation lives in [docs/README.md](docs/README.md).
+NotchMuse is MIT-licensed; bundled third-party components are documented in [Third-Party Notices](THIRD_PARTY_NOTICES.md). Read [Support](docs/community/SUPPORT.md) and [Feedback](docs/community/FEEDBACK.md), or [open an issue](https://github.com/Xiye88/NotchMuse/issues). Developer and build documentation lives in [docs/README.md](docs/README.md).

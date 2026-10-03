@@ -9,7 +9,7 @@ Priority: P1
 ## Findings
 
 - 当前可用于 GitHub Open Source Beta Release 的最新可靠数据来源，是 Lyrics Quality Lab 已验证的 VPS benchmark run `6`。
-- 数据源：`lyrics-provider-benchmark/datasets/extended_1000.tsv`。
+- 数据源：`tools/lyrics-provider-benchmark/datasets/extended_1000.tsv`。
 - 样本规模：`1000` tracks。
 - Dataset 类型：mixed-language benchmark，覆盖 `english_pop`、`chinese_pop`、`japanese`、`korean`、`independent`、`spotify_hot`。
 - 最新已验证运行时间：`2026-07-18T00:00:08+00:00` 到 `2026-07-18T00:34:49+00:00`。

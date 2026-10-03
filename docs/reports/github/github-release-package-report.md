@@ -10,7 +10,7 @@ Priority: P1
 
 - README is release-oriented and covers product summary, core features, macOS requirements, Apple Silicon-only beta scope, installation, Gatekeeper warning, permissions, privacy, source build commands, tests, known limitations, and third-party notices.
 - README still has screenshot placeholders for Status Bar, Notch Mode, and Settings.
-- Release checklist exists at `RELEASE_CHECKLIST.md` and tracks product, macOS permission, packaging, signing, notarization, DMG, and GitHub release steps.
+- Release checklist exists at `docs/project/RELEASE_CHECKLIST.md` and tracks product, macOS permission, packaging, signing, notarization, DMG, and GitHub release steps.
 - CHANGELOG exists and includes `0.3.0-beta - 2026-07-18` with release-preparation changes.
 - LICENSE exists and uses MIT License.
 - THIRD_PARTY_NOTICES exists and documents Lyricify Lyrics Helper as an Apache 2.0 reference, including project URL, copyright, reference commit, and no-binary-dependency statement.

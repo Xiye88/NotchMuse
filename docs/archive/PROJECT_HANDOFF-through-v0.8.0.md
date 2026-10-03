@@ -5,7 +5,7 @@
 Current status: RELEASED, Version 0.8.0 / Build 47. Release/tag/binary source SHA `15e13fc2c23ff8f5530db7e5629de076dd9011c5`. Product Owner accepted Preview Build 47 and authorized the full official release; development is stopped.
 Completed: branch/main sync, main CI `37136789378` and documentation CI `37138256104` PASS; exact archive moves with no production deletion; stable packaging/self-test/codesign/DMG verification; regular GitHub Release (not draft/prerelease), public assets/checksums; signed official HTTPS feed; website apex/www copy; actual website-button download with matching SHA; stable installation/running executable verified. English-first bilingual release notes and one-time older-build migration instructions are public.
 Pending confirmation: none for release. `SCREENSHOT_REFRESH_PENDING_PO` is non-blocking; notarization and wider clean-Mac coverage remain future work. Do not claim Apple notarization or newly repeated player soak.
-Key files: `docs/releases/RELEASE_NOTES_v0.8.0.md`, `reports/v0.8.0-release-verification.md`, `RELEASE_CHECKLIST.md`; public https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0 and https://notchmuse.com/appcast.xml. Site release directory `/opt/notchmuse-site/releases/20261004-v080` is active.
+Key files: `docs/releases/RELEASE_NOTES_v0.8.0.md`, `docs/reports/v0.8.0-release-verification.md`, `docs/project/RELEASE_CHECKLIST.md`; public https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0 and https://notchmuse.com/appcast.xml. Site release directory `/opt/notchmuse-site/releases/20261004-v080` is active.
 Next step: STOP. Resume only from real user feedback or a new authorized task. Future sync/publication requires fresh approval.
 Do not repeat: Preview feature work, old staged updater issues, WeChat QR changes, player long tests or Menu Bar Space. Stable `/Applications/NotchMuse.app` is Build 47, executable SHA-256 `e6991ac1e75474555cbabbeb32a3b2a9c53a120eec77e07e5291bbcb59db6fe3`; separate Preview remains Build 47, SHA-256 `8444eda48674efa439d269985c4365be032c76cfeaa49896ec06e771f8067e43`. DMG SHA-256 `8a3d4ef8caf326f069cc8661bde34ea468b9b7692793cb21ee6605b01fa94d36`. Stable points to the public feed; Preview keeps loopback-only feed and separate preferences. The transient generate_appcast Keychain block was resolved using the already-authorized Sparkle sign_update tool; private key was never exported.
 
@@ -16,7 +16,7 @@ Earlier checkpoints below are historical, including resolved pending-signing sta
 Current status: main merged/pushed, CI PASS; public promotion PENDING signing. Safe release SHA `15e13fc2c23ff8f5530db7e5629de076dd9011c5`; stable release package Version 0.8.0 Build 47 is under `dist.noindex/`.
 Completed: main CI `37136789378`, Release build/package/self-test, deep/strict codesign, DMG integrity, website language checks. Runtime source tree equals the accepted Build 47 source. DMG SHA-256 `8a3d4ef8caf326f069cc8661bde34ea468b9b7692793cb21ee6605b01fa94d36`; executable SHA-256 `e6991ac1e75474555cbabbeb32a3b2a9c53a120eec77e07e5291bbcb59db6fe3`. Website content staged in `/opt/notchmuse-site/releases/20261004-v080`, not activated.
 Pending confirmation: Mac is locked; `generate_appcast --account notchmuse` is awaiting SecurityAgent/Keychain authorization. Never bypass it or export a private key. No tag/Release/feed/website activation/stable replacement before the official signature passes.
-Key files: `dist.noindex/appcast-staging/0.8.0-47/`, `dist.noindex/release-site-server.py`, `docs/releases/RELEASE_NOTES_v0.8.0.md`, `RELEASE_CHECKLIST.md`.
+Key files: `dist.noindex/appcast-staging/0.8.0-47/`, `dist.noindex/release-site-server.py`, `docs/releases/RELEASE_NOTES_v0.8.0.md`, `docs/project/RELEASE_CHECKLIST.md`.
 Next step: after authorized Keychain access, generate/verify appcast; create v0.8.0 tag at the safe release SHA, regular GitHub Release with exact artifacts, verify public checksums, deploy signed feed/website, replace stable, record actual completion and push final docs.
 Do not repeat: existing build/CI/GUI tests or Preview changes. Current stable Build 38 and Preview Build 47 remain untouched.
 
@@ -34,7 +34,7 @@ Do not repeat: Preview feature development, GUI/player soak, WeChat QR changes, 
 Current status: Preview staged installation COMPLETE. `/Applications/NotchMuse Preview.app` is Version 0.8.0, Build 47; PID 21948 started at 18:24:08 and runs its installed `Contents/MacOS/NotchMuse`. The previous updater/host connection ended at that time. No additional reinstall was needed after the user's instruction to continue installation.
 Completed: installed executable SHA-256 `8444eda48674efa439d269985c4365be032c76cfeaa49896ec06e771f8067e43` exactly matches staged Build 47 from source `5761310f7d7b664eedafb68bb099ee6c66fc7e32`. Discovery, notes, download, EdDSA verification, installation and relaunch are verified. Post-update General shows Launch at Login OFF. Manual Check with automatic checks OFF showed the localized up-to-date dialog; automatic checks were then restored ON.
 Pending confirmation: final Product Owner Preview acceptance and explicit public release authorization. Prepared Build 48 is NOT installed or accepted; do not silently replace the verified Build 47. Full installed English UI smoke remains unverified.
-Key files: `PROJECT_STATUS.md`, `TASK_BOARD.md`, `THREAD_REGISTRY.md`; Preview feed remains `http://127.0.0.1:1337/appcast.xml`.
+Key files: `docs/project/PROJECT_STATUS.md`, `docs/project/TASK_BOARD.md`, `docs/project/THREAD_REGISTRY.md`; Preview feed remains `http://127.0.0.1:1337/appcast.xml`.
 Next step: use the actually accepted installed build as the release baseline after Product Owner acceptance; distinguish its source SHA from the newer branch/documentation HEAD.
 Do not repeat: staged installation, baseline builds, WeChat QR changes or long player tests. Stable `/Applications/NotchMuse.app` remains Build 38 with executable SHA-256 `d844889ad485ebdec3b770c2f4ad425468618ba48b3f32273ce8da4bc3a9a120`. No main merge or public publication was performed in this installation follow-up.
 
@@ -355,7 +355,7 @@ Do not repeat: build, source CI, long soak, UI polish, or Matcher work.
 - Blocked by: stable `09_REPO_ARCHITECTURE` source structure.
 - Starting baseline: stable main
   `101e550af4814b34d25b9b8e5f32af3252bb0606`.
-- Source handoff: `docs/project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
+- Source handoff: `docs/archive/NotchMuse_Settings_UI_Redesign_PM_Handoff.md`.
 - Isolated branch head: `5d74ce67ad25dfd9fa1c0a036cc4f06d05772575`;
   CI run `36213755351` passed. English and Simplified Chinese GUI smoke verified
   the real Settings window, all three sections, live previews, presets, and
@@ -402,7 +402,7 @@ Do not repeat: build, source CI, long soak, UI polish, or Matcher work.
   `#filePath` fallback resolves `Resources` from that location. Moving it
   without the matching path adjustment failed the localization self-test; the
   attempted move was reverted.
-- Engineering evidence: `reports/github/09-repository-architecture-cleanup.md`.
+- Engineering evidence: `docs/reports/github/09-repository-architecture-cleanup.md`.
 - Next: report final branch SHA and CI result to `00_PM`; wait for separate
   Product Owner decision before any merge or publication.
 
@@ -656,7 +656,7 @@ Pending confirmation:
 - Notch GUI regression, lifecycle/resource observation, and clean-install QA.
 - Product Owner approval immediately before any public release.
 
-Key files: `PROJECT_STATUS.md`, `ROADMAP.md`, `TASK_BOARD.md`, `CHANGELOG.md`.
+Key files: `docs/project/PROJECT_STATUS.md`, `docs/project/ROADMAP.md`, `docs/project/TASK_BOARD.md`, `CHANGELOG.md`.
 Next step: run the remaining real-player and release gates on build 15.
 Do not repeat: build 9-14 investigations or the completed P0 implementation.
 
@@ -665,7 +665,7 @@ they conflict with the block above, the build-15 update and current status
 documents take precedence.
 
 This file preserves the detailed implementation handoff. Current sprint facts
-are synchronized in `PROJECT_STATUS.md`, `TASK_BOARD.md`, and `ROADMAP.md`.
+are synchronized in `docs/project/PROJECT_STATUS.md`, `docs/project/TASK_BOARD.md`, and `docs/project/ROADMAP.md`.
 
 ## 1. 项目目标
 
@@ -732,7 +732,7 @@ Production Matcher、Provider priority 和新平台必须有独立证据 Gate。
   stapling 未完成。
 - App 主程序当前为 arm64；Bridge framework/helper 为 universal。Intel App
   支持未实现。
-- `PROJECT_STATUS.md`、`TASK_BOARD.md`、`ROADMAP.md` 尚未同步 build 14 的最终
+- `docs/project/PROJECT_STATUS.md`、`docs/project/TASK_BOARD.md`、`docs/project/ROADMAP.md` 尚未同步 build 14 的最终
   状态；本交接文件暂为最新事实源。
 
 ## 3. 当前代码架构
@@ -924,7 +924,7 @@ owner policy、暂停优先级、切换 debounce 和 stale clearing；不得依�
 3. 评估 Developer ID signing/notarization；缺少证书时明确保持 GitHub unsigned
    Beta，不伪造通过。
 4. 修复或接受 Spotify resume 后 Notch 高度短暂变化的 P1 风险。
-5. 同步 `PROJECT_STATUS.md`、`TASK_BOARD.md`、`ROADMAP.md`、CHANGELOG 和 Release
+5. 同步 `docs/project/PROJECT_STATUS.md`、`docs/project/TASK_BOARD.md`、`docs/project/ROADMAP.md`、CHANGELOG 和 Release
    Notes，但不得公开内部 Coverage 数字。
 
 ### P2
@@ -959,7 +959,7 @@ owner policy、暂停优先级、切换 debounce 和 stale clearing；不得依�
 - Worktree started clean and detached at the requested baseline.
 - Current phase: repository architecture audit; runtime and package structure
   remain unchanged. CI proposal is additive only.
-- Deliverables in progress: `reports/github/09-repository-architecture-audit.md`
+- Deliverables in progress: `docs/reports/github/09-repository-architecture-audit.md`
   and `.github/workflows/ci.yml`.
 - Open boundary: no architectural cleanup until `00_PM` supplies Candidate
   Freeze SHA; then fetch it and create `codex/repository-architecture-cleanup`

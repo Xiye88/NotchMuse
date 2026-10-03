@@ -13,7 +13,7 @@ Priority: P0
 - Installation section is release-usable for an unsigned open source beta.
 - Permission section is clear and minimal: Spotify Automation, Left-layout Accessibility, and network access for lyrics lookup.
 - Known Issues are partly covered under `## 已知限制`.
-- `RELEASE_CHECKLIST.md` has been updated to track unsigned Gatekeeper warning, Control-click Open, and Open Anyway validation.
+- `docs/project/RELEASE_CHECKLIST.md` has been updated to track unsigned Gatekeeper warning, Control-click Open, and Open Anyway validation.
 - CHANGELOG has a `0.3.0-beta - 2026-07-18` entry suitable as a base for GitHub Release Notes.
 - LICENSE and THIRD_PARTY_NOTICES exist. THIRD_PARTY_NOTICES includes the Apache 2.0 reference project and local Apache license text is present.
 

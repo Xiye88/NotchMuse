@@ -58,7 +58,7 @@
 - Modify: `scripts/build_dmg.sh`
 - Modify: `README.md`
 - Modify: `CHANGELOG.md`
-- Create: `RELEASE_CHECKLIST.md`
+- Create: `docs/project/RELEASE_CHECKLIST.md`
 
 **Interfaces:**
 - Consumes: `NOTCHMUSE_VERSION`, `NOTCHMUSE_BUILD_NUMBER`, and optional `NOTCHMUSE_SIGN_IDENTITY`.

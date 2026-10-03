@@ -39,7 +39,7 @@ Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐。可以�
 
 NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Developer ID 签名与公证。因此 macOS 首次打开时可能出现安全提示。这属于分发签名状态，与版本状态无关。
 
-如果系统拦截，请打开 **系统设置 → 隐私与安全性 → 仍要打开**，按提示认证后再次启动。安装和权限问题见[使用支持](SUPPORT.md)。目前不支持 Intel Mac。
+如果系统拦截，请打开 **系统设置 → 隐私与安全性 → 仍要打开**，按提示认证后再次启动。安装和权限问题见[使用支持](docs/community/SUPPORT.md)。目前不支持 Intel Mac。
 
 ## 自动更新
 
@@ -67,4 +67,4 @@ EVM 地址支持 Ethereum、BNB Smart Chain (BEP20)、Arbitrum 和 Optimism；TR
 
 ## 许可与反馈
 
-NotchMuse 使用 MIT License；内置第三方组件见[第三方声明](THIRD_PARTY_NOTICES.md)。使用问题请看[支持文档](SUPPORT.md)和[反馈指南](FEEDBACK.md)，或直接[提交 Issue](https://github.com/Xiye88/NotchMuse/issues)。架构与构建文档见 [docs/README.md](docs/README.md)。
+NotchMuse 使用 MIT License；内置第三方组件见[第三方声明](THIRD_PARTY_NOTICES.md)。使用问题请看[支持文档](docs/community/SUPPORT.md)和[反馈指南](docs/community/FEEDBACK.md)，或直接[提交 Issue](https://github.com/Xiye88/NotchMuse/issues)。架构与构建文档见 [docs/README.md](docs/README.md)。

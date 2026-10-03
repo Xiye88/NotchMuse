@@ -5,7 +5,7 @@ Independent coverage tester for NotchMuse lyric providers. It does not import or
 ## Run Locally
 
 ```sh
-cd lyrics-provider-benchmark
+cd tools/lyrics-provider-benchmark
 python3 -m unittest discover -s tests
 python3 -m benchmark.cli --db data/benchmark.sqlite3 init
 python3 -m benchmark.cli --db data/benchmark.sqlite3 run --dataset datasets/extended_1000.tsv --dataset-name extended_1000 --sample-size 1000

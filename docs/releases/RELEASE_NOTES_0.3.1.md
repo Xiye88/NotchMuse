@@ -5,7 +5,7 @@ GitHub beta.
 
 Documentation: [English README](https://github.com/Xiye88/NotchMuse#readme) ·
 [简体中文](https://github.com/Xiye88/NotchMuse/blob/main/README.zh-CN.md) ·
-[Setup help](https://github.com/Xiye88/NotchMuse/blob/main/SUPPORT.md)
+[Setup help](https://github.com/Xiye88/NotchMuse/blob/main/docs/community/SUPPORT.md)
 
 ## Highlights
 

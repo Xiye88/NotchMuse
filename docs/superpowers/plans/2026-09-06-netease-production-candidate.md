@@ -105,8 +105,8 @@
 ### Task 6: UI And Event Runtime Gate
 
 **Files:**
-- Create: `reports/v0.8-netease-ui-runtime-report.md`
-- Create: `reports/v0.8-netease-event-convergence-report.md`
+- Create: `docs/reports/v0.8-netease-ui-runtime-report.md`
+- Create: `docs/reports/v0.8-netease-event-convergence-report.md`
 
 - [ ] Test 20 real songs across Chinese, English, complex metadata, long/short/no lyrics in Status Bar and Notch Mode.
 - [ ] Record final-title latency, lyric requests per switch, stale/flash behavior, marquee, next line, and mode switches.
@@ -115,8 +115,8 @@
 ### Task 7: Lifecycle, Recovery, And Regression Gate
 
 **Files:**
-- Create: `reports/v0.8-netease-lifecycle-report.md`
-- Create: `reports/v0.8-player-regression-report.md`
+- Create: `docs/reports/v0.8-netease-lifecycle-report.md`
+- Create: `docs/reports/v0.8-player-regression-report.md`
 
 - [ ] Run 60 minutes with 30 switches, 10 pause/resume, three NetEase restarts, three NotchMuse restarts, two display modes, and two languages.
 - [ ] Test missing player, no track, health failure, killed helper, broken stream, network loss/recovery, and Sleep/Wake.
@@ -127,10 +127,10 @@
 ### Task 8: Production Gate And Conditional Release
 
 **Files:**
-- Create: `reports/v0.8-production-gate-report.md`
-- Modify: `PROJECT_STATUS.md`
-- Modify: `TASK_BOARD.md`
-- Modify: `ROADMAP.md`
+- Create: `docs/reports/v0.8-production-gate-report.md`
+- Modify: `docs/project/PROJECT_STATUS.md`
+- Modify: `docs/project/TASK_BOARD.md`
+- Modify: `docs/project/ROADMAP.md`
 - Modify only after GO/allowed CONDITIONAL GO: `CHANGELOG.md`, `README.md`, `README.zh-CN.md`, release notes.
 
 - [ ] Classify every runtime finding as P0/P1/P2 and decide GO, CONDITIONAL GO, or NO-GO from the spec criteria.

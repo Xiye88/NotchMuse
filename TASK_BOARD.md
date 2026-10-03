@@ -1,5 +1,17 @@
 # NotchMuse Task Board
 
+## Official v0.8.0 Release - CURRENT (2026-10-04)
+
+- [x] Product Owner accepted Preview Build 47 and authorized the complete official release chain.
+- [x] Diff sanity: six exact archive moves, no deleted production files; release runtime equals accepted source.
+- [x] Final branch/main synchronized at `15e13fc2c23ff8f5530db7e5629de076dd9011c5`; main CI `37136789378` PASS.
+- [x] Stable Build 47 package/self-test/signature/DMG metadata; English-first bilingual notes and public README copy ready.
+- [x] Website directory `20261004-v080` staged without activating download links.
+- [ ] PENDING_KEYCHAIN: unlock/authorize official appcast signing; private key remains protected.
+- [ ] Publish regular v0.8.0 tag/Release/assets, verify public bytes, activate official feed/website.
+- [ ] Deploy stable App and record final public verification. No Preview development or long test repeat.
+- [ ] Non-blocking screenshot refresh.
+
 ## Staged Installation Follow-up - CURRENT (2026-10-03)
 
 - [x] Preview Build 47 installed and relaunched at the correct Applications path; installed binary equals staged package.

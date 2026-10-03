@@ -1,5 +1,20 @@
 # NotchMuse Thread Registry
 
+## Current Official Release Checkpoint - 2026-10-04
+
+| Workspace | Status | Scope |
+| --- | --- | --- |
+| 00_PM | ACTIVE | Release authorized; no further features. Signing is blocked on locked-Mac Keychain access. |
+| 01_APP | DONE | Accepted Build 47 runtime frozen; Build 48 unaccepted patch excluded. |
+| 02_RELEASE | ACTIVE | main CI PASS, stable package/checksums ready; official appcast/tag/Release/deploy pending signing. |
+| 03_LAB | DONE | No new benchmark or long test scope. |
+| 04_UX | DONE | Product Owner accepted Preview; screenshot refresh non-blocking. |
+| 05_MATCHER | DONE | Production Matcher/provider order unchanged. |
+| 06_DOCS | ACTIVE | Bilingual final copy and historical archives ready; record publication only after verified. |
+| 07_QA | DONE | Product Owner staged update E2E PASS; no repeated GUI/player soak. |
+
+Menu Bar Space remains archived/paused and outside this release.
+
 ## Current Staged Installation Checkpoint - 2026-10-03
 
 - 00_PM: ACTIVE; waiting for final Preview acceptance and public release authorization.

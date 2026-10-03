@@ -1,10 +1,10 @@
-# Beta Support
+# NotchMuse Support
 
-NotchMuse is currently an early public beta. This page covers the most common setup and troubleshooting steps before opening an issue.
+This page covers installation and troubleshooting for NotchMuse v0.8.0, before opening an issue.
 
-## Install and open the beta
+## Install and Open
 
-The GitHub beta is ad-hoc signed, but it is not signed with Apple Developer ID or notarized. macOS may block the first launch.
+Direct downloads are ad-hoc signed, but not signed with Apple Developer ID or notarized. macOS may block first launch; this is a distribution-signing limitation, not a version status.
 
 Try this first:
 
@@ -16,9 +16,15 @@ Try this first:
 
 If macOS still blocks it, open `System Settings > Privacy & Security` and choose `Open Anyway` for NotchMuse.
 
+## Updates
+
+Starting with v0.8.0, use Settings > General > Check for Updates to install signed updates. Manual checks remain available when automatic checks are off. Beta 3 or older builds need a one-time manual installation of v0.8.0.
+
 ## Music player Automation permission
 
 NotchMuse reads the current Spotify or Apple Music track through macOS Automation.
+
+NetEase Cloud Music, QQ Music and Soda Music use the bundled bridge, without Homebrew or an extra helper installation.
 
 If lyrics do not appear:
 

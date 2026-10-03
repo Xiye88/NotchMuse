@@ -1,5 +1,15 @@
 # NotchMuse Project Status
 
+## Current Official Release Gate - 2026-10-04
+
+- Product Owner accepted Preview 0.8.0 Build 47 and authorized official publication. Development is frozen.
+- main and final branch source `15e13fc2c23ff8f5530db7e5629de076dd9011c5` synchronized; main CI `37136789378` PASS. Six archive moves preserve contents; no production files deleted. Runtime matches the accepted Build 47 source; unaccepted Build 48 scroller patch excluded.
+- Stable Build 47 package, self-test, codesign and DMG integrity PASS; checksum/build-info ready. DMG SHA-256 `8a3d4ef8caf326f069cc8661bde34ea468b9b7692793cb21ee6605b01fa94d36`.
+- Publication **PENDING_KEYCHAIN**: Mac is locked; official appcast generation needs the Product Owner's Keychain authorization. No official tag/Release, feed activation or stable-app replacement yet. Website release directory `20261004-v080` is staged, not active.
+- Installed stable remains Beta 3 Build 38; separate Preview remains accepted Build 47. New screenshots are non-blocking `SCREENSHOT_REFRESH_PENDING_PO`.
+
+Earlier blocks below are historical checkpoints, not the current release status.
+
 ## Current Installed Preview - 2026-10-03
 
 - Staged update installation and relaunch: **PASS**. Installed Preview Version 0.8.0 / Build 47, executable `/Applications/NotchMuse Preview.app/Contents/MacOS/NotchMuse`, running PID 21948.

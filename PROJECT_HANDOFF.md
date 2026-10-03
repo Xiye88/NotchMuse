@@ -1,5 +1,14 @@
 # NotchMuse Project Handoff
 
+## Release Preflight Checkpoint - 2026-10-04
+
+Current status: main merged/pushed, CI PASS; public promotion PENDING signing. Safe release SHA `15e13fc2c23ff8f5530db7e5629de076dd9011c5`; stable release package Version 0.8.0 Build 47 is under `dist.noindex/`.
+Completed: main CI `37136789378`, Release build/package/self-test, deep/strict codesign, DMG integrity, website language checks. Runtime source tree equals the accepted Build 47 source. DMG SHA-256 `8a3d4ef8caf326f069cc8661bde34ea468b9b7692793cb21ee6605b01fa94d36`; executable SHA-256 `e6991ac1e75474555cbabbeb32a3b2a9c53a120eec77e07e5291bbcb59db6fe3`. Website content staged in `/opt/notchmuse-site/releases/20261004-v080`, not activated.
+Pending confirmation: Mac is locked; `generate_appcast --account notchmuse` is awaiting SecurityAgent/Keychain authorization. Never bypass it or export a private key. No tag/Release/feed/website activation/stable replacement before the official signature passes.
+Key files: `dist.noindex/appcast-staging/0.8.0-47/`, `dist.noindex/release-site-server.py`, `docs/releases/RELEASE_NOTES_v0.8.0.md`, `RELEASE_CHECKLIST.md`.
+Next step: after authorized Keychain access, generate/verify appcast; create v0.8.0 tag at the safe release SHA, regular GitHub Release with exact artifacts, verify public checksums, deploy signed feed/website, replace stable, record actual completion and push final docs.
+Do not repeat: existing build/CI/GUI tests or Preview changes. Current stable Build 38 and Preview Build 47 remain untouched.
+
 ## Official Release Gate - 2026-10-04
 
 Current status: RELEASE IN PROGRESS. Product Owner accepted installed Preview Build 47 and explicitly authorized branch push, main merge, CI, official v0.8.0 publication, website/appcast and stable installation.

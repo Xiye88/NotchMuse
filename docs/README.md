@@ -32,7 +32,7 @@ swift run --package-path MenuBarLyrics NotchMuse --self-test
 ./scripts/run_live_matrix.sh
 ```
 
-The next v0.8.0 build is being prepared on a development branch. GitHub Actions CI runs on
+GitHub Actions CI runs on
 `macos-15` with Swift 6 and verifies Debug/self-test, `swift test`, Release
 packaging, DMG integrity, and repository checks. `build_release.sh` recreates
 `dist.noindex`; do not use it when that directory contains artifacts you need
@@ -56,7 +56,7 @@ current `/Applications/NotchMuse.app` under `dist.noindex/local-backups/`,
 installs and launches the new build, then reports its version, build, and Git
 commit.
 
-The current distribution is ad-hoc signed; v0.8.0 is not yet publicly released.
+The current distribution is ad-hoc signed, without Apple Developer ID notarization.
 Manual release steps are tracked in [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md).
 
 `build_release.sh` writes `BUILD-INFO.txt` and `SHA256SUMS` beside the app and
@@ -123,9 +123,9 @@ coverage.
 The dated execution reports, their archive, and the current architecture
 cleanup report are indexed in [reports/README.md](../reports/README.md).
 
-## Queued Product Work
+## Design History
 
 The approved Settings redesign handoff is stored at
 [NotchMuse_Settings_UI_Redesign_PM_Handoff.md](project/NotchMuse_Settings_UI_Redesign_PM_Handoff.md).
-It is registered as `10_SETTINGS_UI` and remains queued until `00_PM` opens it
-from the latest stable Architecture SHA.
+`10_SETTINGS_UI` and its accepted visual follow-ups are implemented in v0.8.0.
+The handoff is retained as design history, not a queued release task.

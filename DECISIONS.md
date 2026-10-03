@@ -1,5 +1,12 @@
 # NotchMuse Decisions
 
+## 2026-10-04 - Official v0.8.0 Release Authorization
+
+- Product Owner accepted installed Preview Build 47 and authorized branch/main sync, CI, official release, appcast, website and stable deployment without further confirmation unless a P0 appears.
+- Release the accepted Build 47 runtime; exclude the unaccepted later Build 48 scroller patch. Do not add features or repeat player soak.
+- Stable uses the official HTTPS feed; Preview retains separate identity/preferences and loopback-only feed. Do not publicly distribute Preview or overwrite it with stable.
+- Keep ad-hoc/notarization limitations transparent and separate from version naming. Preserve historical prereleases, and require EdDSA verification before public feed promotion.
+
 ## 2026-10-02 - Pause In-App Menu Bar Management
 
 - Decision: keep Menu Bar Space **EXPERIMENTAL / PAUSED** in the backlog; do not merge or release it as a NotchMuse feature.

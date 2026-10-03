@@ -1,11 +1,10 @@
 # NotchMuse Roadmap
 
-## Current - v0.8.0 Preview Candidate
+## Current - Authorized v0.8.0 Release
 
-1. P0: finish only the ready 46 -> 47 staged Install and Relaunch after Product Owner approval; verify new PID/Build and Login Item OFF after restart. No repeated long player tests or WeChat QR work.
-2. P0: deploy prepared Build 48 Preview, verify the idle-scroller correction, up-to-date manual check with auto OFF and English restart UI. System/Light/Dark, frame tests and Keychain signing already passed. Public feed remains unchanged.
-3. P1: Product Owner accepts Preview and publication separately; then publish a coherent v0.8.0 DMG, appcast, release notes, website download, and checksum. Beta 3 remains current until then.
-4. P2: Developer ID signing/notarization and broader clean-Mac testing before wide promotion. Native lyrics probing is deferred; Menu Bar Space remains paused.
+1. P0: complete official Keychain appcast signing after unlock; then publish the accepted Build 47 runtime, verified asset/feed/website and stable installation. main CI and local packaging have passed.
+2. P1: refreshed screenshots and real v0.8.0 user feedback; no new feature development before release closure.
+3. P2: separately assess Developer ID signing/notarization and broader clean-Mac testing before wide promotion. Native lyrics is deferred; Menu Bar Space remains paused.
 
 ## Backlog - Menu Bar Space (2026-10-02)
 

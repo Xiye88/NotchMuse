@@ -7,6 +7,7 @@
 - Non-public Sparkle staged Build 40 to 41: update discovery, release notes, signed appcast/DMG download, installation and signature verification passed. Automatic relaunch was not observed on two attempts, so full updater E2E remains **PARTIAL** and blocks public v0.8.0 approval. The update private key remains in Keychain.
 - Debug/Release Build 43 and packaged full self-test passed; local XCTest remains unavailable in Command Line Tools. NetEase metadata/playback short smoke passed. Spotify playback met an advertisement; five-player visible-lyrics smoke is not yet fully verified.
 - Formal v0.8.0 README and website copy are prepared on this branch only, with notarization status separated from version status. New screenshot gallery remains `SCREENSHOTS_PENDING_PO`. Historical release notes and completed handoffs were archived under `docs/`; canonical PM documents stay at root to preserve workflow references.
+- Branch commit `9af3137933e90823898f424f386b017934290784` was pushed to `origin/codex/v0.8.0-productization`; CI run `37097889679` passed, including Swift package tests and Release DMG checks. This is a development branch, not a public release.
 
 ## v0.8.0 Productization Preview - 2026-10-02
 

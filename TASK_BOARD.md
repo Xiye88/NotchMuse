@@ -8,7 +8,7 @@
 - [ ] Sparkle auto-relaunch: not observed on two staged attempts; investigate before public release.
 - [ ] Five-player visible-lyrics smoke: NetEase metadata/playback checked; Spotify hit an ad; other players not freshly verified on Build 43.
 - [ ] New final UI screenshot gallery (`SCREENSHOTS_PENDING_PO`) and Product Owner Preview acceptance.
-- [ ] Push this branch, run CI; do not merge main or publicly publish yet.
+- [x] Pushed branch commit `9af3137933e90823898f424f386b017934290784`; CI `37097889679` PASS. Do not merge main or publicly publish yet.
 - [x] Prepare formal v0.8.0 README/website copy and archive historical root documents; retain canonical PM files at root.
 
 ## v0.8.0 Productization - IN PROGRESS (2026-10-02)

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased Final Preview Corrections - 2026-10-03
+
+- Add persisted System/Light/Dark app appearance, including Support and adaptive Settings surfaces, without changing lyric colors or backgrounds.
+- Enable Preview Launch at Login, preserve existing choices, and apply the Stable fresh-install default before other startup preferences are written.
+- Fix document sizing that changed the Settings window width; preserve manual frame on page switches and restore it across launches.
+- Keep the local-only staged appcast available through a loopback launchd service; add update lifecycle diagnostics and idle hiding after programmatic scrolling.
+- Build 48 is prepared locally; running Preview is Build 46 awaiting staged 47 final install/relaunch. These changes are not publicly released. Accepted WeChat QR and stable Build 38 remain unchanged.
+
 ## Unreleased v0.8.0 Final Preview Gate - 2026-10-03
 
 - Build 45 Preview standardizes Settings scrolling, shortens the Dock label, keeps manual Sparkle checks available when automatic checks are off, and displays a pixel-preserving cropped WeChat payment QR alongside aligned USDT cards. No stable installation or public release changed.

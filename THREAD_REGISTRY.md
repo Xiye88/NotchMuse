@@ -4,11 +4,14 @@
 
 | Workspace | Status | Scope |
 | --- | --- | --- |
-| 00_PM | ACTIVE | Build 43 Preview integration, branch CI, Sparkle relaunch gate, and final Product Owner acceptance. |
-| 01_APP | DONE | Dock/menu visibility, app lifecycle and Cmd+Q fixes integrated into Preview. |
+| 00_PM | ACTIVE | Final gate PARTIAL: ready staged 46 -> 47 installer awaits PO; Build 48 prepared; source CI PASS. |
+| 01_APP | DONE | Login policy, global appearance and exact frame/restore fixes; real ON/OFF checked, restart still pending. |
+| 02_RELEASE | DONE | Builds 46/47/48 and loopback-only signed staged feed; no public release or main merge. |
+| 04_UX | DONE | Light/Dark/System and Support visuals checked; Build 48 idle-scroller patch awaits deployed GUI check. |
+| 07_QA | ACTIVE | Complete automatic relaunch, restart persistence, latest-version dialog, idle scroller and final PO acceptance. |
 | 06_DOCS | DONE | Formal v0.8.0 copy and historical document archive prepared on the branch only. |
 
-Full Sparkle E2E is PARTIAL because automatic relaunch was not observed. The public Beta 3 app and archived Menu Bar Space experiment are unchanged.
+Full Sparkle E2E is PARTIAL: discovery/notes/download/signature passed, but the final Install and Relaunch button has not been authorized/clicked in this round. CI `37114869177` PASS. WeChat real-phone scan is PO PASS. The public Beta 3 app and archived Menu Bar Space experiment are unchanged.
 
 ## Active - v0.8.0 Productization (2026-10-02)
 

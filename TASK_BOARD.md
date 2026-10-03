@@ -1,5 +1,20 @@
 # NotchMuse Task Board
 
+## Latest Final Preview Corrections - CURRENT (2026-10-03)
+
+- [x] Restore localhost staged feed with loopback-only launchd KeepAlive; sign and verify using existing Keychain key.
+- [x] Real scheduled 46 -> 47 discovery, release notes, download and EdDSA verification; manual Check shows the ready installer.
+- [ ] PENDING_PO final Install and Relaunch button; verify auto-relaunched PID/Build, not manual quit/reopen.
+- [x] Login toggle usable; actual ON/OFF registered/unregistered; 35 policy assertions PASS.
+- [ ] Login OFF retained after real restart; installed English localization smoke.
+- [x] Settings exact frame/restore and appearance/lyric preference isolation tests; Light/Dark/Support GUI checks.
+- [x] WeChat phone scan: Product Owner PASS. Do not recrop or retest.
+- [x] Build 48 prepared with programmatic-scroll idle hiding; branch pushed, CI `37114869177` PASS.
+- [ ] After staged E2E, deploy Build 48 into the unique Preview path; idle-scroller focused GUI and up-to-date with auto OFF.
+- [ ] Final Product Owner Preview acceptance; no main merge/public release before acceptance.
+
+Earlier candidate checklists below are historical, superseded by this current list.
+
 ## v0.8.0 Final Preview Gate - Build 45 (2026-10-03)
 
 - [x] Installed Build 45 Preview; stable Beta 3 Build 38 untouched.

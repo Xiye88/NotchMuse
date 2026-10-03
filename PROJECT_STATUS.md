@@ -1,5 +1,14 @@
 # NotchMuse Project Status
 
+## Latest Final Preview Corrections - 2026-10-03
+
+- Gate: **PARTIAL**. Installed Preview Build 46 is awaiting the final staged Build 47 Install and Relaunch action. Build 48 with the final idle-scroller correction is built separately, not yet deployed; do not mistake it for the running binary.
+- Development source `9dae133ea1da675bfc69d93c9724c0b3512b5a38` pushed; CI `37114869177` PASS. Settings focused self-test and 35 login-policy assertions PASS. Exact page-switch frame and manual-frame restore checks PASS.
+- GUI PASS on Build 46: Light, Dark, Support Dark, System matching the current light OS appearance, short Dock/menu/login labels, and EVM/TRON full-address copy. Real Login Item ON/OFF records show enabled/disabled; restart verification remains pending.
+- Sparkle: persistent loopback-only feed; Keychain appcast signing/verification PASS; real scheduled discovery and release notes PASS; download and Sparkle EdDSA verification PASS; manual Check shows Ready to Install. Full install + automatic relaunch is **PENDING_PO**, not PASS. Latest-version dialog after upgrade and English installed-UI restart check remain pending.
+- WeChat phone scan is Product Owner **PASS**; accepted QR unchanged. No repeated player soak or player/Matcher/provider change.
+- Stable `/Applications/NotchMuse.app` remains Build 38; no main merge, public Release, website or public appcast change. Earlier candidate blocks below are historical.
+
 ## v0.8.0 Final Preview UI / Update Gate - 2026-10-03
 
 - Build 45 is installed at `/Applications/NotchMuse Preview.app` with an explicit localhost staged feed. Stable `/Applications/NotchMuse.app` remains Beta 3 Build 38 and was not replaced. No main merge or public release/feed/website change.

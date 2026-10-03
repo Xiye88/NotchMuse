@@ -1,12 +1,25 @@
 # NotchMuse Task Board
 
+## Staged Installation Follow-up - CURRENT (2026-10-03)
+
+- [x] Preview Build 47 installed and relaunched at the correct Applications path; installed binary equals staged package.
+- [x] Login OFF preserved after update/restart.
+- [x] Manual Check with automatic checking OFF shows up-to-date; restore original automatic checking ON.
+- [x] Stable Build 38 remains untouched; no public publication/main merge.
+- [ ] Product Owner final Preview acceptance and explicit public release authorization.
+- [ ] Full installed English localization smoke (not performed in this installation-only follow-up).
+- [ ] Prepared Build 48 remains separate, not installed/accepted; do not substitute it for accepted Build 47 without a decision.
+
+Earlier candidate checklists below are historical.
+
 ## Latest Final Preview Corrections - CURRENT (2026-10-03)
 
 - [x] Restore localhost staged feed with loopback-only launchd KeepAlive; sign and verify using existing Keychain key.
 - [x] Real scheduled 46 -> 47 discovery, release notes, download and EdDSA verification; manual Check shows the ready installer.
-- [ ] PENDING_PO final Install and Relaunch button; verify auto-relaunched PID/Build, not manual quit/reopen.
+- [x] Staged Install and Relaunch completed; Build 47 / PID 21948 verified after update.
 - [x] Login toggle usable; actual ON/OFF registered/unregistered; 35 policy assertions PASS.
-- [ ] Login OFF retained after real restart; installed English localization smoke.
+- [x] Login OFF retained after real restart.
+- [ ] Installed English localization smoke.
 - [x] Settings exact frame/restore and appearance/lyric preference isolation tests; Light/Dark/Support GUI checks.
 - [x] WeChat phone scan: Product Owner PASS. Do not recrop or retest.
 - [x] Build 48 prepared with programmatic-scroll idle hiding; branch pushed, CI `37114869177` PASS.

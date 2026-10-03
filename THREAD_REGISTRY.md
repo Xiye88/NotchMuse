@@ -1,5 +1,12 @@
 # NotchMuse Thread Registry
 
+## Current Staged Installation Checkpoint - 2026-10-03
+
+- 00_PM: ACTIVE; waiting for final Preview acceptance and public release authorization.
+- 02_RELEASE: staged Build 46 -> 47 installation/relaunch verified; official distribution unchanged.
+- 07_QA: post-update correct binary/path, Login OFF persistence and manual up-to-date with auto-check OFF PASS. Full installed English UI remains pending; prepared Build 48 is not deployed.
+- Installed Preview source `5761310f7d7b664eedafb68bb099ee6c66fc7e32`, Build 47. Stable Build 38 unchanged. This checkpoint supersedes the pending-install claims below; no new workspace or public release was created.
+
 ## Active - v0.8.0 Productization (2026-10-03)
 
 | Workspace | Status | Scope |

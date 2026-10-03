@@ -1,5 +1,16 @@
 # NotchMuse Project Handoff
 
+## Verified staged installation - 2026-10-03
+
+Current status: Preview staged installation COMPLETE. `/Applications/NotchMuse Preview.app` is Version 0.8.0, Build 47; PID 21948 started at 18:24:08 and runs its installed `Contents/MacOS/NotchMuse`. The previous updater/host connection ended at that time. No additional reinstall was needed after the user's instruction to continue installation.
+Completed: installed executable SHA-256 `8444eda48674efa439d269985c4365be032c76cfeaa49896ec06e771f8067e43` exactly matches staged Build 47 from source `5761310f7d7b664eedafb68bb099ee6c66fc7e32`. Discovery, notes, download, EdDSA verification, installation and relaunch are verified. Post-update General shows Launch at Login OFF. Manual Check with automatic checks OFF showed the localized up-to-date dialog; automatic checks were then restored ON.
+Pending confirmation: final Product Owner Preview acceptance and explicit public release authorization. Prepared Build 48 is NOT installed or accepted; do not silently replace the verified Build 47. Full installed English UI smoke remains unverified.
+Key files: `PROJECT_STATUS.md`, `TASK_BOARD.md`, `THREAD_REGISTRY.md`; Preview feed remains `http://127.0.0.1:1337/appcast.xml`.
+Next step: use the actually accepted installed build as the release baseline after Product Owner acceptance; distinguish its source SHA from the newer branch/documentation HEAD.
+Do not repeat: staged installation, baseline builds, WeChat QR changes or long player tests. Stable `/Applications/NotchMuse.app` remains Build 38 with executable SHA-256 `d844889ad485ebdec3b770c2f4ad425468618ba48b3f32273ce8da4bc3a9a120`. No main merge or public publication was performed in this installation follow-up.
+
+The blocks below describe earlier checkpoints and are historical.
+
 ## Active final corrections - 2026-10-03
 
 Current status: PARTIAL on `codex/v0.8.0-productization`. Build 46 is running at `/Applications/NotchMuse Preview.app`; staged Build 47 is downloaded, signature-verified and ready for its final Install and Relaunch action. Build 48, including the idle-scroller follow-up, is prepared at `dist.noindex/final-preview/NotchMuse Preview.app`. Stable Beta 3 Build 38 is unchanged.

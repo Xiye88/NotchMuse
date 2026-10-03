@@ -1,5 +1,15 @@
 # NotchMuse Project Status
 
+## Current Installed Preview - 2026-10-03
+
+- Staged update installation and relaunch: **PASS**. Installed Preview Version 0.8.0 / Build 47, executable `/Applications/NotchMuse Preview.app/Contents/MacOS/NotchMuse`, running PID 21948.
+- Binary source `5761310f7d7b664eedafb68bb099ee6c66fc7e32`; executable SHA-256 `8444eda48674efa439d269985c4365be032c76cfeaa49896ec06e771f8067e43`, equal to the staged Build 47 executable. Prepared Build 48 is not the installed build.
+- Post-update manual check with automatic checks OFF: **PASS**, localized up-to-date dialog rather than Update Error. Automatic checking restored ON; Launch at Login remains OFF after restart.
+- Signed Preview feed stays loopback-only. Stable Build 38 executable hash is unchanged. No main merge, public Release, official appcast or website update in this follow-up.
+- Overall release gate still awaits Product Owner final Preview acceptance/public release authorization; full English installed UI and prepared Build 48 deployed GUI checks must not be claimed PASS. Existing branch CI `37115932215` passed at `ef9180bf39060aa4410de11688d1fdab8967dc04`.
+
+Older checkpoints below are historical.
+
 ## Latest Final Preview Corrections - 2026-10-03
 
 - Gate: **PARTIAL**. Installed Preview Build 46 is awaiting the final staged Build 47 Install and Relaunch action. Build 48 with the final idle-scroller correction is built separately, not yet deployed; do not mistake it for the running binary.

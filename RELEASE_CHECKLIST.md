@@ -2,7 +2,8 @@
 
 Target: v0.8.0 Build 47, accepted by Product Owner. Runtime matches the accepted
 source; release source is `15e13fc2c23ff8f5530db7e5629de076dd9011c5`.
-Public promotion remains pending until signing and public verification finish.
+Official release published and verified on 2026-10-04. Earlier clean-Mac
+coverage gaps below are non-blocking future work, not freshly repeated tests.
 
 ## Product
 
@@ -39,11 +40,11 @@ Public promotion remains pending until signing and public verification finish.
 - [ ] Notch Mode screenshot added
 - [ ] Settings screenshot added
 - [ ] Status Bar and Notch Mode demo videos added
-- [ ] `NotchMuse.dmg` uploaded
-- [ ] Official EdDSA appcast signed and verified
-- [ ] Published as a regular v0.8.0 Release, not a prerelease
-- [ ] Website download and official feed verified against published assets
-- [ ] Stable `/Applications/NotchMuse.app` deployed; separate Preview retained
+- [x] `NotchMuse.dmg`, SHA256SUMS, BUILD-INFO and update metadata uploaded
+- [x] Official EdDSA appcast signed and verified against embedded public key
+- [x] Published as a regular v0.8.0 Release, not a prerelease
+- [x] Website-button download and official feed verified against published assets
+- [x] Stable `/Applications/NotchMuse.app` deployed and running; separate Preview retained
 
-Public release is authorized. Unchecked public/signing/deployment steps still
-require actual completion; new screenshot gallery is non-blocking.
+Public release complete. New screenshot gallery and broader clean-Mac coverage
+remain non-blocking. See `reports/v0.8.0-release-verification.md`.

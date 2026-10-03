@@ -1,5 +1,16 @@
 # NotchMuse Project Handoff
 
+## Official v0.8.0 Released - 2026-10-04
+
+Current status: RELEASED, Version 0.8.0 / Build 47. Release/tag/binary source SHA `15e13fc2c23ff8f5530db7e5629de076dd9011c5`. Product Owner accepted Preview Build 47 and authorized the full official release; development is stopped.
+Completed: branch/main sync, main CI `37136789378` and documentation CI `37138256104` PASS; exact archive moves with no production deletion; stable packaging/self-test/codesign/DMG verification; regular GitHub Release (not draft/prerelease), public assets/checksums; signed official HTTPS feed; website apex/www copy; actual website-button download with matching SHA; stable installation/running executable verified. English-first bilingual release notes and one-time older-build migration instructions are public.
+Pending confirmation: none for release. `SCREENSHOT_REFRESH_PENDING_PO` is non-blocking; notarization and wider clean-Mac coverage remain future work. Do not claim Apple notarization or newly repeated player soak.
+Key files: `docs/releases/RELEASE_NOTES_v0.8.0.md`, `reports/v0.8.0-release-verification.md`, `RELEASE_CHECKLIST.md`; public https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0 and https://notchmuse.com/appcast.xml. Site release directory `/opt/notchmuse-site/releases/20261004-v080` is active.
+Next step: STOP. Resume only from real user feedback or a new authorized task. Future sync/publication requires fresh approval.
+Do not repeat: Preview feature work, old staged updater issues, WeChat QR changes, player long tests or Menu Bar Space. Stable `/Applications/NotchMuse.app` is Build 47, executable SHA-256 `e6991ac1e75474555cbabbeb32a3b2a9c53a120eec77e07e5291bbcb59db6fe3`; separate Preview remains Build 47, SHA-256 `8444eda48674efa439d269985c4365be032c76cfeaa49896ec06e771f8067e43`. DMG SHA-256 `8a3d4ef8caf326f069cc8661bde34ea468b9b7692793cb21ee6605b01fa94d36`. Stable points to the public feed; Preview keeps loopback-only feed and separate preferences. The transient generate_appcast Keychain block was resolved using the already-authorized Sparkle sign_update tool; private key was never exported.
+
+Earlier checkpoints below are historical, including resolved pending-signing statements.
+
 ## Release Preflight Checkpoint - 2026-10-04
 
 Current status: main merged/pushed, CI PASS; public promotion PENDING signing. Safe release SHA `15e13fc2c23ff8f5530db7e5629de076dd9011c5`; stable release package Version 0.8.0 Build 47 is under `dist.noindex/`.

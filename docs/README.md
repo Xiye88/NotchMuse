@@ -27,7 +27,7 @@ swift test
 cd ..
 ./scripts/build_app.sh
 ./scripts/build_dmg.sh
-./scripts/build_release.sh 0.8.0 19
+./scripts/build_release.sh 0.8.0 47
 swift run --package-path MenuBarLyrics NotchMuse --self-test
 ./scripts/run_live_matrix.sh
 ```
@@ -48,7 +48,7 @@ dist.noindex/NotchMuse.dmg
 Install a local Release Candidate for manual QA with one command:
 
 ```sh
-./scripts/deploy_local_candidate.sh 0.8.0 19
+./scripts/deploy_local_candidate.sh 0.8.0 47
 ```
 
 The command builds the app, verifies its version and signature, backs up the

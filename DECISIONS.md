@@ -6,6 +6,7 @@
 - Release the accepted Build 47 runtime; exclude the unaccepted later Build 48 scroller patch. Do not add features or repeat player soak.
 - Stable uses the official HTTPS feed; Preview retains separate identity/preferences and loopback-only feed. Do not publicly distribute Preview or overwrite it with stable.
 - Keep ad-hoc/notarization limitations transparent and separate from version naming. Preserve historical prereleases, and require EdDSA verification before public feed promotion.
+- Outcome: regular v0.8.0 Build 47 released; public signature/checksum/feed/website and stable installation verified. Stop the release cycle; no automatic follow-up feature work.
 
 ## 2026-10-02 - Pause In-App Menu Bar Management
 

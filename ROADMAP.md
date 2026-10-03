@@ -1,9 +1,9 @@
 # NotchMuse Roadmap
 
-## Current - Authorized v0.8.0 Release
+## Current - v0.8.0 Release Closed
 
-1. P0: complete official Keychain appcast signing after unlock; then publish the accepted Build 47 runtime, verified asset/feed/website and stable installation. main CI and local packaging have passed.
-2. P1: refreshed screenshots and real v0.8.0 user feedback; no new feature development before release closure.
+1. v0.8.0 Build 47 is released with verified GitHub asset, official signed feed, website download and stable installation. No current P0 release task remains.
+2. P1: refreshed screenshots and real v0.8.0 user feedback; only start follow-up work from a new task.
 3. P2: separately assess Developer ID signing/notarization and broader clean-Mac testing before wide promotion. Native lyrics is deferred; Menu Bar Space remains paused.
 
 ## Backlog - Menu Bar Space (2026-10-02)

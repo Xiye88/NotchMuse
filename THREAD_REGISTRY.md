@@ -1,5 +1,20 @@
 # NotchMuse Thread Registry
 
+## Current Registry - Release Closed (2026-10-04)
+
+| Workspace | Status | Result |
+| --- | --- | --- |
+| 00_PM | DONE | v0.8.0 Build 47 officially released and verified; stop work. |
+| 01_APP | DONE | Accepted runtime frozen; source `15e13fc2c23ff8f5530db7e5629de076dd9011c5`. |
+| 02_RELEASE | DONE | main CI, regular Release, signed feed, website and stable deployment verified. |
+| 03_LAB | DONE | Historical evidence retained; no new long testing. |
+| 04_UX | DONE | Product Owner accepted UI; new gallery non-blocking. |
+| 05_MATCHER | DONE | Production matching/provider priority unchanged. |
+| 06_DOCS | DONE | Public copy, archives and release state synchronized. |
+| 07_QA | DONE | Product Owner staged E2E PASS; public bytes/install verification complete. |
+
+No duplicate active numbered workspaces. Earlier tables are historical snapshots. Menu Bar Space remains ARCHIVED / EXPERIMENTAL / PAUSED, unmerged and unpublished.
+
 ## Current Official Release Checkpoint - 2026-10-04
 
 | Workspace | Status | Scope |

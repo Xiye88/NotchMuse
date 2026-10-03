@@ -1,5 +1,19 @@
 # NotchMuse Task Board
 
+## Official v0.8.0 - CLOSED (2026-10-04)
+
+- [x] Product Owner accepted Build 47 and authorized publication; accepted runtime preserved.
+- [x] Final branch/main sync and main CI; exact document archive moves, no production file deletion.
+- [x] Stable build/self-test/signature/DMG/checksum metadata.
+- [x] Regular v0.8.0 tag/Release/assets, latest on GitHub; English-first bilingual notes.
+- [x] Official appcast signed using authorized sign_update and independently verified with embedded public key. Transient generate_appcast Keychain blocker resolved.
+- [x] Official HTTPS feed and website apex/www activated; actual website-button DMG download verified.
+- [x] Stable `/Applications/NotchMuse.app` installed/running Build 47; separate Preview retained.
+- [x] README/Chinese README/Support/CHANGELOG/PM docs synchronized; historical release notes/handoffs preserved.
+- [ ] Non-blocking screenshot refresh; future clean-Mac/signing assessment only after a new task.
+
+STOP: no new development or tests scheduled for this release cycle. Earlier checklists are historical.
+
 ## Official v0.8.0 Release - CURRENT (2026-10-04)
 
 - [x] Product Owner accepted Preview Build 47 and authorized the complete official release chain.

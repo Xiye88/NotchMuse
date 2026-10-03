@@ -1,5 +1,15 @@
 # NotchMuse Project Status
 
+## Current Public Version - v0.8.0 (2026-10-04)
+
+- **RELEASED**: Version 0.8.0, Build 47, release SHA `15e13fc2c23ff8f5530db7e5629de076dd9011c5`. Regular GitHub Release https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0 is latest, not prerelease/draft.
+- main source CI `37136789378` PASS; documentation-only main CI `37138256104` PASS. Accepted Build 47 runtime preserved, no unaccepted Build 48 change included.
+- Public `NotchMuse.dmg`, SHA256SUMS, BUILD-INFO, signed appcast and bilingual notes uploaded. Official https://notchmuse.com/appcast.xml is HTTPS 200, signature/metadata/length PASS, with no local/staging URL.
+- Website apex/www serve v0.8.0; actual website download SHA-256 `8a3d4ef8caf326f069cc8661bde34ea468b9b7692793cb21ee6605b01fa94d36` matches the verified public Release asset.
+- Installed/running stable `/Applications/NotchMuse.app` is 0.8.0 Build 47, executable SHA-256 `e6991ac1e75474555cbabbeb32a3b2a9c53a120eec77e07e5291bbcb59db6fe3`. `/Applications/NotchMuse Preview.app` retained as the unique isolated development App, not publicly distributed.
+- README/Chinese README, Support, release notes, CHANGELOG and history archives synchronized. Canonical PM files stay at root to preserve AGENTS workflow. Remaining non-blocking work: refreshed screenshots, future Developer ID notarization and broader clean-Mac feedback. Menu Bar Space remains EXPERIMENTAL / PAUSED / ARCHIVED.
+- No new features, Matcher/provider changes or repeated player soak. Stop this release cycle.
+
 ## Current Official Release Gate - 2026-10-04
 
 - Product Owner accepted Preview 0.8.0 Build 47 and authorized official publication. Development is frozen.

@@ -2,11 +2,40 @@
 
 <h1 align="center">NotchMuse v0.8.0</h1>
 
+<p align="center"><img src="website/assets/media/notch-poster.webp" alt="Real NotchMuse overlay lyrics on macOS" width="1080"></p>
+
 <p align="center">Synced lyrics in your Mac menu bar, beside the notch, or at the edge of your screen.</p>
 
 <p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · NetEase Cloud Music · QQ Music · Soda Music</p>
 
 <p align="center"><a href="https://notchmuse.com"><strong>Download from website</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases"><strong>GitHub Releases</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>Report an issue</strong></a></p>
+
+## Status Bar Lyrics
+
+![NotchMuse lyrics playing in the macOS menu bar](docs/assets/demos/github/status-bar-demo.gif)
+
+Synced lyrics live naturally inside your Mac menu bar, with adjustable placement.
+
+## Notch Mode
+
+![NotchMuse overlay lyrics at the top of the screen and above the Dock](docs/assets/demos/github/notch-demo.gif)
+
+Keep lyrics near the notch, or move the overlay above the Dock. This recording shows the top and Dock positions.
+
+## Customize Your Lyrics
+
+![NotchMuse lyric colors, gradients, and background changing during playback](docs/assets/demos/github/appearance-demo.gif)
+
+Choose solid colors, gradients, and a background to suit your desktop.
+
+![NotchMuse v0.8.0 Appearance Settings](docs/assets/screenshots/appearance-settings.png)
+
+<details>
+<summary>Display Settings</summary>
+
+![NotchMuse v0.8.0 Display Settings](docs/assets/screenshots/display-settings.png)
+
+</details>
 
 ## Supported Players
 
@@ -22,12 +51,6 @@ Spotify · Apple Music · NetEase Cloud Music · QQ Music · Soda Music. Choose 
 | Custom width and position | System, Light, and Dark appearance | Launch at Login; Dock and menu bar icon controls |
 
 NetEase, QQ Music, and Soda Music use the bundled MediaRemote bridge. No Homebrew or separate helper installation is needed. Compatibility can change after a macOS or player update.
-
-## Screenshots
-
-<!-- SCREENSHOT_REFRESH_PENDING_PO: Add final v0.8.0 Settings, Status Bar, Notch, side, and Dock screenshots. Do not reuse the older Settings capture. -->
-
-The refreshed gallery is being prepared. See the [Status Bar demo](docs/assets/demos/notchmuse-status-bar-demo.mp4) and [Notch demo](docs/assets/demos/notchmuse-notch-mode-demo.mp4).
 
 ## Quick Start
 

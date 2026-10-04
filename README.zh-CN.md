@@ -2,11 +2,40 @@
 
 <h1 align="center">NotchMuse v0.8.0</h1>
 
+<p align="center"><img src="website/assets/media/notch-poster.webp" alt="NotchMuse 在 macOS 上实际显示的浮层歌词" width="1080"></p>
+
 <p align="center">把同步歌词放在 Mac 菜单栏、刘海旁，或屏幕边缘。</p>
 
 <p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐</p>
 
 <p align="center"><a href="https://notchmuse.com"><strong>官网下载</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases"><strong>GitHub Release</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>报告问题</strong></a></p>
+
+## 菜单栏歌词
+
+![NotchMuse 在 macOS 菜单栏中实际播放歌词](docs/assets/demos/github/status-bar-demo.gif)
+
+同步歌词自然融入 Mac 菜单栏，显示位置可以调整。
+
+## 刘海模式
+
+![NotchMuse 浮层歌词在屏幕顶部和 Dock 上方显示](docs/assets/demos/github/notch-demo.gif)
+
+让歌词靠近刘海，或将浮层移到 Dock 上方。本次录屏展示顶部和 Dock 位置。
+
+## 定制你的歌词
+
+![NotchMuse 实际播放中切换歌词颜色、渐变和背景](docs/assets/demos/github/appearance-demo.gif)
+
+选择适合桌面的纯色、渐变色和歌词背景。
+
+![NotchMuse v0.8.0 外观设置](docs/assets/screenshots/appearance-settings.png)
+
+<details>
+<summary>显示设置</summary>
+
+![NotchMuse v0.8.0 显示设置](docs/assets/screenshots/display-settings.png)
+
+</details>
 
 ## 支持的播放器
 
@@ -22,12 +51,6 @@ Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐。可以�
 | 自定义宽度与位置 | 跟随系统、浅色与深色外观 | 开机自动启动；Dock 与菜单栏图标控制 |
 
 网易云、QQ 音乐和汽水音乐使用随应用打包的 MediaRemote bridge，无需 Homebrew 或额外安装 helper。macOS 或播放器升级后可能需要兼容性更新。
-
-## 界面截图
-
-<!-- SCREENSHOT_REFRESH_PENDING_PO: 补入 v0.8.0 Settings、菜单栏、刘海、侧边和 Dock 新截图；不得复用旧 Settings 截图。 -->
-
-新版图集正在整理。目前可先看[菜单栏演示](docs/assets/demos/notchmuse-status-bar-demo.mp4)和[刘海演示](docs/assets/demos/notchmuse-notch-mode-demo.mp4)。
 
 ## 三步开始
 

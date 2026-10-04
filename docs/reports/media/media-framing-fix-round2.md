@@ -1,12 +1,13 @@
 # Media Framing Fix — Round 2
 
-2026-10-04 · `codex/media-showcase-refresh` · local candidate, not pushed,
-merged or deployed. Baseline for this round: `006a0e16803aff47a1d5a7dbcd648fcab9185595`.
+2026-10-04 · `codex/media-showcase-refresh` · **ACCEPTED / MERGED / DEPLOYED**.
+Source `8f4fb378e54c658246757a336810394d332efbd3`; baseline for this round:
+`006a0e16803aff47a1d5a7dbcd648fcab9185595`. [Production closure](media-showcase-production-closure.md).
 
 ## Acceptance status
 
-**Framing/export work complete for the available footage. Literal
-physical-notch acceptance remains blocked by source footage.**
+**Product Owner accepted the current website visuals and explicitly authorized
+push, merge and deployment without further media/page changes.**
 
 The Product Owner rejected Round 1's lyric-only strips. This round preserves
 the full original 1920×1080 frame (100%, exceeding the requested roughly 2/3)
@@ -32,10 +33,9 @@ release workflow or feed. The Display and Appearance PNGs are unchanged.
 
 **Source limitation:** neither recording contains the physical MacBook display
 cutout. The notch visible inside Settings is the app's own live preview, not
-physical hardware. No hardware notch or app output was fabricated. A question
-is pending in the current PM chat: use this truthful preview for this round,
-or supply footage showing physical hardware. Do not claim physical-notch
-acceptance until Product Owner direction or suitable footage arrives.
+physical hardware. No hardware notch or app output was fabricated. Product Owner
+accepted this current version for publication. The physical-cutout limitation is
+retained as factual context and does not block the accepted closure.
 
 ## Exports and sizes
 
@@ -68,15 +68,16 @@ Reproduction: [media script guide](../../../scripts/media/README.md).
 | Website and README asset references | PASS: all referenced local media exist |
 | Local README preview | PASS: EN/ZH render the same three complete-desktop GIFs; local Markdown preview, not GitHub production rendering |
 | Product and release boundary | PASS: no App, feed, download, version or release changes |
-| Physical hardware notch | NOT MET: missing from supplied footage |
-| Product Owner visual acceptance | PENDING |
+| Physical hardware notch | Absent from supplied footage; current preview accepted as-is |
+| Product Owner visual acceptance | PASS: current version accepted, push/merge/deploy explicitly authorized |
 
 Existing browser suite used installed Chromium 149; the in-app browser was
 also inspected. This does not establish independent Safari/iOS validation.
 The suite passed after the frame/dimension change; the final Notch edit then
 changed only to a continuous 8.5s interval, and final media decode/frame inspection
-was repeated. The prior branch CI PASS at `006a0e1` is historical; Round 2 has
-not been pushed, so no new GitHub CI result exists. No App build was repeated.
+was repeated. Round 2 feature CI `37180680782` and promoted main CI
+`37180798209` PASS at `8f4fb37`; these CI runs include build/tests/package
+validation. No local App build or public App release was repeated.
 
 ## Local review
 
@@ -87,18 +88,19 @@ not been pushed, so no new GitHub CI result exists. No App build was repeated.
 - Final frame strips: `status-bar-gif-sheet.jpg`, `notch-gif-sheet.jpg`,
   `appearance-gif-sheet.jpg`, and corresponding MP4 strips.
 
-The Round 1 pause/continue-control P2 remains open; this framing-only correction
-does not change showcase playback behavior. It must be resolved or explicitly
-accepted before production promotion, independently of framing acceptance.
+The prior pause/continue-control P2 is accepted/deferred with the current
+version under Product Owner acceptance and the instruction to make no more
+page changes. It was not fixed in this framing/closure task.
 
 ## Handoff
 
 ```text
-Current status: Local full-desktop framing candidate; physical-notch decision pending.
-Completed: Full-desktop MP4/WebM/GIF/posters, 16:9 containers, validation, PM sync.
-Pending confirmation: Physical-notch footage/direction, visual acceptance, sync/deploy.
+Current status: Round 2 accepted, merged to main and officially deployed.
+Completed: Full-desktop media; feature/main CI PASS; public README six-media
+loading, apex/www, Hero playback, production bytes and feed preservation PASS.
+Pending confirmation: None for this task.
 Key files: website/index.html; website/style.css; scripts/media/render_showcase.py;
-docs/reports/media/media-framing-fix-round2.md; docs/project/PROJECT_STATUS.md.
-Next step: Review candidate; resolve source limitation; address/accept prior pause P2.
-Do not repeat: Page redesign, source imports, App builds, release/provider/matcher work.
+docs/reports/media/media-showcase-production-closure.md; docs/project/PROJECT_STATUS.md.
+Next step: Stop; use main and the closure report for future handoff.
+Do not repeat: Page redesign, media creation, App builds/release/provider/matcher work.
 ```

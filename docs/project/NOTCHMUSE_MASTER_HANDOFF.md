@@ -58,11 +58,17 @@ Release sequence: **Preview → Product Owner PASS → preflight and artifact ve
 
 Website source is `website/` in this repository; the public apex and www point to the verified v0.8.0 download. Public docs explain DMG installation and the Gatekeeper **Open Anyway** flow without asking users to disable system-wide security. `README.md` and `README.zh-CN.md` are the public front door; this cleanup changes only links caused by moved documents.
 
-Current media work: `codex/media-showcase-refresh` contains a **local Round 2
-framing candidate**, not a production deployment. Full-desktop videos/GIFs
-replace the rejected narrow crops. Physical-notch footage/direction and visual
-acceptance remain pending; see [current evidence](../reports/media/media-framing-fix-round2.md).
-App v0.8.0/Build 47, downloads and the official feed stay unchanged.
+Media Showcase Round 2 is **accepted, merged and deployed**. Source
+`8f4fb378e54c658246757a336810394d332efbd3` is on main and
+`codex/media-showcase-refresh`; full-desktop videos/GIFs replace the rejected
+narrow crops. Production directory `/opt/notchmuse-site/releases/20261004-media-8f4fb37`
+is served by the existing VPS static service through Cloudflare Tunnel; this is
+a manual deployment from main, not automatic deployment on push. EN/ZH GitHub
+main READMEs and apex/www website are verified. Product Owner accepted current
+footage/visuals and authorized closure without further page/media changes; the
+physical-cutout limitation and prior pause-control P2 are recorded as accepted/deferred.
+[Closure evidence](../reports/media/media-showcase-production-closure.md).
+App v0.8.0/Build 47, downloads and official feed remain unchanged.
 
 Root should now be primarily `.github/`, `LICENSES/`, `MenuBarLyrics/`, `docs/`, `scripts/`, `tools/`, `website/`, and the public/legal/build files: `.gitignore`, `AGENTS.md`, `CHANGELOG.md`, `LICENSE`, `README.md`, `README.zh-CN.md`, `THIRD_PARTY_NOTICES.md`. Tiny root `SUPPORT.md` and `FEEDBACK.md` compatibility links remain so existing public URLs keep working; their **only editable source** is `docs/community/`. `docs/project/` contains the single canonical PM documents; `docs/releases/`, `docs/reports/`, and `docs/archive/` contain releases, evidence, and old snapshots. Build artifacts under `dist*.noindex/` are local, untracked, and not part of the public root.
 
@@ -80,7 +86,7 @@ Accepted releases already addressed NetEase seek, pause/resume, restart, stale l
 
 ## 11. Real backlog and technical debt
 
-- Media refresh is active on its feature branch, pending the framing/footage decision and acceptance above. Wider real-user/clean-Mac feedback remains optional; neither blocks the released v0.8.0.
+- Media refresh is complete on main and in production, with Product Owner acceptance recorded above. Wider real-user/clean-Mac feedback remains optional; neither blocks the released v0.8.0.
 - Developer ID signing, notarization and stapling are not configured; ad-hoc signing creates first-launch Gatekeeper friction. This needs a distinct distribution decision.
 - Intel/Universal Binary and native Player Lyrics fallback are not shipped. MediaRemote is a private-framework compatibility risk; re-test against future macOS/player updates when evidence warrants it.
 - Local `swift test` has historically lacked XCTest under the selected Command Line Tools; CI/macOS builds and packaged self-tests supplied release evidence. Recheck the toolchain rather than treating old status text as a current failure.

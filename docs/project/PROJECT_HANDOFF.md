@@ -10,6 +10,18 @@ The macOS app lives in `MenuBarLyrics/`. Spotify and Apple Music have player ada
 
 ## Open work
 
+README follow-up: Product Owner requested default-collapsed sponsorship details in both languages. Implemented native GitHub details/summary around the QR codes and support text; original contents preserved. GitHub GFM rendering verifies a closed disclosure and all three QR images/table retained. This small correction is synchronized to main; no website deployment is needed.
+
+```text
+Current status: README sponsorship defaults to collapsed in EN/ZH.
+Completed: Native disclosure markup; original content preserved; GitHub GFM checks.
+Pending confirmation: None for this README correction.
+Key files: /Users/carlos/Documents/歌词/.worktrees/v08-main-integration-20260926/README.md;
+/Users/carlos/Documents/歌词/.worktrees/v08-main-integration-20260926/README.zh-CN.md.
+Next step: Stop after public GitHub closed/open smoke verification.
+Do not repeat: Media creation, website deployment or App release work.
+```
+
 No active media task or P0. Product Owner accepted the current website and authorized push/merge/deploy without more media or page changes. The source-footage limitation and prior pause-control P2 are accepted/deferred for this version. Broader clean-Mac evidence, Developer ID/notarization and future App features remain separate work. Menu Bar Space stays paused.
 
 ## Closure handoff — 2026-10-04

@@ -80,6 +80,9 @@ NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Develop
 
 ## 支持 NotchMuse
 
+<details>
+<summary>查看赞助方式</summary>
+
 应用内提供 Support 页面，也可以使用以下二维码：
 
 | 微信支付 | USDT · EVM | USDT · TRON |
@@ -87,6 +90,8 @@ NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Develop
 | <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="微信支付二维码" width="150"> | <img src="docs/support/usdt-evm.png" alt="USDT EVM 二维码" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRON 二维码" width="150"> |
 
 EVM 地址支持 Ethereum、BNB Smart Chain (BEP20)、Arbitrum 和 Optimism；TRON 使用独立 TRC20 地址。转账前请核对网络，并且只发送 USDT。[支持者名单](docs/support/supporters.json)仅展示已同意公开的信息。
+
+</details>
 
 ## 许可与反馈
 

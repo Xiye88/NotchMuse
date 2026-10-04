@@ -80,6 +80,9 @@ If you're using Beta 3 or an earlier version, install v0.8.0 manually once. Thos
 
 ## Support NotchMuse
 
+<details>
+<summary>Show sponsorship options</summary>
+
 The app includes a Support page. You can also use these QR codes:
 
 | WeChat Pay | USDT · EVM | USDT · TRON |
@@ -87,6 +90,8 @@ The app includes a Support page. You can also use these QR codes:
 | <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="WeChat Pay QR code" width="150"> | <img src="docs/support/usdt-evm.png" alt="USDT EVM QR code" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRON QR code" width="150"> |
 
 The EVM address supports Ethereum, BNB Smart Chain (BEP20), Arbitrum, and Optimism. TRON uses a separate TRC20 address. Confirm the network before sending USDT. The [supporters list](docs/support/supporters.json) includes only people who consented to public credit.
+
+</details>
 
 ## License and Feedback
 

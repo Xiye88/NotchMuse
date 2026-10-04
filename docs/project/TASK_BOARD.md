@@ -8,6 +8,8 @@ None. Media Showcase closure is complete; no App development or release task is 
 
 ## Recently completed
 
+- README sponsorship: English/Chinese QR codes and support text placed in a native GitHub disclosure, closed by default; GitHub GFM rendering and original-content preservation verified.
+
 - Media Showcase Round 2: Product Owner accepted the current visuals; `8f4fb37` pushed to feature and fast-forwarded/pushed to main; feature/main CI PASS; production `20261004-media-8f4fb37` verified. EN/ZH READMEs load Hero poster, Status Bar/Notch/Appearance GIFs and both Settings screenshots. [Evidence](../reports/media/media-showcase-production-closure.md).
 
 - v0.8.0 Build 47: Product Owner accepted Preview; regular GitHub Release, public DMG, signed official appcast, website download, installed Stable, and verification evidence completed.

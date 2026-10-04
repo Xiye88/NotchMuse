@@ -58,6 +58,12 @@ Release sequence: **Preview → Product Owner PASS → preflight and artifact ve
 
 Website source is `website/` in this repository; the public apex and www point to the verified v0.8.0 download. Public docs explain DMG installation and the Gatekeeper **Open Anyway** flow without asking users to disable system-wide security. `README.md` and `README.zh-CN.md` are the public front door; this cleanup changes only links caused by moved documents.
 
+Current media work: `codex/media-showcase-refresh` contains a **local Round 2
+framing candidate**, not a production deployment. Full-desktop videos/GIFs
+replace the rejected narrow crops. Physical-notch footage/direction and visual
+acceptance remain pending; see [current evidence](../reports/media/media-framing-fix-round2.md).
+App v0.8.0/Build 47, downloads and the official feed stay unchanged.
+
 Root should now be primarily `.github/`, `LICENSES/`, `MenuBarLyrics/`, `docs/`, `scripts/`, `tools/`, `website/`, and the public/legal/build files: `.gitignore`, `AGENTS.md`, `CHANGELOG.md`, `LICENSE`, `README.md`, `README.zh-CN.md`, `THIRD_PARTY_NOTICES.md`. Tiny root `SUPPORT.md` and `FEEDBACK.md` compatibility links remain so existing public URLs keep working; their **only editable source** is `docs/community/`. `docs/project/` contains the single canonical PM documents; `docs/releases/`, `docs/reports/`, and `docs/archive/` contain releases, evidence, and old snapshots. Build artifacts under `dist*.noindex/` are local, untracked, and not part of the public root.
 
 ## 8. Support and donation
@@ -74,7 +80,7 @@ Accepted releases already addressed NetEase seek, pause/resume, restart, stale l
 
 ## 11. Real backlog and technical debt
 
-- Optional refreshed v0.8.0 screenshots/demo and wider real-user/clean-Mac feedback. These are not blockers to the already-published release.
+- Media refresh is active on its feature branch, pending the framing/footage decision and acceptance above. Wider real-user/clean-Mac feedback remains optional; neither blocks the released v0.8.0.
 - Developer ID signing, notarization and stapling are not configured; ad-hoc signing creates first-launch Gatekeeper friction. This needs a distinct distribution decision.
 - Intel/Universal Binary and native Player Lyrics fallback are not shipped. MediaRemote is a private-framework compatibility risk; re-test against future macOS/player updates when evidence warrants it.
 - Local `swift test` has historically lacked XCTest under the selected Command Line Tools; CI/macOS builds and packaged self-tests supplied release evidence. Recheck the toolchain rather than treating old status text as a current failure.
@@ -84,7 +90,12 @@ Accepted releases already addressed NetEase seek, pause/resume, restart, stale l
 
 `00_PM` coordinates work and owns the canonical docs. Reuse `01_APP` through `07_QA` responsibilities; do not create duplicate numbered threads. Subtasks must report results back to PM. On major implementation, release, architecture change, thread archival, or product-policy change, update this master handoff, [status](PROJECT_STATUS.md), [board](TASK_BOARD.md), and [registry](THREAD_REGISTRY.md). Keep routine PM prompts Chinese. Do not repeatedly request approval for ordinary reversible work; public release decisions remain explicit. Long soak is best validated by the Product Owner's actual use, not by speculative repeated tests.
 
-The former long `00_PM` is **handoff/ready to archive**, not a source of new active tasks. `01_APP`–`07_QA` finished the v0.8.0 release; Menu Bar Space is archived. Preserve their history in [the old registry](../archive/THREAD_REGISTRY-through-v0.8.0.md). A new PM should start a fresh `00_PM` only when the Product Owner opens a new phase.
+Current `00_PM` `01a104b8-1eb0-7320-8706-29eece12ab9f` has adopted this handoff
+and is handling the authorized media correction. The former long `00_PM`
+`019f741e-4308-7360-82f8-4e5c0d1c9224` remains ready to archive. `01_APP`–`07_QA`
+finished the v0.8.0 release; `06_DOCS` now tracks the media work. Menu Bar Space
+is archived. Preserve historical IDs in [the old registry](../archive/THREAD_REGISTRY-through-v0.8.0.md);
+do not create another duplicate PM.
 
 ## NEW PM START HERE
 

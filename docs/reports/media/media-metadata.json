@@ -1,146 +1,146 @@
 [
   {
     "file": "website/assets/media/appearance-demo.mp4",
-    "bytes": 240802,
+    "bytes": 644965,
     "duration": "6.000000",
     "codec": "h264",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "30/1",
     "audio_streams": 0
   },
   {
     "file": "website/assets/media/appearance-demo.webm",
-    "bytes": 105429,
+    "bytes": 265948,
     "duration": "6.000000",
     "codec": "vp9",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "30/1",
     "audio_streams": 0
   },
   {
     "file": "website/assets/media/appearance-poster.webp",
-    "bytes": 24504,
+    "bytes": 83604,
     "duration": null,
     "codec": "webp",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "25/1",
     "audio_streams": 0
   },
   {
     "file": "website/assets/media/notch-demo.mp4",
-    "bytes": 193190,
+    "bytes": 384669,
     "duration": "8.500000",
     "codec": "h264",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "30/1",
     "audio_streams": 0
   },
   {
     "file": "website/assets/media/notch-demo.webm",
-    "bytes": 106654,
+    "bytes": 246036,
     "duration": "8.500000",
     "codec": "vp9",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "30/1",
     "audio_streams": 0
   },
   {
     "file": "website/assets/media/notch-poster.webp",
-    "bytes": 9828,
+    "bytes": 84688,
     "duration": null,
     "codec": "webp",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "25/1",
     "audio_streams": 0
   },
   {
     "file": "website/assets/media/status-bar-demo.mp4",
-    "bytes": 134483,
-    "duration": "6.966667",
+    "bytes": 264465,
+    "duration": "7.000000",
     "codec": "h264",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "30/1",
     "audio_streams": 0
   },
   {
     "file": "website/assets/media/status-bar-demo.webm",
-    "bytes": 47980,
-    "duration": "6.966000",
+    "bytes": 245622,
+    "duration": "7.000000",
     "codec": "vp9",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "30/1",
     "audio_streams": 0
   },
   {
     "file": "website/assets/media/status-bar-poster.webp",
-    "bytes": 7852,
+    "bytes": 83954,
     "duration": null,
     "codec": "webp",
     "resolution": [
-      1080,
-      240
+      1280,
+      720
     ],
     "fps": "25/1",
     "audio_streams": 0
   },
   {
     "file": "docs/assets/demos/github/appearance-demo.gif",
-    "bytes": 2925216,
+    "bytes": 1060915,
     "duration": "6.000000",
     "codec": "gif",
     "resolution": [
-      1080,
-      240
+      960,
+      540
     ],
-    "fps": "50/3",
+    "fps": "12/1",
     "audio_streams": 0
   },
   {
     "file": "docs/assets/demos/github/notch-demo.gif",
-    "bytes": 4673791,
-    "duration": "8.540000",
+    "bytes": 975107,
+    "duration": "8.500000",
     "codec": "gif",
     "resolution": [
-      1080,
-      240
+      960,
+      540
     ],
-    "fps": "50/3",
+    "fps": "12/1",
     "audio_streams": 0
   },
   {
     "file": "docs/assets/demos/github/status-bar-demo.gif",
-    "bytes": 2406700,
+    "bytes": 795787,
     "duration": "7.000000",
     "codec": "gif",
     "resolution": [
-      1080,
-      240
+      960,
+      540
     ],
-    "fps": "50/3",
+    "fps": "12/1",
     "audio_streams": 0
   }
 ]

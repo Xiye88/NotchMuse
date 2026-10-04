@@ -10,7 +10,7 @@ The macOS app lives in `MenuBarLyrics/`. Spotify and Apple Music have player ada
 
 ## Open work
 
-Media showcase implementation and validation are complete on `codex/media-showcase-refresh`. The three silent demos, EN/ZH README, Hero mode tabs and Appearance section are ready for PM review. Desktop/mobile, reduced motion, loading/fallbacks and static export pass. Pending: Product Owner visual acceptance and PM-controlled merge/deployment. Evidence: [media refresh report](../reports/media/media-showcase-refresh.md). No engineering blocker; website source is `website/`. Broader clean-Mac evidence, Developer ID/notarization, and features remain separate work. Menu Bar Space is paused and archived, not part of Stable.
+Product Owner rejected Round 1's narrow crops. Round 2 on `codex/media-showcase-refresh` replaces all three demos with full 16:9 desktop framing, synchronized across website and README, and changes only media container proportions. Local candidate is prepared; synchronization/deployment are pending. The source lacks a physical MacBook notch: the candidate shows the real settings preview plus top/Dock lyric positions, awaiting footage/direction and visual acceptance. Evidence: [current framing report](../reports/media/media-framing-fix-round2.md). The manual pause-control P2 remains open, outside this framing-only round. Broader clean-Mac evidence, Developer ID/notarization, and App features remain separate work. Menu Bar Space stays paused.
 
 ## References
 

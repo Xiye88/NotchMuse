@@ -4,7 +4,7 @@ Last reviewed: 2026-10-04. Detailed historical checklists are [archived](../arch
 
 ## Active
 
-- **Media Showcase Refresh — READY FOR PM REVIEW**, `codex/media-showcase-refresh`: real-recording demos, EN/ZH README and website Hero/appearance implemented and verified. [Evidence](../reports/media/media-showcase-refresh.md). Pending Product Owner visual acceptance → PM merge/deploy. No App development or release.
+- **Media Framing Round 2 — LOCAL CANDIDATE**, `codex/media-showcase-refresh`: full-desktop Status Bar, top/Dock and Appearance videos/GIFs replace the rejected narrow crops. [Evidence](../reports/media/media-framing-fix-round2.md). Pending physical-notch footage/direction and visual acceptance, then separate sync/deploy authorization. The manual pause-control P2 remains open outside this framing-only scope. No App development or release.
 
 ## Recently completed
 
@@ -13,7 +13,7 @@ Last reviewed: 2026-10-04. Detailed historical checklists are [archived](../arch
 
 ## Backlog — start only as a new task
 
-- Refreshed v0.8.0 screenshots/demo and real-user feedback.
+- Real-user feedback; current media framing is tracked above, not a duplicate backlog task.
 - Developer ID signing/notarization and wider clean-Mac testing.
 - Native Player Lyrics fallback, Intel support, or new players only after separate product/technical review.
 - Menu Bar Space: **PAUSED / ARCHIVED**; not a Stable feature.

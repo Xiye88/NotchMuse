@@ -2,6 +2,10 @@
 
 2026-10-04 · Marketing / Documentation / Website · ready for `00_PM` review.
 
+**Historical Round 1 evidence.** Product Owner rejected the overly tight
+framing. Current assets and framing evidence are documented in
+[Round 2](media-framing-fix-round2.md); the sizes/crops below describe Round 1.
+
 ## Scope and result
 
 Branch: `codex/media-showcase-refresh`, based on `origin/main` at `84bb0c1`.

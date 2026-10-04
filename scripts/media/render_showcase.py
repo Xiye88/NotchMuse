@@ -7,17 +7,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DEMOS = {
-    'notch': [('a', 3.0, 1.9, '810:180:555:0'),
-              ('a', 9.1, 1.9, '810:180:555:0'),
-              ('a', 13.0, 4.7, '810:180:555:900')],
-    'status-bar': [('b', 6.4, 3.0, '720:160:780:0'),
-                   ('b', 9.7, 1.0, '720:160:780:0'),
-                   ('b', 10.95, 3.0, '720:160:600:0')],
-    'appearance': [('a', 19.95, 1.0, '810:180:555:900'),
-                   ('a', 17.0, 1.0, '810:180:555:900'),
-                   ('a', 21.05, 1.0, '810:180:555:900'),
-                   ('a', 18.05, 1.5, '810:180:555:900'),
-                   ('a', 23.3, 1.5, '810:180:555:900')],
+    # Preserve the whole captured desktop: menu bar, app windows and Dock.
+    'notch': [('a', 8.0, 8.5, '1920:1080:0:0')],
+    # This source interval has no editorial zoom that hides the menu bar.
+    'status-bar': [('b', 36.5, 7.0, '1920:1080:0:0')],
+    'appearance': [('a', 19.95, 1.0, '1920:1080:0:0'),
+                   ('a', 17.0, 1.0, '1920:1080:0:0'),
+                   ('a', 21.05, 1.0, '1920:1080:0:0'),
+                   ('a', 18.05, 1.5, '1920:1080:0:0'),
+                   ('a', 23.3, 1.5, '1920:1080:0:0')],
 }
 
 
@@ -47,7 +45,7 @@ def main():
         for index, (source, start, duration, crop) in enumerate(ranges):
             part = work / f'{name}-{index}.mp4'
             ffmpeg('-ss', start, '-i', sources[source], '-t', duration, '-map', '0:v:0', '-an',
-                   '-vf', f'crop={crop},scale=1080:240:flags=lanczos,fps=30,setsar=1', '-c:v', 'libx264', '-preset', 'slow',
+                   '-vf', f'crop={crop},scale=1280:720:flags=lanczos,fps=30,setsar=1', '-c:v', 'libx264', '-preset', 'slow',
                    '-crf', '18', '-pix_fmt', 'yuv420p', '-map_metadata', '-1', part)
             parts.append(part)
         # Relative names avoid absolute-path escaping in the concat manifest.
@@ -63,9 +61,9 @@ def main():
         subprocess.run(['cwebp', '-quiet', '-q', '90', str(poster), '-o',
                         str(web / f'{name}-poster.webp')], check=True)
         palette = work / f'{name}-palette.png'
-        ffmpeg('-i', mp4, '-vf', 'fps=15,palettegen=stats_mode=diff', '-frames:v', '1', palette)
+        ffmpeg('-i', mp4, '-vf', 'fps=12,scale=960:540:flags=lanczos,palettegen=max_colors=128:stats_mode=diff', '-frames:v', '1', palette)
         ffmpeg('-i', mp4, '-i', palette, '-lavfi',
-               'fps=15[x];[x][1:v]paletteuse=dither=sierra2_4a:diff_mode=rectangle',
+               'fps=12,scale=960:540:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle',
                '-loop', '0', github / f'{name}-demo.gif')
         print(f'{name}: {sum(r[2] for r in ranges):g}s', flush=True)
     for name, time in [('display', 11.8), ('appearance', 20.0)]:

@@ -39,8 +39,8 @@ const launches = process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: proc
   }));
   assert(status.muted && status.loop && status.playsInline);
   assert.equal(status.preload, 'none');
-  assert.equal(status.width, 1080);
-  assert.equal(status.height, 240);
+  assert.equal(status.width, 1280);
+  assert.equal(status.height, 720);
   assert(status.duration >= 6 && status.duration <= 8);
   assert(status.poster.endsWith('status-bar-poster.webp'));
   assert([...media].every(item => item.includes('status-bar-demo.')), 'Only default Hero video loads initially');
@@ -81,6 +81,7 @@ const launches = process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: proc
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Overflow at ${width}px`);
     const bounds = await page.locator('#notch-panel').boundingBox();
     assert(bounds.width > width * (width <= 760 ? 0.8 : 0.3));
+    assert(Math.abs(bounds.width / bounds.height - 16 / 9) < 0.01, 'Full desktop framing stays 16:9');
     if (width <= 760) {
       const copy = await page.locator('.hero-copy').boundingBox();
       assert(bounds.y >= copy.y + copy.height, 'Mobile demo appears below the copy');
@@ -121,5 +122,9 @@ const launches = process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: proc
   assert(await failed.locator('#status-panel .demo-poster').evaluate(img => img.complete && img.naturalWidth > 0));
   assert.equal(await failed.locator('#status-panel .live-demo').evaluate(demo => demo.classList.contains('is-playing')), false);
   console.log('PASS: failed autoplay/media keeps the readable poster');
+  assert(await reduced.locator('.mode-card .demo-poster').evaluateAll(images => images.every(img => {
+    const rect = img.getBoundingClientRect();
+    return Math.abs(rect.width / rect.height - 16 / 9) < 0.01;
+  })), 'Mode-card posters retain full desktop height under reduced motion');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

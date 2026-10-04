@@ -34,3 +34,24 @@
 
 .language-toggle{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#ffffff05;color:var(--text);font:inherit;font-size:.9rem;white-space:nowrap;cursor:pointer}.language-toggle:hover{border-color:#ff8a3670;background:#ffffff09;color:var(--orange)}.site-header nav .language-toggle{transition:background-color .2s ease,color .2s ease,border-color .2s ease}.language-toggle:focus-visible{outline:3px solid var(--orange);outline-offset:4px}
 @media(max-width:420px){.site-header nav{gap:8px}.site-header nav>a:first-child,.site-header nav>a:nth-child(3){display:none}.site-header nav .button-small{padding:8px}.language-toggle{gap:5px;padding:7px 8px;font-size:.78rem}}
+
+/* Real recording showcase: quiet desktop crops, without nested card frames. */
+.hero-visual.live-showcase{padding:0;perspective:none;min-width:0}
+.hero-visual.live-showcase:before{display:none}
+.demo-tabs{display:inline-flex;gap:4px;padding:3px;margin-bottom:18px;border-radius:999px;background:#ffffff08}
+.demo-tabs button{padding:7px 15px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:inherit;font-size:.83rem;cursor:pointer}
+.demo-tabs button[aria-selected=true]{background:#ffffff10;color:var(--text)}
+.demo-tabs button:hover{color:var(--orange)}
+.live-demo{position:relative;aspect-ratio:1080/240;overflow:hidden;border-radius:8px;background:#8193aa;isolation:isolate}
+.live-demo video,.live-demo .demo-poster{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;border:0;border-radius:0;box-shadow:none}
+.live-demo video{opacity:0}
+.live-demo.is-playing video{opacity:1}
+.live-showcase .live-demo{box-shadow:0 18px 45px #0003}
+.hero-visual.live-showcase figcaption{margin-top:14px;color:var(--muted);font-size:.75rem}
+.mode-card .live-demo{flex:none;margin-top:4px}
+.appearance-showcase{display:grid;grid-template-columns:.8fr 1.2fr;align-items:center;gap:36px;margin-top:40px}
+.appearance-showcase h3{margin:0;font-size:1.45rem}
+.appearance-showcase p:not(.mode-label){margin:8px 0 0;color:var(--muted)}
+[role=tabpanel][hidden]{display:none}
+@media(max-width:760px){.appearance-showcase{grid-template-columns:1fr;gap:20px}.hero-visual.live-showcase{margin:0}.demo-tabs{margin-bottom:14px}}
+@media(prefers-reduced-motion:reduce){.live-demo video{display:none}}

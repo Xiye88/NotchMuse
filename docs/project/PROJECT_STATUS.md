@@ -6,7 +6,8 @@ Last reviewed: 2026-10-04. [Master handoff](NOTCHMUSE_MASTER_HANDOFF.md) is the 
 
 - Public: **v0.8.0, Build 47, RELEASED**. GitHub Release, signed official Sparkle feed, website download, and installed Stable app were verified in [release evidence](../reports/v0.8.0-release-verification.md).
 - Stable: `/Applications/NotchMuse.app`. Isolated, non-public development app: `/Applications/NotchMuse Preview.app`.
-- No active feature or release work. Menu Bar Space is experimental, paused, archived, and absent from Stable.
+- Marketing/docs/website media refresh: implemented and verified on `codex/media-showcase-refresh`, ready for PM/visual review; not deployed. [Evidence](../reports/media/media-showcase-refresh.md).
+- No active App feature or release work. Menu Bar Space is experimental, paused, archived, and absent from Stable.
 - This repository-cleanup task changes documentation paths only; it is **not** a new product version or release.
 
 ## Blockers and next

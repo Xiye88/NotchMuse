@@ -10,7 +10,7 @@ Last reviewed: 2026-10-04. [Historical registry](../archive/THREAD_REGISTRY-thro
 | `03_LAB` | DONE | Evidence retained; no long-running test task. |
 | `04_UX` | DONE | Accepted UI; screenshot refresh is optional backlog. |
 | `05_MATCHER` | DONE | Production matching and provider priority frozen. |
-| `06_DOCS` | DONE | Public release documentation and historical archive retained. |
+| `06_DOCS` | READY FOR PM REVIEW | Media/website showcase refresh: `codex/media-showcase-refresh`, execution chat `01a10527-c5ab-7070-9b96-015eaa91bfdf`. Public release documentation/history retained; no new numbered workspace. |
 | `07_QA` | DONE | Staged updater and public-byte verification complete. |
 
 Menu Bar Space: `origin/codex/menu-bar-space` at `62b47067a601fb48a6292efdfcee10e8c92d4036`; experimental, paused, archived, not merged or released. Reuse numbered workspaces; do not create duplicate PM threads.

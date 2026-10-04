@@ -8,7 +8,7 @@
   <title data-i18n="pageTitle">NotchMuse — Lyrics, right where you need them</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
   <header class="site-header wrap">
@@ -29,11 +29,30 @@
         <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0/NotchMuse.dmg"><span data-i18n="downloadMac">Download for Mac</span> <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#modes"><span data-i18n="seeHow">See how it works</span></a></div>
         <p class="fine" data-i18n="releaseMeta">NotchMuse v0.8.0 · macOS 14+ · Apple silicon</p>
       </div>
-      <figure class="hero-visual">
-        <div class="mac-demo">
-          <img src="assets/demos/notch-mode-screen.png" alt="Real NotchMuse Notch Mode screen capture" data-i18n-alt="heroImageAlt">
+      <figure class="hero-visual live-showcase">
+        <div class="demo-tabs" role="tablist" aria-label="Lyric display mode" data-i18n-aria-label="demoTabsLabel">
+          <button id="status-tab" type="button" role="tab" aria-selected="true" aria-controls="status-panel" data-demo-tab data-i18n="statusTab">Status Bar</button>
+          <button id="notch-tab" type="button" role="tab" aria-selected="false" aria-controls="notch-panel" tabindex="-1" data-demo-tab data-i18n="notchTab">Notch</button>
         </div>
-        <figcaption data-i18n="heroCaption">Actual NotchMuse screen capture</figcaption>
+        <div id="status-panel" role="tabpanel" aria-labelledby="status-tab">
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="assets/media/status-bar-poster.webp" width="1080" height="240" alt="Real NotchMuse lyrics playing in the macOS menu bar" data-i18n-alt="statusMediaLabel" fetchpriority="high">
+            <video autoplay muted loop playsinline preload="none" width="1080" height="240" poster="assets/media/status-bar-poster.webp" aria-label="Real NotchMuse lyrics playing in the macOS menu bar" data-i18n-aria-label="statusMediaLabel">
+              <source data-src="assets/media/status-bar-demo.webm" type="video/webm">
+              <source data-src="assets/media/status-bar-demo.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <div id="notch-panel" role="tabpanel" aria-labelledby="notch-tab" hidden>
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="assets/media/notch-poster.webp" width="1080" height="240" alt="Real NotchMuse overlay lyrics moving from the top to above the Dock" data-i18n-alt="notchMediaLabel" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1080" height="240" poster="assets/media/notch-poster.webp" aria-label="Real NotchMuse overlay lyrics moving from the top to above the Dock" data-i18n-aria-label="notchMediaLabel">
+              <source data-src="assets/media/notch-demo.webm" type="video/webm">
+              <source data-src="assets/media/notch-demo.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <figcaption data-i18n="heroCaption">Real playback on macOS · Recorded with Spotify</figcaption>
       </figure>
     </section>
 
@@ -54,18 +73,36 @@
       <p class="section-intro" data-i18n="modesIntro">Choose the display that fits your Mac and your workflow.</p>
       <div class="mode-grid">
         <article class="mode-card">
-          <div><p class="mode-label" data-i18n="notchLabel">01 / REAL APP SCREENSHOT</p><h3 data-i18n="notchTitle">Notch Mode</h3><p data-i18n="notchBody">See NotchMuse’s actual lyric window beside the MacBook notch.</p></div>
-          <div class="capture-frame notch-capture" aria-label="Real NotchMuse Notch Mode screen capture" data-i18n-aria-label="notchMediaLabel">
-            <picture><img src="assets/demos/notch-mode-screen.png" alt="Real NotchMuse Notch Mode screen capture" data-i18n-alt="notchImageAlt"></picture>
+          <div><p class="mode-label" data-i18n="notchLabel">01 / LIVE LYRICS</p><h3 data-i18n="notchTitle">Notch Mode</h3><p data-i18n="notchBody">Keep synced lyrics near the notch, or move them above the Dock.</p></div>
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="assets/media/notch-poster.webp" width="1080" height="240" alt="Real NotchMuse overlay lyrics moving from the top to above the Dock" data-i18n-alt="notchMediaLabel" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1080" height="240" poster="assets/media/notch-poster.webp" aria-label="Real NotchMuse overlay lyrics moving from the top to above the Dock" data-i18n-aria-label="notchMediaLabel">
+              <source data-src="assets/media/notch-demo.webm" type="video/webm">
+              <source data-src="assets/media/notch-demo.mp4" type="video/mp4">
+            </video>
           </div>
         </article>
         <article class="mode-card">
-          <div><p class="mode-label" data-i18n="statusLabel">02 / REAL APP SCREENSHOT</p><h3 data-i18n="statusTitle">Status Bar Mode</h3><p data-i18n="statusBody">See a real screen capture of lyrics in the macOS menu bar.</p></div>
-          <div class="capture-frame status-capture" aria-label="Real NotchMuse Status Bar Mode screen capture" data-i18n-aria-label="statusMediaLabel">
-            <picture><img src="assets/demos/status-bar-screen.png" alt="Real NotchMuse Status Bar Mode screen capture" data-i18n-alt="statusImageAlt"></picture>
+          <div><p class="mode-label" data-i18n="statusLabel">02 / LIVE LYRICS</p><h3 data-i18n="statusTitle">Status Bar Mode</h3><p data-i18n="statusBody">Follow synced lyrics directly in the macOS menu bar.</p></div>
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="assets/media/status-bar-poster.webp" width="1080" height="240" alt="Real NotchMuse lyrics playing in the macOS menu bar" data-i18n-alt="statusMediaLabel" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1080" height="240" poster="assets/media/status-bar-poster.webp" aria-label="Real NotchMuse lyrics playing in the macOS menu bar" data-i18n-aria-label="statusMediaLabel">
+              <source data-src="assets/media/status-bar-demo.webm" type="video/webm">
+              <source data-src="assets/media/status-bar-demo.mp4" type="video/mp4">
+            </video>
           </div>
         </article>
       </div>
+      <article class="appearance-showcase" aria-labelledby="appearance-title">
+        <div><p class="mode-label" data-i18n="appearanceLabel">MAKE IT YOURS</p><h3 id="appearance-title" data-i18n="appearanceTitle">Customize your lyrics.</h3><p data-i18n="appearanceBody">Solid colors, gradients, and a background that fits your desktop.</p></div>
+        <div class="live-demo" data-demo>
+          <img class="demo-poster" src="assets/media/appearance-poster.webp" width="1080" height="240" alt="Real NotchMuse lyric colors and background changing during playback" data-i18n-alt="appearanceMediaLabel" loading="lazy">
+          <video autoplay muted loop playsinline preload="none" width="1080" height="240" poster="assets/media/appearance-poster.webp" aria-label="Real NotchMuse lyric colors and background changing during playback" data-i18n-aria-label="appearanceMediaLabel">
+            <source data-src="assets/media/appearance-demo.webm" type="video/webm">
+            <source data-src="assets/media/appearance-demo.mp4" type="video/mp4">
+          </video>
+        </div>
+      </article>
     </section>
 
     <section class="section wrap how" aria-labelledby="how-title">
@@ -129,8 +166,14 @@
   "launchStep3": "打开“系统设置”→“隐私与安全性”，选择“仍要打开”。",
   "launchStep4": "按 macOS 提示完成认证，然后再次打开 NotchMuse。",
   "releaseMeta": "NotchMuse v0.8.0 · macOS 14+ · Apple 芯片",
-  "heroImageAlt": "NotchMuse 刘海模式的实机截图，截取自项目录屏",
-  "heroCaption": "NotchMuse 实际运行截图",
+  "heroCaption": "macOS 真实播放画面 · 使用 Spotify 录制",
+  "demoTabsLabel": "歌词显示模式",
+  "statusTab": "菜单栏",
+  "notchTab": "刘海",
+  "appearanceLabel": "按你的喜好定制",
+  "appearanceTitle": "定制你的歌词。",
+  "appearanceBody": "纯色、渐变色，以及适合桌面的歌词背景。",
+  "appearanceMediaLabel": "NotchMuse 实际播放中切换歌词颜色和背景",
   "playersEyebrow": "适配你常用的音乐平台",
   "playersTitle": "你喜欢的音乐平台，均已支持。",
   "playersIntro": "选择音乐平台，让歌词始终在视线之中。",
@@ -141,16 +184,14 @@
   "modesEyebrow": "两种方式，随时跟上歌词",
   "modesTitle": "无论看向哪里，都能看到歌词。",
   "modesIntro": "选择适合你的 Mac 和使用习惯的歌词显示方式。",
-  "notchLabel": "01 / 应用实机截图",
+  "notchLabel": "01 / 同步歌词演示",
   "notchTitle": "刘海模式",
-  "notchBody": "在 MacBook 刘海旁查看 NotchMuse 实际显示的歌词。",
-  "notchMediaLabel": "NotchMuse 刘海模式实机截图",
-  "notchImageAlt": "NotchMuse 刘海模式实机截图",
-  "statusLabel": "02 / 应用实机截图",
+  "notchBody": "让同步歌词靠近刘海，或移到 Dock 上方。",
+  "notchMediaLabel": "NotchMuse 实机浮层歌词从顶部移动到 Dock 上方",
+  "statusLabel": "02 / 同步歌词演示",
   "statusTitle": "菜单栏模式",
-  "statusBody": "查看 NotchMuse 在实际 macOS 菜单栏中显示歌词的画面。",
-  "statusMediaLabel": "NotchMuse 菜单栏模式实机截图",
-  "statusImageAlt": "NotchMuse 菜单栏模式实机截图",
+  "statusBody": "直接在 macOS 菜单栏中跟上同步歌词。",
+  "statusMediaLabel": "NotchMuse 在 macOS 菜单栏中实际播放歌词",
   "howEyebrow": "使用方式",
   "howTitle": "三步设置，然后安心听歌。",
   "step1Title": "选择音乐平台",
@@ -236,5 +277,6 @@
       try { localStorage.setItem("notchmuse-language", selectedLanguage); } catch {}
     });
   </script>
+  <script src="showcase.js?v=1" defer></script>
 </body>
 </html>

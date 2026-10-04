@@ -2,7 +2,7 @@
 
 ## Current status
 
-NotchMuse **v0.8.0 Build 47 is released**. Its GitHub asset, official signed update feed, website download, and installed Stable app were verified. This documentation cleanup does not change the app or publish a new version.
+NotchMuse **v0.8.0 Build 47 is released**. Its GitHub asset, official signed update feed, website download, and installed Stable app were verified. The authorized media showcase refresh runs on `codex/media-showcase-refresh` from `84bb0c1`; it does not change the app or publish a new version.
 
 ## Current architecture
 
@@ -10,7 +10,7 @@ The macOS app lives in `MenuBarLyrics/`. Spotify and Apple Music have player ada
 
 ## Open work
 
-No active P0. Optional follow-ups are refreshed screenshots/demo, broader clean-Mac evidence, Developer ID/notarization, and separately approved features. Menu Bar Space is paused and archived, not part of Stable.
+Media showcase implementation and validation are complete on `codex/media-showcase-refresh`. The three silent demos, EN/ZH README, Hero mode tabs and Appearance section are ready for PM review. Desktop/mobile, reduced motion, loading/fallbacks and static export pass. Pending: Product Owner visual acceptance and PM-controlled merge/deployment. Evidence: [media refresh report](../reports/media/media-showcase-refresh.md). No engineering blocker; website source is `website/`. Broader clean-Mac evidence, Developer ID/notarization, and features remain separate work. Menu Bar Space is paused and archived, not part of Stable.
 
 ## References
 

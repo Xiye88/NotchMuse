@@ -4,7 +4,7 @@ Last reviewed: 2026-10-04. Detailed historical checklists are [archived](../arch
 
 ## Active
 
-- No product-development or release task. The repository documentation cleanup is the only current task; it creates no product release.
+- **Media Showcase Refresh — READY FOR PM REVIEW**, `codex/media-showcase-refresh`: real-recording demos, EN/ZH README and website Hero/appearance implemented and verified. [Evidence](../reports/media/media-showcase-refresh.md). Pending Product Owner visual acceptance → PM merge/deploy. No App development or release.
 
 ## Recently completed
 

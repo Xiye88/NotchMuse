@@ -1,6 +1,6 @@
 # NotchMuse Thread Registry
 
-Last reviewed: 2026-10-04. [Historical registry](../archive/THREAD_REGISTRY-through-v0.8.0.md) preserves old workspace IDs and checkpoints.
+Last reviewed: 2026-10-17. [Historical registry](../archive/THREAD_REGISTRY-through-v0.8.0.md) preserves old workspace IDs and checkpoints.
 
 | Workspace | State | Current meaning |
 | --- | --- | --- |
@@ -17,4 +17,4 @@ Menu Bar Space: `origin/codex/menu-bar-space` at `62b47067a601fb48a6292efdfcee10
 
 ## Website publication — 2026-10-17
 
-Responsibility `06_DOCS`, existing SEO chat `01a116ce-e921-70c3-ad28-40baf9e371ed`. Product Owner authorized direct GitHub synchronization and public website deployment. Five distinct topic guides are implemented in English and Chinese (10 new URLs); homepages gain guide cards and the sitemap has12 URLs. Local language, analytics, guide and showcase checks passed; preview is open. Synchronization uses only website changes atop existing main, plus this task's documentation. Public App remains v0.8.0 Build47. Production verification and final publication state: [closure](../reports/website/seo-pages-production-2026-10-17.md).
+Responsibility `06_DOCS`, existing SEO chat `01a116ce-e921-70c3-ad28-40baf9e371ed`: **SYNCHRONIZED / DEPLOYED / PUBLIC HTTP VERIFIED**. Authorized source `983729a4c9e69a748c5772dcdbefc772b2f582c1` was pushed directly atop main; source CI PASS. Five distinct topics in English and Chinese (10 new URLs), home guide cards and12 sitemap URLs are live in `/opt/notchmuse-site/releases/20261017-seo-983729a`. All44 origin files match; public pages on apex/www match source. Three video transfer timeouts passed complete-hash rechecks. Local preview remains open; in-app public navigation failed with a connection error and is not counted as visual verification. Official appcast/notes preserved byte-for-byte; public App remains v0.8.0 Build47. No confirmation remains for this task. [Closure and evidence](../reports/website/seo-pages-production-2026-10-17.md).

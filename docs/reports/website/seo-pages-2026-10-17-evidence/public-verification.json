@@ -1,0 +1,555 @@
+{
+  "time": "2026-10-17T14:39:23.935565+00:00",
+  "source_commit": "983729a4c9e69a748c5772dcdbefc772b2f582c1",
+  "method": "curl GET over public Cloudflare hostnames; initial Python urllib run was blocked403 before evidence completion",
+  "results": [
+    {
+      "url": "https://notchmuse.com/analytics.js",
+      "status": "200",
+      "sha256": "3e7b9f2b2d0094796087594948784ee51023c955943e3694258db67cdaa1eb41",
+      "expected_sha256": "3e7b9f2b2d0094796087594948784ee51023c955943e3694258db67cdaa1eb41",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:19 GMT\ncontent-type: text/javascript\ncontent-length: 4756\ncache-control: max-age=14400, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\naccept-ranges: bytes\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=YnIkB7%2Byv0ykL9zGIOTsqCFRVEaoLryNHJuUbBG9GmaTXzu28KhL%2BNfNwFUc71Qc37fIXjuQQ4J9qZ9Ks8bCaRtLmM5l8QIWQp9GxvMsu3lwB%2Fv7NkodAoLiCZjiMjUx\"}]}\ncf-ray: a4c00a64e92bf5b3-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/apple-music-desktop-lyrics-mac/",
+      "status": "200",
+      "sha256": "1219f67b97210ebd0ed96c328c0a9302d1042fc68f000b548a851b2937cbf6e1",
+      "expected_sha256": "1219f67b97210ebd0ed96c328c0a9302d1042fc68f000b548a851b2937cbf6e1",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:19 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=187P8ncWlh%2B%2Fw3ZuUxNxJmx5n3Fm2%2Ff5LlcNArkrJ58rY6WfwIxsDQYmXF%2FYZKmHm9dGNdAtnD%2BswYynf%2B4qkLfo8%2FXUOnDIPd5T1%2FKotz7OIQ0BkEGRDsHfCcV8iABd\"}]}\ncf-ray: a4c00a64f9f6d743-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/demos/notch-mode-screen.png",
+      "status": "200",
+      "sha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1",
+      "expected_sha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:19 GMT\ncontent-type: image/png\ncontent-length: 49936\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=bz67Nf3lU%2F%2FeVrV4rZF%2FsnitcqEYKvSG8GdUe8UvGKILI34cX1p0UBJkeItO6vUPXuckL8gNsYZC%2F8Ts8uHG9HkPbRx4MQAIrqeazmTH4HI%2Bh%2F1sk2A7t1uTeZ%2BEcIDz\"}]}\ncf-ray: a4c00a64e8b6c238-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/demos/notch-mode-still.png",
+      "status": "200",
+      "sha256": "559556b5874600c6f08788203ffd89430955c8fc90784528ee5629b033acdfb7",
+      "expected_sha256": "559556b5874600c6f08788203ffd89430955c8fc90784528ee5629b033acdfb7",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:20 GMT\ncontent-type: image/png\ncontent-length: 71080\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=sQlNvK9o%2FH7strvcPIr7v%2BjUdILwrDCbDyOjPfCQAQH64kmTQt82N3GAE%2FWh9LKOwAmmJoJDGHhIKsyGqDPI2LbhRCRAm5HRE4thW7LAQ6e%2F5a2OnNbXY6UmZgDlZu0a\"}]}\ncf-ray: a4c00a69c8269501-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/demos/notch-mode.gif",
+      "status": "200",
+      "sha256": "e85c4803349d82f135bbe2f3ee5a5b072f70085d031e768cb47b216a2ea7d3c6",
+      "expected_sha256": "e85c4803349d82f135bbe2f3ee5a5b072f70085d031e768cb47b216a2ea7d3c6",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:20 GMT\ncontent-type: image/gif\ncontent-length: 585505\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=%2BlXv62RPMo6CJJoXeWEpGtUDau0eC7PuJjDnb5fteHvXbFZEr%2FUtRArMUc6FCDfWjc74DwdMlLWNuyH00OMQjT36RALnnEMIM1gkU%2FhWb7%2Bri4iKPDmk3Rw8Txh0vvCx\"}]}\ncf-ray: a4c00a6b0c44d8cf-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/demos/status-bar-screen.png",
+      "status": "200",
+      "sha256": "1f20e8cddb4c26dbc5f7f0bcf604753b27d51ffcfc111316fe843c5458153f81",
+      "expected_sha256": "1f20e8cddb4c26dbc5f7f0bcf604753b27d51ffcfc111316fe843c5458153f81",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:20 GMT\ncontent-type: image/png\ncontent-length: 195077\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=vY62k6NFyshoCxM89fNRZy3N%2BQiWE0vA2K%2FLfeXyscliuRVz6yqA3vtLNE3HEGCoJKZrjPHSrnlGQL6nkU0%2F%2F6EnRFLMpYzww%2Bfdf2Ocn0iWYAiUNcSDiG7Q2a2OBbpt\"}]}\ncf-ray: a4c00a6b0bd7d760-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/demos/status-bar-still.png",
+      "status": "200",
+      "sha256": "ce4eae5e80d3d03471d7c5ee8bae0bea15a7296a70c72d906c46c84a6c338cbf",
+      "expected_sha256": "ce4eae5e80d3d03471d7c5ee8bae0bea15a7296a70c72d906c46c84a6c338cbf",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:22 GMT\ncontent-type: image/png\ncontent-length: 80719\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=eIU%2BHmF4wpTyeGnsrELQsrETHNMZRnnHz5NKmvdPv%2Blfg3Wj7z%2Fwfg516DwFbTiBunl0408NVgaedVgEMnvEmott%2BVgnGkT2Nub5GomOmFaoiWqkJB6lMUlsGbiJWv0W\"}]}\ncf-ray: a4c00a770c2eb359-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/demos/status-bar.gif",
+      "status": "200",
+      "sha256": "c4648a686247b3fa47781191c78c39767456129e0daaa3aae55d4a3592c92789",
+      "expected_sha256": "c4648a686247b3fa47781191c78c39767456129e0daaa3aae55d4a3592c92789",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:25 GMT\ncontent-type: image/gif\ncontent-length: 878336\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=TIKVUxvzjwrTSTdXi69FZBH3o2%2BKh8NSugefeQvvygeOrRgdlrop6ible%2FP%2BQfNOYo1ZJMMcgU6hzdPvp5pkLrAjRbyfqdzgkG7zDmcIybgn%2FEa9Fcd7MVVQV1zII5%2Fo\"}]}\ncf-ray: a4c00a8a2b6ad75c-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/favicon-32.png",
+      "status": "200",
+      "sha256": "f807ed4c22767aff183a3d29cd5c8d08c0db9778feb0f01734fcc6bc6e9f6098",
+      "expected_sha256": "f807ed4c22767aff183a3d29cd5c8d08c0db9778feb0f01734fcc6bc6e9f6098",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:25 GMT\ncontent-type: image/png\ncontent-length: 2366\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=UcgiXl%2Bf%2BorGbYOhwhEN5YtWhAZ2K836YlUd3xCdXGcGkHCJ4XF5tbuVFqt%2BoXbXrnC1dNeS7mZujqavz%2B7qdIjs6k7qoUmm01nXr5xVJGC%2BAuzswRaqoBaNnP%2BZtwYz\"}]}\ncf-ray: a4c00a8acb02eb86-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/mac-desktop.png",
+      "status": "200",
+      "sha256": "a94ec30d416fd2832bc7379094f263c03147cb63aa4781a5b7e969648af8a102",
+      "expected_sha256": "a94ec30d416fd2832bc7379094f263c03147cb63aa4781a5b7e969648af8a102",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:28 GMT\ncontent-type: image/png\ncontent-length: 631063\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=2JVVJ%2F4Y1CnZnoqg5G%2BacI3PH5Vr1pDLamlz9j6kjQoH3B8MU%2BRj%2FED22zxpERr4aDnee6P1ZBZzYLxd%2Bk4hv3xg%2F2zedq%2FnEysJ6IeoOdNe9PilTPKHGaWfKk1UelxY\"}]}\ncf-ray: a4c00a990a1ad768-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/appearance-demo.mp4",
+      "status": "200",
+      "sha256": "2aef9768ffe03cc0dfc93892b7cb4d084a7a78de0a41cdc40abdd2216ac171ac",
+      "expected_sha256": "2aef9768ffe03cc0dfc93892b7cb4d084a7a78de0a41cdc40abdd2216ac171ac",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:32 GMT\ncontent-type: video/mp4\ncontent-length: 644965\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=t6RDY%2Fz8uWOYXLNrNQgZWrpgvsKmjU0tLWzSIRA5Zq3HNHGmjpM%2BuvY01UXQawn3WxcJxP2xP1jvktk8iVcU%2FvMHrqsNQGiGYTV6qRucXficj5yHvR3KXXmym9NtUWDK\"}]}\ncf-ray: a4c00ab519c0aef2-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/appearance-demo.webm",
+      "status": "200",
+      "sha256": "45b579756eef009b6104fdadef29c4e28b46931022ace920e72c9ef5f9b530d1",
+      "expected_sha256": "45b579756eef009b6104fdadef29c4e28b46931022ace920e72c9ef5f9b530d1",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:33 GMT\ncontent-type: video/webm\ncontent-length: 265948\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=qHWAZ4Cnw%2BdTs11X9DBJ%2BwTOUmxTdsnMyLFmuAqqE6FG%2FocOsX5Tmp4sjhVE3DahVkHV2SGef4UsCu2jv8VV%2FhkhRsu7FJlhcCDN%2FSo0H9tNnFTSBPLyZexpGwP5mQpz\"}]}\ncf-ray: a4c00abccdf85282-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/appearance-poster.webp",
+      "status": "200",
+      "sha256": "cfd7adbb200b95b387955dea30b7df4eb5b6125d4c9e48522e2a1b04c325ed5e",
+      "expected_sha256": "cfd7adbb200b95b387955dea30b7df4eb5b6125d4c9e48522e2a1b04c325ed5e",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:40 GMT\ncontent-type: application/octet-stream\ncontent-length: 83604\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=goMVODsio%2FlmZjFHclgjNivPRfI1eYlF7CeesvpXgFenF3eHXR9JfD6xnqCt5o6SQSFF4xTjA6c6D6q18Oad9CSNCEgYSRaLk9Yf2QAvCgPrvxXC31FesR4ifN7%2BDNOC\"}]}\ncf-ray: a4c00ae6f9afe385-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/notch-demo.mp4",
+      "status": "200",
+      "sha256": "752070631b2065ba2b76cb6dcf662ac5d2f75b4a7831390c28fd7c79ffa97de0",
+      "expected_sha256": "752070631b2065ba2b76cb6dcf662ac5d2f75b4a7831390c28fd7c79ffa97de0",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:43 GMT\ncontent-type: video/mp4\ncontent-length: 384669\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=IcCAB0HNZBFfwhxPOD8XZin88mGBbh5KICgo34ecUKymDRYfRrSMoMbkwaq%2B41iGcRaKzjJoeKxyYn0sGnyjlJKgCvJTwqIxhpccCXsiI1LdOICn2Og7eeqjbAHuAwdH\"}]}\ncf-ray: a4c00af70f773f16-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/notch-demo.webm",
+      "status": "200",
+      "sha256": "090c8a017a154f62acb9fab9b811b162b5eb9f67e1b10610c38531388fa90fe1",
+      "expected_sha256": "7d46faa495e063798164121efdb8e87d0ef0b8ea461593ac06f4e52f703fbd49",
+      "pass": false,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:43 GMT\ncontent-type: video/webm\ncontent-length: 246036\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=AtqeMsaGpew7RHYHhODHOcQxa4LynI5%2B42Q3KsypQbFJQ8MPdXZAqMQVeZfseh0GnaHWntRdk7gl04QGESBuRoE7TfR0nkn26PMpdAjd58CqsudwEf9W2HdUn8Um92za\"}]}\ncf-ray: a4c00afa4ddce38f-NRT\nalt-svc: h3=\":443\"; ma=86400\n\nHTTP/2 200 \ndate: Sat, 17 Oct 2026 14:38:13 GMT\ncontent-type: video/webm\ncontent-length: 246036\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\nage: 29\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: HIT\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=Q9FJYZDOcCugC%2FRryCHGqb3dHAM2Pm14VdZnSDYSC%2FZdARFgTDcOt%2Bd7QWQPuuOyqgNhL0sgT1EaLexnnTYhkpWRB9NCKE5%2F7ZksB9J1JvfgV2FJP3xY%2FKFMg93f95Jx\"}]}\ncf-ray: a4c00bb49c3ae38f-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": "curl: (28) Operation timed out after 30005 milliseconds with 178770 out of 246036 bytes received\ncurl: (28) Operation timed out after 30006 milliseconds with 81902 out of 246036 bytes received\n"
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/notch-poster.webp",
+      "status": "200",
+      "sha256": "d0e3e42687296856d212e2e6f18c292718bbee990a7eb4381ff13905399bbf04",
+      "expected_sha256": "d0e3e42687296856d212e2e6f18c292718bbee990a7eb4381ff13905399bbf04",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:44 GMT\ncontent-type: application/octet-stream\ncontent-length: 84688\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=o%2FEvVU7IgekOwJ%2BKQ7f0PZ1uuFJbgvmGtZ%2F8NrBRI2G%2FAAeAs0QSgIaXHZbwr%2BXIyfwcqkSyQsjH8DSdVokOYl2nIbHAnG3ZOIfX6k14h1CNdC2uUhOVDaJ3l0sgPCLP\"}]}\ncf-ray: a4c00afe8f8eaf93-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/status-bar-demo.mp4",
+      "status": "000",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "0517a82acec891d3113610fead43c8c3eac77b064c060b4528d49b915dc20d2b",
+      "pass": false,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:37:57 GMT\ncontent-type: video/mp4\ncontent-length: 264465\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=P%2FELxj2KZXDr399p0GGMwcbtldYm%2BWT%2B5HkRjZ0aKzwYpkRxdpIeMiH7mci6zv%2FZTs%2FZQYhZF9kCS5ZfQWI%2B5z6rRqwG8CIaYWPlWJpGTu58PuZsXpbNWmGBIuEbwrbz\"}]}\ncf-ray: a4c00b539bb5e373-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": "curl: (28) Operation timed out after 30005 milliseconds with 15936 out of 264465 bytes received\ncurl: (28) Operation timed out after 30003 milliseconds with 0 bytes received\n"
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/status-bar-demo.webm",
+      "status": "000",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "a39118ca924e903d6a4d12626837798af23ff534606176d5b3c588c68787d750",
+      "pass": false,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:38:01 GMT\ncontent-type: video/webm\ncontent-length: 245622\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=P%2B4AJTlMcCN8Da76VqkOFb8giDa3sP9GgWV6N0sIxHUqAaF6FwZjp4yEDF%2BViTiIYullcoJe1RbtopvXKhTjMULjvPhnw2UeRL8vaTpvwG1xwD6lyDSlKo0ApEtY7vNa\"}]}\ncf-ray: a4c00b693af39a37-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": "curl: (28) Operation timed out after 30001 milliseconds with 9897 out of 245622 bytes received\ncurl: (28) Operation timed out after 30003 milliseconds with 0 bytes received\n"
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/status-bar-poster.webp",
+      "status": "200",
+      "sha256": "8ee37b1fce36825428d912d0e95ef9a4a2dd5d6bcafb5db8e0ca2bcf58f7f938",
+      "expected_sha256": "8ee37b1fce36825428d912d0e95ef9a4a2dd5d6bcafb5db8e0ca2bcf58f7f938",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:38:48 GMT\ncontent-type: application/octet-stream\ncontent-length: 83954\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=60C4xGaBTpYLU39RNIZcEOe1iEKRPBV1SkugyvzXyVVaOoRHjECjBWCldlw%2B52nqEm1XFe6dgYzdMUClOeH92JAnRKtShn2xTuL%2FTHecXHchF8TytAl8ExtAqiFApd6q\"}]}\ncf-ray: a4c00c92ef53dfaa-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/notchmuse-icon.png",
+      "status": "200",
+      "sha256": "81d8a2ebbfbf4df6469d0650e7e37e622cd9e1e62acc9a02a3a8e2d5e529d0d6",
+      "expected_sha256": "81d8a2ebbfbf4df6469d0650e7e37e622cd9e1e62acc9a02a3a8e2d5e529d0d6",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:38:56 GMT\ncontent-type: image/png\ncontent-length: 16702\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=aIZHJiX9FIWj84P%2Fqaayukt9f6o7blK5f0bH23wkxqebZFjbznuIIbkaH2y3m44Vbo22wQpOHZ8xhYuAWUseBmadl0pxgVd%2FJJvuEkfVQeG5sLrMXExq1MuWxexr3jQG\"}]}\ncf-ray: a4c00cc0a8991ca8-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/players/apple-music.png",
+      "status": "200",
+      "sha256": "96365690588ea483836f67c916b93f18d732ba5b7fb32e7aa358f8a5cdedde6a",
+      "expected_sha256": "96365690588ea483836f67c916b93f18d732ba5b7fb32e7aa358f8a5cdedde6a",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:38:57 GMT\ncontent-type: image/png\ncontent-length: 11830\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\ncache-control: max-age=14400\naccept-ranges: bytes\ncf-cache-status: MISS\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=DgI21yijJ%2BgXWLl8FGMG0fhWY7C9Oe30E616ZyjON0Ocl1%2FR7pYPSyftmUWrPup9EP55H1G2bligextyZcqOrHXrOwUu1hdPUrkz2U8n3HrWFxbNJbaYp7rXGzHWitbm\"}]}\ncf-ray: a4c00cc90f49d794-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/players/netease.png",
+      "status": "200",
+      "sha256": "30056bea3b327e608b7e55e361de039dcd83a4990eaa57a46a1aea38dc5327ea",
+      "expected_sha256": "30056bea3b327e608b7e55e361de039dcd83a4990eaa57a46a1aea38dc5327ea",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:38:58 GMT\ncontent-type: image/png\ncontent-length: 12375\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=iks6ZYwvpmikg9NNxLVuh8miUmBgZTEPOmp6rZaxRhJ8aMK0WVyRG8NlnAjbQux6t4MSW4p5Sq1%2FKGtrIrAerSX1t5fLwVw7BI%2FBE%2FwKW672CorbgpD9Jk7Em1kLLvlN\"}]}\ncf-ray: a4c00ccbed0fed81-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/players/qq-music.jpg",
+      "status": "200",
+      "sha256": "2929914b03b841af4c0972cf44726050f19c174ac5a4c8bd20801fe2bfa8311e",
+      "expected_sha256": "2929914b03b841af4c0972cf44726050f19c174ac5a4c8bd20801fe2bfa8311e",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:38:58 GMT\ncontent-type: image/jpeg\ncontent-length: 30502\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\ncache-control: max-age=14400\naccept-ranges: bytes\ncf-cache-status: MISS\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=%2BqH4SgQpsOr39lqOb9QfPVCkBYcVQ3Az5cuqb9QVEdlCsDRPrINbLhUX2RVH4Q9PFHTyCwqXm9k24aBZ8R13dEYp6alujjLljHJ04E8WcjKlcE6AzFVcr1Bi8f2lebjE\"}]}\ncf-ray: a4c00ccf285e3018-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/players/soda-music.jpg",
+      "status": "200",
+      "sha256": "4f4bdc6b5075acea8363e41d6ee0b753651991fb2002db9a4f82c2bbd24eed69",
+      "expected_sha256": "4f4bdc6b5075acea8363e41d6ee0b753651991fb2002db9a4f82c2bbd24eed69",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:02 GMT\ncontent-type: image/jpeg\ncontent-length: 16678\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=DActlczFGXuAk3%2Fx8tp2H1kf5bzpS0c635SKz2uUFGUERnSr%2BG18vj%2FCDODGw2qZsFKniSrZGDiLitCGGeK3EP4hUwVJ8TYR1G%2BOeAKg%2FomRFouMlOHCAjvcKHN6CcPm\"}]}\ncf-ray: a4c00ce56dbde364-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/players/spotify.png",
+      "status": "200",
+      "sha256": "85ee63edc922199e15da8177687612c60511d3d1b2596d9cd4b7e6255970424c",
+      "expected_sha256": "85ee63edc922199e15da8177687612c60511d3d1b2596d9cd4b7e6255970424c",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:04 GMT\ncontent-type: image/png\ncontent-length: 9045\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=E%2B%2Fs9XQ9LY%2Fi5jjQkSpaoqPxaye%2BHwc5bKvhXTrOzdfCLeOtGOpBu%2F1%2BwAML5dLSKSLVxgww4jLsrvaJXxBZk3wIMaJDD3tcVbK5FsgM%2BLWvuPFUqCFh36E1BRABmbBh\"}]}\ncf-ray: a4c00cf2c9052da1-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/real-notch-mode.png",
+      "status": "200",
+      "sha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1",
+      "expected_sha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:06 GMT\ncontent-type: image/png\ncontent-length: 49936\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:26:53 GMT\nserver: cloudflare\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=1AFila3SUMwz1PNqRzoDobJpCh6534lglpWCRyMS3x4eM%2ByMrskg9Y%2BALGHxEKAPn8JIxO0SQfjsqbBdHkhX%2BrPkx2laAMEp%2FmglppuAOotySvMKoZ%2F8v%2BWaV%2Fxu%2Bp%2FI\"}]}\ncf-ray: a4c00cfe7f0ee8c6-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/guides.css",
+      "status": "200",
+      "sha256": "dcb75994bb2ee21e6ddceb957641a8ce65beca3e5d959d61e56710b80fde9128",
+      "expected_sha256": "dcb75994bb2ee21e6ddceb957641a8ce65beca3e5d959d61e56710b80fde9128",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:07 GMT\ncontent-type: text/css\ncontent-length: 5719\ncache-control: max-age=14400, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\naccept-ranges: bytes\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=7BRowqKDrf07Nt%2Bx6HDZ1ah%2ByPJf6oEjrQwcEDLRaGqEagEkRTGxBTC3%2Ft0VP9ogqL4QV5ZfR67OrZDZJ0cOjt9TqVfa8PAsOkqISzzC162zEVJf2%2FbSXrk%2BnGu9mJfw\"}]}\ncf-ray: a4c00d073fee8eb8-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/",
+      "status": "200",
+      "sha256": "100dfc19c22a094988a2b28931842f5a15c90c395a0f94ed6b9d4ab5cf056c54",
+      "expected_sha256": "100dfc19c22a094988a2b28931842f5a15c90c395a0f94ed6b9d4ab5cf056c54",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:08 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=KytHzVla9q4cd8JuLe%2FsnTdhpCECHSpeyLiNH6%2FA5%2F0j29YhZHCeP14DLg8Ih%2FVbB2CPqIJpUFi2MrXaQifCjeeoW%2BJG%2BYvsYADjntSdQ2FWHYmsAaD4ZvK%2FlyVLHZkl\"}]}\ncf-ray: a4c00d0f28d783c1-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/lyricsx-alternative/",
+      "status": "200",
+      "sha256": "21f67edd50da5215fa6ba3c0f072c698b731aec3106b121f23fe28a13e24dda7",
+      "expected_sha256": "21f67edd50da5215fa6ba3c0f072c698b731aec3106b121f23fe28a13e24dda7",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:10 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=w1tINN2Bq0skRSXSP%2BNLB%2Fbjbod2Y7q%2B7m%2BUCCsPXfoplSuY1sW3mmwNfxtL%2BWp8lKxnjX7K7dXRmBbN9Zbw4m%2F8aTNrtCLrCM7qTa6pHVhCxQZc7jPVs7PO5Bk0Okkt\"}]}\ncf-ray: a4c00d1ae9d6611a-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/macbook-notch-lyrics/",
+      "status": "200",
+      "sha256": "4f707b711f8f0d68200edb9a273d5c60e958017c845de6bed234a8b1e9f48a87",
+      "expected_sha256": "4f707b711f8f0d68200edb9a273d5c60e958017c845de6bed234a8b1e9f48a87",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:10 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=0f5MnRGFE9a%2FkXwFvdnRNUxTSTngJQ92h%2Byq1Rfd8L8na%2B%2FtMBgCssDMawazQ0G5L2R4Jerth3LMnUEVeI1WAnrTyuMyKHDzS2BKa4rT5thU1FfFrC%2FRAX1iXqTYduS3\"}]}\ncf-ray: a4c00d1aaf0d97de-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/menu-bar-lyrics/",
+      "status": "200",
+      "sha256": "b397dcd523d9d8ea0421045e73dd2271dcb1284089fdc1c23a496ba70d623335",
+      "expected_sha256": "b397dcd523d9d8ea0421045e73dd2271dcb1284089fdc1c23a496ba70d623335",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:12 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=Xh1wdydRsfrENjByZMzf5jxgtHLim05a9XroDqWPaI2H1rQlJGIvl3zZiR%2F70jpinBKoKG4%2B9wVegMgzA3MPFKT57J81uIM9asWhyvZ6lm%2BZFE7O1bqLdnKHL%2FUFLtiL\"}]}\ncf-ray: a4c00d251a0f78c1-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/robots.txt",
+      "status": "200",
+      "sha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd",
+      "expected_sha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:13 GMT\ncontent-type: text/plain\ncontent-length: 67\ncache-control: max-age=14400, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\naccept-ranges: bytes\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=ltgr5XNvjVRWFgG5ihoyJhW0%2BhUTFsZLpyz1cZjba4RkHVr9BMX9Jb5tTOHgd3t0mTcjqp3Y7h%2BaveAJFee7QPIiH9%2FkYvoO3vX0jU4FD3FHI7rBN%2F%2Faq%2B9%2BWCU9oRUy\"}]}\ncf-ray: a4c00d2b7c1ac8eb-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/showcase.js",
+      "status": "200",
+      "sha256": "225ba72c1e499fd819e29cb3e104a19c866a64af509b354bce6317087e018d3b",
+      "expected_sha256": "225ba72c1e499fd819e29cb3e104a19c866a64af509b354bce6317087e018d3b",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:13 GMT\ncontent-type: text/javascript\ncontent-length: 2857\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sun, 04 Oct 2026 11:00:40 GMT\nserver: cloudflare\nage: 2944\naccept-ranges: bytes\ncache-control: max-age=14400\ncf-cache-status: HIT\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=O0Lc%2BelZuOQk4btkj8%2BWMiBJINN0OuhCv%2B9rRDN8tF%2F46JlM3X1DtyGZzyq3g3Rw8O7uoUgY6oXSx2MwmksQ6TXlgF5m2hykrJL8XUMZ2kJ46UNNNqQ6GPjPyOcFWW5U\"}]}\ncf-ray: a4c00d2a4d4ee366-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/sitemap.xml",
+      "status": "200",
+      "sha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce",
+      "expected_sha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:13 GMT\ncontent-type: application/xml\ncontent-length: 906\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=9AUyC%2FU%2BItg0KLmIA%2ByNbzrg9L%2BS24SP7xg%2B4yHwKFtH0D4rMbBoaHAmFop2avOobqoaI%2FNyMhZ51fGFGZ%2F%2BKUkIOg5Wr2FA0H6JmzqPI%2B%2F9246X4%2BMhYhoTDyvlDV8r\"}]}\ncf-ray: a4c00d2d4ccbd5ca-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/spotify-lyrics-mac/",
+      "status": "200",
+      "sha256": "13c496b9564a9411ec8f0443583707582dd1da06616030b79e01fb50388b6ddd",
+      "expected_sha256": "13c496b9564a9411ec8f0443583707582dd1da06616030b79e01fb50388b6ddd",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:14 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=RCLIsdLlkVPzBO08EiXJCAnREjhI56T54RFPF2vRwlyf3%2B8gC%2F4hCGLtlR5EVHHMeEoh7BTvZb2c%2Bgs9wpiMVf%2FRxsGqr%2BUU3UD8tmV4TEN5%2Bbx9EPhaY6Zb9AKGtyjs\"}]}\ncf-ray: a4c00d3218d3c170-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/style.css",
+      "status": "200",
+      "sha256": "cd3b650b718f0fe7f495a4d0a505809278a582b4e6a10934583536ed9e91c177",
+      "expected_sha256": "cd3b650b718f0fe7f495a4d0a505809278a582b4e6a10934583536ed9e91c177",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:14 GMT\ncontent-type: text/css\ncontent-length: 18683\ncache-control: max-age=14400, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\naccept-ranges: bytes\ncf-cache-status: EXPIRED\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=KtW1JRuZ%2Fjw804OVlBVczp03aDWpWotuOuLHJO%2Fy6NSO7M8N%2BRkEXP1fA0HXAd3tEyvidM3O4P5qotftle7wZByUIK9duikd6VqzOGlOQdLUeC1tXpxG4Xl1fNz%2BDjuw\"}]}\ncf-ray: a4c00d341e4a96e9-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/zh/apple-music-desktop-lyrics-mac/",
+      "status": "200",
+      "sha256": "86feeb48a8a39403ac7c30a7332f22df16e962420af84d7cbe799c38be5fd540",
+      "expected_sha256": "86feeb48a8a39403ac7c30a7332f22df16e962420af84d7cbe799c38be5fd540",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:14 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=HvPN1PtBsh6Gk8E8M6nrkZ4ROTBNfQgg702y%2Bn2w1Mkn4%2FTd4lmdmGM2mtinY1AlvKaLBodoNX%2BGCSAeThLr%2FWQUf7rLOuS%2BtY4KNClkm1OCoRuFSbENUgMSx73yU1fX\"}]}\ncf-ray: a4c00d346f3cf706-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/zh/",
+      "status": "200",
+      "sha256": "263ad4fb40032ac4ec69d2cc262ace6f2f9ec766dd13ecfd7d8013c20e61d20e",
+      "expected_sha256": "263ad4fb40032ac4ec69d2cc262ace6f2f9ec766dd13ecfd7d8013c20e61d20e",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:15 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=vgKTe2Fq222YEIw2UeOyGTpTUV36gB54FoofOwswLHZYywWkYd1j8KoZncoJ8vkFZoVMP%2F3OOnynP6XVMep7GSSmtaBawW0tZ%2BF%2Bq9szdp3yx5UmRqKrWUoPyVEODjoY\"}]}\ncf-ray: a4c00d392a2dd4d8-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/zh/lyricsx-alternative/",
+      "status": "200",
+      "sha256": "52a466a5264440a120933578b33375fd3c22ec2d7da9a3145bec28e454c4c857",
+      "expected_sha256": "52a466a5264440a120933578b33375fd3c22ec2d7da9a3145bec28e454c4c857",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:15 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=LzxEHg7bUtvNZmJnzkO25taTjtT8oQMNlOSpGFri2Z%2BHcGqeiSpME8WEVFHY6kiK2%2FWj2Z5VlafWFzVBECCrgLeL54XFCdgPnD96jHpdNZ8mwzYlzcO7puYJwSmDY0xS\"}]}\ncf-ray: a4c00d3c5c3baa18-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/zh/macbook-notch-lyrics/",
+      "status": "200",
+      "sha256": "c96bb82a92f3c17c3d8a593043fdf3095e586adf9dc70d08cfa762b052b07d2e",
+      "expected_sha256": "c96bb82a92f3c17c3d8a593043fdf3095e586adf9dc70d08cfa762b052b07d2e",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:16 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=%2F1STarnuJffAgCUiT6V3uSKeSWDka1gsfdOWSVfoq4oH5gHMitU5LFQJlDZ6i%2FP4G9Cqh5xHHHIoeEa7C7aPfYKNXvjUKBv2zK9E04RHNzzr58q%2BSjLwSUXcdwYVm6mn\"}]}\ncf-ray: a4c00d3e2e42d754-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/zh/menu-bar-lyrics/",
+      "status": "200",
+      "sha256": "b7f9eb2abbade3768698bb4a8d2a4421281ce04baee0c1574f7a35c3d8f8eda4",
+      "expected_sha256": "b7f9eb2abbade3768698bb4a8d2a4421281ce04baee0c1574f7a35c3d8f8eda4",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:16 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=%2FQcEf02HzBiBgFjv7cMG3GVO58mM5vuC5yQglyH8u3rKcH61Xtp%2FKAfz7nX9Xe12mtSZCqksoDWyWwsVo3X6zlO6Fc7pTeqJTBJG0i5MYZXVHZR3IQ3PXA0oMeSwcZ4V\"}]}\ncf-ray: a4c00d3f1e32a562-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/zh/spotify-lyrics-mac/",
+      "status": "200",
+      "sha256": "f4cae942e3a8d5d28849215796289aef83eb4860121a3a230f285ec9c827595a",
+      "expected_sha256": "f4cae942e3a8d5d28849215796289aef83eb4860121a3a230f285ec9c827595a",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:17 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=iQ03lMFY%2FN6EMkUefHp2uNNHqyF1mucPXNBb%2BGasE7A6HZZbo3x3p%2BGw03NpihqYUzcOibJgk9jp5quSkl4E3u3J3eDBJ9HtptF%2BBHoQrMuDUpCnCa70pW2O%2FwiLc4eM\"}]}\ncf-ray: a4c00d42b880b359-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/appcast.xml",
+      "status": "200",
+      "sha256": "750fda31ab87c78fe41b494b5119e0343c3413bc8e16b2df74f6127179b44580",
+      "expected_sha256": "750fda31ab87c78fe41b494b5119e0343c3413bc8e16b2df74f6127179b44580",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:18 GMT\ncontent-type: application/xml\ncontent-length: 1412\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 03 Oct 2026 16:58:57 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=uTDAgXigiAE6b4rjlX3zfKOQf9zUcu9JtDo1APAc%2FHTQrCeN2MQeu7GCHaYKUE8eISxy5FjbeiMbx%2BLw0tf2huYcPFQb%2F1ffuqXO%2BqCw5XCijzRYsZ3RUcurndcoPRzY\"}]}\ncf-ray: a4c00d4aba0ee382-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/NotchMuse.md",
+      "status": "200",
+      "sha256": "770f3a527c1c85fb45c80faa5a16a9657a9270883c4a86df1af17c6b6f8e7e04",
+      "expected_sha256": "770f3a527c1c85fb45c80faa5a16a9657a9270883c4a86df1af17c6b6f8e7e04",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:19 GMT\ncontent-type: text/markdown\ncontent-length: 2353\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 03 Oct 2026 16:59:05 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=CezK3DqgSq03Tl5Ew5aOAU9VSQLUK4G1KdutnZD2u%2BNVvgQwt65P5ISg2GLSUPCSiUWQcjw16Bd%2BrsuBeJuziwcUH4So%2FNYwce8qz1r6EctEG0xgJsAH%2B4%2BnMPKUHbw3\"}]}\ncf-ray: a4c00d4f3dd0685a-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/apple-music-desktop-lyrics-mac/",
+      "status": "200",
+      "sha256": "1219f67b97210ebd0ed96c328c0a9302d1042fc68f000b548a851b2937cbf6e1",
+      "expected_sha256": "1219f67b97210ebd0ed96c328c0a9302d1042fc68f000b548a851b2937cbf6e1",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:19 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=guFWKFhdaQzXL69jnaPXZSWuH8dvZAhnmTMJKMBGsJvKzqc%2B5YTH2MxCJh25WIpvEd%2B3vEokesQT1d9efEbbUP6%2BfjT2IGUaGAUDOXPiXpwFpsBQYGJ4Mq4BaZyRU4XHxEkJYg%3D%3D\"}]}\ncf-ray: a4c00d511ed6fd47-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/guides.css",
+      "status": "200",
+      "sha256": "dcb75994bb2ee21e6ddceb957641a8ce65beca3e5d959d61e56710b80fde9128",
+      "expected_sha256": "dcb75994bb2ee21e6ddceb957641a8ce65beca3e5d959d61e56710b80fde9128",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:19 GMT\ncontent-type: text/css\ncontent-length: 5719\ncache-control: max-age=14400, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\naccept-ranges: bytes\ncf-cache-status: MISS\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=JJRvCWeimmnW7fpdlJEMRhweH%2FcEqgZBiErSBpyUKKi21fhigxmmFbA%2BUcaSMWsUO00hptkOYXgH%2FGCD0%2FsRFqOqR37ULpWTvPRE5%2BXSkunXEpAg1yKOab%2FsL0PBRm0%2BBzpOgg%3D%3D\"}]}\ncf-ray: a4c00d536a16d8cf-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/",
+      "status": "200",
+      "sha256": "100dfc19c22a094988a2b28931842f5a15c90c395a0f94ed6b9d4ab5cf056c54",
+      "expected_sha256": "100dfc19c22a094988a2b28931842f5a15c90c395a0f94ed6b9d4ab5cf056c54",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:20 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=sPqqT04RUQ8HqRvKw5FG0Fm66kAAw8CI3j2iemn69c4m%2FnhoJ%2BSjYYrkrkQYyO0Uu778E3pzOUxU1uojOsyiwqcEQMhWE8SdS8lWS8x7BxeMEWuwGodvcFA4FeU%2BVZi3cFGoEA%3D%3D\"}]}\ncf-ray: a4c00d55bf76d76c-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/lyricsx-alternative/",
+      "status": "200",
+      "sha256": "21f67edd50da5215fa6ba3c0f072c698b731aec3106b121f23fe28a13e24dda7",
+      "expected_sha256": "21f67edd50da5215fa6ba3c0f072c698b731aec3106b121f23fe28a13e24dda7",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:20 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=I2U0UZRhNh9yCp21e2CbUEkPjOMDR1oWcyU8ROOryzMN9LKI1EuwFYlh6isl4eq3Dba49x4uLH%2BK9MaBuVUzh3TJg77559H85v%2BFnRxY6Ti0aDc4EOF7vojXOvxSrABf03mRdw%3D%3D\"}]}\ncf-ray: a4c00d574fb0e356-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/macbook-notch-lyrics/",
+      "status": "200",
+      "sha256": "4f707b711f8f0d68200edb9a273d5c60e958017c845de6bed234a8b1e9f48a87",
+      "expected_sha256": "4f707b711f8f0d68200edb9a273d5c60e958017c845de6bed234a8b1e9f48a87",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:20 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=aYcobIxpH8SsUK8LM1QDCkYyYD0qmF4OJTjJJnraPzzLX2eWRCUDJ7AZ6CP%2FOKnwwOcolfk%2Ft7XxHX%2F%2Fo%2FvnfCAq9WBPfhVUlIX0qyzkOcuDRCHhENPZXBUqzvTmoR4OrrtpZw%3D%3D\"}]}\ncf-ray: a4c00d58e9ac8a81-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/menu-bar-lyrics/",
+      "status": "200",
+      "sha256": "b397dcd523d9d8ea0421045e73dd2271dcb1284089fdc1c23a496ba70d623335",
+      "expected_sha256": "b397dcd523d9d8ea0421045e73dd2271dcb1284089fdc1c23a496ba70d623335",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:21 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=4URlQqnqPwRElkjb7h2aXDITUo%2BJP3bUOTlRMaPUPHhWTXBG%2BBhsfwk6luglsfu0fWSGmicCXW%2FDJ7p%2FHVAwqsMO1kcTOF%2Bsbv16umGZa%2Fb5C4rNSqhiZWoUl9B2IRXxch8otg%3D%3D\"}]}\ncf-ray: a4c00d5f79fa2650-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/sitemap.xml",
+      "status": "200",
+      "sha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce",
+      "expected_sha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:22 GMT\ncontent-type: application/xml\ncontent-length: 906\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=rPpwVWhHkBvLhyh7n5EWFRt6w6Xmw0rgraJUiyWWG9aHTYQdVXtHDI0n%2BnzODM7%2FR0evWidROG13%2BjZXehxkJQSWFkRXb5PiYqqccfNVFiJsaeAL%2F6DpiNPAgCI74ofp2TS9qA%3D%3D\"}]}\ncf-ray: a4c00d617fbb1bff-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/spotify-lyrics-mac/",
+      "status": "200",
+      "sha256": "13c496b9564a9411ec8f0443583707582dd1da06616030b79e01fb50388b6ddd",
+      "expected_sha256": "13c496b9564a9411ec8f0443583707582dd1da06616030b79e01fb50388b6ddd",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:22 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=ddyskzA7isxRFx5nCixrRYB7Dqoz5Q3G69aPHxJTcTFhBmZaH3EHvjqPwvOs1oNLuCpKXKAxtN8iqaKW5QT9hIFVp77EvOw4mBJDoRt7DJ2Nji%2F%2FEU5QXybZr8KNfBnUdwzCdA%3D%3D\"}]}\ncf-ray: a4c00d61e9893435-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/zh/apple-music-desktop-lyrics-mac/",
+      "status": "200",
+      "sha256": "86feeb48a8a39403ac7c30a7332f22df16e962420af84d7cbe799c38be5fd540",
+      "expected_sha256": "86feeb48a8a39403ac7c30a7332f22df16e962420af84d7cbe799c38be5fd540",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:22 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=xrD%2BWg0XjpSKDb9Zrz3DojD%2FbYPtm0sxpMemDzfiksWw65fYR1L5C0V%2FSnjP5qS%2Fg4iOqZbwUCWmg%2BxgYhE16AIycTiJIl1jFrZKxgztqBRAWvek82QLIsqgntNQaIUQ1PcCEw%3D%3D\"}]}\ncf-ray: a4c00d655ccad549-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/zh/",
+      "status": "200",
+      "sha256": "263ad4fb40032ac4ec69d2cc262ace6f2f9ec766dd13ecfd7d8013c20e61d20e",
+      "expected_sha256": "263ad4fb40032ac4ec69d2cc262ace6f2f9ec766dd13ecfd7d8013c20e61d20e",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:22 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=Pggl8M0HGDlFlA7S5wtIZg9obRJlq8DIa60jX6VhMnGW0InzimJCp6gIy8k5%2FydPm216b78ljm5nJy4vILUISSerOCYksoTiqkuhsyIURPht2rdbDjAFux0AULrmkVjNzOJ9jw%3D%3D\"}]}\ncf-ray: a4c00d668ce192af-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/zh/lyricsx-alternative/",
+      "status": "200",
+      "sha256": "52a466a5264440a120933578b33375fd3c22ec2d7da9a3145bec28e454c4c857",
+      "expected_sha256": "52a466a5264440a120933578b33375fd3c22ec2d7da9a3145bec28e454c4c857",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:23 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=Ju4jj8GYXM50dOZ59CVq8UTxp%2FurCGjDeiHF57nTdgmr91W6KRNSSMczH30tghX6aeHRSo1lar5j5AdDKdeD410Plu1lD7k0ANqfXCwBxSUwgiDtxMol11sifBngc5W1twfEVg%3D%3D\"}]}\ncf-ray: a4c00d67aa7aedd9-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/zh/macbook-notch-lyrics/",
+      "status": "200",
+      "sha256": "c96bb82a92f3c17c3d8a593043fdf3095e586adf9dc70d08cfa762b052b07d2e",
+      "expected_sha256": "c96bb82a92f3c17c3d8a593043fdf3095e586adf9dc70d08cfa762b052b07d2e",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:23 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=rVe07fsd9H3pV0tSvzgif%2BFP3gHeKpJMcRr1HuAuYpI9%2FJ4543FiTWSjUxuJeA%2FpsuoopnCzFhATTc3GzB4OARK8MliziSpw0F1aS0WPEPjKKSd9rp9x8mChLl89XbraSc5xaQ%3D%3D\"}]}\ncf-ray: a4c00d6bbd8caf6a-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/zh/menu-bar-lyrics/",
+      "status": "200",
+      "sha256": "b7f9eb2abbade3768698bb4a8d2a4421281ce04baee0c1574f7a35c3d8f8eda4",
+      "expected_sha256": "b7f9eb2abbade3768698bb4a8d2a4421281ce04baee0c1574f7a35c3d8f8eda4",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:23 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=6COUVfWU%2B0RpkOt3mpOku5SS7EXa4xOzC7z%2FDPTmIiBAf%2B%2Fxx44CkleND9qGwHbvzEZ8SFSu9rTkM9e6TGX3asUp1aUAB48wOsdOmHjpjYjwz46lEKBAt6S%2FyztTSYwbDgjUBg%3D%3D\"}]}\ncf-ray: a4c00d6c2c3d3640-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    },
+    {
+      "url": "https://www.notchmuse.com/zh/spotify-lyrics-mac/",
+      "status": "200",
+      "sha256": "f4cae942e3a8d5d28849215796289aef83eb4860121a3a230f285ec9c827595a",
+      "expected_sha256": "f4cae942e3a8d5d28849215796289aef83eb4860121a3a230f285ec9c827595a",
+      "pass": true,
+      "headers": "HTTP/2 200 \ndate: Sat, 17 Oct 2026 14:39:23 GMT\ncontent-type: text/html\ncache-control: no-cache, max-age=0, must-revalidate\ncontent-security-policy: script-src 'self' https://www.googletagmanager.com\nlast-modified: Sat, 17 Oct 2026 14:27:09 GMT\nserver: cloudflare\ncf-cache-status: DYNAMIC\nnel: {\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}\nreport-to: {\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=ouvz6A8BW6xQsk2T%2BfUcfOb%2FkVp18hM91bYBUI8GM2G9CYIvFtBEGa%2FbgViGhCYn%2Frwss6%2Bejk8e9YeUGW28c608Lvf7cB3ZbDsqsxEUqFWFBVdkv4fbRCZuCtoyCxo6hTNuOw%3D%3D\"}]}\ncf-ray: a4c00d6de8cbe376-NRT\nalt-svc: h3=\":443\"; ma=86400\n\n",
+      "error": ""
+    }
+  ],
+  "media_rechecks": [
+    {
+      "url": "https://notchmuse.com/assets/media/notch-demo.webm?verify=983729a",
+      "status": "200",
+      "sha256": "7d46faa495e063798164121efdb8e87d0ef0b8ea461593ac06f4e52f703fbd49",
+      "expected_sha256": "7d46faa495e063798164121efdb8e87d0ef0b8ea461593ac06f4e52f703fbd49",
+      "pass": true,
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/status-bar-demo.mp4?verify=983729a",
+      "status": "200",
+      "sha256": "0517a82acec891d3113610fead43c8c3eac77b064c060b4528d49b915dc20d2b",
+      "expected_sha256": "0517a82acec891d3113610fead43c8c3eac77b064c060b4528d49b915dc20d2b",
+      "pass": true,
+      "error": ""
+    },
+    {
+      "url": "https://notchmuse.com/assets/media/status-bar-demo.webm?verify=983729a",
+      "status": "200",
+      "sha256": "a39118ca924e903d6a4d12626837798af23ff534606176d5b3c588c68787d750",
+      "expected_sha256": "a39118ca924e903d6a4d12626837798af23ff534606176d5b3c588c68787d750",
+      "pass": true,
+      "error": ""
+    }
+  ]
+}

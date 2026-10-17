@@ -1,0 +1,13 @@
+{
+  "status": "deployed",
+  "source_commit": "983729a",
+  "release": "/opt/notchmuse-site/releases/20261017-seo-983729a",
+  "previous_release": "/opt/notchmuse-site/releases/20261004-seo-7784fcd",
+  "server_backup": "/opt/notchmuse-site/site_server.before-seo-983729a.py",
+  "verified_origin_files": 44,
+  "protected_hashes": {
+    "appcast.xml": "750fda31ab87c78fe41b494b5119e0343c3413bc8e16b2df74f6127179b44580",
+    "NotchMuse.md": "770f3a527c1c85fb45c80faa5a16a9657a9270883c4a86df1af17c6b6f8e7e04"
+  },
+  "rollback": "Restore server backup and restart notchmuse-site.service"
+}

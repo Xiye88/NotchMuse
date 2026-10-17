@@ -1,0 +1,8 @@
+PASS: default autoplay, silent inline playback, actual looping, poster, deferred video requests
+PASS: mode switching, inactive playback paused, keyboard tabs, bilingual showcase
+PASS: live system motion preference changes pause/resume playback
+PASS: responsive 360/390/760/820/1440px, no overflow, reserved dimensions, CLS < 0.01
+PASS: appearance video loads in view, offscreen Hero pauses
+PASS: initial reduced motion and tab/scroll interactions use only static posters
+PASS: MP4 fallback when WebM cannot be decoded
+PASS: failed autoplay/media keeps the readable poster

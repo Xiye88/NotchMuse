@@ -60,10 +60,12 @@ const launches = process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: proc
   assert.equal(await page.locator('#status-tab').getAttribute('aria-selected'), 'true');
   assert.equal(await page.locator('#status-tab').evaluate(button => document.activeElement === button), true);
   await page.locator('#language-toggle').click();
+  await page.waitForURL('**/zh/');
   assert.equal(await page.locator('#status-tab').textContent(), '菜单栏');
   assert.equal(await page.locator('#notch-tab').textContent(), '刘海');
   await screenshot('website-after-desktop-chinese');
   await page.locator('#language-toggle').click();
+  await page.waitForURL(url.endsWith('/') ? url : `${url}/`);
   console.log('PASS: mode switching, inactive playback paused, keyboard tabs, bilingual showcase');
 
   await page.emulateMedia({ reducedMotion: 'reduce' });

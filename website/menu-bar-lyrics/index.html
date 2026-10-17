@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b101a">
+  <title>Mac Menu Bar Lyrics — Setup &amp; Display | NotchMuse</title>
+  <meta name="description" content="Show synced lyrics in the macOS menu bar with NotchMuse. Set up supported players, choose placement and understand Automation and Accessibility permissions.">
+  <link rel="canonical" href="https://notchmuse.com/menu-bar-lyrics/">
+  <link rel="alternate" hreflang="en" href="https://notchmuse.com/menu-bar-lyrics/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://notchmuse.com/zh/menu-bar-lyrics/">
+  <link rel="alternate" hreflang="x-default" href="https://notchmuse.com/menu-bar-lyrics/">
+  <meta property="og:title" content="Mac Menu Bar Lyrics — Setup &amp; Display | NotchMuse">
+  <meta property="og:description" content="Show synced lyrics in the macOS menu bar with NotchMuse. Set up supported players, choose placement and understand Automation and Accessibility permissions.">
+  <meta property="og:url" content="https://notchmuse.com/menu-bar-lyrics/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NotchMuse">
+  <meta property="og:image" content="https://notchmuse.com/assets/media/status-bar-poster.webp">
+  <meta property="og:image:alt" content="Real Status Bar Mode playback, recorded with Spotify.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mac Menu Bar Lyrics — Setup &amp; Display | NotchMuse">
+  <meta name="twitter:description" content="Show synced lyrics in the macOS menu bar with NotchMuse. Set up supported players, choose placement and understand Automation and Accessibility permissions.">
+  <meta name="twitter:image" content="https://notchmuse.com/assets/media/status-bar-poster.webp">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
+  <link rel="stylesheet" href="/style.css?v=14">
+  <link rel="stylesheet" href="/guides.css?v=1">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "NotchMuse", "item": "https://notchmuse.com/"}, {"@type": "ListItem", "position": 2, "name": "Menu bar lyrics", "item": "https://notchmuse.com/menu-bar-lyrics/"}]}</script>
+</head>
+<body class="guide-page">
+  <a class="skip-link" href="#guide-content">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="brand" href="/" aria-label="NotchMuse home"><img class="brand-icon" src="/assets/notchmuse-icon.png" alt=""> NotchMuse</a>
+    <nav aria-label="Main navigation">
+      <a href="/#guides">Guides</a>
+      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0/NotchMuse.dmg" data-download-placement="nav">Download</a>
+      <a class="language-toggle" id="language-toggle" href="/zh/menu-bar-lyrics/" lang="zh-Hans" aria-label="切换到简体中文"><span aria-hidden="true">🌐</span><span>简体中文</span></a>
+    </nav>
+  </header>
+  <main>
+    <nav class="guide-breadcrumb wrap" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Menu bar lyrics</span></nav>
+    <section class="guide-hero wrap">
+      <div><p class="eyebrow">LYRICS THAT FIT YOUR WORKFLOW</p><h1>A place for lyrics in your Mac menu bar.</h1><p class="lead">Keep the current line close to the apps you are using. Status Bar Mode gives lyrics a small, familiar place at the top of your screen.</p>
+        <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0/NotchMuse.dmg" data-download-placement="hero">Download for Mac <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#guide-content">Read the guide</a></div>
+        <p class="fine">NotchMuse v0.8.0 · macOS 14+ · Apple silicon</p>
+      </div>
+      <figure class="guide-figure"><div class="live-demo" data-demo><img class="demo-poster" src="/assets/media/status-bar-poster.webp" width="1920" height="1080" alt="Real Status Bar Mode playback, recorded with Spotify."><video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"><source data-src="/assets/media/status-bar-demo.webm" type="video/webm"><source data-src="/assets/media/status-bar-demo.mp4" type="video/mp4"></video></div><figcaption>Real Status Bar Mode playback, recorded with Spotify.</figcaption></figure>
+    </section>
+    <div class="guide-layout wrap">
+      <article id="guide-content" class="guide-content" tabindex="-1">
+        <section id="players" class="guide-section"><h2>One display, several desktop players</h2><p>NotchMuse supports the Mac desktop apps for Spotify, Apple Music, NetEase Cloud Music, QQ Music and Soda Music. Auto Detect follows the player currently playing; manual selection is available when you want to choose one.</p><p>This is the lyric line displayed inside the macOS menu bar. If you prefer more room for the words or want lyrics nearer the Dock, use the separate <a href="/macbook-notch-lyrics/">Notch Mode overlay</a>. NotchMuse does not organize or hide other apps’ menu bar icons.</p></section><section id="setup" class="guide-section"><h2>Turn on menu bar lyrics</h2><ol><li>Start a song in a supported desktop player.</li><li>Open NotchMuse Settings from its menu bar icon. Check Auto Detect or select the player you are listening to.</li><li>Choose Status Bar, then choose your preferred position and display width.</li><li>Adjust font size and lyric colors so the text is readable against your menu bar.</li></ol><p>Start with a short line, then try a song with longer lines. Give the lyric area enough width for your usual music rather than judging the layout from one song.</p></section><section id="permissions" class="guide-section"><h2>Why the left-side layout asks for access</h2><p>Spotify and Apple Music may prompt for Automation permission so NotchMuse can read track details and playback position. The left-side status bar layout also needs Accessibility permission.</p><p>These permissions serve different jobs. If the song information is stale, check player access under System Settings → Privacy &amp; Security → Automation. If you selected the left-side layout and it does not appear, also check Accessibility. Grant the access requested for the layout you use.</p></section><section id="space" class="guide-section"><h2>Make room for the line</h2><p>A crowded menu bar, large text and long lyric lines compete for the same space. Try a different position, a smaller font or a different width. If another menu bar utility hides NotchMuse’s icon, check that utility’s settings.</p><p>For more flexible placement, switch to Notch Mode and move lyrics near the top or above the Dock. Both displays follow the same selected player; they are ways to view your lyrics, not separate music players.</p></section>
+        <section id="questions" class="guide-section faq"><h2>Questions before you try it</h2><details><summary>Does menu bar mode need a MacBook notch?</summary><p>No physical notch is required for Status Bar Mode. You still need a supported Apple silicon Mac running macOS 14 or later.</p></details><details><summary>Which permission is needed for the left layout?</summary><p>The left-side menu bar layout needs Accessibility access. Spotify and Apple Music may separately require Automation access.</p></details><details><summary>Why does one song have no lyrics?</summary><p>Player support does not guarantee lyric coverage for every song. Check whether the track updates, then try another song to separate matching from playback detection.</p></details></section>
+        <section id="before-download" class="guide-section guide-note"><h2>Installation and privacy</h2><p>The public release requires macOS 14+ and Apple silicon; Intel is not supported. Direct downloads are not yet notarized with an Apple Developer ID, so first launch may show a security prompt. Read the <a href="/#install-title">installation steps</a>.</p><p>The app needs no account, collects no telemetry and does not read or upload audio. Track metadata may be sent to third-party lyric providers. Website analytics is separate and requires consent; a download click does not confirm installation. <a href="/#website-analytics">Privacy and website analytics</a></p></section>
+        <section id="sources" class="guide-section guide-sources"><h2>Sources and further reading</h2><ul><li><a href="https://notchmuse.com/">NotchMuse: product, installation and privacy ↗</a></li></ul><p class="fine">Documentation reviewed October 17, 2026. Player interfaces and third-party services can change.</p></section>
+      </article>
+      <aside class="guide-toc" aria-label="On this page"><p class="eyebrow">ON THIS PAGE</p><a href="#players">One display, several desktop players</a><a href="#setup">Turn on menu bar lyrics</a><a href="#permissions">Why the left-side layout asks for access</a><a href="#space">Make room for the line</a><a href="#questions">Questions</a><a href="#before-download">Installation and privacy</a></aside>
+    </div>
+    <section class="section wrap guide-related" aria-labelledby="related-title"><p class="eyebrow">KEEP EXPLORING</p><h2 id="related-title">Find your way to keep lyrics in view.</h2><div class="guide-card-grid"><a class="guide-card" href="/spotify-lyrics-mac/"><h3>Spotify lyrics on Mac<span aria-hidden="true">↗</span></h3><p>Keep lyrics visible while using other apps.</p></a><a class="guide-card" href="/apple-music-desktop-lyrics-mac/"><h3>Apple Music desktop lyrics<span aria-hidden="true">↗</span></h3><p>Compare built-in lyrics, MiniPlayer and an overlay.</p></a><a class="guide-card" href="/macbook-notch-lyrics/"><h3>MacBook notch lyrics<span aria-hidden="true">↗</span></h3><p>Place lyrics near the top or above the Dock.</p></a><a class="guide-card" href="/lyricsx-alternative/"><h3>LyricsX alternative<span aria-hidden="true">↗</span></h3><p>Compare documented features before switching.</p></a></div></section>
+    <section class="closing"><div class="wrap"><p class="eyebrow">MUSIC BELONGS IN YOUR FLOW</p><h2>Try it with your own music.</h2><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0/NotchMuse.dmg" data-download-placement="footer">Download for Mac <span aria-hidden="true">↗</span></a><p class="fine">NotchMuse v0.8.0 · macOS 14+ · Apple silicon</p></div></section>
+  </main>
+  <footer class="site-footer wrap"><a class="brand" href="/"><img class="brand-icon" src="/assets/notchmuse-icon.png" alt=""> NotchMuse</a><nav aria-label="Footer navigation"><a href="/#guides">Guides</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="/#website-analytics">Privacy</a><button class="language-toggle" type="button" data-analytics-settings hidden>Analytics settings</button></nav><p>© NotchMuse · A small app for a more musical day.</p></footer>
+  <aside class="analytics-consent" data-analytics-consent role="region" aria-labelledby="consent-title" hidden>
+    <div><strong id="consent-title">Allow website analytics?</strong><p>With your consent, Google Analytics measures visits and download-button clicks. Your choice does not affect the app or downloads. <a href="/#website-analytics">Privacy details</a></p></div>
+    <div class="consent-actions"><button type="button" class="language-toggle" data-consent-reject>Reject analytics</button><button type="button" class="button button-small" data-consent-accept>Allow analytics</button><button type="button" class="language-toggle" data-consent-close hidden>Close</button></div>
+  </aside>
+  <script src="/analytics.js?v=1" defer></script>
+  <script src="/showcase.js?v=1" defer></script>
+</body>
+</html>

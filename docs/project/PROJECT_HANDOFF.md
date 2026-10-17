@@ -46,3 +46,7 @@ Do not repeat: Media creation, page design, v0.8.0 release, App/provider/matcher
 - **Start here:** [Master handoff](NOTCHMUSE_MASTER_HANDOFF.md)
 - [Current status](PROJECT_STATUS.md) · [Task board](TASK_BOARD.md) · [Thread registry](THREAD_REGISTRY.md) · [Roadmap](ROADMAP.md)
 - [Pre-cleanup detailed handoff](../archive/PROJECT_HANDOFF-through-v0.8.0.md) · [release evidence](../reports/v0.8.0-release-verification.md)
+
+## Website publication — 2026-10-17
+
+Responsibility `06_DOCS`, existing SEO chat `01a116ce-e921-70c3-ad28-40baf9e371ed`. Product Owner authorized direct GitHub synchronization and public website deployment. Five distinct topic guides are implemented in English and Chinese (10 new URLs); homepages gain guide cards and the sitemap has12 URLs. Local language, analytics, guide and showcase checks passed; preview is open. Synchronization uses only website changes atop existing main, plus this task's documentation. Public App remains v0.8.0 Build47. Production verification and final publication state: [closure](../reports/website/seo-pages-production-2026-10-17.md).

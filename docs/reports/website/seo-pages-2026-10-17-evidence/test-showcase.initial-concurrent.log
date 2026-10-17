@@ -1,0 +1,7 @@
+PASS: default autoplay, silent inline playback, actual looping, poster, deferred video requests
+PASS: mode switching, inactive playback paused, keyboard tabs, bilingual showcase
+page.waitForFunction: Timeout 30000ms exceeded.
+    at /Users/carlos/.codex/worktrees/notchmuse-seo-pages/歌词/website/test-showcase.cjs:72:14 {
+  log: [],
+  name: 'TimeoutError'
+}

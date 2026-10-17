@@ -110,3 +110,7 @@ do not create another duplicate PM.
 3. `git fetch origin`, compare `main` and the latest regular Release without altering Stable or Preview apps.
 4. Read a specific archived report or source file only for the next concrete question. Do **not** replay hundreds of prior chat messages.
 5. Continue only the newly authorized phase. Keep version/feed/release boundaries explicit and update canonical documents after material changes.
+
+## Website publication — 2026-10-17
+
+Responsibility `06_DOCS`, existing SEO chat `01a116ce-e921-70c3-ad28-40baf9e371ed`. Product Owner authorized direct GitHub synchronization and public website deployment. Five distinct topic guides are implemented in English and Chinese (10 new URLs); homepages gain guide cards and the sitemap has12 URLs. Local language, analytics, guide and showcase checks passed; preview is open. Synchronization uses only website changes atop existing main, plus this task's documentation. Public App remains v0.8.0 Build47. Production verification and final publication state: [closure](../reports/website/seo-pages-production-2026-10-17.md).

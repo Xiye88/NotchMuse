@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b101a">
+  <title>Spotify Lyrics Overlay for Mac — NotchMuse</title>
+  <meta name="description" content="Keep Spotify lyrics in your Mac menu bar or a floating overlay with NotchMuse. See the setup, permissions, display options and song coverage limits.">
+  <link rel="canonical" href="https://notchmuse.com/spotify-lyrics-mac/">
+  <link rel="alternate" hreflang="en" href="https://notchmuse.com/spotify-lyrics-mac/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://notchmuse.com/zh/spotify-lyrics-mac/">
+  <link rel="alternate" hreflang="x-default" href="https://notchmuse.com/spotify-lyrics-mac/">
+  <meta property="og:title" content="Spotify Lyrics Overlay for Mac — NotchMuse">
+  <meta property="og:description" content="Keep Spotify lyrics in your Mac menu bar or a floating overlay with NotchMuse. See the setup, permissions, display options and song coverage limits.">
+  <meta property="og:url" content="https://notchmuse.com/spotify-lyrics-mac/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NotchMuse">
+  <meta property="og:image" content="https://notchmuse.com/assets/media/notch-poster.webp">
+  <meta property="og:image:alt" content="Real NotchMuse playback, recorded with Spotify. The overlay moves from the top to above the Dock.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Spotify Lyrics Overlay for Mac — NotchMuse">
+  <meta name="twitter:description" content="Keep Spotify lyrics in your Mac menu bar or a floating overlay with NotchMuse. See the setup, permissions, display options and song coverage limits.">
+  <meta name="twitter:image" content="https://notchmuse.com/assets/media/notch-poster.webp">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
+  <link rel="stylesheet" href="/style.css?v=14">
+  <link rel="stylesheet" href="/guides.css?v=1">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "NotchMuse", "item": "https://notchmuse.com/"}, {"@type": "ListItem", "position": 2, "name": "Spotify lyrics on Mac", "item": "https://notchmuse.com/spotify-lyrics-mac/"}]}</script>
+</head>
+<body class="guide-page">
+  <a class="skip-link" href="#guide-content">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="brand" href="/" aria-label="NotchMuse home"><img class="brand-icon" src="/assets/notchmuse-icon.png" alt=""> NotchMuse</a>
+    <nav aria-label="Main navigation">
+      <a href="/#guides">Guides</a>
+      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0/NotchMuse.dmg" data-download-placement="nav">Download</a>
+      <a class="language-toggle" id="language-toggle" href="/zh/spotify-lyrics-mac/" lang="zh-Hans" aria-label="切换到简体中文"><span aria-hidden="true">🌐</span><span>简体中文</span></a>
+    </nav>
+  </header>
+  <main>
+    <nav class="guide-breadcrumb wrap" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span aria-current="page">Spotify lyrics on Mac</span></nav>
+    <section class="guide-hero wrap">
+      <div><p class="eyebrow">LYRICS THAT FIT YOUR WORKFLOW</p><h1>Spotify lyrics, alongside your work.</h1><p class="lead">A lyrics overlay for the Spotify desktop app. Follow the current line from your menu bar, near the notch or above the Dock while you use other Mac apps.</p>
+        <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0/NotchMuse.dmg" data-download-placement="hero">Download for Mac <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#guide-content">Read the guide</a></div>
+        <p class="fine">NotchMuse v0.8.0 · macOS 14+ · Apple silicon</p>
+      </div>
+      <figure class="guide-figure"><div class="live-demo" data-demo><img class="demo-poster" src="/assets/media/notch-poster.webp" width="1920" height="1080" alt="Real NotchMuse playback, recorded with Spotify. The overlay moves from the top to above the Dock."><video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"><source data-src="/assets/media/notch-demo.webm" type="video/webm"><source data-src="/assets/media/notch-demo.mp4" type="video/mp4"></video></div><figcaption>Real NotchMuse playback, recorded with Spotify. The overlay moves from the top to above the Dock.</figcaption></figure>
+    </section>
+    <div class="guide-layout wrap">
+      <article id="guide-content" class="guide-content" tabindex="-1">
+        <section id="native" class="guide-section"><h2>Start with Spotify’s own lyrics</h2><p>If you only want to read lyrics inside Spotify, you may already have what you need: play a song and click the Lyrics button at the bottom of the desktop app. Lyrics availability varies by song and device.</p><p>NotchMuse is useful when you want a separate, compact lyric display while writing, browsing or working in another window. It reads the desktop player’s playback details and looks for matching lyrics through third-party providers.</p></section><section id="setup" class="guide-section"><h2>Set up floating Spotify lyrics</h2><ol><li>Install NotchMuse, then open the Spotify desktop app on your Mac and start a song.</li><li>Open NotchMuse Settings. Leave Auto Detect selected, or choose Spotify explicitly if another player is also running.</li><li>Allow Automation access when macOS asks to let NotchMuse read Spotify’s current track and playback position.</li><li>Choose Notch Mode for the overlay, then adjust its position and width. Choose Status Bar instead for menu bar lyrics.</li></ol><p>To revisit a permission you previously denied, check System Settings → Privacy &amp; Security → Automation. Accessibility is additionally needed for the left-side menu bar layout, rather than for every lyric position.</p></section><section id="placement" class="guide-section"><h2>Pick the display you will actually use</h2><div class="guide-options"><div><h3>Menu bar</h3><p>Keep the current lyric at the top of the screen, with little desktop space taken up. See the <a href="/menu-bar-lyrics/">menu bar setup guide</a> for placement and permissions.</p></div><div><h3>Floating overlay</h3><p>Use Notch Mode to place lyrics near the top or above the Dock. Adjust width, lyric colors and background to fit your desktop. See <a href="/macbook-notch-lyrics/">notch and Dock positions</a>.</p></div></div></section><section id="missing" class="guide-section"><h2>If lyrics are missing or look wrong</h2><p>First check that the song is playing in the Mac desktop app and the correct player is selected. If the track details are not updating, check Automation access. If the track updates but no lyrics appear, try another song to distinguish player detection from a missing lyric match.</p><p>Spotify’s own lyric catalog and NotchMuse’s providers are separate. A song working in one does not guarantee a match in the other. An overlay is not a guaranteed fix for every “Spotify lyrics not showing” problem, and this guide does not claim support for Spotify’s web player.</p></section>
+        <section id="questions" class="guide-section faq"><h2>Questions before you try it</h2><details><summary>Does it replace Spotify?</summary><p>No. Keep using Spotify to play music; NotchMuse adds a separate lyric display.</p></details><details><summary>Can I keep lyrics in the menu bar instead?</summary><p>Yes. Select Status Bar in NotchMuse Settings. The left-side layout needs Accessibility permission.</p></details><details><summary>Does every Spotify song have synced lyrics?</summary><p>No. Coverage and synchronization depend on a matching result from the lyric providers.</p></details></section>
+        <section id="before-download" class="guide-section guide-note"><h2>Installation and privacy</h2><p>The public release requires macOS 14+ and Apple silicon; Intel is not supported. Direct downloads are not yet notarized with an Apple Developer ID, so first launch may show a security prompt. Read the <a href="/#install-title">installation steps</a>.</p><p>The app needs no account, collects no telemetry and does not read or upload audio. Track metadata may be sent to third-party lyric providers. Website analytics is separate and requires consent; a download click does not confirm installation. <a href="/#website-analytics">Privacy and website analytics</a></p></section>
+        <section id="sources" class="guide-section guide-sources"><h2>Sources and further reading</h2><ul><li><a href="https://notchmuse.com/">NotchMuse: product, installation and privacy ↗</a></li><li><a href="https://support.spotify.com/us/article/lyrics/">Spotify: View lyrics ↗</a></li></ul><p class="fine">Documentation reviewed October 17, 2026. Player interfaces and third-party services can change.</p></section>
+      </article>
+      <aside class="guide-toc" aria-label="On this page"><p class="eyebrow">ON THIS PAGE</p><a href="#native">Start with Spotify’s own lyrics</a><a href="#setup">Set up floating Spotify lyrics</a><a href="#placement">Pick the display you will actually use</a><a href="#missing">If lyrics are missing or look wrong</a><a href="#questions">Questions</a><a href="#before-download">Installation and privacy</a></aside>
+    </div>
+    <section class="section wrap guide-related" aria-labelledby="related-title"><p class="eyebrow">KEEP EXPLORING</p><h2 id="related-title">Find your way to keep lyrics in view.</h2><div class="guide-card-grid"><a class="guide-card" href="/menu-bar-lyrics/"><h3>Menu bar lyrics<span aria-hidden="true">↗</span></h3><p>Choose placement, width and the right permissions.</p></a><a class="guide-card" href="/apple-music-desktop-lyrics-mac/"><h3>Apple Music desktop lyrics<span aria-hidden="true">↗</span></h3><p>Compare built-in lyrics, MiniPlayer and an overlay.</p></a><a class="guide-card" href="/macbook-notch-lyrics/"><h3>MacBook notch lyrics<span aria-hidden="true">↗</span></h3><p>Place lyrics near the top or above the Dock.</p></a><a class="guide-card" href="/lyricsx-alternative/"><h3>LyricsX alternative<span aria-hidden="true">↗</span></h3><p>Compare documented features before switching.</p></a></div></section>
+    <section class="closing"><div class="wrap"><p class="eyebrow">MUSIC BELONGS IN YOUR FLOW</p><h2>Try it with your own music.</h2><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.0/NotchMuse.dmg" data-download-placement="footer">Download for Mac <span aria-hidden="true">↗</span></a><p class="fine">NotchMuse v0.8.0 · macOS 14+ · Apple silicon</p></div></section>
+  </main>
+  <footer class="site-footer wrap"><a class="brand" href="/"><img class="brand-icon" src="/assets/notchmuse-icon.png" alt=""> NotchMuse</a><nav aria-label="Footer navigation"><a href="/#guides">Guides</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="/#website-analytics">Privacy</a><button class="language-toggle" type="button" data-analytics-settings hidden>Analytics settings</button></nav><p>© NotchMuse · A small app for a more musical day.</p></footer>
+  <aside class="analytics-consent" data-analytics-consent role="region" aria-labelledby="consent-title" hidden>
+    <div><strong id="consent-title">Allow website analytics?</strong><p>With your consent, Google Analytics measures visits and download-button clicks. Your choice does not affect the app or downloads. <a href="/#website-analytics">Privacy details</a></p></div>
+    <div class="consent-actions"><button type="button" class="language-toggle" data-consent-reject>Reject analytics</button><button type="button" class="button button-small" data-consent-accept>Allow analytics</button><button type="button" class="language-toggle" data-consent-close hidden>Close</button></div>
+  </aside>
+  <script src="/analytics.js?v=1" defer></script>
+  <script src="/showcase.js?v=1" defer></script>
+</body>
+</html>

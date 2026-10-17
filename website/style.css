@@ -55,3 +55,13 @@
 [role=tabpanel][hidden]{display:none}
 @media(max-width:760px){.appearance-showcase{grid-template-columns:1fr;gap:20px}.hero-visual.live-showcase{margin:0}.demo-tabs{margin-bottom:14px}}
 @media(prefers-reduced-motion:reduce){.live-demo video{display:none}}
+
+/* Basic Consent controls reuse the site's colors and button treatments. */
+.website-analytics p{max-width:850px;color:var(--muted)}
+.site-footer nav{flex-wrap:wrap}
+.analytics-consent{position:fixed;z-index:20;inset:auto 18px 18px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 24px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:0 12px 40px #0008}
+.analytics-consent p{max-width:700px;margin:6px 0 0;color:var(--muted);font-size:.86rem}
+.consent-actions{display:flex;flex-wrap:wrap;gap:10px;flex-shrink:0}
+.consent-actions button{font:inherit;font-size:.86rem;cursor:pointer}
+[hidden]{display:none!important}
+@media(max-width:760px){.analytics-consent{inset:auto 12px 12px;flex-direction:column;align-items:flex-start;gap:16px;padding:18px}.consent-actions{flex-shrink:1}.site-footer nav{gap:16px}}

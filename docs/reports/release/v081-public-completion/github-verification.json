@@ -1,0 +1,102 @@
+{
+  "release_url": "https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1",
+  "release_id": 416351670,
+  "published_at": "2026-10-18T09:32:29Z",
+  "latest": true,
+  "assets": [
+    {
+      "name": "BUILD-INFO.txt",
+      "bytes": 561,
+      "digest": "sha256:99f2d8ebcd0e914b54823b9d10beec5ad1b8aa8baaee9efc58078c5f14aa964d",
+      "url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/BUILD-INFO.txt"
+    },
+    {
+      "name": "NotchMuse.dmg",
+      "bytes": 6802591,
+      "digest": "sha256:d8e2bc73e22cc79919708b88539edf480b7c07f14fe67d1d9683c9d530f77851",
+      "url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+    },
+    {
+      "name": "RELEASE_NOTES.en.md",
+      "bytes": 3688,
+      "digest": "sha256:1489de7701416204c9f9b4761a15c473183677e9161f5a1d309f064c548416a4",
+      "url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/RELEASE_NOTES.en.md"
+    },
+    {
+      "name": "RELEASE_NOTES.zh-CN.md",
+      "bytes": 3155,
+      "digest": "sha256:b31c4ffcb429d4b5827beb87d84be2e83122b61d622bfc9d327444cee2911422",
+      "url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/RELEASE_NOTES.zh-CN.md"
+    },
+    {
+      "name": "SHA256SUMS",
+      "bytes": 80,
+      "digest": "sha256:a2e3f79874bfd18e2b134ad0ed64aea69538fe01e2c233d4146ae27cd8755348",
+      "url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/SHA256SUMS"
+    },
+    {
+      "name": "SOURCE_PROVENANCE.json",
+      "bytes": 21242,
+      "digest": "sha256:3f07bd63f0881aff56796b4e847b79a30d65d507d32b2bf10d2f23e43f1c2ff9",
+      "url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/SOURCE_PROVENANCE.json"
+    }
+  ],
+  "source_commit": "8320271b4218431b66175bf40e203230ce8fa741",
+  "annotated_tag": "v0.8.1",
+  "tag_target_verified": true,
+  "main_source_at_release": "8320271b4218431b66175bf40e203230ce8fa741",
+  "public_documents": {
+    "README.md": {
+      "git_blob_sha": "97e7b0d99a3747f0e1fc2531cb20913b3bfca8ba",
+      "version_verified": true
+    },
+    "README.zh-CN.md": {
+      "git_blob_sha": "974420077d2a339d1f9acdf2fcd0492206718299",
+      "version_verified": true
+    },
+    "CHANGELOG.md": {
+      "git_blob_sha": "aa7a7fe525cad71db84795846e5dd69072cfd536",
+      "version_verified": true
+    }
+  },
+  "v080_retained": {
+    "release_id": 402605070,
+    "assets": [
+      {
+        "name": "appcast.xml",
+        "id": 608176457,
+        "bytes": 1412
+      },
+      {
+        "name": "BUILD-INFO.txt",
+        "id": 608176459,
+        "bytes": 150
+      },
+      {
+        "name": "NotchMuse.dmg",
+        "id": 608176456,
+        "bytes": 6477809
+      },
+      {
+        "name": "NotchMuse.md",
+        "id": 608176455,
+        "bytes": 2353
+      },
+      {
+        "name": "SHA256SUMS",
+        "id": 608176460,
+        "bytes": 185
+      }
+    ]
+  },
+  "source_ci": {
+    "url": "https://github.com/Xiye88/NotchMuse/actions/runs/39114852639",
+    "conclusion": "success"
+  },
+  "main_ci": {
+    "url": "https://github.com/Xiye88/NotchMuse/actions/runs/39115633205",
+    "commit": "8320271b4218431b66175bf40e203230ce8fa741",
+    "result": "PASS",
+    "branch": "main"
+  }
+}

@@ -13,12 +13,29 @@
   "total_passed": 474,
   "evidence": "Existing frozen Build61 regression execution; artifact unchanged. No blanket rerun claimed.",
   "packaged_production_contract_checks_passed": 15,
-  "full_xctest": "BLOCKED: selected Command Line Tools environment lacks XCTest; not reported as passed.",
   "independent_clean_mac_first_install": "NOT_TESTED; explicitly accepted release limitation",
   "sparkle_actual_47_to_61_install_relaunch_recovery": "NOT_VERIFIED; official feed remains Build47",
   "accepted_song_manual_confirmation": [
     "APT.",
     "Rubia"
   ],
-  "manual_accuracy_rate_claimed": false
+  "manual_accuracy_rate_claimed": false,
+  "local_full_xctest": "BLOCKED: selected Command Line Tools environment lacks XCTest; not reported as passed.",
+  "release_source_ci": {
+    "url": "https://github.com/Xiye88/NotchMuse/actions/runs/39114852639",
+    "commit": "8320271b4218431b66175bf40e203230ce8fa741",
+    "result": "PASS",
+    "checks": [
+      "Debug build / full self-test",
+      "Swift Package tests on macOS runner",
+      "Release build / DMG / packaged self-test",
+      "Metadata / hashes / bridge / localization"
+    ]
+  },
+  "main_ci": {
+    "url": "https://github.com/Xiye88/NotchMuse/actions/runs/39115633205",
+    "commit": "8320271b4218431b66175bf40e203230ce8fa741",
+    "result": "PASS",
+    "branch": "main"
+  }
 }

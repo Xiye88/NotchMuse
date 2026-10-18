@@ -1,20 +1,25 @@
 # NotchMuse Current Handoff
 
-## Active release checkpoint — 2026-10-18
+## Current release — 2026-10-18
 
-Product Owner has explicitly lifted `PAUSED_BY_OWNER` and authorized the public **v0.8.1 / Build61** release, Git push/tag, GitHub assets and the necessary website deployment. Developer ID/notarization and independent clean-Mac testing are accepted limitations for this release, not pending approvals. No such test is reported as PASS.
-
-The frozen DMG remains unchanged (SHA256 `d8e2bc73e22cc79919708b88539edf480b7c07f14fe67d1d9683c9d530f77851`). Integrate the frozen Build61 runtime/build inputs atop current public main, preserving all SEO/analytics work. Publish only reviewed source and public release materials, never the private development history or test data. Installed Stable47 and Preview60 remain untouched.
-
-Sparkle is a separate gate: cryptographic validation alone does not qualify actual updater installation/relaunch/recovery. If actual isolated Build47→61 verification cannot be completed safely, publish manual downloads while retaining the Build47 official feed.
+- **v0.8.1 / Build61 is PUBLIC / RELEASED**, for manual download and installation. [Release](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1) · [Website](https://notchmuse.com) · [Completion report](V081_PUBLIC_RELEASE_COMPLETION.md).
+- Annotated tag `v0.8.1` targets public source `8320271b4218431b66175bf40e203230ce8fa741`. The frozen DMG was built at `4c392efbd8da0c8abb0fdc70833575192e18d7d1`; 79 runtime/packaging inputs are byte-identical in the public release. [Provenance](../releases/v0.8.1/SOURCE_PROVENANCE.json).
+- Public DMG SHA256: `d8e2bc73e22cc79919708b88539edf480b7c07f14fe67d1d9683c9d530f77851` (6,802,591 bytes). The website's 12 EN/ZH pages and all36 download CTAs point to this asset; SEO, GA4 consent and CSP are preserved.
+- **Sparkle v0.8.1: NOT COMPLETED / not pushed.** Archive signature and tamper rejection passed, but real isolated Build47→61 installer/relaunch/recovery remains unverified. Official feed and its notes stay at Build47. Do not silently activate Build61.
+- Local Stable47 and regular Preview60, including preferences, remain unchanged. Stable47 full rollback and v0.8.0 public assets remain available. Only the two existing resident Apps are retained.
+- Developer ID/notarization and independent clean-Mac first-install tests are explicitly accepted limitations for this release. First-install/Gatekeeper/permission tests remain **NOT_TESTED**, not PASS. `PAUSED_BY_OWNER` has been explicitly lifted; do not reopen those waived gates or request an account switch.
+- Lyrics algorithm remains frozen. Product Owner-accepted APT./Rubia are regression samples, not repeated manual QA tasks. No paid provider, Gateway, membership or new lyric source is included.
 
 ```text
-Current status: v0.8.1 FINAL AUTHORIZATION / public release in progress.
-Completed: Frozen artifact hash; website reconciliation with current main; release source isolation.
-Pending confirmation: None for the authorized publication; no account or credential purchase.
-Key files: docs/project/PROJECT_HANDOFF.md; docs/releases/v0.8.1/; website/.
-Next step: Verify staged source/materials, publish GitHub assets and website, verify actual public bytes.
-Do not repeat: Lyrics algorithm work, accepted-song manual QA, source research, or waived installation gates.
+Current status: v0.8.1 / Build61 PUBLIC / WEBSITE DEPLOYED; manual update.
+Completed: Sanitized source/main/tag; frozen asset upload and public SHA256; EN/ZH materials;
+12 website pages /36 CTAs; desktop/mobile and consent checks; local App/rollback protection.
+Pending confirmation: None for this release. Sparkle installer E2E remains a separate uncompleted item.
+Key files: docs/project/V081_PUBLIC_RELEASE_COMPLETION.md; docs/releases/v0.8.1/;
+docs/reports/release/v081-public-completion/; website/.
+Next step: Stop release execution; collect actual user feedback. Retain all rollback artifacts.
+Do not repeat: Waived clean-Mac/signing gates, accepted-song manual QA, source/VPS research,
+algorithm changes, or activation of an unqualified Sparkle update.
 ```
 
 ## Earlier public checkpoints (historical)

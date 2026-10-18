@@ -1,0 +1,18 @@
+[
+  {
+    "page": "https://notchmuse.com/",
+    "placement": "hero",
+    "actual_download_url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg",
+    "bytes": 6802591,
+    "sha256": "d8e2bc73e22cc79919708b88539edf480b7c07f14fe67d1d9683c9d530f77851",
+    "google_requests_without_consent": 0
+  },
+  {
+    "page": "https://notchmuse.com/zh/",
+    "placement": "hero",
+    "actual_download_url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg",
+    "bytes": 6802591,
+    "sha256": "d8e2bc73e22cc79919708b88539edf480b7c07f14fe67d1d9683c9d530f77851",
+    "google_requests_without_consent": 0
+  }
+]

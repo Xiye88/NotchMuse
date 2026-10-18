@@ -1,0 +1,6 @@
+{
+  "length_matches" : true,
+  "signature_matches_installed_trust" : true,
+  "tampered_archive_rejected" : true,
+  "tampered_signature_rejected" : true
+}

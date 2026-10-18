@@ -1,0 +1,15 @@
+{
+  "stable": {
+    "build": "47",
+    "app_and_preferences_unchanged": true
+  },
+  "preview": {
+    "build": "60",
+    "app_and_preferences_unchanged": true
+  },
+  "stable47_full_rollback_verified": true,
+  "resident_apps": [
+    "NotchMuse Preview.app",
+    "NotchMuse.app"
+  ]
+}

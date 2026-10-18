@@ -1,0 +1,222 @@
+{
+  "pages": [
+    {
+      "url": "https://notchmuse.com/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/zh/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/spotify-lyrics-mac/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/zh/spotify-lyrics-mac/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/menu-bar-lyrics/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/zh/menu-bar-lyrics/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/apple-music-desktop-lyrics-mac/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/zh/apple-music-desktop-lyrics-mac/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/macbook-notch-lyrics/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/zh/macbook-notch-lyrics/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/lyricsx-alternative/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    },
+    {
+      "url": "https://notchmuse.com/zh/lyricsx-alternative/",
+      "download_ctas": [
+        {
+          "placement": "nav",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "hero",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        },
+        {
+          "placement": "footer",
+          "href": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+        }
+      ],
+      "desktop_mobile_no_overflow": true
+    }
+  ],
+  "google_requests_before_consent": 0,
+  "page_errors": []
+}

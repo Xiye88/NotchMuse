@@ -1,5 +1,24 @@
 # NotchMuse Current Handoff
 
+## Active release checkpoint — 2026-10-18
+
+Product Owner has explicitly lifted `PAUSED_BY_OWNER` and authorized the public **v0.8.1 / Build61** release, Git push/tag, GitHub assets and the necessary website deployment. Developer ID/notarization and independent clean-Mac testing are accepted limitations for this release, not pending approvals. No such test is reported as PASS.
+
+The frozen DMG remains unchanged (SHA256 `d8e2bc73e22cc79919708b88539edf480b7c07f14fe67d1d9683c9d530f77851`). Integrate the frozen Build61 runtime/build inputs atop current public main, preserving all SEO/analytics work. Publish only reviewed source and public release materials, never the private development history or test data. Installed Stable47 and Preview60 remain untouched.
+
+Sparkle is a separate gate: cryptographic validation alone does not qualify actual updater installation/relaunch/recovery. If actual isolated Build47→61 verification cannot be completed safely, publish manual downloads while retaining the Build47 official feed.
+
+```text
+Current status: v0.8.1 FINAL AUTHORIZATION / public release in progress.
+Completed: Frozen artifact hash; website reconciliation with current main; release source isolation.
+Pending confirmation: None for the authorized publication; no account or credential purchase.
+Key files: docs/project/PROJECT_HANDOFF.md; docs/releases/v0.8.1/; website/.
+Next step: Verify staged source/materials, publish GitHub assets and website, verify actual public bytes.
+Do not repeat: Lyrics algorithm work, accepted-song manual QA, source research, or waived installation gates.
+```
+
+## Earlier public checkpoints (historical)
+
 ## Current status
 
 NotchMuse **v0.8.0 Build 47 is released**. Its GitHub asset, official signed update feed, website download, and installed Stable app were verified. Media Showcase Round 2 is accepted, pushed, merged to main and deployed from source `8f4fb37`; it does not change the app or publish a new version.

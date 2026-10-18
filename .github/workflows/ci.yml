@@ -69,11 +69,11 @@ jobs:
           swiftc -parse-as-library MenuBarLyrics/Sources/MenuBarLyrics/App/LoginAtLaunchPolicy.swift MenuBarLyrics/Tests/LoginAtLaunchPolicyTests.swift -o "$RUNNER_TEMP/login-policy-tests"
           "$RUNNER_TEMP/login-policy-tests"
       - name: Build Release app, package DMG, and run packaged self-test
-        run: NOTCHMUSE_SKIP_BRIDGE_RUNTIME_TEST=1 ./scripts/build_release.sh 0.8.0 19
+        run: NOTCHMUSE_SKIP_BRIDGE_RUNTIME_TEST=1 ./scripts/build_release.sh 0.8.1 61
       - name: Verify release metadata and hashes
         run: |
-          grep -Fx "Version: 0.8.0" dist.noindex/BUILD-INFO.txt
-          grep -Fx "Build: 19" dist.noindex/BUILD-INFO.txt
+          grep -Fx "Version: 0.8.1" dist.noindex/BUILD-INFO.txt
+          grep -Fx "Build: 61" dist.noindex/BUILD-INFO.txt
           grep -Fx "Architecture: arm64" dist.noindex/BUILD-INFO.txt
           grep -Fx "Notarized: no" dist.noindex/BUILD-INFO.txt
           (cd dist.noindex && shasum -a 256 -c SHA256SUMS)

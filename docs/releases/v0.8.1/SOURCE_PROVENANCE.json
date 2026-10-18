@@ -1,0 +1,483 @@
+{
+  "version": "0.8.1",
+  "build": 61,
+  "original_build_commit": "4c392efbd8da0c8abb0fdc70833575192e18d7d1",
+  "dmg_sha256": "d8e2bc73e22cc79919708b88539edf480b7c07f14fe67d1d9683c9d530f77851",
+  "note": "The public v0.8.1 tag contains these byte-identical frozen runtime and packaging inputs. The original DMG is not rebuilt or modified. Symlink hashes describe link text.",
+  "files": [
+    {
+      "path": "MenuBarLyrics/Package.resolved",
+      "mode": "100644",
+      "git_blob_sha1": "d7e655554d19f0e916ced6865d47877e0cd378fe",
+      "sha256": "8aed20d924efbb4a9da7b6ac2029a8027b2b299a4fb4bf3f698a6a39ce6c7ffd"
+    },
+    {
+      "path": "MenuBarLyrics/Package.swift",
+      "mode": "100644",
+      "git_blob_sha1": "31abf99f448486e354ba351834f04163f01bd8f6",
+      "sha256": "48b3fb7aa101e2270527ba77435e9d3dfea806b7a7efb62fc6dcfede9770e2a8"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/AppIcon.icns",
+      "mode": "100644",
+      "git_blob_sha1": "6ac3d89f1f1017e1ef611778199def82aa21694a",
+      "sha256": "1dc9e3875533125f0eb4cd5626a837586648577bd929b67a9fb1b51f59346010"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/NotchMuse.entitlements",
+      "mode": "100644",
+      "git_blob_sha1": "50623405677e34ba3a6114c069529c94daa7e93d",
+      "sha256": "5a55add63b4e1c68336859ed5c165493920c13a10cfa5bc2c12ea33f6216bb60"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/SettingsPreviewWallpaper.png",
+      "mode": "100644",
+      "git_blob_sha1": "aafddb8f4750071a8583f2a9bc71ff7e2e5bfdce",
+      "sha256": "e29bfda3092aacf38774e21ad4cb4c060dee555eed13e83fb0db368ebaade9d2"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/WeChatSupport.jpg",
+      "mode": "100644",
+      "git_blob_sha1": "155ce0bb46d514b20239eeb64017faa308df5150",
+      "sha256": "fe4b61715eb702310c511dd256e646222cd94330acb75b5744b324422e2ca89f"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/en.lproj/InfoPlist.strings",
+      "mode": "100644",
+      "git_blob_sha1": "97d7d2a76f445c69c01f40abe9dba73766f746b7",
+      "sha256": "bdbba04fa79d2caee697663cbbef59d902abfc413050649919f022ce67c3395d"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/en.lproj/Localizable.strings",
+      "mode": "100644",
+      "git_blob_sha1": "17065d35af26885bb666a4479ef84453b7a77701",
+      "sha256": "a40e1259dccc33330ee1ba3ac4eb1ec300193c78ed004122fddeab9856fc431c"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/mediaremote-watchdog.sh",
+      "mode": "100755",
+      "git_blob_sha1": "0791726621806736782636c3abf8bf1b97e906cc",
+      "sha256": "1cec5b94050ea59f2b399b3849e45a6756afcfe95040a22d6d79bfc8d5f36192"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/zh-Hans.lproj/InfoPlist.strings",
+      "mode": "100644",
+      "git_blob_sha1": "3d6d625673f34060ec778a849e75469c5d50b9ef",
+      "sha256": "17252c64de869a9507f5979768c054e2752657fe788ecd5be2f1cb156be524d2"
+    },
+    {
+      "path": "MenuBarLyrics/Resources/zh-Hans.lproj/Localizable.strings",
+      "mode": "100644",
+      "git_blob_sha1": "34d25f91dc1693114272956830ed6264e9f40c41",
+      "sha256": "988c03a81a0bc1bbdd5dbeb2e93791ad58eacef90d5e99d5d851203dd62c9605"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/LyricsCore/LyricClock.swift",
+      "mode": "100644",
+      "git_blob_sha1": "299c757ff84cb4c88497cb2a0e20a7d0a59ea1cf",
+      "sha256": "e80c302a59b7a48997acf2316e3e994dbf4734d6305f668519d889f87060da37"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/LyricsCore/LyricParser.swift",
+      "mode": "100644",
+      "git_blob_sha1": "890f9c2a6830d24a86136f8d05d37bfa5342fdf8",
+      "sha256": "fef5008bed029b8db53f0a90cce20f6a7f254b382ee3abcc13c4fd31d5a9584a"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/App/AppAppearanceController.swift",
+      "mode": "100644",
+      "git_blob_sha1": "c4455bfdbdc19538e098ee55934b9418d3ff44c1",
+      "sha256": "8398b2a003f74815029883d04b11260ceafe2c29b2cffd30fa37766c88e9914b"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/App/AppDelegate.swift",
+      "mode": "100644",
+      "git_blob_sha1": "585d9cb2ec8924536497ff05b0931743cd11c01b",
+      "sha256": "21e89824701ad154b35114b6e7880a885314cfa6a3152b1614034d02bbb4ffeb"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/App/LoginAtLaunchPolicy.swift",
+      "mode": "100644",
+      "git_blob_sha1": "ce76b758592b50c0075edb2d495139ec036e43b2",
+      "sha256": "e8a239dfc4964e257c753fcaed02a4d9a59531303917caf759032f5081b69564"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/App/UpdateController.swift",
+      "mode": "100644",
+      "git_blob_sha1": "f6db510b63982f4ef6105e1a581b065aab17dfa7",
+      "sha256": "9b804251e88ab6be7e8ecfb1a0b67d1fa918d1918ce727eafa0fc96a1d51c3a8"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/AppLocalization.swift",
+      "mode": "100644",
+      "git_blob_sha1": "d49a76af75d1bf072d11b9db580785d27b605ef8",
+      "sha256": "c07f4b8d8855b9e034c4c4d5dac176e2e585f93e723ef52da7e55b1a2a437448"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/KugouLyricsSource.swift",
+      "mode": "100644",
+      "git_blob_sha1": "59fd59f80aa4e68e22f62d664b8eba3d243ba525",
+      "sha256": "ca501ffe13a75a81c272a5e60bdc232cc8ee0ad1d5c8ec80e7850324cd80d903"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/LRCLIBLyricsSource.swift",
+      "mode": "100644",
+      "git_blob_sha1": "764251b9354296192d5a58b6ecdb5320359ae71b",
+      "sha256": "02864e8384e558a9a3dc9dbea347048baec2ba5ff7818744baae717d48bac08c"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/LRCMuxLyricsSource.swift",
+      "mode": "100644",
+      "git_blob_sha1": "a4f5d40e9394356eb2b66cfeac8efaa54e39b6da",
+      "sha256": "732fca73630af47870ac189de0002790675c1d5123b6f375b8dadddde6a5702b"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/LyricsBackendShadow.swift",
+      "mode": "100644",
+      "git_blob_sha1": "6845437dbd01c21776587e6a78dc2272a78210ab",
+      "sha256": "d13ac8f0e1bb422f282e81871c6245032bc118015ab7e9b954cb74270e36f2e2"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/LyricsCandidate.swift",
+      "mode": "100644",
+      "git_blob_sha1": "8971838658f2e9894a2c24570c8d95e606d4b96b",
+      "sha256": "de65069720fd9c3b2d5f1436e3682fecece706823b4c59d27dc2c37c86c878d5"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/LyricsClient.swift",
+      "mode": "100644",
+      "git_blob_sha1": "9287f09b2297a2db8631f81b521f84e195271751",
+      "sha256": "632339175ae9a742e09b745fe3f4035acab34949f281d03007c149b92b9286ea"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/LyricsHTTP.swift",
+      "mode": "100644",
+      "git_blob_sha1": "012225e2c30943c17e7b08521313025caf2b0e23",
+      "sha256": "eb69707875b905bc4d1b0f6f7848304a6ffb1ceb912f14f7c82e56ca56902959"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/LyricsIssueReporter.swift",
+      "mode": "100644",
+      "git_blob_sha1": "70264562fb9b9e41b1942059ff3c41604643e7f1",
+      "sha256": "9a2635547b031690e5321f04b251496af1df97a4d82b6c6cb132084867a59d6b"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/LyricsSelection.swift",
+      "mode": "100644",
+      "git_blob_sha1": "35d89caeded8baa0bbc2c4f27c4773c3eee2d277",
+      "sha256": "1d9e6c4e869d77d015fe60c87f2497c0cc2ee021b8ed4f85f0d405862bb726fc"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/NetEaseExactIDFallback.swift",
+      "mode": "100644",
+      "git_blob_sha1": "1e4e680c9a380155b470fd1af78d672dd02b3887",
+      "sha256": "bb03f08b80ae5b147032915f4f9eff0544ae68f29d1533818860da7d75663cb3"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/NetEaseLyricsSource.swift",
+      "mode": "100644",
+      "git_blob_sha1": "f8afee130305b1daa55cf70e88b28ce21171866c",
+      "sha256": "ea87a2395ce9047bccc2a030663760152fcf4a5af999cb95c1126c904992c39e"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/QQMusicLyricsSource.swift",
+      "mode": "100644",
+      "git_blob_sha1": "0c88d3e620554fcf94897360f5b1490ebbd96e67",
+      "sha256": "78fa52a5bc42f16ff2e1196ba26abaf7077fc54f869301f09416c0c080853187"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/SodaMusicLyricsSource.swift",
+      "mode": "100644",
+      "git_blob_sha1": "ba841b7017c82f3e5a6676d2b36781562aa4fe47",
+      "sha256": "51ffae999554b4fa9cf779b1d5b648a434c2d019ecb91b171b4b78f60f3b52d5"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/SpotifyIdentityResolver.swift",
+      "mode": "100644",
+      "git_blob_sha1": "ecfc8d44527eab4eb9daafc658d5ec4a3a4e3fe6",
+      "sha256": "656c9639c75fe3d5ea1e107278c883bebd351baae99b855c8c5c76e058cec6a4"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Lyrics/TrackMatcher.swift",
+      "mode": "100644",
+      "git_blob_sha1": "f459c9d670375ae58abb03b6ee7a0944e3b5cf85",
+      "sha256": "94e431aef28c2fc57cf871ce33063bce6d74119196fc9eaa9b842590ebdda05c"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/PackagedSelfTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "c6e6102a55a19a4a7e9b1b54b1d779d89ff50ce3",
+      "sha256": "fda9350eec0d84bc2c8b7cc7a206c4e7cd1f15908f48d4401f19df7edd509417"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Players/AppleMusicAdapter.swift",
+      "mode": "100644",
+      "git_blob_sha1": "199e81816e0e99e75f367bf3171eaae4b87281d2",
+      "sha256": "df35e325e1d9b1fedf94aaa52002ed656896964edac8c3af8ed9208059f64136"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Players/MediaRemoteBridge.swift",
+      "mode": "100644",
+      "git_blob_sha1": "24d82bedf7fe81fe90ff950d0460d7ad6ea60309",
+      "sha256": "7be7812400db436ccf043bf35281a25126d6172d4b8fa03b1ee5108d1a739929"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Players/MediaRemotePlayerAdapter.swift",
+      "mode": "100644",
+      "git_blob_sha1": "3ddf6610cf899e81ff2dd6633e8cd45bc0fd486a",
+      "sha256": "86541d36fcc5d9dd62ab17fd1fc13d5b75d8f742c047e4667fdb89e370acc29a"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Players/MusicPlayerAdapter.swift",
+      "mode": "100644",
+      "git_blob_sha1": "bbef7163200529e6748af10877e0867349fde0cb",
+      "sha256": "50272f75cac223cef53fda37b130e3468ff8508f36d32c664ac12fdde06da95f"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Players/NetEaseEventConverger.swift",
+      "mode": "100644",
+      "git_blob_sha1": "0a54cb7b0f77067b3e88d1790b0e77fea56000b9",
+      "sha256": "7e1575066c7d4d9b350129586cf2b8be09f3735c5403c3b6581ac7d905e390d9"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Players/NetEaseMusicAdapter.swift",
+      "mode": "100644",
+      "git_blob_sha1": "a4c42077e7983668da4a5d3a156a0409432d1c29",
+      "sha256": "38975fb0282d86ec74700c7888fa8f60932beec7e2dbeb5486f0355d106af060"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Players/SpotifyReader.swift",
+      "mode": "100644",
+      "git_blob_sha1": "215ec2d4890a74db88c951e0bfba2f67264dd68b",
+      "sha256": "c70a33a99f4b8c69e515f9cab1756e7ecddd58b1a07b30c1c091954ec192e3f7"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/SelfTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "3bec1bc1116f42442633085d4d54ce237cd8b2eb",
+      "sha256": "61874098c2a7c5a027b77a8780e339dd61c4243f279b5a8c8e7b29c6012a5ab3"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Support/AccessibilityManager.swift",
+      "mode": "100644",
+      "git_blob_sha1": "72aa2486d7c85e7a68d997d4834d043dad16a78e",
+      "sha256": "2f095b419f895499e563c1c70fbe8e46629e70547ffced5cda603470b28fcd88"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/Support/DebugLog.swift",
+      "mode": "100644",
+      "git_blob_sha1": "68ccc46824d40f3534e17e79b8ddec57b3c7a44b",
+      "sha256": "db8734f537c0d0b257419f2fac5bb6698dec2ada7ccd3d64b33ff60c678a00f0"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/AppearanceSurfaceView.swift",
+      "mode": "100644",
+      "git_blob_sha1": "849182277341d7524399807d2997532023913137",
+      "sha256": "0e68a917664211fca4385c5bf2e7d09ca8a1b15c32c3eb494ed94a03025758c9"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/BrandStyle.swift",
+      "mode": "100644",
+      "git_blob_sha1": "ae21fe5408cf7d1f40c0c50be68811d979fe1ec2",
+      "sha256": "66aacdde5b68be66346817dd8d6064f314307fc34e3fddaafbfa473c035521b3"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/LyricHighlightLayout.swift",
+      "mode": "100644",
+      "git_blob_sha1": "88385c52d6a6f6dbcfb562e6fc6dee4ac43ddf13",
+      "sha256": "44665f779eed99235a048886777f1bd677d2ef17dbecc66c2ae349245f798ffd"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarController.swift",
+      "mode": "100644",
+      "git_blob_sha1": "5064253e9a905f7744542a3bd16f19c63323adee",
+      "sha256": "e190a602b1c97d446552306f41f1128ddbf8031c67d41739ad62ab51f53e5ba5"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/MenuBarSafety.swift",
+      "mode": "100644",
+      "git_blob_sha1": "3bfe98064256bb2522a7a26eae07e7ab938d83e0",
+      "sha256": "6d66bf06a26b5035073fdaa8a554b43019c26c179679758d7d6038d4732e92b5"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/OverlayLyricsWindow.swift",
+      "mode": "100644",
+      "git_blob_sha1": "e9024bb252216f80b4ca1881251e41278d8137e6",
+      "sha256": "8c23be78fd8c71e5a5b0dc4d973a325aa38c08cc85df79bc63018e2dffc6006a"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/ScrollState.swift",
+      "mode": "100644",
+      "git_blob_sha1": "ade5bbdb12cffc473621f9c6dabf84bf1b0d8568",
+      "sha256": "df98a648012dcc9a27f5daa89ecef37eb25fe0a2e6b4d50db3d04c9481e08a33"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/SettingsWindowController.swift",
+      "mode": "100644",
+      "git_blob_sha1": "4cc12b94b031aed4d7e510f35847b5f4fb0936a3",
+      "sha256": "1497e382f7821f0f35f4b04c2fd85223641107b12892523c0be5a5f3ea3c5721"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/UI/SupportWindowController.swift",
+      "mode": "100644",
+      "git_blob_sha1": "ca68c8d5d99ffa2bc4a7dbad38c1a32b54817aff",
+      "sha256": "ef256adbbe3285eabd302f010c7672e8199892a49c868a85cbed3c05e1453dcf"
+    },
+    {
+      "path": "MenuBarLyrics/Sources/MenuBarLyrics/main.swift",
+      "mode": "100644",
+      "git_blob_sha1": "4ed5e9065bf6fdc77cecd0e47006c0eb375dd1a1",
+      "sha256": "0372bbae0285ef10f717d2bf33a65bcb9fcfd33ee4a08bda670efdf9defd78a4"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/AppAppearanceTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "528e6e9e9eb012433d84abb6ec1d2bf2fcc5fa2a",
+      "sha256": "33f689fa9025d2e23e7ac43c2c85003d4a43a2e381d31de5b2dd20d9ca708b26"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/LoginAtLaunchPolicyTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "2942f1e8370da4547dc94c8897a4f0490483a7b3",
+      "sha256": "8f9f01bfacbe26329e32fcea66d1835b0eef6a0509b42db8405f89895c91ddda"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/LyricTimingTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "2208ba239d90aa24654ccb391265bd5bf5852838",
+      "sha256": "698333ee5bb6aa3c3d19e204329e92250df7b7ba6fe576a8e22e825b423fb1bb"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/LyricsDiagnosticsTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "9189fe72abda3a4f65533f1f1038818494c70ed0",
+      "sha256": "8b780eaf6c185b0a0c1f7d001f9519316011f592c4d3e5db2c0a38a07ea619e1"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/LyricsProviderCandidateTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "bba5f4ae757551b6df32e96089f871852fbdb86b",
+      "sha256": "649861932cfd0c8873a4f8b7ed3b19e4be00838135fcfb081b9b01a3f5f0a276"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/LyricsRecallRecoveryTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "66e5dfdfaff44a652a731dd6881c3429c089ca91",
+      "sha256": "9d4d6bf73dc17a2f8310a8b5fc34642faf0832346b2560acc32c386b6f43857c"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/LyricsSelectionTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "24151bd51bbc0ea3b7f06e8bd531a611b6ff7f79",
+      "sha256": "84d6a9cf6a4601666b8e36f21b015ccc8c63b535f46f13f49755a1ef568c6482"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/MenuBarLyricsTests/LyricsCoreTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "f5b6ac16a78e0e940b6b53be08a25954eb8f6350",
+      "sha256": "81917cb7d35045be4371dad42dbb8301f67c56f1e05c43de52a25741065b4ac7"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/NetEaseExactIDTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "5c451fe8aeeb70d9de56d7d3942d4e9b06574070",
+      "sha256": "dad9c81296491bdfd1da86495440e7912cdaad8860831f52791e4f63917899c1"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/SpotifyIdentityBridgeTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "2e3201b3a2591a4b9a391b97fabd7c701a071b42",
+      "sha256": "2ddc5f1bf72455322d6e7ffd4f4cfbf5450a40f4c2d744cb5b9b08561512a08b"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/SpotifyIdentityRecoveryTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "ff94a8c03b1b0394b2aaf1251b43901ab1d788d7",
+      "sha256": "718db7a07dddd863e0bbdf57c245952c71f3375c7bd6e75881572a2944e3fc9a"
+    },
+    {
+      "path": "MenuBarLyrics/Tests/SpotifyIdentityTests.swift",
+      "mode": "100644",
+      "git_blob_sha1": "9b97bec48db2d5b3c331535795dbd8198e93850d",
+      "sha256": "1bcecaeac4fe881e84bd79a2fcedc1e336c791beca6dddd1a12d6f5f2c6e0088"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/LICENSE",
+      "mode": "100644",
+      "git_blob_sha1": "e70a4bdf39b326f5703845e747cb777fbc44b355",
+      "sha256": "a489c16a6be195584fa0b35e28fca54abc8492eb0cc05d851dd24f522f4900a2"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/MediaRemoteAdapter.framework/MediaRemoteAdapter",
+      "mode": "120000",
+      "git_blob_sha1": "65b3513b7f9fff7f007f1bb09525d9f64d750cf7",
+      "sha256": "547b42f24081337c6863803c050f41978782b95c960c31d2504b2ec34fdb7385"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/MediaRemoteAdapter.framework/Resources",
+      "mode": "120000",
+      "git_blob_sha1": "953ee36f3bb709faf58a351e0b33c353e337c0a2",
+      "sha256": "59991b51b8ee15b59f07ec45942957a4ce90494257766964f5df60b7c7998e42"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/MediaRemoteAdapter.framework/Versions/A/MediaRemoteAdapter",
+      "mode": "100755",
+      "git_blob_sha1": "5dacf5d8665f809ff462d5bf149627363e6bbf4e",
+      "sha256": "e5241c9d92cc5e79fb4d67d9ff029e0781e49b23cbea84018378e5ea888b50b5"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/MediaRemoteAdapter.framework/Versions/A/Resources/Info.plist",
+      "mode": "100644",
+      "git_blob_sha1": "bf2b7b112d1ca0947fca7bca04c33e74ef4d92a8",
+      "sha256": "cf7c9699302a8ddacf24465443eb7a0153e1c347bf23c3c0895af41c85368af8"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/MediaRemoteAdapter.framework/Versions/A/_CodeSignature/CodeResources",
+      "mode": "100644",
+      "git_blob_sha1": "16ea63b36911061858d3e007a774c9147c20dd1b",
+      "sha256": "5ddd46b76ea756abd4e084c1f21566a39b4ff890bd21dce9b6f11ace69563305"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/MediaRemoteAdapter.framework/Versions/Current",
+      "mode": "120000",
+      "git_blob_sha1": "8c7e5a667f1b771847fe88c01c3de34413a1b220",
+      "sha256": "559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/MediaRemoteAdapterTestClient",
+      "mode": "100755",
+      "git_blob_sha1": "cb0a634de41e25f70ad057ea427f7bb76f0b5fba",
+      "sha256": "a9953e9db2cd3022f3392ee618a8bb76ede264358d34e5e3dc8844a1be1049bd"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/VERSION.json",
+      "mode": "100644",
+      "git_blob_sha1": "8f34c47a4f7b25b8bfc6bdc9c65027cfc15c2c1c",
+      "sha256": "726f26bc60a60d03dc0dd72755383c18a96f7d286fa3cbab3ea2b7274a602bea"
+    },
+    {
+      "path": "MenuBarLyrics/Vendor/MediaRemoteBridge/mediaremote-adapter.pl",
+      "mode": "100755",
+      "git_blob_sha1": "fddb9835136176ab0cb73dad8107a0788c5d8299",
+      "sha256": "fd6ce4dfd6cbe1578e0effeaf8c38468299a596d055975a1a978c9a6df8e9760"
+    },
+    {
+      "path": "scripts/build_app.sh",
+      "mode": "100755",
+      "git_blob_sha1": "e13ab6762babd76d02cb7475ee71d2a49c711de9",
+      "sha256": "4357dc5a03615314806d119b2114f931e877369160cce8c70e82bc4888fe5722"
+    },
+    {
+      "path": "scripts/build_dmg.sh",
+      "mode": "100755",
+      "git_blob_sha1": "2661fcbc9ac37bfbede14e90088ea9dd24bc0e5a",
+      "sha256": "9db011ef25376ce7ab2098d1f372e347327330593c94bf317eaf9e6c6231e474"
+    },
+    {
+      "path": "scripts/build_release.sh",
+      "mode": "100755",
+      "git_blob_sha1": "992b8a10aca887348fd1c3abb4ced38334d2cd16",
+      "sha256": "1670e4b57aa29d369fb1d3d14ed25a21c8318dd4419f897d95cc3612e1b99533"
+    }
+  ]
+}

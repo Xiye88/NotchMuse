@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | 简体中文</p>
 
-<h1 align="center">NotchMuse v0.8.0</h1>
+<h1 align="center">NotchMuse v0.8.1</h1>
 
 <p align="center"><img src="website/assets/media/notch-poster.webp" alt="NotchMuse 在 macOS 上实际显示的浮层歌词" width="1080"></p>
 
@@ -8,7 +8,7 @@
 
 <p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐</p>
 
-<p align="center"><a href="https://notchmuse.com"><strong>官网下载</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases"><strong>GitHub Release</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>报告问题</strong></a></p>
+<p align="center"><a href="https://notchmuse.com"><strong>官网下载</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1"><strong>GitHub Release</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>报告问题</strong></a></p>
 
 ## 菜单栏歌词
 
@@ -62,13 +62,17 @@ Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐。可以�
 
 NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Developer ID 签名与公证。因此 macOS 首次打开时可能出现安全提示。这属于分发签名状态，与版本状态无关。
 
-如果系统拦截，请打开 **系统设置 → 隐私与安全性 → 仍要打开**，按提示认证后再次启动。安装和权限问题见[使用支持](docs/community/SUPPORT.md)。目前不支持 Intel Mac。
+如果系统拦截，请打开 **系统设置 → 隐私与安全性 → 仍要打开**，按提示认证后再次启动。安装和权限问题见[使用支持](docs/community/SUPPORT.md)。不要通过关闭 Gatekeeper 或移除 quarantine 强制运行。见 [Apple“仍要打开”指引](https://support.apple.com/zh-cn/102445)。本次仅为 ad-hoc 签名，未使用 Developer ID，也未通过公证；尚未完成独立干净 Mac 首次安装验证。目前不支持 Intel Mac。
 
-## 自动更新
+## 更新至 v0.8.1
 
-从 v0.8.0 开始，在 **设置 → 通用 → 检查更新…** 中发现、下载并安装签名更新。关闭自动检查不会禁用手动检查。Sparkle 在安装和重启前验证更新包的 EdDSA 签名。
+**本次需要手动安装。** 下载 [v0.8.1 / Build61](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg)，对照 [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/SHA256SUMS) 校验，退出旧正式版，再替换“应用程序”中的 NotchMuse。需要回滚时请将旧 App 和偏好设置一并备份；[v0.8.0](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0) 仍然保留。不要用正式包覆盖 Preview。
 
-如果你正在使用 Beta 3 或更早版本，请手动下载安装一次 v0.8.0。旧版本不包含更新器。
+Sparkle 正式 feed 暂时保留 Build47，应用内“检查更新”**不会提供 Build61**。本包尚未完成隔离环境中的真实更新安装及失败恢复验证，仅有签名校验不足以启用自动更新。
+
+### 本次改进
+
+Spotify 身份补全和联合歌手识别、录音与版本保护、请求恢复及缓存防护、网易云原生身份验证，以及明确区分“检索中 / 超时 / 无歌词”的界面状态。无需 Spotify Premium 或用户 API Key。歌词仍取决于第三方覆盖率。见[中文发布说明](docs/releases/v0.8.1/RELEASE_NOTES.zh-CN.md)。
 
 ## 常见问题
 

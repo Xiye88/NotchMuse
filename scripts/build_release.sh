@@ -5,9 +5,9 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="${1:-${NOTCHMUSE_VERSION:-0.8.0}}"
 BUILD_NUMBER="${2:-${NOTCHMUSE_BUILD_NUMBER:-19}}"
 SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
-DIST="$ROOT/dist.noindex"
-APP="$ROOT/dist.noindex/NotchMuse.app"
-DMG="$ROOT/dist.noindex/NotchMuse.dmg"
+DIST="${NOTCHMUSE_DIST_DIR:-$ROOT/dist.noindex}"
+APP="$DIST/NotchMuse.app"
+DMG="$DIST/NotchMuse.dmg"
 
 [[ "$VERSION" =~ '^[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9]+)*$' ]] || {
   echo "Invalid version: $VERSION" >&2
@@ -23,6 +23,7 @@ rm -f "$DMG" "$DIST/SHA256SUMS" "$DIST/BUILD-INFO.txt"
 swift package --package-path "$ROOT/MenuBarLyrics" clean
 
 NOTCHMUSE_DIST_DIR="$DIST" \
+NOTCHMUSE_PREVIEW=0 \
 NOTCHMUSE_VERSION="$VERSION" \
 NOTCHMUSE_BUILD_NUMBER="$BUILD_NUMBER" \
 NOTCHMUSE_SIGN_IDENTITY="$SIGN_IDENTITY" \

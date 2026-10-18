@@ -98,9 +98,12 @@ enum SelfTests {
     private static func testStatusFeedback() {
         check(PlayerFeedback.notRunning.menuTitle(for: .spotify, language: .english) == "Spotify: Not Running", "explains when Spotify is not running")
         check(PlayerFeedback.connected.menuTitle(for: .appleMusic, language: .english) == "Apple Music: Connected", "shows the selected player state")
-        check(LyricsFeedback.searching.displayText == L10n.text("Changing song..."), "explains song changes")
+        check(LyricsFeedback.searching.displayText == L10n.text("Searching lyrics..."), "explains that lyrics are still being searched")
         check(LyricsFeedback.notFound.displayText == L10n.text("No lyrics found"), "explains missing lyrics")
+        check(LyricsFeedback.timeout.displayText == L10n.text("Lyrics search timed out"), "explains lyric search timeouts")
         check(LyricsFeedback.networkFailure.displayText == L10n.text("Lyrics network unavailable"), "explains lyric network failures")
+        check(LyricsClient.shouldSurfaceTimeout(candidates: [], statuses: ["LRCLIB": "timeout"]), "surfaces an all-timeout search distinctly")
+        check(!LyricsClient.shouldSurfaceTimeout(candidates: [], statuses: ["LRCLIB": "empty", "QQ": "timeout"]), "keeps a definitive empty result as No Lyrics")
     }
 
     private static func testLocalization() {
@@ -183,6 +186,10 @@ enum SelfTests {
         check(seeked.observationIdentity == nowPlaying.observationIdentity, "keeps track identity stable across a position jump")
         check(LyricClock.currentLine(at: seeked.playbackPosition, in: seekLines) == "after seek", "resynchronizes lyrics to a large position jump")
         check(!MenuBarController.shouldUpdateTrack(current: nowPlaying.spotifyTrack, currentIdentity: nowPlaying.observationIdentity, next: seeked.spotifyTrack, nextIdentity: seeked.observationIdentity, force: false), "does not request lyrics again after a position jump")
+        check(MenuBarController.shouldUpdateTrack(current: spotify, currentIdentity: "same", next: spotify, nextIdentity: "same", force: false, resumed: true, playerSource: .netEaseMusic, identityRecoveryEnabled: true), "reauthorizes NetEase Exact-ID when identity recovery resumes the same song")
+        check(!MenuBarController.shouldUpdateTrack(current: spotify, currentIdentity: "same", next: spotify, nextIdentity: "same", force: false, resumed: true, playerSource: .netEaseMusic, identityRecoveryEnabled: false), "preserves legacy same-song resume behavior without identity capability")
+        check(!MenuBarController.shouldUpdateTrack(current: spotify, currentIdentity: "same", next: spotify, nextIdentity: "same", force: false, resumed: false, playerSource: .netEaseMusic, identityRecoveryEnabled: true), "does not reauthorize NetEase on every playing poll")
+        check(!MenuBarController.shouldUpdateTrack(current: spotify, currentIdentity: "same", next: spotify, nextIdentity: "same", force: false, resumed: true, playerSource: .spotify, identityRecoveryEnabled: true), "does not requery Spotify solely for resume")
         check(TrackVersionHint.detect(title: "Oliver", album: "Album") == nil, "does not infer Live from a partial word")
         check(TrackVersionHint.detect(title: "Song (feat. Guest)", album: "Deluxe") == [.deluxe, .featuredArtist], "detects bounded version markers")
         check(MusicPlayerSnapshot.playing(nowPlaying).currentTrack == nowPlaying, "exposes the current adapter track")
@@ -679,10 +686,10 @@ enum SelfTests {
         do {
             _ = try LyricsHTTP.validate(data: Data(), response: response)
             check(false, "rejects a 429 lyrics response")
-        } catch let error as URLError {
-            check(error.code == .badServerResponse, "reports a 429 lyrics response as badServerResponse")
+        } catch let error as LyricsHTTP.StatusError {
+            check(error.code == 429 && !LyricsHTTP.isTransient(error), "preserves HTTP 429 and does not retry rate limits")
         } catch {
-            check(false, "reports a 429 lyrics response as badServerResponse")
+            check(false, "reports HTTP rate limits with typed status")
         }
     }
 
@@ -849,6 +856,13 @@ enum SelfTests {
         defaults.set(false, forKey: AppPreferences.showMenuBarIconKey)
         check(!AppPreferences.showInDock(in: defaults) && !AppPreferences.showMenuBarIcon(in: defaults),
               "explicit visibility choices persist independently")
+        AppPreferences.restorePreviewMenuBarIfNeeded(in: defaults, isPreview: false)
+        check(!AppPreferences.showMenuBarIcon(in: defaults), "Preview repair never changes Stable visibility")
+        AppPreferences.restorePreviewMenuBarIfNeeded(in: defaults, isPreview: true)
+        check(AppPreferences.showMenuBarIcon(in: defaults), "Preview upgrade restores a hidden control icon")
+        defaults.set(false, forKey: AppPreferences.showMenuBarIconKey)
+        AppPreferences.restorePreviewMenuBarIfNeeded(in: defaults, isPreview: true)
+        check(!AppPreferences.showMenuBarIcon(in: defaults), "Preview migration preserves later explicit visibility choices")
         let color = NSColor(calibratedRed: 0.2, green: 0.4, blue: 0.6, alpha: 0.8)
         AppPreferences.setColor(color, forKey: AppPreferences.customLyricsColorKey, in: defaults)
         check(AppPreferences.color(forKey: AppPreferences.customLyricsColorKey, in: defaults) == color, "persists and restores a custom lyric color")
@@ -888,8 +902,8 @@ enum SelfTests {
 
         let detailFixture = Data(#"{"lyric":{"content":"[1000,500]<0,500,0>简单点\n[2000,500]<0,500,0>说话","type":"krc"},"track":{"id":"6778775241108752385","name":"演员","duration":261277,"artists":[{"name":"薛之谦"}]}}"#.utf8)
         check((try! source.parseDetail(detailFixture, for: track)) == [
-            LyricLine(time: 1, text: "简单点"),
-            LyricLine(time: 2, text: "说话")
+            LyricLine(time: 1, text: "简单点", endTime: 1.5, segments: [LyricSegment(time: 1, endTime: 1.5, text: "简单点")]),
+            LyricLine(time: 2, text: "说话", endTime: 2.5, segments: [LyricSegment(time: 2, endTime: 2.5, text: "说话")])
         ], "parses matched Soda Music KRC lyrics")
     }
 
@@ -1015,7 +1029,9 @@ enum SelfTests {
             ("Song (feat. Guest)", "Artist", "Other Album", 202, "[00:01.00]Second")
         ])
         let tiedTrack = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
-        check((try! source.parse(tied, for: tiedTrack)).isEmpty, "rejects distinct equal-scoring LRCLIB candidates")
+        check((try! source.parse(tied, for: tiedTrack)) == [LyricLine(time: 1, text: "First")], "ranks the exact requested album before ineligible releases")
+        let unboundTied = SpotifyTrack(name: "Song", artist: "Artist", album: "", duration: 200)
+        check((try! source.parse(tied, for: unboundTied)).isEmpty, "still rejects equal-scoring LRCLIB recordings without album binding")
 
         let duplicate = lrclibJSON([
             ("Hello!", "ADELE", "25", 200, "[00:01.00]Hello from the other side"),
@@ -1042,7 +1058,7 @@ enum SelfTests {
         let track = SpotifyTrack(name: "Song", artist: "Artist", album: "Album", duration: 200)
         let data = lrcMuxJSON(title: "Song", artist: "Artist", album: "Album", duration: 200, isrc: "USABC1234567", texts: ["Hello", "World"])
         let lines = try! LRCMuxLyricsSource().parse(data, for: track)
-        check(lines == [LyricLine(time: 1, text: "Hello"), LyricLine(time: 2, text: "World")], "parses official lrcmux track/meta/lines JSON")
+        check(lines == [LyricLine(time: 1, text: "Hello", endTime: 2), LyricLine(time: 2, text: "World", endTime: 3)], "parses official lrcmux track/meta/lines JSON")
 
         let wrongTrack = SpotifyTrack(name: "Different", artist: "Artist", album: "Album", duration: 200)
         check((try! LRCMuxLyricsSource().parse(data, for: wrongTrack)).isEmpty, "reuses track matching for lrcmux metadata")
@@ -1211,10 +1227,9 @@ enum SelfTests {
 
         let encrypted = "a3JjMTjbGsglTQAlwOOCgBP9uCbNoutBagJEl2A0I5z41FTPAPHgqs2PfysRGjnCJwDTNZGBQSLYlGQSt5BRePV0t+kYV7+E9w8oR7sMLx0="
         let krc = try! source.decryptKRC(encrypted)
-        check(source.parseKRC(krc) == [
-            LyricLine(time: 1, text: "你好"),
-            LyricLine(time: 3, text: "世界")
-        ], "decrypts and parses Kugou KRC line lyrics")
+        let parsedKRC = source.parseKRC(krc)
+        check(parsedKRC.map(\.text) == ["你好", "世界"] && parsedKRC.map(\.time) == [1, 3], "decrypts and parses Kugou KRC text/starts")
+        check(parsedKRC.allSatisfy { $0.endTime != nil && !$0.segments.isEmpty }, "preserves Kugou KRC ends/segments")
         check((try? source.decryptKRC("not base64")) == nil, "rejects malformed Kugou KRC content")
         check((try? source.decryptKRC(Data("nopepayload".utf8).base64EncodedString())) == nil, "rejects a malformed Kugou KRC header")
         check((try? source.decryptKRC(Data("krc1truncated".utf8).base64EncodedString())) == nil, "rejects truncated Kugou KRC data")
@@ -1291,10 +1306,10 @@ enum SelfTests {
                 await cancellation.waitUntilStarted()
                 return first
             }
-        ], for: track)
+        ], for: track, window: 0.05)
         check(raced == first, "returns the first non-empty raced result")
         let wasCancelled = await cancellation.wasCancelled()
-        check(wasCancelled, "cancels pending lyric sources after finding lyrics")
+        check(wasCancelled, "cancels pending lyric sources at collection deadline")
 
         let offlineClient = LyricsClient(sources: [
             { _ in throw URLError(.notConnectedToInternet) },

@@ -1,6 +1,6 @@
 # NotchMuse Support
 
-This page covers installation and troubleshooting for NotchMuse v0.8.0, before opening an issue.
+This page covers installation and troubleshooting for NotchMuse v0.8.1, before opening an issue.
 
 ## Install and Open
 
@@ -14,11 +14,11 @@ Try this first:
 4. Choose `Open`.
 5. Confirm `Open` again.
 
-If macOS still blocks it, open `System Settings > Privacy & Security` and choose `Open Anyway` for NotchMuse.
+If macOS still blocks it, open `System Settings > Privacy & Security` and choose `Open Anyway` for NotchMuse. Follow [Apple’s official guidance](https://support.apple.com/en-us/102445) only if you trust the official download and its checksum. Do not disable Gatekeeper or remove quarantine. Stop if macOS reports malware or a damaged app. Independent clean-Mac first-install testing has not been completed for this release.
 
 ## Updates
 
-Starting with v0.8.0, use Settings > General > Check for Updates to install signed updates. Manual checks remain available when automatic checks are off. Beta 3 or older builds need a one-time manual installation of v0.8.0.
+v0.8.1 / Build61 is a manual-install update. Download the official DMG and SHA256SUMS from the [v0.8.1 Release](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1), verify the hash, quit the old Stable and replace it in Applications. Back up its App and preferences together for rollback. Keep Preview separate. The signed Sparkle feed remains at Build47; in-app checks do not offer Build61.
 
 ## Music player Automation permission
 

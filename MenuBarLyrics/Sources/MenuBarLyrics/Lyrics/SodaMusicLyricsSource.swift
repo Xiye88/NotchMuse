@@ -15,14 +15,18 @@ struct SodaMusicLyricsSource {
     }
 
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
-        let (searchData, searchResponse) = try await URLSession.shared.data(for: searchRequest(for: track))
+        try await candidate(for: track)?.document.normalizedLines ?? []
+    }
+
+    func candidate(for track: SpotifyTrack) async throws -> LyricsCandidate? {
+        let (searchData, searchResponse) = try await LyricsHTTP.data(for: searchRequest(for: track))
         guard let trackID = try matchingTrackID(
             in: LyricsHTTP.validate(data: searchData, response: searchResponse),
             for: track
-        ) else { return [] }
+        ) else { return nil }
 
-        let (detailData, detailResponse) = try await URLSession.shared.data(for: detailRequest(trackID: trackID))
-        return try parseDetail(LyricsHTTP.validate(data: detailData, response: detailResponse), for: track)
+        let (detailData, detailResponse) = try await LyricsHTTP.data(for: detailRequest(trackID: trackID))
+        return try parseCandidate(LyricsHTTP.validate(data: detailData, response: detailResponse), for: track, expectedTrackID: trackID)
     }
 
     func searchRequest(for track: SpotifyTrack) -> URLRequest {
@@ -65,17 +69,28 @@ struct SodaMusicLyricsSource {
     }
 
     func parseDetail(_ data: Data, for track: SpotifyTrack) throws -> [LyricLine] {
+        try parseCandidate(data, for: track)?.document.normalizedLines ?? []
+    }
+
+    func parseCandidate(_ data: Data, for track: SpotifyTrack, expectedTrackID: String? = nil) throws -> LyricsCandidate? {
         let response = try JSONDecoder().decode(SodaDetailResponse.self, from: data)
+        guard expectedTrackID == nil || response.track.id == expectedTrackID else { return nil }
         let candidate = TrackMatcher.Candidate(
             title: response.track.name,
             artists: response.track.artists.map(\.name),
             durationMs: response.track.duration
         )
         guard TrackMatcher.bestMatchIndex(for: track, candidates: [candidate], provider: "Soda") == 0,
-              let lyric = response.lyric else { return [] }
-        return lyric.type.lowercased() == "krc"
+              let lyric = response.lyric else { return nil }
+        let lines = lyric.type.lowercased() == "krc"
             ? KugouLyricsSource().parseKRC(lyric.content)
             : LyricParser.parse(lyric.content)
+        guard !lines.isEmpty else { return nil }
+        return LyricsCandidate(document: TimedLyricDocument(lines: lines, metadata: LyricsMetadata(provider: "Soda", platformTrackID: response.track.id)),
+            provider: "Soda", sourcePlatform: "soda", sourceTrackID: response.track.id,
+            sourceTitle: response.track.name, sourceArtist: response.track.artists.map(\.name).joined(separator: ", "), sourceAlbum: response.track.album?.name,
+            sourceDuration: Double(response.track.duration) / 1000, sourceISRC: nil,
+            matcherScore: TrackMatcher.score(track, candidate: candidate))
     }
 
     private var commonQueryItems: [URLQueryItem] {
@@ -129,7 +144,10 @@ private struct SodaTrack: Decodable {
     let name: String
     let duration: Int
     let artists: [SodaArtist]
+    let album: SodaAlbum?
 }
+
+private struct SodaAlbum: Decodable { let name: String? }
 
 private struct SodaArtist: Decodable { let name: String }
 private struct SodaLyric: Decodable {

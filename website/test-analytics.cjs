@@ -52,7 +52,7 @@ const key = 'notchmuse.analytics-consent';
       assert.equal(googleRequests.length, 1, 'Repeated consent and duplicate script do not reload the tag');
       assert.equal(await configs(), 1);
       for (const placement of ['nav', 'hero', 'footer']) await download(placement);
-      assert.deepEqual(await events(), ['nav', 'hero', 'footer'].map(placement => ({ name: 'download_click', params: { app_version: '0.8.0', placement, page_language: language } })));
+      assert.deepEqual(await events(), ['nav', 'hero', 'footer'].map(placement => ({ name: 'download_click', params: { app_version: '0.8.1', placement, page_language: language } })));
       assert.equal(downloads, 5, 'Consent never prevents the native download action');
       await page.locator('.site-header a[href="#faq"]').click();
       assert.equal((await events()).length, 3, 'Ordinary navigation does not send download events');

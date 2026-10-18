@@ -5,6 +5,14 @@ enum AppAppearance: String, CaseIterable {
     case light = "Light"
     case dark = "Dark"
 
+    func toggled(for effectiveAppearance: NSAppearance) -> AppAppearance {
+        switch self {
+        case .light: .dark
+        case .dark: .light
+        case .system: effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? .light : .dark
+        }
+    }
+
     var appearance: NSAppearance? {
         switch self {
         case .system: nil

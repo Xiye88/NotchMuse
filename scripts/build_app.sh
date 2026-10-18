@@ -31,6 +31,25 @@ SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
 DEFAULT_FEEDBACK_EMAIL="ztongxue3@gmail.com"
 FEEDBACK_EMAIL="${FEEDBACK_EMAIL:-$DEFAULT_FEEDBACK_EMAIL}"
 
+# Private Preview shadow metadata endpoint; keep credentials and public hosts out of the bundle.
+if [[ -n "${NOTCHMUSE_SHADOW_URL:-}" ]]; then
+  /usr/bin/python3 - "$PREVIEW" <<'PYSHADOW'
+import os, sys
+from urllib.parse import urlsplit
+value = os.environ["NOTCHMUSE_SHADOW_URL"]
+try:
+    url = urlsplit(value)
+    valid = (sys.argv[1] == "1" and url.scheme == "http" and
+             url.hostname in {"127.0.0.1", "localhost"} and url.port is not None and
+             1 <= url.port <= 65535 and url.path == "/v1/shadow/resolve" and
+             url.username is None and url.password is None and not url.query and not url.fragment)
+except ValueError:
+    valid = False
+if not valid:
+    raise SystemExit("Shadow endpoint must be a private loopback Preview endpoint")
+PYSHADOW
+fi
+
 verify_hash() {
   local path="$1"
   local expected="$2"
@@ -105,6 +124,8 @@ cat > "$CONTENTS/Info.plist" <<PLIST
   <string>$FEEDBACK_EMAIL</string>
   <key>NotchMusePreview</key>
   <$([[ "$PREVIEW" == "1" ]] && echo true || echo false)/>
+  <key>NotchMuseLyricsCapabilitiesVersion</key>
+  <integer>1</integer>
   <key>SUFeedURL</key>
   <string>$FEED_URL</string>
   <key>SUPublicEDKey</key>
@@ -135,6 +156,17 @@ cat > "$CONTENTS/Info.plist" <<PLIST
 </dict>
 </plist>
 PLIST
+
+if [[ -n "${NOTCHMUSE_SHADOW_URL:-}" ]]; then
+  /usr/bin/python3 - "$CONTENTS/Info.plist" <<'PYSHADOWINFO'
+import os, plistlib, sys
+with open(sys.argv[1], "rb") as file:
+    info = plistlib.load(file)
+info["NotchMuseShadowURL"] = os.environ["NOTCHMUSE_SHADOW_URL"]
+with open(sys.argv[1], "wb") as file:
+    plistlib.dump(info, file)
+PYSHADOWINFO
+fi
 
 plutil -lint "$CONTENTS/Info.plist" >/dev/null
 if [[ "$SIGN_IDENTITY" == "-" ]]; then

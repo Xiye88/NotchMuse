@@ -3,37 +3,54 @@ import LyricsCore
 
 struct QQMusicLyricsSource {
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
-        try await withThrowingTaskGroup(of: [LyricLine].self) { group in
-            group.addTask { try await fetchLyrics(for: track) }
+        try await candidate(for: track)?.document.normalizedLines ?? []
+    }
+
+    func candidate(for track: SpotifyTrack) async throws -> LyricsCandidate? {
+        try await withThrowingTaskGroup(of: LyricsCandidate?.self) { group in
+            group.addTask { try await fetchCandidate(for: track) }
             group.addTask {
                 try await Task.sleep(for: .seconds(8))
                 throw URLError(.timedOut)
             }
             defer { group.cancelAll() }
-            return try await group.next() ?? []
+            return try await group.next() ?? nil
         }
     }
 
-    private func fetchLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
+    private func fetchCandidate(for track: SpotifyTrack) async throws -> LyricsCandidate? {
         var lastError: Error?
-        var songMID: String?
+        var song: QQSong?
         for query in searchQueries(for: track) {
+            try Task.checkCancellation()
             do {
                 if let match = try await search(query, for: track) {
-                    songMID = match
+                    song = match
                     break
                 }
+            } catch is CancellationError {
+                throw CancellationError()
             } catch {
                 lastError = error
             }
         }
-        guard let songMID else {
+        guard let song else {
             if let lastError { throw lastError }
-            return []
+            return nil
         }
 
-        let (data, response) = try await URLSession.shared.data(for: lyricRequest(songMID: songMID))
-        return try parseLyrics(LyricsHTTP.validate(data: data, response: response))
+        let (data, response) = try await LyricsHTTP.data(for: lyricRequest(songMID: song.mid))
+        let lines = try parseLyrics(LyricsHTTP.validate(data: data, response: response))
+        return makeCandidate(song: song, lines: lines, for: track)
+    }
+
+    func makeCandidate(song: QQSong, lines: [LyricLine], for track: SpotifyTrack) -> LyricsCandidate? {
+        guard !lines.isEmpty else { return nil }
+        let match = TrackMatcher.Candidate(title: song.title, artists: song.singer.map(\.name), durationMs: song.interval * 1000)
+        return LyricsCandidate(document: TimedLyricDocument(lines: lines, metadata: LyricsMetadata(provider: "QQ", platformTrackID: song.mid)),
+            provider: "QQ", sourcePlatform: "qq", sourceTrackID: song.mid,
+            sourceTitle: song.title, sourceArtist: song.singer.map(\.name).joined(separator: ", "), sourceAlbum: song.album?.name,
+            sourceDuration: Double(song.interval), sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: match))
     }
 
     func searchQueries(for track: SpotifyTrack) -> [String] {
@@ -66,12 +83,22 @@ struct QQMusicLyricsSource {
     }
 
     func matchingSongMID(in data: Data, for track: SpotifyTrack) throws -> String? {
+        try matchingSong(in: data, for: track)?.mid
+    }
+
+    func matchingSong(in data: Data, for track: SpotifyTrack) throws -> QQSong? {
         let songs = try JSONDecoder().decode(SearchResponse.self, from: data).request.data.body.song.list
-        let candidates = songs.map {
+        let bound = songs.filter {
+            LyricsSelection.albumMatches($0.album?.name, track: track) &&
+            TrackMatcher.identityRejectReason(track, title: $0.title, artist: $0.singer.map(\.name).joined(separator: ", "), album: $0.album?.name) == nil &&
+            abs(Double($0.interval) - track.duration) <= 2
+        }
+        let pool = bound.isEmpty ? songs : bound
+        let candidates = pool.map {
             TrackMatcher.Candidate(title: $0.title, artists: $0.singer.map(\.name), durationMs: $0.interval * 1000)
         }
         guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "QQ") else { return nil }
-        return songs[index].mid
+        return pool[index]
     }
 
     func lyricRequest(songMID: String) -> URLRequest {
@@ -148,6 +175,10 @@ struct QQMusicLyricsSource {
     }
 
     func validatedSongMID(in data: Data, for track: SpotifyTrack) throws -> String? {
+        try validatedSong(in: data, for: track)?.mid
+    }
+
+    private func validatedSong(in data: Data, for track: SpotifyTrack) throws -> QQSong? {
         let callback = "getOneSongInfoCallback"
         let response = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
         guard response.hasPrefix("\(callback)("), let close = response.lastIndex(of: ")") else { return nil }
@@ -157,7 +188,7 @@ struct QQMusicLyricsSource {
             TrackMatcher.Candidate(title: $0.title, artists: $0.singer.map(\.name), durationMs: $0.interval * 1000)
         }
         guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: candidates, provider: "QQ") else { return nil }
-        return songs[index].mid
+        return songs[index]
     }
 
     func parseLyrics(_ data: Data) throws -> [LyricLine] {
@@ -173,24 +204,28 @@ struct QQMusicLyricsSource {
         return LyricParser.parse(lrc)
     }
 
-    private func search(_ query: String, for track: SpotifyTrack) async throws -> String? {
+    private func search(_ query: String, for track: SpotifyTrack) async throws -> QQSong? {
         do {
-            let (data, response) = try await URLSession.shared.data(for: searchRequest(query: query))
-            if let songMID = try matchingSongMID(in: LyricsHTTP.validate(data: data, response: response), for: track) {
-                return songMID
+            let (data, response) = try await LyricsHTTP.data(for: searchRequest(query: query))
+            if let song = try matchingSong(in: LyricsHTTP.validate(data: data, response: response), for: track) {
+                return song
             }
+        } catch is CancellationError {
+            throw CancellationError()
         } catch {
             // Fall through to Smartbox when the primary QQ endpoint fails.
         }
+        try Task.checkCancellation()
         return try await searchSmartbox(query, for: track)
     }
 
-    private func searchSmartbox(_ query: String, for track: SpotifyTrack) async throws -> String? {
-        let (data, response) = try await URLSession.shared.data(for: smartboxRequest(query: query))
+    private func searchSmartbox(_ query: String, for track: SpotifyTrack) async throws -> QQSong? {
+        let (data, response) = try await LyricsHTTP.data(for: smartboxRequest(query: query))
         guard let songMID = try matchingSmartboxSongMID(in: LyricsHTTP.validate(data: data, response: response), for: track) else { return nil }
 
-        let (details, detailsResponse) = try await URLSession.shared.data(for: songDetailsRequest(songMID: songMID))
-        return try validatedSongMID(in: LyricsHTTP.validate(data: details, response: detailsResponse), for: track)
+        let (details, detailsResponse) = try await LyricsHTTP.data(for: songDetailsRequest(songMID: songMID))
+        guard let selected = try validatedSong(in: LyricsHTTP.validate(data: details, response: detailsResponse), for: track), selected.mid == songMID else { return nil }
+        return selected
     }
 }
 
@@ -218,14 +253,17 @@ private struct SearchSongs: Decodable {
     let list: [QQSong]
 }
 
-private struct QQSong: Decodable {
+struct QQSong: Decodable {
     let mid: String
     let title: String
     let singer: [QQSinger]
     let interval: Int
+    let album: QQAlbum?
 }
 
-private struct QQSinger: Decodable {
+struct QQAlbum: Decodable { let name: String? }
+
+struct QQSinger: Decodable {
     let name: String
 }
 
@@ -253,12 +291,5 @@ private struct SmartboxSong: Decodable {
 }
 
 private struct SongDetailsResponse: Decodable {
-    let data: [SongDetailsSong]
-}
-
-private struct SongDetailsSong: Decodable {
-    let mid: String
-    let title: String
-    let singer: [QQSinger]
-    let interval: Int
+    let data: [QQSong]
 }

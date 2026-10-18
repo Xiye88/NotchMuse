@@ -36,6 +36,12 @@ enum AppPreferences {
         return defaults.object(forKey: hasShownFirstLaunchGuideKey) != nil
     }
 
+    static func restorePreviewMenuBarIfNeeded(in defaults: UserDefaults, isPreview: Bool) {
+        guard isPreview, !defaults.bool(forKey: "PreviewMenuBarInitialized") else { return }
+        defaults.set(true, forKey: showMenuBarIconKey)
+        defaults.set(true, forKey: "PreviewMenuBarInitialized")
+    }
+
     static var showMenuBarIcon: Bool { showMenuBarIcon(in: .standard) }
 
     static func showMenuBarIcon(in defaults: UserDefaults) -> Bool {
@@ -76,7 +82,8 @@ enum AppPreferences {
 
     static var position: LyricsPosition {
         let stored = UserDefaults.standard.string(forKey: positionKey)
-            ?? UserDefaults(suiteName: "local.menubarlyrics.app")?.string(forKey: positionKey)
+            ?? (Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+                ? nil : UserDefaults(suiteName: "local.menubarlyrics.app")?.string(forKey: positionKey))
         if stored == "Both" {
             UserDefaults.standard.set(LyricsPosition.right.rawValue, forKey: positionKey)
         }
@@ -301,6 +308,7 @@ final class SettingsWindowController: NSWindowController {
     private var selectedPage: SettingsPage = .display
     private weak var settingsScrollView: SettingsScrollView?
     private var sidebarButtons: [SettingsPage: NSButton] = [:]
+    private let sidebarQuickActions = SettingsSidebarQuickActionsView()
     private var supportWindow: SupportWindowController?
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
@@ -321,7 +329,9 @@ final class SettingsWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "NotchMuse"
+        window.title = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+            ? "NotchMuse Preview · Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development")"
+            : "NotchMuse"
         window.minSize = NSSize(width: 900, height: 610)
         window.titlebarAppearsTransparent = true
         window.isReleasedWhenClosed = false
@@ -617,6 +627,11 @@ final class SettingsWindowController: NSWindowController {
         sidebarFooter.onSupport = { [weak self] in self?.showSupport() }
         sidebarFooter.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebarFooter)
+        sidebarQuickActions.onThemeToggle = { [weak self] appearance in
+            self?.selectAppAppearance(AppAppearanceController.selection.toggled(for: appearance))
+        }
+        sidebarQuickActions.translatesAutoresizingMaskIntoConstraints = false
+        sidebarPanel.addSubview(sidebarQuickActions)
 
         let previewHeader = NSStackView(views: [sectionTitle(L10n.text("Live Preview")), previewModeControl])
         previewHeader.orientation = .horizontal
@@ -663,8 +678,12 @@ final class SettingsWindowController: NSWindowController {
             sidebar.topAnchor.constraint(equalTo: sidebarPanel.topAnchor, constant: 24),
             sidebarFooter.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 14),
             sidebarFooter.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -14),
-            sidebarFooter.bottomAnchor.constraint(equalTo: sidebarPanel.bottomAnchor, constant: -14),
+            sidebarFooter.bottomAnchor.constraint(equalTo: sidebarQuickActions.topAnchor, constant: -10),
             sidebarFooter.heightAnchor.constraint(equalToConstant: 172),
+            sidebarQuickActions.leadingAnchor.constraint(equalTo: sidebarFooter.leadingAnchor),
+            sidebarQuickActions.trailingAnchor.constraint(equalTo: sidebarFooter.trailingAnchor),
+            sidebarQuickActions.bottomAnchor.constraint(equalTo: sidebarPanel.bottomAnchor, constant: -14),
+            sidebarQuickActions.heightAnchor.constraint(equalToConstant: 36),
             scrollView.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: 18),
             scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
@@ -1015,6 +1034,7 @@ final class SettingsWindowController: NSWindowController {
         launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
         launchAtLoginSwitch.isEnabled = true
         appAppearanceControl.selectedSegment = AppAppearance.allCases.firstIndex(of: AppAppearanceController.selection)!
+        sidebarQuickActions.updateThemeButton()
         showInDockSwitch.state = AppPreferences.showInDock ? .on : .off
         showMenuBarIconSwitch.state = AppPreferences.showMenuBarIcon ? .on : .off
         automaticUpdateSwitch.state = UpdateController.shared.automaticallyChecksForUpdates ? .on : .off
@@ -1396,7 +1416,13 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func appAppearanceChanged() {
         guard AppAppearance.allCases.indices.contains(appAppearanceControl.selectedSegment) else { return }
-        AppAppearanceController.select(AppAppearance.allCases[appAppearanceControl.selectedSegment])
+        selectAppAppearance(AppAppearance.allCases[appAppearanceControl.selectedSegment])
+    }
+
+    private func selectAppAppearance(_ appearance: AppAppearance) {
+        AppAppearanceController.select(appearance)
+        appAppearanceControl.selectedSegment = AppAppearance.allCases.firstIndex(of: appearance)!
+        sidebarQuickActions.updateThemeButton()
         updateSidebarSelection()
     }
 
@@ -1542,6 +1568,64 @@ private final class SettingsSidebarFooterView: AppearanceSurfaceView {
             color.setFill()
             wave.fill()
         }
+    }
+}
+
+private final class SettingsSidebarQuickActionsView: AppearanceSurfaceView {
+    var onThemeToggle: ((NSAppearance) -> Void)?
+    private let themeButton = NSButton()
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        themeButton.target = self
+        themeButton.action = #selector(toggleTheme)
+        themeButton.bezelStyle = .rounded
+        themeButton.imagePosition = .imageOnly
+        themeButton.setAccessibilityIdentifier("settings.themeQuickAction")
+        themeButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(themeButton)
+
+        let githubButton = NSButton(title: L10n.text("GitHub Star"), target: self, action: #selector(openGitHub))
+        githubButton.bezelStyle = .rounded
+        githubButton.image = NSImage(systemSymbolName: "star", accessibilityDescription: nil)
+        githubButton.imagePosition = .imageLeading
+        githubButton.toolTip = L10n.text("Open NotchMuse on GitHub to leave a star.")
+        githubButton.setAccessibilityIdentifier("settings.githubQuickAction")
+        githubButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(githubButton)
+
+        NSLayoutConstraint.activate([
+            themeButton.leadingAnchor.constraint(equalTo: leadingAnchor),
+            themeButton.topAnchor.constraint(equalTo: topAnchor),
+            themeButton.bottomAnchor.constraint(equalTo: bottomAnchor),
+            themeButton.widthAnchor.constraint(equalToConstant: 36),
+            githubButton.leadingAnchor.constraint(equalTo: themeButton.trailingAnchor, constant: 10),
+            githubButton.trailingAnchor.constraint(equalTo: trailingAnchor),
+            githubButton.topAnchor.constraint(equalTo: topAnchor),
+            githubButton.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+        updateThemeButton()
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateThemeButton()
+    }
+
+    func updateThemeButton() {
+        let isDark = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+        let action = L10n.text(isDark ? "Switch to Light Mode" : "Switch to Dark Mode")
+        themeButton.image = NSImage(systemSymbolName: isDark ? "moon.fill" : "sun.max.fill", accessibilityDescription: nil)
+        themeButton.toolTip = action
+        themeButton.setAccessibilityLabel(action)
+    }
+
+    @objc private func toggleTheme() { onThemeToggle?(effectiveAppearance) }
+
+    @objc private func openGitHub() {
+        NSWorkspace.shared.open(URL(string: "https://github.com/Xiye88/NotchMuse")!)
     }
 }
 

@@ -1,4 +1,5 @@
 import Foundation
+import LyricsCore
 
 enum LyricsIssueReporter {
     static var recipient: String {
@@ -9,6 +10,8 @@ enum LyricsIssueReporter {
         recipient: String = recipient,
         track: NowPlayingTrack?,
         provider: String?,
+        timing: TimedLyricDocument? = nil,
+        selection: String? = nil,
         appVersion: String,
         language: AppLanguage = AppPreferences.language
     ) -> URL? {
@@ -16,6 +19,13 @@ enum LyricsIssueReporter {
         var components = URLComponents()
         components.scheme = "mailto"
         components.path = recipient
+        let diagnostics = timing.map { document in
+            """
+            Timing: \(document.timingFidelity.rawValue); word lines: \(document.lines.filter { !$0.segments.isEmpty }.count); end lines: \(document.lines.filter { $0.endTime != nil }.count)
+            Source track ID: \(document.metadata.platformTrackID ?? "unavailable")
+            First lyric timestamp: \(document.lines.first?.time ?? -1) s
+            """
+        } ?? ""
         let body = """
         \(L10n.text("Issue type: No lyrics / Wrong lyrics / Wrong song matched / Timing issue / Other", language: language))
 
@@ -25,6 +35,7 @@ enum LyricsIssueReporter {
         \(L10n.text("Player source", language: language)): \(track?.playerSource.rawValue ?? L10n.text("Unknown", language: language))
         \(L10n.text("Lyrics provider", language: language)): \(provider ?? L10n.text("Unknown", language: language))
         \(L10n.text("NotchMuse version", language: language)): \(appVersion)
+        \(selection ?? diagnostics)
 
         \(L10n.text("What happened?", language: language))
 

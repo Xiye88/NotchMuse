@@ -1,5 +1,6 @@
 import AppKit
 import QuartzCore
+import LyricsCore
 
 enum DisplayMode: String, CaseIterable {
     case statusBar = "Status Bar"
@@ -432,6 +433,7 @@ final class OverlayLyricsWindow: NSObject {
         var song = ""
         var artist = ""
         var progress: CGFloat = 0
+        var highlight: LyricHighlight?
         var font = NSFont.systemFont(ofSize: 13, weight: .medium)
         var style = NotchStyle.lyricOnly
         var colors = BrandStyle.gradientColors
@@ -505,12 +507,14 @@ final class OverlayLyricsWindow: NSObject {
             }
 
             if progress > 0 {
-                NSBezierPath(rect: NSRect(
-                    x: lyricTextRect.minX,
-                    y: lyricTextRect.minY,
-                    width: lyricTextRect.width * min(progress, 1),
-                    height: lyricTextRect.height
-                )).addClip()
+                let clip = NSBezierPath()
+                if lyricWraps, let highlight {
+                    for rect in LyricHighlightLayout.clipRects(highlight, text: lyric, font: font, rect: lyricTextRect) { clip.appendRect(rect) }
+                } else {
+                    clip.appendRect(NSRect(x: lyricTextRect.minX, y: lyricTextRect.minY,
+                                           width: lyricTextRect.width * min(progress, 1), height: lyricTextRect.height))
+                }
+                clip.addClip()
                 if usesGradient {
                     drawGradientLyric(colors: activeColors)
                 } else {
@@ -630,6 +634,7 @@ final class OverlayLyricsWindow: NSObject {
             song: String,
             artist: String,
             progress: CGFloat,
+            highlight: LyricHighlight?,
             style requestedStyle: NotchStyle,
             placement: NotchPlacement,
             fontSize: CGFloat,
@@ -688,6 +693,7 @@ final class OverlayLyricsWindow: NSObject {
             view.song = song
             view.artist = artist
             view.progress = progress
+            view.highlight = highlight
             view.font = font
             view.style = style
             view.vertical = placement.isVertical
@@ -759,6 +765,7 @@ final class OverlayLyricsWindow: NSObject {
     func show(
         text: String,
         progress: CGFloat,
+        highlight: LyricHighlight? = nil,
         mode: DisplayMode,
         position: LyricsPosition,
         notchStyle: NotchStyle,
@@ -811,7 +818,12 @@ final class OverlayLyricsWindow: NSObject {
                 lyric: text,
                 song: song,
                 artist: artist,
-                progress: progress,
+                progress: highlight.map { value in
+                    notchPlacement.isVertical
+                        ? value.progress(in: text) { CGFloat($0.count) }
+                        : LyricHighlightLayout.progress(value, text: text, font: .systemFont(ofSize: fontSize, weight: .medium))
+                } ?? progress,
+                highlight: highlight,
                 style: effectiveStyle,
                 placement: notchPlacement,
                 fontSize: fontSize,
@@ -852,6 +864,7 @@ final class OverlayLyricsWindow: NSObject {
         )
         let statusText = "♪ \(text)"
         let font = NSFont.menuBarFont(ofSize: fontSize)
+        let progress = highlight.map { LyricHighlightLayout.progress($0, text: text, font: font, prefix: "♪ ") } ?? progress
         let textWidth = ceil((statusText as NSString).size(withAttributes: [.font: font]).width)
 
         switch position {

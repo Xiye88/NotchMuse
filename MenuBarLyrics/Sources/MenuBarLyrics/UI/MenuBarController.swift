@@ -1,4 +1,5 @@
 import AppKit
+import OSLog
 import Foundation
 import LyricsCore
 
@@ -23,6 +24,7 @@ enum LyricsFeedback {
     case searching
     case available
     case notFound
+    case timeout
     case networkFailure
 
     func menuTitle(for source: PlayerSource) -> String {
@@ -31,6 +33,7 @@ enum LyricsFeedback {
         case .searching: return L10n.text("Lyrics: Searching...")
         case .available: return L10n.text("Lyrics: Available")
         case .notFound: return L10n.text("Lyrics: Not Found")
+        case .timeout: return L10n.text("Lyrics: Search Timed Out")
         case .networkFailure: return L10n.text("Lyrics: Network Error")
         }
     }
@@ -38,9 +41,10 @@ enum LyricsFeedback {
     var displayText: String {
         switch self {
         case .waiting: return L10n.text("Waiting for Spotify")
-        case .searching: return L10n.text("Changing song...")
+        case .searching: return L10n.text("Searching lyrics...")
         case .available: return L10n.text("Lyrics available")
         case .notFound: return L10n.text("No lyrics found")
+        case .timeout: return L10n.text("Lyrics search timed out")
         case .networkFailure: return L10n.text("Lyrics network unavailable")
         }
     }
@@ -49,8 +53,9 @@ enum LyricsFeedback {
 @MainActor
 final class MenuBarController: NSObject {
     private let statusItem: NSStatusItem = {
-        let autosaveName = "NotchMuseStatusItem"
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        let isPreview = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+        let autosaveName = isPreview ? "\(Bundle.main.bundleIdentifier ?? "app.notchmuse.mac.preview").StatusItem" : "NotchMuseStatusItem"
+        let item = NSStatusBar.system.statusItem(withLength: isPreview ? NSStatusItem.variableLength : NSStatusItem.squareLength)
         item.autosaveName = autosaveName
         item.isVisible = true
         return item
@@ -78,6 +83,7 @@ final class MenuBarController: NSObject {
     private var currentLines: [LyricLine] = []
     private var latestPlayerPosition: TimeInterval?
     private var latestPlayerUptime: TimeInterval?
+    private var displayHighlight: LyricHighlight?
     private var displayProgress: CGFloat = 0
     private var displayIdentity: Int?
     private var scroll = ScrollState()
@@ -85,6 +91,7 @@ final class MenuBarController: NSObject {
     private var scrollTimer: Timer?
     private var progressTimer: Timer?
     private var pollTask: Task<Void, Never>?
+    private var lyricsTask: Task<Void, Never>?
     private var pollGeneration = 0
 #if DEBUG
     private var lyricsRequestCount = 0
@@ -114,6 +121,9 @@ final class MenuBarController: NSObject {
     }
 
     func stop() {
+        lyricsTask?.cancel()
+        lyricsTask = nil
+        lyricsClient.clearDiagnostics()
         pollTimer?.invalidate()
         pollTimer = nil
         scrollTimer?.invalidate()
@@ -130,7 +140,12 @@ final class MenuBarController: NSObject {
     private func setupButton() {
         statusItem.button?.toolTip = "NotchMuse"
         statusItem.button?.image = BrandStyle.noteImage()
-        statusItem.button?.imagePosition = .imageOnly
+        let isPreview = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+        statusItem.button?.title = isPreview ? "P" : ""
+        statusItem.button?.imagePosition = isPreview ? .imageLeading : .imageOnly
+        if isPreview {
+            statusItem.button?.toolTip = "NotchMuse Preview · Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development")"
+        }
     }
 
     private func setupMenu() {
@@ -159,6 +174,12 @@ final class MenuBarController: NSObject {
         if UpdateController.shared.isAvailable {
             menu.addItem(NSMenuItem(title: L10n.text("Check for Updates…"), action: #selector(checkForUpdates), keyEquivalent: ""))
         }
+        if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true {
+            menu.addItem(NSMenuItem(title: AppPreferences.language == .simplifiedChinese ? "复制歌词诊断" : "Copy Lyrics Diagnostics", action: #selector(copyLyricsDiagnostics), keyEquivalent: ""))
+        }
+        if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true {
+            menu.addItem(NSMenuItem(title: AppPreferences.language == .simplifiedChinese ? "歌词匹配详情…" : "Lyrics Selection Details…", action: #selector(showLyricsSelection), keyEquivalent: ""))
+        }
         menu.addItem(NSMenuItem(title: L10n.text("Report Lyrics Issue…"), action: #selector(reportLyricsIssue), keyEquivalent: ""))
         menu.insertItem(NSMenuItem(title: L10n.text("Open NotchMuse"), action: #selector(showSettings), keyEquivalent: ","), at: 0)
         menu.insertItem(NSMenuItem.separator(), at: 1)
@@ -167,6 +188,11 @@ final class MenuBarController: NSObject {
 
         for item in menu.items {
             item.target = self
+        }
+        if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true {
+            let label = NSMenuItem(title: "NotchMuse Preview · Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development")", action: nil, keyEquivalent: "")
+            label.isEnabled = false
+            menu.insertItem(label, at: 0)
         }
         statusItem.menu = menu
     }
@@ -228,6 +254,7 @@ final class MenuBarController: NSObject {
             let text = LyricClock.moment(at: position, in: currentLines)?.text ?? unpausedFallbackText()
             setDisplay(L10n.format("Paused: %@", text))
         case let .playing(nowPlaying):
+            let resumed = isPlaybackPaused
             isPlayerStopped = false
             isPlaybackPaused = false
             let track = nowPlaying.spotifyTrack
@@ -237,12 +264,15 @@ final class MenuBarController: NSObject {
             latestPlayerUptime = ProcessInfo.processInfo.systemUptime
             setPlayerFeedback(.connected)
             setTrackInfo(track)
-            await updateTrackIfNeeded(track, identity: nowPlaying.observationIdentity, force: forceLyricsRefresh)
+            await updateTrackIfNeeded(track, identity: nowPlaying.observationIdentity, force: forceLyricsRefresh, resumed: resumed)
             updatePlayingDisplay()
         }
     }
 
     private func handlePlayerStopped(display: String) {
+        lyricsTask?.cancel()
+        lyricsTask = nil
+        lyricsClient.clearDiagnostics("Player: \(player.source.rawValue)\nTrack title: unavailable\nResolution Status: no current playback selection")
         stopProgressTimer()
         latestPlayerUptime = nil
         isPlayerStopped = true
@@ -260,8 +290,10 @@ final class MenuBarController: NSObject {
         setDisplay(L10n.format("Paused: %@", text))
     }
 
-    private func updateTrackIfNeeded(_ track: SpotifyTrack, identity: String, force: Bool) async {
-        guard Self.shouldUpdateTrack(current: currentTrack, currentIdentity: currentTrackIdentity, next: track, nextIdentity: identity, force: force) else { return }
+    private func updateTrackIfNeeded(_ track: SpotifyTrack, identity: String, force: Bool, resumed: Bool = false) async {
+        guard Self.shouldUpdateTrack(current: currentTrack, currentIdentity: currentTrackIdentity, next: track, nextIdentity: identity, force: force,
+                                    resumed: resumed, playerSource: currentPlayerTrack?.playerSource,
+                                    identityRecoveryEnabled: LyricsRuntimeCapabilities.current) else { return }
 #if DEBUG
         lyricsRequestCount += 1
         print("[Lyrics] request=\(lyricsRequestCount) source=\(player.source.rawValue) track=\(currentPlayerTrack?.nativeTrackID ?? "-") title=\(track.name) artist=\(track.artist)")
@@ -272,17 +304,56 @@ final class MenuBarController: NSObject {
         setLyricsFeedback(.searching)
         setDisplay(LyricsFeedback.searching.displayText)
 
-        do {
-            let lines = try await lyricsClient.syncedLyrics(for: track, bypassCache: force)
-            guard !Task.isCancelled, currentTrack == track, currentTrackIdentity == identity else { return }
-            currentLines = lines
-            let feedback: LyricsFeedback = lines.isEmpty ? .notFound : .available
-            setLyricsFeedback(feedback)
-            setDisplay(lines.isEmpty ? feedback.displayText : track.name)
-        } catch {
-            guard !Task.isCancelled, currentTrack == track, currentTrackIdentity == identity else { return }
-            setLyricsFeedback(.networkFailure)
-            setDisplay(LyricsFeedback.networkFailure.displayText)
+        lyricsTask?.cancel()
+        let requestingSource = player.source
+        let expectedIdentifier = currentPlayerTrack?.nativeTrackID
+        let isrc = currentPlayerTrack?.isrc
+        let sourceName = currentPlayerTrack?.playerSource.rawValue
+        let isNetEase = currentPlayerTrack?.playerSource == .netEaseMusic
+        lyricsTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                let exactSource: LyricsClient.CandidateSource?
+                if isNetEase {
+                    exactSource = { @Sendable requestedTrack in
+                        try await NetEaseExactIDFallback().candidate(for: requestedTrack, expectedIdentifier: expectedIdentifier)
+                    }
+                } else {
+                    exactSource = nil
+                }
+                let lines = try await lyricsClient.syncedLyrics(for: track, bypassCache: force, exactSource: exactSource,
+                                                                playerSource: sourceName,
+                                                                nativeTrackID: expectedIdentifier, isrc: isrc)
+                guard !Task.isCancelled, currentTrack == track, currentTrackIdentity == identity else { return }
+                // Re-read identity before showing a timeline, including switches between polls.
+                let confirmed = await player.snapshot()
+                guard !Task.isCancelled, currentTrack == track, currentTrackIdentity == identity else { return }
+                guard requestingSource == player.source,
+                      confirmed.currentTrack?.observationIdentity == identity else {
+                    currentTrack = nil
+                    currentTrackIdentity = nil
+                    lyricsClient.clearDiagnostics("Track title: unavailable\nResolution Status: playback changed during collection; previous report cleared")
+                    DebugLog.lyricsDiagnostic("selection.apply rejected=playback_changed_during_collection")
+                    return
+                }
+                currentLines = lines
+                if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true,
+                   lyricsClient.selectedProvider == "NetEaseExactID (Preview)", !lines.isEmpty {
+                    Logger(subsystem: "app.notchmuse.mac.preview", category: "ExactID").notice("fallback_applied provider=NetEaseExactID line_count=\(lines.count) feedback=available")
+                }
+                let feedback: LyricsFeedback = lines.isEmpty ? .notFound : .available
+                setLyricsFeedback(feedback)
+                setDisplay(lines.isEmpty ? feedback.displayText : track.name)
+                updatePlayingDisplay()
+            } catch let error as LyricsClientError where error == .timeout {
+                guard !Task.isCancelled, currentTrack == track, currentTrackIdentity == identity else { return }
+                setLyricsFeedback(.timeout)
+                setDisplay(LyricsFeedback.timeout.displayText)
+            } catch {
+                guard !Task.isCancelled, currentTrack == track, currentTrackIdentity == identity else { return }
+                setLyricsFeedback(.networkFailure)
+                setDisplay(LyricsFeedback.networkFailure.displayText)
+            }
         }
     }
 
@@ -291,9 +362,13 @@ final class MenuBarController: NSObject {
         currentIdentity: String?,
         next: SpotifyTrack,
         nextIdentity: String,
-        force: Bool
+        force: Bool,
+        resumed: Bool = false,
+        playerSource: PlayerSource? = nil,
+        identityRecoveryEnabled: Bool = false
     ) -> Bool {
         force || current != next || currentIdentity != nextIdentity
+            || (resumed && identityRecoveryEnabled && playerSource == .netEaseMusic)
     }
 
     static func shouldHideLyrics(
@@ -316,12 +391,13 @@ final class MenuBarController: NSObject {
         return fallbackText()
     }
 
-    private func setDisplay(_ text: String, progress: CGFloat = 0, identity: Int? = nil) {
+    private func setDisplay(_ text: String, progress: CGFloat = 0, identity: Int? = nil, highlight: LyricHighlight? = nil) {
         if text != displaySource || identity != displayIdentity {
             scroll.reset()
         }
         displaySource = text
         displayProgress = progress
+        displayHighlight = highlight
         displayIdentity = identity
         updateDisplay()
     }
@@ -339,6 +415,7 @@ final class MenuBarController: NSObject {
         let overflows = overlay.show(
             text: displaySource.isEmpty ? " " : displaySource,
             progress: displayProgress,
+            highlight: displayHighlight,
             mode: displayMode,
             position: position,
             notchStyle: notchStyle,
@@ -423,7 +500,7 @@ final class MenuBarController: NSObject {
             return
         }
         if let moment = LyricClock.moment(at: position, in: currentLines) {
-            setDisplay(moment.text, progress: moment.progress, identity: moment.identity)
+            setDisplay(moment.text, progress: moment.progress, identity: moment.identity, highlight: moment.highlight)
         } else {
             setDisplay(fallbackText())
         }
@@ -490,7 +567,10 @@ final class MenuBarController: NSObject {
             pollTask?.cancel()
             pollTask = nil
             pollGeneration += 1
+            lyricsTask?.cancel()
+            lyricsTask = nil
             player.shutdown()
+            lyricsClient.clearDiagnostics()
             player = Self.adapter(for: selectedSource)
             latestPlayerUptime = nil
             setPlayerFeedback(.checking)
@@ -523,11 +603,52 @@ final class MenuBarController: NSObject {
         startPoll(forceLyricsRefresh: true)
     }
 
+    @objc func showLyricsSelection() {
+        guard Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true else { return }
+        let alert = NSAlert()
+        alert.messageText = AppPreferences.language == .simplifiedChinese ? "歌词匹配详情" : "Lyrics Selection Details"
+        let previewStatus = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+            ? "NotchMuse Preview · Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development")\nMenu Bar Icon: \(statusItem.isVisible ? "visible" : "hidden") / \(statusItem.button?.title ?? "")\n\n"
+            : ""
+        let isPreview = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+        alert.informativeText = previewStatus
+        if isPreview {
+            let scrollView = NSScrollView(frame: NSRect(x: 0, y: 0, width: 560, height: 340))
+            scrollView.hasVerticalScroller = true
+            scrollView.borderType = .bezelBorder
+            let textView = NSTextView(frame: scrollView.bounds)
+            textView.isEditable = false
+            textView.isSelectable = true
+            textView.isVerticallyResizable = true
+            textView.maxSize = NSSize(width: 560, height: CGFloat.greatestFiniteMagnitude)
+            textView.isHorizontallyResizable = false
+            textView.autoresizingMask = [.width]
+            textView.textContainer?.widthTracksTextView = true
+            textView.font = .monospacedSystemFont(ofSize: 11, weight: .regular)
+            textView.string = lyricsClient.diagnosticsText
+            scrollView.documentView = textView
+            alert.accessoryView = scrollView
+            alert.addButton(withTitle: AppPreferences.language == .simplifiedChinese ? "关闭" : "Close")
+            alert.addButton(withTitle: AppPreferences.language == .simplifiedChinese ? "复制歌词诊断" : "Copy Lyrics Diagnostics")
+        }
+        if alert.runModal() == .alertSecondButtonReturn, isPreview { copyLyricsDiagnostics() }
+    }
+
+    @objc func copyLyricsDiagnostics() {
+        guard Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true else { return }
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development"
+        let report = "NotchMuse Preview · Build \(build)\n\n" + lyricsClient.diagnosticsText
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(report, forType: .string)
+    }
+
     @objc private func reportLyricsIssue() {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Development"
         guard let url = LyricsIssueReporter.mailtoURL(
             track: currentPlayerTrack,
             provider: lyricsClient.selectedProvider,
+            timing: lyricsClient.selectedDocument,
+            selection: lyricsClient.selectionDiagnostics,
             appVersion: version
         ) else {
             let alert = NSAlert()

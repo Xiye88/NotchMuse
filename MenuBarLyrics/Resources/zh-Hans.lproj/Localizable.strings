@@ -11,11 +11,13 @@
 "Lyrics: Searching..." = "歌词：搜索中…";
 "Lyrics: Available" = "歌词：已找到";
 "Lyrics: Not Found" = "歌词：未找到";
+"Lyrics: Search Timed Out" = "歌词：搜索超时";
 "Lyrics: Network Error" = "歌词：网络错误";
 "Waiting for Spotify" = "等待 Spotify";
-"Changing song..." = "正在切换歌曲…";
+"Searching lyrics..." = "正在搜索歌词…";
 "Lyrics available" = "已找到歌词";
 "No lyrics found" = "未找到歌词";
+"Lyrics search timed out" = "歌词搜索超时，请稍后刷新";
 "Lyrics network unavailable" = "歌词网络暂不可用";
 "Checking Spotify..." = "正在检查 Spotify…";
 "Spotify is not running" = "Spotify 未运行";
@@ -175,6 +177,10 @@
 "Auto-Check Updates" = "自动检查更新";
 "Choose how and where lyrics appear." = "选择歌词的显示方式与位置。";
 "Support NotchMuse" = "请作者喝杯咖啡";
+"GitHub Star" = "GitHub Star";
+"Open NotchMuse on GitHub to leave a star." = "在 GitHub 上为 NotchMuse 点 Star。";
+"Switch to Light Mode" = "切换到浅色模式";
+"Switch to Dark Mode" = "切换到深色模式";
 "Your support helps keep NotchMuse improving." = "感谢你支持 NotchMuse 持续改进。";
 "WeChat Pay" = "微信支付";
 "Copy Address" = "复制地址";

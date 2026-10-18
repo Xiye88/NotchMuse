@@ -15,20 +15,63 @@ struct LRCLIBLyricsSource {
     }
 
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
-        let (data, response) = try await URLSession.shared.data(for: request(for: track))
-        return try parse(LyricsHTTP.validate(data: data, response: response), for: track)
+        try await candidate(for: track)?.document.normalizedLines ?? []
+    }
+
+    func candidate(for track: SpotifyTrack) async throws -> LyricsCandidate? {
+        let (data, response) = try await LyricsHTTP.data(for: request(for: track))
+        return try parseCandidate(LyricsHTTP.validate(data: data, response: response), for: track)
     }
 
     func parse(_ data: Data, for track: SpotifyTrack) throws -> [LyricLine] {
+        try parseCandidate(data, for: track)?.document.normalizedLines ?? []
+    }
+
+    func parseCandidate(_ data: Data, for track: SpotifyTrack) throws -> LyricsCandidate? {
         let results = try JSONDecoder().decode([Result].self, from: data)
-        let usable = results.filter { $0.syncedLyrics?.isEmpty == false && $0.duration != nil }
-        guard !hasUnmarkedScriptConflict(usable, track: track),
-              !hasDuplicateScriptConflict(usable) else { return [] }
+        let available = results.filter { $0.syncedLyrics?.isEmpty == false && $0.duration != nil }
+        guard !hasUnmarkedScriptConflict(available, track: track),
+              !hasDuplicateScriptConflict(available, track: track) else { return nil }
+        let bound = available.filter {
+            LyricsSelection.albumMatches($0.albumName, track: track) &&
+            TrackMatcher.identityRejectReason(track, title: $0.trackName, artist: $0.artistName, album: $0.albumName) == nil &&
+            abs(($0.duration ?? 0) - track.duration) <= 2
+        }
+        let usable = bound.isEmpty ? available : bound
+
+        // Search uploads can share title/artist yet describe different recordings.
+        // Reject competing payloads before metadata dedup can hide the disagreement.
+        let topScore = usable.map { TrackMatcher.score(track, candidate: $0.candidate) }.max() ?? 0
+        let contenders = usable.filter {
+            let score = TrackMatcher.score(track, candidate: $0.candidate)
+            return score >= TrackMatcher.acceptanceThreshold && topScore - score < 6
+        }
+        func candidate(_ row: Result) -> LyricsCandidate {
+            LyricsCandidate(document: LyricParser.parseDocument(row.syncedLyrics ?? "", provider: "LRCLIB"),
+                provider: "LRCLIB", sourcePlatform: "lrclib", sourceTrackID: row.id.map(String.init),
+                sourceTitle: row.trackName, sourceArtist: row.artistName, sourceAlbum: row.albumName,
+                sourceDuration: row.duration, matcherScore: TrackMatcher.score(track, candidate: row.candidate))
+        }
+        for group in Dictionary(grouping: contenders, by: { metadataKey(for: $0, track: track) }).values {
+            for i in group.indices {
+                for j in group.indices where j > i {
+                    let a = candidate(group[i]), b = candidate(group[j])
+                    let identical = a.document.normalizedLines == b.document.normalizedLines && abs((a.sourceDuration ?? 0) - (b.sourceDuration ?? 0)) <= 1
+                    let comparable = a.document.lines.count >= 5 && b.document.lines.count >= 5 &&
+                        abs((a.sourceDuration ?? 0) - track.duration) <= 2 && abs((b.sourceDuration ?? 0) - track.duration) <= 2 &&
+                        LyricsSelection.timelinesAgree(a, b)
+                    if !identical && !comparable {
+                        DebugLog.lyricsDiagnostic("matcher.provider_internal_conflict provider=LRCLIB reason=recording_ambiguity")
+                        return nil
+                    }
+                }
+            }
+        }
 
         var indices = [MetadataKey: Int]()
         var unique = [Result]()
         for result in usable {
-            let key = metadataKey(for: result)
+            let key = metadataKey(for: result, track: track)
             if let index = indices[key] {
                 if TrackMatcher.score(track, candidate: result.candidate) > TrackMatcher.score(track, candidate: unique[index].candidate) {
                     unique[index] = result
@@ -40,8 +83,12 @@ struct LRCLIBLyricsSource {
         }
         guard let index = TrackMatcher.bestMatchIndex(for: track, candidates: unique.map(\.candidate), provider: "LRCLIB"),
               let lyrics = unique[index].syncedLyrics,
-              !hasSuspiciousKana(lyrics, for: track) else { return [] }
-        return LyricParser.parse(lyrics)
+              !hasSuspiciousKana(lyrics, for: track) else { return nil }
+        let selected = unique[index]
+        return LyricsCandidate(document: LyricParser.parseDocument(lyrics, provider: "LRCLIB"),
+            provider: "LRCLIB", sourcePlatform: "lrclib", sourceTrackID: selected.id.map(String.init),
+            sourceTitle: selected.trackName, sourceArtist: selected.artistName, sourceAlbum: selected.albumName,
+            sourceDuration: selected.duration, sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: selected.candidate))
     }
 
     private func hasUnmarkedScriptConflict(_ results: [Result], track: SpotifyTrack) -> Bool {
@@ -50,19 +97,17 @@ struct LRCLIBLyricsSource {
         return scripts.contains(.kana) && scripts.contains(.hangul)
     }
 
-    private func hasDuplicateScriptConflict(_ results: [Result]) -> Bool {
-        Dictionary(grouping: results, by: metadataKey).values.contains {
+    private func hasDuplicateScriptConflict(_ results: [Result], track: SpotifyTrack) -> Bool {
+        Dictionary(grouping: results, by: { metadataKey(for: $0, track: track) }).values.contains {
             let scripts = Set($0.compactMap { script(of: $0.syncedLyrics ?? "") })
             return scripts.contains(.kana) && scripts.contains(.hangul)
         }
     }
 
-    private func metadataKey(for result: Result) -> MetadataKey {
+    private func metadataKey(for result: Result, track: SpotifyTrack) -> MetadataKey {
         MetadataKey(
             title: normalize(result.trackName),
-            artist: Set(result.artistName.components(separatedBy: CharacterSet(charactersIn: ",/&;×、"))
-                .map(normalize)
-                .filter { !$0.isEmpty })
+            artist: TrackMatcher.artistGroupKey(result.artistName, expectedArtists: [track.artist])
         )
     }
 
@@ -122,6 +167,8 @@ private struct MetadataKey: Hashable {
 }
 
 private struct Result: Decodable {
+    let id: Int?
+    let albumName: String?
     let trackName: String
     let artistName: String
     let duration: Double?

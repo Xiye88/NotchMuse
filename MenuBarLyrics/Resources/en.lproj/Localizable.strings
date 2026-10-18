@@ -11,11 +11,13 @@
 "Lyrics: Searching..." = "Lyrics: Searching...";
 "Lyrics: Available" = "Lyrics: Available";
 "Lyrics: Not Found" = "Lyrics: Not Found";
+"Lyrics: Search Timed Out" = "Lyrics: Search Timed Out";
 "Lyrics: Network Error" = "Lyrics: Network Error";
 "Waiting for Spotify" = "Waiting for Spotify";
-"Changing song..." = "Changing song...";
+"Searching lyrics..." = "Searching lyrics...";
 "Lyrics available" = "Lyrics available";
 "No lyrics found" = "No lyrics found";
+"Lyrics search timed out" = "Lyrics search timed out";
 "Lyrics network unavailable" = "Lyrics network unavailable";
 "Checking Spotify..." = "Checking Spotify...";
 "Spotify is not running" = "Spotify is not running";
@@ -175,6 +177,10 @@
 "Auto-Check Updates" = "Auto-Check Updates";
 "Choose how and where lyrics appear." = "Choose how and where lyrics appear.";
 "Support NotchMuse" = "Support NotchMuse";
+"GitHub Star" = "GitHub Star";
+"Open NotchMuse on GitHub to leave a star." = "Open NotchMuse on GitHub to leave a star.";
+"Switch to Light Mode" = "Switch to Light Mode";
+"Switch to Dark Mode" = "Switch to Dark Mode";
 "Your support helps keep NotchMuse improving." = "Your support helps keep NotchMuse improving.";
 "WeChat Pay" = "WeChat Pay";
 "Copy Address" = "Copy Address";

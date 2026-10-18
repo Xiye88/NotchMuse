@@ -10,7 +10,7 @@ struct KugouLyricsSource {
         let duration: Int
     }
 
-    struct LyricsCandidate {
+    struct LyricDownloadCandidate {
         let id: String
         let accessKey: String
         let title: String
@@ -19,21 +19,25 @@ struct KugouLyricsSource {
     }
 
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
-        try await withThrowingTaskGroup(of: [LyricLine].self) { group in
-            group.addTask { try await fetchLyrics(for: track) }
+        try await candidate(for: track)?.document.normalizedLines ?? []
+    }
+
+    func candidate(for track: SpotifyTrack) async throws -> LyricsCandidate? {
+        try await withThrowingTaskGroup(of: LyricsCandidate?.self) { group in
+            group.addTask { try await fetchCandidate(for: track) }
             group.addTask {
                 try await Task.sleep(for: .seconds(8))
                 throw URLError(.timedOut)
             }
             defer { group.cancelAll() }
-            return try await group.next() ?? []
+            return try await group.next() ?? nil
         }
     }
 
-    private func fetchLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
-        let (songData, songResponse) = try await URLSession.shared.data(for: songSearchRequest(for: track))
+    private func fetchCandidate(for track: SpotifyTrack) async throws -> LyricsCandidate? {
+        let (songData, songResponse) = try await LyricsHTTP.data(for: songSearchRequest(for: track))
         guard let song = try matchingSong(in: LyricsHTTP.validate(data: songData, response: songResponse), for: track) else {
-            return []
+            return nil
         }
 
         let keyword = "\(song.title) \(song.artist)"
@@ -43,7 +47,7 @@ struct KugouLyricsSource {
         guard let candidate = try matchingLyrics(
             in: LyricsHTTP.validate(data: candidateData, response: candidateResponse),
             for: track
-        ) else { return [] }
+        ) else { return nil }
 
         let (downloadData, downloadResponse) = try await URLSession.shared.data(
             for: downloadRequest(id: candidate.id, accessKey: candidate.accessKey)
@@ -52,8 +56,19 @@ struct KugouLyricsSource {
             DownloadResponse.self,
             from: LyricsHTTP.validate(data: downloadData, response: downloadResponse)
         )
-        guard payload.status == 200, let content = payload.content, !content.isEmpty else { return [] }
-        return parseKRC(try decryptKRC(content))
+        guard payload.status == 200, let content = payload.content, !content.isEmpty else { return nil }
+        let lines = parseKRC(try decryptKRC(content))
+        return makeCandidate(song: song, lyrics: candidate, lines: lines, for: track)
+    }
+
+    func makeCandidate(song: Song, lyrics: LyricDownloadCandidate, lines: [LyricLine], for track: SpotifyTrack) -> LyricsCandidate? {
+        guard !lines.isEmpty else { return nil }
+        let match = TrackMatcher.Candidate(title: lyrics.title, artists: [lyrics.artist], durationMs: lyrics.durationMs)
+        // Hash identifies the recording; the lyric download ID is not a player song ID.
+        return LyricsCandidate(document: TimedLyricDocument(lines: lines, metadata: LyricsMetadata(provider: "Kugou", platformTrackID: song.hash)),
+            provider: "Kugou", sourcePlatform: "kugou", sourceTrackID: song.hash,
+            sourceTitle: lyrics.title, sourceArtist: lyrics.artist, sourceAlbum: nil,
+            sourceDuration: Double(lyrics.durationMs) / 1000, sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: match))
     }
 
     func songSearchRequest(for track: SpotifyTrack) -> URLRequest {
@@ -107,11 +122,11 @@ struct KugouLyricsSource {
         return songs[index]
     }
 
-    func matchingLyrics(in data: Data, for track: SpotifyTrack) throws -> LyricsCandidate? {
+    func matchingLyrics(in data: Data, for track: SpotifyTrack) throws -> LyricDownloadCandidate? {
         let response = try JSONDecoder().decode(LyricsSearchResponse.self, from: data)
         guard response.status == 200 else { return nil }
         let candidates = deduplicated(response.candidates.map {
-            LyricsCandidate(id: $0.id, accessKey: $0.accessKey, title: $0.title, artist: $0.artist, durationMs: $0.durationMs)
+            LyricDownloadCandidate(id: $0.id, accessKey: $0.accessKey, title: $0.title, artist: $0.artist, durationMs: $0.durationMs)
         }, signature: { signature(title: $0.title, artist: $0.artist, durationMs: $0.durationMs) })
         let matches = candidates.map {
             TrackMatcher.Candidate(title: $0.title, artists: [$0.artist], durationMs: $0.durationMs)
@@ -166,21 +181,7 @@ struct KugouLyricsSource {
     }
 
     func parseKRC(_ krc: String) -> [LyricLine] {
-        let pattern = #"^\[(\d+),(\d+)\](.*)$"#
-        let expression = try! NSRegularExpression(pattern: pattern)
-        return krc.split(whereSeparator: \.isNewline).compactMap { rawLine in
-            let line = String(rawLine)
-            let range = NSRange(line.startIndex..., in: line)
-            guard let match = expression.firstMatch(in: line, range: range),
-                  let startRange = Range(match.range(at: 1), in: line),
-                  let textRange = Range(match.range(at: 3), in: line),
-                  let startMilliseconds = Double(line[startRange]) else { return nil }
-            let text = String(line[textRange])
-                .replacingOccurrences(of: #"<\d+,\d+,\d+>"#, with: "", options: .regularExpression)
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !text.isEmpty else { return nil }
-            return LyricLine(time: startMilliseconds / 1000, text: text)
-        }.sorted { $0.time < $1.time }
+        LyricParser.parseKRC(krc)
     }
 
     private func request(url: URL) -> URLRequest {

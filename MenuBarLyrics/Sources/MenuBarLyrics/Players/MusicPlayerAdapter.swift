@@ -191,11 +191,11 @@ struct NowPlayingTrack: Equatable, Sendable {
     let versionHints: [TrackVersionHint]?
 
     var spotifyTrack: SpotifyTrack {
-        SpotifyTrack(name: title, artist: artist, album: album, duration: duration)
+        SpotifyTrack(name: title, artist: artist, album: album, duration: duration, nativeTrackID: nativeTrackID)
     }
 
     var observationIdentity: String {
-        [playerSource.rawValue, nativeTrackID ?? "", title, artist, album, String(duration)]
+        [playerSource.rawValue, nativeTrackID ?? "", isrc?.uppercased() ?? "", title, artist, album, String(duration)]
             .joined(separator: "\u{1F}")
     }
 }
@@ -291,7 +291,7 @@ struct SpotifyAdapter: MusicPlayerAdapter {
             playbackPosition: position,
             playbackState: state,
             playerSource: .spotify,
-            nativeTrackID: nil,
+            nativeTrackID: track.nativeTrackID,
             isrc: nil,
             versionHints: TrackVersionHint.detect(title: track.name, album: track.album)
         )

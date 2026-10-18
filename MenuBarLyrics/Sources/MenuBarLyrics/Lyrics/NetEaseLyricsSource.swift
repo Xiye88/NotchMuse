@@ -3,20 +3,75 @@ import LyricsCore
 
 struct NetEaseLyricsSource {
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
+        try await candidate(for: track)?.document.normalizedLines ?? []
+    }
+
+    func candidate(for track: SpotifyTrack) async throws -> LyricsCandidate? {
         let songs = try await search(track)
+        guard let song = selectedSong(songs, for: track) else { return nil }
+        let lines = try await lyricLines(songID: String(song.id))
+        return makeCandidate(song: song, lines: lines, for: track)
+    }
+
+    func selectedSong(_ songs: [Song], for track: SpotifyTrack) -> Song? {
+        // Apply the existing recording gate before ranking; another album must
+        // not hide the requested release during metadata deduplication.
+        let bound = songs.filter {
+            LyricsSelection.albumMatches($0.album?.name, track: track) &&
+            TrackMatcher.identityRejectReason(track, title: $0.name, artist: $0.artists.map(\.name).joined(separator: ", "), album: $0.album?.name) == nil &&
+            abs(Double($0.duration) / 1000 - track.duration) <= 2
+        }
+        let songs = bound.isEmpty ? songs : bound
         let candidates = songs.map {
             TrackMatcher.Candidate(title: $0.name, artists: $0.artists.map(\.name), durationMs: $0.duration)
         }
-        guard let index = matchingIndex(for: track, candidates: candidates) else { return [] }
-        let song = songs[index]
+        guard let index = matchingIndex(for: track, candidates: candidates) else { return nil }
+        return songs[index]
+    }
 
-        var components = URLComponents(string: "https://music.163.com/api/song/lyric")!
-        components.queryItems = [
-            URLQueryItem(name: "id", value: String(song.id)),
-            URLQueryItem(name: "lv", value: "-1")
-        ]
-        let (data, response) = try await URLSession.shared.data(for: request(components.url!))
-        let lyric = try JSONDecoder().decode(LyricResponse.self, from: LyricsHTTP.validate(data: data, response: response)).lrc?.lyric ?? ""
+    func makeCandidate(song: Song, lines: [LyricLine], for track: SpotifyTrack) -> LyricsCandidate? {
+        guard !lines.isEmpty else { return nil }
+        let match = TrackMatcher.Candidate(title: song.name, artists: song.artists.map(\.name), durationMs: song.duration)
+        return LyricsCandidate(document: TimedLyricDocument(lines: lines, metadata: LyricsMetadata(provider: "NetEase", platformTrackID: String(song.id))),
+            provider: "NetEase", sourcePlatform: "netease", sourceTrackID: String(song.id),
+            sourceTitle: song.name, sourceArtist: song.artists.map(\.name).joined(separator: ", "), sourceAlbum: song.album?.name,
+            sourceDuration: Double(song.duration) / 1000, sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: match))
+    }
+
+    /// A public richer endpoint; IDs still come from conservative search or live-authorized Exact-ID.
+    func lyricLines(songID: String) async throws -> [LyricLine] {
+        do {
+            let (data, response) = try await LyricsHTTP.data(for: lyricRequest(songID: songID, rich: true))
+            let validated = try LyricsHTTP.validate(data: data, response: response)
+            if let lines = try parseLyrics(validated) { return lines }
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            // Existing endpoint remains available if the richer public endpoint fails.
+        }
+        try Task.checkCancellation()
+        let (data, response) = try await LyricsHTTP.data(for: lyricRequest(songID: songID, rich: false))
+        return try parseLyrics(LyricsHTTP.validate(data: data, response: response)) ?? []
+    }
+
+    func lyricRequest(songID: String, rich: Bool) -> URLRequest {
+        var components = URLComponents(string: rich ? "https://music.163.com/api/song/lyric/v1" : "https://music.163.com/api/song/lyric")!
+        components.queryItems = [URLQueryItem(name: "id", value: songID), URLQueryItem(name: "lv", value: "-1")]
+        if rich {
+            components.queryItems! += ["kv", "tv", "rv", "yv", "ytv", "yrv"].map { URLQueryItem(name: $0, value: "-1") }
+        }
+        return request(components.url!)
+    }
+
+    /// nil denotes an unsupported response, while [] is a legitimate no-lyrics result.
+    func parseLyrics(_ data: Data) throws -> [LyricLine]? {
+        let payload = try JSONDecoder().decode(LyricResponse.self, from: data)
+        guard payload.code == 200 else { return nil }
+        if let yrc = payload.yrc?.lyric {
+            let lines = LyricParser.parseYRC(yrc)
+            if !lines.isEmpty && lines.allSatisfy({ !$0.segments.isEmpty }) { return lines }
+        }
+        guard let lyric = payload.lrc?.lyric else { return nil }
         return LyricParser.parse(lyric)
     }
 
@@ -46,7 +101,7 @@ struct NetEaseLyricsSource {
 
     private func search(_ track: SpotifyTrack) async throws -> [Song] {
         let searchRequest = searchRequest(for: track)
-        let (data, response) = try await URLSession.shared.data(for: searchRequest)
+        let (data, response) = try await LyricsHTTP.data(for: searchRequest)
         return try parseSearch(LyricsHTTP.validate(data: data, response: response))
     }
 
@@ -83,6 +138,7 @@ struct NetEaseLyricsSource {
         NetEaseMetadataKey(
             title: normalize(song.name),
             artists: Set(song.artists.map { normalize($0.name) }),
+            album: song.album?.name.map(normalize),
             duration: (song.duration + 500) / 1000
         )
     }
@@ -98,6 +154,7 @@ struct NetEaseLyricsSource {
 private struct NetEaseMetadataKey: Hashable {
     let title: String
     let artists: Set<String>
+    let album: String?
     let duration: Int
 }
 
@@ -114,13 +171,18 @@ struct Song: Decodable {
     let name: String
     let artists: [Artist]
     let duration: Int
+    let album: NetEaseAlbum?
 }
+
+struct NetEaseAlbum: Decodable { let name: String? }
 
 struct Artist: Decodable {
     let name: String
 }
 
 private struct LyricResponse: Decodable {
+    let code: Int?
+    let yrc: LRC?
     let lrc: LRC?
 }
 

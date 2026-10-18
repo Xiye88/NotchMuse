@@ -1,0 +1,24 @@
+{
+  "checks": {
+    "selection": 65,
+    "provider_candidates": 53,
+    "recall_recovery": 19,
+    "identity_recovery": 31,
+    "diagnostics": 58,
+    "timing": 146,
+    "netease_exact_id": 38,
+    "spotify_native_identity": 29,
+    "login_policy": 35
+  },
+  "total_passed": 474,
+  "evidence": "Existing frozen Build61 regression execution; artifact unchanged. No blanket rerun claimed.",
+  "packaged_production_contract_checks_passed": 15,
+  "full_xctest": "BLOCKED: selected Command Line Tools environment lacks XCTest; not reported as passed.",
+  "independent_clean_mac_first_install": "NOT_TESTED; explicitly accepted release limitation",
+  "sparkle_actual_47_to_61_install_relaunch_recovery": "NOT_VERIFIED; official feed remains Build47",
+  "accepted_song_manual_confirmation": [
+    "APT.",
+    "Rubia"
+  ],
+  "manual_accuracy_rate_claimed": false
+}

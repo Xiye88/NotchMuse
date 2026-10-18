@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.1 — Build61
+
+- Improve Spotify lyric recall with public recording identity, complete artist evidence and bounded request recovery; no Premium or user API key required.
+- Preserve wrong-song/version and timeline protections while normalizing multi-artist metadata and retaining identity provenance.
+- Validate NetEase native identity against fresh playback ownership and resume state; prevent stale lyrics after track/player changes.
+- Distinguish Searching, Timeout, network failure and No Lyrics. Production includes the validated lyric capabilities; Preview diagnostics and shadow service stay disabled.
+- Distribute an ad-hoc signed, non-notarized Apple silicon package for macOS14+. This release requires manual installation; the official Sparkle feed stays at Build47 pending real updater install/recovery validation.
+- Independent clean-Mac first installation has not been verified. [Release notes (English)](docs/releases/v0.8.1/RELEASE_NOTES.en.md) · [中文发布说明](docs/releases/v0.8.1/RELEASE_NOTES.zh-CN.md).
+
+
 ## 0.8.0 - 2026-10-04
 
 - In-app Sparkle updates with signed packages, release notes, installation and relaunch; manual checks work independently of automatic checking.

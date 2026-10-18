@@ -6,6 +6,8 @@ import AppKit
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Detect a fresh install before startup writes any preferences.
         LoginAtLaunchPolicy.configureIfNeeded()
+        AppPreferences.restorePreviewMenuBarIfNeeded(in: .standard,
+            isPreview: Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true)
         AppAppearanceController.apply()
         let mainMenu = NSMenu()
         let applicationItem = NSMenuItem()
@@ -23,6 +25,17 @@ import AppKit
         UpdateController.shared.startIfStable()
         controller = MenuBarController()
         controller?.start()
+        if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true {
+            let details = NSMenuItem(title: L10n.text("Lyrics Selection Details…"),
+                action: #selector(MenuBarController.showLyricsSelection), keyEquivalent: "d")
+            details.target = controller
+            applicationMenu.insertItem(details, at: 0)
+            let copy = NSMenuItem(title: AppPreferences.language == .simplifiedChinese ? "复制歌词诊断" : "Copy Lyrics Diagnostics",
+                action: #selector(MenuBarController.copyLyricsDiagnostics), keyEquivalent: "d")
+            copy.keyEquivalentModifierMask = [.command, .shift]
+            copy.target = controller
+            applicationMenu.insertItem(copy, at: 1)
+        }
         controller?.showSettings()
         DistributedNotificationCenter.default().addObserver(
             self, selector: #selector(reopenFromSecondLaunch(_:)),

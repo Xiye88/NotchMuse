@@ -30,7 +30,7 @@ for (const [file, lang, canonical, alternate, title, description, h1, subtitle] 
   assert(!html.includes('notchmuse-language') && !html.includes('data-i18n'));
   assert(!html.includes('noindex') && !html.includes('googletagmanager.com/gtag/js'));
   for (const placement of ['nav', 'hero', 'footer']) assert.equal((html.match(new RegExp(`data-download-placement="${placement}"`, 'g')) || []).length, 1);
-  assert.equal((html.match(/NotchMuse\.dmg"/g) || []).length, 3);
+  assert.equal((html.match(/<a\b[^>]*href="[^\"]*NotchMuse\.dmg"/g) || []).length, 3);
   assert.equal((html.match(/<details>/g) || []).length, 7, 'Existing FAQ is static and complete');
   assert(html.includes(lang === 'en' ? 'Which music players work with NotchMuse?' : 'NotchMuse 支持哪些音乐平台？'));
   for (const match of html.matchAll(/(?:href|src|data-src|poster)="(\/[^"#?]+)(?:[?#][^"]*)?"/g)) {

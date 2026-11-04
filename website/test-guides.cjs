@@ -18,6 +18,35 @@ for (const suffix of urls) {
   assert(!titles.has(title), `Repeated title: ${suffix}`);
   assert(!descriptions.has(description), `Repeated description: ${suffix}`);
   titles.add(title); descriptions.add(description);
+  const zh = suffix.startsWith('/zh/');
+  const canonical = 'https://notchmuse.com' + suffix;
+  const schemaBlocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => JSON.parse(m[1]));
+  const applications = schemaBlocks.filter(item => item['@type'] === 'SoftwareApplication');
+  assert.equal(applications.length, 1, `One application schema: ${suffix}`);
+  assert.deepEqual(applications[0], {
+    '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'NotchMuse',
+    url: canonical, inLanguage: zh ? 'zh-Hans' : 'en',
+    operatingSystem: zh ? 'macOS 14 或更高版本' : 'macOS 14 or later',
+    applicationCategory: 'MultimediaApplication',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    downloadUrl: 'https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg',
+    sameAs: 'https://github.com/Xiye88/NotchMuse',
+  }, `Verified schema field whitelist: ${suffix}`);
+  const breadcrumbs = schemaBlocks.filter(item => item['@type'] === 'BreadcrumbList');
+  const home = suffix === '/' || suffix === '/zh/';
+  assert.equal(breadcrumbs.length, home ? 0 : 1);
+  assert.equal(schemaBlocks.length, home ? 1 : 2);
+  if (!home) assert.equal(breadcrumbs[0].itemListElement[1].item, canonical);
+  assert(html.includes(`<html lang="${applications[0].inLanguage}">`));
+  assert(html.includes(`<link rel="canonical" href="${canonical}">`));
+  const englishPath = zh ? suffix.replace(/^\/zh/, '') || '/' : suffix;
+  for (const [code, target] of [['en', englishPath], ['zh-Hans', '/zh' + englishPath], ['x-default', englishPath]]) {
+    assert(html.includes(`<link rel="alternate" hreflang="${code}" href="https://notchmuse.com${target}">`));
+  }
+  if (!home) {
+    assert(!html.includes('NotchMuse v0.8.0'), `No fixed old comparison baseline: ${suffix}`);
+    assert(html.includes(zh ? '文档核对日期：2026 年 10 月 17 日。播放器界面与第三方服务可能变化。' : 'Documentation reviewed October 17, 2026. Player interfaces and third-party services can change.'));
+  }
   // Resolve every local link and fragment against its actual target page.
   for (const match of html.matchAll(/(?:href|src|poster|data-src)="([^"]+)"/g)) {
     const url = new URL(match[1], `https://notchmuse.com${suffix}`);
@@ -60,7 +89,8 @@ for (const suffix of urls) {
         assert.equal(await page.locator('.guide-related .guide-card').count(), 4);
         assert.equal(await page.locator('script[src*="analytics.js"]').count(), 1);
         assert.equal(await page.locator('.guide-figure .demo-poster').evaluate(img => img.complete && img.naturalWidth > 0), true);
-        assert.equal(JSON.parse(await page.locator('script[type="application/ld+json"]').textContent()).itemListElement[1].item, 'https://notchmuse.com' + suffix);
+        const schemas = await page.locator('head script[type="application/ld+json"]').allTextContents();
+        assert.equal(schemas.map(JSON.parse).find(item => item['@type'] === 'BreadcrumbList').itemListElement[1].item, 'https://notchmuse.com' + suffix);
         assert.equal(google.length, 0, 'No analytics before consent');
         for (const width of [360, 768, 1440]) {
           await page.setViewportSize({ width, height: 1000 });
@@ -107,8 +137,13 @@ for (const suffix of urls) {
       assert.equal(await page.locator('a[data-download-placement]').count(), 3);
       if (suffix === '/' || suffix === '/zh/') assert.equal(await page.locator('#guides .guide-card').count(), 5);
       else assert(await page.locator('.guide-content').isVisible());
+      const target = suffix.startsWith('/zh/') ? suffix.replace(/^\/zh/, '') || '/' : '/zh' + suffix;
+      assert.equal(await page.locator('a#language-toggle').getAttribute('href'), target);
+      await page.locator('a#language-toggle').click();
+      await page.waitForURL(base + target);
+      assert.equal(await page.locator('html').getAttribute('lang'), target.startsWith('/zh/') ? 'zh-Hans' : 'en');
     }
     await noJS.close();
-    console.log('PASS: all 12 pages readable and download links present without JavaScript; sitemap, unique metadata and internal links/anchors valid');
+    console.log('PASS: all 12 pages readable, native language links navigate without JavaScript; 12 application schemas, 10 breadcrumbs, sitemap, metadata, downloads and internal links/anchors valid');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

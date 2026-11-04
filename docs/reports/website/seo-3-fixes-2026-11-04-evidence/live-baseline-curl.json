@@ -1,0 +1,263 @@
+{
+  "checkedAt": "2026-11-04T13:40:29.332658+00:00",
+  "base": "9a4220703a7ee397f626d8972e3549a618a2acb6",
+  "results": [
+    {
+      "path": "/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "fc18343aa3a9bf576f6a674aedcbb71c939f8133cda70c2d67dd7b097a15912e",
+      "baseSha256": "fc18343aa3a9bf576f6a674aedcbb71c939f8133cda70c2d67dd7b097a15912e",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/zh/\" lang=\"zh-Hans\" aria-label=\"Switch to Simplified Chinese\"><span aria-hidden=\"true\">🌐</span><span>简体中文</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/zh/",
+      "status": "000",
+      "exitCode": 35,
+      "previousAttempt": {
+        "path": "/zh/",
+        "status": "200",
+        "exitCode": 28,
+        "error": "curl: (28) Operation timed out after 25004 milliseconds with 8972 bytes received\n"
+      },
+      "error": "curl: (35) Recv failure: Connection reset by peer\n"
+    },
+    {
+      "path": "/spotify-lyrics-mac/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "107518452d3fdc87319ca425c4374410d77b76a4f1334fcb64583972aca5a39a",
+      "baseSha256": "107518452d3fdc87319ca425c4374410d77b76a4f1334fcb64583972aca5a39a",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/zh/spotify-lyrics-mac/\" lang=\"zh-Hans\" aria-label=\"切换到简体中文\"><span aria-hidden=\"true\">🌐</span><span>简体中文</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/zh/spotify-lyrics-mac/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "418a545a0b951fa696e3e3c5237fcd0cf212e5dd5f124a314a88e7d032355514",
+      "baseSha256": "418a545a0b951fa696e3e3c5237fcd0cf212e5dd5f124a314a88e7d032355514",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/spotify-lyrics-mac/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/menu-bar-lyrics/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "d754a5a0e313fa6eef9397c1eb0c3f4bdd7093268bbf10d92677da6f86d06938",
+      "baseSha256": "d754a5a0e313fa6eef9397c1eb0c3f4bdd7093268bbf10d92677da6f86d06938",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/zh/menu-bar-lyrics/\" lang=\"zh-Hans\" aria-label=\"切换到简体中文\"><span aria-hidden=\"true\">🌐</span><span>简体中文</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/zh/menu-bar-lyrics/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "87be359068aabd5b5592ef0c358712518dbc686a579ffc5af0aef4e28dd1a9e1",
+      "baseSha256": "87be359068aabd5b5592ef0c358712518dbc686a579ffc5af0aef4e28dd1a9e1",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/menu-bar-lyrics/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/apple-music-desktop-lyrics-mac/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "a23bccc7856073430d81c50987302ab816ad48a3ff0844c7c92d97eef61416e3",
+      "baseSha256": "a23bccc7856073430d81c50987302ab816ad48a3ff0844c7c92d97eef61416e3",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/zh/apple-music-desktop-lyrics-mac/\" lang=\"zh-Hans\" aria-label=\"切换到简体中文\"><span aria-hidden=\"true\">🌐</span><span>简体中文</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/zh/apple-music-desktop-lyrics-mac/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "28660eb0793c0811458a7600874eb1f79950a8444f74dfa485b9df3881835814",
+      "baseSha256": "28660eb0793c0811458a7600874eb1f79950a8444f74dfa485b9df3881835814",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/apple-music-desktop-lyrics-mac/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/macbook-notch-lyrics/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "d97a5955c6a6e652bb8d934a8427c4ef1c0711ecf3fc41a2a4a77d5efc704fc3",
+      "baseSha256": "d97a5955c6a6e652bb8d934a8427c4ef1c0711ecf3fc41a2a4a77d5efc704fc3",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/zh/macbook-notch-lyrics/\" lang=\"zh-Hans\" aria-label=\"切换到简体中文\"><span aria-hidden=\"true\">🌐</span><span>简体中文</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/zh/macbook-notch-lyrics/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "c37d7ceae78d868bde636ee1b6105b1452a976076836c99e9655087d74a29756",
+      "baseSha256": "c37d7ceae78d868bde636ee1b6105b1452a976076836c99e9655087d74a29756",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/macbook-notch-lyrics/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/lyricsx-alternative/",
+      "status": "000",
+      "exitCode": 35,
+      "previousAttempt": {
+        "path": "/lyricsx-alternative/",
+        "status": "000",
+        "exitCode": 28,
+        "error": "curl: (28) Operation timed out after 25002 milliseconds with 0 bytes received\n"
+      },
+      "error": "curl: (35) Recv failure: Connection reset by peer\n"
+    },
+    {
+      "path": "/zh/lyricsx-alternative/",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "998e7cd01b9bce012dfa74830df537362904dc7494142727a80611d179d18353",
+      "baseSha256": "998e7cd01b9bce012dfa74830df537362904dc7494142727a80611d179d18353",
+      "exactMatch": true,
+      "nativeLanguageToggle": [
+        "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/lyricsx-alternative/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>"
+      ],
+      "downloadUrls": [
+        "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg"
+      ],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": "000",
+      "exitCode": 35,
+      "previousAttempt": {
+        "path": "/sitemap.xml",
+        "status": "000",
+        "exitCode": 35,
+        "error": "curl: (35) Recv failure: Connection reset by peer\n"
+      },
+      "error": "curl: (35) Recv failure: Connection reset by peer\n"
+    },
+    {
+      "path": "/robots.txt",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd",
+      "baseSha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd",
+      "exactMatch": true,
+      "nativeLanguageToggle": [],
+      "downloadUrls": [],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    },
+    {
+      "path": "/analytics.js",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "3e7b9f2b2d0094796087594948784ee51023c955943e3694258db67cdaa1eb41",
+      "baseSha256": "3e7b9f2b2d0094796087594948784ee51023c955943e3694258db67cdaa1eb41",
+      "exactMatch": true,
+      "nativeLanguageToggle": [],
+      "downloadUrls": [],
+      "softwareApplicationCount": 0,
+      "csp": [
+        "content-security-policy: script-src 'self' https://www.googletagmanager.com"
+      ],
+      "matchesWithoutCloudflareBeacon": true
+    }
+  ],
+  "retryAt": "2026-11-04T13:42:58.348894+00:00"
+}

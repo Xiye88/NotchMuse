@@ -1,0 +1,100 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 19634,
+    "sha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00"
+  },
+  {
+    "path": "/zh/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 19873,
+    "sha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1"
+  },
+  {
+    "path": "/spotify-lyrics-mac/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 12882,
+    "sha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c"
+  },
+  {
+    "path": "/zh/spotify-lyrics-mac/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 12599,
+    "sha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad"
+  },
+  {
+    "path": "/menu-bar-lyrics/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 12581,
+    "sha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490"
+  },
+  {
+    "path": "/zh/menu-bar-lyrics/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 12388,
+    "sha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9"
+  },
+  {
+    "path": "/apple-music-desktop-lyrics-mac/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 13422,
+    "sha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd"
+  },
+  {
+    "path": "/zh/apple-music-desktop-lyrics-mac/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 13427,
+    "sha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2"
+  },
+  {
+    "path": "/macbook-notch-lyrics/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 12613,
+    "sha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57"
+  },
+  {
+    "path": "/zh/macbook-notch-lyrics/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 12443,
+    "sha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476"
+  },
+  {
+    "path": "/lyricsx-alternative/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 14812,
+    "sha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39"
+  },
+  {
+    "path": "/zh/lyricsx-alternative/",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 14431,
+    "sha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4"
+  },
+  {
+    "path": "/sitemap.xml",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 906,
+    "sha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce"
+  },
+  {
+    "path": "/robots.txt",
+    "status": 200,
+    "matchesLocal": true,
+    "bytes": 67,
+    "sha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd"
+  }
+]

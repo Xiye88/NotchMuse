@@ -1,0 +1,276 @@
+{
+  "date": "2026-11-04",
+  "timezone": "Asia/Shanghai",
+  "workspace": "/Users/carlos/.codex/worktrees/notchmuse-website-publish/歌词",
+  "branch": "codex/website-seo-3-fixes-20261104",
+  "base": "9a4220703a7ee397f626d8972e3549a618a2acb6",
+  "implementationCommit": "a631ad05abce1f223699e6286f2ad37d0e5ad4d6",
+  "state": "READY_TO_DEPLOY / VERIFICATION_LIMITATION (external checks only)",
+  "pushed": false,
+  "merged": false,
+  "deployed": false,
+  "tests": [
+    {
+      "command": "node website/test-language.cjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "NODE_PATH=/private/tmp/notchmuse-seo-test-runtime/node_modules SHOWCASE_URL=http://127.0.0.1:8891 PLAYWRIGHT_EXECUTABLE_PATH=\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" SHOWCASE_EVIDENCE=/private/tmp/notchmuse-seo-3-fixes-20261104/screenshots node website/test-guides.cjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "NODE_PATH=/private/tmp/notchmuse-seo-test-runtime/node_modules SHOWCASE_URL=http://127.0.0.1:8891 PLAYWRIGHT_EXECUTABLE_PATH=/Users/carlos/Library/Caches/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-mac-arm64/chrome-headless-shell node website/test-analytics.cjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "python3 /private/tmp/notchmuse-seo-3-fixes-20261104/snapshot.py after",
+      "exitCode": 0,
+      "result": "PASS: protected fields and exact HTML outside allowed changes"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "runtime": {
+    "node": "26.0.0",
+    "playwrightCore": "1.60.0",
+    "resolution": "Existing playwright-core reused via temporary /private/tmp/notchmuse-seo-test-runtime/node_modules/playwright symlink; no project dependency added",
+    "server": "python3 -m http.server 8891 --bind 127.0.0.1 --directory website"
+  },
+  "schemaPages": [
+    {
+      "path": "/",
+      "applicationCount": 1,
+      "breadcrumbCount": 0,
+      "canonical": "https://notchmuse.com/",
+      "language": "en",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/zh/",
+      "applicationCount": 1,
+      "breadcrumbCount": 0,
+      "canonical": "https://notchmuse.com/zh/",
+      "language": "zh-Hans",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/spotify-lyrics-mac/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/spotify-lyrics-mac/",
+      "language": "en",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/zh/spotify-lyrics-mac/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/zh/spotify-lyrics-mac/",
+      "language": "zh-Hans",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/menu-bar-lyrics/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/menu-bar-lyrics/",
+      "language": "en",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/zh/menu-bar-lyrics/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/zh/menu-bar-lyrics/",
+      "language": "zh-Hans",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/apple-music-desktop-lyrics-mac/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/apple-music-desktop-lyrics-mac/",
+      "language": "en",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/zh/apple-music-desktop-lyrics-mac/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/zh/apple-music-desktop-lyrics-mac/",
+      "language": "zh-Hans",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/macbook-notch-lyrics/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/macbook-notch-lyrics/",
+      "language": "en",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/zh/macbook-notch-lyrics/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/zh/macbook-notch-lyrics/",
+      "language": "zh-Hans",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/lyricsx-alternative/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/lyricsx-alternative/",
+      "language": "en",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    },
+    {
+      "path": "/zh/lyricsx-alternative/",
+      "applicationCount": 1,
+      "breadcrumbCount": 1,
+      "canonical": "https://notchmuse.com/zh/lyricsx-alternative/",
+      "language": "zh-Hans",
+      "whitelistAndLocalizedValues": "PASS",
+      "downloadAnchors": 3
+    }
+  ],
+  "p2": [
+    {
+      "path": "/zh/",
+      "href": "/",
+      "sourceAnchor": {
+        "tag": "a",
+        "class": "language-toggle",
+        "id": "language-toggle",
+        "href": "/",
+        "lang": "en",
+        "aria-label": "切换为英文"
+      },
+      "liveAnchor": "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/\" lang=\"en\" aria-label=\"切换为英文\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>",
+      "liveEvidenceCoverage": "link observed in first 8972 bytes of HTTP200 response; full body timed out",
+      "localNoJavaScriptNavigation": "PASS",
+      "result": "ALREADY PASS / NO CODE CHANGE"
+    },
+    {
+      "path": "/zh/spotify-lyrics-mac/",
+      "href": "/spotify-lyrics-mac/",
+      "sourceAnchor": {
+        "tag": "a",
+        "class": "language-toggle",
+        "id": "language-toggle",
+        "href": "/spotify-lyrics-mac/",
+        "lang": "en",
+        "aria-label": "Switch to English"
+      },
+      "liveAnchor": "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/spotify-lyrics-mac/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>",
+      "liveEvidenceCoverage": "complete HTTP200 baseline response",
+      "localNoJavaScriptNavigation": "PASS",
+      "result": "ALREADY PASS / NO CODE CHANGE"
+    },
+    {
+      "path": "/zh/menu-bar-lyrics/",
+      "href": "/menu-bar-lyrics/",
+      "sourceAnchor": {
+        "tag": "a",
+        "class": "language-toggle",
+        "id": "language-toggle",
+        "href": "/menu-bar-lyrics/",
+        "lang": "en",
+        "aria-label": "Switch to English"
+      },
+      "liveAnchor": "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/menu-bar-lyrics/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>",
+      "liveEvidenceCoverage": "complete HTTP200 baseline response",
+      "localNoJavaScriptNavigation": "PASS",
+      "result": "ALREADY PASS / NO CODE CHANGE"
+    },
+    {
+      "path": "/zh/apple-music-desktop-lyrics-mac/",
+      "href": "/apple-music-desktop-lyrics-mac/",
+      "sourceAnchor": {
+        "tag": "a",
+        "class": "language-toggle",
+        "id": "language-toggle",
+        "href": "/apple-music-desktop-lyrics-mac/",
+        "lang": "en",
+        "aria-label": "Switch to English"
+      },
+      "liveAnchor": "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/apple-music-desktop-lyrics-mac/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>",
+      "liveEvidenceCoverage": "complete HTTP200 baseline response",
+      "localNoJavaScriptNavigation": "PASS",
+      "result": "ALREADY PASS / NO CODE CHANGE"
+    },
+    {
+      "path": "/zh/macbook-notch-lyrics/",
+      "href": "/macbook-notch-lyrics/",
+      "sourceAnchor": {
+        "tag": "a",
+        "class": "language-toggle",
+        "id": "language-toggle",
+        "href": "/macbook-notch-lyrics/",
+        "lang": "en",
+        "aria-label": "Switch to English"
+      },
+      "liveAnchor": "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/macbook-notch-lyrics/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>",
+      "liveEvidenceCoverage": "complete HTTP200 baseline response",
+      "localNoJavaScriptNavigation": "PASS",
+      "result": "ALREADY PASS / NO CODE CHANGE"
+    },
+    {
+      "path": "/zh/lyricsx-alternative/",
+      "href": "/lyricsx-alternative/",
+      "sourceAnchor": {
+        "tag": "a",
+        "class": "language-toggle",
+        "id": "language-toggle",
+        "href": "/lyricsx-alternative/",
+        "lang": "en",
+        "aria-label": "Switch to English"
+      },
+      "liveAnchor": "<a class=\"language-toggle\" id=\"language-toggle\" href=\"/lyricsx-alternative/\" lang=\"en\" aria-label=\"Switch to English\"><span aria-hidden=\"true\">🌐</span><span>English</span></a>",
+      "liveEvidenceCoverage": "complete HTTP200 baseline response",
+      "localNoJavaScriptNavigation": "PASS",
+      "result": "ALREADY PASS / NO CODE CHANGE"
+    }
+  ],
+  "visualInspection": {
+    "method": "Agent inspected browser-generated screenshots; not Product Owner acceptance",
+    "files": [
+      "home-en.png",
+      "home-zh.png",
+      "lyricsx-alternative-en-desktop.png",
+      "lyricsx-alternative-zh-mobile.png"
+    ],
+    "result": "No apparent clipped navigation or new layout issue in sampled views; guide browser checks also cover widths360/768/1440"
+  },
+  "limitations": [
+    "No deployment authorized or performed; post-deployment 12-page verification NOT_RUN.",
+    "Pre-change public fetch completed and matched main for10/12HTML plus robots/analytics; /zh/, /lyricsx-alternative/, /sitemap.xml full-response baseline remains INCONCLUSIVE after limited attempts.",
+    "Chinese homepage native English anchor was observed in partial HTTP200 response; all6Chinese native links and12directions pass local no-JS actual clicks.",
+    "Schema.org validator homepage requests reset/timed out; auxiliary external validation NOT_TESTED. Local independent JSON.parse and exact field whitelist validation PASS. No Rich Results claim.",
+    "Official DMG initial HEAD returned200/content-length6802591; later full GET timed out and was not hashed or executed. Existing release checksum was not re-certified in this task.",
+    "Analytics elevated system-Chrome launch approvals twice timed out before execution; default-sandbox launch failed. Independent cached headless browser run passed without changing analytics source/assertions.",
+    "A final3-path network attempt was not executed because automatic approval review timed out; this is not a security rejection."
+  ],
+  "authorizationNeeded": [
+    "Explicit authorization to synchronize/push this specific branch and integrate into current main.",
+    "Separate explicit authorization to deploy this website-only patch using the existing site process, preserving CSP and feed; then public12-page/sitemap/robots verification."
+  ]
+}

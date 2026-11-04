@@ -1,0 +1,90 @@
+{
+  "pages": [
+    {
+      "file": "website/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 0
+    },
+    {
+      "file": "website/zh/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 0
+    },
+    {
+      "file": "website/spotify-lyrics-mac/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/zh/spotify-lyrics-mac/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/menu-bar-lyrics/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/zh/menu-bar-lyrics/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/apple-music-desktop-lyrics-mac/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/zh/apple-music-desktop-lyrics-mac/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/macbook-notch-lyrics/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/zh/macbook-notch-lyrics/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/lyricsx-alternative/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    },
+    {
+      "file": "website/zh/lyricsx-alternative/index.html",
+      "protectedFields": "PASS",
+      "exactHtmlOutsideAuthorizedChanges": "PASS",
+      "softwareApplicationCount": 1,
+      "breadcrumbCount": 1
+    }
+  ],
+  "protectedFiles": "UNCHANGED",
+  "downloadAnchors": 36
+}

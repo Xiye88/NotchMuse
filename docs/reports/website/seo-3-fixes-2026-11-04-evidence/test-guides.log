@@ -1,0 +1,6 @@
+PASS: spotify-lyrics-mac EN/ZH, metadata, mobile/desktop, consent, downloads, language pairing
+PASS: menu-bar-lyrics EN/ZH, metadata, mobile/desktop, consent, downloads, language pairing
+PASS: apple-music-desktop-lyrics-mac EN/ZH, metadata, mobile/desktop, consent, downloads, language pairing
+PASS: macbook-notch-lyrics EN/ZH, metadata, mobile/desktop, consent, downloads, language pairing
+PASS: lyricsx-alternative EN/ZH, metadata, mobile/desktop, consent, downloads, language pairing
+PASS: all 12 pages readable, native language links navigate without JavaScript; 12 application schemas, 10 breadcrumbs, sitemap, metadata, downloads and internal links/anchors valid

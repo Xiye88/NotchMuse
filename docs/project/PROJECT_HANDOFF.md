@@ -1,5 +1,10 @@
 # NotchMuse Current Handoff
 
+## Website three SEO fixes — 2026-11-04 (local task)
+
+READY_TO_DEPLOY / VERIFICATION_LIMITATION（external checks only）. Existing worktree `/Users/carlos/.codex/worktrees/notchmuse-website-publish/歌词`; branch `codex/website-seo-3-fixes-20261104`; base `9a4220703a7ee397f626d8972e3549a618a2acb6`; implementation `a631ad05abce1f223699e6286f2ad37d0e5ad4d6`. P0 historical comparison basis updated, P1 12 application schemas, P2 native language links ALREADY PASS / NO CODE CHANGE. Required language/guide/analytics tests, local14HTTP paths and exact protected-baseline comparison PASS. Public/manual Stable61 and recorded Preview68 protected; no App work. Some public pre-change responses and official schema validator remain incomplete. No push/merge/deployment; separate explicit synchronization and deployment authorization required. [Report](../reports/website/seo-3-fixes-2026-11-04.md).
+
+
 ## Current release — 2026-10-18
 
 - **v0.8.1 / Build61 is PUBLIC / RELEASED**, for manual download and installation. [Release](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1) · [Website](https://notchmuse.com) · [Completion report](V081_PUBLIC_RELEASE_COMPLETION.md).

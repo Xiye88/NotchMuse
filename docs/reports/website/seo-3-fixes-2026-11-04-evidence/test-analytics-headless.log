@@ -1,0 +1,4 @@
+PASS: en no-consent/refusal/reload, consent once, 3 exact download events, native downloads, withdrawal cookies, static language links
+PASS: zh-Hans no-consent/refusal/reload, consent once, 3 exact download events, native downloads, withdrawal cookies, static language links
+PASS: cross-tab consent and withdrawal stop both pages; blocked-storage withdrawal reload resets to zero analytics
+PASS: blocked storage consent works; JavaScript-disabled bilingual H1/FAQ/links remain readable

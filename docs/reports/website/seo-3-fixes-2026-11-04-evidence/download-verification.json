@@ -1,0 +1,19 @@
+{
+  "url": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg",
+  "status": "200",
+  "exitCode": 28,
+  "error": "curl: (28) Operation timed out after 33713 milliseconds with 130183 out of 6802591 bytes received\n",
+  "head": {
+    "status": "000",
+    "exitCode": 35,
+    "contentLengths": [],
+    "contentTypes": []
+  },
+  "initialHead": {
+    "status": 200,
+    "bytes": 6802591,
+    "contentType": "application/octet-stream",
+    "time": "2026-11-04T13:37:22Z",
+    "source": "Successful curl -I -L tool output (before later network failures)"
+  }
+}

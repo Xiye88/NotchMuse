@@ -1,0 +1,33 @@
+{
+  "state": "DEPLOYED / PUBLIC_CONTENT_VERIFIED",
+  "deploymentSourceCommit": "9d1d50e79698d989b1bf80d53a49e19e93f7440b",
+  "websiteTree": "82d8ede83750e2ff111c3a8e3f8ceb1e7404fc1d",
+  "sourceSnapshot": "git archive 9d1d50e website;42 served static files,4 tests excluded",
+  "originVerifiedFiles": 46,
+  "publicVerifiedTargets": 72,
+  "exactBytes": true,
+  "allowedByteTransformations": [],
+  "browserPassed": 3,
+  "browserTotal": 4,
+  "ci": {
+    "url": "https://github.com/Xiye88/NotchMuse/actions/runs/41856383967",
+    "lastConfirmedStatus": "completed",
+    "conclusion": "failure",
+    "laterRefresh": "run completed failure;job cancelled without runner or steps",
+    "deploymentGate": "PM removed unrelated App-CI-only queue as website gate; main protected=false, rules=[]",
+    "jobConclusion": "cancelled",
+    "steps": [],
+    "runnerName": ""
+  },
+  "rollback": {
+    "previousRelease": "/opt/notchmuse-site/releases/20261018-v081-8320271",
+    "serverBackup": "/opt/notchmuse-site/site_server.before-seo-20261104-9d1d50e.py",
+    "command": "Restore server backup to site_server.py; restart notchmuse-site.service; verify origin/public and retained files"
+  },
+  "finalDocumentationCommit": "Resolve via git log; documentation-only follow-up must retain website tree 82d8ede83750e2ff111c3a8e3f8ceb1e7404fc1d",
+  "limitations": [
+    "External Schema.org validator remained unavailable; local exact whitelist checks PASS.",
+    "CI run failed;job cancelled with no runner or executed steps. See ci-jobs/ci-annotations, not a successful App test.",
+    "English homepage browser navigation timed out on apex/www/query route; public HTTP exact bytes and local rendered homepage PASS;3otherpublic browser pages/download checks PASS. Not reported as complete browser PASS."
+  ]
+}

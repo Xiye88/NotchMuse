@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-11-04T15:29:21.977264+00:00",
+  "sourceCommit": "9d1d50e79698d989b1bf80d53a49e19e93f7440b",
+  "websiteTree": "82d8ede83750e2ff111c3a8e3f8ceb1e7404fc1d",
+  "passCount": 66,
+  "total": 72,
+  "allPass": false
+}
+Incomplete/mismatch: [('notchmuse.com', '/assets/demos/notch-mode.gif'), ('notchmuse.com', '/assets/demos/status-bar.gif'), ('notchmuse.com', '/assets/mac-desktop.png'), ('notchmuse.com', '/assets/media/appearance-demo.mp4'), ('notchmuse.com', '/assets/media/appearance-demo.webm'), ('notchmuse.com', '/assets/media/notch-demo.mp4')]

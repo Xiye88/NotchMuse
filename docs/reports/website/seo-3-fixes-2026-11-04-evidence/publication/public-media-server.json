@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-11-04T15:46:04.002759+00:00",
+  "results": [
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/demos/notch-mode.gif",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "e85c4803349d82f135bbe2f3ee5a5b072f70085d031e768cb47b216a2ea7d3c6",
+      "expectedSha256": "e85c4803349d82f135bbe2f3ee5a5b072f70085d031e768cb47b216a2ea7d3c6",
+      "pass": true,
+      "error": "",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/demos/status-bar.gif",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "c4648a686247b3fa47781191c78c39767456129e0daaa3aae55d4a3592c92789",
+      "expectedSha256": "c4648a686247b3fa47781191c78c39767456129e0daaa3aae55d4a3592c92789",
+      "pass": true,
+      "error": "",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/mac-desktop.png",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "a94ec30d416fd2832bc7379094f263c03147cb63aa4781a5b7e969648af8a102",
+      "expectedSha256": "a94ec30d416fd2832bc7379094f263c03147cb63aa4781a5b7e969648af8a102",
+      "pass": true,
+      "error": "",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/appearance-demo.mp4",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "2aef9768ffe03cc0dfc93892b7cb4d084a7a78de0a41cdc40abdd2216ac171ac",
+      "expectedSha256": "2aef9768ffe03cc0dfc93892b7cb4d084a7a78de0a41cdc40abdd2216ac171ac",
+      "pass": true,
+      "error": "",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/appearance-demo.webm",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "45b579756eef009b6104fdadef29c4e28b46931022ace920e72c9ef5f9b530d1",
+      "expectedSha256": "45b579756eef009b6104fdadef29c4e28b46931022ace920e72c9ef5f9b530d1",
+      "pass": true,
+      "error": "",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/notch-demo.mp4",
+      "status": "200",
+      "exitCode": 0,
+      "sha256": "752070631b2065ba2b76cb6dcf662ac5d2f75b4a7831390c28fd7c79ffa97de0",
+      "expectedSha256": "752070631b2065ba2b76cb6dcf662ac5d2f75b4a7831390c28fd7c79ffa97de0",
+      "pass": true,
+      "error": "",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+    }
+  ],
+  "allPass": true
+}

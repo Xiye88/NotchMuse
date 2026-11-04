@@ -1,0 +1,51 @@
+[
+  {
+    "path": "/",
+    "previousAttempt": {
+      "path": "/",
+      "previousAttempt": {
+        "path": "/",
+        "previousAttempt": {
+          "path": "/",
+          "result": "INCONCLUSIVE",
+          "error": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://notchmuse.com/\", waiting until \"networkidle\"\u001b[22m\n"
+        },
+        "result": "INCONCLUSIVE",
+        "error": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://notchmuse.com/\", waiting until \"domcontentloaded\"\u001b[22m\n"
+      },
+      "result": "INCONCLUSIVE",
+      "error": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://www.notchmuse.com/\", waiting until \"domcontentloaded\"\u001b[22m\n"
+    },
+    "result": "INCONCLUSIVE",
+    "error": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://notchmuse.com/?verify=seo-9d1d50e\", waiting until \"domcontentloaded\"\u001b[22m\n"
+  },
+  {
+    "path": "/zh/",
+    "previousAttempt": {
+      "path": "/zh/",
+      "result": "INCONCLUSIVE",
+      "error": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://notchmuse.com/zh/\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    "status": 200,
+    "visualScreenshot": "public-home-zh.png",
+    "threeNativeDownloadNavigations": "PASS (intercepted)",
+    "googleRequests": 0,
+    "result": "PASS"
+  },
+  {
+    "path": "/lyricsx-alternative/",
+    "status": 200,
+    "visualScreenshot": "public-lyricsx-en.png",
+    "threeNativeDownloadNavigations": "PASS (intercepted)",
+    "googleRequests": 0,
+    "result": "PASS"
+  },
+  {
+    "path": "/zh/lyricsx-alternative/",
+    "status": 200,
+    "visualScreenshot": "public-lyricsx-zh.png",
+    "threeNativeDownloadNavigations": "PASS (intercepted)",
+    "googleRequests": 0,
+    "result": "PASS"
+  }
+]

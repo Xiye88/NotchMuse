@@ -1,0 +1,1912 @@
+{
+  "checkedAt": "2026-11-04T15:31:03.868362+00:00",
+  "sourceCommit": "9d1d50e79698d989b1bf80d53a49e19e93f7440b",
+  "websiteTree": "82d8ede83750e2ff111c3a8e3f8ceb1e7404fc1d",
+  "results": [
+    {
+      "host": "notchmuse.com",
+      "path": "/analytics.js",
+      "expectedSha256": "3e7b9f2b2d0094796087594948784ee51023c955943e3694258db67cdaa1eb41",
+      "actualSha256": "3e7b9f2b2d0094796087594948784ee51023c955943e3694258db67cdaa1eb41",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 4756,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "3e7b9f2b2d0094796087594948784ee51023c955943e3694258db67cdaa1eb41"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/apple-music-desktop-lyrics-mac/index.html",
+      "expectedSha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd",
+      "actualSha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 13422,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/demos/notch-mode-screen.png",
+      "expectedSha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1",
+      "actualSha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 49936,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/demos/notch-mode-still.png",
+      "expectedSha256": "559556b5874600c6f08788203ffd89430955c8fc90784528ee5629b033acdfb7",
+      "actualSha256": "559556b5874600c6f08788203ffd89430955c8fc90784528ee5629b033acdfb7",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 71080,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "559556b5874600c6f08788203ffd89430955c8fc90784528ee5629b033acdfb7"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/demos/notch-mode.gif",
+      "expectedSha256": "e85c4803349d82f135bbe2f3ee5a5b072f70085d031e768cb47b216a2ea7d3c6",
+      "pass": true,
+      "attempts": [
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30004 milliseconds with 229376 out of 585505 bytes received\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30004 milliseconds with 157489 out of 585505 bytes received\n",
+          "attempt": 2
+        },
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 3
+        },
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 4
+        }
+      ],
+      "localAttemptPassed": false,
+      "publicFollowup": {
+        "host": "notchmuse.com",
+        "path": "/assets/demos/notch-mode.gif",
+        "status": "200",
+        "exitCode": 0,
+        "sha256": "e85c4803349d82f135bbe2f3ee5a5b072f70085d031e768cb47b216a2ea7d3c6",
+        "expectedSha256": "e85c4803349d82f135bbe2f3ee5a5b072f70085d031e768cb47b216a2ea7d3c6",
+        "pass": true,
+        "error": "",
+        "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+      },
+      "comparison": "EXACT_BYTES",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)",
+      "actualSha256": "e85c4803349d82f135bbe2f3ee5a5b072f70085d031e768cb47b216a2ea7d3c6",
+      "status": 200
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/demos/status-bar-screen.png",
+      "expectedSha256": "1f20e8cddb4c26dbc5f7f0bcf604753b27d51ffcfc111316fe843c5458153f81",
+      "actualSha256": "1f20e8cddb4c26dbc5f7f0bcf604753b27d51ffcfc111316fe843c5458153f81",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 195077,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30003 milliseconds with 172156 out of 195077 bytes received\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 2,
+          "sha256": "1f20e8cddb4c26dbc5f7f0bcf604753b27d51ffcfc111316fe843c5458153f81"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/demos/status-bar-still.png",
+      "expectedSha256": "ce4eae5e80d3d03471d7c5ee8bae0bea15a7296a70c72d906c46c84a6c338cbf",
+      "actualSha256": "ce4eae5e80d3d03471d7c5ee8bae0bea15a7296a70c72d906c46c84a6c338cbf",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 80719,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "ce4eae5e80d3d03471d7c5ee8bae0bea15a7296a70c72d906c46c84a6c338cbf"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/demos/status-bar.gif",
+      "expectedSha256": "c4648a686247b3fa47781191c78c39767456129e0daaa3aae55d4a3592c92789",
+      "pass": true,
+      "attempts": [
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30006 milliseconds with 147147 out of 878336 bytes received\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30006 milliseconds with 202370 out of 878336 bytes received\n",
+          "attempt": 2
+        },
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 3
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30005 milliseconds with 315127 out of 878336 bytes received\n",
+          "attempt": 4
+        }
+      ],
+      "localAttemptPassed": false,
+      "publicFollowup": {
+        "host": "notchmuse.com",
+        "path": "/assets/demos/status-bar.gif",
+        "status": "200",
+        "exitCode": 0,
+        "sha256": "c4648a686247b3fa47781191c78c39767456129e0daaa3aae55d4a3592c92789",
+        "expectedSha256": "c4648a686247b3fa47781191c78c39767456129e0daaa3aae55d4a3592c92789",
+        "pass": true,
+        "error": "",
+        "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+      },
+      "comparison": "EXACT_BYTES",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)",
+      "actualSha256": "c4648a686247b3fa47781191c78c39767456129e0daaa3aae55d4a3592c92789",
+      "status": 200
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/favicon-32.png",
+      "expectedSha256": "f807ed4c22767aff183a3d29cd5c8d08c0db9778feb0f01734fcc6bc6e9f6098",
+      "actualSha256": "f807ed4c22767aff183a3d29cd5c8d08c0db9778feb0f01734fcc6bc6e9f6098",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 2366,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "f807ed4c22767aff183a3d29cd5c8d08c0db9778feb0f01734fcc6bc6e9f6098"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/mac-desktop.png",
+      "expectedSha256": "a94ec30d416fd2832bc7379094f263c03147cb63aa4781a5b7e969648af8a102",
+      "pass": true,
+      "attempts": [
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30003 milliseconds with 307200 out of 631063 bytes received\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30001 milliseconds with 425182 out of 631063 bytes received\n",
+          "attempt": 2
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30004 milliseconds with 250458 out of 631063 bytes received\n",
+          "attempt": 3
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30004 milliseconds with 298770 out of 631063 bytes received\n",
+          "attempt": 4
+        }
+      ],
+      "localAttemptPassed": false,
+      "publicFollowup": {
+        "host": "notchmuse.com",
+        "path": "/assets/mac-desktop.png",
+        "status": "200",
+        "exitCode": 0,
+        "sha256": "a94ec30d416fd2832bc7379094f263c03147cb63aa4781a5b7e969648af8a102",
+        "expectedSha256": "a94ec30d416fd2832bc7379094f263c03147cb63aa4781a5b7e969648af8a102",
+        "pass": true,
+        "error": "",
+        "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+      },
+      "comparison": "EXACT_BYTES",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)",
+      "actualSha256": "a94ec30d416fd2832bc7379094f263c03147cb63aa4781a5b7e969648af8a102",
+      "status": 200
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/appearance-demo.mp4",
+      "expectedSha256": "2aef9768ffe03cc0dfc93892b7cb4d084a7a78de0a41cdc40abdd2216ac171ac",
+      "pass": true,
+      "attempts": [
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30005 milliseconds with 348160 out of 644965 bytes received\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30004 milliseconds with 193154 out of 644965 bytes received\n",
+          "attempt": 2
+        },
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 3
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30005 milliseconds with 233308 out of 644965 bytes received\n",
+          "attempt": 4
+        }
+      ],
+      "localAttemptPassed": false,
+      "publicFollowup": {
+        "host": "notchmuse.com",
+        "path": "/assets/media/appearance-demo.mp4",
+        "status": "200",
+        "exitCode": 0,
+        "sha256": "2aef9768ffe03cc0dfc93892b7cb4d084a7a78de0a41cdc40abdd2216ac171ac",
+        "expectedSha256": "2aef9768ffe03cc0dfc93892b7cb4d084a7a78de0a41cdc40abdd2216ac171ac",
+        "pass": true,
+        "error": "",
+        "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+      },
+      "comparison": "EXACT_BYTES",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)",
+      "actualSha256": "2aef9768ffe03cc0dfc93892b7cb4d084a7a78de0a41cdc40abdd2216ac171ac",
+      "status": 200
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/appearance-demo.webm",
+      "expectedSha256": "45b579756eef009b6104fdadef29c4e28b46931022ace920e72c9ef5f9b530d1",
+      "pass": true,
+      "attempts": [
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30005 milliseconds with 245760 out of 265948 bytes received\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30000 milliseconds with 140643 out of 265948 bytes received\n",
+          "attempt": 2
+        },
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 3
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30003 milliseconds with 219002 out of 265948 bytes received\n",
+          "attempt": 4
+        }
+      ],
+      "localAttemptPassed": false,
+      "publicFollowup": {
+        "host": "notchmuse.com",
+        "path": "/assets/media/appearance-demo.webm",
+        "status": "200",
+        "exitCode": 0,
+        "sha256": "45b579756eef009b6104fdadef29c4e28b46931022ace920e72c9ef5f9b530d1",
+        "expectedSha256": "45b579756eef009b6104fdadef29c4e28b46931022ace920e72c9ef5f9b530d1",
+        "pass": true,
+        "error": "",
+        "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+      },
+      "comparison": "EXACT_BYTES",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)",
+      "actualSha256": "45b579756eef009b6104fdadef29c4e28b46931022ace920e72c9ef5f9b530d1",
+      "status": 200
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/appearance-poster.webp",
+      "expectedSha256": "cfd7adbb200b95b387955dea30b7df4eb5b6125d4c9e48522e2a1b04c325ed5e",
+      "actualSha256": "cfd7adbb200b95b387955dea30b7df4eb5b6125d4c9e48522e2a1b04c325ed5e",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 83604,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "cfd7adbb200b95b387955dea30b7df4eb5b6125d4c9e48522e2a1b04c325ed5e"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/notch-demo.mp4",
+      "expectedSha256": "752070631b2065ba2b76cb6dcf662ac5d2f75b4a7831390c28fd7c79ffa97de0",
+      "pass": true,
+      "attempts": [
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30004 milliseconds with 274432 out of 384669 bytes received\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30004 milliseconds with 311296 out of 384669 bytes received\n",
+          "attempt": 2
+        },
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 3
+        },
+        {
+          "exitCode": 28,
+          "status": "200",
+          "error": "curl: (28) Operation timed out after 30005 milliseconds with 168315 out of 384669 bytes received\n",
+          "attempt": 4
+        }
+      ],
+      "localAttemptPassed": false,
+      "publicFollowup": {
+        "host": "notchmuse.com",
+        "path": "/assets/media/notch-demo.mp4",
+        "status": "200",
+        "exitCode": 0,
+        "sha256": "752070631b2065ba2b76cb6dcf662ac5d2f75b4a7831390c28fd7c79ffa97de0",
+        "expectedSha256": "752070631b2065ba2b76cb6dcf662ac5d2f75b4a7831390c28fd7c79ffa97de0",
+        "pass": true,
+        "error": "",
+        "vantage": "production host -> public Cloudflare HTTPS (not localhost)"
+      },
+      "comparison": "EXACT_BYTES",
+      "vantage": "production host -> public Cloudflare HTTPS (not localhost)",
+      "actualSha256": "752070631b2065ba2b76cb6dcf662ac5d2f75b4a7831390c28fd7c79ffa97de0",
+      "status": 200
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/notch-demo.webm",
+      "expectedSha256": "7d46faa495e063798164121efdb8e87d0ef0b8ea461593ac06f4e52f703fbd49",
+      "actualSha256": "7d46faa495e063798164121efdb8e87d0ef0b8ea461593ac06f4e52f703fbd49",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 246036,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 2,
+          "sha256": "7d46faa495e063798164121efdb8e87d0ef0b8ea461593ac06f4e52f703fbd49"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/notch-poster.webp",
+      "expectedSha256": "d0e3e42687296856d212e2e6f18c292718bbee990a7eb4381ff13905399bbf04",
+      "actualSha256": "d0e3e42687296856d212e2e6f18c292718bbee990a7eb4381ff13905399bbf04",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 84688,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "d0e3e42687296856d212e2e6f18c292718bbee990a7eb4381ff13905399bbf04"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/status-bar-demo.mp4",
+      "expectedSha256": "0517a82acec891d3113610fead43c8c3eac77b064c060b4528d49b915dc20d2b",
+      "actualSha256": "0517a82acec891d3113610fead43c8c3eac77b064c060b4528d49b915dc20d2b",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 264465,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 2,
+          "sha256": "0517a82acec891d3113610fead43c8c3eac77b064c060b4528d49b915dc20d2b"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/status-bar-demo.webm",
+      "expectedSha256": "a39118ca924e903d6a4d12626837798af23ff534606176d5b3c588c68787d750",
+      "actualSha256": "a39118ca924e903d6a4d12626837798af23ff534606176d5b3c588c68787d750",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 245622,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 35,
+          "status": "000",
+          "error": "curl: (35) Recv failure: Connection reset by peer\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 2,
+          "sha256": "a39118ca924e903d6a4d12626837798af23ff534606176d5b3c588c68787d750"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/media/status-bar-poster.webp",
+      "expectedSha256": "8ee37b1fce36825428d912d0e95ef9a4a2dd5d6bcafb5db8e0ca2bcf58f7f938",
+      "actualSha256": "8ee37b1fce36825428d912d0e95ef9a4a2dd5d6bcafb5db8e0ca2bcf58f7f938",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 83954,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "8ee37b1fce36825428d912d0e95ef9a4a2dd5d6bcafb5db8e0ca2bcf58f7f938"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/notchmuse-icon.png",
+      "expectedSha256": "81d8a2ebbfbf4df6469d0650e7e37e622cd9e1e62acc9a02a3a8e2d5e529d0d6",
+      "actualSha256": "81d8a2ebbfbf4df6469d0650e7e37e622cd9e1e62acc9a02a3a8e2d5e529d0d6",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 16702,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "81d8a2ebbfbf4df6469d0650e7e37e622cd9e1e62acc9a02a3a8e2d5e529d0d6"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/players/apple-music.png",
+      "expectedSha256": "96365690588ea483836f67c916b93f18d732ba5b7fb32e7aa358f8a5cdedde6a",
+      "actualSha256": "96365690588ea483836f67c916b93f18d732ba5b7fb32e7aa358f8a5cdedde6a",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 11830,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "96365690588ea483836f67c916b93f18d732ba5b7fb32e7aa358f8a5cdedde6a"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/players/netease.png",
+      "expectedSha256": "30056bea3b327e608b7e55e361de039dcd83a4990eaa57a46a1aea38dc5327ea",
+      "actualSha256": "30056bea3b327e608b7e55e361de039dcd83a4990eaa57a46a1aea38dc5327ea",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12375,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "30056bea3b327e608b7e55e361de039dcd83a4990eaa57a46a1aea38dc5327ea"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/players/qq-music.jpg",
+      "expectedSha256": "2929914b03b841af4c0972cf44726050f19c174ac5a4c8bd20801fe2bfa8311e",
+      "actualSha256": "2929914b03b841af4c0972cf44726050f19c174ac5a4c8bd20801fe2bfa8311e",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 30502,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "2929914b03b841af4c0972cf44726050f19c174ac5a4c8bd20801fe2bfa8311e"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/players/soda-music.jpg",
+      "expectedSha256": "4f4bdc6b5075acea8363e41d6ee0b753651991fb2002db9a4f82c2bbd24eed69",
+      "actualSha256": "4f4bdc6b5075acea8363e41d6ee0b753651991fb2002db9a4f82c2bbd24eed69",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 16678,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4f4bdc6b5075acea8363e41d6ee0b753651991fb2002db9a4f82c2bbd24eed69"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/players/spotify.png",
+      "expectedSha256": "85ee63edc922199e15da8177687612c60511d3d1b2596d9cd4b7e6255970424c",
+      "actualSha256": "85ee63edc922199e15da8177687612c60511d3d1b2596d9cd4b7e6255970424c",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 9045,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "85ee63edc922199e15da8177687612c60511d3d1b2596d9cd4b7e6255970424c"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/assets/real-notch-mode.png",
+      "expectedSha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1",
+      "actualSha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 49936,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "0ef91e294b09e0b1af2e0530981bc7d1c9f28a42cdc63ada28abe67cb31a51a1"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/guides.css",
+      "expectedSha256": "dcb75994bb2ee21e6ddceb957641a8ce65beca3e5d959d61e56710b80fde9128",
+      "actualSha256": "dcb75994bb2ee21e6ddceb957641a8ce65beca3e5d959d61e56710b80fde9128",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 5719,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "dcb75994bb2ee21e6ddceb957641a8ce65beca3e5d959d61e56710b80fde9128"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/index.html",
+      "expectedSha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00",
+      "actualSha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 19634,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/lyricsx-alternative/index.html",
+      "expectedSha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39",
+      "actualSha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 14812,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/macbook-notch-lyrics/index.html",
+      "expectedSha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57",
+      "actualSha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12613,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/menu-bar-lyrics/index.html",
+      "expectedSha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490",
+      "actualSha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12581,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/robots.txt",
+      "expectedSha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd",
+      "actualSha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 67,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/showcase.js",
+      "expectedSha256": "225ba72c1e499fd819e29cb3e104a19c866a64af509b354bce6317087e018d3b",
+      "actualSha256": "225ba72c1e499fd819e29cb3e104a19c866a64af509b354bce6317087e018d3b",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 2857,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "225ba72c1e499fd819e29cb3e104a19c866a64af509b354bce6317087e018d3b"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/sitemap.xml",
+      "expectedSha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce",
+      "actualSha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 906,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/spotify-lyrics-mac/index.html",
+      "expectedSha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c",
+      "actualSha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12882,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/style.css",
+      "expectedSha256": "cd3b650b718f0fe7f495a4d0a505809278a582b4e6a10934583536ed9e91c177",
+      "actualSha256": "cd3b650b718f0fe7f495a4d0a505809278a582b4e6a10934583536ed9e91c177",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 18683,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "cd3b650b718f0fe7f495a4d0a505809278a582b4e6a10934583536ed9e91c177"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/apple-music-desktop-lyrics-mac/index.html",
+      "expectedSha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2",
+      "actualSha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 13427,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/index.html",
+      "expectedSha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1",
+      "actualSha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 19873,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/lyricsx-alternative/index.html",
+      "expectedSha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4",
+      "actualSha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 14431,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/macbook-notch-lyrics/index.html",
+      "expectedSha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476",
+      "actualSha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12443,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/menu-bar-lyrics/index.html",
+      "expectedSha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9",
+      "actualSha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12388,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 28,
+          "status": "000",
+          "error": "curl: (28) SSL connection timeout\n",
+          "attempt": 1
+        },
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 2,
+          "sha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/spotify-lyrics-mac/index.html",
+      "expectedSha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad",
+      "actualSha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12599,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/NotchMuse.md",
+      "expectedSha256": "770f3a527c1c85fb45c80faa5a16a9657a9270883c4a86df1af17c6b6f8e7e04",
+      "actualSha256": "770f3a527c1c85fb45c80faa5a16a9657a9270883c4a86df1af17c6b6f8e7e04",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 2353,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "770f3a527c1c85fb45c80faa5a16a9657a9270883c4a86df1af17c6b6f8e7e04"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/appcast.xml",
+      "expectedSha256": "750fda31ab87c78fe41b494b5119e0343c3413bc8e16b2df74f6127179b44580",
+      "actualSha256": "750fda31ab87c78fe41b494b5119e0343c3413bc8e16b2df74f6127179b44580",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 1412,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "750fda31ab87c78fe41b494b5119e0343c3413bc8e16b2df74f6127179b44580"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/releases/v0.8.1/RELEASE_NOTES.en.md",
+      "expectedSha256": "1489de7701416204c9f9b4761a15c473183677e9161f5a1d309f064c548416a4",
+      "actualSha256": "1489de7701416204c9f9b4761a15c473183677e9161f5a1d309f064c548416a4",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 3688,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "1489de7701416204c9f9b4761a15c473183677e9161f5a1d309f064c548416a4"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/releases/v0.8.1/RELEASE_NOTES.zh-CN.md",
+      "expectedSha256": "b31c4ffcb429d4b5827beb87d84be2e83122b61d622bfc9d327444cee2911422",
+      "actualSha256": "b31c4ffcb429d4b5827beb87d84be2e83122b61d622bfc9d327444cee2911422",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 3155,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "b31c4ffcb429d4b5827beb87d84be2e83122b61d622bfc9d327444cee2911422"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/",
+      "expectedSha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00",
+      "actualSha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 19634,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/",
+      "expectedSha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1",
+      "actualSha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 19873,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/spotify-lyrics-mac/",
+      "expectedSha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c",
+      "actualSha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12882,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/spotify-lyrics-mac/",
+      "expectedSha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad",
+      "actualSha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12599,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/menu-bar-lyrics/",
+      "expectedSha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490",
+      "actualSha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12581,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/menu-bar-lyrics/",
+      "expectedSha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9",
+      "actualSha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12388,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/apple-music-desktop-lyrics-mac/",
+      "expectedSha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd",
+      "actualSha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 13422,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/apple-music-desktop-lyrics-mac/",
+      "expectedSha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2",
+      "actualSha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 13427,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/macbook-notch-lyrics/",
+      "expectedSha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57",
+      "actualSha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12613,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/macbook-notch-lyrics/",
+      "expectedSha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476",
+      "actualSha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12443,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/lyricsx-alternative/",
+      "expectedSha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39",
+      "actualSha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 14812,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "notchmuse.com",
+      "path": "/zh/lyricsx-alternative/",
+      "expectedSha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4",
+      "actualSha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 14431,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/",
+      "expectedSha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00",
+      "actualSha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 19634,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4ae87abd9cf3d6e1366a139159055d9697bbc6238bf796ca6271ebec9cbe1b00"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/zh/",
+      "expectedSha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1",
+      "actualSha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 19873,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "28d00e2b2258877bc023aff720e5d49764e6bf220210603b65925c2cd4de2cc1"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/spotify-lyrics-mac/",
+      "expectedSha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c",
+      "actualSha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12882,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "363a4d45eb80f9e7cd040805d2f7b354f1133f4ccb994140eb1eda7ea329cd6c"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/zh/spotify-lyrics-mac/",
+      "expectedSha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad",
+      "actualSha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12599,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4211fea19a49f6d275e65551a418cd6c3df4f52bd32be39ccb528a9999139aad"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/menu-bar-lyrics/",
+      "expectedSha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490",
+      "actualSha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12581,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "d51a9104669716dc7ff45b034b8d138c437ca1b4008941d0ec98fc2f8cc1e490"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/zh/menu-bar-lyrics/",
+      "expectedSha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9",
+      "actualSha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12388,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "c147fc33ec9d95439d1718d87773c2d4081170b27bdd448a03d1f560940cb3a9"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/apple-music-desktop-lyrics-mac/",
+      "expectedSha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd",
+      "actualSha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 13422,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "c7279a7549124021d8be2553a6e3f800a08861bd6a2ee2b44b7858634a47abfd"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/zh/apple-music-desktop-lyrics-mac/",
+      "expectedSha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2",
+      "actualSha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 13427,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "e3cd8349a9e993209c16247dfa38b13ca1f01de4b8817119bdec11358513eed2"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/macbook-notch-lyrics/",
+      "expectedSha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57",
+      "actualSha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12613,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "0f9d43a5dc762c3da6cbd6a32c2650e573295fef206d31b119b1ea9780fdfd57"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/zh/macbook-notch-lyrics/",
+      "expectedSha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476",
+      "actualSha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 12443,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "72c3d6b93a978e10e7d1ce660a45e0d6619d0b1be29a6e3e099d56b1bce89476"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/lyricsx-alternative/",
+      "expectedSha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39",
+      "actualSha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 14812,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "e1ea8193d6af4ab6ee469b45c59bba79f58c33ba461bf8a0bf9af46691f3ee39"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/zh/lyricsx-alternative/",
+      "expectedSha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4",
+      "actualSha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 14431,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "a8ca4b35bf06c6ac0a8dfad697fc5721fcfdac8e1fd4515ee212a7d8ff81ded4"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/sitemap.xml",
+      "expectedSha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce",
+      "actualSha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 906,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "dbaee5a586616dfe26a73c0f65d08e028870d12c0d949ba495a408b1320112ce"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    },
+    {
+      "host": "www.notchmuse.com",
+      "path": "/robots.txt",
+      "expectedSha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd",
+      "actualSha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd",
+      "pass": true,
+      "status": 200,
+      "comparison": "EXACT_BYTES",
+      "allowedDifferences": [],
+      "bytes": 67,
+      "csp": [
+        "script-src 'self' https://www.googletagmanager.com"
+      ],
+      "attempts": [
+        {
+          "exitCode": 0,
+          "status": "200",
+          "error": "",
+          "attempt": 1,
+          "sha256": "4892e36e22fdf02204f08ff7459eaf6e37dec38eb43ec0458ac286192d62abdd"
+        }
+      ],
+      "vantage": "local Mac -> public HTTPS"
+    }
+  ],
+  "passCount": 72,
+  "total": 72,
+  "allPass": true
+}

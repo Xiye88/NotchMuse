@@ -29,7 +29,7 @@ for (const suffix of urls) {
     operatingSystem: zh ? 'macOS 14 或更高版本' : 'macOS 14 or later',
     applicationCategory: 'MultimediaApplication',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    downloadUrl: 'https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg',
+    downloadUrl: 'https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/NotchMuse.dmg',
     sameAs: 'https://github.com/Xiye88/NotchMuse',
   }, `Verified schema field whitelist: ${suffix}`);
   const breadcrumbs = schemaBlocks.filter(item => item['@type'] === 'BreadcrumbList');

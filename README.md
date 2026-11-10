@@ -1,6 +1,6 @@
 <p align="center">English | <a href="README.zh-CN.md">简体中文</a></p>
 
-<h1 align="center">NotchMuse v0.8.1</h1>
+<h1 align="center">NotchMuse v0.8.2</h1>
 
 <p align="center"><img src="website/assets/media/notch-poster.webp" alt="Real NotchMuse overlay lyrics on macOS" width="1080"></p>
 
@@ -8,7 +8,7 @@
 
 <p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · NetEase Cloud Music · QQ Music · Soda Music</p>
 
-<p align="center"><a href="https://notchmuse.com"><strong>Download from website</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1"><strong>GitHub Releases</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>Report an issue</strong></a></p>
+<p align="center"><a href="https://notchmuse.com"><strong>Download from website</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.2"><strong>GitHub Releases</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>Report an issue</strong></a></p>
 
 ## Status Bar Lyrics
 
@@ -64,15 +64,15 @@ NotchMuse is distributed directly through the website and GitHub. Apple Develope
 
 If macOS blocks the app, open **System Settings → Privacy & Security → Open Anyway** for NotchMuse, authenticate if asked, then open it again. See [Support](docs/community/SUPPORT.md) for installation and permission help. Do not disable Gatekeeper or remove quarantine to force installation. [Apple’s Open Anyway guidance](https://support.apple.com/en-us/102445). This release is ad-hoc signed, not Developer ID signed or notarized. Independent clean-Mac first-install verification has not been completed. Intel Macs are not supported.
 
-## Updating to v0.8.1
+## Updating to v0.8.2
 
-**Manual installation only for this release.** [Download v0.8.1 / Build61](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/NotchMuse.dmg), verify it against [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.1/SHA256SUMS), quit the old Stable, and replace it in Applications. Keep the old App and its preferences backed up together if you need rollback; [v0.8.0](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.0) remains available. Do not replace Preview with the Stable package.
+**Manual installation only for this release.** [Download v0.8.2 / Build70](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/NotchMuse.dmg), verify it against [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/SHA256SUMS), quit the old Stable, and replace it in Applications. Keep the old App and its preferences backed up together if you need rollback; [v0.8.1](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1) remains available. Do not replace Preview with the Stable package.
 
-The signed Sparkle feed remains at Build47. In-app Check for Updates does **not** deliver Build61: real isolated updater installation and recovery are not yet verified for this package. Archive signature validation alone is insufficient.
+The signed Sparkle feed remains at Build47. In-app Check for Updates does **not** deliver Build70: real isolated updater installation and recovery are not yet verified for this package. Archive signature validation alone is insufficient.
 
 ### What changed
 
-Better Spotify identity recovery and multi-artist handling, recording/version checks, request recovery and cache safeguards, NetEase native identity validation, and distinct Searching / Timeout / No Lyrics states. No Spotify Premium or personal API key is required. Lyrics still depend on third-party coverage. [English / Chinese release notes](docs/releases/v0.8.1/RELEASE_NOTES.en.md).
+Draggable lyrics with saved positions, locking and click-through controls; genuine word/line-end highlighting with static display when end timing is unavailable; usable NetEase timing retained across malformed rows; clearer update-check status and retry feedback. Lyrics still depend on third-party coverage. [English / Chinese release notes](docs/releases/v0.8.2/RELEASE_NOTES.en.md).
 
 ## FAQ
 

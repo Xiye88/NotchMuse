@@ -1,5 +1,18 @@
 # NotchMuse Current Handoff
 
+## v0.8.2 / Build70 preparation — 2026-11-10
+
+Owner accepted Preview69 listening/synchronization and requested pushing this update. Bilingual lyrics are deferred. Preparing a stable manual-download candidate with runtime byte-equivalent to accepted Preview69; preserve current website, private development history, and official Build47 feed. Code synchronization is authorized; public download promotion remains a separate final confirmation under the project release rule.
+
+```text
+Current status: RELEASE_PREPARATION; accepted Preview69 source frozen, GitHub sync and stable package preparation in progress.
+Completed: Owner acceptance; public main and release-path inspection.
+Pending confirmation: Final public release/download promotion after concrete package verification.
+Key files: docs/releases/v0.8.2/; docs/project/PROJECT_HANDOFF.md.
+Next step: Export accepted runtime on latest public main, verify parity, test, build stable0.8.2/70, synchronize source.
+Do not repeat: Bilingual development, song/source research, private-history push, automatic feed activation, or unrelated website changes.
+```
+
 ## Website three SEO fixes — 2026-11-04 (DEPLOYED)
 
 GitHub main integrated source `9d1d50e79698d989b1bf80d53a49e19e93f7440b`; website tree `82d8ede83750e2ff111c3a8e3f8ceb1e7404fc1d`. Production `/opt/notchmuse-site/releases/20261104-seo-9d1d50e`:42GitHub static files+4retained feed/notes,46origin hashes/CSP PASS;72public requests exact-match PASS (66local,6media from production host via public Cloudflare HTTPS).12page schema/SEO/download protection PASS;public browser3/4PASS, remaining limits and original failures in report. App CI completed failure (job cancelled,no runner/steps), not PASS; unrelated App queue gate removed by PM, main rules=[]. Old release/server rollback retained. No App/Release/feed changes. Documentation-only follow-up preserves website tree; no redeploy. [Report](../reports/website/seo-3-fixes-2026-11-04.md).

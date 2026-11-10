@@ -319,7 +319,16 @@ enum LyricsSelection {
         return max(min(5, shorter), Int(ceil(Double(shorter) * 0.5)))
     }
     private static func fidelityRank(_ document: TimedLyricDocument) -> Int {
-        switch document.timingFidelity { case .word: return 0; case .lineWithEnd: return 1; case .lineStartOnly: return 2; case .estimated: return 3 }
+        switch document.timingFidelity {
+        case .word: return 0
+        case .lineWithEnd: return 1
+        case .lineStartOnly, .estimated:
+            // A malformed row must not erase the genuine timing retained by other rows.
+            if document.lines.contains(where: { line in
+                line.timingFidelity == .word || (line.endTime != nil && !line.endTimeIsEstimated)
+            }) { return 2 }
+            return document.timingFidelity == .lineStartOnly ? 3 : 4
+        }
     }
     private static func sourceOrder(_ provider: String) -> Int {
         ["NetEaseExactID (Preview)", "LRCLIB", "NetEase", "LRCMux", "QQ", "Kugou", "Soda"].firstIndex(of: provider) ?? 100

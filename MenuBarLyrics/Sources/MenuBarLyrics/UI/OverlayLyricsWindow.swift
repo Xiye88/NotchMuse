@@ -5,6 +5,7 @@ import LyricsCore
 enum DisplayMode: String, CaseIterable {
     case statusBar = "Status Bar"
     case notch = "Notch Mode"
+    case free = "Free Position"
 }
 
 enum LyricsPosition: String, CaseIterable {
@@ -434,6 +435,7 @@ final class OverlayLyricsWindow: NSObject {
         var artist = ""
         var progress: CGFloat = 0
         var highlight: LyricHighlight?
+        var staticText = false
         var font = NSFont.systemFont(ofSize: 13, weight: .medium)
         var style = NotchStyle.lyricOnly
         var colors = BrandStyle.gradientColors
@@ -533,7 +535,7 @@ final class OverlayLyricsWindow: NSObject {
             guard !glyphs.isEmpty else { return }
             let cell = ceil(font.pointSize * 1.45)
             let rows = max(1, Int(lyricViewport.height / cell))
-            let start = glyphs.count > rows * 2 ? min(glyphs.count - rows * 2, Int(CGFloat(glyphs.count - rows * 2) * min(max(progress, 0), 1))) : 0
+            let start = LyricHighlightLayout.verticalStart(glyphCount: glyphs.count, rows: rows, progress: progress, staticText: staticText)
             let visible = Array(glyphs.dropFirst(start).prefix(rows * 2))
             let columnWidth = lyricViewport.width / 2
             for (index, glyph) in visible.enumerated() {
@@ -594,6 +596,8 @@ final class OverlayLyricsWindow: NSObject {
         let view = NotchLyricsView()
         let window: NSWindow
         private let containerView = NSView()
+        private let lyricGroup = NSView()
+        private(set) var interaction: FreeLyricsInteraction?
         private let materialView = NSVisualEffectView()
         private let tintView = NSView()
         private var hoverTimer: Timer?
@@ -601,7 +605,7 @@ final class OverlayLyricsWindow: NSObject {
         private var hidesOnHover = true
         private var hoverFrame = NSRect.zero
 
-        init() {
+        init(interactive: Bool = false) {
             window = NSWindow(
                 contentRect: .zero,
                 styleMask: [.borderless],
@@ -621,11 +625,15 @@ final class OverlayLyricsWindow: NSObject {
             materialView.wantsLayer = true
             tintView.wantsLayer = true
             containerView.wantsLayer = true
-            containerView.addSubview(materialView)
-            containerView.addSubview(tintView)
-            containerView.addSubview(view)
+            containerView.addSubview(lyricGroup)
+            lyricGroup.addSubview(materialView)
+            lyricGroup.addSubview(tintView)
+            lyricGroup.addSubview(view)
             window.contentView = containerView
             view.wantsLayer = true
+            if interactive {
+                interaction = FreeLyricsInteraction(window: window, container: containerView, lyricViews: [lyricGroup])
+            }
         }
 
         func show(
@@ -635,6 +643,7 @@ final class OverlayLyricsWindow: NSObject {
             artist: String,
             progress: CGFloat,
             highlight: LyricHighlight?,
+            staticText: Bool = false,
             style requestedStyle: NotchStyle,
             placement: NotchPlacement,
             fontSize: CGFloat,
@@ -648,6 +657,9 @@ final class OverlayLyricsWindow: NSObject {
             scroll: ScrollState,
             animationSpeed: CGFloat
         ) -> Bool {
+            let windowFrame = frame
+            let toolbarHeight = interaction == nil ? 0 : FreeLyricsInteraction.toolbarHeight
+            let frame = NSRect(origin: .zero, size: NSSize(width: frame.width, height: frame.height - toolbarHeight))
             let style: NotchStyle = song.isEmpty ? .lyricOnly : requestedStyle
             let displayLyric = lyric
             let font = NSFont.systemFont(ofSize: fontSize, weight: .medium)
@@ -674,10 +686,11 @@ final class OverlayLyricsWindow: NSObject {
             let needsScrolling = !placement.isVertical && overflows && !scroll.isFinished(contentWidth: textWidth, viewportWidth: viewport.width, speedMultiplier: animationSpeed)
             let textX = lyricWraps ? viewport.minX : overflows ? viewport.minX - offset : viewport.midX - textWidth / 2
 
-            if window.frame != frame {
-                window.setFrame(frame, display: true)
+            if window.frame != windowFrame {
+                window.setFrame(windowFrame, display: true)
             }
-            containerView.frame = NSRect(origin: .zero, size: frame.size)
+            containerView.frame = NSRect(origin: .zero, size: windowFrame.size)
+            lyricGroup.frame = NSRect(x: 0, y: toolbarHeight, width: frame.width, height: frame.height)
             materialView.frame = backgroundRect
             materialView.layer?.cornerRadius = placement.isVertical ? 16 : style == .lyricOnly ? frame.height / 2 : min(16, frame.height * 0.28)
             materialView.layer?.masksToBounds = true
@@ -694,6 +707,7 @@ final class OverlayLyricsWindow: NSObject {
             view.artist = artist
             view.progress = progress
             view.highlight = highlight
+            view.staticText = staticText
             view.font = font
             view.style = style
             view.vertical = placement.isVertical
@@ -706,14 +720,18 @@ final class OverlayLyricsWindow: NSObject {
             view.drawsBackground = backgroundEnabled && backgroundOpacity > 0
             view.backgroundRect = backgroundRect
             view.needsDisplay = true
-            window.ignoresMouseEvents = OverlayMousePolicy.ignoresMouseEvents
+            if interaction == nil { window.ignoresMouseEvents = OverlayMousePolicy.ignoresMouseEvents }
             hoverFrame = backgroundEnabled
-                ? backgroundRect.offsetBy(dx: frame.minX, dy: frame.minY)
-                : frame
+                ? backgroundRect.offsetBy(dx: windowFrame.minX, dy: windowFrame.minY)
+                : windowFrame
             configuredOpacity = 1
             hidesOnHover = hideOnHover
-            updateHoverTimer()
-            applyHoverVisibility()
+            if let interaction {
+                interaction.update(hideOnHover: hideOnHover)
+            } else {
+                updateHoverTimer()
+                applyHoverVisibility()
+            }
             if !window.isVisible {
                 window.orderFrontRegardless()
             }
@@ -727,6 +745,7 @@ final class OverlayLyricsWindow: NSObject {
         }
 
         func hide() {
+            interaction?.hide()
             hoverTimer?.invalidate()
             hoverTimer = nil
             if window.isVisible {
@@ -755,17 +774,22 @@ final class OverlayLyricsWindow: NSObject {
     private let leftLane = Lane(level: .mainMenu)
     private let rightLane = Lane(level: NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1))
     private let notchLane = NotchLane()
+    private let freeLane = NotchLane(interactive: true)
+    var freeInteraction: FreeLyricsInteraction { freeLane.interaction! }
+    var isEditing: Bool { freeInteraction.isEditing }
 
     func hide() {
         leftLane.hide()
         rightLane.hide()
         notchLane.hide()
+        freeLane.hide()
     }
 
     func show(
         text: String,
         progress: CGFloat,
         highlight: LyricHighlight? = nil,
+        staticText: Bool = false,
         mode: DisplayMode,
         position: LyricsPosition,
         notchStyle: NotchStyle,
@@ -790,13 +814,18 @@ final class OverlayLyricsWindow: NSObject {
         customWidth: CGFloat,
         statusBarOffset: CGFloat
     ) -> Bool {
-        guard let screen = selectedScreen(target: displayTarget, statusItem: statusItem) else { return false }
+        guard let preferredScreen = selectedScreen(target: displayTarget, statusItem: statusItem) else { return false }
+        let screen = mode == .free ? freeInteraction.screen(vertical: FreeLyricsPreferences.vertical, fallback: preferredScreen) : preferredScreen
         let colors = BrandStyle.gradientColors(for: colorPreset, customColor: customLyricsColor, customEndColor: customLyricsEndColor)
 
-        if mode == .notch {
+        if mode != .free { freeLane.hide() }
+        if mode == .notch || mode == .free {
+            if mode == .free { notchLane.hide() }
+            let lane = mode == .free ? freeLane : notchLane
+            let placement: NotchPlacement = mode == .free ? (FreeLyricsPreferences.vertical ? .left : .bottom) : notchPlacement
             leftLane.hide()
             rightLane.hide()
-            notchLane.applyAppearance(statusItem.button?.effectiveAppearance)
+            lane.applyAppearance(statusItem.button?.effectiveAppearance)
             let effectiveStyle: NotchStyle = song.isEmpty ? .lyricOnly : notchStyle
             let availableWidth = max(0, screen.visibleFrame.width - 32)
             let width = WidthGeometry.notchWidth(
@@ -805,27 +834,33 @@ final class OverlayLyricsWindow: NSObject {
                 style: effectiveStyle,
                 customWidth: customWidth
             )
-            let frame = NotchGeometry.frame(
+            var frame = NotchGeometry.frame(
                 screenFrame: screen.frame,
                 visibleFrame: screen.visibleFrame,
                 style: effectiveStyle,
                 fontSize: fontSize,
                 width: width,
-                placement: notchPlacement
+                placement: placement
             )
-            return notchLane.show(
+            if mode == .free {
+                let size = NSSize(width: placement.isVertical ? FreeLyricsInteraction.expandedToolbarWidth : max(FreeLyricsInteraction.expandedToolbarWidth, frame.width),
+                                  height: frame.height + FreeLyricsInteraction.toolbarHeight)
+                frame = freeInteraction.frame(size: size, vertical: placement.isVertical, fallback: screen)
+            }
+            return lane.show(
                 frame: frame,
                 lyric: text,
                 song: song,
                 artist: artist,
                 progress: highlight.map { value in
-                    notchPlacement.isVertical
+                    placement.isVertical
                         ? value.progress(in: text) { CGFloat($0.count) }
                         : LyricHighlightLayout.progress(value, text: text, font: .systemFont(ofSize: fontSize, weight: .medium))
                 } ?? progress,
                 highlight: highlight,
+                staticText: staticText,
                 style: effectiveStyle,
-                placement: notchPlacement,
+                placement: placement,
                 fontSize: fontSize,
                 colors: colors,
                 usesGradient: colorPreset.isGradient,

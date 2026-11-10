@@ -1,5 +1,12 @@
 # NotchMuse Task Board
 
+## v0.8.2 / Build70 — release preparation, 2026-11-10
+
+- Product Owner accepted Preview69 listening/synchronization and requested this update; bilingual lyrics remain deferred.
+- Public-source integration is based on latest main `2a63580`, exporting only accepted app/test/scripts changes. Runtime and packaging inputs match accepted Preview69; provenance is in [v0.8.2](../releases/v0.8.2/SOURCE_PROVENANCE.json). Current website SEO tree is preserved.
+- Related offline timing/selection/provider/recovery/diagnostics and update-feedback checks pass. Stable0.8.2/70 package preparation is in progress. Complete local XCTest remains unavailable in the current Command Line Tools environment; CI status will be recorded separately.
+- Public download and website promotion require the final publication confirmation separately from source synchronization. The official automatic-update feed stays at the last qualified Build47; this candidate is for manual installation.
+
 ## Website three SEO fixes — 2026-11-04 (DEPLOYED)
 
 GitHub main integrated source `9d1d50e79698d989b1bf80d53a49e19e93f7440b`; website tree `82d8ede83750e2ff111c3a8e3f8ceb1e7404fc1d`. Production `/opt/notchmuse-site/releases/20261104-seo-9d1d50e`:42GitHub static files+4retained feed/notes,46origin hashes/CSP PASS;72public requests exact-match PASS (66local,6media from production host via public Cloudflare HTTPS).12page schema/SEO/download protection PASS;public browser3/4PASS, remaining limits and original failures in report. App CI completed failure (job cancelled,no runner/steps), not PASS; unrelated App queue gate removed by PM, main rules=[]. Old release/server rollback retained. No App/Release/feed changes. Documentation-only follow-up preserves website tree; no redeploy. [Report](../reports/website/seo-3-fixes-2026-11-04.md).

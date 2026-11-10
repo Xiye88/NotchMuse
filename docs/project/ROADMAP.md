@@ -1,5 +1,11 @@
 # NotchMuse Roadmap
 
+## Current — 2026-11-10
+
+1. Synchronize the owner-accepted Preview69 app source and prepare stable v0.8.2 / Build70.
+2. Obtain the separate final public-download/website promotion decision after package verification. Automatic feed qualification remains separate.
+3. Bilingual lyric display is deferred; no new feature or source research is included.
+
 ## Current — v0.8.1 released
 
 1. Collect actual post-release installation/playback feedback; keep the algorithm frozen.

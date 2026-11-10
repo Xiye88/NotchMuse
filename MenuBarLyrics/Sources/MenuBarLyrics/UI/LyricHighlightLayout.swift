@@ -4,6 +4,12 @@ import LyricsCore
 /// Measures the same font and prefixes used to draw the lyric. Token count is not pixel width.
 @MainActor
 enum LyricHighlightLayout {
+    /// A static fully lit line starts at its first glyph, independent of color progress.
+    static func verticalStart(glyphCount: Int, rows: Int, progress: CGFloat, staticText: Bool) -> Int {
+        guard !staticText, glyphCount > rows * 2 else { return 0 }
+        return min(glyphCount - rows * 2, Int(CGFloat(glyphCount - rows * 2) * min(max(progress, 0), 1)))
+    }
+
     static func progress(_ highlight: LyricHighlight, text: String, font: NSFont, prefix: String = "") -> CGFloat {
         let display = prefix + text
         let total = (display as NSString).size(withAttributes: [.font: font]).width

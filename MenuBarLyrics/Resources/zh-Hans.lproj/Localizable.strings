@@ -188,3 +188,17 @@
 "Check the selected network and send USDT only." = "请确认转账网络与所选网络一致，仅发送 USDT。";
 "Supporters" = "感谢支持者";
 "Thanks to everyone supporting NotchMuse." = "感谢每一位支持 NotchMuse 的朋友。";
+
+"Free Position" = "自由定位";
+"Horizontal" = "横向";
+"Vertical" = "竖向";
+"Orientation" = "歌词方向";
+"Lock Position" = "锁定位置";
+"Click Through" = "鼠标穿透";
+"Move Lyrics" = "移动歌词";
+"Unlock Position" = "解锁位置";
+"Reset Position" = "恢复默认位置";
+"Use Move Lyrics to edit, even when locked or click-through is on." = "锁定或穿透后，仍可从菜单栏或设置选择“移动歌词”。再次锁定后恢复鼠标隐藏和穿透设置。";
+
+"Switch to Horizontal" = "切换为横向歌词";
+"Switch to Vertical" = "切换为竖向歌词";

@@ -69,7 +69,7 @@ struct NetEaseLyricsSource {
         guard payload.code == 200 else { return nil }
         if let yrc = payload.yrc?.lyric {
             let lines = LyricParser.parseYRC(yrc)
-            if !lines.isEmpty && lines.allSatisfy({ !$0.segments.isEmpty }) { return lines }
+            if !lines.isEmpty { return lines }
         }
         guard let lyric = payload.lrc?.lyric else { return nil }
         return LyricParser.parse(lyric)

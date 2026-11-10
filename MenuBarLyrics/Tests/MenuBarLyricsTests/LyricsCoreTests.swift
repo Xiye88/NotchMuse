@@ -21,10 +21,10 @@ final class LyricsCoreTests: XCTestCase {
         ]
 
         XCTAssertNil(LyricClock.moment(at: 0.5, in: lines))
-        XCTAssertEqual(LyricClock.moment(at: 1, in: lines)?.progress, 0)
-        XCTAssertEqual(LyricClock.moment(at: 2, in: lines)?.progress, 0.5)
-        XCTAssertEqual(LyricClock.moment(at: 3, in: lines)?.progress, 0)
-        XCTAssertEqual(LyricClock.moment(at: 10, in: lines)?.progress, 0.375)
+        XCTAssertEqual(LyricClock.moment(at: 1, in: lines)?.progress, 1)
+        XCTAssertEqual(LyricClock.moment(at: 2, in: lines)?.progress, 1)
+        XCTAssertEqual(LyricClock.moment(at: 3, in: lines)?.progress, 1)
+        XCTAssertEqual(LyricClock.moment(at: 10, in: lines)?.progress, 1)
         XCTAssertEqual(LyricClock.currentLine(at: 3.2, in: lines), "Three")
     }
 
@@ -44,10 +44,10 @@ final class LyricsCoreTests: XCTestCase {
         XCTAssertEqual(LyricClock.moment(at: 14, in: [line])?.progress, 1)
     }
 
-    func testEstimatedTimingKeepsSourceSwitches() {
+    func testStaticTimingKeepsSourceSwitches() {
         let lines = [LyricLine(time: 10, text: "Hello"), LyricLine(time: 70, text: "Next")]
         XCTAssertEqual(LyricClock.moment(at: 18, in: lines)?.progress, 1)
-        XCTAssertEqual(LyricClock.moment(at: 18, in: lines)?.timingFidelity, .estimated)
+        XCTAssertEqual(LyricClock.moment(at: 18, in: lines)?.timingFidelity, .lineStartOnly)
         XCTAssertEqual(LyricClock.moment(at: 69.9, in: lines)?.identity, 0)
         XCTAssertEqual(LyricClock.moment(at: 70, in: lines)?.identity, 1)
     }
@@ -55,7 +55,7 @@ final class LyricsCoreTests: XCTestCase {
     func testOffsetNormalizedOnce() {
         let document = LyricParser.parseDocument("[offset:500]\n[00:10]A\n[00:12]B")
         XCTAssertEqual(document.metadata.lyricOffset, 0.5)
-        XCTAssertEqual(LyricClock.moment(at: 10.5, in: document)?.progress, 0.5)
+        XCTAssertEqual(LyricClock.moment(at: 10.5, in: document)?.progress, 1)
         XCTAssertEqual(LyricClock.moment(at: 10.5, in: document), LyricClock.moment(at: 10.5, in: document.normalizedLines))
     }
 

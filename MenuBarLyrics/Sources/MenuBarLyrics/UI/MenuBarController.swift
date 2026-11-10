@@ -74,6 +74,8 @@ final class MenuBarController: NSObject {
     private let songItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let artistItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private var isLyricsHidden = false
+    private var freeEditObserver: NSObjectProtocol?
+    private var freeResetObserver: NSObjectProtocol?
     private var isPlayerStopped = false
     private var isPlaybackPaused = false
     private var displaySource = ""
@@ -85,6 +87,7 @@ final class MenuBarController: NSObject {
     private var latestPlayerUptime: TimeInterval?
     private var displayHighlight: LyricHighlight?
     private var displayProgress: CGFloat = 0
+    private var displayStaticText = false
     private var displayIdentity: Int?
     private var scroll = ScrollState()
     private var pollTimer: Timer?
@@ -104,6 +107,22 @@ final class MenuBarController: NSObject {
         displaySource = L10n.format("Checking %@...", player.source.displayName())
         setupButton()
         setupMenu()
+        overlay.freeInteraction.onSettings = { [weak self] in self?.showSettings() }
+        overlay.freeInteraction.onClose = { [weak self] in
+            self?.isLyricsHidden = true
+            self?.updateDisplay()
+        }
+        overlay.freeInteraction.onColor = { [weak self] in self?.reloadSettings() }
+        overlay.freeInteraction.onInteractionChanged = { [weak self] in
+            self?.settingsWindowController?.refresh()
+            self?.updateDisplay()
+        }
+        freeEditObserver = NotificationCenter.default.addObserver(forName: FreeLyricsPreferences.editNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.editFreeLyrics() }
+        }
+        freeResetObserver = NotificationCenter.default.addObserver(forName: FreeLyricsPreferences.resetNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.resetFreeLyrics() }
+        }
         reloadSettings()
         Task { @MainActor [weak self] in
             self?.showFirstLaunchGuideIfNeeded()
@@ -123,6 +142,8 @@ final class MenuBarController: NSObject {
     func stop() {
         lyricsTask?.cancel()
         lyricsTask = nil
+        if let freeEditObserver { NotificationCenter.default.removeObserver(freeEditObserver) }
+        if let freeResetObserver { NotificationCenter.default.removeObserver(freeResetObserver) }
         lyricsClient.clearDiagnostics()
         pollTimer?.invalidate()
         pollTimer = nil
@@ -157,7 +178,10 @@ final class MenuBarController: NSObject {
         menu.addItem(songItem)
         menu.addItem(artistItem)
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: L10n.text("Hide Lyrics"), action: #selector(toggleLyricsVisibility(_:)), keyEquivalent: ""))
+        let visibility = NSMenuItem(title: L10n.text(isLyricsHidden ? "Show Lyrics" : "Hide Lyrics"), action: #selector(toggleLyricsVisibility(_:)), keyEquivalent: "")
+        menu.addItem(visibility)
+        menu.addItem(NSMenuItem(title: L10n.text("Move Lyrics"), action: #selector(editFreeLyrics), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: L10n.text("Reset Position"), action: #selector(resetFreeLyrics), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
 
         for itemPosition in LyricsPosition.allCases {
@@ -391,23 +415,27 @@ final class MenuBarController: NSObject {
         return fallbackText()
     }
 
-    private func setDisplay(_ text: String, progress: CGFloat = 0, identity: Int? = nil, highlight: LyricHighlight? = nil) {
+    private func setDisplay(_ text: String, progress: CGFloat = 0, identity: Int? = nil, highlight: LyricHighlight? = nil, staticText: Bool = false) {
         if text != displaySource || identity != displayIdentity {
             scroll.reset()
         }
         displaySource = text
         displayProgress = progress
+        displayStaticText = staticText
         displayHighlight = highlight
         displayIdentity = identity
         updateDisplay()
     }
 
     private func updateDisplay() {
+        if let item = statusItem.menu?.items.first(where: { $0.action == #selector(toggleLyricsVisibility(_:)) }) {
+            item.title = L10n.text(isLyricsHidden ? "Show Lyrics" : "Hide Lyrics")
+        }
         guard !Self.shouldHideLyrics(
             isUserHidden: isLyricsHidden,
             isPlaying: !isPlayerStopped && !isPlaybackPaused,
             stopBehavior: AppPreferences.playerStopBehavior
-        ) else {
+        ) || overlay.isEditing else {
             overlay.hide()
             updateScrollTimer(overflows: false)
             return
@@ -416,6 +444,7 @@ final class MenuBarController: NSObject {
             text: displaySource.isEmpty ? " " : displaySource,
             progress: displayProgress,
             highlight: displayHighlight,
+            staticText: displayStaticText,
             mode: displayMode,
             position: position,
             notchStyle: notchStyle,
@@ -500,7 +529,8 @@ final class MenuBarController: NSObject {
             return
         }
         if let moment = LyricClock.moment(at: position, in: currentLines) {
-            setDisplay(moment.text, progress: moment.progress, identity: moment.identity, highlight: moment.highlight)
+            setDisplay(moment.text, progress: moment.progress, identity: moment.identity, highlight: moment.highlight,
+                       staticText: moment.timingFidelity == .lineStartOnly || moment.timingFidelity == .estimated)
         } else {
             setDisplay(fallbackText())
         }
@@ -528,6 +558,20 @@ final class MenuBarController: NSObject {
     private func stopProgressTimer() {
         progressTimer?.invalidate()
         progressTimer = nil
+    }
+
+    @objc private func editFreeLyrics() {
+        UserDefaults.standard.set(DisplayMode.free.rawValue, forKey: AppPreferences.displayModeKey)
+        isLyricsHidden = false
+        overlay.freeInteraction.beginEditing()
+        reloadSettings()
+        settingsWindowController?.refresh()
+    }
+
+    @objc private func resetFreeLyrics() {
+        UserDefaults.standard.removeObject(forKey: FreeLyricsPreferences.horizontalAnchorKey)
+        UserDefaults.standard.removeObject(forKey: FreeLyricsPreferences.verticalAnchorKey)
+        editFreeLyrics()
     }
 
     @objc private func toggleLyricsVisibility(_ sender: NSMenuItem) {
@@ -665,9 +709,101 @@ final class MenuBarController: NSObject {
             settingsWindowController = SettingsWindowController { [weak self] in
                 self?.reloadSettings()
             }
+            settingsWindowController?.onFreeLockChanged = { [weak self] in
+                self?.overlay.freeInteraction.endEditing()
+            }
+            settingsWindowController?.onDisplayModeSelected = { [weak self] in
+                guard let self else { return }
+                self.isLyricsHidden = false
+                self.updateDisplay()
+            }
         }
         settingsWindowController?.show()
     }
+
+    #if DEBUG
+    static func testVocalGapPresentation() {
+        let controller = MenuBarController()
+        controller.isLyricsHidden = true // Exercise real display state without showing a fixture over user lyrics.
+        defer { controller.overlay.hide(); NSStatusBar.system.removeStatusItem(controller.statusItem) }
+        let next = LyricLine(time: 20, text: "Next", endTime: 23)
+        let estimatedText = "One two three four five six seven eight"
+        for line in [LyricLine(time: 10, text: estimatedText), LyricLine(time: 10, text: estimatedText, endTime: 20, endTimeIsEstimated: true)] {
+            controller.currentLines = [line, next]
+            for position in [10.0, 12.5, 15, 17.5, 19.999] {
+                controller.latestPlayerPosition = position
+                controller.updatePlayingDisplay()
+                precondition(controller.displayProgress == 1, "Start-only and estimated lyrics remain fully lit without a guessed sweep")
+                precondition(controller.displayStaticText && controller.displayHighlight == nil && controller.displaySource == estimatedText, "Static display does not fabricate word timestamps or advance the line early")
+            }
+        }
+        for line in [LyricLine(time: 10, text: "Fixture", endTime: 15),
+                     LyricLine(time: 10, text: "Fixture", endTime: 15, segments: [LyricSegment(time: 10, endTime: 15, text: "Fixture")])] {
+            controller.currentLines = [line, next]
+            controller.latestPlayerPosition = 12.5
+            controller.updatePlayingDisplay()
+            precondition(!controller.displayStaticText && controller.displayProgress == 0.5, "Authentic five-second vocal timing remains proportional")
+            for position in [15.0, 17.5, 19.999, 15, 12.5] {
+                controller.latestPlayerPosition = position
+                controller.updatePlayingDisplay()
+                precondition(controller.displayProgress == (position >= 15 ? 1 : 0.5), "Real vocal ends hold through the five-second gap and follow seek backwards")
+            }
+            controller.latestPlayerPosition = 20
+            controller.updatePlayingDisplay()
+            precondition(controller.displaySource == "Next" && controller.displayProgress == 0, "Next timed line starts only at source timestamp")
+        }
+        print("PASS: vocal-gap display checks — authentic timing retained; start-only and estimated timing stays static")
+    }
+
+    static func testDisplayModeReopen() {
+        let defaults = UserDefaults.standard
+        let keys = [AppPreferences.displayModeKey, AppPreferences.playerSourceKey, "NSWindow Frame NotchMuseSettings"] + FreeLyricsPreferences.keys
+        let saved = keys.map { defaults.object(forKey: $0) }
+        defaults.set(PlayerSource.spotify.rawValue, forKey: AppPreferences.playerSourceKey)
+        let controller = MenuBarController()
+        defer {
+            controller.settingsWindowController?.close()
+            controller.overlay.hide()
+            controller.scrollTimer?.invalidate()
+            NSStatusBar.system.removeStatusItem(controller.statusItem)
+            for (key, value) in zip(keys, saved) {
+                if let value { defaults.set(value, forKey: key) } else { defaults.removeObject(forKey: key) }
+            }
+        }
+        controller.showSettings()
+        func findModeControl(_ view: NSView) -> NSSegmentedControl? {
+            if let control = view as? NSSegmentedControl,
+               control.action == NSSelectorFromString("displayModeChanged") { return control }
+            return view.subviews.lazy.compactMap { findModeControl($0) }.first
+        }
+        let control = findModeControl(controller.settingsWindowController!.window!.contentView!)!
+        for mode in [DisplayMode.free, .notch, .free, .free] {
+            controller.isLyricsHidden = true // State left by the overlay's close action.
+            controller.overlay.hide()
+            controller.showSettings()
+            precondition(controller.isLyricsHidden, "Opening settings alone must not reopen closed lyrics")
+            control.selectedSegment = DisplayMode.allCases.firstIndex(of: mode)!
+            _ = NSApp.sendAction(control.action!, to: control.target, from: control)
+            precondition(!controller.isLyricsHidden, "Selecting a display mode must reopen closed lyrics, including reselecting the same mode")
+            if mode == .free {
+                precondition(controller.overlay.freeInteraction.window.isVisible, "Free lyrics must actually reopen")
+            }
+        }
+        func findLockControl(_ view: NSView) -> NSSwitch? {
+            if let control = view as? NSSwitch,
+               control.action == NSSelectorFromString("freeLockChanged") { return control }
+            return view.subviews.lazy.compactMap { findLockControl($0) }.first
+        }
+        let lockControl = findLockControl(controller.settingsWindowController!.window!.contentView!)!
+        controller.overlay.freeInteraction.beginEditing()
+        lockControl.state = .on
+        _ = NSApp.sendAction(lockControl.action!, to: lockControl.target, from: lockControl)
+        precondition(!controller.overlay.isEditing, "Locking from settings must end temporary editing")
+        precondition(defaults.bool(forKey: FreeLyricsPreferences.lockedKey), "Settings lock persists")
+        precondition(!(controller.overlay.freeInteraction.testToolbar.subviews[0] as! NSButton).isEnabled, "Settings lock disables native drag control")
+        print("PASS: display-mode selection reopens closed lyrics, including same-mode reselection; settings locking ends editing")
+    }
+    #endif
 
     @objc private func checkForUpdates() {
         UpdateController.shared.checkForUpdates()

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.2 — Build70
+
+**Stable release package candidate — publication pending; manual installation.**
+
+- Add a draggable lyric frame with saved positions, screen-bound recovery, horizontal/vertical layouts and accessible lock, click-through and toolbar controls.
+- Follow genuine word/line endings and hold completed highlighting until the next line; show the whole line statically when genuine timing is unavailable.
+- Preserve valid NetEase timing across malformed rows and mixed-quality documents without relaxing recording identity checks.
+- Clarify update status and connection-error retry feedback.
+- macOS 14+ / Apple Silicon; ad-hoc signed, without Developer ID signing or notarization. The official Sparkle feed stays at Build47; automatic installation, relaunch and previous-version recovery remain unverified. [English release notes](docs/releases/v0.8.2/RELEASE_NOTES.en.md) · [中文发布说明](docs/releases/v0.8.2/RELEASE_NOTES.zh-CN.md).
+
 ## 0.8.1 — Build61
 
 - Improve Spotify lyric recall with public recording identity, complete artist evidence and bounded request recovery; no Premium or user API key required.

@@ -318,6 +318,12 @@ final class SettingsWindowController: NSWindowController {
     private var notchBackgroundRow: NSGridRow?
     private var notchBackgroundColorRow: NSGridRow?
     private var notchHideOnHoverRow: NSGridRow?
+    private let freeOrientation = NSSegmentedControl(labels: [L10n.text("Horizontal"), L10n.text("Vertical")], trackingMode: .selectOne, target: nil, action: nil)
+    private let freeLock = NSSwitch()
+    private let freePassThrough = NSSwitch()
+    private var freeCard: NSView?
+    var onFreeLockChanged: (() -> Void)?
+    var onDisplayModeSelected: (() -> Void)?
     private let onSettingsChange: () -> Void
 
     init(onSettingsChange: @escaping () -> Void) {
@@ -359,7 +365,7 @@ final class SettingsWindowController: NSWindowController {
         _ = NSApplication.shared
         let defaults = UserDefaults.standard
         let keys = [AppPreferences.displayModeKey, AppPreferences.displayWidthKey, AppPreferences.colorPresetKey, AppPreferences.notchPlacementKey,
-                    AppAppearanceController.preferenceKey, "NSWindow Frame NotchMuseSettings"]
+                    AppAppearanceController.preferenceKey, "NSWindow Frame NotchMuseSettings"] + FreeLyricsPreferences.keys
         let saved = keys.map { defaults.object(forKey: $0) }
         let savedAppearance = NSApp.appearance
         defer {
@@ -388,6 +394,15 @@ final class SettingsWindowController: NSWindowController {
             controller.notchPlacementChanged()
             precondition(AppPreferences.notchPlacement == placement, "Placement must persist")
         }
+        controller.preview.onModeClick?(.free)
+        precondition(AppPreferences.displayMode == .free && controller.freeCard?.isHidden == false, "Free mode must be reachable from preview card")
+        precondition(controller.notchPlacementRow?.isHidden == true, "Free mode must not expose fixed notch placement")
+        controller.freeOrientation.selectedSegment = 1
+        controller.freeLock.state = .on
+        controller.freePassThrough.state = .on
+        controller.freeOptionsChanged()
+        precondition(FreeLyricsPreferences.vertical && UserDefaults.standard.bool(forKey: FreeLyricsPreferences.lockedKey) && UserDefaults.standard.bool(forKey: FreeLyricsPreferences.passThroughKey), "Independent interaction preferences persist")
+        controller.preview.onModeClick?(.notch)
         controller.colorModeControl.selectedSegment = 1
         controller.colorModeChanged()
         precondition(AppPreferences.colorPreset.isGradient && controller.solidPalette.isHidden && !controller.gradientPalette.isHidden,
@@ -545,7 +560,7 @@ final class SettingsWindowController: NSWindowController {
         previewModeControl.selectedSegment = 0
         preview.onModeClick = { [weak self] mode in
             guard let self else { return }
-            self.previewModeControl.selectedSegment = mode == .notch ? 1 : 0
+            self.previewModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: mode) ?? 0
             self.previewModeChanged()
         }
         let displayGrid = grid([
@@ -597,6 +612,22 @@ final class SettingsWindowController: NSWindowController {
         generalPage.addArrangedSubview(checkUpdates)
 
         displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how and where lyrics appear."), grid: displayGrid, trailing: resetButton(for: .display))))
+        freeOrientation.target = self
+        freeOrientation.action = #selector(freeOptionsChanged)
+        freeLock.target = self
+        freeLock.action = #selector(freeLockChanged)
+        freePassThrough.target = self
+        freePassThrough.action = #selector(freeOptionsChanged)
+        let freeGrid = grid([
+            [label(L10n.text("Orientation")), freeOrientation],
+            [label(L10n.text("Lock Position")), freeLock],
+            [label(L10n.text("Click Through")), freePassThrough],
+            [NSButton(title: L10n.text("Move Lyrics"), target: self, action: #selector(editFreeLyrics)),
+             NSButton(title: L10n.text("Reset Position"), target: self, action: #selector(resetFreeLyrics))]
+        ])
+        let freeCard = card(content: cardBody(title: "Free Position", subtitle: "Use Move Lyrics to edit, even when locked or click-through is on.", grid: freeGrid, trailing: NSView()))
+        self.freeCard = freeCard
+        displayPage.addArrangedSubview(freeCard)
 
         guard let contentView = window?.contentView else { return }
         let backdrop = SettingsBackdropView(frame: contentView.bounds)
@@ -778,9 +809,16 @@ final class SettingsWindowController: NSWindowController {
     private func cardHeader(title: String, subtitle: String, trailing: NSView) -> NSStackView {
         let heading = NSTextField(labelWithString: L10n.text(title))
         heading.font = .systemFont(ofSize: 17, weight: .semibold)
+        heading.setContentCompressionResistancePriority(.required, for: .vertical)
         let detail = NSTextField(labelWithString: L10n.text(subtitle))
         detail.textColor = .secondaryLabelColor
         detail.font = .systemFont(ofSize: 13)
+        detail.setContentCompressionResistancePriority(.required, for: .vertical)
+        if title == "Free Position" {
+            detail.maximumNumberOfLines = 2
+            detail.usesSingleLineMode = false
+            detail.lineBreakMode = .byWordWrapping
+        }
         let symbol: String
         switch title {
         case "Display": symbol = "rectangle.on.rectangle"
@@ -868,6 +906,7 @@ final class SettingsWindowController: NSWindowController {
         let label = NSTextField(labelWithString: title)
         label.alignment = .left
         label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.setContentCompressionResistancePriority(.required, for: .vertical)
         return label
     }
 
@@ -1001,10 +1040,15 @@ final class SettingsWindowController: NSWindowController {
         return image
     }
 
+    func refresh() { sync(); updatePreview() }
+
     private func sync() {
         displayModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: AppPreferences.displayMode) ?? 0
         previewModeControl.selectedSegment = displayModeControl.selectedSegment
-        preview.mode = AppPreferences.displayMode == .notch ? .notch : .statusBar
+        preview.mode = AppPreferences.displayMode
+        freeOrientation.selectedSegment = FreeLyricsPreferences.vertical ? 1 : 0
+        freeLock.state = UserDefaults.standard.bool(forKey: FreeLyricsPreferences.lockedKey) ? .on : .off
+        freePassThrough.state = UserDefaults.standard.bool(forKey: FreeLyricsPreferences.passThroughKey) ? .on : .off
         positionControl.selectedSegment = LyricsPosition.allCases.firstIndex(of: AppPreferences.position) ?? 1
         notchStyleControl.selectedSegment = NotchStyle.allCases.firstIndex(of: AppPreferences.notchStyle) ?? 0
         notchPlacementControl.selectedSegment = NotchPlacement.allCases.firstIndex(of: AppPreferences.notchPlacement) ?? 0
@@ -1062,7 +1106,8 @@ final class SettingsWindowController: NSWindowController {
         positionRow?.isHidden = !statusBarMode
         statusBarOffsetRow?.isHidden = !statusBarMode
         notchStyleRow?.isHidden = statusBarMode
-        notchPlacementRow?.isHidden = statusBarMode
+        notchPlacementRow?.isHidden = AppPreferences.displayMode != .notch
+        freeCard?.isHidden = AppPreferences.displayMode != .free
         solidPalette.isHidden = colorModeControl.selectedSegment == 1
         gradientPalette.isHidden = colorModeControl.selectedSegment != 1
         customWidthRow?.isHidden = false
@@ -1076,13 +1121,37 @@ final class SettingsWindowController: NSWindowController {
         notchHideOnHoverRow?.isHidden = statusBarMode
     }
 
+    @objc private func freeLockChanged() {
+        freeOptionsChanged()
+        onFreeLockChanged?()
+    }
+
+    @objc private func freeOptionsChanged() {
+        UserDefaults.standard.set(freeOrientation.selectedSegment == 1, forKey: FreeLyricsPreferences.verticalKey)
+        UserDefaults.standard.set(freeLock.state == .on, forKey: FreeLyricsPreferences.lockedKey)
+        UserDefaults.standard.set(freePassThrough.state == .on, forKey: FreeLyricsPreferences.passThroughKey)
+        onSettingsChange()
+        updatePreview()
+    }
+
+    @objc private func editFreeLyrics() {
+        NotificationCenter.default.post(name: FreeLyricsPreferences.editNotification, object: nil)
+    }
+
+    @objc private func resetFreeLyrics() {
+        NotificationCenter.default.post(name: FreeLyricsPreferences.resetNotification, object: nil)
+    }
+
     @objc private func displayModeChanged() {
         let modes = DisplayMode.allCases
         guard modes.indices.contains(displayModeControl.selectedSegment) else { return }
         save(modes[displayModeControl.selectedSegment], key: AppPreferences.displayModeKey)
+        onDisplayModeSelected?()
         previewModeControl.selectedSegment = displayModeControl.selectedSegment
-        preview.mode = modes[displayModeControl.selectedSegment] == .notch ? .notch : .statusBar
+        preview.mode = modes[displayModeControl.selectedSegment]
         updateControlAvailability()
+        window?.contentView?.layoutSubtreeIfNeeded()
+        settingsScrollView?.layoutDocument()
     }
 
     @objc private func positionChanged() {
@@ -1203,7 +1272,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func opacityChanged() {
-        let key = AppPreferences.displayMode == .notch ? AppPreferences.notchBackgroundOpacityKey : AppPreferences.opacityKey
+        let key = AppPreferences.displayMode != .statusBar ? AppPreferences.notchBackgroundOpacityKey : AppPreferences.opacityKey
         UserDefaults.standard.set(opacitySlider.doubleValue, forKey: key)
         opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
         onSettingsChange()
@@ -1211,7 +1280,7 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func opacityEntered() {
-        let minimum: Double = AppPreferences.displayMode == .notch ? 0 : 10
+        let minimum: Double = AppPreferences.displayMode != .statusBar ? 0 : 10
         guard let percent = NumericInput.parse(opacityValue.stringValue, minimum: minimum, maximum: 100) else {
             opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
             NSSound.beep()
@@ -1456,7 +1525,7 @@ final class SettingsWindowController: NSWindowController {
         let keys: [String]
         switch page {
         case .display:
-            keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.statusBarOffsetKey, AppPreferences.notchStyleKey, AppPreferences.notchPlacementKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey]
+            keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.statusBarOffsetKey, AppPreferences.notchStyleKey, AppPreferences.notchPlacementKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey] + FreeLyricsPreferences.keys
         case .appearance:
             keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.customLyricsEndColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchBackgroundOpacityKey, AppPreferences.notchBackgroundPaddingKey, AppPreferences.notchHideOnHoverKey]
         case .general:
@@ -1685,7 +1754,7 @@ private enum SettingsPage: String, CaseIterable {
 
 @MainActor
 private final class SettingsPreviewView: NSView {
-    enum Mode { case statusBar, notch }
+    typealias Mode = DisplayMode
     var mode: Mode = .statusBar { didSet { needsDisplay = true } }
     var onModeClick: ((Mode) -> Void)?
     private var hoveredMode: Mode? { didSet { if hoveredMode != oldValue { needsDisplay = true } } }
@@ -1742,7 +1811,7 @@ private final class SettingsPreviewView: NSView {
 
     private func mode(at point: NSPoint) -> Mode? {
         guard bounds.contains(point) else { return nil }
-        return point.x < bounds.midX ? .statusBar : .notch
+        return Mode.allCases[min(2, max(0, Int(point.x / max(1, bounds.width / 3))))]
     }
 
     func apply(colors: [NSColor], usesGradient: Bool, fontSize: CGFloat, opacity: CGFloat, backgroundOpacity: CGFloat, width: DisplayWidth,
@@ -1768,17 +1837,19 @@ private final class SettingsPreviewView: NSView {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         let gap: CGFloat = 12
-        let panelWidth = (bounds.width - gap) / 2
-        drawPanel(NSRect(x: 0, y: 0, width: panelWidth, height: bounds.height), notch: false)
-        drawPanel(NSRect(x: panelWidth + gap, y: 0, width: panelWidth, height: bounds.height), notch: true)
+        let panelWidth = (bounds.width - gap * 2) / 3
+        for (index, mode) in Mode.allCases.enumerated() {
+            drawPanel(NSRect(x: CGFloat(index) * (panelWidth + gap), y: 0, width: panelWidth, height: bounds.height), panelMode: mode)
+        }
     }
 
-    private func drawPanel(_ rect: NSRect, notch: Bool) {
-        let selected = (mode == .notch) == notch
-        let hovered = hoveredMode == (notch ? .notch : .statusBar)
+    private func drawPanel(_ rect: NSRect, panelMode: Mode) {
+        let notch = panelMode != .statusBar
+        let selected = mode == panelMode
+        let hovered = hoveredMode == panelMode
         (selected || hovered ? NSColor.controlAccentColor.withAlphaComponent(hovered ? 0.10 : 0.05) : NSColor.clear).setFill()
         NSBezierPath(roundedRect: rect, xRadius: 11, yRadius: 11).fill()
-        let title = L10n.text(notch ? "Notch Preview" : "Status Bar Preview")
+        let title = L10n.text(panelMode == .free ? "Free Position" : (notch ? "Notch Preview" : "Status Bar Preview"))
         (title as NSString).draw(in: NSRect(x: rect.minX + 10, y: rect.minY + 2, width: rect.width - 20, height: 22),
                                  withAttributes: [.font: NSFont.systemFont(ofSize: 12, weight: .semibold),
                                                   .foregroundColor: NSColor.secondaryLabelColor])
@@ -1813,6 +1884,7 @@ private final class SettingsPreviewView: NSView {
             case .expanded: overlayHeight = lineHeight * 4 + 22
             }
             let overlay: NSRect
+            let notchPlacement: NotchPlacement = panelMode == .free ? (FreeLyricsPreferences.vertical ? .left : .bottom) : self.notchPlacement
             switch notchPlacement {
             case .top: overlay = NSRect(x: screen.midX - overlayWidth / 2, y: cutout.maxY + 6, width: overlayWidth, height: overlayHeight)
             case .bottom: overlay = NSRect(x: screen.midX - overlayWidth / 2, y: screen.maxY - overlayHeight - 8, width: overlayWidth, height: overlayHeight)
@@ -1889,7 +1961,7 @@ private final class SettingsPreviewView: NSView {
         NSGraphicsContext.restoreGraphicsState()
         (selected ? NSColor.controlAccentColor : NSColor.white.withAlphaComponent(0.85)).setStroke()
         let outline = NSBezierPath(roundedRect: screen.insetBy(dx: 0.5, dy: 0.5), xRadius: 11, yRadius: 11)
-        outline.lineWidth = selected ? 2.5 : hoveredMode == (notch ? .notch : .statusBar) ? 2 : 1.5
+        outline.lineWidth = selected ? 2.5 : hovered ? 2 : 1.5
         outline.stroke()
         (selected ? NSColor.controlAccentColor : hovered ? NSColor.controlAccentColor.withAlphaComponent(0.7) : NSColor.clear).setStroke()
         let cardOutline = NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 11, yRadius: 11)

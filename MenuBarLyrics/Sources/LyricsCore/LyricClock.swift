@@ -37,7 +37,7 @@ public enum LyricClock {
         }
         guard let index = match else { return nil }
         let line = lines[index]
-        if !line.segments.isEmpty {
+        if !line.segments.isEmpty && !line.segments.contains(where: \.synthetic) {
             var prefix = ""
             for segment in line.segments {
                 let through = prefix + segment.text
@@ -52,21 +52,12 @@ public enum LyricClock {
             return LyricMoment(text: line.text, progress: 1, identity: index, timingFidelity: line.timingFidelity,
                                highlight: LyricHighlight(prefixBefore: line.text, prefixThrough: line.text, fraction: 1))
         }
-        let gap = index + 1 < lines.count ? lines[index + 1].time - line.time : nil
-        let duration: TimeInterval
-        let fidelity: TimingFidelity
-        if let end = line.endTime, !line.endTimeIsEstimated {
-            duration = end - line.time
-            fidelity = .lineWithEnd
-        } else {
-            // Conservative visual estimate only for unusually long gaps. Line switches still use source starts.
-            // Eight-second floor avoids shortening normal short lines; sixteen-second ceiling bounds slow sweeps.
-            let estimate = min(16, max(8, Double(line.text.count) * 0.65 + 2))
-            duration = gap.map { $0 > max(12, estimate * 1.75) ? estimate : max(0.001, $0) } ?? estimate
-            fidelity = .estimated
+        guard let end = line.endTime, !line.endTimeIsEstimated else {
+            // Missing genuine timing is static; line-start gaps are not vocal durations.
+            return LyricMoment(text: line.text, progress: 1, identity: index, timingFidelity: line.timingFidelity, highlight: nil)
         }
-        let progress = CGFloat(max(0, min(1, (position - line.time) / duration)))
-        return LyricMoment(text: line.text, progress: progress, identity: index, timingFidelity: fidelity, highlight: nil)
+        let progress = CGFloat(max(0, min(1, (position - line.time) / (end - line.time))))
+        return LyricMoment(text: line.text, progress: progress, identity: index, timingFidelity: .lineWithEnd, highlight: nil)
     }
 
     public static func currentLine(at position: TimeInterval, in lines: [LyricLine]) -> String? {

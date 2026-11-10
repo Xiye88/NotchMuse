@@ -5,7 +5,7 @@
 - Owner explicitly requested immediate old-user updates. Official signed appcast now advertises70, using the unchanged public v0.8.2 DMG; apex/www and origin bytes verified. Earlier manual-only checkpoints below are historical and superseded.
 - Actual full old-app temporary copies passed47→70 and public61→70 download/install/relaunch (118 bundle entries exact); updated70 reports latest. Automatic61 check found70 without clicking Check for Updates and displayed Later/Install/Skip. Complete original preferences restored and compared; installed Stable61/Preview69 unchanged.
 - Automatic checks follow user settings and schedule; users confirm installation. Offline apps/disabled checks and Beta3-or-earlier cannot be guaranteed a notice. No app runtime, build/tag or frozen asset replacement. Bilingual lyrics remain deferred.
-- Release script and process now support frozen inputs, versioned notes and required signed public-feed verification. [Evidence and limitations](../reports/release/V082_UPDATE_DELIVERY.md).
+- Source42b3d4a is synchronized to GitHub main/release branch; main CI passed. Website/notes deployed:46 current-source origin files exact,12 public apex/www checks exact, CSP preserved. Release script and process now support frozen inputs, versioned notes and required signed public-feed verification. [Evidence and limitations](../reports/release/V082_UPDATE_DELIVERY.md).
 
 ## v0.8.2 / Build70 — RELEASED / WEBSITE DEPLOYED, 2026-11-10
 

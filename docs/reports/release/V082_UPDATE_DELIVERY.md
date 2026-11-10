@@ -28,6 +28,10 @@ Stable Build47 and Build61 already embed Sparkle2.10.0, the same bundle identity
 
 The initial staged test showed a release-notes404 before notes deployment; installation succeeded. The public61 test subsequently displayed the complete notes correctly. First sandboxed generator attempt could not mount DMG/read Keychain; normal authorized host execution generated and verified successfully. No private key was exported.
 
+## Public completion
+
+Implementation/source commit `42b3d4af42726c4b99f7e2fcdff1f31e09c93e8b` is synchronized to main and the existing release branch. [Main CI passed](https://github.com/Xiye88/NotchMuse/actions/runs/42778260377). Origin has46 exact current source files plus3 retained historical note files;12 public apex/www checks (EN/ZH pages, current release notes, feed and updater notes) match source bytes and preserve CSP. The GitHub Release body now explains in-app updating; its frozen DMG digest and length remain unchanged. The original feed and changed pages/notes are backed up outside the served root. Temporary HTTP service is stopped; installed Stable61/Preview69 and exact original Stable preferences remain preserved.
+
 ## Delivery behavior and limits
 
 Compatible old Stable users who keep automatic checks enabled discover70 when their running app next checks online, then confirm installation. This is scheduled checking with consented in-app download/install/relaunch, not a server force-install or immediate delivery guarantee to every user. Manual Check for Updates works independently. Preview stays separate. Beta3 and earlier contain no updater and require one manual install. Offline apps and disabled checks cannot be reached by this feed.

@@ -1,5 +1,8 @@
 # NotchMuse Release Checklist
 
+For every future stable release, verify the public appcast advertises the released build and matches the frozen DMG URL/length/signature; publish versioned notes before the feed. A GitHub/website download alone does not complete old-user delivery. v0.8.2/70 delivery was verified in [the current report](../reports/release/V082_UPDATE_DELIVERY.md).
+
+
 Target: v0.8.0 Build 47, accepted by Product Owner. Runtime matches the accepted
 source; release source is `15e13fc2c23ff8f5530db7e5629de076dd9011c5`.
 Official release published and verified on 2026-10-04. Earlier clean-Mac

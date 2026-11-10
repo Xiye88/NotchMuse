@@ -66,9 +66,9 @@ If macOS blocks the app, open **System Settings → Privacy & Security → Open 
 
 ## Updating to v0.8.2
 
-**Manual installation only for this release.** [Download v0.8.2 / Build70](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/NotchMuse.dmg), verify it against [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/SHA256SUMS), quit the old Stable, and replace it in Applications. Keep the old App and its preferences backed up together if you need rollback; [v0.8.1](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1) remains available. Do not replace Preview with the Stable package.
+Existing Stable users can use **Settings → General → Check for Updates** to download, install and restart into v0.8.2 / Build70. With automatic checks enabled, the app discovers the release at its next scheduled check and asks before installation. The official signed feed now advertises Build70; actual Build47→70 and Build61→70 updates were verified using temporary full app copies.
 
-The signed Sparkle feed remains at Build47. In-app Check for Updates does **not** deliver Build70: real isolated updater installation and recovery are not yet verified for this package. Archive signature validation alone is insufficient.
+Beta 3 and earlier need a one-time [manual installation](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/NotchMuse.dmg). Manual download remains available with [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/SHA256SUMS); keep Preview separate. Offline apps and users who disable automatic checks will not receive scheduled prompts.
 
 ### What changed
 

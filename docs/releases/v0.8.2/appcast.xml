@@ -1,0 +1,21 @@
+<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>NotchMuse</title>
+        <item>
+            <title>0.8.2</title>
+            <pubDate>Tue, 10 Nov 2026 15:32:05 +0800</pubDate>
+            <link>https://notchmuse.com/</link>
+            <sparkle:version>70</sparkle:version>
+            <sparkle:shortVersionString>0.8.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <sparkle:releaseNotesLink>https://notchmuse.com/releases/v0.8.2/NotchMuse.md</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/NotchMuse.dmg" length="7270643" type="application/octet-stream" sparkle:edSignature="VcKf60VTw3FFCtv7ZErKyun3Wg/j53adZhdDF6I8Y+uFQHJs2ZuEoKhD58RwA8ULYtui1mPt+cwUyWEr/QYOCQ=="></enclosure>
+        </item>
+    </channel>
+</rss><!-- sparkle-signatures:
+edSignature: Ldlhv6y0c7LgrgF9XYIF71tJFttmDbV0ptT0N1qg6frHibnRaNvyAlC42Qh64f2AFPT4arTciUJj6aqVV7EDDQ==
+length: 1280
+-->

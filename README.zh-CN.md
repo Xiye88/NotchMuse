@@ -66,9 +66,9 @@ NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Develop
 
 ## 更新至 v0.8.2
 
-**本次需要手动安装。** 下载 [v0.8.2 / Build70](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/NotchMuse.dmg)，对照 [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/SHA256SUMS) 校验，退出旧正式版，再替换“应用程序”中的 NotchMuse。需要回滚时请将旧 App 和偏好设置一并备份；[v0.8.1](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.1) 仍然保留。不要用正式包覆盖 Preview。
+已有正式版可在 **设置 → 通用 → 检查更新** 中下载、安装并重启到 v0.8.2 / Build70。开启自动检查后，应用会在下一次定时检查时发现新版，并在安装前征求确认。官方签名更新源已提供 Build70；已使用完整旧版临时副本实测 Build47→70、Build61→70。
 
-Sparkle 正式 feed 暂时保留 Build47，应用内“检查更新”**不会提供 Build70**。本包尚未完成隔离环境中的真实更新安装及失败恢复验证，仅有签名校验不足以启用自动更新。
+Beta 3 及更早版本需进行一次[手动安装](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/NotchMuse.dmg)。仍可手动下载并对照 [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/SHA256SUMS) 校验；Preview 保持独立。应用离线或关闭自动检查时，不会自动弹出更新提示。
 
 ### 本次改进
 

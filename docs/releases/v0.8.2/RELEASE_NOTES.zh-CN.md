@@ -1,6 +1,6 @@
 # NotchMuse v0.8.2
 
-Build70 · 正式版 · 手动下载安装
+Build70 · 正式版 · 支持应用内更新
 
 macOS 14+ · Apple Silicon · [English](RELEASE_NOTES.en.md)
 
@@ -16,6 +16,6 @@ macOS 14+ · Apple Silicon · [English](RELEASE_NOTES.en.md)
 
 请从[官方 GitHub Releases](https://github.com/Xiye88/NotchMuse/releases)下载 DMG，退出旧正式版，再替换“应用程序”中的 App；Preview 保持独立。
 
-**本版需要手动安装。** 正式 Sparkle 更新源仍停留在 Build47；本包的自动安装、重启及恢复上一版尚未验证，不承诺自动推送。
+**已启用应用内更新。** 带 Sparkle 的旧正式版可在“设置 → 通用 → 检查更新”中升级。开启自动检查后，应用会在下一次联网定时检查时提示 Build70，安装需要确认。已实测 Build47→70、Build61→70 的下载、安装和重启。Beta 3 及更早版本需要手动安装一次；Preview 保持独立。
 
 本包采用 ad-hoc 签名，没有 Developer ID 签名及 Apple 公证。歌词取决于第三方来源，部分歌曲或录音版本可能没有匹配结果。

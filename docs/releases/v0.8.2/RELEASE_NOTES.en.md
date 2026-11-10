@@ -1,6 +1,6 @@
 # NotchMuse v0.8.2
 
-Build70 · Stable release · Manual installation
+Build70 · Stable release · In-app update available
 
 macOS 14+ · Apple Silicon · [简体中文](RELEASE_NOTES.zh-CN.md)
 
@@ -16,6 +16,6 @@ macOS 14+ · Apple Silicon · [简体中文](RELEASE_NOTES.zh-CN.md)
 
 Download the official DMG from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases), quit the old Stable app and replace it in Applications. Keep Preview separate.
 
-**Manual installation is required.** The official Sparkle feed remains at Build47. Automatic installation, relaunch and recovery to the previous version remain unverified for this package.
+**In-app updates are available.** Existing Stable apps with Sparkle can use Settings → General → Check for Updates. With automatic checks enabled, the app offers Build70 at its next scheduled online check; installation requires confirmation. Actual Build47→70 and Build61→70 download/install/relaunch were verified. Beta 3 and earlier need one manual installation; Preview stays separate.
 
 The app is ad-hoc signed, without Developer ID signing or Apple notarization. Lyrics depend on third-party availability; some songs or versions may have no match.

@@ -1,5 +1,12 @@
 # NotchMuse Task Board
 
+## Current — v0.8.2 / Build70 UPDATE DELIVERY LIVE, 2026-11-10
+
+- Owner explicitly requested immediate old-user updates. Official signed appcast now advertises70, using the unchanged public v0.8.2 DMG; apex/www and origin bytes verified. Earlier manual-only checkpoints below are historical and superseded.
+- Actual full old-app temporary copies passed47→70 and public61→70 download/install/relaunch (118 bundle entries exact); updated70 reports latest. Automatic61 check found70 without clicking Check for Updates and displayed Later/Install/Skip. Complete original preferences restored and compared; installed Stable61/Preview69 unchanged.
+- Automatic checks follow user settings and schedule; users confirm installation. Offline apps/disabled checks and Beta3-or-earlier cannot be guaranteed a notice. No app runtime, build/tag or frozen asset replacement. Bilingual lyrics remain deferred.
+- Release script and process now support frozen inputs, versioned notes and required signed public-feed verification. [Evidence and limitations](../reports/release/V082_UPDATE_DELIVERY.md).
+
 ## v0.8.2 / Build70 — RELEASED / WEBSITE DEPLOYED, 2026-11-10
 
 - Owner accepted Preview69 and approved publication. [GitHub v0.8.2](https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.2) is the regular Latest release. Tag and website deployment source: `0e98ad09e093e61cea4686acbb369154446fbc0a`; [CI passed](https://github.com/Xiye88/NotchMuse/actions/runs/42745321470). Anonymous DMG download matched the frozen SHA256 `f0aef83093c7bd0845816f4a52986d8cd3dee1d9c2381145e53c6fdd8226540c` (7,270,643 bytes).

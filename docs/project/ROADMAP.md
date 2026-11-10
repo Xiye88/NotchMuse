@@ -2,12 +2,12 @@
 
 ## Active — 2026-11-10
 
-v0.8.2 / Build70 is released and the website download is deployed and verified. The official automatic update feed remains Build47; installation is manual. Bilingual lyrics remain deferred.
+v0.8.2 / Build70 is released with the official signed feed70 live. Actual47/61→70 install/relaunch and automatic61 notice passed; keep future release completion coupled to public feed verification. Bilingual lyrics remain deferred.
 
 ## Current — 2026-11-10
 
 1. Synchronize the owner-accepted Preview69 app source and prepare stable v0.8.2 / Build70.
-2. Publish the owner-authorized v0.8.2/70 manual download, deploy matching website links, and verify public hashes. Automatic feed qualification remains separate.
+2. Completed: v0.8.2/70 download, website links and signed official feed70; actual old-app updates verified.
 3. Bilingual lyric display is deferred; no new feature or source research is included.
 
 ## Current — v0.8.1 released

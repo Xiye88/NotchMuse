@@ -1,5 +1,9 @@
 # NotchMuse Roadmap
 
+## Active — 2026-11-10
+
+v0.8.2/70 is publicly released with verified manual download. Complete website deployment once its existing server connection/configuration location is supplied; no further publication approval is pending. Preserve the frozen asset and feed47. Bilingual lyrics remain deferred.
+
 ## Current — 2026-11-10
 
 1. Synchronize the owner-accepted Preview69 app source and prepare stable v0.8.2 / Build70.

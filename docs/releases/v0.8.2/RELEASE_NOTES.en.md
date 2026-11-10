@@ -1,6 +1,6 @@
 # NotchMuse v0.8.2
 
-Build70 · Stable release package candidate · **Publication pending**
+Build70 · Stable release · Manual installation
 
 macOS 14+ · Apple Silicon · [简体中文](RELEASE_NOTES.zh-CN.md)
 
@@ -14,7 +14,7 @@ macOS 14+ · Apple Silicon · [简体中文](RELEASE_NOTES.zh-CN.md)
 
 ## Installation and availability
 
-This candidate is not yet publicly downloadable. After publication, download the official DMG from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases), quit the old Stable app and replace it in Applications. Keep Preview separate.
+Download the official DMG from [GitHub Releases](https://github.com/Xiye88/NotchMuse/releases), quit the old Stable app and replace it in Applications. Keep Preview separate.
 
 **Manual installation is required.** The official Sparkle feed remains at Build47. Automatic installation, relaunch and recovery to the previous version remain unverified for this package.
 

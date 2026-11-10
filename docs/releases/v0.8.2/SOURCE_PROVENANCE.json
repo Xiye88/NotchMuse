@@ -4,7 +4,7 @@
   "accepted_preview_version": "0.8.1",
   "accepted_preview_build": 69,
   "accepted_source": "1a718b0bad4a135840bb6903a5b962ca09b9c755",
-  "note": "Runtime and packaging inputs match the owner-accepted Preview69 source except the explicitly listed English resource completeness adjustment. Stable packaging metadata/configuration differ by the existing branches. No lyric logic is changed by the release adjustment. Binary artifact details are recorded after building.",
+  "note": "Runtime and packaging inputs match the owner-accepted Preview69 source except the explicitly listed English resource completeness adjustment. Stable packaging metadata/configuration differ by the existing branches. No lyric logic is changed by the release adjustment. Binary artifact details are recorded after building. The public v0.8.2 source tag retains these exact runtime/packaging inputs; the frozen DMG was built at build_source_commit and is not rebuilt for website or release-document changes.",
   "files": [
     {
       "path": "LICENSES/Apache-2.0.txt",
@@ -476,5 +476,9 @@
       "accepted_sha256": "a40e1259dccc33330ee1ba3ac4eb1ec300193c78ed004122fddeab9856fc431c",
       "reason": "Add twelve explicit English values equal to the existing missing-key fallback, to satisfy localization parity; lyric logic and displayed English wording are unchanged."
     }
-  ]
+  ],
+  "build_source_commit": "443ac5afb68d091cc154cdc5675bccea9bc37709",
+  "public_release_tag": "v0.8.2",
+  "dmg_sha256": "f0aef83093c7bd0845816f4a52986d8cd3dee1d9c2381145e53c6fdd8226540c",
+  "dmg_bytes": 7270643
 }

@@ -2,7 +2,7 @@
 
 ## 0.8.2 — Build70
 
-**Stable release package candidate — publication pending; manual installation.**
+**Released 2026-11-10; manual installation.**
 
 - Add a draggable lyric frame with saved positions, screen-bound recovery, horizontal/vertical layouts and accessible lock, click-through and toolbar controls.
 - Follow genuine word/line endings and hold completed highlighting until the next line; show the whole line statically when genuine timing is unavailable.

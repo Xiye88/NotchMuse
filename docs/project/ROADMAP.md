@@ -2,7 +2,7 @@
 
 ## Active — 2026-11-10
 
-v0.8.2/70 is publicly released with verified manual download. Complete website deployment once its existing server connection/configuration location is supplied; no further publication approval is pending. Preserve the frozen asset and feed47. Bilingual lyrics remain deferred.
+v0.8.2 / Build70 is released and the website download is deployed and verified. The official automatic update feed remains Build47; installation is manual. Bilingual lyrics remain deferred.
 
 ## Current — 2026-11-10
 

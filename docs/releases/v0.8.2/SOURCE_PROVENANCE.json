@@ -4,7 +4,7 @@
   "accepted_preview_version": "0.8.1",
   "accepted_preview_build": 69,
   "accepted_source": "1a718b0bad4a135840bb6903a5b962ca09b9c755",
-  "note": "Runtime and packaging inputs match the owner-accepted Preview69 source. Stable bundle identity, version/build metadata, preferences domain and update configuration differ by the existing packaging branches. No private development history or diagnostic data is included. Binary artifact details are recorded separately after building.",
+  "note": "Runtime and packaging inputs match the owner-accepted Preview69 source except the explicitly listed English resource completeness adjustment. Stable packaging metadata/configuration differ by the existing branches. No lyric logic is changed by the release adjustment. Binary artifact details are recorded after building.",
   "files": [
     {
       "path": "LICENSES/Apache-2.0.txt",
@@ -57,8 +57,8 @@
     {
       "path": "MenuBarLyrics/Resources/en.lproj/Localizable.strings",
       "mode": "100644",
-      "git_blob_sha1": "17065d35af26885bb666a4479ef84453b7a77701",
-      "sha256": "a40e1259dccc33330ee1ba3ac4eb1ec300193c78ed004122fddeab9856fc431c"
+      "git_blob_sha1": "513c3341e3174d1dfd45a943512df7bb919c9678",
+      "sha256": "8108e8bbaf42537aa493bf0441e33d51bf1e381ebca2965015349fca2e569718"
     },
     {
       "path": "MenuBarLyrics/Resources/mediaremote-watchdog.sh",
@@ -467,6 +467,14 @@
       "mode": "100644",
       "git_blob_sha1": "bb685b2981573d5de534e03a516863811ddcdb87",
       "sha256": "a6dc756767f1cb524b1e30a745f3e36858d2bc239776c688d522b175c5a199be"
+    }
+  ],
+  "release_adjustments": [
+    {
+      "path": "MenuBarLyrics/Resources/en.lproj/Localizable.strings",
+      "accepted_git_blob_sha1": "17065d35af26885bb666a4479ef84453b7a77701",
+      "accepted_sha256": "a40e1259dccc33330ee1ba3ac4eb1ec300193c78ed004122fddeab9856fc431c",
+      "reason": "Add twelve explicit English values equal to the existing missing-key fallback, to satisfy localization parity; lyric logic and displayed English wording are unchanged."
     }
   ]
 }

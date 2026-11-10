@@ -188,3 +188,17 @@
 "Check the selected network and send USDT only." = "Check the selected network and send USDT only.";
 "Supporters" = "Supporters";
 "Thanks to everyone supporting NotchMuse." = "Thanks to everyone supporting NotchMuse.";
+
+/* Explicit English labels matching the existing localization fallback. */
+"Click Through" = "Click Through";
+"Free Position" = "Free Position";
+"Horizontal" = "Horizontal";
+"Lock Position" = "Lock Position";
+"Move Lyrics" = "Move Lyrics";
+"Orientation" = "Orientation";
+"Reset Position" = "Reset Position";
+"Switch to Horizontal" = "Switch to Horizontal";
+"Switch to Vertical" = "Switch to Vertical";
+"Unlock Position" = "Unlock Position";
+"Use Move Lyrics to edit, even when locked or click-through is on." = "Use Move Lyrics to edit, even when locked or click-through is on.";
+"Vertical" = "Vertical";

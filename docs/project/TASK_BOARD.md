@@ -1,5 +1,9 @@
 # NotchMuse Task Board
 
+## Local Preview updater delivery — 2026-11-12
+
+Local0.8.3 Preview71 passed build/packaged self-tests, no-update quiet startup, visible default-ON independent switches and actual signed loopback71→72 automatic download/install/relaunch (no manual check/install action;72 is a same-runtime test fixture). Installed `/Applications/NotchMuse Preview.app` now shows Build72. Daily timer logged delay/interval86400. Original69 rollback retained; first delivery failed startup verification and successfully rolled back, repeat delivery passed.36 policy/preferences/delegate checks +3 packaging configs and lifecycle tests passed. Full XCTest unavailable in CLT (missing XCTest). Actual24-hour wait, offline UI, corrupted-package installer and long-running prepared-update UI remain untested; do not mark full updater qualification complete. Public0.8.2/70 unchanged. Shared future runtime source is intentional, only Preview packaged/delivered; Preview fixture identity was checked before signing. Evidence: PM preview-updater-20261110/preview-verification.json.
+
 ## IN_PROGRESS — local Preview updater development, 2026-11-10
 
 Owner explicitly authorizes direct coding and local Preview delivery: startup quiet checks (only new updates notify), independent automatic-update toggle default ON for unset preferences, respect explicit OFF, and checks while long-running. PM selects daily checks via existing Sparkle scheduler. Implementation/test plan: docs/superpowers/plans/2026-11-10-preview-updater.md. Public Stable70, official feed, GitHub release and website remain unchanged; no push/publication authorized for this new candidate. Preserve accepted Preview69 for rollback; next candidate >70.

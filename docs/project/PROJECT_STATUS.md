@@ -1,5 +1,9 @@
 # NotchMuse Project Status
 
+## Local Preview updater delivery — 2026-11-12
+
+Local0.8.3 Preview71 passed build/packaged self-tests, no-update quiet startup, visible default-ON independent switches and actual signed loopback71→72 automatic download/install/relaunch (no manual check/install action;72 is a same-runtime test fixture). Installed `/Applications/NotchMuse Preview.app` now shows Build72. Daily timer logged delay/interval86400. Original69 rollback retained; first delivery failed startup verification and successfully rolled back, repeat delivery passed.36 policy/preferences/delegate checks +3 packaging configs and lifecycle tests passed. Full XCTest unavailable in CLT (missing XCTest). Actual24-hour wait, offline UI, corrupted-package installer and long-running prepared-update UI remain untested; do not mark full updater qualification complete. Public0.8.2/70 unchanged. Shared future runtime source is intentional, only Preview packaged/delivered; Preview fixture identity was checked before signing. Evidence: PM preview-updater-20261110/preview-verification.json.
+
 ## Release governance maintenance — 2026-11-12
 
 Unified one-authorization rule in AGENTS/RELEASE_POLICY; reusable unchecked RELEASE_CHECKLIST replaces completed0.8.0 checklist (preserved in docs/archive). Execution procedure now uses release parameters and verifies all channels in dependency order. Added scripts/check_release_consistency.py; current0.8.2/70 local and real online checks PASS (12 pages, README/download/JSON-LD, Latest/About/package checksum, apex/www feed/notes). Stale README/site/feed mutations are rejected. About now has a version-free description; old screenshot labels correctly identify historical0.8.0 captures (asset commit9554338), so were retained. No Build70 rebuild or republication. Installer/media/translation/feature correctness and cryptographic verification remain explicit checklist items, not claims made by the lightweight script.

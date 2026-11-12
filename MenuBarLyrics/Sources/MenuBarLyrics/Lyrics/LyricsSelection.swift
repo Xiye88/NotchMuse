@@ -204,7 +204,7 @@ enum LyricsSelection {
         let offset = candidate.document.metadata.lyricOffset
         let lines = candidate.document.lines.map { line in
             if let end = line.endTime, !end.isFinite || end - offset > context.track.duration + 2 || end < line.time {
-                return LyricLine(time: line.time, text: line.text)
+                return LyricLine(time: line.time, text: line.text, translation: line.translation)
             }
             return line
         }

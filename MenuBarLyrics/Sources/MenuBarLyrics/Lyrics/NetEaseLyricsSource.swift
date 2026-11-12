@@ -69,10 +69,24 @@ struct NetEaseLyricsSource {
         guard payload.code == 200 else { return nil }
         if let yrc = payload.yrc?.lyric {
             let lines = LyricParser.parseYRC(yrc)
-            if !lines.isEmpty { return lines }
+            if !lines.isEmpty { return withTranslations(lines, from: payload.tlyric?.lyric) }
         }
         guard let lyric = payload.lrc?.lyric else { return nil }
-        return LyricParser.parse(lyric)
+        return withTranslations(LyricParser.parse(lyric), from: payload.tlyric?.lyric)
+    }
+
+    /// Only mutually unique timestamps within 450ms qualify. Crowded or duplicate
+    /// starts remain untranslated rather than pairing two lines by array index.
+    private func withTranslations(_ lines: [LyricLine], from translationText: String?) -> [LyricLine] {
+        guard let translationText else { return lines }
+        let translations = LyricParser.parse(translationText)
+        return lines.map { line in
+            let matches = translations.filter { abs($0.time - line.time) <= 0.45 }
+            guard matches.count == 1, let translation = matches.first,
+                  lines.filter({ abs($0.time - translation.time) <= 0.45 }).count == 1 else { return line }
+            return LyricLine(time: line.time, text: line.text, translation: translation.text,
+                             endTime: line.endTime, segments: line.segments, endTimeIsEstimated: line.endTimeIsEstimated)
+        }
     }
 
     func matchingIndex(for track: SpotifyTrack, candidates: [TrackMatcher.Candidate]) -> Int? {
@@ -184,6 +198,19 @@ private struct LyricResponse: Decodable {
     let code: Int?
     let yrc: LRC?
     let lrc: LRC?
+    let tlyric: LRC?
+
+    private enum CodingKeys: String, CodingKey { case code, yrc, lrc, tlyric }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        code = try values.decodeIfPresent(Int.self, forKey: .code)
+        yrc = try values.decodeIfPresent(LRC.self, forKey: .yrc)
+        lrc = try values.decodeIfPresent(LRC.self, forKey: .lrc)
+        // Providers occasionally return an object or malformed scalar here. Ignore only
+        // the translation field so valid original lyrics still decode.
+        tlyric = try? values.decode(LRC.self, forKey: .tlyric)
+    }
 }
 
 private struct LRC: Decodable {

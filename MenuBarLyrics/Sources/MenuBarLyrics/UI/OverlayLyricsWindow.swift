@@ -199,6 +199,23 @@ enum OverlayLaneGeometry {
     }
 }
 
+enum BilingualLayout {
+    static func translation(_ value: String?, enabled: Bool) -> String? {
+        guard enabled, let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+    static func regions(original: NSRect, lineHeight: CGFloat, bilingual: Bool, vertical: Bool) -> (original: NSRect, translation: NSRect) {
+        guard bilingual else { return (original, .zero) }
+        if vertical {
+            let h = min(lineHeight, original.height)
+            return (NSRect(x: original.minX, y: original.minY + h, width: original.width, height: max(0, original.height - h)), NSRect(x: original.minX, y: original.minY, width: original.width, height: h))
+        }
+        let h = min(lineHeight, original.height / 2)
+        return (NSRect(x: original.minX, y: original.minY + h, width: original.width, height: max(0, original.height - h)), NSRect(x: original.minX, y: original.minY, width: original.width, height: h))
+    }
+}
+
 enum NotchBackgroundContrast {
     static func foreground(on background: NSColor) -> NSColor {
         guard let color = background.usingColorSpace(.deviceRGB) else { return .white }
@@ -240,17 +257,18 @@ enum NotchGeometry {
         style: NotchStyle,
         fontSize: CGFloat,
         width: CGFloat,
-        placement: NotchPlacement = .top
+        placement: NotchPlacement = .top,
+        bilingual: Bool = false
     ) -> NSRect {
         let lineHeight = ceil(fontSize * 1.3)
         let height: CGFloat
         switch style {
         case .lyricOnly:
-            height = lineHeight + 14
+            height = lineHeight * (bilingual ? 2 : 1) + (bilingual ? 22 : 14)
         case .songLyric:
-            height = lineHeight * 2 + 18
+            height = lineHeight * (bilingual ? 3 : 2) + (bilingual ? 22 : 18)
         case .expanded:
-            height = lineHeight * 4 + 22
+            height = lineHeight * (bilingual ? 5 : 4) + (bilingual ? 26 : 22)
         }
 
         if placement.isVertical {
@@ -431,6 +449,7 @@ final class OverlayLyricsWindow: NSObject {
                 }
             }
         }
+        var translation: String?
         var song = ""
         var artist = ""
         var progress: CGFloat = 0
@@ -459,6 +478,9 @@ final class OverlayLyricsWindow: NSObject {
 
             if vertical {
                 drawVerticalLyric()
+                if let translation, !translation.isEmpty {
+                    drawTranslation(translation, in: NSRect(x: 4, y: 2, width: bounds.width - 8, height: lineHeight), font: .systemFont(ofSize: max(9, font.pointSize - 3)))
+                }
                 return
             }
 
@@ -481,6 +503,15 @@ final class OverlayLyricsWindow: NSObject {
             }
 
             drawLyric()
+            if let translation, !translation.isEmpty {
+                let rect = NSRect(x: lyricViewport.minX, y: max(0, lyricViewport.minY - lineHeight), width: lyricViewport.width, height: lineHeight)
+                drawTranslation(translation, in: rect, font: .systemFont(ofSize: max(9, font.pointSize - 3)))
+            }
+        }
+
+        private func drawTranslation(_ text: String, in rect: NSRect, font: NSFont) {
+            let p = NSMutableParagraphStyle(); p.alignment = .center; p.lineBreakMode = .byTruncatingTail
+            (text as NSString).draw(in: rect, withAttributes: [.font: font, .foregroundColor: (drawsBackground ? NotchBackgroundContrast.foreground(on: backgroundColor) : NSColor.white).withAlphaComponent(0.72), .paragraphStyle: p])
         }
 
         private func drawMetadata(_ text: String, in rect: NSRect, font: NSFont, alignment: NSTextAlignment) {
@@ -639,6 +670,7 @@ final class OverlayLyricsWindow: NSObject {
         func show(
             frame: NSRect,
             lyric: String,
+            translation: String?,
             song: String,
             artist: String,
             progress: CGFloat,
@@ -703,6 +735,7 @@ final class OverlayLyricsWindow: NSObject {
             window.hasShadow = backgroundEnabled && backgroundOpacity > 0
             view.frame = NSRect(origin: .zero, size: frame.size)
             view.lyric = displayLyric
+            view.translation = translation
             view.song = song
             view.artist = artist
             view.progress = progress
@@ -788,6 +821,7 @@ final class OverlayLyricsWindow: NSObject {
     func show(
         text: String,
         progress: CGFloat,
+        translation: String? = nil,
         highlight: LyricHighlight? = nil,
         staticText: Bool = false,
         mode: DisplayMode,
@@ -840,7 +874,8 @@ final class OverlayLyricsWindow: NSObject {
                 style: effectiveStyle,
                 fontSize: fontSize,
                 width: width,
-                placement: placement
+                placement: placement,
+                bilingual: translation != nil && mode != .statusBar
             )
             if mode == .free {
                 let size = NSSize(width: placement.isVertical ? FreeLyricsInteraction.expandedToolbarWidth : max(FreeLyricsInteraction.expandedToolbarWidth, frame.width),
@@ -850,6 +885,7 @@ final class OverlayLyricsWindow: NSObject {
             return lane.show(
                 frame: frame,
                 lyric: text,
+                translation: (mode == .statusBar ? nil : translation),
                 song: song,
                 artist: artist,
                 progress: highlight.map { value in

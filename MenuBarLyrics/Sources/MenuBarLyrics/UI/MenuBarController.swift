@@ -79,6 +79,7 @@ final class MenuBarController: NSObject {
     private var isPlayerStopped = false
     private var isPlaybackPaused = false
     private var displaySource = ""
+    private var displayTranslation: String?
     private var currentTrack: SpotifyTrack?
     private var currentTrackIdentity: String?
     private var currentPlayerTrack: NowPlayingTrack?
@@ -443,6 +444,7 @@ final class MenuBarController: NSObject {
         let overflows = overlay.show(
             text: displaySource.isEmpty ? " " : displaySource,
             progress: displayProgress,
+            translation: displayTranslation,
             highlight: displayHighlight,
             staticText: displayStaticText,
             mode: displayMode,
@@ -529,9 +531,11 @@ final class MenuBarController: NSObject {
             return
         }
         if let moment = LyricClock.moment(at: position, in: currentLines) {
+            displayTranslation = AppPreferences.bilingualLyricsEnabled ? moment.translation : nil
             setDisplay(moment.text, progress: moment.progress, identity: moment.identity, highlight: moment.highlight,
                        staticText: moment.timingFidelity == .lineStartOnly || moment.timingFidelity == .estimated)
         } else {
+            displayTranslation = nil
             setDisplay(fallbackText())
         }
         updateProgressTimer()

@@ -21,13 +21,15 @@ public struct LyricSegment: Equatable, Sendable {
 public struct LyricLine: Equatable, Sendable {
     public let time: TimeInterval
     public let text: String
+    public let translation: String?
     public let endTime: TimeInterval?
     public let segments: [LyricSegment]
     public let endTimeIsEstimated: Bool
 
-    public init(time: TimeInterval, text: String, endTime: TimeInterval? = nil, segments: [LyricSegment] = [], endTimeIsEstimated: Bool = false) {
+    public init(time: TimeInterval, text: String, translation: String? = nil, endTime: TimeInterval? = nil, segments: [LyricSegment] = [], endTimeIsEstimated: Bool = false) {
         self.time = time
         self.text = text
+        self.translation = translation?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? translation : nil
         let validEnd = endTime.flatMap { $0.isFinite && $0 > time ? $0 : nil }
         self.endTime = validEnd
         self.endTimeIsEstimated = endTimeIsEstimated
@@ -46,7 +48,7 @@ public struct LyricLine: Equatable, Sendable {
     }
 
     public func shifted(by offset: TimeInterval) -> LyricLine {
-        LyricLine(time: time + offset, text: text, endTime: endTime.map { $0 + offset },
+        LyricLine(time: time + offset, text: text, translation: translation, endTime: endTime.map { $0 + offset },
                   segments: segments.map { LyricSegment(time: $0.time + offset, endTime: $0.endTime + offset, text: $0.text, synthetic: $0.synthetic) }, endTimeIsEstimated: endTimeIsEstimated)
     }
 }

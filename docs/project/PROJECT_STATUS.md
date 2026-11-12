@@ -1,5 +1,17 @@
 # NotchMuse Project Status
 
+## Release governance maintenance — 2026-11-12
+
+Unified one-authorization rule in AGENTS/RELEASE_POLICY; reusable unchecked RELEASE_CHECKLIST replaces completed0.8.0 checklist (preserved in docs/archive). Execution procedure now uses release parameters and verifies all channels in dependency order. Added scripts/check_release_consistency.py; current0.8.2/70 local and real online checks PASS (12 pages, README/download/JSON-LD, Latest/About/package checksum, apex/www feed/notes). Stale README/site/feed mutations are rejected. About now has a version-free description; old screenshot labels correctly identify historical0.8.0 captures (asset commit9554338), so were retained. No Build70 rebuild or republication. Installer/media/translation/feature correctness and cryptographic verification remain explicit checklist items, not claims made by the lightweight script.
+
+Local Preview71 updater development is separate from this governance synchronization; current formal release remains0.8.2/70. Full local XCTest remains unavailable (Command Line Tools lacks XCTest); standalone tests and Preview verification are recorded separately.
+
+## Owner decision — next-version updater and permanent notes rule, 2026-11-10
+
+- NEXT_VERSION / NOT_IMPLEMENTED: check for available updates when the app opens, and add a separate user-opted-in automatic-download/install checkbox. Preserve update preferences, signed Stable validation and a usable old app on failure; verify install/relaunch before claiming completion. Current0.8.2 remains scheduled checking plus consented installation.
+- PERMANENT: release notes must be equally complete in English and Chinese, with a short opening overview/language cue, English first and full Chinese below. This applies to the actual popup, GitHub and website. Owner accepts current0.8.2 wording unchanged. See [release policy](RELEASE_POLICY.md).
+- This turn records requirements locally only; no app implementation, build, feed/site change, GitHub push or new release.
+
 ## Current — v0.8.2 / Build70 UPDATE DELIVERY LIVE, 2026-11-10
 
 - Owner explicitly requested immediate old-user updates. Official signed appcast now advertises70, using the unchanged public v0.8.2 DMG; apex/www and origin bytes verified. Earlier manual-only checkpoints below are historical and superseded.

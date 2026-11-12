@@ -1,5 +1,11 @@
 # NotchMuse Thread Registry
 
+## Owner decision — next-version updater and permanent notes rule, 2026-11-10
+
+- NEXT_VERSION / NOT_IMPLEMENTED: check for available updates when the app opens, and add a separate user-opted-in automatic-download/install checkbox. Preserve update preferences, signed Stable validation and a usable old app on failure; verify install/relaunch before claiming completion. Current0.8.2 remains scheduled checking plus consented installation.
+- PERMANENT: release notes must be equally complete in English and Chinese, with a short opening overview/language cue, English first and full Chinese below. This applies to the actual popup, GitHub and website. Owner accepts current0.8.2 wording unchanged. See [release policy](RELEASE_POLICY.md).
+- This turn records requirements locally only; no app implementation, build, feed/site change, GitHub push or new release.
+
 ## Current — v0.8.2 / Build70 UPDATE DELIVERY LIVE, 2026-11-10
 
 - Owner explicitly requested immediate old-user updates. Official signed appcast now advertises70, using the unchanged public v0.8.2 DMG; apex/www and origin bytes verified. Earlier manual-only checkpoints below are historical and superseded.

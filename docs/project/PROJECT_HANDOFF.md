@@ -1,5 +1,30 @@
 # NotchMuse Current Handoff
 
+## Release governance maintenance — 2026-11-12
+
+Unified one-authorization rule in AGENTS/RELEASE_POLICY; reusable unchecked RELEASE_CHECKLIST replaces completed0.8.0 checklist (preserved in docs/archive). Execution procedure now uses release parameters and verifies all channels in dependency order. Added scripts/check_release_consistency.py; current0.8.2/70 local and real online checks PASS (12 pages, README/download/JSON-LD, Latest/About/package checksum, apex/www feed/notes). Stale README/site/feed mutations are rejected. About now has a version-free description; old screenshot labels correctly identify historical0.8.0 captures (asset commit9554338), so were retained. No Build70 rebuild or republication. Installer/media/translation/feature correctness and cryptographic verification remain explicit checklist items, not claims made by the lightweight script.
+
+Local Preview71 updater development is separate from this governance synchronization; current formal release remains0.8.2/70. Full local XCTest remains unavailable (Command Line Tools lacks XCTest); standalone tests and Preview verification are recorded separately.
+
+## Active — local Preview updater development, 2026-11-10
+
+Owner explicitly authorizes direct coding and local Preview delivery: startup quiet checks (only new updates notify), independent automatic-update toggle default ON for unset preferences, respect explicit OFF, and checks while long-running. PM selects daily checks via existing Sparkle scheduler. Implementation/test plan: docs/superpowers/plans/2026-11-10-preview-updater.md. Public Stable70, official feed, GitHub release and website remain unchanged; no push/publication authorized for this new candidate. Preserve accepted Preview69 for rollback; next candidate >70.
+
+## Owner decision — next-version updater and permanent notes rule, 2026-11-10
+
+- NEXT_VERSION / NOT_IMPLEMENTED: check for available updates when the app opens, and add a separate user-opted-in automatic-download/install checkbox. Preserve update preferences, signed Stable validation and a usable old app on failure; verify install/relaunch before claiming completion. Current0.8.2 remains scheduled checking plus consented installation.
+- PERMANENT: release notes must be equally complete in English and Chinese, with a short opening overview/language cue, English first and full Chinese below. This applies to the actual popup, GitHub and website. Owner accepts current0.8.2 wording unchanged. See [release policy](RELEASE_POLICY.md).
+- This turn records requirements locally only; no app implementation, build, feed/site change, GitHub push or new release.
+
+```text
+Current status: Owner preferences and next-version updater requirements recorded locally; not implemented.
+Completed: Equal-detail bilingual release-note policy; startup-check and opt-in automatic-install backlog.
+Pending confirmation: No decision needed for recording; candidate implementation/testing and future public release remain separate.
+Key files: docs/project/RELEASE_POLICY.md; docs/project/ROADMAP.md; docs/project/TASK_BOARD.md.
+Next step: Use the next-version requirements for a bounded updater candidate; review both languages in the actual popup.
+Do not repeat: Current-note rewrite/deploy, current-app/feed changes or claiming these future features are already shipped.
+```
+
 ## Current — v0.8.2 / Build70 UPDATE DELIVERY LIVE, 2026-11-10
 
 - Owner explicitly requested immediate old-user updates. Official signed appcast now advertises70, using the unchanged public v0.8.2 DMG; apex/www and origin bytes verified. Earlier manual-only checkpoints below are historical and superseded.

@@ -29,15 +29,18 @@ a task changes state.
 
 ## Release Boundary
 
-Building and verifying a local candidate is autonomous. Pushing, tagging, or
-publishing a public release requires final Product Owner approval.
-
-After each update, explicitly tell the Product Owner what changed and whether
-it exists only locally, is synchronized to GitHub, or is publicly downloadable.
-Ask separately whether to synchronize to GitHub and whether to publish/update
-the website download. Do not treat approval of a local implementation as
-approval to push, tag, publish, or replace public download assets. Prior release
-approval does not carry forward to later updates.
+Local candidate development, building and testing are autonomous. Each App public
+release needs one Product Owner authorization for that release. That authorization
+covers related Git push, tag/Release/assets, website deployment, bilingual notes,
+Sparkle promotion and final public verification; do not ask separately per step.
+Approval does not carry to a later App release. Confirmed routine website/SEO work
+includes tests, GitHub synchronization, deployment and public verification.
+Pause only for material safety risks, major test failures or scope beyond approval;
+never skip verification to claim completion. Follow every item in
+[RELEASE_CHECKLIST](docs/project/RELEASE_CHECKLIST.md) and the sequence in
+[UPDATE_RELEASE_AUTOMATION](docs/project/UPDATE_RELEASE_AUTOMATION.md).
+Report deployed, verified and untested separately; GitHub Release alone is not
+old-user update delivery. Keep complete English-first/Chinese-second notes.
 
 ## Canonical Documentation
 

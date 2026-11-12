@@ -8,6 +8,9 @@ PREVIEW="${NOTCHMUSE_PREVIEW:-0}"
 APP_NAME="NotchMuse"
 BUNDLE_ID="app.notchmuse.mac"
 FEED_URL="https://notchmuse.com/appcast.xml"
+AUTOMATIC_CHECKS_DEFAULT=true
+AUTOMATIC_UPDATES_DEFAULT=false
+PREVIEW_UPDATE_DEFAULTS=""
 if [[ "$PREVIEW" == "1" ]]; then
   APP_NAME="NotchMuse Preview"
   BUNDLE_ID="app.notchmuse.mac.preview"
@@ -16,6 +19,13 @@ if [[ "$PREVIEW" == "1" ]]; then
     echo "Preview feed must be a localhost staged appcast" >&2
     exit 1
   fi
+  AUTOMATIC_CHECKS_DEFAULT=false
+  if [[ "$FEED_URL" == http://127.0.0.1:*/appcast.xml ]]; then
+    AUTOMATIC_CHECKS_DEFAULT=true
+    AUTOMATIC_UPDATES_DEFAULT=true
+  fi
+  PREVIEW_UPDATE_DEFAULTS="<key>SUAutomaticallyUpdate</key><$AUTOMATIC_UPDATES_DEFAULT/>
+  <key>SUScheduledCheckInterval</key><integer>86400</integer>"
 fi
 APP="$DIST/$APP_NAME.app"
 CONTENTS="$APP/Contents"
@@ -131,9 +141,10 @@ cat > "$CONTENTS/Info.plist" <<PLIST
   <key>SUPublicEDKey</key>
   <string>ccBh4EpD4c0P2f18HDHmZuxFAg0q06cSxpLH+7mlNjk=</string>
   <key>SUEnableAutomaticChecks</key>
-  <$([[ "$PREVIEW" == "1" ]] && echo false || echo true)/>
+  <$AUTOMATIC_CHECKS_DEFAULT/>
   <key>SUAllowsAutomaticUpdates</key>
-  <false/>
+  <$AUTOMATIC_UPDATES_DEFAULT/>
+  $PREVIEW_UPDATE_DEFAULTS
   <key>SUVerifyUpdateBeforeExtraction</key>
   <true/>
   <key>LSMinimumSystemVersion</key>

@@ -288,6 +288,7 @@ final class SettingsWindowController: NSWindowController {
     private let showInDockSwitch = NSSwitch()
     private let showMenuBarIconSwitch = NSSwitch()
     private let automaticUpdateSwitch = NSSwitch()
+    private let automaticInstallSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let appAppearanceControl = NSSegmentedControl(labels: AppAppearance.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let playerPopUp = NSPopUpButton()
@@ -537,6 +538,8 @@ final class SettingsWindowController: NSWindowController {
         showMenuBarIconSwitch.action = #selector(showMenuBarIconChanged)
         automaticUpdateSwitch.target = self
         automaticUpdateSwitch.action = #selector(automaticUpdateChanged)
+        automaticInstallSwitch.target = self
+        automaticInstallSwitch.action = #selector(automaticInstallChanged)
         for language in AppLanguage.allCases {
             languagePopUp.addItem(withTitle: language.displayName)
         }
@@ -603,10 +606,15 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Show in Dock")), showInDockSwitch],
             [label(L10n.text("Show Menu Bar Icon")), showMenuBarIconSwitch],
             [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch],
+            [label(L10n.text("Auto-Install Updates")), automaticInstallSwitch],
             [label(L10n.text("Appearance Mode")), appAppearanceControl],
             [label(L10n.text("Language")), languagePopUp]
         ])
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
+        let updateHelp = NSTextField(wrappingLabelWithString: L10n.text("Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared."))
+        updateHelp.font = .systemFont(ofSize: 11)
+        updateHelp.textColor = .secondaryLabelColor
+        generalPage.addArrangedSubview(updateHelp)
         let checkUpdates = NSButton(title: L10n.text("Check for Updates…"), target: self, action: #selector(checkForUpdates))
         checkUpdates.isEnabled = UpdateController.shared.isAvailable
         generalPage.addArrangedSubview(checkUpdates)
@@ -1083,6 +1091,8 @@ final class SettingsWindowController: NSWindowController {
         showMenuBarIconSwitch.state = AppPreferences.showMenuBarIcon ? .on : .off
         automaticUpdateSwitch.state = UpdateController.shared.automaticallyChecksForUpdates ? .on : .off
         automaticUpdateSwitch.isEnabled = UpdateController.shared.isAvailable
+        automaticInstallSwitch.state = UpdateController.shared.automaticallyDownloadsUpdates ? .on : .off
+        automaticInstallSwitch.isEnabled = UpdateController.shared.isAvailable && UpdateController.shared.allowsAutomaticUpdates
         playerPopUp.selectItem(at: PlayerSource.allCases.firstIndex(of: AppPreferences.playerSource) ?? 0)
         playerStopBehaviorPopUp.selectItem(at: PlayerStopBehavior.allCases.firstIndex(of: AppPreferences.playerStopBehavior) ?? 0)
         languagePopUp.selectItem(at: AppLanguage.allCases.firstIndex(of: AppPreferences.language) ?? 0)
@@ -1407,6 +1417,10 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func automaticUpdateChanged() {
         UpdateController.shared.automaticallyChecksForUpdates = automaticUpdateSwitch.state == .on
+    }
+
+    @objc private func automaticInstallChanged() {
+        UpdateController.shared.automaticallyDownloadsUpdates = automaticInstallSwitch.state == .on
     }
 
     @objc private func checkForUpdates() {

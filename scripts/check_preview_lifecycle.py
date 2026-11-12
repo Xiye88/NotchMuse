@@ -137,4 +137,20 @@ if __name__ == '__main__':
         refused(lambda: lifecycle.stop(lifecycle.INSTALLED, [4700]))
         kill.assert_not_called()
     print('PASS: PID ownership changed to Stable; no signal sent')
+    with tempfile.TemporaryDirectory(prefix='notchmuse-preview-feed-') as temp:
+        candidate = Path(temp) / 'NotchMuse Preview.app'
+        app(candidate, 71)
+        plist = candidate / 'Contents/Info.plist'
+        data = plistlib.loads(plist.read_bytes())
+        with patch.object(lifecycle.subprocess, 'run'):
+            # Local update tests may opt into startup/daily checks; production feeds are never accepted.
+            data.update(SUFeedURL='http://127.0.0.1:1337/appcast.xml', SUEnableAutomaticChecks=True)
+            plist.write_bytes(plistlib.dumps(data))
+            lifecycle.verify(candidate, 71)
+            for url in ['https://notchmuse.com/appcast.xml', 'http://127.0.0.1.evil.test:1337/appcast.xml',
+                        'http://user@127.0.0.1:1337/appcast.xml', 'https://invalid.localhost/appcast.xml']:
+                data['SUFeedURL'] = url
+                plist.write_bytes(plistlib.dumps(data))
+                refused(lambda: lifecycle.verify(candidate, 71))
+    print('PASS: loopback automatic-check delivery accepted; public/invalid automatic feeds rejected')
     print('PASS: 9 sandbox lifecycle scenarios; Stable app/preferences and older rollback unchanged')

@@ -202,3 +202,6 @@
 
 "Switch to Horizontal" = "切换为横向歌词";
 "Switch to Vertical" = "切换为竖向歌词";
+
+"Auto-Install Updates" = "自动下载安装更新";
+"Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared." = "开启后在启动时及运行期间每日检查更新。自动安装需同时开启自动检查：启动时应用更新，运行中下载后提示重启。关闭开关不会取消已准备安装的更新。";

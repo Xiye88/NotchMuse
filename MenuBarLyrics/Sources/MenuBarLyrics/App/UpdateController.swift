@@ -5,9 +5,20 @@ import Sparkle
 final class UpdateController: NSObject, SPUUpdaterDelegate, SPUStandardUserDriverDelegate {
     static let shared = UpdateController()
 
+    private let hostBundle: Bundle
     private var updater: SPUUpdater?
     private var userDriver: NotchMuseUpdateDriver?
     private var retryAfterCycle = false
+    private var policy = UpdatePolicy()
+    private var isPreview: Bool { hostBundle.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true }
+    private var configuredFeed: URL? {
+        (hostBundle.object(forInfoDictionaryKey: "SUFeedURL") as? String).flatMap(URL.init(string:))
+    }
+
+    init(hostBundle: Bundle = .main) {
+        self.hostBundle = hostBundle
+        super.init()
+    }
 
     var isAvailable: Bool { updater != nil }
     var automaticallyChecksForUpdates: Bool {
@@ -15,22 +26,30 @@ final class UpdateController: NSObject, SPUUpdaterDelegate, SPUStandardUserDrive
         set { updater?.automaticallyChecksForUpdates = newValue }
     }
 
+    var automaticallyDownloadsUpdates: Bool {
+        get { updater?.automaticallyDownloadsUpdates ?? false }
+        set { updater?.automaticallyDownloadsUpdates = newValue }
+    }
+    var allowsAutomaticUpdates: Bool { updater?.allowsAutomaticUpdates ?? false }
+
     func startIfStable() {
-        let isPreview = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
-        let feed = Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as? String ?? ""
-        guard !isPreview || URL(string: feed)?.host == "127.0.0.1" else { return }
+        guard UpdatePolicy.permitsFeed(isPreview: isPreview, url: configuredFeed) else { return }
         guard updater == nil else { return }
-        let driver = NotchMuseUpdateDriver(hostBundle: .main, delegate: self)
+        let driver = NotchMuseUpdateDriver(hostBundle: hostBundle, delegate: self)
         driver.retry = { [weak self] in
             guard let self else { return }
             if self.updater?.canCheckForUpdates == true { self.checkForUpdates() }
             else { self.retryAfterCycle = true }
         }
-        let updater = SPUUpdater(hostBundle: .main, applicationBundle: .main, userDriver: driver, delegate: self)
+        let updater = SPUUpdater(hostBundle: hostBundle, applicationBundle: hostBundle, userDriver: driver, delegate: self)
         do {
             try updater.start()
             self.userDriver = driver
             self.updater = updater
+            // Sparkle cancels its pending initial scheduler cycle when this immediate launch check begins.
+            if policy.beginStartupCheck(checksEnabled: updater.automaticallyChecksForUpdates, sessionInProgress: updater.sessionInProgress) {
+                updater.checkForUpdatesInBackground()
+            }
         } catch {
             NSLog("[NotchMuse Sparkle] startup failed %@", String(describing: error))
         }
@@ -38,16 +57,49 @@ final class UpdateController: NSObject, SPUUpdaterDelegate, SPUStandardUserDrive
 
     func checkForUpdates() {
         guard let updater, updater.canCheckForUpdates else { return }
+        policy.beginUserCheck()
         updater.checkForUpdates()
+    }
+
+    func feedURLString(for updater: SPUUpdater) -> String? {
+        // A stale defaults override must not connect Preview to the Stable feed.
+        isPreview ? configuredFeed?.absoluteString : nil
+    }
+
+    func updater(_ updater: SPUUpdater, shouldProceedWithUpdate item: SUAppcastItem, updateCheck: SPUUpdateCheck) throws {
+        guard !isPreview || UpdatePolicy.isLoopback(item.fileURL) else {
+            throw NSError(domain: SUSparkleErrorDomain, code: Int(SUError.appcastError.rawValue),
+                          userInfo: [NSLocalizedDescriptionKey: "Preview updates must use the local Preview source."])
+        }
     }
 
     nonisolated func standardUserDriverShouldShowVersionHistory(for item: SUAppcastItem) -> Bool { false }
 
+    func updater(_ updater: SPUUpdater, willScheduleUpdateCheckAfterDelay delay: TimeInterval) {
+        NSLog("[NotchMuse Sparkle] scheduledCheck delay=%.1f interval=%.1f", delay, updater.updateCheckInterval)
+    }
+
     func updater(_ updater: SPUUpdater, didFinishUpdateCycleFor updateCheck: SPUUpdateCheck, error: Error?) {
-        guard retryAfterCycle else { return }
-        retryAfterCycle = false
-        // Sparkle finishes cleanup asynchronously; retry only after its session is ready.
-        DispatchQueue.main.async { [weak self] in self?.checkForUpdates() }
+        policy.finishedCycle(succeeded: error == nil)
+        // Sparkle finishes its current session before a prepared update can be resumed in its native UI.
+        DispatchQueue.main.async { [weak self, weak updater] in
+            guard let self, let updater, updater.canCheckForUpdates, !updater.sessionInProgress else { return }
+            guard self.retryAfterCycle || self.policy.takePreparedNotice(canCheck: true) else { return }
+            self.retryAfterCycle = false
+            self.checkForUpdates()
+        }
+    }
+
+    func updater(_ updater: SPUUpdater, willInstallUpdateOnQuit item: SUAppcastItem,
+                 immediateInstallationBlock immediateInstallHandler: @escaping () -> Void) -> Bool {
+        guard UpdatePolicy.permitsFeed(isPreview: isPreview, url: configuredFeed),
+              !isPreview || UpdatePolicy.isLoopback(item.fileURL) else { return false }
+        guard policy.preparedUpdate(checksEnabled: updater.automaticallyChecksForUpdates,
+                                    automaticInstall: updater.automaticallyDownloadsUpdates) else { return false }
+        // Sparkle's handler already dispatches installation asynchronously onto the main queue.
+        // Invoke before returning YES so ownership can never stall an update cycle.
+        immediateInstallHandler()
+        return true
     }
 
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {

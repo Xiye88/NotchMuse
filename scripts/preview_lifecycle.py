@@ -53,8 +53,9 @@ def verify(app, build):
         and url.port and not url.username and not url.password and not url.query and not url.fragment
     ):
         raise ValueError('Preview must not read a public Sparkle feed')
-    if data.get('SUEnableAutomaticChecks') is not False:
-        raise ValueError('Preview automatic Sparkle checks must be disabled')
+    checks = data.get('SUEnableAutomaticChecks')
+    if checks is not False and not (checks is True and feed != 'https://invalid.localhost/appcast.xml'):
+        raise ValueError('Preview automatic checks require a staged loopback feed')
     executable = app / 'Contents/MacOS/NotchMuse'
     if executable.is_symlink() or not os.access(executable, os.X_OK):
         raise ValueError('Missing or unsafe Preview executable')

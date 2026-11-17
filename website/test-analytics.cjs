@@ -12,6 +12,8 @@ const key = 'notchmuse.analytics-consent';
       const context = await browser.newContext();
       const googleRequests = [];
       let downloads = 0;
+      const pvuvRequests = [];
+      await context.route("https://www.pvuv.ai/**", route => { pvuvRequests.push(route.request().url()); return route.fulfill({ contentType: "application/javascript", body: "window.__pvuvTestLoaded = true;" }); });
       await context.route(/https:\/\/[^/]*(?:google-analytics|googletagmanager|analytics\.google)\.com\//, route => {
         googleRequests.push(route.request().url());
         return route.fulfill({ contentType: 'application/javascript', body: 'window.__gaTestLoaded = true;' });
@@ -32,6 +34,7 @@ const key = 'notchmuse.analytics-consent';
       await page.goto(url + suffix, { waitUntil: 'networkidle' });
       assert.equal(await page.locator('html').getAttribute('lang'), language, 'Legacy language storage cannot change the URL language');
       assert.equal(googleRequests.length, 0);
+      assert.equal(pvuvRequests.length, 0);
       assert.equal(await configs(), 0);
       await download('hero');
       assert.deepEqual(await events(), []);
@@ -44,6 +47,8 @@ const key = 'notchmuse.analytics-consent';
       await page.locator('.site-footer [data-analytics-settings]').click();
       await page.locator('[data-consent-accept]').click();
       await page.waitForFunction(() => window.__gaTestLoaded);
+      await page.waitForFunction(() => window.__pvuvTestLoaded);
+      assert.equal(pvuvRequests.length, 1);
       assert.equal(googleRequests.length, 1);
       assert.equal(await configs(), 1);
       await page.addScriptTag({ content: fs.readFileSync(`${__dirname}/analytics.js`, 'utf8') });
@@ -63,11 +68,13 @@ const key = 'notchmuse.analytics-consent';
       await page.locator('.site-footer [data-analytics-settings]').click();
       await Promise.all([page.waitForEvent('load'), page.locator('[data-consent-reject]').click()]);
       await page.waitForLoadState('networkidle');
+      assert.equal(pvuvRequests.length, 2, 'Withdrawal reload does not reload PVUV');
       assert.equal(googleRequests.length, 2, 'Withdrawal reload sends zero new Google requests');
       assert.equal(await configs(), 0);
       assert.equal(await page.evaluate(k => localStorage.getItem(k), key), 'denied');
       const cookies = await context.cookies();
-      assert(!cookies.some(cookie => cookie.name.startsWith('_ga')));
+      assert(!cookies.some(cookie => cookie.name.startsWith('_ga') || cookie.name.startsWith('_pv_')));
+      assert.equal(await page.evaluate(() => localStorage.getItem('_pv_id')), null);
       assert(cookies.some(cookie => cookie.name === 'unrelated'));
       await download('footer');
       assert.deepEqual(await events(), []);
@@ -80,6 +87,7 @@ const key = 'notchmuse.analytics-consent';
       await context.close();
     }
     const blocked = await browser.newContext();
+    await blocked.route('https://www.pvuv.ai/**', route => route.fulfill({contentType:'application/javascript',body:''}));
     await blocked.route('https://www.googletagmanager.com/**', route => route.fulfill({ contentType: 'application/javascript', body: 'window.__gaTestLoaded = true;' }));
     await blocked.addInitScript(() => {
       Storage.prototype.getItem = () => { throw Error('blocked storage'); };
@@ -100,6 +108,7 @@ const key = 'notchmuse.analytics-consent';
     await blocked.close();
 
     const shared = await browser.newContext();
+    await shared.route('https://www.pvuv.ai/**', route => route.fulfill({contentType:'application/javascript',body:''}));
     let sharedRequests = 0;
     await shared.route('https://www.googletagmanager.com/**', route => {
       sharedRequests++;

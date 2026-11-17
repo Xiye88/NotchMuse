@@ -47,8 +47,8 @@ for (const [file, lang, canonical, alternate, title, description, h1, subtitle] 
   assert(html.includes('og:site_name" content="NotchMuse"'));
   assert(html.includes('twitter:card" content="summary_large_image"'));
   assert(html.includes(lang === 'en'
-    ? 'The NotchMuse app does not collect usage analytics or upload audio. With your consent, this website uses Google Analytics to measure visits and download-button clicks. Website analytics are separate from the app.'
-    : 'NotchMuse 应用不收集使用分析数据，也不上传音频。经你同意，官网使用 Google Analytics 统计访问和下载按钮点击。官网统计与应用本身相互独立。'));
+    ? 'The NotchMuse app does not collect usage analytics or upload audio. With your consent, this website uses Google Analytics and PVUV to measure visits and download-button clicks. Website analytics are separate from the app.'
+    : 'NotchMuse 应用不收集使用分析数据，也不上传音频。经你同意，官网使用 Google Analytics 和 PVUV 统计访问和下载按钮点击。官网统计与应用本身相互独立。'));
   assert(html.includes('id="website-analytics"'));
   assert.equal((html.match(/data-analytics-settings/g) || []).length, 2);
   assert(html.includes('href="#website-analytics"'));

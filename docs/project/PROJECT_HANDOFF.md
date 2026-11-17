@@ -1,5 +1,9 @@
 # NotchMuse Current Handoff
 
+## PVUV website installation — 2026-11-17
+
+Owner authorizes website PVUV site f9FFRntt installation, GitHub sync and deployment; App0.8.2/70 and official feed remain unchanged. Implementing12-page consent-gated loading plus bilingual disclosure, narrow production CSP allowlist, tests and real verification. Preserve existing SEO/GA4/download placements and dirty Preview workspace.
+
 ## Local Preview updater delivery — 2026-11-12
 
 Local0.8.3 Preview71 passed build/packaged self-tests, no-update quiet startup, visible default-ON independent switches and actual signed loopback71→72 automatic download/install/relaunch (no manual check/install action;72 is a same-runtime test fixture). Installed `/Applications/NotchMuse Preview.app` now shows Build72. Daily timer logged delay/interval86400. Original69 rollback retained; first delivery failed startup verification and successfully rolled back, repeat delivery passed.36 policy/preferences/delegate checks +3 packaging configs and lifecycle tests passed. Full XCTest unavailable in CLT (missing XCTest). Actual24-hour wait, offline UI, corrupted-package installer and long-running prepared-update UI remain untested; do not mark full updater qualification complete. Public0.8.2/70 unchanged. Shared future runtime source is intentional, only Preview packaged/delivered; Preview fixture identity was checked before signing. Evidence: PM preview-updater-20261110/preview-verification.json.

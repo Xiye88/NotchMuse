@@ -10,7 +10,6 @@
   let choice;
   let started = false;
   let tag;
-  let pvuvTag;
   let settingsTrigger;
   try { choice = localStorage.getItem(storageKey); } catch {}
   if (!['granted', 'denied'].includes(choice)) choice = null;
@@ -46,26 +45,14 @@
     tag.async = true;
     tag.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
     document.head.appendChild(tag);
-    const pvuv = document.querySelector('script[data-pvuv]');
-    if (pvuv) {
-      pvuvTag = document.createElement('script');
-      pvuvTag.defer = true;
-      pvuvTag.src = pvuv.dataset.src;
-      pvuvTag.dataset.site = pvuv.dataset.site;
-      pvuvTag.dataset.api = pvuv.dataset.api;
-      document.head.appendChild(pvuvTag);
-    }
   };
 
   const clearAnalyticsCookies = () => {
     const domains = new Set(['', location.hostname, `.${location.hostname}`]);
     if (location.hostname.endsWith('.notchmuse.com')) domains.add('.notchmuse.com');
-    ['_pv_id', '_pv_sid', '_pv_ft', '_pv_v', '_pv_uid'].forEach(key => {
-      try { localStorage.removeItem(key); } catch {}
-    });
     document.cookie.split(';').forEach(cookie => {
       const name = cookie.split('=')[0].trim();
-      if (!/^(_ga(?:_|$)|_gid$|_gat(?:_|$)|_pv_(?:id|sid|ft|v|uid)$)/.test(name)) return;
+      if (!/^(_ga(?:_|$)|_gid$|_gat(?:_|$))/.test(name)) return;
       domains.forEach(domain => {
         document.cookie = `${name}=; Max-Age=0; Path=/;${domain ? ` Domain=${domain};` : ''}`;
       });
@@ -81,7 +68,6 @@
       // sending immediately, then reload with the saved refusal to discard it.
       window[disableKey] = true;
       tag?.remove();
-      pvuvTag?.remove();
       if (window.dataLayer) window.dataLayer.length = 0;
       clearAnalyticsCookies();
       if (started) { location.reload(); return; }

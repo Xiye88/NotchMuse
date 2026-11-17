@@ -1,8 +1,8 @@
 # NotchMuse Current Handoff
 
-## PVUV website installation — 2026-11-17
+## PVUV website installation — 2026-11-18
 
-Owner authorizes website PVUV site f9FFRntt installation, GitHub sync and deployment; App0.8.2/70 and official feed remain unchanged. Implementing12-page consent-gated loading plus bilingual disclosure, narrow production CSP allowlist, tests and real verification. Preserve existing SEO/GA4/download placements and dirty Preview workspace.
+Installed the exact owner-provided PVUV script in all12 page heads; site f9FFRntt, API https://in.pvuv.ai. Extra consent integration/copy/test changes were removed at owner's correction; original GA4 code and text restored. Main source d3c696b pushed and deployed; minimal CSP addition allows www.pvuv.ai. Live homepage snippet confirmed. App/official feed untouched. [Short delivery note](../reports/website/2026-11-18-pvuv-install.md).
 
 ## Local Preview updater delivery — 2026-11-12
 

@@ -1,5 +1,9 @@
 # NotchMuse Current Handoff
 
+## Website security headers — 2026-11-18
+
+Cloudflare response-header rule425c18cfabe0421aa87434365e28d389 enabled with7 requested static values; apex/www verified. Original CSP retained; page resources load and PVUV /in returns204. No App/site-code/DNS/feed changes. [Delivery note](../reports/website/2026-11-18-security-headers.md).
+
 ## PVUV website installation — 2026-11-18
 
 Installed the exact owner-provided PVUV script in all12 page heads; site f9FFRntt, API https://in.pvuv.ai. Extra consent integration/copy/test changes were removed at owner's correction; original GA4 code and text restored. Main source d3c696b pushed and deployed; minimal CSP addition allows www.pvuv.ai. Live homepage snippet confirmed. App/official feed untouched. [Short delivery note](../reports/website/2026-11-18-pvuv-install.md).

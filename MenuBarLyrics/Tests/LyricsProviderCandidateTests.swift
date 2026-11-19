@@ -90,6 +90,10 @@ enum DebugLog {
         check(LyricsSelection.albumMatches("因你而在", track: jjAppleTrack), "bilingual CJK+Latin Apple Music album matches CJK album")
         check(LyricsSelection.albumMatches("范特西", track: SpotifyTrack(name: "愛在西元前", artist: "Jay Chou", album: "范特西 - EP", duration: 234)), "EP suffix matches base album")
         check(!LyricsSelection.albumMatches("其他专辑", track: jjAppleTrack), "different CJK album remains rejected")
+        let suyanApple = SpotifyTrack(name: "素颜 (with 何曼婷)", artist: "许嵩", album: "素颜 - Single", duration: 239)
+        check(TrackMatcher.identityRejectReason(suyanApple, title: "素颜", artist: "许嵩, 何曼婷", album: "素颜") == nil, "Apple Music (with collaborator) matches multi-artist track")
+        check(TrackMatcher.identityRejectReason(suyanApple, title: "素颜", artist: "许嵩, 其他人", album: "素颜") == "artist_mismatch", "wrong collaborator stays rejected")
+        check(TrackMatcher.chineseSearchQuery(for: suyanApple) == "素颜 许嵩", "search query strips (with collaborator) noise")
         let soda = SodaMusicLyricsSource(deviceID: "fixture", installID: "fixture")
         let sodaData = Data(#"{"track":{"id":"soda-recording","name":"Song","artists":[{"name":"Artist"}],"duration":200250,"album":{"name":"Soda Album"}},"lyric":{"type":"lrc","content":"[00:10.00]fixture"}}"#.utf8)
         let sodaCandidate = try soda.parseCandidate(sodaData, for: track, expectedTrackID: "soda-recording")!

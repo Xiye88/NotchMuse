@@ -39,6 +39,17 @@ actor SelectionCalls {
         check(LyricsSelection.select([generic, exact], context: netease).winner == exact, "verified catalog identity defeats earlier conflicting generic")
         check(LyricsSelection.select([generic, candidate("QQ", platform: "qq", text: lines())], context: netease).winner == nil, "generic shifted timeline fails closed")
         check(LyricsSelection.select([candidate("LRCLIB"), candidate("QQ", text: lines(prefix: "Entirely different words"))], context: netease).winner == nil, "disjoint lyric bodies fail closed")
+        let outlierDecision = LyricsSelection.select([
+            candidate("Kugou", platform: "kugou"),
+            candidate("QQ", platform: "qq"),
+            candidate("LRCLIB", platform: "lrclib", text: lines(prefix: "Different formatting outlier"))
+        ], context: netease)
+        check(outlierDecision.winner != nil && outlierDecision.rejected["LRCLIB"] == "uncorroborated_content_outlier", "corroborated Tier-3 direct consensus survives a single content_ambiguity outlier")
+        check(LyricsSelection.select([
+            candidate("Kugou", platform: "kugou"),
+            candidate("QQ", platform: "qq"),
+            candidate("LRCLIB", platform: "lrclib", text: lines(14))
+        ], context: netease).winner == nil, "timeline_conflict still fails closed even with two agreeing providers")
         check(LyricsSelection.select([candidate("LRCLIB", text: lines(count: 4)), candidate("QQ", text: lines(10, count: 4))], context: netease).winner == nil, "short four-line shifted timeline fails closed")
         check(LyricsSelection.select([candidate("LRCMux", platform: "lrclib")], context: netease).winner == nil, "resolver metadata alone cannot establish lyric source compatibility")
         let muxSupported = LyricsSelection.select([candidate("LRCMux", platform: "lrclib"), candidate("LRCLIB", platform: "lrclib")], context: netease)

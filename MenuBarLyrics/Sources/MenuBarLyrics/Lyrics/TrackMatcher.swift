@@ -28,9 +28,10 @@ enum TrackMatcher {
         let requested = parsedTitle(track.name), source = parsedTitle(title)
         if requested.name != source.name { return "title_mismatch" }
         if requested.versions != source.versions { return "version_mismatch" }
-        let a = artistKeys([track.artist])
-        let b = artistKeys([artist])
-        let candidateGroup = artistGroupKey(artist, expectedArtists: [track.artist])
+        let expectedArtists = effectiveTrackArtists(for: track)
+        let a = artistKeys(expectedArtists)
+        let b = artistKeys([artist] + titleCollaborators(in: title))
+        let candidateGroup = artistGroupKey(artist, expectedArtists: expectedArtists)
         if a.members != b.members && a.group != candidateGroup { return "artist_mismatch" }
         func versions(_ value: String) -> Set<String> {
             var result = parsedTitle(value).versions
@@ -50,9 +51,11 @@ enum TrackMatcher {
               sourceTitle.versions == candidateTitle.versions,
               durationDifference <= 8 else { return 0 }
 
-        let sourceArtists = artistKeys([track.artist])
-        let candidateArtists = artistKeys(candidate.artists)
-        let contextCandidateGroup = Set(candidate.artists.flatMap { artistGroupKey($0, expectedArtists: [track.artist]) })
+        let expectedArtists = effectiveTrackArtists(for: track)
+        let sourceArtists = artistKeys(expectedArtists)
+        let candidateAllArtists = candidate.artists + titleCollaborators(in: candidate.title)
+        let candidateArtists = artistKeys(candidateAllArtists)
+        let contextCandidateGroup = Set(candidateAllArtists.flatMap { artistGroupKey($0, expectedArtists: expectedArtists) })
         let artistsMatch = artistsMatch(source: sourceArtists.members, candidate: candidateArtists.members)
             || artistsMatch(source: sourceArtists.group, candidate: contextCandidateGroup)
         let artistScore = artistsMatch ? 30 : 0
@@ -135,11 +138,27 @@ enum TrackMatcher {
         return score < acceptanceThreshold ? "below_threshold" : "ambiguous_shadow"
     }
 
+    static func titleCollaborators(in title: String) -> [String] {
+        guard let regex = try? NSRegularExpression(pattern: #"[\(\[]\s*(?:feat\.?|ft\.?|featuring|with)\s+([^\)\]]+)[\)\]]"#, options: .caseInsensitive) else {
+            return []
+        }
+        let range = NSRange(title.startIndex..., in: title)
+        return regex.matches(in: title, range: range).compactMap { match -> String? in
+            guard match.numberOfRanges > 1, let r = Range(match.range(at: 1), in: title) else { return nil }
+            let value = title[r].trimmingCharacters(in: .whitespacesAndNewlines)
+            return value.isEmpty ? nil : value
+        }
+    }
+
+    private static func effectiveTrackArtists(for track: SpotifyTrack) -> [String] {
+        [track.artist] + titleCollaborators(in: track.name)
+    }
+
     static func parsedTitle(_ title: String) -> (name: String, versions: Set<String>) {
         let folded = title.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
         var name = folded
         for pattern in [
-            #"[\(\[].*?\b(feat\.?|ft\.?|featuring)\b.*?[\)\]]"#,
+            #"[\(\[].*?\b(feat\.?|ft\.?|featuring|with)\b.*?[\)\]]"#,
             #"\s+\b(feat\.?|ft\.?|featuring)\b.*$"#
         ] {
             name = name.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
@@ -197,7 +216,12 @@ enum TrackMatcher {
     }
 
     static func chineseSearchQuery(for track: SpotifyTrack) -> String {
-        let title = simplifiedChinese(track.name)
+        let cleanedTitle = track.name.replacingOccurrences(
+            of: #"[\(\[]\s*(?:feat\.?|ft\.?|featuring|with)\s+[^\)\]]+[\)\]]"#,
+            with: "",
+            options: [.regularExpression, .caseInsensitive]
+        ).trimmingCharacters(in: .whitespacesAndNewlines)
+        let title = simplifiedChinese(cleanedTitle.isEmpty ? track.name : cleanedTitle)
         let artist = canonicalArtistForChineseSearch(track.artist)
         return "\(title) \(artist)".trimmingCharacters(in: .whitespacesAndNewlines)
     }

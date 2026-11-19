@@ -92,6 +92,34 @@ enum LyricsSelection {
                     rejected[item.candidate.provider] = "lower_confidence_content_conflict"
                 }
                 eligible = bound
+            } else if !conflicting.values.contains("timeline_conflict") {
+                // When >=2 independent direct Tier-3 providers form a mutually-agreeing group
+                // (with zero timeline_conflict anywhere), uncorroborated formatting/script outliers
+                // (content_ambiguity only) must not poison the corroborated consensus.
+                var bestClique: [(candidate: LyricsCandidate, tier: Int)] = []
+                for seed in bound {
+                    var clique = [seed]
+                    for other in bound where other.candidate.provider != seed.candidate.provider {
+                        let agreesWithAll = clique.allSatisfy { member in
+                            member.candidate.sourcePlatform != nil && other.candidate.sourcePlatform != nil &&
+                            member.candidate.sourcePlatform != other.candidate.sourcePlatform &&
+                            timelinesAgree(member.candidate, other.candidate) &&
+                            disagreement(member.candidate, other.candidate) == nil
+                        }
+                        if agreesWithAll { clique.append(other) }
+                    }
+                    if clique.count > bestClique.count { bestClique = clique }
+                }
+                if bestClique.count >= 2 {
+                    let kept = Set(bestClique.map { $0.candidate.provider })
+                    for item in eligible where !kept.contains(item.candidate.provider) {
+                        rejected[item.candidate.provider] = "uncorroborated_content_outlier"
+                    }
+                    eligible = bestClique
+                } else {
+                    for item in eligible { rejected[item.candidate.provider] = conflicting[item.candidate.provider] ?? "unresolved_content_ambiguity" }
+                    return Decision(winner: nil, tier: nil, reason: "content_ambiguity", rejected: rejected)
+                }
             } else {
                 let reason = conflicting.values.contains("timeline_conflict") ? "timeline_conflict" : "content_ambiguity"
                 for item in eligible { rejected[item.candidate.provider] = conflicting[item.candidate.provider] ?? "unresolved_\(reason)" }

@@ -159,7 +159,8 @@ enum TrackMatcher {
         var name = folded
         for pattern in [
             #"[\(\[].*?\b(feat\.?|ft\.?|featuring|with)\b.*?[\)\]]"#,
-            #"\s+\b(feat\.?|ft\.?|featuring)\b.*$"#
+            #"\s+\b(feat\.?|ft\.?|featuring)\b.*$"#,
+            #"[\(\[（](?:电视剧|电影|网剧|动画|动漫|游戏|综艺)?《[^》]+》[^\)）\]]*[\)\]）]"#
         ] {
             name = name.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
         }
@@ -216,11 +217,14 @@ enum TrackMatcher {
     }
 
     static func chineseSearchQuery(for track: SpotifyTrack) -> String {
-        let cleanedTitle = track.name.replacingOccurrences(
-            of: #"[\(\[]\s*(?:feat\.?|ft\.?|featuring|with)\s+[^\)\]]+[\)\]]"#,
-            with: "",
-            options: [.regularExpression, .caseInsensitive]
-        ).trimmingCharacters(in: .whitespacesAndNewlines)
+        var cleanedTitle = track.name
+        for pattern in [
+            #"[\(\[]\s*(?:feat\.?|ft\.?|featuring|with)\s+[^\)\]]+[\)\]]"#,
+            #"[\(\[（](?:电视剧|电影|网剧|动画|动漫|游戏|综艺)?《[^》]+》[^\)）\]]*[\)\]）]"#
+        ] {
+            cleanedTitle = cleanedTitle.replacingOccurrences(of: pattern, with: "", options: [.regularExpression, .caseInsensitive])
+        }
+        cleanedTitle = cleanedTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         let title = simplifiedChinese(cleanedTitle.isEmpty ? track.name : cleanedTitle)
         let artist = canonicalArtistForChineseSearch(track.artist)
         return "\(title) \(artist)".trimmingCharacters(in: .whitespacesAndNewlines)

@@ -48,7 +48,7 @@ enum LyricsSelection {
         eligible = evidencePool.compactMap { item in
             guard item.tier == 4 else { return item }
             let bound = evidencePool.filter { identityTier($0.candidate, context: context) == 3 && $0.candidate.provider != "LRCMux" }
-            let compatibleWithBound = !crossCatalogPlayer || bound.allSatisfy { timelinesAgree(item.candidate, $0.candidate) }
+            let compatibleWithBound = !crossCatalogPlayer || !bound.contains { timelinesConflict(item.candidate, $0.candidate) }
             let corroborated = compatibleWithBound && evidencePool.contains { other in
                 guard item.candidate.provider != other.candidate.provider,
                       let platform = item.candidate.sourcePlatform,
@@ -246,7 +246,7 @@ enum LyricsSelection {
               candidate.sourceTrackID?.isEmpty == false else { return candidate }
         let valid = pool.filter { $0.provider != "LRCMux" && rejection($0, context: context) == nil }
         let bound = valid.filter { identityTier($0, context: context) == 3 }
-        guard bound.allSatisfy({ timelinesAgree(candidate, $0) }), valid.contains(where: {
+        guard !bound.contains(where: { timelinesConflict(candidate, $0) }), valid.contains(where: {
             $0.provider != candidate.provider && $0.sourcePlatform != nil &&
             $0.sourcePlatform != candidate.sourcePlatform && timelinesAgree(candidate, $0)
         }) else { return candidate }
@@ -332,10 +332,28 @@ enum LyricsSelection {
     private static func deltas(_ a: LyricsCandidate, _ b: LyricsCandidate) -> [Double] {
         if let shifts = completeBodyBoundaryDeltas(a, b) { return shifts }
         let aa = anchors(a), bb = anchors(b)
-        return aa.keys.sorted().flatMap { key -> [Double] in
+        var exact = aa.keys.sorted().flatMap { key -> [Double] in
             guard let av = aa[key], let bv = bb[key], av.count == bv.count else { return [] }
             return zip(av, bv).map { abs($0 - $1) }
-        }.sorted()
+        }
+        // Providers frequently merge two consecutive short lines into one line (e.g. LRCLIB vs QQ/Kugou).
+        // Match unique >=5-char line-start prefixes when exact line equality is sparse.
+        let matchedKeys = Set(aa.keys).intersection(bb.keys)
+        let unmatchedA = aa.filter { !matchedKeys.contains($0.key) && $0.value.count == 1 && $0.key.count >= 5 }
+        let unmatchedB = bb.filter { !matchedKeys.contains($0.key) && $0.value.count == 1 && $0.key.count >= 5 }
+        if !unmatchedA.isEmpty && !unmatchedB.isEmpty {
+            var usedB = Set<String>()
+            for (ka, va) in unmatchedA.sorted(by: { $0.key < $1.key }) {
+                let prefixMatches = unmatchedB.filter { kb, _ in
+                    !usedB.contains(kb) && (ka.hasPrefix(kb) || kb.hasPrefix(ka))
+                }
+                if prefixMatches.count == 1, let match = prefixMatches.first {
+                    usedB.insert(match.key)
+                    exact.append(abs(va[0] - match.value[0]))
+                }
+            }
+        }
+        return exact.sorted()
     }
     // Different line breaks are not a different lyric body. Only byte-equivalent
     // normalized complete vocals and shared timed boundaries qualify; no fuzzy text.

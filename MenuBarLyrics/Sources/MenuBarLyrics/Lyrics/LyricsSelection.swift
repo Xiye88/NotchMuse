@@ -11,7 +11,8 @@ enum LyricsSelection {
     }
 
     static func select(_ candidates: [LyricsCandidate], context: LyricsSelectionContext) -> Decision {
-        let candidates = context.platform == "spotify" ? candidates.map { repairedTiming($0, among: candidates, context: context) } : candidates
+        let crossCatalogPlayer = context.platform == "spotify" || context.platform == "apple"
+        let candidates = crossCatalogPlayer ? candidates.map { repairedTiming($0, among: candidates, context: context) } : candidates
         var rejected: [String: String] = [:]
         var eligible: [(candidate: LyricsCandidate, tier: Int)] = []
         for candidate in candidates {
@@ -47,7 +48,7 @@ enum LyricsSelection {
         eligible = evidencePool.compactMap { item in
             guard item.tier == 4 else { return item }
             let bound = evidencePool.filter { identityTier($0.candidate, context: context) == 3 && $0.candidate.provider != "LRCMux" }
-            let compatibleWithBound = context.platform != "spotify" || bound.allSatisfy { timelinesAgree(item.candidate, $0.candidate) }
+            let compatibleWithBound = !crossCatalogPlayer || bound.allSatisfy { timelinesAgree(item.candidate, $0.candidate) }
             let corroborated = compatibleWithBound && evidencePool.contains { other in
                 guard item.candidate.provider != other.candidate.provider,
                       let platform = item.candidate.sourcePlatform,
@@ -84,7 +85,7 @@ enum LyricsSelection {
             let boundConflicts = bound.contains { a in bound.contains { b in
                 a.candidate.provider != b.candidate.provider && timelinesConflict(a.candidate, b.candidate)
             } }
-            if context.platform == "spotify", !bound.isEmpty, !boundConflicts,
+            if crossCatalogPlayer, !bound.isEmpty, !boundConflicts,
                bound.contains(where: { strongMetadata($0.candidate, context: context) }) {
                 // Release-unbound outliers cannot veto an otherwise validated album recording.
                 // Never use source majority to break a conflict between equally bound recordings.
@@ -183,7 +184,10 @@ enum LyricsSelection {
 
     private static func albumKey(_ value: String) -> String {
         let releaseName = value.replacingOccurrences(of: #"\s*[-–—]\s*(Single|EP)\s*$"#, with: "", options: [.regularExpression, .caseInsensitive])
-        let simplified = releaseName.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? releaseName
+        let simplified = (releaseName.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? releaseName)
+            .replacingOccurrences(of: "十二月", with: "12月")
+            .replacingOccurrences(of: "十一月", with: "11月")
+            .replacingOccurrences(of: "十月", with: "10月")
         return TrackMatcher.parsedTitle(simplified).name
     }
     private static func albumMatches(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> Bool {
@@ -269,7 +273,7 @@ enum LyricsSelection {
             (checkRichEnds && (!($0.endTime ?? $0.time).isFinite || ($0.endTime ?? $0.time) > context.track.duration + 2)) }) { return "timeline_out_of_recording" }
         if let reason = TrackMatcher.identityRejectReason(context.track, title: candidate.sourceTitle, artist: candidate.sourceArtist, album: candidate.sourceAlbum) { return reason }
         let tier = identityTier(candidate, context: context)
-        if context.platform != "spotify", tier >= 3, let album = candidate.sourceAlbum,
+        if context.platform != "spotify", context.platform != "apple", tier >= 3, let album = candidate.sourceAlbum,
            !albumKey(album).isEmpty, !albumKey(context.track.album).isEmpty,
            !albumMatches(candidate, context: context) { return "album_mismatch" }
         if candidate.provider != "LRCMux", candidate.sourcePlatform == context.platform,

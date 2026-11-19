@@ -261,7 +261,21 @@ enum TrackMatcher {
         "crowlu": "卢广仲",
         "weibird": "韦礼安",
         "yogalin": "林宥嘉",
-        "jamhsiao": "萧敬腾"
+        "jamhsiao": "萧敬腾",
+        "아일릿": "illit",
+        "리센느": "rescene",
+        "에이티즈": "ateez",
+        "태연": "taeyeon",
+        "방탄소년단": "bts",
+        "블랙핑크": "blackpink",
+        "뉴진스": "newjeans",
+        "에스파": "aespa",
+        "아이브": "ive",
+        "르세라핌": "lesserafim",
+        "세븐틴": "seventeen",
+        "트와이스": "twice",
+        "아이유": "iu",
+        "지드래곤": "gdragon"
     ]
 
     static func artistKeys(_ artists: [String]) -> (members: Set<String>, group: Set<String>) {

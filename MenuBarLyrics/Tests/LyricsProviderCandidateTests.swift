@@ -94,6 +94,10 @@ enum DebugLog {
         check(TrackMatcher.identityRejectReason(suyanApple, title: "素颜", artist: "许嵩, 何曼婷", album: "素颜") == nil, "Apple Music (with collaborator) matches multi-artist track")
         check(TrackMatcher.identityRejectReason(suyanApple, title: "素颜", artist: "许嵩, 其他人", album: "素颜") == "artist_mismatch", "wrong collaborator stays rejected")
         check(TrackMatcher.chineseSearchQuery(for: suyanApple) == "素颜 许嵩", "search query strips (with collaborator) noise")
+        let elrcLines = LyricParser.parse("[00:26.45] <00:26.450>我<00:26.623>在<00:26.831>沙<00:27.105>滩<00:27.264>")
+        check(elrcLines.count == 1 && elrcLines[0].text == "我在沙滩", "Enhanced LRC strips inline <mm:ss.xxx> tags cleanly")
+        check(elrcLines[0].timingFidelity == .word && elrcLines[0].segments.count == 4, "Enhanced LRC parses word-level timing segments")
+        check(LyricsSelection.albumMatches("十一月的萧邦", track: SpotifyTrack(name: "夜曲", artist: "周杰伦", album: "11月的萧邦", duration: 226)), "Arabic and Chinese month numerals match in album names")
         let soda = SodaMusicLyricsSource(deviceID: "fixture", installID: "fixture")
         let sodaData = Data(#"{"track":{"id":"soda-recording","name":"Song","artists":[{"name":"Artist"}],"duration":200250,"album":{"name":"Soda Album"}},"lyric":{"type":"lrc","content":"[00:10.00]fixture"}}"#.utf8)
         let sodaCandidate = try soda.parseCandidate(sodaData, for: track, expectedTrackID: "soda-recording")!

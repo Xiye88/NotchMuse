@@ -135,10 +135,12 @@ final class FreeLyricsInteraction: NSObject {
         unlockWindow.title = L10n.text("Unlock Position")
         window.addChildWindow(unlockWindow, ordered: .above)
         toolbar.material = .hudWindow
-        toolbar.blendingMode = .withinWindow
+        toolbar.blendingMode = .behindWindow
         toolbar.state = .active
         toolbar.wantsLayer = true
-        toolbar.layer?.cornerRadius = 10
+        toolbar.layer?.cornerRadius = 16
+        toolbar.layer?.borderWidth = 0.5
+        toolbar.layer?.borderColor = NSColor.white.withAlphaComponent(0.16).cgColor
         toolbar.layer?.masksToBounds = true
         toolbar.onHover = { [weak self] in self?.setHovered($0) }
         container.addSubview(toolbar)

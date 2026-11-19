@@ -78,6 +78,18 @@ enum DebugLog {
         let kugouCandidate = kugou.makeCandidate(song: .init(hash: "recording-hash", title: "Song", artist: "Artist", duration: 200), lyrics: .init(id: "lyric-download-id", accessKey: "fixture", title: "Song", artist: "Artist", durationMs: 200750), lines: [line], for: track)!
         check(kugouCandidate.sourceTrackID == "recording-hash", "Kugou recording hash distinguishes lyric download ID")
         check(kugouCandidate.sourceDuration == 200.75 && kugouCandidate.sourcePlatform == "kugou", "Kugou lyric metadata retained")
+        let jayTrack = SpotifyTrack(name: "髮如雪", artist: "周杰倫", album: "十一月的蕭邦", duration: 299)
+        let kugouSearchJSON = Data(#"{"status":1,"data":{"info":[{"hash":"jay-hash","songname":"发如雪","singername":"周杰伦","album_name":"十一月的萧邦","duration":299}]}}"#.utf8)
+        let matchedKugouJay = try kugou.matchingSong(in: kugouSearchJSON, for: jayTrack)
+        check(matchedKugouJay?.hash == "jay-hash" && matchedKugouJay?.album == "十一月的萧邦", "Kugou matches Traditional Chinese Jay Chou and preserves album_name")
+        let kugouJayCand = matchedKugouJay.flatMap { kugou.makeCandidate(song: $0, lyrics: .init(id: "1", accessKey: "k", title: "发如雪", artist: "周杰伦", durationMs: 299000), lines: [line], for: jayTrack) }
+        check(kugouJayCand?.sourceAlbum == "十一月的萧邦", "Kugou candidate retains sourceAlbum for Tier 3 identity")
+        let jjAppleTrack = SpotifyTrack(name: "修煉愛情", artist: "JJ Lin", album: "因你而在 Stories Untold", duration: 287)
+        check(TrackMatcher.identityRejectReason(jjAppleTrack, title: "修炼爱情", artist: "林俊杰", album: "因你而在") == nil, "English alias JJ Lin matches 林俊杰")
+        check(TrackMatcher.chineseSearchQuery(for: jjAppleTrack) == "修炼爱情 林俊杰", "Chinese search query normalizes JJ Lin and Traditional title")
+        check(LyricsSelection.albumMatches("因你而在", track: jjAppleTrack), "bilingual CJK+Latin Apple Music album matches CJK album")
+        check(LyricsSelection.albumMatches("范特西", track: SpotifyTrack(name: "愛在西元前", artist: "Jay Chou", album: "范特西 - EP", duration: 234)), "EP suffix matches base album")
+        check(!LyricsSelection.albumMatches("其他专辑", track: jjAppleTrack), "different CJK album remains rejected")
         let soda = SodaMusicLyricsSource(deviceID: "fixture", installID: "fixture")
         let sodaData = Data(#"{"track":{"id":"soda-recording","name":"Song","artists":[{"name":"Artist"}],"duration":200250,"album":{"name":"Soda Album"}},"lyric":{"type":"lrc","content":"[00:10.00]fixture"}}"#.utf8)
         let sodaCandidate = try soda.parseCandidate(sodaData, for: track, expectedTrackID: "soda-recording")!

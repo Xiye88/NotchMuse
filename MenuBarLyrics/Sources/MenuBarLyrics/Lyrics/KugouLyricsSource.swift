@@ -8,6 +8,15 @@ struct KugouLyricsSource {
         let title: String
         let artist: String
         let duration: Int
+        let album: String?
+
+        init(hash: String, title: String, artist: String, duration: Int, album: String? = nil) {
+            self.hash = hash
+            self.title = title
+            self.artist = artist
+            self.duration = duration
+            self.album = album
+        }
     }
 
     struct LyricDownloadCandidate {
@@ -41,7 +50,7 @@ struct KugouLyricsSource {
         }
 
         let keyword = "\(song.title) \(song.artist)"
-        let (candidateData, candidateResponse) = try await URLSession.shared.data(
+        let (candidateData, candidateResponse) = try await LyricsHTTP.data(
             for: lyricsSearchRequest(keyword: keyword, duration: song.duration, hash: song.hash)
         )
         guard let candidate = try matchingLyrics(
@@ -49,25 +58,37 @@ struct KugouLyricsSource {
             for: track
         ) else { return nil }
 
-        let (downloadData, downloadResponse) = try await URLSession.shared.data(
-            for: downloadRequest(id: candidate.id, accessKey: candidate.accessKey)
-        )
-        let payload = try JSONDecoder().decode(
-            DownloadResponse.self,
-            from: LyricsHTTP.validate(data: downloadData, response: downloadResponse)
-        )
+        let downloadData = try await downloadLyricData(id: candidate.id, accessKey: candidate.accessKey)
+        let payload = try JSONDecoder().decode(DownloadResponse.self, from: downloadData)
         guard payload.status == 200, let content = payload.content, !content.isEmpty else { return nil }
         let lines = parseKRC(try decryptKRC(content))
         return makeCandidate(song: song, lyrics: candidate, lines: lines, for: track)
     }
 
+    private func downloadLyricData(id: String, accessKey: String) async throws -> Data {
+        var lastError: Error?
+        for host in ["http://lyrics.kugou.com/download", "http://krcs.kugou.com/download"] {
+            try Task.checkCancellation()
+            do {
+                let (data, response) = try await LyricsHTTP.data(for: downloadRequest(id: id, accessKey: accessKey, baseURL: host))
+                return try LyricsHTTP.validate(data: data, response: response)
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                lastError = error
+            }
+        }
+        throw lastError ?? URLError(.cannotLoadFromNetwork)
+    }
+
     func makeCandidate(song: Song, lyrics: LyricDownloadCandidate, lines: [LyricLine], for track: SpotifyTrack) -> LyricsCandidate? {
         guard !lines.isEmpty else { return nil }
         let match = TrackMatcher.Candidate(title: lyrics.title, artists: [lyrics.artist], durationMs: lyrics.durationMs)
+        let album = song.album?.trimmingCharacters(in: .whitespacesAndNewlines)
         // Hash identifies the recording; the lyric download ID is not a player song ID.
         return LyricsCandidate(document: TimedLyricDocument(lines: lines, metadata: LyricsMetadata(provider: "Kugou", platformTrackID: song.hash)),
             provider: "Kugou", sourcePlatform: "kugou", sourceTrackID: song.hash,
-            sourceTitle: lyrics.title, sourceArtist: lyrics.artist, sourceAlbum: nil,
+            sourceTitle: lyrics.title, sourceArtist: lyrics.artist, sourceAlbum: album?.isEmpty == false ? album : nil,
             sourceDuration: Double(lyrics.durationMs) / 1000, sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: match))
     }
 
@@ -75,7 +96,7 @@ struct KugouLyricsSource {
         var components = URLComponents(string: "http://mobilecdn.kugou.com/api/v3/search/song")!
         components.queryItems = [
             URLQueryItem(name: "format", value: "json"),
-            URLQueryItem(name: "keyword", value: "\(track.name) \(track.artist)"),
+            URLQueryItem(name: "keyword", value: TrackMatcher.chineseSearchQuery(for: track)),
             URLQueryItem(name: "page", value: "1"),
             URLQueryItem(name: "pagesize", value: "20"),
             URLQueryItem(name: "showtype", value: "1")
@@ -96,8 +117,8 @@ struct KugouLyricsSource {
         return request(url: components.url!)
     }
 
-    func downloadRequest(id: String, accessKey: String) -> URLRequest {
-        var components = URLComponents(string: "https://lyrics.kugou.com/download")!
+    func downloadRequest(id: String, accessKey: String, baseURL: String = "http://lyrics.kugou.com/download") -> URLRequest {
+        var components = URLComponents(string: baseURL)!
         components.queryItems = [
             URLQueryItem(name: "ver", value: "1"),
             URLQueryItem(name: "client", value: "pc"),
@@ -113,13 +134,19 @@ struct KugouLyricsSource {
         let response = try JSONDecoder().decode(SongSearchResponse.self, from: data)
         guard response.status == 1 else { return nil }
         let songs = deduplicated(response.data.info.flatMap { [$0] + ($0.group ?? []) }.map {
-            Song(hash: $0.hash, title: $0.title, artist: $0.artist, duration: $0.duration)
+            Song(hash: $0.hash, title: $0.title, artist: $0.artist, duration: $0.duration, album: $0.albumName)
         }, signature: { signature(title: $0.title, artist: $0.artist, durationMs: $0.duration * 1000) })
-        let candidates = songs.map {
+        let bound = songs.filter {
+            LyricsSelection.albumMatches($0.album, track: track) &&
+            TrackMatcher.identityRejectReason(track, title: $0.title, artist: $0.artist, album: $0.album) == nil &&
+            abs(Double($0.duration) - track.duration) <= 2
+        }
+        let pool = bound.isEmpty ? songs : bound
+        let candidates = pool.map {
             TrackMatcher.Candidate(title: $0.title, artists: [$0.artist], durationMs: $0.duration * 1000)
         }
         guard let index = closestAcceptedIndex(for: track, candidates: candidates) else { return nil }
-        return songs[index]
+        return pool[index]
     }
 
     func matchingLyrics(in data: Data, for track: SpotifyTrack) throws -> LyricDownloadCandidate? {
@@ -225,12 +252,14 @@ private struct SongSearchItem: Decodable {
     let title: String
     let artist: String
     let duration: Int
+    let albumName: String?
     let group: [SongSearchItem]?
 
     private enum CodingKeys: String, CodingKey {
         case hash, duration, group
         case title = "songname"
         case artist = "singername"
+        case albumName = "album_name"
     }
 }
 

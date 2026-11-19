@@ -128,7 +128,7 @@ struct NetEaseLyricsSource {
     func searchRequest(for track: SpotifyTrack) -> URLRequest {
         var form = URLComponents()
         form.queryItems = [
-            URLQueryItem(name: "s", value: "\(track.name) \(track.artist)"),
+            URLQueryItem(name: "s", value: TrackMatcher.chineseSearchQuery(for: track)),
             URLQueryItem(name: "type", value: "1"),
             URLQueryItem(name: "limit", value: "10"),
             URLQueryItem(name: "offset", value: "0")

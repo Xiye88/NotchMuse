@@ -160,6 +160,16 @@ cat > "$CONTENTS/Info.plist" <<PLIST
         <key>NSExceptionAllowsInsecureHTTPLoads</key>
         <true/>
       </dict>
+      <key>lyrics.kugou.com</key>
+      <dict>
+        <key>NSExceptionAllowsInsecureHTTPLoads</key>
+        <true/>
+      </dict>
+      <key>krcs.kugou.com</key>
+      <dict>
+        <key>NSExceptionAllowsInsecureHTTPLoads</key>
+        <true/>
+      </dict>
     </dict>
   </dict>
   <key>NSAppleEventsUsageDescription</key>

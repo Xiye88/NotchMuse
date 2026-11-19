@@ -54,7 +54,14 @@ struct QQMusicLyricsSource {
     }
 
     func searchQueries(for track: SpotifyTrack) -> [String] {
-        ["\(track.name) \(track.artist)", track.name]
+        let chinese = TrackMatcher.chineseSearchQuery(for: track)
+        let simplifiedTitle = TrackMatcher.simplifiedChinese(track.name)
+        var queries: [String] = []
+        for candidate in [chinese, "\(track.name) \(track.artist)", simplifiedTitle, track.name] {
+            let trimmed = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty, !queries.contains(trimmed) { queries.append(trimmed) }
+        }
+        return queries
     }
 
     func searchRequest(query: String) throws -> URLRequest {
@@ -205,18 +212,19 @@ struct QQMusicLyricsSource {
     }
 
     private func search(_ query: String, for track: SpotifyTrack) async throws -> QQSong? {
+        // Smartbox + single-song detail is faster and remains responsive when musicu search returns empty/2001.
         do {
-            let (data, response) = try await LyricsHTTP.data(for: searchRequest(query: query))
-            if let song = try matchingSong(in: LyricsHTTP.validate(data: data, response: response), for: track) {
+            if let song = try await searchSmartbox(query, for: track) {
                 return song
             }
         } catch is CancellationError {
             throw CancellationError()
         } catch {
-            // Fall through to Smartbox when the primary QQ endpoint fails.
+            // Fall through to musicu when Smartbox fails.
         }
         try Task.checkCancellation()
-        return try await searchSmartbox(query, for: track)
+        let (data, response) = try await LyricsHTTP.data(for: searchRequest(query: query))
+        return try matchingSong(in: LyricsHTTP.validate(data: data, response: response), for: track)
     }
 
     private func searchSmartbox(_ query: String, for track: SpotifyTrack) async throws -> QQSong? {

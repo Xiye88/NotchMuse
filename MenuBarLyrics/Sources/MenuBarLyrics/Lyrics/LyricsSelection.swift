@@ -154,7 +154,7 @@ enum LyricsSelection {
     }
 
     private static func albumKey(_ value: String) -> String {
-        let releaseName = value.replacingOccurrences(of: #"\s*[-–—]\s*Single\s*$"#, with: "", options: [.regularExpression, .caseInsensitive])
+        let releaseName = value.replacingOccurrences(of: #"\s*[-–—]\s*(Single|EP)\s*$"#, with: "", options: [.regularExpression, .caseInsensitive])
         let simplified = releaseName.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? releaseName
         return TrackMatcher.parsedTitle(simplified).name
     }
@@ -164,7 +164,24 @@ enum LyricsSelection {
     static func albumMatches(_ album: String?, track: SpotifyTrack) -> Bool {
         let requested = albumKey(track.album)
         guard let album else { return false }
-        return !requested.isEmpty && requested == albumKey(album)
+        let candidate = albumKey(album)
+        guard !requested.isEmpty, !candidate.isEmpty else { return false }
+        if requested == candidate { return true }
+        // Apple Music often appends an English subtitle to a CJK album name (e.g. "因你而在 Stories Untold").
+        // Allow matching when one side is bilingual CJK+Latin and both share the exact same CJK core.
+        guard TrackMatcher.parsedTitle(track.album).versions == TrackMatcher.parsedTitle(album).versions else { return false }
+        let reqHan = hanOnly(requested), candHan = hanOnly(candidate)
+        let reqHasLatin = hasLatin(requested), candHasLatin = hasLatin(candidate)
+        if reqHan.count >= 2, reqHan == candHan, (reqHasLatin != candHasLatin) {
+            return true
+        }
+        return false
+    }
+    private static func hanOnly(_ value: String) -> String {
+        value.unicodeScalars.filter { (0x3400...0x9FFF).contains($0.value) || (0x20000...0x323AF).contains($0.value) }.map(String.init).joined()
+    }
+    private static func hasLatin(_ value: String) -> Bool {
+        value.unicodeScalars.contains { (0x0041...0x007A).contains($0.value) }
     }
 
     static func strongMetadata(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> Bool {
@@ -247,8 +264,21 @@ enum LyricsSelection {
         func normalized(_ value: String) -> String {
             let folded = value.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
             let hasHan = folded.unicodeScalars.contains { (0x3400...0x9FFF).contains($0.value) || (0x20000...0x323AF).contains($0.value) }
-            let simplified = hasHan ? (folded.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? folded) : folded
-            let canonical = !hasHan || simplified.applyingTransform(StringTransform("Simplified-Traditional"), reverse: false) == folded ? simplified : folded
+            let canonical: String
+            if hasHan {
+                // Convert Traditional to Simplified (including 妳→你, 著→着, 為→为) so cross-provider
+                // Traditional/Simplified lyrics corroborate each other, while keeping ambiguous
+                // Traditional-only pairs (髮/發, 幹/乾) distinct.
+                let ambiguous: Set<Character> = ["髮", "發", "幹", "乾"]
+                canonical = folded.map { ch -> String in
+                    if ambiguous.contains(ch) { return String(ch) }
+                    if ch == "妳" { return "你" }
+                    let s = String(ch)
+                    return s.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? s
+                }.joined()
+            } else {
+                canonical = folded
+            }
             return canonical.unicodeScalars.filter(CharacterSet.alphanumerics.contains).map(String.init).joined()
         }
         let raw = line.text.trimmingCharacters(in: .whitespacesAndNewlines), text = normalized(raw)

@@ -181,6 +181,65 @@ enum TrackMatcher {
         return base.subtracting([normalize(artist)]).union(split)
     }
 
+    static func simplifiedChinese(_ text: String) -> String {
+        text.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? text
+    }
+
+    static func canonicalArtistForChineseSearch(_ artist: String) -> String {
+        let parts = artist.components(separatedBy: CharacterSet(charactersIn: ",;/×、"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        let mapped = parts.map { part -> String in
+            let key = normalize(part)
+            return artistAliases[key] ?? simplifiedChinese(part)
+        }
+        return mapped.isEmpty ? simplifiedChinese(artist) : mapped.joined(separator: " ")
+    }
+
+    static func chineseSearchQuery(for track: SpotifyTrack) -> String {
+        let title = simplifiedChinese(track.name)
+        let artist = canonicalArtistForChineseSearch(track.artist)
+        return "\(title) \(artist)".trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static let artistAliases: [String: String] = [
+        "jjlin": "林俊杰",
+        "jaychou": "周杰伦",
+        "easonchan": "陈奕迅",
+        "gem": "邓紫棋",
+        "gem邓紫棋": "邓紫棋",
+        "mayday": "五月天",
+        "jokexue": "薛之谦",
+        "ericchou": "周兴哲",
+        "ronghaoli": "李荣浩",
+        "lironghao": "李荣浩",
+        "leehomwang": "王力宏",
+        "wangleehom": "王力宏",
+        "davidtao": "陶喆",
+        "khalilfong": "方大同",
+        "jolintsai": "蔡依林",
+        "hebetien": "田馥甄",
+        "stefaniesun": "孙燕姿",
+        "fishleong": "梁静茹",
+        "amei": "张惠妹",
+        "jackycheung": "张学友",
+        "lesliecheung": "张国荣",
+        "fayewong": "王菲",
+        "sodagreen": "苏打绿",
+        "silencewang": "汪苏泷",
+        "charliezhou": "周深",
+        "zhoushen": "周深",
+        "maobuyi": "毛不易",
+        "huachenyu": "华晨宇",
+        "karenmok": "莫文蔚",
+        "tanyachua": "蔡健雅",
+        "lalahsu": "徐佳莹",
+        "crowlu": "卢广仲",
+        "weibird": "韦礼安",
+        "yogalin": "林宥嘉",
+        "jamhsiao": "萧敬腾"
+    ]
+
     static func artistKeys(_ artists: [String]) -> (members: Set<String>, group: Set<String>) {
         let cleaned = artists.map {
             $0.replacingOccurrences(of: "薛之謙", with: "薛之谦")
@@ -189,15 +248,20 @@ enum TrackMatcher {
         }
         let members = cleaned.flatMap {
             $0.components(separatedBy: CharacterSet(charactersIn: ",;/×、"))
-                .map(normalize)
+                .map(normalizeArtist)
                 .filter { !$0.isEmpty }
         }
         let group = Set(cleaned.flatMap {
             $0.components(separatedBy: CharacterSet(charactersIn: ",&;/×、"))
-                .map(normalize)
+                .map(normalizeArtist)
                 .filter { !$0.isEmpty }
         })
         return (Set(members), group)
+    }
+
+    private static func normalizeArtist(_ text: String) -> String {
+        let key = normalize(text)
+        return artistAliases[key] ?? key
     }
 
     private static func artistsMatch(source: Set<String>, candidate: Set<String>) -> Bool {
@@ -207,9 +271,7 @@ enum TrackMatcher {
     private static func normalize(_ text: String) -> String {
         let folded = text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
         let simplified = folded.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? folded
-        // Only reversible spelling equivalents: 髮/發 and 幹/乾 must not collapse.
-        let canonical = simplified.applyingTransform(StringTransform("Simplified-Traditional"), reverse: false) == folded ? simplified : folded
-        return canonical
+        return simplified
             .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
             .map(String.init).joined()
     }

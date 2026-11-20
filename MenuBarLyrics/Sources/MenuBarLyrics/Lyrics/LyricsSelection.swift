@@ -11,8 +11,7 @@ enum LyricsSelection {
     }
 
     static func select(_ candidates: [LyricsCandidate], context: LyricsSelectionContext) -> Decision {
-        let crossCatalogPlayer = context.platform == "spotify" || context.platform == "apple"
-        let candidates = crossCatalogPlayer ? candidates.map { repairedTiming($0, among: candidates, context: context) } : candidates
+        let candidates = candidates.map { repairedTiming($0, among: candidates, context: context) }
         var rejected: [String: String] = [:]
         var eligible: [(candidate: LyricsCandidate, tier: Int)] = []
         for candidate in candidates {
@@ -32,13 +31,16 @@ enum LyricsSelection {
             }
         }
         // Resolver track metadata is not automatically bound to its lyric payload.
-        // A direct adapter for the backing platform must corroborate the vocal timeline.
+        // Accept LRCMux only when corroborated by a direct adapter (same or independent platform),
+        // or as a strict solo fallback when no direct provider returned a candidate and album + full vocal span match.
         let direct = eligible.filter { $0.candidate.provider != "LRCMux" }
         eligible = eligible.filter { item in
             guard item.candidate.provider == "LRCMux" else { return true }
-            let supported = item.candidate.sourcePlatform != nil && direct.contains {
-                $0.candidate.sourcePlatform == item.candidate.sourcePlatform && timelinesAgree(item.candidate, $0.candidate)
+            let supportedByDirect = item.candidate.sourcePlatform != nil && direct.contains {
+                $0.candidate.sourcePlatform != nil && timelinesAgree(item.candidate, $0.candidate)
             }
+            let strictSoloFallback = direct.isEmpty && strongResolverFallback(item.candidate, context: context)
+            let supported = supportedByDirect || strictSoloFallback
             if !supported { rejected[item.candidate.provider] = "resolver_metadata_unverified" }
             return supported
         }
@@ -48,15 +50,21 @@ enum LyricsSelection {
         eligible = evidencePool.compactMap { item in
             guard item.tier == 4 else { return item }
             let bound = evidencePool.filter { identityTier($0.candidate, context: context) == 3 && $0.candidate.provider != "LRCMux" }
-            let compatibleWithBound = !crossCatalogPlayer || !bound.contains { timelinesConflict(item.candidate, $0.candidate) }
-            let corroborated = compatibleWithBound && evidencePool.contains { other in
-                guard item.candidate.provider != other.candidate.provider,
-                      let platform = item.candidate.sourcePlatform,
-                      let otherPlatform = other.candidate.sourcePlatform else { return false }
-                let independent = platform != otherPlatform && other.candidate.provider != "LRCMux"
-                let backedResolver = item.candidate.provider == "LRCMux" && platform == otherPlatform && other.tier <= 3
-                return (independent || backedResolver) && timelinesAgree(item.candidate, other.candidate)
-            }
+            let compatibleWithBound = !bound.contains { timelinesConflict(item.candidate, $0.candidate) }
+            let corroborated = compatibleWithBound && (
+                (item.candidate.provider == "LRCMux" && direct.isEmpty && strongResolverFallback(item.candidate, context: context)) ||
+                evidencePool.contains { other in
+                    guard item.candidate.provider != other.candidate.provider,
+                          let platform = item.candidate.sourcePlatform,
+                          let otherPlatform = other.candidate.sourcePlatform else { return false }
+                    let independent = platform != otherPlatform && other.candidate.provider != "LRCMux"
+                    let backedResolver = item.candidate.provider == "LRCMux" && other.candidate.provider != "LRCMux" &&
+                        ((platform == otherPlatform && other.tier <= 3) || platform != otherPlatform)
+                    let directBackedByDifferentPlatformResolver = item.candidate.provider != "LRCMux" &&
+                        other.candidate.provider == "LRCMux" && platform != otherPlatform
+                    return (independent || backedResolver || directBackedByDifferentPlatformResolver) && timelinesAgree(item.candidate, other.candidate)
+                }
+            )
             if !corroborated { rejected[item.candidate.provider] = "identity_ambiguous" }
             return corroborated ? (item.candidate, 3) : nil
         }
@@ -85,7 +93,7 @@ enum LyricsSelection {
             let boundConflicts = bound.contains { a in bound.contains { b in
                 a.candidate.provider != b.candidate.provider && timelinesConflict(a.candidate, b.candidate)
             } }
-            if crossCatalogPlayer, !bound.isEmpty, !boundConflicts,
+            if !bound.isEmpty, !boundConflicts,
                bound.contains(where: { strongMetadata($0.candidate, context: context) }) {
                 // Release-unbound outliers cannot veto an otherwise validated album recording.
                 // Never use source majority to break a conflict between equally bound recordings.
@@ -225,6 +233,15 @@ enum LyricsSelection {
         return last >= context.track.duration * 0.6 && last - first >= context.track.duration * 0.5
     }
 
+    private static func strongResolverFallback(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> Bool {
+        guard candidate.provider == "LRCMux", candidate.sourcePlatform != nil,
+              albumMatches(candidate, context: context),
+              rejection(candidate, context: context) == nil else { return false }
+        let vocalTimes = anchors(candidate).values.flatMap { $0 }.sorted()
+        guard vocalTimes.count >= 10, let first = vocalTimes.first, let last = vocalTimes.last else { return false }
+        return last >= context.track.duration * 0.6 && last - first >= context.track.duration * 0.5
+    }
+
     /// An explainable evidence score, not a probability. Hard contradictions always win.
     static func confidence(_ candidate: LyricsCandidate, among pool: [LyricsCandidate], context: LyricsSelectionContext) -> Int {
         guard rejection(candidate, context: context) == nil else { return 0 }
@@ -273,9 +290,6 @@ enum LyricsSelection {
             (checkRichEnds && (!($0.endTime ?? $0.time).isFinite || ($0.endTime ?? $0.time) > context.track.duration + 2)) }) { return "timeline_out_of_recording" }
         if let reason = TrackMatcher.identityRejectReason(context.track, title: candidate.sourceTitle, artist: candidate.sourceArtist, album: candidate.sourceAlbum) { return reason }
         let tier = identityTier(candidate, context: context)
-        if context.platform != "spotify", context.platform != "apple", tier >= 3, let album = candidate.sourceAlbum,
-           !albumKey(album).isEmpty, !albumKey(context.track.album).isEmpty,
-           !albumMatches(candidate, context: context) { return "album_mismatch" }
         if candidate.provider != "LRCMux", candidate.sourcePlatform == context.platform,
            context.platform != "netease", let sourceID = candidate.sourceTrackID, let native = context.nativeTrackID,
            normalizedID(sourceID, platform: context.platform) != normalizedID(native, platform: context.platform) { return "exact_id_mismatch" }

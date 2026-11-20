@@ -222,12 +222,12 @@ final class LyricsClient {
         }
         // One recovery pass, only for transport/deadline failures. Empty responses
         // and rejected candidates are evidence, not reasons to repeat requests.
-        if context.platform == "spotify", decision.winner == nil, !recoveredIdentity {
+        if decision.winner == nil, !recoveredIdentity {
             let indices = sources.indices.filter { names.indices.contains($0) && LyricsHTTP.retryableStatus(statuses[names[$0]] ?? "") }
             if !indices.isEmpty {
                 try await Task.sleep(for: .milliseconds(150))
                 let retry = await Self.collect(indices.map { sources[$0] }, names: indices.map { names[$0] },
-                    for: context.track, window: 4.5, context: context, boundedSpotify: true)
+                    for: context.track, window: context.platform == "spotify" ? 4.5 : 3.5, context: context, boundedSpotify: context.platform == "spotify")
                 try Task.checkCancellation()
                 for (name, status) in retry.statuses { statuses[name] = status; statuses[name + " first attempt"] = collected.statuses[name] }
                 statuses["Recovery"] = "one_transient_source_retry"

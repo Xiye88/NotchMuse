@@ -34,7 +34,7 @@ enum LyricsHTTP {
     struct StatusError: Error { let code: Int; let retryAllowed: Bool }
 
     static func isTransient(_ error: Error) -> Bool {
-        if let error = error as? StatusError { return error.retryAllowed && [502, 503, 504].contains(error.code) }
+        if let error = error as? StatusError { return error.retryAllowed && [429, 500, 502, 503, 504].contains(error.code) }
         guard let error = error as? URLError else { return false }
         return [.timedOut, .networkConnectionLost, .cannotConnectToHost, .dnsLookupFailed].contains(error.code)
     }

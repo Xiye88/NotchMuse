@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NotchMuse v0.8.5 Release Notes</title>
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0b0b0d;
+      --card: #161618;
+      --border: rgba(255, 255, 255, 0.10);
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --accent: #ff8a36;
+      --accent-soft: rgba(255, 138, 54, 0.14);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f5f7;
+        --card: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --accent: #e06d1b;
+        --accent-soft: rgba(224, 109, 27, 0.10);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px 22px 28px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro SC", "PingFang SC", sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .lang-radio { position: absolute; opacity: 0; pointer-events: none; }
+    .wrap { max-width: 680px; margin: 0 auto; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .title-group h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .badge {
+      display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 600;
+    }
+    .lang-switch {
+      display: inline-flex; padding: 2px; border-radius: 999px;
+      background: var(--card); border: 1px solid var(--border);
+      user-select: none; -webkit-user-select: none;
+    }
+    .lang-switch label {
+      display: inline-block; color: var(--muted); font-size: 12px; font-weight: 600;
+      padding: 5px 12px; border-radius: 999px; cursor: pointer;
+    }
+    #lang-zh:checked ~ .wrap label[for="lang-zh"],
+    #lang-en:checked ~ .wrap label[for="lang-en"] { background: var(--accent); color: #ffffff; }
+    #panel-zh, #panel-en { display: none; }
+    #lang-zh:checked ~ .wrap #panel-zh,
+    #lang-en:checked ~ .wrap #panel-en { display: block; }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+    }
+    h2 { margin: 0 0 10px; font-size: 15px; font-weight: 650; }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin-bottom: 6px; }
+    .metrics {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px; margin: 10px 0 12px;
+    }
+    .metric {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+    }
+    .metric strong { color: var(--accent); }
+    .qr-box { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .qr-box img {
+      width: 124px; height: 124px; border-radius: 10px;
+      background: #fff; padding: 4px; border: 1px solid var(--border);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <input class="lang-radio" type="radio" name="release-lang" id="lang-en" checked>
+  <input class="lang-radio" type="radio" name="release-lang" id="lang-zh">
+
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-group">
+        <h1>NotchMuse v0.8.5</h1>
+        <span class="badge">Build 83 · macOS 14+</span>
+      </div>
+      <div class="lang-switch" role="tablist" aria-label="Language">
+        <label for="lang-en" id="btn-en">English</label>
+        <label for="lang-zh" id="btn-zh">中文</label>
+      </div>
+    </div>
+
+    <div id="panel-en">
+      <div class="card">
+        <h2>1. Version Display, Smoother Updates &amp; In-App Announcements</h2>
+        <ul>
+          <li><strong>Clear version display</strong>: Current version and build number are now shown in Settings → General and at the bottom of the Menu Bar dropdown.</li>
+          <li><strong>Clear feedback during background updates</strong>: Automatic launch update checks and background downloads are enabled by default; clicking <em>Check for Updates…</em> while a background download is running now shows a clear status notice instead of ignoring the click.</li>
+          <li><strong>Native Updates &amp; Announcements window</strong>: Clicking the pinned top banner in Settings opens an in-app history &amp; announcements window with a subtle unread dot and quiet background refresh.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. Major Lyrics Engine Upgrade (90% Match Rate Across 4 Players)</h2>
+        <div class="metrics">
+          <div class="metric"><span>Apple Music</span><strong>43% → 90% (+47%)</strong></div>
+          <div class="metric"><span>Spotify</span><strong>58% → 90% (+32%)</strong></div>
+          <div class="metric"><span>NetEase Cloud</span><strong>45% → 90% (+45%)</strong></div>
+          <div class="metric"><span>Soda Music</span><strong>44% → 90% (+46%)</strong></div>
+        </div>
+        <ul>
+          <li>Restored direct Kugou &amp; QQ Music lyric sources, Enhanced LRC word-timestamp parsing, and cross-source timing corroboration across C-Pop, K-Pop, J-Pop, and Western tracks.</li>
+          <li>Upgraded Notch frosted vibrancy with a crisp 0.5pt rim, capsule Free Floating hover bar, and readability shadows.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. Feedback &amp; Community</h2>
+        <div class="qr-box">
+          <img src="https://notchmuse.com/assets/wechat-group-qr.jpg" alt="NotchMuse WeChat Group QR Code">
+          <div>
+            <p style="margin:0 0 8px;">Found a bug or a song missing lyrics? Reach out anytime:</p>
+            <ul>
+              <li>Support Email: <a href="mailto:support@notchmuse.com">support@notchmuse.com</a></li>
+              <li>GitHub Issues: <a href="https://github.com/Xiye88/NotchMuse/issues">Xiye88/NotchMuse/issues</a></li>
+              <li>Scan to join the <strong>NotchMuse WeChat User Group</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-zh">
+      <div class="card">
+        <h2>1. 版本号展示、自动更新反馈与应用内公告中心</h2>
+        <ul>
+          <li><strong>清晰展示当前版本号</strong>：设置页「通用」及菜单栏下拉菜单底部新增当前版本号与 Build 号显示，随时一眼确认。</li>
+          <li><strong>默认开启启动自动检查与自动下载安装</strong>：后台正在下载新版本时点击「检查更新」不再无响应，改为明确提示当前进度。</li>
+          <li><strong>原生「更新与公告」窗口</strong>：点击设置页顶部常驻公告条直接打开应用内公告与历史版本窗口，支持未读橙色小圆点与定时静默刷新。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. 歌词引擎全面升级（四平台实测命中率均提升至 90%）</h2>
+        <div class="metrics">
+          <div class="metric"><span>Apple Music</span><strong>43% → 90% (+47%)</strong></div>
+          <div class="metric"><span>Spotify</span><strong>58% → 90% (+32%)</strong></div>
+          <div class="metric"><span>网易云音乐</span><strong>45% → 90% (+45%)</strong></div>
+          <div class="metric"><span>汽水音乐</span><strong>44% → 90% (+46%)</strong></div>
+        </div>
+        <ul>
+          <li>恢复酷狗/QQ 音乐直连歌词源并支持逐字时间戳解析，彻底消除部分歌曲中的异常数字串，全面强化繁简、双语别名与跨源校验。</li>
+          <li>刘海模式恢复原生毛玻璃质感与 0.5pt 描边，悬浮工具条升级为毛玻璃胶囊样式并新增透明底可读性阴影。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. 问题反馈与用户交流群</h2>
+        <div class="qr-box">
+          <img src="https://notchmuse.com/assets/wechat-group-qr.jpg" alt="NotchMuse 微信交流群二维码">
+          <div>
+            <p style="margin:0 0 8px;">使用中遇到任何 Bug、歌词未匹配或功能建议，欢迎随时联系我：</p>
+            <ul>
+              <li>反馈邮箱：<a href="mailto:support@notchmuse.com">support@notchmuse.com</a></li>
+              <li>GitHub Issues：<a href="https://github.com/Xiye88/NotchMuse/issues">Xiye88/NotchMuse/issues</a></li>
+              <li>扫码加入 <strong>NotchMuse 微信交流群</strong>（直接联系开发者）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./release-notes.js" defer></script>
+</body>
+</html>

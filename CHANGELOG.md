@@ -315,7 +315,14 @@ All older candidate/build/pending-release sections below are historical and are 
 
 - 防止重复启动产生多个 NotchMuse 进程
 - 退出时释放 Timer、异步任务和 Overlay 窗口
-- 防止切歌后旧歌词结果覆盖当前歌曲## [0.8.4] - 2026-11-20 (Build 82)
+- 防止切歌后旧歌词结果覆盖当前歌曲## [0.8.5] - 2026-11-20 (Build 83)
+
+### Added & Improved
+- Display current version and build number in Settings → General and at the bottom of the Menu Bar dropdown.
+- Show an informational status notice when clicking Check for Updates while a background download is already in progress instead of silently ignoring the click.
+- Updated bundled `FeedbackEmail` in `Info.plist` to `support@notchmuse.com` and added explicit `xml:lang="en"` on localized Sparkle appcast release notes links.
+
+## [0.8.4] - 2026-11-20 (Build 82)
 
 ### Added
 - Native in-app **Updates & Announcements** window (`AnnouncementWindowController`) showing announcements and release history instead of opening a browser tab.

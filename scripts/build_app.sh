@@ -40,7 +40,7 @@ BRIDGE_DEST="$RESOURCES/MediaRemoteBridge"
 VERSION="${NOTCHMUSE_VERSION:-0.8.0}"
 BUILD_NUMBER="${NOTCHMUSE_BUILD_NUMBER:-19}"
 SIGN_IDENTITY="${NOTCHMUSE_SIGN_IDENTITY:--}"
-DEFAULT_FEEDBACK_EMAIL="ztongxue3@gmail.com"
+DEFAULT_FEEDBACK_EMAIL="support@notchmuse.com"
 FEEDBACK_EMAIL="${FEEDBACK_EMAIL:-$DEFAULT_FEEDBACK_EMAIL}"
 
 # Private Preview shadow metadata endpoint; keep credentials and public hosts out of the bundle.

@@ -635,7 +635,20 @@ final class SettingsWindowController: NSWindowController {
         generalPage.addArrangedSubview(updateHelp)
         let checkUpdates = NSButton(title: L10n.text("Check for Updates…"), target: self, action: #selector(checkForUpdates))
         checkUpdates.isEnabled = UpdateController.shared.isAvailable
-        generalPage.addArrangedSubview(checkUpdates)
+        let shortVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+        let buildNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
+        let isPreview = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+        let versionPrefix = AppPreferences.language == .simplifiedChinese ? "当前版本：" : "Version "
+        let channelPrefix = isPreview ? "Preview " : ""
+        let buildSuffix = buildNumber.isEmpty ? "" : " (Build \(buildNumber))"
+        let versionLabel = NSTextField(labelWithString: "\(versionPrefix)\(channelPrefix)v\(shortVersion)\(buildSuffix)")
+        versionLabel.font = .monospacedDigitSystemFont(ofSize: 11.5, weight: .regular)
+        versionLabel.textColor = .secondaryLabelColor
+        let updateActionRow = NSStackView(views: [checkUpdates, versionLabel])
+        updateActionRow.orientation = .horizontal
+        updateActionRow.alignment = .centerY
+        updateActionRow.spacing = 12
+        generalPage.addArrangedSubview(updateActionRow)
 
         displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how and where lyrics appear."), grid: displayGrid, trailing: resetButton(for: .display))))
         freeOrientation.target = self

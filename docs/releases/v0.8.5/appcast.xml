@@ -1,0 +1,18 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>NotchMuse</title>
+        <item>
+            <title>0.8.5</title>
+            <pubDate>Sat, 21 Nov 2026 00:03:22 +0800</pubDate>
+            <link>https://notchmuse.com/</link>
+            <sparkle:version>83</sparkle:version>
+            <sparkle:shortVersionString>0.8.5</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <sparkle:releaseNotesLink xml:lang="en">https://notchmuse.com/releases/v0.8.5/NotchMuse.html</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink xml:lang="zh">https://notchmuse.com/releases/v0.8.5/NotchMuse.zh.html</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" length="7327684" type="application/octet-stream" sparkle:edSignature="bCwsds8bOzFdrSpTgssSUebUEwfbYZ63xGYlThbtjIE/FIUuPhmhuXaOk71L3mDyThmPiJoT41zT32kFvtZCDw=="/>
+        </item>
+    </channel>
+</rss>

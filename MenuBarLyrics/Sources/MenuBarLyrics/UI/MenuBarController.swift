@@ -214,6 +214,13 @@ final class MenuBarController: NSObject {
         menu.insertItem(announcementMenuItem, at: 0)
         menu.insertItem(announcementSeparator, at: 1)
         menu.addItem(NSMenuItem.separator())
+        let shortVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+        let buildNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
+        let appLabel = (Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true) ? "NotchMuse Preview" : "NotchMuse"
+        let versionTitle = buildNumber.isEmpty ? "\(appLabel) v\(shortVersion)" : "\(appLabel) v\(shortVersion) (Build \(buildNumber))"
+        let versionItem = NSMenuItem(title: versionTitle, action: nil, keyEquivalent: "")
+        versionItem.isEnabled = false
+        menu.addItem(versionItem)
         menu.addItem(NSMenuItem(title: L10n.text("Quit"), action: #selector(quit), keyEquivalent: "q"))
 
         for item in menu.items {

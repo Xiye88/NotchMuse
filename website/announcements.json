@@ -1,16 +1,28 @@
 {
-  "id": "v0.8.4",
-  "title_zh": "v0.8.4 已发布：应用内公告与历史版本窗口上线，点击查看",
-  "title_en": "v0.8.4 Released: In-app announcements & release history — View",
-  "url": "https://notchmuse.com/releases/v0.8.4/NotchMuse.html",
+  "id": "v0.8.5",
+  "title_zh": "v0.8.5 已发布：版本号展示与更新体验完善，点击查看详情",
+  "title_en": "v0.8.5 Released: Version display & smoother update feedback — View",
+  "url": "https://notchmuse.com/releases/v0.8.5/NotchMuse.html",
   "enabled": true,
   "items": [
     {
-      "id": "v0.8.4",
+      "id": "v0.8.5",
       "kind": "release",
       "date": "2026-11-20",
       "badge_zh": "最新版本",
       "badge_en": "Latest",
+      "title_zh": "v0.8.5 — 版本号展示与更新交互体验完善",
+      "title_en": "v0.8.5 — Version Display & Smoother Update Feedback",
+      "body_zh": "• 在设置页「通用」与菜单栏下拉菜单底部清晰展示当前版本号与 Build 号\n• 后台静默下载更新期间点击「检查更新」不再无响应，改为明确提示当前进度\n• 完整包含应用内「更新与公告」中心、定时静默刷新、未读小圆点及统一反馈邮箱 support@notchmuse.com",
+      "body_en": "• Added clear version and build number display in Settings → General and at the bottom of the Menu Bar dropdown\n• Clicking Check for Updates while a background download is running now shows a clear status message instead of ignoring the click\n• Includes the native in-app Updates & Announcements window, quiet background refresh, unread dot, and support@notchmuse.com",
+      "url": "https://notchmuse.com/releases/v0.8.5/NotchMuse.html"
+    },
+    {
+      "id": "v0.8.4",
+      "kind": "release",
+      "date": "2026-11-20",
+      "badge_zh": "历史版本",
+      "badge_en": "Release",
       "title_zh": "v0.8.4 — 应用内更新公告中心与统一反馈入口",
       "title_en": "v0.8.4 — In-App Announcements Center & Unified Support",
       "body_zh": "• 点击顶部公告条不再跳转浏览器，改为直接打开原生「更新与公告」窗口查看历史版本与平台公告，且公告条常驻不消失\n• 新增未读小圆点提示与后台定时静默刷新（每 6 小时及打开设置页时按需更新）\n• 更新说明弹窗支持按系统语言自动展示中文/英文并可零延迟一键切换\n• 反馈邮箱统一升级为 support@notchmuse.com，并在公告窗口底部内置直达入口",

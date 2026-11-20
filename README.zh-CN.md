@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | 简体中文</p>
 
-<h1 align="center">NotchMuse v0.8.4</h1>
+<h1 align="center">NotchMuse v0.8.5</h1>
 
 <p align="center"><img src="website/assets/media/notch-poster.webp" alt="NotchMuse 在 macOS 上实际显示的浮层歌词" width="1080"></p>
 
@@ -8,7 +8,7 @@
 
 <p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐</p>
 
-<p align="center"><a href="https://notchmuse.com"><strong>官网下载</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.4"><strong>GitHub Release</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>报告问题</strong></a></p>
+<p align="center"><a href="https://notchmuse.com"><strong>官网下载</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.5"><strong>GitHub Release</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>报告问题</strong></a></p>
 
 ## 菜单栏歌词
 
@@ -64,15 +64,15 @@ NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Develop
 
 如果系统拦截，请打开 **系统设置 → 隐私与安全性 → 仍要打开**，按提示认证后再次启动。安装和权限问题见[使用支持](docs/community/SUPPORT.md)。不要通过关闭 Gatekeeper 或移除 quarantine 强制运行。见 [Apple“仍要打开”指引](https://support.apple.com/zh-cn/102445)。本次仅为 ad-hoc 签名，未使用 Developer ID，也未通过公证；尚未完成独立干净 Mac 首次安装验证。目前不支持 Intel Mac。
 
-## 更新至 v0.8.4
+## 更新至 v0.8.5
 
-已有正式版可在 **设置 → 通用 → 检查更新** 中下载、安装并重启到 v0.8.4 / Build70。开启自动检查后，应用会在下一次定时检查时发现新版，并在安装前征求确认。官方签名更新源已提供 Build70；已使用完整旧版临时副本实测 Build47→70、Build61→70。
+已有正式版可在 **设置 → 通用 → 检查更新** 中下载、安装并重启到 v0.8.5 / Build70。开启自动检查后，应用会在下一次定时检查时发现新版，并在安装前征求确认。官方签名更新源已提供 Build70；已使用完整旧版临时副本实测 Build47→70、Build61→70。
 
-Beta 3 及更早版本需进行一次[手动安装](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.4/NotchMuse.dmg)。仍可手动下载并对照 [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.4/SHA256SUMS) 校验；Preview 保持独立。应用离线或关闭自动检查时，不会自动弹出更新提示。
+Beta 3 及更早版本需进行一次[手动安装](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg)。仍可手动下载并对照 [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/SHA256SUMS) 校验；Preview 保持独立。应用离线或关闭自动检查时，不会自动弹出更新提示。
 
 ### 本次改进
 
-可拖拽歌词框、位置保存、锁定与点击穿透；优先按真实词尾/句尾划色，缺少结束时间时整句静态显示；网易单行时间异常不再丢掉其他行的有效时间；更新状态和网络重试提示更清楚。歌词仍取决于第三方覆盖率。见[中文发布说明](docs/releases/v0.8.4/RELEASE_NOTES.zh-CN.md)。
+可拖拽歌词框、位置保存、锁定与点击穿透；优先按真实词尾/句尾划色，缺少结束时间时整句静态显示；网易单行时间异常不再丢掉其他行的有效时间；更新状态和网络重试提示更清楚。歌词仍取决于第三方覆盖率。见[中文发布说明](docs/releases/v0.8.5/RELEASE_NOTES.zh-CN.md)。
 
 ## 常见问题
 

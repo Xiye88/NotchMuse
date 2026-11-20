@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hans">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,6 +36,11 @@
       font-size: 14px;
       line-height: 1.65;
     }
+    .lang-radio {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
     .wrap { max-width: 680px; margin: 0 auto; }
     .topbar {
       display: flex;
@@ -68,10 +73,11 @@
       border-radius: 999px;
       background: var(--card);
       border: 1px solid var(--border);
+      user-select: none;
+      -webkit-user-select: none;
     }
-    .lang-switch button {
-      border: 0;
-      background: transparent;
+    .lang-switch label {
+      display: inline-block;
       color: var(--muted);
       font-size: 12px;
       font-weight: 600;
@@ -79,9 +85,18 @@
       border-radius: 999px;
       cursor: pointer;
     }
-    .lang-switch button.active {
+    #lang-zh:checked ~ .wrap label[for="lang-zh"],
+    #lang-en:checked ~ .wrap label[for="lang-en"] {
       background: var(--accent);
       color: #ffffff;
+    }
+    #panel-zh,
+    #panel-en {
+      display: none;
+    }
+    #lang-zh:checked ~ .wrap #panel-zh,
+    #lang-en:checked ~ .wrap #panel-en {
+      display: block;
     }
     .card {
       background: var(--card);
@@ -130,11 +145,13 @@
     }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
-    .hidden { display: none; }
     .muted { color: var(--muted); font-size: 12.5px; }
   </style>
 </head>
 <body>
+  <input class="lang-radio" type="radio" name="release-lang" id="lang-zh" checked>
+  <input class="lang-radio" type="radio" name="release-lang" id="lang-en">
+
   <div class="wrap">
     <div class="topbar">
       <div class="title-group">
@@ -142,8 +159,8 @@
         <span class="badge">Build 81 · macOS 14+</span>
       </div>
       <div class="lang-switch" role="tablist" aria-label="Language">
-        <button id="btn-zh" type="button">中文</button>
-        <button id="btn-en" type="button">English</button>
+        <label for="lang-zh" id="btn-zh">中文</label>
+        <label for="lang-en" id="btn-en">English</label>
       </div>
     </div>
 
@@ -153,23 +170,22 @@
         <div class="metrics">
           <div class="metric"><span>Apple Music</span><strong>43% → 90% (+47%)</strong></div>
           <div class="metric"><span>Spotify</span><strong>58% → 90% (+32%)</strong></div>
-          <div class="metric"><span>网易云音乐 (通用)</span><strong>43% → 90% (+47%)</strong></div>
-          <div class="metric"><span>汽水音乐</span><strong>43% → 90% (+47%)</strong></div>
+          <div class="metric"><span>网易云音乐</span><strong>45% → 90% (+45%)</strong></div>
+          <div class="metric"><span>汽水音乐</span><strong>44% → 90% (+46%)</strong></div>
         </div>
         <ul>
-          <li><strong>恢复酷狗逐字 KRC 与 QQ 音乐主力词源</strong>：修复酷狗下载链路并保留专辑信息，QQ 音乐优先切换至高可用搜索链路。</li>
-          <li><strong>支持 Enhanced LRC（<code>&lt;mm:ss.xxx&gt;</code>）逐字解析</strong>：彻底消除歌词中出现的莫名时间数字，并升级为逐字高亮。</li>
-          <li><strong>全面优化 Apple Music 与跨平台曲目匹配</strong>：修复繁简转换误杀（如周杰倫/周杰伦、髮如雪/发如雪），新增中英/韩文歌手别名归一，支持 <code>(with ...)</code> 合唱、括号副标题、影视 OST 与数字专辑名，全平台统一双直连源共识与瞬态重试。</li>
-          <li><strong>修复 QQ 音乐无专辑名匹配</strong>：解决 QQ 音乐桌面端未上报专辑名时自家正版歌词无法命中的问题。</li>
+          <li>恢复酷狗音乐、QQ 音乐直连歌词源，并支持逐字时间戳解析，彻底消除部分歌曲歌词中出现 <code>&lt;00:12.34&gt;</code> 异常数字串的问题。</li>
+          <li>强化繁简转换、双语歌手别名、合唱标识、剧集 OST 副标题及专辑别名匹配，大幅提升华语、粤语、日韩与英文热门曲目命中率。</li>
+          <li>统一四平台跨源校验与时间轴修正，并对瞬时网络抖动增加有限重试，切歌出词更快更稳。</li>
         </ul>
       </div>
 
       <div class="card">
-        <h2>2. 启动自动检查更新、通知栏位与界面质感打磨</h2>
+        <h2>2. 启动自动检查更新、版本公告位与界面细节升级</h2>
         <ul>
-          <li><strong>启动静默检查 & 自动下载安装开关</strong>：打开 App 自动检查更新，设置页提供独立的自动下载安装开关。</li>
-          <li><strong>版本更新通知栏位</strong>：设置页顶部与菜单栏顶部新增轻量可关闭的更新公告入口，一眼直达最新版本说明。</li>
-          <li><strong>刘海与自由浮层打磨</strong>：恢复刘海原生 macOS 毛玻璃通透感与 0.5pt 极细高光描边；自由浮层工具栏升级为原生毛玻璃胶囊并增强透明背景可读性阴影。</li>
+          <li><strong>启动自动检查更新</strong>：App 启动时自动静默检查新版本，设置页新增「自动下载并安装更新」独立开关。</li>
+          <li><strong>版本公告位</strong>：设置页顶部新增可查看的版本公告横幅，菜单栏同步展示未读新版本入口。</li>
+          <li><strong>刘海与悬浮词条质感升级</strong>：刘海模式恢复原生毛玻璃质感与 0.5pt 柔和描边，悬浮工具条升级为毛玻璃胶囊样式，透明底新增柔和阴影保证浅色桌面可读性。</li>
         </ul>
       </div>
 
@@ -178,7 +194,7 @@
         <div class="qr-box">
           <img src="https://notchmuse.com/assets/wechat-group-qr.jpg" alt="NotchMuse 微信交流群二维码">
           <div>
-            <p style="margin:0 0 8px;">使用中遇到任何 Bug、缺词或同步问题，欢迎随时反馈：</p>
+            <p style="margin:0 0 8px;">使用中遇到任何 Bug、歌词未匹配或功能建议，欢迎随时联系我：</p>
             <ul>
               <li>扫码加入 <strong>NotchMuse 微信交流群</strong>（直接联系开发者）</li>
               <li>GitHub Issues：<a href="https://github.com/Xiye88/NotchMuse/issues">Xiye88/NotchMuse/issues</a></li>
@@ -189,20 +205,19 @@
       </div>
     </div>
 
-    <div id="panel-en" class="hidden">
+    <div id="panel-en">
       <div class="card">
-        <h2>1. Major Lyrics Matching Upgrade (90% Across All 4 Players)</h2>
+        <h2>1. Major Lyrics Match-Rate Upgrade (90% Across 4 Platforms)</h2>
         <div class="metrics">
           <div class="metric"><span>Apple Music</span><strong>43% → 90% (+47%)</strong></div>
           <div class="metric"><span>Spotify</span><strong>58% → 90% (+32%)</strong></div>
-          <div class="metric"><span>NetEase (Generic)</span><strong>43% → 90% (+47%)</strong></div>
-          <div class="metric"><span>Soda Music</span><strong>43% → 90% (+47%)</strong></div>
+          <div class="metric"><span>NetEase Cloud</span><strong>45% → 90% (+45%)</strong></div>
+          <div class="metric"><span>Soda Music</span><strong>44% → 90% (+46%)</strong></div>
         </div>
         <ul>
-          <li><strong>Restored Kugou (word-by-word KRC) &amp; QQ Music pipelines</strong>: Fixed Kugou lyric downloads with album metadata preserved and prioritized reliable QQ Smartbox search.</li>
-          <li><strong>Enhanced LRC (<code>&lt;mm:ss.xxx&gt;</code>) word-level timing</strong>: Eliminated raw timestamp numbers appearing in lyrics and upgraded them to smooth word-by-word highlighting.</li>
-          <li><strong>Better Apple Music &amp; cross-platform matching</strong>: Fixed Traditional/Simplified Chinese mismatches, added bilingual/K-pop artist aliases, supported <code>(with ...)</code> duets, parenthetical/OST subtitles, numeral albums, and unified cross-source corroboration with transient retries.</li>
-          <li><strong>QQ Music empty-album matching</strong>: Tracks without album metadata from QQ Music macOS now match directly against QQ Music's catalog.</li>
+          <li>Restored direct Kugou &amp; QQ Music lyric providers and added Enhanced LRC inline word-timestamp parsing, eliminating raw <code>&lt;00:12.34&gt;</code> timestamp leaks.</li>
+          <li>Improved Traditional/Simplified Chinese, bilingual artist aliases, duet credits, OST subtitles, and parenthetical album alias matching across C-Pop, K-Pop, J-Pop, and Western tracks.</li>
+          <li>Unified cross-source timing corroboration and added bounded transient-error retry for faster, steadier lyrics on track change.</li>
         </ul>
       </div>
 
@@ -210,7 +225,7 @@
         <h2>2. Startup Auto-Updates, Announcement Slot &amp; UI Polish</h2>
         <ul>
           <li><strong>Quiet startup checks &amp; auto-install control</strong>: Checks for updates automatically on launch, with an independent automatic download &amp; install toggle in Settings.</li>
-          <li><strong>In-app release announcement banner</strong>: Dismissible announcement card at the top of Settings and unread menu item so you never miss what's new.</li>
+          <li><strong>In-app release announcement banner</strong>: Announcement card at the top of Settings and unread menu item so you never miss what's new.</li>
           <li><strong>Notch &amp; Free Floating polish</strong>: Restored native macOS frosted-glass vibrancy with a crisp 0.5pt rim on the Notch overlay, upgraded the Free Floating hover bar to a frosted capsule pill, and added readability shadows for transparent backgrounds.</li>
         </ul>
       </div>

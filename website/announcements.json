@@ -1,7 +1,45 @@
 {
   "id": "v0.8.3",
-  "title_zh": "v0.8.3 已发布：四平台歌词命中率提升至 90%，点击查看更新说明",
-  "title_en": "v0.8.3 Released: 90% lyrics match rate across 4 players — View notes",
+  "title_zh": "v0.8.3 已发布：四平台歌词命中率提升至 90%，点击查看更新与公告",
+  "title_en": "v0.8.3 Released: 90% lyrics match rate across 4 players — View announcements",
   "url": "https://notchmuse.com/releases/v0.8.3/NotchMuse.html",
-  "enabled": true
+  "enabled": true,
+  "items": [
+    {
+      "id": "v0.8.3",
+      "kind": "release",
+      "date": "2026-11-20",
+      "badge_zh": "最新版本",
+      "badge_en": "Latest",
+      "title_zh": "v0.8.3 — 四平台歌词命中率提升至 90%",
+      "title_en": "v0.8.3 — 90% Lyrics Match Rate Across 4 Players",
+      "body_zh": "• Apple Music（43% → 90%）、Spotify（58% → 90%）、网易云音乐（45% → 90%）、汽水音乐（44% → 90%）\n• 恢复酷狗/QQ 音乐直连并支持逐字时间戳解析，消除 <00:12.34> 异常数字串\n• 启动自动静默检查更新 + 设置页独立「自动下载并安装更新」开关\n• 刘海/悬浮毛玻璃质感、0.5pt 描边与胶囊工具条升级",
+      "body_en": "• Apple Music (43% → 90%), Spotify (58% → 90%), NetEase Cloud (45% → 90%), Soda Music (44% → 90%)\n• Restored direct Kugou & QQ Music sources and Enhanced LRC word-timestamp parsing\n• Automatic launch update checks + independent auto download & install toggle\n• Upgraded Notch/Free Floating frosted vibrancy, 0.5pt rim, and capsule hover bar",
+      "url": "https://notchmuse.com/releases/v0.8.3/NotchMuse.html"
+    },
+    {
+      "id": "v0.8.2",
+      "kind": "release",
+      "date": "2026-11-10",
+      "badge_zh": "历史版本",
+      "badge_en": "Release",
+      "title_zh": "v0.8.2 — 应用内自动更新与播放器识别增强",
+      "title_en": "v0.8.2 — Built-in Auto-Updates & Player Detection",
+      "body_zh": "• 正式集成 Sparkle 应用内更新机制与 EdDSA 签名校验\n• 增强网易云音乐、QQ 音乐、汽水音乐与 Spotify 的播放状态同步",
+      "body_en": "• Integrated Sparkle in-app updater with EdDSA signature verification\n• Improved playback sync across NetEase Cloud, QQ Music, Soda Music, and Spotify",
+      "url": "https://notchmuse.com/releases/v0.8.2/NotchMuse.md"
+    },
+    {
+      "id": "v0.8.1",
+      "kind": "release",
+      "date": "2026-10-18",
+      "badge_zh": "历史版本",
+      "badge_en": "Release",
+      "title_zh": "v0.8.1 — 自由悬浮模式与时间轴精准同步",
+      "title_en": "v0.8.1 — Free Floating Mode & Precision Timing Sync",
+      "body_zh": "• 支持桌面自由悬浮词条、单行/双行切换与手动微调时间偏移\n• 优化菜单栏歌词渲染性能与低功耗表现",
+      "body_en": "• Added Free Floating desktop lyrics, 1/2-line modes, and manual timing offset\n• Optimized menu-bar rendering and low-power idle behavior",
+      "url": "https://notchmuse.com/releases/v0.8.1/NotchMuse.md"
+    }
+  ]
 }

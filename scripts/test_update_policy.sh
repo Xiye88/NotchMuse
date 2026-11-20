@@ -27,7 +27,8 @@ for preview,feed,enabled in [('1','http://127.0.0.1:1337/appcast.xml',True),('1'
         assert info['CFBundleIdentifier']=='app.notchmuse.mac'
         assert info['SUFeedURL']=='https://notchmuse.com/appcast.xml'
         assert info['SUEnableAutomaticChecks'] is True
-        assert info['SUAllowsAutomaticUpdates'] is False
-        assert 'SUAutomaticallyUpdate' not in info and 'SUScheduledCheckInterval' not in info
+        assert info['SUAllowsAutomaticUpdates'] is True
+        assert info['SUAutomaticallyUpdate'] is True
+        assert info['SUScheduledCheckInterval']==86400
     print('PASS plist:',preview,feed or 'Stable default')
 PYPLIST

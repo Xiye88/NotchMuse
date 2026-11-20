@@ -29,7 +29,10 @@ enum AppPreferences {
     static let showMenuBarIconKey = "ShowMenuBarIcon"
     static let hiddenControlsNoticeKey = "HiddenControlsNoticeShown"
     static let bilingualLyricsKey = "BilingualLyricsEnabled"
-    static var bilingualLyricsEnabled: Bool { UserDefaults.standard.bool(forKey: bilingualLyricsKey) }
+    static var bilingualLyricsEnabled: Bool {
+        Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true &&
+        UserDefaults.standard.bool(forKey: bilingualLyricsKey)
+    }
 
     static var showInDock: Bool { showInDock(in: .standard) }
 
@@ -291,6 +294,9 @@ final class SettingsWindowController: NSWindowController {
     private let showMenuBarIconSwitch = NSSwitch()
     private let automaticUpdateSwitch = NSSwitch()
     private let automaticInstallSwitch = NSSwitch()
+    private var announcementBanner: NSView?
+    private var announcementTitleButton: NSButton?
+    private var announcementObserver: NSObjectProtocol?
     private let bilingualLyricsSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
     private let appAppearanceControl = NSSegmentedControl(labels: AppAppearance.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
@@ -604,7 +610,7 @@ final class SettingsWindowController: NSWindowController {
         appearancePage.addArrangedSubview(card(content: cardBody(title: "Appearance", subtitle: "Customize the look of your lyrics.", grid: appearanceGrid, trailing: resetButton(for: .appearance))))
         appearancePage.addArrangedSubview(quickPresetsCard())
         configure(page: generalPage)
-        let generalGrid = grid([
+        var generalRows: [[NSView]] = [
             [label(L10n.text("Music Player")), playerPopUp],
             [label(L10n.text("When Player Stops")), playerStopBehaviorPopUp],
             [label(L10n.text("Launch at Login")), launchAtLoginSwitch],
@@ -613,9 +619,12 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch],
             [label(L10n.text("Auto-Install Updates")), automaticInstallSwitch],
             [label(L10n.text("Appearance Mode")), appAppearanceControl],
-            [label(L10n.text("Language")), languagePopUp],
-            [label(L10n.text("Bilingual Lyrics")), bilingualLyricsSwitch]
-        ])
+            [label(L10n.text("Language")), languagePopUp]
+        ]
+        if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true {
+            generalRows.append([label(L10n.text("Bilingual Lyrics")), bilingualLyricsSwitch])
+        }
+        let generalGrid = grid(generalRows)
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
         let updateHelp = NSTextField(wrappingLabelWithString: L10n.text("Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared."))
         updateHelp.font = .systemFont(ofSize: 11)
@@ -697,6 +706,14 @@ final class SettingsWindowController: NSWindowController {
         contentStack.addArrangedSubview(previewCard)
         contentStack.addArrangedSubview(displayPage)
         contentStack.addArrangedSubview(appearancePage)
+        let banner = makeAnnouncementBanner()
+        announcementBanner = banner
+        contentStack.insertArrangedSubview(banner, at: 0)
+        banner.widthAnchor.constraint(equalTo: contentStack.widthAnchor).isActive = true
+        updateAnnouncementBanner()
+        announcementObserver = NotificationCenter.default.addObserver(forName: AnnouncementManager.notification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.updateAnnouncementBanner() }
+        }
         contentStack.addArrangedSubview(generalPage)
         appearancePage.isHidden = true
         generalPage.isHidden = true
@@ -1433,6 +1450,74 @@ final class SettingsWindowController: NSWindowController {
     @objc private func bilingualLyricsChanged() {
         UserDefaults.standard.set(bilingualLyricsSwitch.state == .on, forKey: AppPreferences.bilingualLyricsKey)
         onSettingsChange()
+    }
+
+    private func makeAnnouncementBanner() -> NSView {
+        let box = NSView()
+        box.wantsLayer = true
+        box.layer?.cornerRadius = 12
+        box.layer?.borderWidth = 1
+        box.layer?.borderColor = NSColor(calibratedRed: 1.0, green: 0.54, blue: 0.21, alpha: 0.42).cgColor
+        box.layer?.backgroundColor = NSColor(calibratedRed: 1.0, green: 0.54, blue: 0.21, alpha: 0.10).cgColor
+        box.translatesAutoresizingMaskIntoConstraints = false
+
+        let icon = NSImageView()
+        icon.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
+        icon.contentTintColor = NSColor(calibratedRed: 1.0, green: 0.62, blue: 0.28, alpha: 1.0)
+        icon.translatesAutoresizingMaskIntoConstraints = false
+
+        let titleButton = NSButton(title: "", target: self, action: #selector(openAnnouncement))
+        titleButton.isBordered = false
+        titleButton.alignment = .left
+        titleButton.font = .systemFont(ofSize: 12.5, weight: .medium)
+        titleButton.lineBreakMode = .byTruncatingTail
+        titleButton.translatesAutoresizingMaskIntoConstraints = false
+        announcementTitleButton = titleButton
+
+        let dismissButton = NSButton(title: "", target: self, action: #selector(dismissAnnouncement))
+        dismissButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: "Dismiss")
+        dismissButton.imagePosition = .imageOnly
+        dismissButton.isBordered = false
+        dismissButton.contentTintColor = .secondaryLabelColor
+        dismissButton.translatesAutoresizingMaskIntoConstraints = false
+
+        box.addSubview(icon)
+        box.addSubview(titleButton)
+        box.addSubview(dismissButton)
+        NSLayoutConstraint.activate([
+            box.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
+            icon.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
+            icon.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+            icon.widthAnchor.constraint(equalToConstant: 16),
+            icon.heightAnchor.constraint(equalToConstant: 16),
+            titleButton.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 8),
+            titleButton.trailingAnchor.constraint(lessThanOrEqualTo: dismissButton.leadingAnchor, constant: -8),
+            titleButton.topAnchor.constraint(equalTo: box.topAnchor, constant: 8),
+            titleButton.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -8),
+            dismissButton.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -10),
+            dismissButton.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+            dismissButton.widthAnchor.constraint(equalToConstant: 20),
+            dismissButton.heightAnchor.constraint(equalToConstant: 20)
+        ])
+        return box
+    }
+
+    private func updateAnnouncementBanner() {
+        guard let banner = announcementBanner, let button = announcementTitleButton else { return }
+        if let active = AnnouncementManager.shared.activeAnnouncement {
+            button.title = "\(active.localizedTitle) ›"
+            banner.isHidden = false
+        } else {
+            banner.isHidden = true
+        }
+    }
+
+    @objc private func openAnnouncement() {
+        AnnouncementManager.shared.openActive()
+    }
+
+    @objc private func dismissAnnouncement() {
+        AnnouncementManager.shared.dismissCurrent()
     }
 
     @objc private func checkForUpdates() {

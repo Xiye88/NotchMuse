@@ -9,8 +9,9 @@ APP_NAME="NotchMuse"
 BUNDLE_ID="app.notchmuse.mac"
 FEED_URL="https://notchmuse.com/appcast.xml"
 AUTOMATIC_CHECKS_DEFAULT=true
-AUTOMATIC_UPDATES_DEFAULT=false
-PREVIEW_UPDATE_DEFAULTS=""
+AUTOMATIC_UPDATES_DEFAULT=true
+PREVIEW_UPDATE_DEFAULTS="<key>SUAutomaticallyUpdate</key><$AUTOMATIC_UPDATES_DEFAULT/>
+  <key>SUScheduledCheckInterval</key><integer>86400</integer>"
 if [[ "$PREVIEW" == "1" ]]; then
   APP_NAME="NotchMuse Preview"
   BUNDLE_ID="app.notchmuse.mac.preview"
@@ -20,6 +21,7 @@ if [[ "$PREVIEW" == "1" ]]; then
     exit 1
   fi
   AUTOMATIC_CHECKS_DEFAULT=false
+  AUTOMATIC_UPDATES_DEFAULT=false
   if [[ "$FEED_URL" == http://127.0.0.1:*/appcast.xml ]]; then
     AUTOMATIC_CHECKS_DEFAULT=true
     AUTOMATIC_UPDATES_DEFAULT=true

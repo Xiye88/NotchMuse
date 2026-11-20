@@ -69,6 +69,9 @@ final class MenuBarController: NSObject {
     private var settingsWindowController: SettingsWindowController?
     private let positionMenu = NSMenu()
     private let positionMenuItem = NSMenuItem(title: L10n.text("Status Bar Position"), action: nil, keyEquivalent: "")
+    private let announcementMenuItem = NSMenuItem(title: "", action: #selector(openAnnouncement), keyEquivalent: "")
+    private let announcementSeparator = NSMenuItem.separator()
+    private var announcementObserver: NSObjectProtocol?
     private let playerStatusItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let lyricsStatusItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let songItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
@@ -208,12 +211,19 @@ final class MenuBarController: NSObject {
         menu.addItem(NSMenuItem(title: L10n.text("Report Lyrics Issue…"), action: #selector(reportLyricsIssue), keyEquivalent: ""))
         menu.insertItem(NSMenuItem(title: L10n.text("Open NotchMuse"), action: #selector(showSettings), keyEquivalent: ","), at: 0)
         menu.insertItem(NSMenuItem.separator(), at: 1)
+        menu.insertItem(announcementMenuItem, at: 0)
+        menu.insertItem(announcementSeparator, at: 1)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: L10n.text("Quit"), action: #selector(quit), keyEquivalent: "q"))
 
         for item in menu.items {
             item.target = self
         }
+        updateAnnouncementMenuItem()
+        announcementObserver = NotificationCenter.default.addObserver(forName: AnnouncementManager.notification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.updateAnnouncementMenuItem() }
+        }
+        AnnouncementManager.shared.refreshIfNeeded()
         if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true {
             let label = NSMenuItem(title: "NotchMuse Preview · Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development")", action: nil, keyEquivalent: "")
             label.isEnabled = false
@@ -808,6 +818,21 @@ final class MenuBarController: NSObject {
         print("PASS: display-mode selection reopens closed lyrics, including same-mode reselection; settings locking ends editing")
     }
     #endif
+
+    private func updateAnnouncementMenuItem() {
+        if let active = AnnouncementManager.shared.activeAnnouncement {
+            announcementMenuItem.title = "● \(active.localizedTitle) ›"
+            announcementMenuItem.isHidden = false
+            announcementSeparator.isHidden = false
+        } else {
+            announcementMenuItem.isHidden = true
+            announcementSeparator.isHidden = true
+        }
+    }
+
+    @objc private func openAnnouncement() {
+        AnnouncementManager.shared.openActive()
+    }
 
     @objc private func checkForUpdates() {
         UpdateController.shared.checkForUpdates()

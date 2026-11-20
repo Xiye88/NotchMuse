@@ -296,6 +296,7 @@ final class SettingsWindowController: NSWindowController {
     private let automaticInstallSwitch = NSSwitch()
     private var announcementBanner: NSView?
     private var announcementTitleButton: NSButton?
+    private var announcementUnreadDot: NSView?
     private var announcementObserver: NSObjectProtocol?
     private let bilingualLyricsSwitch = NSSwitch()
     private let languagePopUp = NSPopUpButton()
@@ -365,6 +366,8 @@ final class SettingsWindowController: NSWindowController {
 
     func show() {
         sync()
+        AnnouncementManager.shared.refreshIfStale()
+        updateAnnouncementBanner()
         showWindow(nil)
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
@@ -1474,6 +1477,13 @@ final class SettingsWindowController: NSWindowController {
         titleButton.translatesAutoresizingMaskIntoConstraints = false
         announcementTitleButton = titleButton
 
+        let unreadDot = NSView()
+        unreadDot.wantsLayer = true
+        unreadDot.layer?.cornerRadius = 3.5
+        unreadDot.layer?.backgroundColor = NSColor(calibratedRed: 1.0, green: 0.45, blue: 0.14, alpha: 1.0).cgColor
+        unreadDot.translatesAutoresizingMaskIntoConstraints = false
+        announcementUnreadDot = unreadDot
+
         let chevron = NSImageView()
         chevron.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
         chevron.contentTintColor = .secondaryLabelColor
@@ -1481,6 +1491,7 @@ final class SettingsWindowController: NSWindowController {
 
         box.addSubview(icon)
         box.addSubview(titleButton)
+        box.addSubview(unreadDot)
         box.addSubview(chevron)
         NSLayoutConstraint.activate([
             box.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
@@ -1489,9 +1500,13 @@ final class SettingsWindowController: NSWindowController {
             icon.widthAnchor.constraint(equalToConstant: 16),
             icon.heightAnchor.constraint(equalToConstant: 16),
             titleButton.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 8),
-            titleButton.trailingAnchor.constraint(equalTo: chevron.leadingAnchor, constant: -8),
+            titleButton.trailingAnchor.constraint(lessThanOrEqualTo: unreadDot.leadingAnchor, constant: -8),
             titleButton.topAnchor.constraint(equalTo: box.topAnchor, constant: 8),
             titleButton.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -8),
+            unreadDot.trailingAnchor.constraint(equalTo: chevron.leadingAnchor, constant: -8),
+            unreadDot.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+            unreadDot.widthAnchor.constraint(equalToConstant: 7),
+            unreadDot.heightAnchor.constraint(equalToConstant: 7),
             chevron.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
             chevron.centerYAnchor.constraint(equalTo: box.centerYAnchor),
             chevron.widthAnchor.constraint(equalToConstant: 12),
@@ -1504,6 +1519,7 @@ final class SettingsWindowController: NSWindowController {
         guard let banner = announcementBanner, let button = announcementTitleButton else { return }
         if let active = AnnouncementManager.shared.activeAnnouncement {
             button.title = active.localizedTitle
+            announcementUnreadDot?.isHidden = !AnnouncementManager.shared.hasUnread
             banner.isHidden = false
         } else {
             banner.isHidden = true

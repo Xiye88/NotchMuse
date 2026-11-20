@@ -79,15 +79,30 @@ struct AppAnnouncement: Codable, Equatable, Sendable {
 final class AnnouncementManager {
     static let shared = AnnouncementManager()
     static let notification = Notification.Name("NotchMuseAnnouncementDidChange")
+    private static let seenKey = "SeenAnnouncementIDs"
     private static let feedURL = URL(string: "https://notchmuse.com/announcements.json")!
+    private static let periodicInterval: TimeInterval = 6 * 3600
+    private static let staleInterval: TimeInterval = 30 * 60
 
     private static let fallbackItems: [AnnouncementEntry] = [
         AnnouncementEntry(
-            id: "v0.8.3",
+            id: "v0.8.4",
             kind: "release",
             date: "2026-11-20",
             badgeZh: "最新版本",
             badgeEn: "Latest",
+            titleZh: "v0.8.4 — 应用内更新公告中心与统一反馈入口",
+            titleEn: "v0.8.4 — In-App Announcements Center & Unified Support",
+            bodyZh: "• 点击顶部公告条不再跳转浏览器，改为直接打开原生「更新与公告」窗口查看历史版本与平台公告，且公告条常驻不消失\n• 新增未读小圆点提示与后台定时静默刷新（每 6 小时及打开设置页时按需更新）\n• 更新说明弹窗支持按系统语言自动展示中文/英文并可零延迟一键切换\n• 反馈邮箱统一升级为 support@notchmuse.com，并在公告窗口底部内置直达入口",
+            bodyEn: "• Clicking the top announcement bar now opens a native in-app Updates & Announcements window instead of a browser tab, while keeping the banner permanently pinned\n• Added a subtle unread dot for new announcements and quiet background refresh (every 6 hours and when reopening Settings)\n• Release notes now default to your macOS language with instant one-click EN/ZH switching\n• Unified support email to support@notchmuse.com with a direct footer link inside the announcements window",
+            url: "https://notchmuse.com/releases/v0.8.4/NotchMuse.html"
+        ),
+        AnnouncementEntry(
+            id: "v0.8.3",
+            kind: "release",
+            date: "2026-11-20",
+            badgeZh: "历史版本",
+            badgeEn: "Release",
             titleZh: "v0.8.3 — 四平台歌词命中率提升至 90%",
             titleEn: "v0.8.3 — 90% Lyrics Match Rate Across 4 Players",
             bodyZh: "• Apple Music（43% → 90%）、Spotify（58% → 90%）、网易云音乐（45% → 90%）、汽水音乐（44% → 90%）\n• 恢复酷狗/QQ 音乐直连并支持逐字时间戳解析，消除 <00:12.34> 异常数字串\n• 启动自动静默检查更新 + 设置页独立「自动下载并安装更新」开关\n• 刘海/悬浮毛玻璃质感、0.5pt 描边与胶囊工具条升级",
@@ -120,20 +135,32 @@ final class AnnouncementManager {
         )
     ]
 
-    private var hasRefreshed = false
+    private let defaults: UserDefaults
+    private var hasStarted = false
+    private var lastFetchedAt: Date?
+    private var periodicTimer: Timer?
 
     private(set) var current: AppAnnouncement? = AppAnnouncement(
-        id: "v0.8.3",
-        titleZh: "v0.8.3 已发布：四平台歌词命中率提升至 90%，点击查看更新与公告",
-        titleEn: "v0.8.3 Released: 90% lyrics match rate across 4 players — View announcements",
-        url: "https://notchmuse.com/releases/v0.8.3/NotchMuse.html",
+        id: "v0.8.4",
+        titleZh: "v0.8.4 已发布：应用内公告与历史版本窗口上线，点击查看",
+        titleEn: "v0.8.4 Released: In-app announcements & release history — View",
+        url: "https://notchmuse.com/releases/v0.8.4/NotchMuse.html",
         enabled: true,
         items: AnnouncementManager.fallbackItems
     )
 
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+    }
+
     var activeAnnouncement: AppAnnouncement? {
         guard let current, current.enabled else { return nil }
         return current
+    }
+
+    var hasUnread: Bool {
+        guard let active = activeAnnouncement else { return false }
+        return !seenIDs.contains(active.id)
     }
 
     var historyItems: [AnnouncementEntry] {
@@ -143,17 +170,37 @@ final class AnnouncementManager {
         return Self.fallbackItems
     }
 
+    private var seenIDs: Set<String> {
+        Set(defaults.stringArray(forKey: Self.seenKey) ?? [])
+    }
+
     func refreshIfNeeded() {
-        guard !hasRefreshed else { return }
-        hasRefreshed = true
+        guard !hasStarted else { return }
+        hasStarted = true
+        refreshNow()
+        schedulePeriodicRefresh()
+    }
+
+    func refreshIfStale() {
+        if let lastFetchedAt, Date().timeIntervalSince(lastFetchedAt) < Self.staleInterval {
+            return
+        }
+        refreshNow()
+    }
+
+    func refreshNow() {
+        lastFetchedAt = Date()
         Task {
             await fetchRemote()
         }
     }
 
-    func refreshNow() {
-        Task {
-            await fetchRemote()
+    private func schedulePeriodicRefresh() {
+        periodicTimer?.invalidate()
+        periodicTimer = Timer.scheduledTimer(withTimeInterval: Self.periodicInterval, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.refreshNow()
+            }
         }
     }
 
@@ -172,7 +219,17 @@ final class AnnouncementManager {
         }
     }
 
+    func markCurrentSeen() {
+        guard let id = current?.id else { return }
+        var ids = seenIDs
+        if ids.insert(id).inserted {
+            defaults.set(Array(ids).sorted(), forKey: Self.seenKey)
+            NotificationCenter.default.post(name: Self.notification, object: nil)
+        }
+    }
+
     func openActive() {
+        markCurrentSeen()
         refreshNow()
         AnnouncementWindowController.shared.show()
     }

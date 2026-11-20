@@ -6,6 +6,9 @@ final class AnnouncementWindowController: NSWindowController {
 
     private let stackView = NSStackView()
     private let subtitleLabel = NSTextField(labelWithString: "")
+    private let footerPrefixLabel = NSTextField(labelWithString: "")
+    private let footerEmailButton = NSButton(title: "support@notchmuse.com", target: nil, action: nil)
+    private let footerIssuesButton = NSButton(title: "GitHub Issues", target: nil, action: nil)
     private var announcementObserver: NSObjectProtocol?
     private var itemURLs: [Int: URL] = [:]
 
@@ -67,8 +70,39 @@ final class AnnouncementWindowController: NSWindowController {
         docView.addSubview(stackView)
         scrollView.documentView = docView
 
+        let footerDivider = NSBox()
+        footerDivider.boxType = .separator
+        footerDivider.translatesAutoresizingMaskIntoConstraints = false
+
+        footerPrefixLabel.font = .systemFont(ofSize: 11.5)
+        footerPrefixLabel.textColor = .secondaryLabelColor
+
+        footerEmailButton.target = self
+        footerEmailButton.action = #selector(openSupportEmail)
+        footerEmailButton.isBordered = false
+        footerEmailButton.font = .systemFont(ofSize: 11.5, weight: .medium)
+        footerEmailButton.contentTintColor = NSColor(calibratedRed: 0.95, green: 0.48, blue: 0.16, alpha: 1.0)
+
+        let dotLabel = NSTextField(labelWithString: "·")
+        dotLabel.font = .systemFont(ofSize: 11.5)
+        dotLabel.textColor = .tertiaryLabelColor
+
+        footerIssuesButton.target = self
+        footerIssuesButton.action = #selector(openGitHubIssues)
+        footerIssuesButton.isBordered = false
+        footerIssuesButton.font = .systemFont(ofSize: 11.5, weight: .medium)
+        footerIssuesButton.contentTintColor = NSColor(calibratedRed: 0.95, green: 0.48, blue: 0.16, alpha: 1.0)
+
+        let footerRow = NSStackView(views: [footerPrefixLabel, footerEmailButton, dotLabel, footerIssuesButton])
+        footerRow.orientation = .horizontal
+        footerRow.alignment = .centerY
+        footerRow.spacing = 6
+        footerRow.translatesAutoresizingMaskIntoConstraints = false
+
         contentView.addSubview(header)
         contentView.addSubview(scrollView)
+        contentView.addSubview(footerDivider)
+        contentView.addSubview(footerRow)
 
         NSLayoutConstraint.activate([
             header.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 14),
@@ -82,7 +116,15 @@ final class AnnouncementWindowController: NSWindowController {
             scrollView.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 10),
             scrollView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: footerDivider.topAnchor),
+
+            footerDivider.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            footerDivider.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            footerDivider.bottomAnchor.constraint(equalTo: footerRow.topAnchor, constant: -9),
+
+            footerRow.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            footerRow.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -20),
+            footerRow.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
 
             docView.topAnchor.constraint(equalTo: scrollView.contentView.topAnchor),
             docView.leadingAnchor.constraint(equalTo: scrollView.contentView.leadingAnchor),
@@ -117,6 +159,7 @@ final class AnnouncementWindowController: NSWindowController {
         subtitleLabel.stringValue = isZh
             ? "查看 NotchMuse 最新公告与历史版本更新记录"
             : "Latest NotchMuse announcements and release history"
+        footerPrefixLabel.stringValue = isZh ? "反馈与交流：" : "Feedback & Support:"
 
         for view in stackView.arrangedSubviews {
             stackView.removeArrangedSubview(view)
@@ -233,6 +276,18 @@ final class AnnouncementWindowController: NSWindowController {
     @objc private func openEntryLink(_ sender: NSButton) {
         guard let url = itemURLs[sender.tag] else { return }
         NSWorkspace.shared.open(url)
+    }
+
+    @objc private func openSupportEmail() {
+        if let url = URL(string: "mailto:support@notchmuse.com") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    @objc private func openGitHubIssues() {
+        if let url = URL(string: "https://github.com/Xiye88/NotchMuse/issues") {
+            NSWorkspace.shared.open(url)
+        }
     }
 }
 

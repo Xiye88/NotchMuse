@@ -188,7 +188,11 @@ enum LyricsSelection {
            context.platform != "netease", normalizedID(source, platform: context.platform) == normalizedID(native, platform: context.platform) { return 1 }
         if let source = RecordingISRC.normalized(candidate.sourceISRC), let isrc = RecordingISRC.normalized(context.isrc),
            source == isrc { return 2 }
-        return albumMatches(candidate, context: context) ? 3 : 4
+        if albumMatches(candidate, context: context) { return 3 }
+        if context.track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           candidate.sourcePlatform == context.platform,
+           candidate.sourceTrackID?.isEmpty == false { return 3 }
+        return 4
     }
 
     private static func albumKey(_ value: String) -> String {

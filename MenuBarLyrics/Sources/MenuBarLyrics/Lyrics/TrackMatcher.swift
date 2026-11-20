@@ -139,7 +139,7 @@ enum TrackMatcher {
     }
 
     static func titleCollaborators(in title: String) -> [String] {
-        guard let regex = try? NSRegularExpression(pattern: #"[\(\[]\s*(?:feat\.?|ft\.?|featuring|with)\s+([^\)\]]+)[\)\]]"#, options: .caseInsensitive) else {
+        guard let regex = try? NSRegularExpression(pattern: #"[\(\[]\s*with\s+([^\)\]]+)[\)\]]"#, options: .caseInsensitive) else {
             return []
         }
         let range = NSRange(title.startIndex..., in: title)
@@ -163,6 +163,17 @@ enum TrackMatcher {
             #"[\(\[（](?:电视剧|电影|网剧|动画|动漫|游戏|综艺)?《[^》]+》[^\)）\]]*[\)\]）]"#
         ] {
             name = name.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        }
+        // Strip trailing Chinese parenthetical subtitle appended to an English title (e.g. "The Moment You Saw Me（当我，在你的目光里）"),
+        // unless it contains a version hint.
+        if let subRange = name.range(of: #"\s*[\(（][^\(\)（）]*[\u{4E00}-\u{9FFF}][^\(\)（）]*[\)）]\s*$"#, options: .regularExpression) {
+            let prefix = String(name[..<subRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+            let sub = String(name[subRange])
+            let hasVersionHint = ["live", "remix", "acoustic", "instrumental", "remaster", "cover", "现场", "翻唱", "伴奏", "混音", "重录"].contains { sub.contains($0) }
+            let prefixIsLatin = !prefix.isEmpty && prefix.unicodeScalars.allSatisfy { $0.value < 0x3400 }
+            if prefixIsLatin && !hasVersionHint {
+                name = prefix
+            }
         }
         var versions = Set(["live", "remix", "acoustic", "instrumental", "remaster", "remastered", "cover", "rerecorded"].filter {
             name.range(of: "\\b\($0)\\b", options: .regularExpression) != nil
@@ -315,7 +326,11 @@ enum TrackMatcher {
 
     private static func normalize(_ text: String) -> String {
         let folded = text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        let simplified = folded.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? folded
+        let simplified = folded.map { ch -> String in
+            if ch == "乾" || ch == "幹" { return String(ch) }
+            let s = String(ch)
+            return s.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? s
+        }.joined()
         return simplified
             .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
             .map(String.init).joined()

@@ -1474,16 +1474,14 @@ final class SettingsWindowController: NSWindowController {
         titleButton.translatesAutoresizingMaskIntoConstraints = false
         announcementTitleButton = titleButton
 
-        let dismissButton = NSButton(title: "", target: self, action: #selector(dismissAnnouncement))
-        dismissButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: "Dismiss")
-        dismissButton.imagePosition = .imageOnly
-        dismissButton.isBordered = false
-        dismissButton.contentTintColor = .secondaryLabelColor
-        dismissButton.translatesAutoresizingMaskIntoConstraints = false
+        let chevron = NSImageView()
+        chevron.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
+        chevron.contentTintColor = .secondaryLabelColor
+        chevron.translatesAutoresizingMaskIntoConstraints = false
 
         box.addSubview(icon)
         box.addSubview(titleButton)
-        box.addSubview(dismissButton)
+        box.addSubview(chevron)
         NSLayoutConstraint.activate([
             box.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
             icon.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
@@ -1491,13 +1489,13 @@ final class SettingsWindowController: NSWindowController {
             icon.widthAnchor.constraint(equalToConstant: 16),
             icon.heightAnchor.constraint(equalToConstant: 16),
             titleButton.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 8),
-            titleButton.trailingAnchor.constraint(lessThanOrEqualTo: dismissButton.leadingAnchor, constant: -8),
+            titleButton.trailingAnchor.constraint(equalTo: chevron.leadingAnchor, constant: -8),
             titleButton.topAnchor.constraint(equalTo: box.topAnchor, constant: 8),
             titleButton.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -8),
-            dismissButton.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -10),
-            dismissButton.centerYAnchor.constraint(equalTo: box.centerYAnchor),
-            dismissButton.widthAnchor.constraint(equalToConstant: 20),
-            dismissButton.heightAnchor.constraint(equalToConstant: 20)
+            chevron.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
+            chevron.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+            chevron.widthAnchor.constraint(equalToConstant: 12),
+            chevron.heightAnchor.constraint(equalToConstant: 12)
         ])
         return box
     }
@@ -1505,7 +1503,7 @@ final class SettingsWindowController: NSWindowController {
     private func updateAnnouncementBanner() {
         guard let banner = announcementBanner, let button = announcementTitleButton else { return }
         if let active = AnnouncementManager.shared.activeAnnouncement {
-            button.title = "\(active.localizedTitle) ›"
+            button.title = active.localizedTitle
             banner.isHidden = false
         } else {
             banner.isHidden = true
@@ -1514,10 +1512,6 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func openAnnouncement() {
         AnnouncementManager.shared.openActive()
-    }
-
-    @objc private func dismissAnnouncement() {
-        AnnouncementManager.shared.dismissCurrent()
     }
 
     @objc private func checkForUpdates() {

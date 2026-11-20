@@ -50,7 +50,7 @@ enum LyricsSelection {
         eligible = evidencePool.compactMap { item in
             guard item.tier == 4 else { return item }
             let bound = evidencePool.filter { identityTier($0.candidate, context: context) == 3 && $0.candidate.provider != "LRCMux" }
-            let compatibleWithBound = !bound.contains { timelinesConflict(item.candidate, $0.candidate) }
+            let compatibleWithBound = !bound.contains { disagreement(item.candidate, $0.candidate) == "timeline_conflict" }
             let corroborated = compatibleWithBound && (
                 (item.candidate.provider == "LRCMux" && direct.isEmpty && strongResolverFallback(item.candidate, context: context)) ||
                 evidencePool.contains { other in
@@ -105,10 +105,11 @@ enum LyricsSelection {
                 // When >=2 independent direct Tier-3 providers form a mutually-agreeing group
                 // (with zero timeline_conflict anywhere), uncorroborated formatting/script outliers
                 // (content_ambiguity only) must not poison the corroborated consensus.
+                let cliquePool = eligible.filter { $0.tier == 3 && $0.candidate.provider != "LRCMux" }
                 var bestClique: [(candidate: LyricsCandidate, tier: Int)] = []
-                for seed in bound {
+                for seed in cliquePool {
                     var clique = [seed]
-                    for other in bound where other.candidate.provider != seed.candidate.provider {
+                    for other in cliquePool where other.candidate.provider != seed.candidate.provider {
                         let agreesWithAll = clique.allSatisfy { member in
                             member.candidate.sourcePlatform != nil && other.candidate.sourcePlatform != nil &&
                             member.candidate.sourcePlatform != other.candidate.sourcePlatform &&
@@ -215,7 +216,16 @@ enum LyricsSelection {
         if reqHan.count >= 2, reqHan == candHan, (reqHasLatin != candHasLatin) {
             return true
         }
+        // Apple Music often appends an alternate title in parentheses (e.g. "第二天堂 (江南)" vs "第二天堂").
+        let strippedReq = albumKey(stripNonVersionParenthetical(track.album))
+        let strippedCand = albumKey(stripNonVersionParenthetical(album))
+        if !strippedReq.isEmpty, strippedReq == strippedCand {
+            return true
+        }
         return false
+    }
+    private static func stripNonVersionParenthetical(_ value: String) -> String {
+        value.replacingOccurrences(of: #"\s*[\(（][^\(\)（）]+[\)）]\s*$"#, with: "", options: .regularExpression)
     }
     private static func hanOnly(_ value: String) -> String {
         value.unicodeScalars.filter { (0x3400...0x9FFF).contains($0.value) || (0x20000...0x323AF).contains($0.value) }.map(String.init).joined()

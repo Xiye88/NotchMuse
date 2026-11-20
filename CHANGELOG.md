@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.3 — Build 81
+
+**Released 2026-11-20; major lyrics stability upgrade, startup auto-updates, and in-app release announcements.**
+
+- Major lyrics matching upgrade: 4-platform 100-track benchmark hit rate improved to 90% across Apple Music (43% → 90%), Spotify (58% → 90%), NetEase generic pipeline (43% → 90%), and Soda Music (43% → 90%).
+- Restored Kugou word-by-word KRC & QQ Music Smartbox search pipelines; parsed Enhanced LRC (`<mm:ss.xxx>`) inline word timestamps cleanly; fixed Traditional/Simplified Chinese, bilingual/K-pop artist aliases, `(with ...)` duets, parenthetical/OST subtitles, numeral albums, and QQ empty-album same-platform matching.
+- Added quiet startup update checks with an independent Auto-Install Updates toggle in Settings.
+- Added dismissible in-app release announcement banner in Settings & unread menu bar notification item, plus Notch frosted-glass vibrancy and Free Floating pill toolbar readability polish.
+- Interactive language-aware Sparkle release notes (EN/ZH toggle) & WeChat user feedback group QR. [Release notes (EN & ZH)](docs/releases/v0.8.3/NotchMuse.md).
+
 ## 0.8.2 — Build70
 
 **Released 2026-11-10; in-app update delivery enabled.**

@@ -11,7 +11,7 @@ enum LyricsSelection {
     }
 
     static func select(_ candidates: [LyricsCandidate], context: LyricsSelectionContext) -> Decision {
-        let candidates = context.platform == "spotify" ? candidates.map { repairedTiming($0, among: candidates, context: context) } : candidates
+        let candidates = candidates.map { repairedTiming($0, among: candidates, context: context) }
         var rejected: [String: String] = [:]
         var eligible: [(candidate: LyricsCandidate, tier: Int)] = []
         for candidate in candidates {
@@ -31,13 +31,16 @@ enum LyricsSelection {
             }
         }
         // Resolver track metadata is not automatically bound to its lyric payload.
-        // A direct adapter for the backing platform must corroborate the vocal timeline.
+        // Accept LRCMux only when corroborated by a direct adapter (same or independent platform),
+        // or as a strict solo fallback when no direct provider returned a candidate and album + full vocal span match.
         let direct = eligible.filter { $0.candidate.provider != "LRCMux" }
         eligible = eligible.filter { item in
             guard item.candidate.provider == "LRCMux" else { return true }
-            let supported = item.candidate.sourcePlatform != nil && direct.contains {
-                $0.candidate.sourcePlatform == item.candidate.sourcePlatform && timelinesAgree(item.candidate, $0.candidate)
+            let supportedByDirect = item.candidate.sourcePlatform != nil && direct.contains {
+                $0.candidate.sourcePlatform != nil && timelinesAgree(item.candidate, $0.candidate)
             }
+            let strictSoloFallback = direct.isEmpty && strongResolverFallback(item.candidate, context: context)
+            let supported = supportedByDirect || strictSoloFallback
             if !supported { rejected[item.candidate.provider] = "resolver_metadata_unverified" }
             return supported
         }
@@ -47,15 +50,21 @@ enum LyricsSelection {
         eligible = evidencePool.compactMap { item in
             guard item.tier == 4 else { return item }
             let bound = evidencePool.filter { identityTier($0.candidate, context: context) == 3 && $0.candidate.provider != "LRCMux" }
-            let compatibleWithBound = context.platform != "spotify" || bound.allSatisfy { timelinesAgree(item.candidate, $0.candidate) }
-            let corroborated = compatibleWithBound && evidencePool.contains { other in
-                guard item.candidate.provider != other.candidate.provider,
-                      let platform = item.candidate.sourcePlatform,
-                      let otherPlatform = other.candidate.sourcePlatform else { return false }
-                let independent = platform != otherPlatform && other.candidate.provider != "LRCMux"
-                let backedResolver = item.candidate.provider == "LRCMux" && platform == otherPlatform && other.tier <= 3
-                return (independent || backedResolver) && timelinesAgree(item.candidate, other.candidate)
-            }
+            let compatibleWithBound = !bound.contains { disagreement(item.candidate, $0.candidate) == "timeline_conflict" }
+            let corroborated = compatibleWithBound && (
+                (item.candidate.provider == "LRCMux" && direct.isEmpty && strongResolverFallback(item.candidate, context: context)) ||
+                evidencePool.contains { other in
+                    guard item.candidate.provider != other.candidate.provider,
+                          let platform = item.candidate.sourcePlatform,
+                          let otherPlatform = other.candidate.sourcePlatform else { return false }
+                    let independent = platform != otherPlatform && other.candidate.provider != "LRCMux"
+                    let backedResolver = item.candidate.provider == "LRCMux" && other.candidate.provider != "LRCMux" &&
+                        ((platform == otherPlatform && other.tier <= 3) || platform != otherPlatform)
+                    let directBackedByDifferentPlatformResolver = item.candidate.provider != "LRCMux" &&
+                        other.candidate.provider == "LRCMux" && platform != otherPlatform
+                    return (independent || backedResolver || directBackedByDifferentPlatformResolver) && timelinesAgree(item.candidate, other.candidate)
+                }
+            )
             if !corroborated { rejected[item.candidate.provider] = "identity_ambiguous" }
             return corroborated ? (item.candidate, 3) : nil
         }
@@ -84,7 +93,7 @@ enum LyricsSelection {
             let boundConflicts = bound.contains { a in bound.contains { b in
                 a.candidate.provider != b.candidate.provider && timelinesConflict(a.candidate, b.candidate)
             } }
-            if context.platform == "spotify", !bound.isEmpty, !boundConflicts,
+            if !bound.isEmpty, !boundConflicts,
                bound.contains(where: { strongMetadata($0.candidate, context: context) }) {
                 // Release-unbound outliers cannot veto an otherwise validated album recording.
                 // Never use source majority to break a conflict between equally bound recordings.
@@ -92,6 +101,35 @@ enum LyricsSelection {
                     rejected[item.candidate.provider] = "lower_confidence_content_conflict"
                 }
                 eligible = bound
+            } else if !conflicting.values.contains("timeline_conflict") {
+                // When >=2 independent direct Tier-3 providers form a mutually-agreeing group
+                // (with zero timeline_conflict anywhere), uncorroborated formatting/script outliers
+                // (content_ambiguity only) must not poison the corroborated consensus.
+                let cliquePool = eligible.filter { $0.tier == 3 && $0.candidate.provider != "LRCMux" }
+                var bestClique: [(candidate: LyricsCandidate, tier: Int)] = []
+                for seed in cliquePool {
+                    var clique = [seed]
+                    for other in cliquePool where other.candidate.provider != seed.candidate.provider {
+                        let agreesWithAll = clique.allSatisfy { member in
+                            member.candidate.sourcePlatform != nil && other.candidate.sourcePlatform != nil &&
+                            member.candidate.sourcePlatform != other.candidate.sourcePlatform &&
+                            timelinesAgree(member.candidate, other.candidate) &&
+                            disagreement(member.candidate, other.candidate) == nil
+                        }
+                        if agreesWithAll { clique.append(other) }
+                    }
+                    if clique.count > bestClique.count { bestClique = clique }
+                }
+                if bestClique.count >= 2 {
+                    let kept = Set(bestClique.map { $0.candidate.provider })
+                    for item in eligible where !kept.contains(item.candidate.provider) {
+                        rejected[item.candidate.provider] = "uncorroborated_content_outlier"
+                    }
+                    eligible = bestClique
+                } else {
+                    for item in eligible { rejected[item.candidate.provider] = conflicting[item.candidate.provider] ?? "unresolved_content_ambiguity" }
+                    return Decision(winner: nil, tier: nil, reason: "content_ambiguity", rejected: rejected)
+                }
             } else {
                 let reason = conflicting.values.contains("timeline_conflict") ? "timeline_conflict" : "content_ambiguity"
                 for item in eligible { rejected[item.candidate.provider] = conflicting[item.candidate.provider] ?? "unresolved_\(reason)" }
@@ -150,12 +188,19 @@ enum LyricsSelection {
            context.platform != "netease", normalizedID(source, platform: context.platform) == normalizedID(native, platform: context.platform) { return 1 }
         if let source = RecordingISRC.normalized(candidate.sourceISRC), let isrc = RecordingISRC.normalized(context.isrc),
            source == isrc { return 2 }
-        return albumMatches(candidate, context: context) ? 3 : 4
+        if albumMatches(candidate, context: context) { return 3 }
+        if context.track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           candidate.sourcePlatform == context.platform,
+           candidate.sourceTrackID?.isEmpty == false { return 3 }
+        return 4
     }
 
     private static func albumKey(_ value: String) -> String {
-        let releaseName = value.replacingOccurrences(of: #"\s*[-–—]\s*Single\s*$"#, with: "", options: [.regularExpression, .caseInsensitive])
-        let simplified = releaseName.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? releaseName
+        let releaseName = value.replacingOccurrences(of: #"\s*[-–—]\s*(Single|EP)\s*$"#, with: "", options: [.regularExpression, .caseInsensitive])
+        let simplified = (releaseName.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? releaseName)
+            .replacingOccurrences(of: "十二月", with: "12月")
+            .replacingOccurrences(of: "十一月", with: "11月")
+            .replacingOccurrences(of: "十月", with: "10月")
         return TrackMatcher.parsedTitle(simplified).name
     }
     private static func albumMatches(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> Bool {
@@ -164,7 +209,33 @@ enum LyricsSelection {
     static func albumMatches(_ album: String?, track: SpotifyTrack) -> Bool {
         let requested = albumKey(track.album)
         guard let album else { return false }
-        return !requested.isEmpty && requested == albumKey(album)
+        let candidate = albumKey(album)
+        guard !requested.isEmpty, !candidate.isEmpty else { return false }
+        if requested == candidate { return true }
+        // Apple Music often appends an English subtitle to a CJK album name (e.g. "因你而在 Stories Untold").
+        // Allow matching when one side is bilingual CJK+Latin and both share the exact same CJK core.
+        guard TrackMatcher.parsedTitle(track.album).versions == TrackMatcher.parsedTitle(album).versions else { return false }
+        let reqHan = hanOnly(requested), candHan = hanOnly(candidate)
+        let reqHasLatin = hasLatin(requested), candHasLatin = hasLatin(candidate)
+        if reqHan.count >= 2, reqHan == candHan, (reqHasLatin != candHasLatin) {
+            return true
+        }
+        // Apple Music often appends an alternate title in parentheses (e.g. "第二天堂 (江南)" vs "第二天堂").
+        let strippedReq = albumKey(stripNonVersionParenthetical(track.album))
+        let strippedCand = albumKey(stripNonVersionParenthetical(album))
+        if !strippedReq.isEmpty, strippedReq == strippedCand {
+            return true
+        }
+        return false
+    }
+    private static func stripNonVersionParenthetical(_ value: String) -> String {
+        value.replacingOccurrences(of: #"\s*[\(（][^\(\)（）]+[\)）]\s*$"#, with: "", options: .regularExpression)
+    }
+    private static func hanOnly(_ value: String) -> String {
+        value.unicodeScalars.filter { (0x3400...0x9FFF).contains($0.value) || (0x20000...0x323AF).contains($0.value) }.map(String.init).joined()
+    }
+    private static func hasLatin(_ value: String) -> Bool {
+        value.unicodeScalars.contains { (0x0041...0x007A).contains($0.value) }
     }
 
     static func strongMetadata(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> Bool {
@@ -173,6 +244,15 @@ enum LyricsSelection {
               rejection(candidate, context: context) == nil else { return false }
         let vocalTimes = anchors(candidate).values.flatMap { $0 }.sorted()
         guard vocalTimes.count >= 5, let first = vocalTimes.first, let last = vocalTimes.last else { return false }
+        return last >= context.track.duration * 0.6 && last - first >= context.track.duration * 0.5
+    }
+
+    private static func strongResolverFallback(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> Bool {
+        guard candidate.provider == "LRCMux", candidate.sourcePlatform != nil,
+              albumMatches(candidate, context: context),
+              rejection(candidate, context: context) == nil else { return false }
+        let vocalTimes = anchors(candidate).values.flatMap { $0 }.sorted()
+        guard vocalTimes.count >= 10, let first = vocalTimes.first, let last = vocalTimes.last else { return false }
         return last >= context.track.duration * 0.6 && last - first >= context.track.duration * 0.5
     }
 
@@ -197,14 +277,14 @@ enum LyricsSelection {
               candidate.sourceTrackID?.isEmpty == false else { return candidate }
         let valid = pool.filter { $0.provider != "LRCMux" && rejection($0, context: context) == nil }
         let bound = valid.filter { identityTier($0, context: context) == 3 }
-        guard bound.allSatisfy({ timelinesAgree(candidate, $0) }), valid.contains(where: {
+        guard !bound.contains(where: { timelinesConflict(candidate, $0) }), valid.contains(where: {
             $0.provider != candidate.provider && $0.sourcePlatform != nil &&
             $0.sourcePlatform != candidate.sourcePlatform && timelinesAgree(candidate, $0)
         }) else { return candidate }
         let offset = candidate.document.metadata.lyricOffset
         let lines = candidate.document.lines.map { line in
             if let end = line.endTime, !end.isFinite || end - offset > context.track.duration + 2 || end < line.time {
-                return LyricLine(time: line.time, text: line.text)
+                return LyricLine(time: line.time, text: line.text, translation: line.translation)
             }
             return line
         }
@@ -224,9 +304,6 @@ enum LyricsSelection {
             (checkRichEnds && (!($0.endTime ?? $0.time).isFinite || ($0.endTime ?? $0.time) > context.track.duration + 2)) }) { return "timeline_out_of_recording" }
         if let reason = TrackMatcher.identityRejectReason(context.track, title: candidate.sourceTitle, artist: candidate.sourceArtist, album: candidate.sourceAlbum) { return reason }
         let tier = identityTier(candidate, context: context)
-        if context.platform != "spotify", tier >= 3, let album = candidate.sourceAlbum,
-           !albumKey(album).isEmpty, !albumKey(context.track.album).isEmpty,
-           !albumMatches(candidate, context: context) { return "album_mismatch" }
         if candidate.provider != "LRCMux", candidate.sourcePlatform == context.platform,
            context.platform != "netease", let sourceID = candidate.sourceTrackID, let native = context.nativeTrackID,
            normalizedID(sourceID, platform: context.platform) != normalizedID(native, platform: context.platform) { return "exact_id_mismatch" }
@@ -247,8 +324,21 @@ enum LyricsSelection {
         func normalized(_ value: String) -> String {
             let folded = value.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
             let hasHan = folded.unicodeScalars.contains { (0x3400...0x9FFF).contains($0.value) || (0x20000...0x323AF).contains($0.value) }
-            let simplified = hasHan ? (folded.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? folded) : folded
-            let canonical = !hasHan || simplified.applyingTransform(StringTransform("Simplified-Traditional"), reverse: false) == folded ? simplified : folded
+            let canonical: String
+            if hasHan {
+                // Convert Traditional to Simplified (including 妳→你, 著→着, 為→为) so cross-provider
+                // Traditional/Simplified lyrics corroborate each other, while keeping ambiguous
+                // Traditional-only pairs (髮/發, 幹/乾) distinct.
+                let ambiguous: Set<Character> = ["髮", "發", "幹", "乾"]
+                canonical = folded.map { ch -> String in
+                    if ambiguous.contains(ch) { return String(ch) }
+                    if ch == "妳" { return "你" }
+                    let s = String(ch)
+                    return s.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? s
+                }.joined()
+            } else {
+                canonical = folded
+            }
             return canonical.unicodeScalars.filter(CharacterSet.alphanumerics.contains).map(String.init).joined()
         }
         let raw = line.text.trimmingCharacters(in: .whitespacesAndNewlines), text = normalized(raw)
@@ -270,10 +360,28 @@ enum LyricsSelection {
     private static func deltas(_ a: LyricsCandidate, _ b: LyricsCandidate) -> [Double] {
         if let shifts = completeBodyBoundaryDeltas(a, b) { return shifts }
         let aa = anchors(a), bb = anchors(b)
-        return aa.keys.sorted().flatMap { key -> [Double] in
+        var exact = aa.keys.sorted().flatMap { key -> [Double] in
             guard let av = aa[key], let bv = bb[key], av.count == bv.count else { return [] }
             return zip(av, bv).map { abs($0 - $1) }
-        }.sorted()
+        }
+        // Providers frequently merge two consecutive short lines into one line (e.g. LRCLIB vs QQ/Kugou).
+        // Match unique >=5-char line-start prefixes when exact line equality is sparse.
+        let matchedKeys = Set(aa.keys).intersection(bb.keys)
+        let unmatchedA = aa.filter { !matchedKeys.contains($0.key) && $0.value.count == 1 && $0.key.count >= 5 }
+        let unmatchedB = bb.filter { !matchedKeys.contains($0.key) && $0.value.count == 1 && $0.key.count >= 5 }
+        if !unmatchedA.isEmpty && !unmatchedB.isEmpty {
+            var usedB = Set<String>()
+            for (ka, va) in unmatchedA.sorted(by: { $0.key < $1.key }) {
+                let prefixMatches = unmatchedB.filter { kb, _ in
+                    !usedB.contains(kb) && (ka.hasPrefix(kb) || kb.hasPrefix(ka))
+                }
+                if prefixMatches.count == 1, let match = prefixMatches.first {
+                    usedB.insert(match.key)
+                    exact.append(abs(va[0] - match.value[0]))
+                }
+            }
+        }
+        return exact.sorted()
     }
     // Different line breaks are not a different lyric body. Only byte-equivalent
     // normalized complete vocals and shared timed boundaries qualify; no fuzzy text.

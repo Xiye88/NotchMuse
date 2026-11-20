@@ -42,11 +42,11 @@
 .demo-tabs button{padding:7px 15px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:inherit;font-size:.83rem;cursor:pointer}
 .demo-tabs button[aria-selected=true]{background:#ffffff10;color:var(--text)}
 .demo-tabs button:hover{color:var(--orange)}
-.live-demo{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:#8193aa;isolation:isolate}
+.live-demo{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:18px;border:1px solid rgba(255,255,255,0.12);background:#0a0a0c;box-shadow:0 24px 60px rgba(0,0,0,0.48),0 4px 16px rgba(0,0,0,0.28);isolation:isolate}
 .live-demo video,.live-demo .demo-poster{position:absolute;inset:0;display:block;width:100%;height:100%;max-height:none;object-fit:contain;border:0;border-radius:0;box-shadow:none}
-.live-demo video{opacity:0}
+.live-demo video{opacity:0;transition:opacity 0.35s ease}
 .live-demo.is-playing video{opacity:1}
-.live-showcase .live-demo{box-shadow:0 18px 45px #0003}
+.live-showcase .live-demo{box-shadow:0 28px 70px rgba(0,0,0,0.55),0 6px 20px rgba(0,0,0,0.32)}
 .hero-visual.live-showcase figcaption{margin-top:14px;color:var(--muted);font-size:.75rem}
 .mode-card .live-demo{flex:none;margin-top:4px}
 .appearance-showcase{display:grid;grid-template-columns:.8fr 1.2fr;align-items:center;gap:36px;margin-top:40px}
@@ -65,3 +65,34 @@
 .consent-actions button{font:inherit;font-size:.86rem;cursor:pointer}
 [hidden]{display:none!important}
 @media(max-width:760px){.analytics-consent{inset:auto 12px 12px;flex-direction:column;align-items:flex-start;gap:16px;padding:18px}.consent-actions{flex-shrink:1}.site-footer nav{gap:16px}}
+
+/* Phase 1 Quick Wins: Chinese typography, Apple-style 52px sticky glass header, streamlined install & analytics sections */
+html[lang="zh-Hans"],:lang(zh-Hans){font-family:-apple-system,"SF Pro SC","PingFang SC","Hiragino Sans GB",sans-serif}
+html[lang="zh-Hans"] body{line-height:1.7}
+html[lang="zh-Hans"] .hero h1,html[lang="zh-Hans"] h1{line-height:1.18;letter-spacing:-0.015em}
+html[lang="zh-Hans"] .section h2,html[lang="zh-Hans"] .privacy-panel h2,html[lang="zh-Hans"] .closing h2{line-height:1.24;letter-spacing:-0.01em}
+
+.site-header,.site-header.wrap{position:sticky;top:0;z-index:40;width:100%;height:52px;padding-inline:max(24px,calc((100% - var(--wrap))/2));background:rgba(10,10,12,0.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.08)}
+.site-header .brand{font-size:1rem;gap:8px}
+.site-header .brand-icon{width:26px;height:26px;border-radius:7px}
+.site-header nav{gap:24px}
+.site-header .button-small{padding:6px 13px;font-size:.85rem;border-radius:7px;box-shadow:none}
+.site-header .language-toggle{padding:6px 10px;font-size:.84rem;border-radius:7px}
+@media(max-width:760px){.site-header,.site-header.wrap{height:52px;padding-inline:18px}.site-header nav{gap:14px}}
+@media(max-width:420px){.site-header,.site-header.wrap{padding-inline:15px}.site-header nav{gap:8px}.site-header .brand-icon{width:24px;height:24px}.site-header .button-small{padding:6px 9px;font-size:.8rem}.site-header .language-toggle{padding:5px 8px;font-size:.78rem}}
+
+.install-steps{padding-left:20px;margin:16px 0;color:var(--muted)}
+.install-steps li+li{margin-top:8px}
+.install-note{font-size:.86rem;color:var(--muted)}
+.install-note a{color:#ffb27d}
+
+.website-analytics{padding-block:48px 64px;border-top:1px solid #ffffff12}
+.website-analytics .analytics-controls{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:16px}
+.website-analytics .analytics-controls [data-analytics-status]{margin:0;font-size:.88rem}
+.analytics-details{max-width:850px;margin-top:18px;color:var(--muted);font-size:.86rem}
+.analytics-details summary{cursor:pointer;color:#ffb27d;font-weight:600;list-style:none;display:inline-flex;align-items:center;gap:6px}
+.analytics-details summary::-webkit-details-marker{display:none}
+.analytics-details summary::after{content:"▸";font-size:.8rem;transition:transform .2s ease}
+.analytics-details[open] summary::after{transform:rotate(90deg)}
+.analytics-details p{margin:12px 0 0;font-size:.86rem}
+.analytics-details a{color:#ffb27d}

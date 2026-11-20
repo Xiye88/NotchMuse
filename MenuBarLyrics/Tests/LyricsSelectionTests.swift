@@ -39,6 +39,23 @@ actor SelectionCalls {
         check(LyricsSelection.select([generic, exact], context: netease).winner == exact, "verified catalog identity defeats earlier conflicting generic")
         check(LyricsSelection.select([generic, candidate("QQ", platform: "qq", text: lines())], context: netease).winner == nil, "generic shifted timeline fails closed")
         check(LyricsSelection.select([candidate("LRCLIB"), candidate("QQ", text: lines(prefix: "Entirely different words"))], context: netease).winner == nil, "disjoint lyric bodies fail closed")
+        let outlierDecision = LyricsSelection.select([
+            candidate("Kugou", platform: "kugou"),
+            candidate("QQ", platform: "qq"),
+            candidate("LRCLIB", platform: "lrclib", text: lines(prefix: "Different formatting outlier"))
+        ], context: netease)
+        check(outlierDecision.winner != nil && outlierDecision.rejected["LRCLIB"] == "uncorroborated_content_outlier", "corroborated Tier-3 direct consensus survives a single content_ambiguity outlier")
+        check(LyricsSelection.select([
+            candidate("Kugou", platform: "kugou"),
+            candidate("QQ", platform: "qq"),
+            candidate("LRCLIB", platform: "lrclib", text: lines(14))
+        ], context: netease).winner == nil, "timeline_conflict still fails closed even with two agreeing providers")
+        let appleContext = LyricsSelectionContext(track: SpotifyTrack(name: "Song", artist: "Artist", album: "English Greatest Hits", duration: 200), playerSource: "Apple Music", nativeTrackID: "AM1", isrc: nil)
+        check(LyricsSelection.select([candidate("Kugou", platform: "kugou", album: "中文原版专辑")], context: appleContext).winner == nil, "lone album-mismatch candidate on Apple Music stays rejected")
+        check(LyricsSelection.select([
+            candidate("Kugou", platform: "kugou", album: "中文原版专辑"),
+            candidate("QQ", platform: "qq", album: "中文原版专辑")
+        ], context: appleContext).winner != nil, "two independent agreeing direct providers corroborate across Apple Music album naming differences")
         check(LyricsSelection.select([candidate("LRCLIB", text: lines(count: 4)), candidate("QQ", text: lines(10, count: 4))], context: netease).winner == nil, "short four-line shifted timeline fails closed")
         check(LyricsSelection.select([candidate("LRCMux", platform: "lrclib")], context: netease).winner == nil, "resolver metadata alone cannot establish lyric source compatibility")
         let muxSupported = LyricsSelection.select([candidate("LRCMux", platform: "lrclib"), candidate("LRCLIB", platform: "lrclib")], context: netease)

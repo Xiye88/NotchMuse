@@ -21,13 +21,15 @@ public struct LyricSegment: Equatable, Sendable {
 public struct LyricLine: Equatable, Sendable {
     public let time: TimeInterval
     public let text: String
+    public let translation: String?
     public let endTime: TimeInterval?
     public let segments: [LyricSegment]
     public let endTimeIsEstimated: Bool
 
-    public init(time: TimeInterval, text: String, endTime: TimeInterval? = nil, segments: [LyricSegment] = [], endTimeIsEstimated: Bool = false) {
+    public init(time: TimeInterval, text: String, translation: String? = nil, endTime: TimeInterval? = nil, segments: [LyricSegment] = [], endTimeIsEstimated: Bool = false) {
         self.time = time
         self.text = text
+        self.translation = translation?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? translation : nil
         let validEnd = endTime.flatMap { $0.isFinite && $0 > time ? $0 : nil }
         self.endTime = validEnd
         self.endTimeIsEstimated = endTimeIsEstimated
@@ -46,7 +48,7 @@ public struct LyricLine: Equatable, Sendable {
     }
 
     public func shifted(by offset: TimeInterval) -> LyricLine {
-        LyricLine(time: time + offset, text: text, endTime: endTime.map { $0 + offset },
+        LyricLine(time: time + offset, text: text, translation: translation, endTime: endTime.map { $0 + offset },
                   segments: segments.map { LyricSegment(time: $0.time + offset, endTime: $0.endTime + offset, text: $0.text, synthetic: $0.synthetic) }, endTimeIsEstimated: endTimeIsEstimated)
     }
 }
@@ -140,6 +142,8 @@ public enum LyricParser {
         return TimedLyricDocument(lines: lines, metadata: LyricsMetadata(lyricOffset: offset(in: text))).normalizedLines
     }
 
+    private static let enhancedTokenRegex = try! NSRegularExpression(pattern: #"<(\d+:\d+(?:\.\d+)?)>"#)
+
     private static func parseLine(_ rawLine: Substring) -> [LyricLine] {
         var rest = String(rawLine)
         var times: [TimeInterval] = []
@@ -149,9 +153,48 @@ public enum LyricParser {
             if let time = parseTime(tag) { times.append(time) }
             rest = String(rest[rest.index(after: close)...])
         }
-        let text = rest.trimmingCharacters(in: .whitespaces)
-        guard !times.isEmpty, !text.isEmpty else { return [] }
-        return times.map { LyricLine(time: $0, text: text) }
+        guard !times.isEmpty else { return [] }
+        let body = rest.trimmingCharacters(in: .whitespaces)
+        let tokens = enhancedTokenRegex.matches(in: body, range: NSRange(body.startIndex..., in: body))
+        if tokens.isEmpty {
+            guard !body.isEmpty else { return [] }
+            return times.map { LyricLine(time: $0, text: body) }
+        }
+        let cleaned = enhancedTokenRegex.stringByReplacingMatches(in: body, range: NSRange(body.startIndex..., in: body), withTemplate: "")
+            .trimmingCharacters(in: .whitespaces)
+        guard !cleaned.isEmpty else { return [] }
+        if times.count == 1 {
+            let lineStart = times[0]
+            var parsedTokens: [(time: TimeInterval, range: NSRange)] = []
+            for match in tokens {
+                if let r = Range(match.range(at: 1), in: body), let t = parseTime(String(body[r])) {
+                    parsedTokens.append((t, match.range))
+                }
+            }
+            var segments: [LyricSegment] = []
+            var lineEnd: TimeInterval? = nil
+            for (index, token) in parsedTokens.enumerated() {
+                let textStart = token.range.upperBound
+                let textEnd = index + 1 < parsedTokens.count ? parsedTokens[index + 1].range.location : (body as NSString).length
+                if textEnd <= textStart {
+                    if index == parsedTokens.count - 1 && token.time > lineStart { lineEnd = token.time }
+                    continue
+                }
+                guard let textRange = Range(NSRange(location: textStart, length: textEnd - textStart), in: body) else { continue }
+                var tokenText = String(body[textRange])
+                if segments.isEmpty { tokenText = tokenText.replacingOccurrences(of: #"^\s+"#, with: "", options: .regularExpression) }
+                let nextTime: TimeInterval? = index + 1 < parsedTokens.count ? parsedTokens[index + 1].time : nil
+                if let nextTime, nextTime > token.time {
+                    if index + 1 == parsedTokens.count - 1 {
+                        tokenText = tokenText.replacingOccurrences(of: #"\s+$"#, with: "", options: .regularExpression)
+                    }
+                    segments.append(LyricSegment(time: token.time, endTime: nextTime, text: tokenText))
+                    lineEnd = max(lineEnd ?? nextTime, nextTime)
+                }
+            }
+            return [LyricLine(time: lineStart, text: cleaned, endTime: lineEnd, segments: segments)]
+        }
+        return times.map { LyricLine(time: $0, text: cleaned) }
     }
 
     private static func parseTime(_ tag: String) -> TimeInterval? {

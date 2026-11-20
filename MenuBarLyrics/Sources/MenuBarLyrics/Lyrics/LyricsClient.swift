@@ -184,7 +184,7 @@ final class LyricsClient {
         var sources = candidateSources, names = sourceNames
         if let exactSource { sources.append(exactSource); names.append("NetEaseExactID (Preview)") }
         var collected = await Self.collect(sources, names: names, for: context.track,
-            window: context.platform == "spotify" ? 2.75 : 8, context: context, boundedSpotify: context.platform == "spotify")
+            window: context.platform == "spotify" ? 4.5 : 8, context: context, boundedSpotify: context.platform == "spotify")
         try Task.checkCancellation()
         var decision = LyricsSelection.select(collected.candidates, context: context)
         var statuses = collected.statuses
@@ -205,7 +205,7 @@ final class LyricsClient {
                     // candidate cannot stand in for a query using the full identity.
                     context = canonicalContext
                     collected = await Self.collect(sources, names: names, for: canonical,
-                        window: 2.75, context: context, boundedSpotify: true)
+                        window: 4.5, context: context, boundedSpotify: true)
                     try Task.checkCancellation()
                     statuses = collected.statuses
                     statuses["Recovery"] = "validated_identity_requery"
@@ -222,12 +222,12 @@ final class LyricsClient {
         }
         // One recovery pass, only for transport/deadline failures. Empty responses
         // and rejected candidates are evidence, not reasons to repeat requests.
-        if context.platform == "spotify", decision.winner == nil, !recoveredIdentity {
+        if decision.winner == nil, !recoveredIdentity {
             let indices = sources.indices.filter { names.indices.contains($0) && LyricsHTTP.retryableStatus(statuses[names[$0]] ?? "") }
             if !indices.isEmpty {
                 try await Task.sleep(for: .milliseconds(150))
                 let retry = await Self.collect(indices.map { sources[$0] }, names: indices.map { names[$0] },
-                    for: context.track, window: 2.75, context: context, boundedSpotify: true)
+                    for: context.track, window: context.platform == "spotify" ? 4.5 : 3.5, context: context, boundedSpotify: context.platform == "spotify")
                 try Task.checkCancellation()
                 for (name, status) in retry.statuses { statuses[name] = status; statuses[name + " first attempt"] = collected.statuses[name] }
                 statuses["Recovery"] = "one_transient_source_retry"
@@ -439,7 +439,7 @@ final class LyricsClient {
             for (index, source) in sources.enumerated() {
                 group.addTask {
                     let label = names.indices.contains(index) ? names[index] : "source_\(index + 1)"
-                    let budget = boundedSpotify ? min(window, ["LRCLIB": 2.5, "NetEase": 2.5, "QQ": 2.4, "Kugou": 2.2, "LRCMux": 1.8, "Soda": 0.5][label] ?? window) : window
+                    let budget = boundedSpotify ? min(window, ["LRCLIB": 4.0, "NetEase": 3.5, "QQ": 3.5, "Kugou": 3.5, "LRCMux": 1.5, "Soda": 0.5][label] ?? window) : window
                     let (candidate, status) = await boundedSource(source, track: track, budget: budget, label: label)
                     return .source(index, candidate, status)
                 }
@@ -465,7 +465,7 @@ final class LyricsClient {
                     }
                     // All primary direct providers must finish before generic selection.
                     // A validated recording need not wait for supplemental Soda or the unbound resolver.
-                    if boundedSpotify, let context,
+                    if let context,
                        sources.indices.allSatisfy({ names.indices.contains($0) && ["LRCMux", "Soda"].contains(names[$0]) || statuses[names.indices.contains($0) ? names[$0] : "source_\($0 + 1)"] != nil }),
                        let winner = LyricsSelection.select(candidates, context: context).winner,
                        winner.provider != "LRCMux" {

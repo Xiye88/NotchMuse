@@ -13,7 +13,7 @@ def validate(root, version, build):
         text = (root/name).read_text()
         assert version in text, f'{name}: version missing'
         if name != 'CHANGELOG.md': assert asset in text, f'{name}: download missing'
-    pages = sorted((root/'website').rglob('*.html'))
+    pages = sorted(p for p in (root/'website').rglob('*.html') if 'releases' not in p.relative_to(root/'website').parts)
     assert len(pages) >= 12, 'website page inventory incomplete'
     for page in pages:
         text = page.read_text()
@@ -39,17 +39,19 @@ def validate(root, version, build):
     assert enclosure.get('url')==asset and int(enclosure.get('length','0'))>0, 'feed asset/length'
     assert enclosure.get('{'+ns['s']+'}edSignature'), 'archive signature missing'
     notes = item.findtext('s:releaseNotesLink', namespaces=ns)
-    assert notes == f'https://notchmuse.com/releases/v{version}/NotchMuse.md', 'versioned notes URL'
-    content=(root/f'docs/releases/v{version}/NotchMuse.md').read_text()
-    assert '简体中文' in content and re.search('[A-Za-z]{5}',content), 'combined bilingual notes missing'
-    return asset, enclosure, pages
+    allowed_notes = {f'https://notchmuse.com/releases/v{version}/NotchMuse.md', f'https://notchmuse.com/releases/v{version}/NotchMuse.html'}
+    assert notes in allowed_notes, 'versioned notes URL'
+    notes_name = notes.rsplit('/', 1)[-1]
+    content=(root/f'docs/releases/v{version}/{notes_name}').read_text()
+    assert ('简体中文' in content or '中文' in content) and re.search('[A-Za-z]{5}',content), 'combined bilingual notes missing'
+    return asset, enclosure, pages, notes_name
 
 def fetch(url):
     return subprocess.check_output(['curl','-q','-fsSL','--max-time','40',url])
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('version');p.add_argument('build');p.add_argument('--online',action='store_true');a=p.parse_args()
-    asset,enclosure,pages=validate(ROOT,a.version,a.build)
+    asset,enclosure,pages,notes_name=validate(ROOT,a.version,a.build)
     print(f'PASS local: {len(pages)} pages, README, CHANGELOG, JSON-LD, feed metadata and combined notes')
     if a.online:
         release=json.loads(subprocess.check_output(['gh','api','repos/Xiye88/NotchMuse/releases/latest']))
@@ -61,7 +63,7 @@ def main():
         assert not re.search(r'v\d+\.\d+\.\d+',about), 'About contains fixed version'
         for host in ['notchmuse.com','www.notchmuse.com']:
             assert fetch('https://'+host+'/appcast.xml')==(ROOT/f'docs/releases/v{a.version}/appcast.xml').read_bytes(), 'public feed differs'
-            assert fetch(f'https://{host}/releases/v{a.version}/NotchMuse.md')==(ROOT/f'docs/releases/v{a.version}/NotchMuse.md').read_bytes(), 'public notes differ'
+            assert fetch(f'https://{host}/releases/v{a.version}/{notes_name}')==(ROOT/f'docs/releases/v{a.version}/{notes_name}').read_bytes(), 'public notes differ'
             for page in pages:
                 rel=str(page.relative_to(ROOT/'website'))
                 assert fetch('https://'+host+'/'+rel)==page.read_bytes(), f'public page differs: {host}/{rel}'

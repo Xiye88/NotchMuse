@@ -17,9 +17,11 @@ NOTES_PREFIX="https://notchmuse.com/releases/v$VERSION/"
 
 [[ -f "$DMG" && -f "$NOTES" && -x "$SPARKLE" ]]
 [[ "$VERSION" =~ '^[0-9]+\.[0-9]+\.[0-9]+$' ]]
+EXT="${NOTES##*.}"
+[[ "$EXT" == "html" || "$EXT" == "md" ]] || EXT="md"
 mkdir -p "$STAGING"
 cp "$DMG" "$STAGING/NotchMuse.dmg"
-cp "$NOTES" "$STAGING/NotchMuse.md"
+cp "$NOTES" "$STAGING/NotchMuse.$EXT"
 "$SPARKLE" --account notchmuse --maximum-deltas 0 \
   --download-url-prefix "$DOWNLOAD_PREFIX" \
   --release-notes-url-prefix "$NOTES_PREFIX" \
@@ -32,5 +34,5 @@ grep -q 'sparkle:edSignature=' "$OUTPUT"
 grep -Fq "<sparkle:version>$BUILD</sparkle:version>" "$OUTPUT"
 grep -Fq "<sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>" "$OUTPUT"
 grep -Fq "${DOWNLOAD_PREFIX}NotchMuse.dmg" "$OUTPUT"
-grep -Fq "${NOTES_PREFIX}NotchMuse.md" "$OUTPUT"
+grep -Fq "${NOTES_PREFIX}NotchMuse.$EXT" "$OUTPUT"
 echo "Staged only: $OUTPUT"

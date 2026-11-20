@@ -1,6 +1,6 @@
 <p align="center">English | <a href="README.zh-CN.md">简体中文</a></p>
 
-<h1 align="center">NotchMuse v0.8.3</h1>
+<h1 align="center">NotchMuse v0.8.4</h1>
 
 <p align="center"><img src="website/assets/media/notch-poster.webp" alt="Real NotchMuse overlay lyrics on macOS" width="1080"></p>
 
@@ -8,7 +8,7 @@
 
 <p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · NetEase Cloud Music · QQ Music · Soda Music</p>
 
-<p align="center"><a href="https://notchmuse.com"><strong>Download from website</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.3"><strong>GitHub Releases</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>Report an issue</strong></a></p>
+<p align="center"><a href="https://notchmuse.com"><strong>Download from website</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.4"><strong>GitHub Releases</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>Report an issue</strong></a></p>
 
 ## Status Bar Lyrics
 
@@ -64,15 +64,15 @@ NotchMuse is distributed directly through the website and GitHub. Apple Develope
 
 If macOS blocks the app, open **System Settings → Privacy & Security → Open Anyway** for NotchMuse, authenticate if asked, then open it again. See [Support](docs/community/SUPPORT.md) for installation and permission help. Do not disable Gatekeeper or remove quarantine to force installation. [Apple’s Open Anyway guidance](https://support.apple.com/en-us/102445). This release is ad-hoc signed, not Developer ID signed or notarized. Independent clean-Mac first-install verification has not been completed. Intel Macs are not supported.
 
-## Updating to v0.8.3
+## Updating to v0.8.4
 
-Existing Stable users can use **Settings → General → Check for Updates** to download, install and restart into v0.8.3 / Build70. With automatic checks enabled, the app discovers the release at its next scheduled check and asks before installation. The official signed feed now advertises Build70; actual Build47→70 and Build61→70 updates were verified using temporary full app copies.
+Existing Stable users can use **Settings → General → Check for Updates** to download, install and restart into v0.8.4 / Build70. With automatic checks enabled, the app discovers the release at its next scheduled check and asks before installation. The official signed feed now advertises Build70; actual Build47→70 and Build61→70 updates were verified using temporary full app copies.
 
-Beta 3 and earlier need a one-time [manual installation](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.3/NotchMuse.dmg). Manual download remains available with [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.3/SHA256SUMS); keep Preview separate. Offline apps and users who disable automatic checks will not receive scheduled prompts.
+Beta 3 and earlier need a one-time [manual installation](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.4/NotchMuse.dmg). Manual download remains available with [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.4/SHA256SUMS); keep Preview separate. Offline apps and users who disable automatic checks will not receive scheduled prompts.
 
 ### What changed
 
-Draggable lyrics with saved positions, locking and click-through controls; genuine word/line-end highlighting with static display when end timing is unavailable; usable NetEase timing retained across malformed rows; clearer update-check status and retry feedback. Lyrics still depend on third-party coverage. [English / Chinese release notes](docs/releases/v0.8.3/RELEASE_NOTES.en.md).
+Draggable lyrics with saved positions, locking and click-through controls; genuine word/line-end highlighting with static display when end timing is unavailable; usable NetEase timing retained across malformed rows; clearer update-check status and retry feedback. Lyrics still depend on third-party coverage. [English / Chinese release notes](docs/releases/v0.8.4/RELEASE_NOTES.en.md).
 
 ## FAQ
 

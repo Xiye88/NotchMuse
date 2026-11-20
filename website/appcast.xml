@@ -1,21 +1,18 @@
-<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
-IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
---><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>NotchMuse</title>
         <item>
-            <title>0.8.3</title>
-            <pubDate>Fri, 20 Nov 2026 15:33:12 +0800</pubDate>
+            <title>0.8.4</title>
+            <pubDate>Fri, 20 Nov 2026 20:01:39 +0800</pubDate>
             <link>https://notchmuse.com/</link>
-            <sparkle:version>81</sparkle:version>
-            <sparkle:shortVersionString>0.8.3</sparkle:shortVersionString>
+            <sparkle:version>82</sparkle:version>
+            <sparkle:shortVersionString>0.8.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <sparkle:releaseNotesLink>https://notchmuse.com/releases/v0.8.3/NotchMuse.html</sparkle:releaseNotesLink>
-            <enclosure url="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.3/NotchMuse.dmg" length="7305310" type="application/octet-stream" sparkle:edSignature="uxKvlw/HvDFwIR9QaAM6Jt/d05YLPEaoRqEL81tg8Nw2zKBV9L30o/suOqwTiCxyJhM0XpDrzrx7dnK4KFCeDQ=="></enclosure>
+            <sparkle:releaseNotesLink>https://notchmuse.com/releases/v0.8.4/NotchMuse.html</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink xml:lang="zh">https://notchmuse.com/releases/v0.8.4/NotchMuse.zh.html</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.4/NotchMuse.dmg" length="7326144" type="application/octet-stream" sparkle:edSignature="4VXJ0b94hKK0kg4vfgm5bImmTeHOlImV7n8lArr35QBdXIJqo0fg8pwcfgiqndL8DNy4nQ5HHPW+9XFNOGDtDg=="/>
         </item>
     </channel>
-</rss><!-- sparkle-signatures:
-edSignature: OsEhlchhnpi8ouso8vLdDJ6NJyog9Xwp8FkpdEEOu+xOvQvBohOAhQUMcBQn+vTlXMMOy+yVmsSnIOZ099qXCA==
-length: 1282
--->
+</rss>

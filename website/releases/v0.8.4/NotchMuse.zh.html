@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NotchMuse v0.8.4 Release Notes</title>
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0b0b0d;
+      --card: #161618;
+      --border: rgba(255, 255, 255, 0.10);
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --accent: #ff8a36;
+      --accent-soft: rgba(255, 138, 54, 0.14);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f5f7;
+        --card: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --accent: #e06d1b;
+        --accent-soft: rgba(224, 109, 27, 0.10);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px 22px 28px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro SC", "PingFang SC", sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .lang-radio {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .wrap { max-width: 680px; margin: 0 auto; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .title-group h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .lang-switch {
+      display: inline-flex;
+      padding: 2px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .lang-switch label {
+      display: inline-block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    #lang-zh:checked ~ .wrap label[for="lang-zh"],
+    #lang-en:checked ~ .wrap label[for="lang-en"] {
+      background: var(--accent);
+      color: #ffffff;
+    }
+    #panel-zh,
+    #panel-en {
+      display: none;
+    }
+    #lang-zh:checked ~ .wrap #panel-zh,
+    #lang-en:checked ~ .wrap #panel-en {
+      display: block;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 650;
+    }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin-bottom: 6px; }
+    .qr-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .qr-box img {
+      width: 124px;
+      height: 124px;
+      border-radius: 10px;
+      background: #fff;
+      padding: 4px;
+      border: 1px solid var(--border);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <input class="lang-radio" type="radio" name="release-lang" id="lang-zh" checked>
+  <input class="lang-radio" type="radio" name="release-lang" id="lang-en">
+
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-group">
+        <h1>NotchMuse v0.8.4</h1>
+        <span class="badge">Build 82 · macOS 14+</span>
+      </div>
+      <div class="lang-switch" role="tablist" aria-label="Language">
+        <label for="lang-zh" id="btn-zh">中文</label>
+        <label for="lang-en" id="btn-en">English</label>
+      </div>
+    </div>
+
+    <div id="panel-en">
+      <div class="card">
+        <h2>1. Native In-App Announcements &amp; Release History</h2>
+        <ul>
+          <li><strong>No more forced browser redirects</strong>: Clicking the top announcement bar in Settings (or the Menu Bar entry) now opens a clean native <strong>Updates &amp; Announcements</strong> window right inside NotchMuse to browse announcements and version history.</li>
+          <li><strong>Pinned bar with subtle unread dot</strong>: The top announcement bar stays pinned with the latest update instead of disappearing after click, and shows a subtle orange unread dot whenever a new announcement arrives.</li>
+          <li><strong>Quiet background refresh</strong>: Automatically refreshes announcements every 6 hours and when reopening Settings, so long-running menu bar sessions stay up to date without restarting.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. Instant Bilingual Release Notes &amp; Unified Support</h2>
+        <ul>
+          <li><strong>Zero-JS interactive language switch</strong>: Release notes inside the Sparkle update dialog now default to your macOS language and switch instantly between English and Chinese with one click.</li>
+          <li><strong>Unified support channel</strong>: All support inquiries now route to <a href="mailto:support@notchmuse.com">support@notchmuse.com</a>, with a direct feedback bar built into the bottom of the Updates &amp; Announcements window.</li>
+          <li>Includes all v0.8.3 upgrades (90% lyrics match rate across Apple Music, Spotify, NetEase Cloud &amp; Soda Music, startup automatic update checks, and Notch/Free Floating UI polish).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. Feedback &amp; Community</h2>
+        <div class="qr-box">
+          <img src="https://notchmuse.com/assets/wechat-group-qr.jpg" alt="NotchMuse WeChat Group QR Code">
+          <div>
+            <p style="margin:0 0 8px;">Found a bug or a song missing lyrics? Reach out anytime:</p>
+            <ul>
+              <li>Support Email: <a href="mailto:support@notchmuse.com">support@notchmuse.com</a></li>
+              <li>GitHub Issues: <a href="https://github.com/Xiye88/NotchMuse/issues">Xiye88/NotchMuse/issues</a></li>
+              <li>Scan to join the <strong>NotchMuse WeChat User Group</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-zh">
+      <div class="card">
+        <h2>1. 原生应用内「更新与公告」中心</h2>
+        <ul>
+          <li><strong>不再跳转浏览器</strong>：点击设置页顶部公告条（或菜单栏公告入口）将直接打开 NotchMuse 原生<strong>「更新与公告」</strong>窗口，一站查看平台公告与历史版本更新记录。</li>
+          <li><strong>公告条常驻 + 未读小圆点</strong>：顶部公告条点击后不再消失、固定展示最新一条；当有新公告发布时右侧会出现克制的橙色小圆点，点开查看后自动消除。</li>
+          <li><strong>定时静默刷新</strong>：每 6 小时及重新打开设置页时按需静默刷新公告，菜单栏长期不退出也能及时看到最新消息。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. 更新说明一键切换与统一反馈邮箱</h2>
+        <ul>
+          <li><strong>更新弹窗零延迟中英切换</strong>：Sparkle 更新弹窗按系统语言自动展示中文或英文，右上角按钮无需 JS 即可一键切换。</li>
+          <li><strong>统一反馈邮箱</strong>：问题反馈邮箱正式升级为 <a href="mailto:support@notchmuse.com">support@notchmuse.com</a>，并在「更新与公告」窗口底部内置直达入口。</li>
+          <li>完整包含 v0.8.3 的全部核心升级（四平台歌词命中率提升至 90%、启动自动检查与自动下载安装更新、刘海与悬浮词条质感升级）。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. 问题反馈与用户交流群</h2>
+        <div class="qr-box">
+          <img src="https://notchmuse.com/assets/wechat-group-qr.jpg" alt="NotchMuse 微信交流群二维码">
+          <div>
+            <p style="margin:0 0 8px;">使用中遇到任何 Bug、歌词未匹配或功能建议，欢迎随时联系我：</p>
+            <ul>
+              <li>反馈邮箱：<a href="mailto:support@notchmuse.com">support@notchmuse.com</a></li>
+              <li>GitHub Issues：<a href="https://github.com/Xiye88/NotchMuse/issues">Xiye88/NotchMuse/issues</a></li>
+              <li>扫码加入 <strong>NotchMuse 微信交流群</strong>（直接联系开发者）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./release-notes.js" defer></script>
+</body>
+</html>

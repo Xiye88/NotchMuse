@@ -315,4 +315,12 @@ All older candidate/build/pending-release sections below are historical and are 
 
 - 防止重复启动产生多个 NotchMuse 进程
 - 退出时释放 Timer、异步任务和 Overlay 窗口
-- 防止切歌后旧歌词结果覆盖当前歌曲
+- 防止切歌后旧歌词结果覆盖当前歌曲## [0.8.4] - 2026-11-20 (Build 82)
+
+### Added
+- Native in-app **Updates & Announcements** window (`AnnouncementWindowController`) showing announcements and release history instead of opening a browser tab.
+- Subtle unread orange dot on the pinned Settings announcement banner (clears on view while keeping the banner permanently visible) and quiet periodic background refresh (every 6 hours + when reopening Settings).
+- Localized zero-JS pure-CSS EN/ZH Sparkle release notes (`NotchMuse.html` + `NotchMuse.zh.html`) defaulting to the user's macOS language.
+- Unified support email `support@notchmuse.com` with a direct feedback footer inside the Updates & Announcements window.
+
+

@@ -142,8 +142,8 @@
         <span class="badge">Build 81 · macOS 14+</span>
       </div>
       <div class="lang-switch" role="tablist" aria-label="Language">
-        <button id="btn-zh" type="button" onclick="setLang('zh')">中文</button>
-        <button id="btn-en" type="button" onclick="setLang('en')">English</button>
+        <button id="btn-zh" type="button">中文</button>
+        <button id="btn-en" type="button">English</button>
       </div>
     </div>
 
@@ -231,21 +231,6 @@
       </div>
     </div>
   </div>
-  <script>
-    function setLang(lang) {
-      var isZh = lang === 'zh';
-      document.getElementById('panel-zh').classList.toggle('hidden', !isZh);
-      document.getElementById('panel-en').classList.toggle('hidden', isZh);
-      document.getElementById('btn-zh').classList.toggle('active', isZh);
-      document.getElementById('btn-en').classList.toggle('active', !isZh);
-      document.documentElement.lang = isZh ? 'zh-Hans' : 'en';
-    }
-    (function init() {
-      var q = new URLSearchParams(location.search).get('lang') || location.hash.replace('#', '');
-      if (q === 'zh' || q === 'en') { setLang(q); return; }
-      var nav = (navigator.language || 'en').toLowerCase();
-      setLang(nav.startsWith('zh') ? 'zh' : 'en');
-    })();
-  </script>
+  <script src="./release-notes.js" defer></script>
 </body>
 </html>

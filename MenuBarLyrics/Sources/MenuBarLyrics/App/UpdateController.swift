@@ -56,7 +56,20 @@ final class UpdateController: NSObject, SPUUpdaterDelegate, SPUStandardUserDrive
     }
 
     func checkForUpdates() {
-        guard let updater, updater.canCheckForUpdates else { return }
+        guard let updater else { return }
+        guard updater.canCheckForUpdates else {
+            let chinese = AppPreferences.language == .simplifiedChinese
+            let alert = NSAlert()
+            alert.alertStyle = .informational
+            alert.messageText = chinese ? "正在后台检查或下载更新" : "Update Check in Progress"
+            alert.informativeText = chinese
+                ? "NotchMuse 正在后台检查或下载新版本，完成后会自动提示或准备安装，请稍候片刻。"
+                : "NotchMuse is checking for or downloading an update in the background. You will be notified once it is ready."
+            alert.addButton(withTitle: chinese ? "好" : "OK")
+            NSApp.activate(ignoringOtherApps: true)
+            alert.runModal()
+            return
+        }
         policy.beginUserCheck()
         updater.checkForUpdates()
     }

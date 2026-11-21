@@ -1,0 +1,47 @@
+# NotchMuse
+
+> NotchMuse is a free, lightweight native Swift/AppKit macOS app that displays live synced lyrics around the MacBook notch, in the menu bar, or as a click-through floating desktop overlay. No account or login is required.
+
+## Core Facts
+
+- **Price & Account**: Free to download and use; no account or login required.
+- **System Requirements**: macOS 14 or later on Apple silicon Macs (M1 series or later; Intel Macs are not supported).
+- **Supported Players**: Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music desktop apps on macOS (via macOS Now Playing / MediaRemote and Automation where prompted).
+- **Display Modes**:
+  - **Notch Mode**: Dynamic Island–style synced lyrics around the MacBook notch or positioned above the Dock.
+  - **Status Bar Mode**: Compact scrolling lyrics in the macOS menu bar (left-side layout uses Accessibility permission).
+  - **Floating Overlay**: Click-through, freely positionable desktop overlay with position lock, color presets, opacity, width, and animation speed controls.
+- **Lyrics Sync**: Displays synchronized lyrics from public lyric sources, including word-timed progression when the source provides it.
+- **Privacy**: The macOS app does not read or upload audio and requires no account. Track metadata (such as title and artist) may be sent to third-party lyric providers to fetch matching lyrics.
+- **Trademark Notice**: Dynamic Island and MacBook are trademarks of Apple Inc. NotchMuse is an independent utility and is not affiliated with Apple.
+- **Latest Download**: https://github.com/Xiye88/NotchMuse/releases/latest
+- **GitHub Repository**: https://github.com/Xiye88/NotchMuse
+- **Support**: support@notchmuse.com
+
+## English Pages
+
+- [NotchMuse Home](https://notchmuse.com/): Product overview, live macOS recordings, installation steps, and FAQ.
+- [Menu Bar Lyrics for Mac](https://notchmuse.com/menu-bar-lyrics/): Setup, placement, width, and permissions for Status Bar Mode.
+- [Spotify Lyrics on Mac](https://notchmuse.com/spotify-lyrics-mac/): Live synced Spotify lyrics in the menu bar, notch, or floating overlay.
+- [Apple Music Desktop Lyrics for Mac](https://notchmuse.com/apple-music-desktop-lyrics-mac/): Comparing Apple Music built-in lyrics, MiniPlayer, and NotchMuse overlay modes.
+- [MacBook Notch Lyrics](https://notchmuse.com/macbook-notch-lyrics/): Placing synced lyrics around the MacBook notch or above the Dock.
+- [Mac Dynamic Island–Style Lyrics](https://notchmuse.com/mac-dynamic-island-lyrics/): Dynamic Island–style lyric companion around the MacBook notch for Apple silicon Macs.
+- [Floating Lyrics for Mac](https://notchmuse.com/floating-lyrics-mac/): Click-through, always-above-regular-windows desktop lyric overlay with position lock.
+- [LyricsX Alternative for macOS 14+](https://notchmuse.com/lyricsx-alternative/): Neutral comparison of documented features and Apple silicon macOS 14+ support.
+- [NetEase Cloud Music Lyrics for Mac](https://notchmuse.com/netease-cloud-music-lyrics-mac/): Synced desktop and menu bar lyrics for the NetEase Cloud Music Mac desktop app.
+- [QQ Music Lyrics for Mac](https://notchmuse.com/qq-music-lyrics-mac/): Synced lyrics for the QQ Music Mac desktop app via macOS Now Playing.
+- [Soda Music Lyrics for Mac](https://notchmuse.com/soda-music-lyrics-mac/): Synced lyrics for the Soda Music Mac desktop app in Notch or Status Bar Mode.
+
+## Simplified Chinese Pages (简体中文)
+
+- [NotchMuse 中文首页](https://notchmuse.com/zh/): 产品介绍、macOS 实机演示、安装指引与常见问题。
+- [Mac 菜单栏歌词](https://notchmuse.com/zh/menu-bar-lyrics/): 菜单栏模式设置、显示宽度与权限说明。
+- [Spotify Mac 桌面歌词](https://notchmuse.com/zh/spotify-lyrics-mac/): 在 Mac 桌面、刘海旁与菜单栏实时显示 Spotify 同步歌词。
+- [Apple Music Mac 桌面歌词](https://notchmuse.com/zh/apple-music-desktop-lyrics-mac/): Apple Music 原生歌词、MiniPlayer 与 NotchMuse 浮层对比。
+- [MacBook 刘海歌词](https://notchmuse.com/zh/macbook-notch-lyrics/): 在 MacBook 刘海两侧或 Dock 上方显示同步歌词。
+- [Mac 灵动岛风格歌词](https://notchmuse.com/zh/mac-dynamic-island-lyrics/): 在配备物理刘海的 Apple 芯片 MacBook 上呈现灵动岛风格同步歌词。
+- [Mac 桌面悬浮歌词](https://notchmuse.com/zh/floating-lyrics-mac/): 支持点击穿透、位置锁定与外观预设的桌面悬浮歌词。
+- [LyricsX 替代方案（macOS 14+）](https://notchmuse.com/zh/lyricsx-alternative/): 面向 macOS 14+ 与 Apple 芯片的客观功能对比。
+- [网易云音乐 Mac 桌面歌词](https://notchmuse.com/zh/netease-cloud-music-lyrics-mac/): 在菜单栏与刘海区域优雅显示网易云音乐同步歌词。
+- [QQ 音乐 Mac 桌面歌词](https://notchmuse.com/zh/qq-music-lyrics-mac/): 通过 macOS Now Playing 在菜单栏或刘海旁同步显示 QQ 音乐歌词。
+- [汽水音乐 Mac 桌面歌词](https://notchmuse.com/zh/soda-music-lyrics-mac/): 在 MacBook 刘海旁或顶部菜单栏同步显示汽水音乐歌词。

@@ -26,7 +26,7 @@
 @media(prefers-reduced-motion:reduce){.hero-visual .sample-pill>strong{animation:none;background-position:50% 0}}
 
 /* 2026-09-26: use the real capture and keep the five players in a 3 + 2 layout. */
-.player-list{display:flex;flex-wrap:wrap;justify-content:center}.player-list li{flex:0 1 calc((100% - 32px)/3)}.hero-visual .mac-demo{height:auto;aspect-ratio:794/224}.hero-visual .mac-demo>img{position:relative;inset:auto;width:100%;height:auto;object-fit:contain!important}.hero-visual .sample-pill{display:none}
+.player-list{display:flex;flex-wrap:wrap;justify-content:center}.player-list li{flex:0 1 calc((100% - 32px)/3)}.player-list li a{display:flex;gap:16px;align-items:center;width:100%;text-decoration:none;color:inherit}.player-list li:has(a):hover{border-color:#ff8a3670;background:#ffffff09}.hero-visual .mac-demo{height:auto;aspect-ratio:794/224}.hero-visual .mac-demo>img{position:relative;inset:auto;width:100%;height:auto;object-fit:contain!important}.hero-visual .sample-pill{display:none}
 @media(max-width:760px){.player-list{display:grid;grid-template-columns:1fr}.player-list li{flex:auto}}
 
 .beta-notice{margin:14px 0 8px;padding:10px 13px;border:1px solid #ff8a3655;border-radius:9px;background:#ff8a360b;color:var(--muted);font-size:.82rem}.beta-notice strong{color:#ffbd91}.first-launch-guide{margin-top:8px;color:var(--muted);font-size:.83rem}.first-launch-guide summary{cursor:pointer;color:#ffbd91;font-weight:650}.first-launch-guide[open] .guide-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px}.first-launch-guide ol{padding-left:20px}.first-launch-guide li+li{margin-top:6px}

@@ -5,7 +5,18 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const base = process.env.SHOWCASE_URL || 'http://127.0.0.1:8891';
 const output = process.env.SHOWCASE_EVIDENCE;
-const topics = ['spotify-lyrics-mac', 'menu-bar-lyrics', 'apple-music-desktop-lyrics-mac', 'macbook-notch-lyrics', 'lyricsx-alternative'];
+const topics = [
+  'spotify-lyrics-mac',
+  'menu-bar-lyrics',
+  'apple-music-desktop-lyrics-mac',
+  'macbook-notch-lyrics',
+  'lyricsx-alternative',
+  'soda-music-lyrics-mac',
+  'netease-cloud-music-lyrics-mac',
+  'qq-music-lyrics-mac',
+  'floating-lyrics-mac',
+  'mac-dynamic-island-lyrics',
+];
 const urls = ['/', '/zh/', ...topics.flatMap(slug => [`/${slug}/`, `/zh/${slug}/`])];
 const sitemap = fs.readFileSync(path.join(__dirname, 'sitemap.xml'), 'utf8');
 assert.deepEqual([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => new URL(m[1]).pathname), urls);
@@ -29,7 +40,7 @@ for (const suffix of urls) {
     operatingSystem: zh ? 'macOS 14 或更高版本' : 'macOS 14 or later',
     applicationCategory: 'MultimediaApplication',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    downloadUrl: 'https://github.com/Xiye88/NotchMuse/releases/download/v0.8.2/NotchMuse.dmg',
+    downloadUrl: 'https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg',
     sameAs: 'https://github.com/Xiye88/NotchMuse',
   }, `Verified schema field whitelist: ${suffix}`);
   const breadcrumbs = schemaBlocks.filter(item => item['@type'] === 'BreadcrumbList');
@@ -45,7 +56,9 @@ for (const suffix of urls) {
   }
   if (!home) {
     assert(!html.includes('NotchMuse v0.8.0'), `No fixed old comparison baseline: ${suffix}`);
-    assert(html.includes(zh ? '文档核对日期：2026 年 10 月 17 日。播放器界面与第三方服务可能变化。' : 'Documentation reviewed October 17, 2026. Player interfaces and third-party services can change.'));
+    assert(zh
+      ? /文档核对日期：2026 年 (?:10 月 17|11 月 21) 日。播放器界面与第三方服务可能变化。/.test(html)
+      : /Documentation reviewed (?:October 17|November 21), 2026\. Player interfaces and third-party services can change\./.test(html));
   }
   // Resolve every local link and fragment against its actual target page.
   for (const match of html.matchAll(/(?:href|src|poster|data-src)="([^"]+)"/g)) {
@@ -135,7 +148,7 @@ for (const suffix of urls) {
       await page.goto(base + suffix);
       assert(await page.locator('h1').isVisible());
       assert.equal(await page.locator('a[data-download-placement]').count(), 3);
-      if (suffix === '/' || suffix === '/zh/') assert.equal(await page.locator('#guides .guide-card').count(), 5);
+      if (suffix === '/' || suffix === '/zh/') assert.equal(await page.locator('#guides .guide-card').count(), 10);
       else assert(await page.locator('.guide-content').isVisible());
       const target = suffix.startsWith('/zh/') ? suffix.replace(/^\/zh/, '') || '/' : '/zh' + suffix;
       assert.equal(await page.locator('a#language-toggle').getAttribute('href'), target);

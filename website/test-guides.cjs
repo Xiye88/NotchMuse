@@ -16,6 +16,8 @@ const topics = [
   'qq-music-lyrics-mac',
   'floating-lyrics-mac',
   'mac-dynamic-island-lyrics',
+  'lyrics-downloader',
+  'best-macbook-notch-apps',
 ];
 const urls = ['/', '/zh/', ...topics.flatMap(slug => [`/${slug}/`, `/zh/${slug}/`])];
 const sitemap = fs.readFileSync(path.join(__dirname, 'sitemap.xml'), 'utf8');
@@ -148,7 +150,7 @@ for (const suffix of urls) {
       await page.goto(base + suffix);
       assert(await page.locator('h1').isVisible());
       assert.equal(await page.locator('a[data-download-placement]').count(), 3);
-      if (suffix === '/' || suffix === '/zh/') assert.equal(await page.locator('#guides .guide-card').count(), 10);
+      if (suffix === '/' || suffix === '/zh/') assert.equal(await page.locator('#guides .guide-card').count(), 12);
       else assert(await page.locator('.guide-content').isVisible());
       const target = suffix.startsWith('/zh/') ? suffix.replace(/^\/zh/, '') || '/' : '/zh' + suffix;
       assert.equal(await page.locator('a#language-toggle').getAttribute('href'), target);

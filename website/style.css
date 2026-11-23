@@ -7,6 +7,7 @@ body:before{content:"";position:fixed;z-index:-1;inset:-20%;pointer-events:none;
 a{color:inherit}
 a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--orange);outline-offset:4px;border-radius:4px}
 [hidden]{display:none!important}
+.nowrap{white-space:nowrap}
 .wrap{width:min(var(--wrap),calc(100% - 48px));margin-inline:auto}
 
 /* Sticky frosted-glass header */
@@ -170,6 +171,9 @@ html[lang="zh-Hans"] .section h2,html[lang="zh-Hans"] .privacy-panel h2,html[lan
   .site-footer>p{grid-column:auto}
   .analytics-consent{inset:auto 12px 12px;flex-direction:column;align-items:flex-start;gap:14px;padding:16px}
   .consent-actions{flex-shrink:1}
+}
+@media(max-width:520px){
+  .site-header nav>a:not(.button):not(.language-toggle){display:none}
 }
 @media(max-width:420px){
   .wrap{width:calc(100% - 30px)}

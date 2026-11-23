@@ -10,7 +10,7 @@ const cases = [
   ['zh/index.html', 'zh-Hans', 'https://notchmuse.com/zh/', '/',
     'NotchMuse｜Mac 桌面歌词与菜单栏歌词工具',
     '用 NotchMuse 在 Mac 桌面或菜单栏显示同步歌词，支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。适用于 macOS 14 及以上的 Apple 芯片 Mac，免费下载，无需注册。',
-    'Mac 桌面与菜单栏同步歌词',
+    'Mac 桌面与菜单栏歌词',
     '工作时也能随时查看歌词。支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。'],
 ];
 const decode = text => text.replaceAll('&amp;', '&').replaceAll('&quot;', '"');
@@ -20,7 +20,7 @@ for (const [file, lang, canonical, alternate, title, description, h1, subtitle] 
   assert.equal(decode(html.match(/<title>(.*?)<\/title>/)[1]), title);
   assert.equal(decode(html.match(/<meta name="description" content="([^"]*)"/)[1]), description);
   assert.equal((html.match(/<h1\b/g) || []).length, 1);
-  assert.equal(decode(html.match(/<h1>(.*?)<\/h1>/)[1]), h1);
+  assert.equal(decode(html.match(/<h1>(.*?)<\/h1>/)[1].replace(/<[^>]+>/g, '')), h1);
   assert.equal(decode(html.match(/<p class="lead">(.*?)<\/p>/)[1]), subtitle);
   assert(html.includes(`<link rel="canonical" href="${canonical}">`));
   for (const [code, url] of [['en', 'https://notchmuse.com/'], ['zh-Hans', 'https://notchmuse.com/zh/'], ['x-default', 'https://notchmuse.com/']]) {

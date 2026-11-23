@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://notchmuse.com/assets/media/appearance-poster.webp">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=14">
-  <link rel="stylesheet" href="/guides.css?v=1">
+  <link rel="stylesheet" href="/style.css?v=15">
+  <link rel="stylesheet" href="/guides.css?v=3">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"NotchMuse","item":"https://notchmuse.com/zh/"},{"@type":"ListItem","position":2,"name":"网易云音乐 Mac 桌面歌词","item":"https://notchmuse.com/zh/netease-cloud-music-lyrics-mac/"}]}</script>
   <script type="application/ld+json">
 {
@@ -53,9 +53,10 @@
   <header class="site-header wrap">
     <a class="brand" href="/zh/" aria-label="NotchMuse 首页"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
     <nav aria-label="主导航">
-      <a href="/zh/#guides">使用指南</a>
+      <a class="nav-desktop-only" href="/zh/#guides">使用指南</a>
+      <a class="nav-desktop-only" href="/zh/lyrics-downloader/">歌词下载</a>
       <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav">下载</a>
-      <a class="language-toggle" id="language-toggle" href="/netease-cloud-music-lyrics-mac/" lang="en" aria-label="Switch to English"><span aria-hidden="true">🌐</span><span>English</span></a>
+      <a class="language-toggle" id="language-toggle" href="/netease-cloud-music-lyrics-mac/" lang="en" aria-label="Switch to English"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>English</span></a>
     </nav>
   </header>
   <main>
@@ -65,23 +66,23 @@
         <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="hero">下载 Mac 版 <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#guide-content">查看使用说明</a></div>
         <p class="fine">NotchMuse v0.8.5 · macOS 14+ · Apple 芯片</p>
       </div>
-      <figure class="guide-figure"><div class="live-demo" data-demo><img class="demo-poster" src="/assets/media/appearance-poster.webp" width="1920" height="1080" alt="NotchMuse 桌面悬浮歌词外观与色彩自定义实机录屏。"><video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"><source data-src="/assets/media/appearance-demo.webm" type="video/webm"><source data-src="/assets/media/appearance-demo.mp4" type="video/mp4"></video></div><figcaption>NotchMuse 桌面悬浮歌词外观与色彩自定义实机录屏。</figcaption></figure>
+      <figure class="guide-figure"><div class="live-demo" data-demo><img class="demo-poster" src="/assets/media/appearance-poster.webp" width="1920" height="1080" alt="NotchMuse 桌面悬浮歌词外观与色彩自定义实机录屏。"><video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"><source data-src="/assets/media/appearance-demo.webm" type="video/webm"><source data-src="/assets/media/appearance-demo.mp4" type="video/mp4"></video></div><figcaption>桌面悬浮歌词与配色预设</figcaption></figure>
     </section>
     <div class="guide-layout wrap">
       <article id="guide-content" class="guide-content" tabindex="-1">
         <section id="why-companion" class="guide-section"><h2>告别遮挡：为什么你需要更克制的桌面歌词</h2><p>写代码、剪辑或处理文档时，传统的大字桌面歌词条很容易遮住界面按钮。NotchMuse 把歌词安排在更克制的视觉位置——顶部<a href="/zh/menu-bar-lyrics/">菜单栏</a>、MacBook 刘海两侧，或支持点击穿透的<a href="/zh/floating-lyrics-mac/">悬浮浮层</a>。</p></section><section id="native-design" class="guide-section"><h2>原生 Swift 打造：流畅自然与低资源占用</h2><p>NotchMuse 基于原生 Swift 与 AppKit 架构开发，专为 macOS 14+ 与 Apple 芯片打造，轻量运行、静默常驻，不打扰日常多任务工作流。</p><p>你可以在设置中调整色彩预设、透明度、显示宽度与动画速度，让歌词与你的桌面融为一体。</p></section><section id="setup" class="guide-section"><h2>极简上手：三步开启网易云歌词同步</h2><ol><li>在网易云音乐 Mac 客户端设置中关闭自带桌面歌词条（避免重叠）。</li><li>播放一首歌曲，确认 macOS 播控中心已识别当前曲目。</li><li>打开 NotchMuse 设置，使用“自动检测”或手动选择网易云音乐，并挑选喜欢的显示模式。</li></ol></section><section id="matching" class="guide-section"><h2>歌词同步与曲库匹配说明</h2><p>NotchMuse 通过公共歌词索引匹配时间轴，支持主流中外曲目的同步展示；当歌词源包含逐字时间戳时，也能平滑呈现逐字推进效果。</p></section>
         <section id="questions" class="guide-section faq"><h2>常见问题</h2><details><summary>是否需要关闭网易云音乐自带的桌面歌词功能？</summary><p>建议关闭官方自带的桌面歌词悬浮条，避免双重遮挡；关闭后仅由 NotchMuse 负责在状态栏或刘海位置静默展示。</p></details><details><summary>哪些歌曲可以正常显示同步歌词？</summary><p>凡具备公共时间轴歌词的歌曲均可自动同步；部分无时间轴的纯音乐、翻唱或播客内容将显示歌曲名与歌手。</p></details><details><summary>网易云音乐切歌时，歌词反应是否会有延迟？</summary><p>不会。NotchMuse 持续监听系统音频通道切换事件，曲目变更后自动刷新时间轴。</p></details><details><summary>软件需要网易云音乐授权或输手机号登录吗？</summary><p>完全不需要。NotchMuse 不干涉你的账户体系，纯粹作为系统层辅助浮层工具运作。</p></details></section>
-        <section id="before-download" class="guide-section guide-note"><h2>安装与隐私</h2><p>当前公开版需要 macOS 14+ 与 Apple 芯片，不支持 Intel。官网下载包尚无 Developer ID 签名及 Apple 公证，首次打开可能显示安全提示。请先阅读 <a href="/zh/#install-title">安装说明</a>。</p><p>应用无需账户，不读取或上传音频；为了匹配歌词，曲目信息可能发送给第三方歌词服务。官网统计与应用本身分开，下载按钮点击不代表安装成功。<a href="/zh/#website-analytics">隐私与官网统计说明</a></p></section>
-        <section id="sources" class="guide-section guide-sources"><h2>资料来源</h2><ul><li><a href="https://notchmuse.com/zh/">NotchMuse: 产品、安装与隐私说明 ↗</a></li></ul><p class="fine">文档核对日期：2026 年 11 月 21 日。播放器界面与第三方服务可能变化。</p></section>
+        
+        
       </article>
-      <aside class="guide-toc" aria-label="本页目录"><p class="eyebrow">本页目录</p><a href="#why-companion">告别遮挡：为什么你需要更克制的桌面歌词</a><a href="#native-design">原生 Swift 打造：流畅自然与低资源占用</a><a href="#setup">极简上手：三步开启网易云歌词同步</a><a href="#matching">歌词同步与曲库匹配说明</a><a href="#questions">常见问题</a><a href="#before-download">安装与隐私</a></aside>
+      <aside class="guide-toc" aria-label="本页目录"><p class="eyebrow">本页目录</p><a href="#why-companion">告别遮挡：为什么你需要更克制的桌面歌词</a><a href="#native-design">原生 Swift 打造：流畅自然与低资源占用</a><a href="#setup">极简上手：三步开启网易云歌词同步</a><a href="#matching">歌词同步与曲库匹配说明</a><a href="#questions">常见问题</a></aside>
     </div>
-    <section class="section wrap guide-related" aria-labelledby="related-title"><p class="eyebrow">继续了解</p><h2 id="related-title">找到适合你的歌词显示方式。</h2><div class="guide-card-grid"><a class="guide-card" href="/zh/qq-music-lyrics-mac/"><h3>QQ 音乐 Mac 桌面歌词<span aria-hidden="true">↗</span></h3><p>将 QQ 音乐同步歌词常驻菜单栏或刘海旁。</p></a><a class="guide-card" href="/zh/soda-music-lyrics-mac/"><h3>汽水音乐 Mac 桌面歌词<span aria-hidden="true">↗</span></h3><p>在刘海旁或菜单栏同步显示汽水音乐歌词。</p></a><a class="guide-card" href="/zh/menu-bar-lyrics/"><h3>Mac 菜单栏歌词<span aria-hidden="true">↗</span></h3><p>了解位置、宽度与所需权限。</p></a><a class="guide-card" href="/zh/lyricsx-alternative/"><h3>LyricsX 替代选择<span aria-hidden="true">↗</span></h3><p>切换前，核对公开功能与适用条件。</p></a></div></section>
+    <section class="section wrap guide-related" aria-labelledby="related-title"><p class="eyebrow">继续了解</p><h2 id="related-title">找到适合你的歌词显示方式。</h2><div class="guide-card-grid"><a class="guide-card" href="/zh/qq-music-lyrics-mac/"><h3>QQ 音乐 Mac 桌面歌词<span aria-hidden="true">↗</span></h3><p>将 QQ 音乐同步歌词常驻菜单栏或刘海旁。</p></a><a class="guide-card" href="/zh/soda-music-lyrics-mac/"><h3>汽水音乐 Mac 桌面歌词<span aria-hidden="true">↗</span></h3><p>在刘海旁或菜单栏同步显示汽水音乐歌词。</p></a><a class="guide-card" href="/zh/menu-bar-lyrics/"><h3>Mac 菜单栏歌词<span aria-hidden="true">↗</span></h3><p>了解位置、宽度与所需权限。</p></a><a class="guide-card" href="/zh/lyricsx-alternative/"><h3>LyricsX 替代选择<span aria-hidden="true">↗</span></h3><p>对比 macOS 14+ 原生支持与使用方式。</p></a></div></section>
     <section class="closing"><div class="wrap"><p class="eyebrow">让音乐融入你的节奏</p><h2>在你的 Mac 上试试看。</h2><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="footer">下载 Mac 版 <span aria-hidden="true">↗</span></a><p class="fine">NotchMuse v0.8.5 · macOS 14+ · Apple 芯片</p></div></section>
   </main>
-  <footer class="site-footer wrap"><a class="brand" href="/zh/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="页脚导航"><a href="/zh/#guides">使用指南</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="/zh/#website-analytics">隐私</a><button class="language-toggle" type="button" data-analytics-settings hidden>统计设置</button></nav><p>© NotchMuse · 让每一天的音乐体验更自在。</p></footer>
+  <footer class="site-footer wrap"><a class="brand" href="/zh/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="页脚导航"><a href="/zh/#guides">使用指南</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="/zh/#privacy">隐私</a><button class="footer-link-btn" type="button" data-analytics-settings hidden>统计设置</button></nav><p>© NotchMuse · 让每一天的音乐体验更自在。</p></footer>
   <aside class="analytics-consent" data-analytics-consent role="region" aria-labelledby="consent-title" hidden>
-    <div><strong id="consent-title">允许官网统计吗？</strong><p>经你同意，Google Analytics 统计访问和下载按钮点击。选择不会影响应用或下载。<a href="/zh/#website-analytics">隐私说明</a></p></div>
+    <div><strong id="consent-title">允许官网统计吗？</strong><p>经你同意，Google Analytics 统计访问和下载按钮点击。选择不会影响应用或下载。<a href="/zh/#privacy">隐私说明</a></p></div>
     <div class="consent-actions"><button type="button" class="language-toggle" data-consent-reject>拒绝统计</button><button type="button" class="button button-small" data-consent-accept>同意统计</button><button type="button" class="language-toggle" data-consent-close hidden>关闭</button></div>
   </aside>
   <script src="/analytics.js?v=1" defer></script>

@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://notchmuse.com/assets/media/status-bar-poster.webp">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=14">
-  <link rel="stylesheet" href="/guides.css?v=2">
+  <link rel="stylesheet" href="/style.css?v=15">
+  <link rel="stylesheet" href="/guides.css?v=3">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"NotchMuse","item":"https://notchmuse.com/"},{"@type":"ListItem","position":2,"name":"Lyrics Downloader","item":"https://notchmuse.com/lyrics-downloader/"}]}</script>
   <script type="application/ld+json">
 {
@@ -55,7 +55,7 @@
     <nav aria-label="Main navigation">
       <a href="/#guides">Guides</a>
       <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav">Download</a>
-      <a class="language-toggle" id="language-toggle" href="/zh/lyrics-downloader/" lang="zh-Hans" aria-label="切换到简体中文"><span aria-hidden="true">🌐</span><span>简体中文</span></a>
+      <a class="language-toggle" id="language-toggle" href="/zh/lyrics-downloader/" lang="zh-Hans" aria-label="切换到简体中文"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>简体中文</span></a>
     </nav>
   </header>
   <main>
@@ -69,18 +69,21 @@
         <input id="lyrics-search-input" type="search" autocomplete="off" required placeholder="Enter song title or artist (e.g. Bohemian Rhapsody, Hotel California)...">
         <button id="lyrics-search-btn" class="button" type="submit">Search Lyrics</button>
       </form>
-      <p class="lyrics-disclaimer">Notice: This tool downloads lyric text and .lrc timing files only — it does not download or stream audio files. Powered by the public LRCLIB community database for personal, non-commercial lyric viewing.</p>
+      <div class="lyrics-examples" aria-label="Example searches"><span>Try:</span><button type="button" class="example-chip" data-query="Bohemian Rhapsody">Bohemian Rhapsody</button><button type="button" class="example-chip" data-query="Blinding Lights">Blinding Lights</button><button type="button" class="example-chip" data-query="晴天">晴天</button></div>
+      <p class="lyrics-disclaimer">Lyrics text &amp; .lrc timing files only (no audio) · Powered by <a href="https://lrclib.net/">LRCLIB</a>.</p>
       <p id="lyrics-status" class="lyrics-status" aria-live="polite"></p>
       <div id="lyrics-workspace" class="lyrics-workspace" hidden>
         <div id="lyrics-results-list" class="lyrics-results" role="listbox" aria-label="Search results"></div>
         <div id="lyrics-preview-container" class="lyrics-preview" hidden>
-          <h2 id="lyrics-preview-title" class="lyrics-preview-head"></h2>
-          <pre id="lyrics-preview-text" class="lyrics-preview-box"></pre>
-          <div class="lyrics-actions">
-            <button id="lyrics-download-lrc-btn" type="button" class="button button-small" disabled>Download .LRC File</button>
-            <button id="lyrics-download-txt-btn" type="button" class="language-toggle" disabled>Download Plain .TXT</button>
-            <button id="lyrics-copy-btn" type="button" class="language-toggle" disabled>Copy Lyrics to Clipboard</button>
+          <div class="lyrics-preview-header">
+            <h2 id="lyrics-preview-title" class="lyrics-preview-head"></h2>
+            <div class="lyrics-actions">
+              <button id="lyrics-download-lrc-btn" type="button" class="button button-small" disabled>Download .LRC</button>
+              <button id="lyrics-download-txt-btn" type="button" class="language-toggle" disabled>Download .TXT</button>
+              <button id="lyrics-copy-btn" type="button" class="language-toggle" disabled>Copy</button>
+            </div>
           </div>
+          <pre id="lyrics-preview-text" class="lyrics-preview-box"></pre>
         </div>
       </div>
       <div class="lyrics-funnel">
@@ -95,21 +98,21 @@
         <section id="how-to-use" class="guide-section"><h2>How to use downloaded LRC lyrics in desktop &amp; portable players</h2><ol><li>Search for your song above and click <strong>Download .LRC File</strong> to save a UTF-8 encoded <code>.lrc</code> file.</li><li>Rename the <code>.lrc</code> file so it matches your MP3 or FLAC filename exactly (keeping the <code>.lrc</code> extension).</li><li>Place the <code>.lrc</code> file in the same folder as the audio track; most local players will detect it automatically.</li></ol></section>
         <section id="auto-macos" class="guide-section"><h2>Automated live lyrics on macOS with NotchMuse</h2><p>If you stream music on macOS, maintaining local lyric files is unnecessary. NotchMuse is a lightweight native Swift/AppKit app that reads active playback from Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music and shows live synced lyrics around your <a href="/macbook-notch-lyrics/">MacBook notch</a> or in the <a href="/menu-bar-lyrics/">menu bar</a>.</p></section>
         <section id="questions" class="guide-section faq"><h2>Frequently asked questions</h2><details><summary>What is the difference between an LRC file and a TXT file?</summary><p>An LRC file contains time tags (e.g. [00:15.20]) before each line of lyric text, allowing compatible music players to highlight and scroll the lyrics in sync with the audio. A TXT file contains raw lyric text without timing markers.</p></details><details><summary>Can I use downloaded LRC files on my phone, DAP, or car audio?</summary><p>Yes. Most dedicated music players (such as HiBy, FiiO, Sony Walkman), Android media apps, and car USB audio systems automatically display lyrics when the .lrc file has the exact same filename and folder as the audio track.</p></details><details><summary>Does this tool download MP3 or music audio?</summary><p>No. This tool strictly searches and downloads lyric text files (.lrc and .txt). It does not host, process, or download audio streams.</p></details><details><summary>Where does the lyric data come from?</summary><p>Search results and timing data are fetched in real time from the open community lyric repository LRCLIB.</p></details><details><summary>How does NotchMuse for Mac handle lyrics differently?</summary><p>If you listen to streaming music on Mac (Spotify, Apple Music, NetEase Cloud Music, QQ Music, or Soda Music), NotchMuse eliminates manual file downloads. It detects the active track through macOS Now Playing and renders live scrolling lyrics automatically around your notch or menu bar.</p></details></section>
-        <section id="before-download" class="guide-section guide-note"><h2>Installation and privacy</h2><p>This online tool queries the public LRCLIB API directly from your browser with no account required. The NotchMuse Mac app requires macOS 14+ and Apple silicon (Intel is not supported), needs no account, and never reads or uploads audio. <a href="/#install-title">Installation steps</a> · <a href="/#website-analytics">Privacy and website analytics</a></p></section>
-        <section id="sources" class="guide-section guide-sources"><h2>Sources and attribution</h2><ul><li><a href="https://lrclib.net/">LRCLIB: public community lyrics database ↗</a></li><li><a href="https://notchmuse.com/">NotchMuse: product, installation and privacy ↗</a></li></ul><p class="fine">Documentation reviewed November 21, 2026. Player interfaces and third-party services can change.</p></section>
+        
+        
       </article>
-      <aside class="guide-toc" aria-label="On this page"><p class="eyebrow">ON THIS PAGE</p><a href="#what-is-lrc">What is an LRC file?</a><a href="#how-to-use">How to use LRC files</a><a href="#auto-macos">Automated macOS lyrics</a><a href="#questions">Questions</a><a href="#before-download">Installation and privacy</a></aside>
+      <aside class="guide-toc" aria-label="On this page"><p class="eyebrow">ON THIS PAGE</p><a href="#what-is-lrc">What is an LRC file?</a><a href="#how-to-use">How to use LRC files</a><a href="#auto-macos">Automated macOS lyrics</a><a href="#questions">Questions</a></aside>
     </div>
 
     <section class="section wrap guide-related" aria-labelledby="related-title"><p class="eyebrow">KEEP EXPLORING</p><h2 id="related-title">Find your way to keep lyrics in view.</h2><div class="guide-card-grid"><a class="guide-card" href="/menu-bar-lyrics/"><h3>Menu bar lyrics<span aria-hidden="true">↗</span></h3><p>Keep synced lyrics cleanly in your macOS menu bar.</p></a><a class="guide-card" href="/spotify-lyrics-mac/"><h3>Spotify lyrics on Mac<span aria-hidden="true">↗</span></h3><p>Keep Spotify lyrics visible while using other apps.</p></a><a class="guide-card" href="/best-macbook-notch-apps/"><h3>Best MacBook notch apps<span aria-hidden="true">↗</span></h3><p>Compare top MacBook notch utilities by use case.</p></a><a class="guide-card" href="/floating-lyrics-mac/"><h3>Floating lyrics for Mac<span aria-hidden="true">↗</span></h3><p>Click-through desktop overlay you can lock anywhere.</p></a></div></section>
     <section class="closing"><div class="wrap"><p class="eyebrow">MUSIC BELONGS IN YOUR FLOW</p><h2>Try it with your own music.</h2><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="footer">Download for Mac <span aria-hidden="true">↗</span></a><p class="fine">NotchMuse v0.8.5 · macOS 14+ · Apple silicon</p></div></section>
   </main>
-  <footer class="site-footer wrap"><a class="brand" href="/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="Footer navigation"><a href="/#guides">Guides</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="/#website-analytics">Privacy</a><button class="language-toggle" type="button" data-analytics-settings hidden>Analytics settings</button></nav><p>© NotchMuse · A small app for a more musical day.</p></footer>
+  <footer class="site-footer wrap"><a class="brand" href="/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="Footer navigation"><a href="/#guides">Guides</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="/#privacy">Privacy</a><button class="footer-link-btn" type="button" data-analytics-settings hidden>Analytics settings</button></nav><p>© NotchMuse · A small app for a more musical day.</p></footer>
   <aside class="analytics-consent" data-analytics-consent role="region" aria-labelledby="consent-title" hidden>
-    <div><strong id="consent-title">Allow website analytics?</strong><p>With your consent, Google Analytics measures visits and download-button clicks. Your choice does not affect the app or downloads. <a href="/#website-analytics">Privacy details</a></p></div>
+    <div><strong id="consent-title">Allow website analytics?</strong><p>With your consent, Google Analytics measures visits and download-button clicks. Your choice does not affect the app or downloads. <a href="/#privacy">Privacy details</a></p></div>
     <div class="consent-actions"><button type="button" class="language-toggle" data-consent-reject>Reject analytics</button><button type="button" class="button button-small" data-consent-accept>Allow analytics</button><button type="button" class="language-toggle" data-consent-close hidden>Close</button></div>
   </aside>
   <script src="/analytics.js?v=1" defer></script>
-  <script src="/lyrics-downloader/app.js?v=1" defer></script>
+  <script src="/lyrics-downloader/app.js?v=2" defer></script>
 </body>
 </html>

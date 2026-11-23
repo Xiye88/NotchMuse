@@ -20,13 +20,13 @@
           searching: '正在检索公共社区歌词库...',
           empty: '未找到相关歌词。请检查拼写或尝试加入歌手名重新搜索。',
           error: '暂时无法连接公共歌词库，请稍后重试。',
-          found: n => `找到 ${n} 条结果，点击任意曲目查看并下载歌词：`,
+          found: n => `找到 ${n} 条结果，点击曲目查看并下载歌词：`,
           synced: '时间轴同步 .LRC',
           plain: '纯文本 .TXT',
           instrumental: '纯音乐',
           noLyricsText: '该条目为纯音乐或暂无歌词文本。',
-          copyDefault: '复制全部歌词',
-          copied: '已复制到剪贴板',
+          copyDefault: '复制歌词',
+          copied: '已复制 ✓',
         }
       : {
           searching: 'Searching community lyrics database...',
@@ -37,11 +37,27 @@
           plain: 'Plain Text',
           instrumental: 'Instrumental',
           noLyricsText: 'This entry is marked instrumental or has no lyric text.',
-          copyDefault: 'Copy Lyrics to Clipboard',
-          copied: 'Copied!',
+          copyDefault: 'Copy',
+          copied: 'Copied ✓',
         };
 
     let selectedTrack = null;
+
+    const norm = s => String(s || '').trim().toLowerCase();
+
+    const dedupeMeta = (trackName, artistName, albumName) => {
+      const seen = new Set();
+      const out = [];
+      for (const part of [trackName, artistName, albumName]) {
+        const clean = String(part || '').trim();
+        if (!clean) continue;
+        const key = norm(clean);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(clean);
+      }
+      return out;
+    };
 
     const formatDuration = seconds => {
       if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0) return '';
@@ -60,9 +76,9 @@
 
     const triggerDownload = (content, ext) => {
       if (!selectedTrack || !content) return;
-      const track = selectedTrack.trackName || selectedTrack.name || 'lyrics';
-      const artist = selectedTrack.artistName || '';
-      const base = sanitizeFilename(artist && artist !== track ? `${artist} - ${track}` : track);
+      const track = String(selectedTrack.trackName || selectedTrack.name || 'lyrics').trim();
+      const artist = String(selectedTrack.artistName || '').trim();
+      const base = sanitizeFilename(artist && norm(artist) !== norm(track) ? `${artist} - ${track}` : track);
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -84,10 +100,13 @@
       resultsList.querySelectorAll('.lyrics-result-item').forEach(btn => {
         btn.setAttribute('aria-selected', btn === buttonEl ? 'true' : 'false');
       });
-      const title = track.trackName || track.name || 'Unknown Track';
-      const artist = track.artistName || '';
-      const album = track.albumName && track.albumName !== title ? ` (${track.albumName})` : '';
-      previewTitle.textContent = artist ? `${title} — ${artist}${album}` : `${title}${album}`;
+      const title = String(track.trackName || track.name || 'Unknown Track').trim();
+      const artist = String(track.artistName || '').trim();
+      const album = String(track.albumName || '').trim();
+      const showArtist = artist && norm(artist) !== norm(title);
+      const showAlbum = album && norm(album) !== norm(title) && norm(album) !== norm(artist);
+      previewTitle.textContent =
+        (showArtist ? `${title} — ${artist}` : title) + (showAlbum ? ` (${album})` : '');
       const displayContent = track.syncedLyrics || track.plainLyrics || '';
       previewText.textContent = displayContent || copy.noLyricsText;
       downloadLrcBtn.disabled = !track.syncedLyrics;
@@ -112,20 +131,25 @@
       if (workspace) workspace.hidden = false;
 
       let firstSelectable = null;
+      const rendered = [];
       items.slice(0, 20).forEach(item => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'lyrics-result-item';
+        btn.setAttribute('role', 'option');
         btn.setAttribute('aria-selected', 'false');
 
+        const title = String(item.trackName || item.name || 'Unknown Track').trim();
         const titleEl = document.createElement('span');
         titleEl.className = 'lyrics-result-title';
-        titleEl.textContent = item.trackName || item.name || 'Unknown Track';
+        titleEl.textContent = title;
 
-        const metaParts = [item.artistName, item.albumName, formatDuration(item.duration)].filter(Boolean);
+        const [, ...restMeta] = dedupeMeta(title, item.artistName, item.albumName);
+        const dur = formatDuration(item.duration);
+        if (dur) restMeta.push(dur);
         const metaEl = document.createElement('span');
         metaEl.className = 'lyrics-result-meta';
-        metaEl.textContent = metaParts.join(' · ');
+        metaEl.textContent = restMeta.join(' · ');
 
         const badgesEl = document.createElement('span');
         badgesEl.className = 'lyrics-badges';
@@ -148,19 +172,35 @@
           badgesEl.appendChild(b);
         }
 
-        btn.append(titleEl, metaEl, badgesEl);
+        btn.append(titleEl);
+        if (restMeta.length) btn.append(metaEl);
+        btn.append(badgesEl);
         btn.addEventListener('click', () => selectTrack(item, btn));
         resultsList.appendChild(btn);
+        rendered.push({ item, btn });
 
         if (!firstSelectable && (item.syncedLyrics || item.plainLyrics)) {
           firstSelectable = { item, btn };
         }
       });
 
+      resultsList.onkeydown = event => {
+        if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+        const idx = rendered.findIndex(r => r.btn.getAttribute('aria-selected') === 'true');
+        if (idx === -1) return;
+        event.preventDefault();
+        const nextIdx = event.key === 'ArrowDown'
+          ? Math.min(rendered.length - 1, idx + 1)
+          : Math.max(0, idx - 1);
+        const target = rendered[nextIdx];
+        selectTrack(target.item, target.btn);
+        target.btn.focus();
+      };
+
       if (firstSelectable) {
         selectTrack(firstSelectable.item, firstSelectable.btn);
-      } else if (items[0]) {
-        selectTrack(items[0], resultsList.firstElementChild);
+      } else if (rendered[0]) {
+        selectTrack(rendered[0].item, rendered[0].btn);
       }
     };
 
@@ -193,6 +233,13 @@
       runSearch();
     });
 
+    document.querySelectorAll('.example-chip[data-query]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        input.value = chip.dataset.query || '';
+        runSearch();
+      });
+    });
+
     downloadLrcBtn.addEventListener('click', () => {
       if (selectedTrack?.syncedLyrics) {
         triggerDownload(selectedTrack.syncedLyrics, 'lrc');
@@ -212,7 +259,7 @@
       try {
         await navigator.clipboard.writeText(text);
         copyBtn.textContent = copy.copied;
-        setTimeout(() => { copyBtn.textContent = copy.copyDefault; }, 1800);
+        setTimeout(() => { copyBtn.textContent = copy.copyDefault; }, 1500);
       } catch {}
     });
   };

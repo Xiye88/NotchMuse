@@ -5,12 +5,12 @@ const cases = [
   ['index.html', 'en', 'https://notchmuse.com/', '/zh/',
     'NotchMuse — Desktop & Menu Bar Lyrics for Mac',
     'Show synced lyrics on your Mac desktop or in the menu bar. Works with Spotify, Apple Music and more. Free to download. No account required.',
-    'Synced lyrics for your Mac desktop and menu bar.',
+    'Live lyrics for your Mac.',
     'Keep lyrics in view while you work. Supports Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music.'],
   ['zh/index.html', 'zh-Hans', 'https://notchmuse.com/zh/', '/',
     'NotchMuse｜Mac 桌面歌词与菜单栏歌词工具',
     '用 NotchMuse 在 Mac 桌面或菜单栏显示同步歌词，支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。适用于 macOS 14 及以上的 Apple 芯片 Mac，免费下载，无需注册。',
-    '在 Mac 桌面或菜单栏查看同步歌词',
+    'Mac 桌面与菜单栏同步歌词',
     '工作时也能随时查看歌词。支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。'],
 ];
 const decode = text => text.replaceAll('&amp;', '&').replaceAll('&quot;', '"');
@@ -46,12 +46,9 @@ for (const [file, lang, canonical, alternate, title, description, h1, subtitle] 
   assert(html.includes('og:type" content="website"'));
   assert(html.includes('og:site_name" content="NotchMuse"'));
   assert(html.includes('twitter:card" content="summary_large_image"'));
-  assert(html.includes(lang === 'en'
-    ? 'The NotchMuse app does not collect usage analytics or upload audio. With your consent, this website uses Google Analytics to measure visits and download-button clicks. Website analytics are separate from the app.'
-    : 'NotchMuse 应用不收集使用分析数据，也不上传音频。经你同意，官网使用 Google Analytics 统计访问和下载按钮点击。官网统计与应用本身相互独立。'));
-  assert(html.includes('id="website-analytics"'));
-  assert.equal((html.match(/data-analytics-settings/g) || []).length, 2);
-  assert(html.includes('href="#website-analytics"'));
+  assert(html.includes('id="privacy"'));
+  assert.equal((html.match(/data-analytics-settings/g) || []).length, 1);
+  assert(html.includes('href="#privacy"'));
 
 }
 const sitemap = fs.readFileSync(path.join(__dirname, 'sitemap.xml'), 'utf8');

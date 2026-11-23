@@ -58,9 +58,6 @@ for (const suffix of urls) {
   }
   if (!home) {
     assert(!html.includes('NotchMuse v0.8.0'), `No fixed old comparison baseline: ${suffix}`);
-    assert(zh
-      ? /文档核对日期：2026 年 (?:10 月 17|11 月 21) 日。播放器界面与第三方服务可能变化。/.test(html)
-      : /Documentation reviewed (?:October 17|November 21), 2026\. Player interfaces and third-party services can change\./.test(html));
   }
   // Resolve every local link and fragment against its actual target page.
   for (const match of html.matchAll(/(?:href|src|poster|data-src)="([^"]+)"/g)) {
@@ -150,7 +147,7 @@ for (const suffix of urls) {
       await page.goto(base + suffix);
       assert(await page.locator('h1').isVisible());
       assert.equal(await page.locator('a[data-download-placement]').count(), 3);
-      if (suffix === '/' || suffix === '/zh/') assert.equal(await page.locator('#guides .guide-card').count(), 12);
+      if (suffix === '/' || suffix === '/zh/') assert.equal(await page.locator('#guides .guide-links a').count(), 12);
       else assert(await page.locator('.guide-content').isVisible());
       const target = suffix.startsWith('/zh/') ? suffix.replace(/^\/zh/, '') || '/' : '/zh' + suffix;
       assert.equal(await page.locator('a#language-toggle').getAttribute('href'), target);

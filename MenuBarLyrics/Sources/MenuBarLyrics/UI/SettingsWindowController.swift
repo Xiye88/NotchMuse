@@ -688,7 +688,14 @@ final class SettingsWindowController: NSWindowController {
         sidebar.spacing = 4
         sidebar.translatesAutoresizingMaskIntoConstraints = false
         sidebar.addArrangedSubview(sidebarTitle())
-        sidebar.setCustomSpacing(18, after: sidebar.arrangedSubviews[0])
+        sidebar.setCustomSpacing(16, after: sidebar.arrangedSubviews[0])
+        let sectionHeader = NSTextField(labelWithString: AppPreferences.language == .simplifiedChinese ? "设置" : "SETTINGS")
+        sectionHeader.font = .systemFont(ofSize: 11, weight: .semibold)
+        sectionHeader.textColor = .tertiaryLabelColor
+        let sectionWrap = NSStackView(views: [sectionHeader])
+        sectionWrap.edgeInsets = NSEdgeInsets(top: 0, left: 10, bottom: 2, right: 0)
+        sidebar.addArrangedSubview(sectionWrap)
+        sidebar.setCustomSpacing(6, after: sectionWrap)
         for page in SettingsPage.allCases {
             let button = sidebarButton(for: page)
             sidebarButtons[page] = button
@@ -799,34 +806,45 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func sidebarTitle() -> NSView {
-        let title = NSTextField(labelWithString: "NotchMuse")
-        title.font = .systemFont(ofSize: 15, weight: .semibold)
-        title.textColor = .labelColor
-        let icon = NSImageView(image: notchMuseAppIcon())
+        let iconImage = NSApp.applicationIconImage ?? notchMuseAppIcon()
+        let icon = NSImageView(image: iconImage)
         icon.setAccessibilityLabel("NotchMuse")
-        icon.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        icon.heightAnchor.constraint(equalToConstant: 20).isActive = true
-        let row = NSStackView(views: [icon, title])
+        icon.wantsLayer = true
+        icon.layer?.cornerRadius = 6
+        icon.layer?.cornerCurve = .continuous
+        icon.layer?.masksToBounds = true
+        icon.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 24).isActive = true
+
+        let title = NSTextField(labelWithString: "NotchMuse")
+        title.font = .systemFont(ofSize: 13.5, weight: .semibold)
+        title.textColor = .labelColor
+
+        let shortVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.9"
+        let isPreview = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
+        let captionText = isPreview ? "v\(shortVersion) Preview" : "v\(shortVersion)"
+        let caption = NSTextField(labelWithString: captionText)
+        caption.font = .systemFont(ofSize: 10.5, weight: .regular)
+        caption.textColor = .secondaryLabelColor
+
+        let textStack = NSStackView(views: [title, caption])
+        textStack.orientation = .vertical
+        textStack.alignment = .leading
+        textStack.spacing = 1
+
+        let row = NSStackView(views: [icon, textStack])
         row.orientation = .horizontal
         row.alignment = .centerY
-        row.spacing = 8
-        row.edgeInsets = NSEdgeInsets(top: 0, left: 6, bottom: 0, right: 0)
+        row.spacing = 9
+        row.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         return row
     }
 
     private func sidebarButton(for page: SettingsPage) -> NSButton {
-        let button = NSButton(title: L10n.text(page.title), target: self, action: #selector(pageChanged))
-        button.isBordered = false
-        button.setButtonType(.toggle)
-        button.alignment = .left
-        button.image = NSImage(systemSymbolName: page.symbol, accessibilityDescription: L10n.text(page.title))
-        button.imagePosition = .imageLeading
+        let button = SidebarNavButton(page: page, target: self, action: #selector(pageChanged))
         button.identifier = NSUserInterfaceItemIdentifier(page.rawValue)
-        button.wantsLayer = true
-        button.layer?.cornerRadius = 7
         button.widthAnchor.constraint(equalToConstant: 176).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        button.image = button.image?.withSymbolConfiguration(.init(pointSize: 14, weight: .medium))
+        button.heightAnchor.constraint(equalToConstant: 36).isActive = true
         button.toolTip = L10n.text(page.help)
         return button
     }
@@ -1698,18 +1716,7 @@ final class SettingsWindowController: NSWindowController {
             sidebarButtons.forEach { page, button in
                 let selected = page == selectedPage
                 button.state = selected ? .on : .off
-                button.layer?.backgroundColor = selected
-                    ? NSColor.selectedContentBackgroundColor.withAlphaComponent(0.18).cgColor
-                    : NSColor.clear.cgColor
-                button.contentTintColor = selected ? .controlAccentColor : .secondaryLabelColor
-                let text = NSAttributedString(
-                    string: "  " + L10n.text(page.title),
-                    attributes: [
-                        .font: NSFont.systemFont(ofSize: 13, weight: selected ? .semibold : .medium),
-                        .foregroundColor: selected ? NSColor.labelColor : NSColor.secondaryLabelColor
-                    ]
-                )
-                button.attributedTitle = text
+                (button as? SidebarNavButton)?.setSelected(selected)
             }
         }
     }
@@ -1917,9 +1924,16 @@ private enum SettingsPage: String, CaseIterable {
     var title: String { rawValue.capitalized }
     var symbol: String {
         switch self {
-        case .display: return "display"
-        case .appearance: return "paintpalette"
-        case .general: return "gearshape"
+        case .display: return "menubar.rectangle"
+        case .appearance: return "paintbrush.fill"
+        case .general: return "gearshape.fill"
+        }
+    }
+    var badgeColor: NSColor {
+        switch self {
+        case .display: return NSColor(calibratedRed: 1.0, green: 0.54, blue: 0.21, alpha: 1.0)
+        case .appearance: return .systemIndigo
+        case .general: return .systemGray
         }
     }
     var help: String {
@@ -1927,6 +1941,115 @@ private enum SettingsPage: String, CaseIterable {
         case .display: return "Lyrics display mode, position, and screen."
         case .appearance: return "Lyrics color, typography, and motion."
         case .general: return "Player selection and system behavior."
+        }
+    }
+}
+
+@MainActor
+private final class SidebarNavButton: NSButton {
+    private let badgeView = NSView()
+    private let badgeIcon = NSImageView()
+    private let titleLabel = NSTextField(labelWithString: "")
+    private var tracking: NSTrackingArea?
+    private var isHovered = false
+    private var isRowSelected = false
+
+    init(page: SettingsPage, target: AnyObject?, action: Selector?) {
+        super.init(frame: .zero)
+        self.title = ""
+        self.target = target
+        self.action = action
+        self.isBordered = false
+        self.setButtonType(.momentaryChange)
+        self.setAccessibilityLabel(L10n.text(page.title))
+        self.wantsLayer = true
+        self.layer?.cornerRadius = 8
+        self.layer?.cornerCurve = .continuous
+        self.layer?.borderWidth = 0.5
+        self.layer?.borderColor = NSColor.clear.cgColor
+
+        badgeView.wantsLayer = true
+        badgeView.layer?.cornerRadius = 5
+        badgeView.layer?.cornerCurve = .continuous
+        badgeView.layer?.backgroundColor = page.badgeColor.cgColor
+        badgeView.translatesAutoresizingMaskIntoConstraints = false
+
+        let symbolImage = NSImage(systemSymbolName: page.symbol, accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 11.5, weight: .semibold))
+        badgeIcon.image = symbolImage
+        badgeIcon.contentTintColor = .white
+        badgeIcon.translatesAutoresizingMaskIntoConstraints = false
+        badgeView.addSubview(badgeIcon)
+
+        titleLabel.stringValue = L10n.text(page.title)
+        titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        titleLabel.textColor = .secondaryLabelColor
+        titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        addSubview(badgeView)
+        addSubview(titleLabel)
+        NSLayoutConstraint.activate([
+            badgeView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+            badgeView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            badgeView.widthAnchor.constraint(equalToConstant: 20),
+            badgeView.heightAnchor.constraint(equalToConstant: 20),
+            badgeIcon.centerXAnchor.constraint(equalTo: badgeView.centerXAnchor),
+            badgeIcon.centerYAnchor.constraint(equalTo: badgeView.centerYAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: badgeView.trailingAnchor, constant: 10),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -10),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
+        ])
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    func setSelected(_ selected: Bool) {
+        isRowSelected = selected
+        refreshAppearance()
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(rect: .zero, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        isHovered = true
+        refreshAppearance()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        isHovered = false
+        refreshAppearance()
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshAppearance()
+    }
+
+    private func refreshAppearance() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            if isRowSelected {
+                layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.16).cgColor
+                layer?.borderColor = NSColor.controlAccentColor.withAlphaComponent(0.28).cgColor
+                titleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
+                titleLabel.textColor = .labelColor
+            } else if isHovered {
+                layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.05).cgColor
+                layer?.borderColor = NSColor.clear.cgColor
+                titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
+                titleLabel.textColor = .labelColor
+            } else {
+                layer?.backgroundColor = NSColor.clear.cgColor
+                layer?.borderColor = NSColor.clear.cgColor
+                titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
+                titleLabel.textColor = .secondaryLabelColor
+            }
         }
     }
 }

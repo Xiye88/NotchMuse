@@ -190,7 +190,8 @@ enum FreeLyricsSelfTests {
         let freeWindow = overlay.freeInteraction.window
         check(freeWindow.isVisible && !freeWindow.ignoresMouseEvents, "actual free renderer visible/interactive")
         check(freeWindow.collectionBehavior.contains(.canJoinAllSpaces) && freeWindow.collectionBehavior.contains(.fullScreenAuxiliary), "Space/fullscreen window policy")
-        freeWindow.setFrameOrigin(NSPoint(x: 90, y: 150))
+        let screenOrigin = freeWindow.screen?.visibleFrame.origin ?? .zero
+        freeWindow.setFrameOrigin(NSPoint(x: screenOrigin.x + 90, y: screenOrigin.y + 150))
         overlay.freeInteraction.savePosition()
         let moved = freeWindow.frame
         let lines = [LyricLine(time: 10, text: "Test one"), LyricLine(time: 20, text: "Test two")]

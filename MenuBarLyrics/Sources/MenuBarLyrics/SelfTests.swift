@@ -117,7 +117,10 @@ enum SelfTests {
         check(L10n.text("Report Lyrics Issue…", language: .simplifiedChinese) == "报告歌词问题…", "localizes the Chinese feedback entry")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
         check(AppPreferences.normalizedPlayerSource(nil) == .auto, "defaults to automatic player detection")
-        check(PlayerSource.allCases == [.auto, .spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic], "keeps all five players and Auto Detect in Settings")
+        check(PlayerSource.allCases == [
+            .auto, .spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic,
+            .kugouMusic, .youtubeMusic, .tidal, .amazonMusic, .deezer, .qobuz, .plexamp, .allNowPlaying
+        ], "keeps all supported players, Auto Detect, and All Now Playing in Settings")
         check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
         check(AppPreferences.normalizedPlayerSource("NetEase Cloud Music") == .netEaseMusic, "persists NetEase selection")
         check(AppPreferences.normalizedPlayerSource("QQ Music") == .qqMusic, "persists QQ Music selection")
@@ -150,7 +153,105 @@ enum SelfTests {
         check(PlayerSource.qqMusic.displayName(language: .simplifiedChinese) == "QQ音乐", "shows the Chinese QQ Music name")
         check(PlayerSource.sodaMusic.displayName(language: .simplifiedChinese) == "汽水音乐", "shows the Chinese Soda Music name")
         check(PlayerSource.auto.displayName(language: .simplifiedChinese) == "自动检测（推荐）", "localizes the recommended player option")
-        check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == ["com.spotify.client", "com.apple.Music", "com.netease.163music", "com.tencent.QQMusicMac", "com.soda.music"], "registers all supported player bundle identifiers")
+        check(PlayerSource.kugouMusic.displayName(language: .simplifiedChinese) == "酷狗音乐", "shows the Chinese Kugou name")
+        check(PlayerSource.allNowPlaying.displayName(language: .simplifiedChinese) == "所有系统播控应用", "localizes All Now Playing option")
+        check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == [
+            "com.spotify.client", "com.apple.Music", "com.netease.163music", "com.tencent.QQMusicMac", "com.soda.music",
+            "com.kugou.mac", "com.github.th-ch.youtube-music", "com.tidal.desktop", "com.amazon.music",
+            "com.deezer.deezer-desktop", "com.qobuz.QobuzDesktop", "tv.plex.plexamp"
+        ], "registers all supported player bundle identifiers")
+        testExpandedMediaRemotePlayersAndSanitizer()
+    }
+
+    private static func testExpandedMediaRemotePlayersAndSanitizer() {
+        func makeEvent(
+            bundle: String,
+            parent: String? = nil,
+            title: String,
+            artist: String?,
+            album: String? = nil,
+            duration: TimeInterval? = 210,
+            playing: Bool = true
+        ) -> MediaRemoteEvent {
+            MediaRemoteEvent(
+                bundleIdentifier: bundle,
+                parentApplicationBundleIdentifier: parent,
+                playing: playing,
+                title: title,
+                artist: artist,
+                album: album,
+                duration: duration,
+                elapsedTimeNow: 30,
+                timestamp: nil,
+                uniqueIdentifier: nil,
+                contentItemIdentifier: nil,
+                mediaType: nil
+            )
+        }
+
+        // Kugou with empty artist packed in title "Artist - Song"
+        let kugouEvent = makeEvent(bundle: "com.kugou.mac", title: "周杰伦 - 晴天", artist: "")
+        if case let .playing(track) = MediaRemotePlayerAdapter.snapshot(from: kugouEvent, source: .kugouMusic, isRunning: true) {
+            check(track.artist == "周杰伦" && track.title == "晴天", "splits Kugou Artist - Title when artist is empty")
+        } else {
+            fatalError("Expected Kugou track to parse")
+        }
+
+        // YouTube Music Chrome browser tab with MV noise + Topic suffix + redundant artist prefix
+        let ytBrowserEvent = makeEvent(
+            bundle: "com.google.Chrome",
+            title: "Queen - Bohemian Rhapsody (Official Video) - YouTube Music",
+            artist: "Queen - Topic",
+            duration: 365
+        )
+        if case let .playing(track) = MediaRemotePlayerAdapter.snapshot(from: ytBrowserEvent, source: .youtubeMusic, isRunning: true) {
+            check(track.title == "Bohemian Rhapsody" && track.artist == "Queen", "sanitizes YouTube Music browser title and Topic artist")
+            check(track.spotifyTrack.relaxedDurationMatching, "enables relaxed MV duration tolerance for YouTube Music")
+            let candidate = TrackMatcher.Candidate(title: "Bohemian Rhapsody", artists: ["Queen"], durationMs: 353_000)
+            check(TrackMatcher.score(track.spotifyTrack, candidate: candidate) >= TrackMatcher.acceptanceThreshold,
+                  "accepts 12s MV intro/outro duration delta for YouTube Music")
+            let strictTrack = SpotifyTrack(name: "Bohemian Rhapsody", artist: "Queen", album: "", duration: 365)
+            check(TrackMatcher.score(strictTrack, candidate: candidate) == 0,
+                  "keeps strict 8s duration gate for non-YouTube players")
+        } else {
+            fatalError("Expected YouTube Music browser event to parse")
+        }
+
+        // Non-music browser guard (> 15 min video)
+        let longTalk = makeEvent(bundle: "com.google.Chrome", title: "Swift Concurrency Deep Dive - YouTube", artist: "WWDC", duration: 2400)
+        check(MediaRemotePlayerAdapter.snapshot(from: longTalk, source: .youtubeMusic, isRunning: true) == .stopped,
+              "rejects long non-music YouTube talks in browser")
+
+        // Global explicit players: TIDAL, Amazon Music, Deezer, Qobuz, Plexamp, th-ch YouTube Music
+        let explicitCases: [(PlayerSource, String)] = [
+            (.youtubeMusic, "com.github.th-ch.youtube-music"),
+            (.tidal, "com.tidal.desktop"),
+            (.amazonMusic, "com.amazon.music"),
+            (.deezer, "com.deezer.deezer-desktop"),
+            (.qobuz, "com.qobuz.QobuzDesktop"),
+            (.plexamp, "tv.plex.plexamp")
+        ]
+        for (source, bundle) in explicitCases {
+            let ev = makeEvent(bundle: bundle, title: "Blinding Lights", artist: "The Weeknd")
+            if case let .playing(track) = MediaRemotePlayerAdapter.snapshot(from: ev, source: source, isRunning: true) {
+                check(track.playerSource == source && track.title == "Blinding Lights", "parses \(source.rawValue) payload")
+            } else {
+                fatalError("Expected \(source.rawValue) payload to parse")
+            }
+        }
+
+        // All macOS Now Playing Apps accepts unknown music player & rejects denylist (Zoom/FaceTime/Teams/QuickTime)
+        let vox = makeEvent(bundle: "com.coppertino.Vox", title: "Clocks", artist: "Coldplay")
+        if case let .playing(track) = MediaRemotePlayerAdapter.snapshot(from: vox, source: .allNowPlaying, isRunning: true) {
+            check(track.title == "Clocks" && track.artist == "Coldplay", "All Now Playing accepts generic music players")
+        } else {
+            fatalError("Expected All Now Playing to accept generic player")
+        }
+        for denied in ["us.zoom.xos", "com.apple.FaceTime", "com.microsoft.teams2", "com.apple.QuickTimePlayerX"] {
+            let ev = makeEvent(bundle: denied, title: "Weekly Sync", artist: "Team")
+            check(MediaRemotePlayerAdapter.snapshot(from: ev, source: .allNowPlaying, isRunning: true) == .stopped,
+                  "All Now Playing denylists \(denied)")
+        }
     }
 
     @MainActor private static func testMusicPlayerAdapterModel() {

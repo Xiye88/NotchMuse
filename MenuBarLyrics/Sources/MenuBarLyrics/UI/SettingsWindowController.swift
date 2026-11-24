@@ -263,6 +263,11 @@ private func notchMuseAppIcon() -> NSImage {
         .flatMap(NSImage.init(contentsOf:)) ?? NSImage()
 }
 
+enum PermissionFixKind: Equatable {
+    case accessibility
+    case automation
+}
+
 @MainActor
 final class SettingsWindowController: NSWindowController {
     private let displayModeControl = NSSegmentedControl(labels: DisplayMode.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
@@ -333,6 +338,10 @@ final class SettingsWindowController: NSWindowController {
     private let freeLock = NSSwitch()
     private let freePassThrough = NSSwitch()
     private var freeCard: NSView?
+    private let liveStatusDot = NSView()
+    private let liveStatusLabel = NSTextField(labelWithString: "")
+    private let permissionFixButton = NSButton(title: "", target: nil, action: nil)
+    private var activePermissionFix: PermissionFixKind?
     var onFreeLockChanged: (() -> Void)?
     var onDisplayModeSelected: (() -> Void)?
     private let onSettingsChange: () -> Void
@@ -425,12 +434,12 @@ final class SettingsWindowController: NSWindowController {
         controller.colorChanged(controller.colorButtons[1])
         precondition(AppPreferences.colorPreset == .red && !controller.solidPalette.isHidden && controller.gradientPalette.isHidden,
                      "Solid color selection remains solid in Notch mode")
-        controller.displayModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: .statusBar)!
+        controller.previewModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: .statusBar)!
         controller.displayModeChanged()
-        precondition(controller.previewModeControl.selectedSegment == controller.displayModeControl.selectedSegment, "Mode selectors must stay synchronized")
+        precondition(AppPreferences.displayMode == .statusBar && controller.preview.mode == .statusBar, "Mode selector must stay synchronized with preview")
         controller.preview.onModeClick?(.notch)
-        precondition(AppPreferences.displayMode == .notch && controller.previewModeControl.selectedSegment == controller.displayModeControl.selectedSegment,
-                     "Preview card must update both mode selectors")
+        precondition(AppPreferences.displayMode == .notch && controller.previewModeControl.selectedSegment == DisplayMode.allCases.firstIndex(of: .notch)!,
+                     "Preview card must update mode selector")
         let lyricsKeys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey,
                           AppPreferences.customLyricsEndColorKey, AppPreferences.notchBackgroundColorKey,
                           AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundOpacityKey]
@@ -573,15 +582,14 @@ final class SettingsWindowController: NSWindowController {
         playerStopBehaviorPopUp.action = #selector(playerStopBehaviorChanged)
 
         previewModeControl.target = self
-        previewModeControl.action = #selector(previewModeChanged)
+        previewModeControl.action = #selector(displayModeChanged)
         previewModeControl.selectedSegment = 0
         preview.onModeClick = { [weak self] mode in
             guard let self else { return }
             self.previewModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: mode) ?? 0
-            self.previewModeChanged()
+            self.displayModeChanged()
         }
         let displayGrid = grid([
-            [label(L10n.text("Display Mode")), displayModeControl],
             [label(L10n.text("Status Bar Position")), positionControl],
             [label(L10n.text("Horizontal Offset")), valueRow(slider: statusBarOffsetSlider, value: statusBarOffsetValue, unit: "pt")],
             [label(L10n.text("Notch Style")), notchStyleControl],
@@ -590,11 +598,11 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Lyrics Width")), widthControl],
             [label(L10n.text("Custom Width")), valueRow(slider: customWidthSlider, value: customWidthValue, unit: "pt")]
         ])
-        positionRow = displayGrid.row(at: 1)
-        statusBarOffsetRow = displayGrid.row(at: 2)
-        notchStyleRow = displayGrid.row(at: 3)
-        notchPlacementRow = displayGrid.row(at: 4)
-        customWidthRow = displayGrid.row(at: 7)
+        positionRow = displayGrid.row(at: 0)
+        statusBarOffsetRow = displayGrid.row(at: 1)
+        notchStyleRow = displayGrid.row(at: 2)
+        notchPlacementRow = displayGrid.row(at: 3)
+        customWidthRow = displayGrid.row(at: 6)
         configure(page: displayPage)
         configure(page: appearancePage)
         let appearanceGrid = grid([
@@ -719,6 +727,9 @@ final class SettingsWindowController: NSWindowController {
         contentStack.alignment = .leading
         contentStack.spacing = 18
         contentStack.translatesAutoresizingMaskIntoConstraints = false
+        let statusStrip = makeLiveStatusStrip()
+        contentStack.addArrangedSubview(statusStrip)
+        statusStrip.widthAnchor.constraint(equalTo: contentStack.widthAnchor).isActive = true
         contentStack.addArrangedSubview(previewCard)
         contentStack.addArrangedSubview(displayPage)
         contentStack.addArrangedSubview(appearancePage)
@@ -1194,11 +1205,12 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func displayModeChanged() {
         let modes = DisplayMode.allCases
-        guard modes.indices.contains(displayModeControl.selectedSegment) else { return }
-        save(modes[displayModeControl.selectedSegment], key: AppPreferences.displayModeKey)
+        guard modes.indices.contains(previewModeControl.selectedSegment) else { return }
+        let selected = modes[previewModeControl.selectedSegment]
+        save(selected, key: AppPreferences.displayModeKey)
         onDisplayModeSelected?()
-        previewModeControl.selectedSegment = displayModeControl.selectedSegment
-        preview.mode = modes[displayModeControl.selectedSegment]
+        displayModeControl.selectedSegment = previewModeControl.selectedSegment
+        preview.mode = selected
         updateControlAvailability()
         window?.contentView?.layoutSubtreeIfNeeded()
         settingsScrollView?.layoutDocument()
@@ -1553,6 +1565,104 @@ final class SettingsWindowController: NSWindowController {
         supportWindow?.window?.makeKeyAndOrderFront(nil)
     }
 
+    private func makeLiveStatusStrip() -> NSView {
+        let box = AppearanceSurfaceView()
+        box.wantsLayer = true
+        box.surfaceColor = AppearanceSurfaceColors.card
+        box.layer?.cornerRadius = 10
+        box.layer?.borderWidth = 1
+        box.translatesAutoresizingMaskIntoConstraints = false
+
+        liveStatusDot.wantsLayer = true
+        liveStatusDot.layer?.cornerRadius = 4
+        liveStatusDot.layer?.backgroundColor = NSColor.systemOrange.cgColor
+        liveStatusDot.translatesAutoresizingMaskIntoConstraints = false
+
+        liveStatusLabel.stringValue = L10n.text("Waiting for music…")
+        liveStatusLabel.font = .systemFont(ofSize: 12.5, weight: .medium)
+        liveStatusLabel.textColor = .secondaryLabelColor
+        liveStatusLabel.lineBreakMode = .byTruncatingTail
+        liveStatusLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        permissionFixButton.title = L10n.text("Open Permission Settings")
+        permissionFixButton.bezelStyle = .rounded
+        permissionFixButton.controlSize = .small
+        permissionFixButton.target = self
+        permissionFixButton.action = #selector(openPermissionFix)
+        permissionFixButton.isHidden = true
+        permissionFixButton.translatesAutoresizingMaskIntoConstraints = false
+
+        box.addSubview(liveStatusDot)
+        box.addSubview(liveStatusLabel)
+        box.addSubview(permissionFixButton)
+        NSLayoutConstraint.activate([
+            box.heightAnchor.constraint(greaterThanOrEqualToConstant: 38),
+            liveStatusDot.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
+            liveStatusDot.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+            liveStatusDot.widthAnchor.constraint(equalToConstant: 8),
+            liveStatusDot.heightAnchor.constraint(equalToConstant: 8),
+            liveStatusLabel.leadingAnchor.constraint(equalTo: liveStatusDot.trailingAnchor, constant: 10),
+            liveStatusLabel.trailingAnchor.constraint(lessThanOrEqualTo: permissionFixButton.leadingAnchor, constant: -10),
+            liveStatusLabel.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+            permissionFixButton.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
+            permissionFixButton.centerYAnchor.constraint(equalTo: box.centerYAnchor)
+        ])
+        return box
+    }
+
+    func updateLiveStatus(
+        playerName: String,
+        playerConnected: Bool,
+        trackText: String?,
+        lyricsFeedback: LyricsFeedback,
+        needsPermission: PermissionFixKind?,
+        liveLyricLine: String?
+    ) {
+        activePermissionFix = needsPermission
+        permissionFixButton.isHidden = needsPermission == nil
+        if let needsPermission {
+            liveStatusDot.layer?.backgroundColor = NSColor.systemRed.cgColor
+            let hint = needsPermission == .accessibility
+                ? L10n.text("Accessibility permission needed for Left status bar")
+                : L10n.format("Automation permission needed for %@", playerName)
+            liveStatusLabel.stringValue = hint
+            liveStatusLabel.textColor = .labelColor
+            permissionFixButton.title = L10n.text("Open Permission Settings")
+        } else if playerConnected, let trackText, !trackText.isEmpty {
+            let synced = lyricsFeedback == .available
+            liveStatusDot.layer?.backgroundColor = (synced ? NSColor.systemGreen : NSColor.systemOrange).cgColor
+            let lyricStatus = synced ? L10n.text("Lyrics synced") : lyricsFeedback.displayText
+            liveStatusLabel.stringValue = "\(playerName) · \(trackText) · \(lyricStatus)"
+            liveStatusLabel.textColor = .labelColor
+        } else {
+            liveStatusDot.layer?.backgroundColor = NSColor.systemOrange.cgColor
+            liveStatusLabel.stringValue = L10n.text("Waiting for music…")
+            liveStatusLabel.textColor = .secondaryLabelColor
+        }
+        updateLiveLyricLine(liveLyricLine)
+    }
+
+    func updateLiveLyricLine(_ line: String?) {
+        let trimmed = line?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let value = (trimmed?.isEmpty == false) ? trimmed : nil
+        if preview.liveLyricText != value {
+            preview.liveLyricText = value
+        }
+    }
+
+    @objc private func openPermissionFix() {
+        switch activePermissionFix {
+        case .accessibility:
+            AccessibilityManager.openSystemSettings()
+        case .automation:
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+                NSWorkspace.shared.open(url)
+            }
+        case nil:
+            break
+        }
+    }
+
     @objc private func languageChanged() {
         let languages = AppLanguage.allCases
         guard languages.indices.contains(languagePopUp.indexOfSelectedItem) else { return }
@@ -1560,8 +1670,18 @@ final class SettingsWindowController: NSWindowController {
         let alert = NSAlert()
         alert.messageText = L10n.text("Language Change")
         alert.informativeText = L10n.text("Restart NotchMuse to apply the new language.")
-        alert.addButton(withTitle: L10n.text("OK"))
-        alert.runModal()
+        alert.addButton(withTitle: L10n.text("Restart Now"))
+        alert.addButton(withTitle: L10n.text("Later"))
+        if alert.runModal() == .alertFirstButtonReturn {
+            let url = Bundle.main.bundleURL
+            let config = NSWorkspace.OpenConfiguration()
+            config.createsNewApplicationInstance = true
+            NSWorkspace.shared.openApplication(at: url, configuration: config) { _, _ in
+                Task { @MainActor in
+                    NSApp.terminate(nil)
+                }
+            }
+        }
     }
 
     @objc private func playerChanged() {
@@ -1890,6 +2010,7 @@ private enum SettingsPage: String, CaseIterable {
 private final class SettingsPreviewView: NSView {
     typealias Mode = DisplayMode
     var mode: Mode = .statusBar { didSet { needsDisplay = true } }
+    var liveLyricText: String? { didSet { needsDisplay = true } }
     var onModeClick: ((Mode) -> Void)?
     private var hoveredMode: Mode? { didSet { if hoveredMode != oldValue { needsDisplay = true } } }
     private var hoverTrackingArea: NSTrackingArea?
@@ -2028,7 +2149,8 @@ private final class SettingsPreviewView: NSView {
                 overlay = NSRect(x: notchPlacement == .left ? screen.minX + 8 : screen.maxX - sideWidth - 8,
                                  y: screen.midY - sideHeight / 2, width: sideWidth, height: sideHeight)
             }
-            let previewText = "♪ " + L10n.text("Preview lyric sample")
+            let sampleLyric = liveLyricText ?? L10n.text("Preview lyric sample")
+            let previewText = "♪ " + sampleLyric
             let previewFont = NSFont.systemFont(ofSize: min(lyricFontSize, 17), weight: .medium)
             let previewTextWidth = (previewText as NSString).size(withAttributes: [.font: previewFont]).width
             let previewMetadataWidth = notchStyle == .lyricOnly ? 0 : (L10n.text("Preview song · Preview artist") as NSString).size(withAttributes: [.font: previewFont]).width
@@ -2039,7 +2161,7 @@ private final class SettingsPreviewView: NSView {
                 NSBezierPath(roundedRect: background, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
             }
             if notchPlacement.isVertical {
-                let sample = Array(L10n.text("Preview lyric sample"))
+                let sample = Array(liveLyricText ?? L10n.text("Preview lyric sample"))
                 let cell: CGFloat = 16
                 let rows = max(1, Int((overlay.height - 12) / cell))
                 for (index, glyph) in sample.prefix(rows * 2).enumerated() {
@@ -2108,7 +2230,7 @@ private final class SettingsPreviewView: NSView {
     }
 
     private func drawLyric(in rect: NSRect, notch: Bool, backgroundColor: NSColor? = nil) {
-        let text = "♪ " + L10n.text("Preview lyric sample")
+        let text = "♪ " + (liveLyricText ?? L10n.text("Preview lyric sample"))
         let size = min(lyricFontSize, notch ? 17 : 15)
         let colors = lyricColors
         let base = colors[min(1, colors.count - 1)].withAlphaComponent(0.72)

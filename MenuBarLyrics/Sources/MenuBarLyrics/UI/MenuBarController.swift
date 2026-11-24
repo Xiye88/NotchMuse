@@ -67,13 +67,22 @@ final class MenuBarController: NSObject {
     private var position = AppPreferences.position
     private var notchStyle = AppPreferences.notchStyle
     private var settingsWindowController: SettingsWindowController?
+    private let displayModeMenu = NSMenu()
+    private let displayModeMenuItem = NSMenuItem(title: L10n.text("Display Mode"), action: nil, keyEquivalent: "")
     private let positionMenu = NSMenu()
     private let positionMenuItem = NSMenuItem(title: L10n.text("Status Bar Position"), action: nil, keyEquivalent: "")
+    private let timingOffsetMenu = NSMenu()
+    private let timingOffsetMenuItem = NSMenuItem(title: L10n.text("Lyric Timing Offset"), action: nil, keyEquivalent: "")
+    private let moveLyricsMenuItem = NSMenuItem(title: L10n.text("Move Lyrics"), action: nil, keyEquivalent: "")
+    private let resetPositionMenuItem = NSMenuItem(title: L10n.text("Reset Position"), action: nil, keyEquivalent: "")
     private let announcementMenuItem = NSMenuItem(title: "", action: #selector(openAnnouncement), keyEquivalent: "")
     private let announcementSeparator = NSMenuItem.separator()
     private var announcementObserver: NSObjectProtocol?
     private let playerStatusItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let lyricsStatusItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+    private var latestPlayerFeedback: PlayerFeedback = .checking
+    private var latestLyricsFeedback: LyricsFeedback = .waiting
+    private var lyricTimingOffset: TimeInterval = 0
     private let songItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let artistItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private var isLyricsHidden = false
@@ -128,9 +137,6 @@ final class MenuBarController: NSObject {
             MainActor.assumeIsolated { self?.resetFreeLyrics() }
         }
         reloadSettings()
-        Task { @MainActor [weak self] in
-            self?.showFirstLaunchGuideIfNeeded()
-        }
 
         pollTimer = Timer.scheduledTimer(
             timeInterval: 1.0,
@@ -184,8 +190,20 @@ final class MenuBarController: NSObject {
         menu.addItem(NSMenuItem.separator())
         let visibility = NSMenuItem(title: L10n.text(isLyricsHidden ? "Show Lyrics" : "Hide Lyrics"), action: #selector(toggleLyricsVisibility(_:)), keyEquivalent: "")
         menu.addItem(visibility)
-        menu.addItem(NSMenuItem(title: L10n.text("Move Lyrics"), action: #selector(editFreeLyrics), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: L10n.text("Reset Position"), action: #selector(resetFreeLyrics), keyEquivalent: ""))
+        for mode in DisplayMode.allCases {
+            let item = NSMenuItem(title: L10n.text(mode.rawValue), action: #selector(selectDisplayMode(_:)), keyEquivalent: "")
+            item.representedObject = mode.rawValue
+            item.state = mode == displayMode ? .on : .off
+            item.target = self
+            displayModeMenu.addItem(item)
+        }
+        displayModeMenuItem.submenu = displayModeMenu
+        menu.addItem(displayModeMenuItem)
+
+        moveLyricsMenuItem.action = #selector(editFreeLyrics)
+        resetPositionMenuItem.action = #selector(resetFreeLyrics)
+        menu.addItem(moveLyricsMenuItem)
+        menu.addItem(resetPositionMenuItem)
         menu.addItem(NSMenuItem.separator())
 
         for itemPosition in LyricsPosition.allCases {
@@ -197,6 +215,21 @@ final class MenuBarController: NSObject {
         }
         positionMenuItem.submenu = positionMenu
         menu.addItem(positionMenuItem)
+
+        let earlierItem = NSMenuItem(title: L10n.text("Earlier (-0.5s)"), action: #selector(nudgeTimingOffset(_:)), keyEquivalent: "")
+        earlierItem.representedObject = -0.5
+        earlierItem.target = self
+        let resetOffsetItem = NSMenuItem(title: L10n.text("Reset (0.0s)"), action: #selector(resetTimingOffset), keyEquivalent: "")
+        resetOffsetItem.target = self
+        let laterItem = NSMenuItem(title: L10n.text("Later (+0.5s)"), action: #selector(nudgeTimingOffset(_:)), keyEquivalent: "")
+        laterItem.representedObject = 0.5
+        laterItem.target = self
+        timingOffsetMenu.addItem(earlierItem)
+        timingOffsetMenu.addItem(resetOffsetItem)
+        timingOffsetMenu.addItem(laterItem)
+        timingOffsetMenuItem.submenu = timingOffsetMenu
+        menu.addItem(timingOffsetMenuItem)
+        updateTimingOffsetMenuTitle()
 
         menu.addItem(NSMenuItem(title: L10n.text("Refresh Lyrics"), action: #selector(refreshLyrics), keyEquivalent: "r"))
         if UpdateController.shared.isAvailable {
@@ -343,6 +376,8 @@ final class MenuBarController: NSObject {
         currentTrack = track
         currentTrackIdentity = identity
         currentLines = []
+        lyricTimingOffset = 0
+        updateTimingOffsetMenuTitle()
         setLyricsFeedback(.searching)
         setDisplay(LyricsFeedback.searching.displayText)
 
@@ -492,11 +527,15 @@ final class MenuBarController: NSObject {
     }
 
     private func setPlayerFeedback(_ feedback: PlayerFeedback) {
+        latestPlayerFeedback = feedback
         playerStatusItem.title = feedback.menuTitle(for: player.source)
+        pushLiveStatusToSettings()
     }
 
     private func setLyricsFeedback(_ feedback: LyricsFeedback) {
+        latestLyricsFeedback = feedback
         lyricsStatusItem.title = feedback.menuTitle(for: player.source)
+        pushLiveStatusToSettings()
     }
 
     private func setTrackInfo(_ track: SpotifyTrack?) {
@@ -504,20 +543,29 @@ final class MenuBarController: NSObject {
         artistItem.isHidden = track == nil
         songItem.title = track.map { L10n.format("Song: %@", $0.name) } ?? ""
         artistItem.title = track.map { L10n.format("Artist: %@", $0.artist) } ?? ""
+        pushLiveStatusToSettings()
     }
 
-    private func showFirstLaunchGuideIfNeeded() {
-        guard !UserDefaults.standard.bool(forKey: AppPreferences.hasShownFirstLaunchGuideKey) else { return }
-
-        NSApp.activate(ignoringOtherApps: true)
-        let alert = NSAlert()
-        alert.messageText = L10n.text("Welcome to NotchMuse 🎵")
-        alert.informativeText = L10n.text("First Launch Guide")
-        alert.addButton(withTitle: L10n.text("Continue"))
-        alert.window.level = .floating
-        alert.window.orderFrontRegardless()
-        alert.runModal()
-        UserDefaults.standard.set(true, forKey: AppPreferences.hasShownFirstLaunchGuideKey)
+    private func pushLiveStatusToSettings() {
+        let needsPermission: PermissionFixKind?
+        if AccessibilityManager.requiresAccess(mode: displayMode, position: position) && !AccessibilityManager.isTrusted {
+            needsPermission = .accessibility
+        } else if latestPlayerFeedback == .unavailable && player.source != .netEaseMusic {
+            needsPermission = .automation
+        } else {
+            needsPermission = nil
+        }
+        let activeSource = currentPlayerTrack?.playerSource ?? player.source
+        let trackText = currentTrack.map { $0.artist.isEmpty ? $0.name : "\($0.name) — \($0.artist)" }
+        let liveLyric: String? = (!isPlayerStopped && !isPlaybackPaused && latestLyricsFeedback == .available && !displaySource.isEmpty) ? displaySource : nil
+        settingsWindowController?.updateLiveStatus(
+            playerName: activeSource.displayName(),
+            playerConnected: latestPlayerFeedback == .connected,
+            trackText: trackText,
+            lyricsFeedback: latestLyricsFeedback,
+            needsPermission: needsPermission,
+            liveLyricLine: liveLyric
+        )
     }
 
     private func updateScrollTimer(overflows: Bool) {
@@ -551,16 +599,24 @@ final class MenuBarController: NSObject {
             displayTranslation = AppPreferences.bilingualLyricsEnabled ? moment.translation : nil
             setDisplay(moment.text, progress: moment.progress, identity: moment.identity, highlight: moment.highlight,
                        staticText: moment.timingFidelity == .lineStartOnly || moment.timingFidelity == .estimated)
+            settingsWindowController?.updateLiveLyricLine(moment.text)
         } else {
             displayTranslation = nil
             setDisplay(fallbackText())
+            settingsWindowController?.updateLiveLyricLine(nil)
         }
         updateProgressTimer()
     }
 
     private func currentPlaybackPosition() -> TimeInterval? {
-        guard let latestPlayerPosition, let latestPlayerUptime else { return latestPlayerPosition }
-        return latestPlayerPosition + ProcessInfo.processInfo.systemUptime - latestPlayerUptime
+        guard let latestPlayerPosition else { return nil }
+        let base: TimeInterval
+        if let latestPlayerUptime {
+            base = latestPlayerPosition + ProcessInfo.processInfo.systemUptime - latestPlayerUptime
+        } else {
+            base = latestPlayerPosition
+        }
+        return max(0, base + lyricTimingOffset)
     }
 
     private func updateProgressTimer() {
@@ -646,12 +702,50 @@ final class MenuBarController: NSObject {
         displayMode = AppPreferences.displayMode
         position = AppPreferences.position
         notchStyle = AppPreferences.notchStyle
+        for item in displayModeMenu.items {
+            item.state = item.representedObject as? String == displayMode.rawValue ? .on : .off
+        }
+        moveLyricsMenuItem.title = L10n.text(displayMode == .free ? "Move Lyrics" : "Enter Free Position & Move")
+        resetPositionMenuItem.isHidden = displayMode != .free
         positionMenuItem.isEnabled = displayMode == .statusBar
         for item in positionMenu.items {
             item.state = item.representedObject as? String == position.rawValue ? .on : .off
         }
         scroll.reset()
         updateDisplay()
+        pushLiveStatusToSettings()
+    }
+
+    @objc private func selectDisplayMode(_ sender: NSMenuItem) {
+        guard let rawValue = sender.representedObject as? String,
+              let mode = DisplayMode(rawValue: rawValue) else { return }
+        UserDefaults.standard.set(mode.rawValue, forKey: AppPreferences.displayModeKey)
+        isLyricsHidden = false
+        reloadSettings()
+        settingsWindowController?.refresh()
+        AccessibilityManager.requestIfNeeded(mode: mode, position: position)
+    }
+
+    @objc private func nudgeTimingOffset(_ sender: NSMenuItem) {
+        guard let delta = sender.representedObject as? Double else { return }
+        lyricTimingOffset = ((lyricTimingOffset + delta) * 10).rounded() / 10
+        updateTimingOffsetMenuTitle()
+        updatePlayingDisplay()
+    }
+
+    @objc private func resetTimingOffset() {
+        lyricTimingOffset = 0
+        updateTimingOffsetMenuTitle()
+        updatePlayingDisplay()
+    }
+
+    private func updateTimingOffsetMenuTitle() {
+        if abs(lyricTimingOffset) < 0.05 {
+            timingOffsetMenuItem.title = L10n.text("Lyric Timing Offset")
+        } else {
+            let formatted = String(format: "%+.1fs", lyricTimingOffset)
+            timingOffsetMenuItem.title = L10n.format("Lyric Timing Offset (%@)", formatted)
+        }
     }
 
     static func adapter(for source: PlayerSource) -> any MusicPlayerAdapter {
@@ -660,7 +754,8 @@ final class MenuBarController: NSObject {
         case .spotify: SpotifyAdapter()
         case .appleMusic: AppleMusicAdapter()
         case .netEaseMusic: NetEaseMusicAdapter()
-        case .qqMusic, .sodaMusic: MediaRemotePlayerAdapter(source: source)
+        case .qqMusic, .sodaMusic, .kugouMusic, .youtubeMusic, .tidal, .amazonMusic, .deezer, .qobuz, .plexamp, .allNowPlaying:
+            MediaRemotePlayerAdapter(source: source)
         }
     }
 
@@ -740,6 +835,7 @@ final class MenuBarController: NSObject {
             }
         }
         settingsWindowController?.show()
+        pushLiveStatusToSettings()
     }
 
     #if DEBUG

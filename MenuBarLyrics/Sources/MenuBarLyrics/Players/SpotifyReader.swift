@@ -6,13 +6,22 @@ struct SpotifyTrack: Equatable, Sendable {
     let album: String
     let duration: TimeInterval
     let nativeTrackID: String?
+    let relaxedDurationMatching: Bool
 
-    init(name: String, artist: String, album: String, duration: TimeInterval, nativeTrackID: String? = nil) {
+    init(
+        name: String,
+        artist: String,
+        album: String,
+        duration: TimeInterval,
+        nativeTrackID: String? = nil,
+        relaxedDurationMatching: Bool = false
+    ) {
         self.name = name
         self.artist = artist
         self.album = album
         self.duration = duration
         self.nativeTrackID = nativeTrackID
+        self.relaxedDurationMatching = relaxedDurationMatching
     }
 }
 

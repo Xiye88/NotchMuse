@@ -7,18 +7,68 @@ enum PlayerSource: String, CaseIterable, Equatable, Sendable {
     case netEaseMusic = "NetEase Cloud Music"
     case qqMusic = "QQ Music"
     case sodaMusic = "Soda Music"
+    case kugouMusic = "Kugou Music"
+    case youtubeMusic = "YouTube Music"
+    case tidal = "TIDAL"
+    case amazonMusic = "Amazon Music"
+    case deezer = "Deezer"
+    case qobuz = "Qobuz"
+    case plexamp = "Plexamp"
+    case allNowPlaying = "All macOS Now Playing Apps"
 
-    static let detectable: [PlayerSource] = [.spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic]
+    static let detectable: [PlayerSource] = [
+        .spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic,
+        .kugouMusic, .youtubeMusic, .tidal, .amazonMusic, .deezer, .qobuz, .plexamp
+    ]
+
+    static let browserBundleIdentifiers: Set<String> = [
+        "com.apple.Safari",
+        "com.google.Chrome",
+        "company.thebrowser.Browser",
+        "com.microsoft.edgemac",
+        "com.brave.Browser",
+        "org.mozilla.firefox"
+    ]
+
+    static let nonMusicDenylist: Set<String> = [
+        "us.zoom.xos",
+        "com.apple.FaceTime",
+        "com.microsoft.teams",
+        "com.microsoft.teams2",
+        "com.apple.QuickTimePlayerX",
+        "com.tinyspeck.slackmacgap",
+        "com.hnc.Discord",
+        "Cisco-Systems.Spark",
+        "com.apple.podcasts",
+        "com.google.Chrome.app.kjgfgldnnfoeklkmfkjfagphfepbbdan" // Google Meet PWA
+    ]
+
+    var bundleIdentifiers: [String] {
+        switch self {
+        case .auto, .allNowPlaying: []
+        case .spotify: ["com.spotify.client"]
+        case .appleMusic: ["com.apple.Music"]
+        case .netEaseMusic: ["com.netease.163music"]
+        case .qqMusic: ["com.tencent.QQMusicMac"]
+        case .sodaMusic: ["com.soda.music"]
+        case .kugouMusic: ["com.kugou.mac", "com.kugou.KugouMusic", "com.kugou.mac.KugouMusic"]
+        case .youtubeMusic: [
+            "com.github.th-ch.youtube-music",
+            "app.ytmdesktop.ytmdesktop",
+            "com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod",
+            "com.microsoft.edgemac.app.cinhimbnkkaeohfgghhklpknlkffjgod",
+            "com.brave.Browser.app.cinhimbnkkaeohfgghhklpknlkffjgod"
+        ]
+        case .tidal: ["com.tidal.desktop"]
+        case .amazonMusic: ["com.amazon.music"]
+        case .deezer: ["com.deezer.deezer-desktop"]
+        case .qobuz: ["com.qobuz.QobuzDesktop"]
+        case .plexamp: ["tv.plex.plexamp"]
+        }
+    }
 
     var bundleIdentifier: String? {
-        switch self {
-        case .auto: nil
-        case .spotify: "com.spotify.client"
-        case .appleMusic: "com.apple.Music"
-        case .netEaseMusic: "com.netease.163music"
-        case .qqMusic: "com.tencent.QQMusicMac"
-        case .sodaMusic: "com.soda.music"
-        }
+        bundleIdentifiers.first
     }
 
     func displayName(language: AppLanguage = AppPreferences.language) -> String {
@@ -42,12 +92,20 @@ final class AutoDetectAdapter: @unchecked Sendable, MusicPlayerAdapter {
     }
 
     convenience init() {
+        let reader = SharedMediaRemoteReader.shared
         self.init(adapters: [
             (.spotify, SpotifyAdapter()),
             (.appleMusic, AppleMusicAdapter()),
             (.netEaseMusic, NetEaseMusicAdapter()),
-            (.qqMusic, MediaRemotePlayerAdapter(source: .qqMusic)),
-            (.sodaMusic, MediaRemotePlayerAdapter(source: .sodaMusic))
+            (.qqMusic, MediaRemotePlayerAdapter(source: .qqMusic, sharedReader: reader)),
+            (.sodaMusic, MediaRemotePlayerAdapter(source: .sodaMusic, sharedReader: reader)),
+            (.kugouMusic, MediaRemotePlayerAdapter(source: .kugouMusic, sharedReader: reader)),
+            (.youtubeMusic, MediaRemotePlayerAdapter(source: .youtubeMusic, sharedReader: reader)),
+            (.tidal, MediaRemotePlayerAdapter(source: .tidal, sharedReader: reader)),
+            (.amazonMusic, MediaRemotePlayerAdapter(source: .amazonMusic, sharedReader: reader)),
+            (.deezer, MediaRemotePlayerAdapter(source: .deezer, sharedReader: reader)),
+            (.qobuz, MediaRemotePlayerAdapter(source: .qobuz, sharedReader: reader)),
+            (.plexamp, MediaRemotePlayerAdapter(source: .plexamp, sharedReader: reader))
         ])
     }
 
@@ -191,7 +249,14 @@ struct NowPlayingTrack: Equatable, Sendable {
     let versionHints: [TrackVersionHint]?
 
     var spotifyTrack: SpotifyTrack {
-        SpotifyTrack(name: title, artist: artist, album: album, duration: duration, nativeTrackID: nativeTrackID)
+        SpotifyTrack(
+            name: title,
+            artist: artist,
+            album: album,
+            duration: duration,
+            nativeTrackID: nativeTrackID,
+            relaxedDurationMatching: playerSource == .youtubeMusic || playerSource == .allNowPlaying
+        )
     }
 
     var observationIdentity: String {

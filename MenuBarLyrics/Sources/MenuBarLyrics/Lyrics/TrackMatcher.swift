@@ -47,9 +47,11 @@ enum TrackMatcher {
         let candidateTitle = parsedTitle(candidate.title)
         let durationDifference = abs(track.duration - Double(candidate.durationMs) / 1000)
 
+        let maxDurationDelta: TimeInterval = track.relaxedDurationMatching ? 15 : 8
+
         guard sourceTitle.name == candidateTitle.name,
               sourceTitle.versions == candidateTitle.versions,
-              durationDifference <= 8 else { return 0 }
+              durationDifference <= maxDurationDelta else { return 0 }
 
         let expectedArtists = effectiveTrackArtists(for: track)
         let sourceArtists = artistKeys(expectedArtists)

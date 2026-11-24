@@ -206,3 +206,25 @@
 "Auto-Install Updates" = "Auto-Install Updates";
 "Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared." = "Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared.";
 "Bilingual Lyrics" = "Bilingual Lyrics";
+
+"Kugou Music" = "Kugou Music";
+"YouTube Music" = "YouTube Music";
+"TIDAL" = "TIDAL";
+"Amazon Music" = "Amazon Music";
+"Deezer" = "Deezer";
+"Qobuz" = "Qobuz";
+"Plexamp" = "Plexamp";
+"All macOS Now Playing Apps" = "All macOS Now Playing Apps";
+"Lyric Timing Offset" = "Lyric Timing Offset";
+"Lyric Timing Offset (%@)" = "Lyric Timing Offset (%@)";
+"Earlier (-0.5s)" = "Earlier (-0.5s)";
+"Reset (0.0s)" = "Reset (0.0s)";
+"Later (+0.5s)" = "Later (+0.5s)";
+"Enter Free Position & Move" = "Enter Free Position & Move";
+"Restart Now" = "Restart Now";
+"Later" = "Later";
+"Waiting for music…" = "Waiting for music…";
+"Lyrics synced" = "Lyrics synced";
+"Open Permission Settings" = "Open Permission Settings";
+"Accessibility permission needed for Left status bar" = "Accessibility permission needed for Left status bar";
+"Automation permission needed for %@" = "Automation permission needed for %@";

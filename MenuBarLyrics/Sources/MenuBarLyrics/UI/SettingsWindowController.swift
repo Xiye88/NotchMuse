@@ -318,6 +318,7 @@ final class SettingsWindowController: NSWindowController {
     private let contentStack = NSStackView()
     private var cards: [NSView] = []
     private let preview = SettingsPreviewView()
+    private var previewCard: NSView?
     private let previewModeControl = NSSegmentedControl(labels: DisplayMode.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let displayPage = NSStackView()
     private let appearancePage = NSStackView()
@@ -325,6 +326,7 @@ final class SettingsWindowController: NSWindowController {
     private var selectedPage: SettingsPage = .display
     private weak var settingsScrollView: SettingsScrollView?
     private var sidebarButtons: [SettingsPage: NSButton] = [:]
+    private let sidebarNavDeck = SidebarNavDeckView()
     private let vinylDeck = VinylDeckCardView()
     private let sidebarQuickActions = SettingsSidebarQuickActionsView()
     private var supportWindow: SupportWindowController?
@@ -700,24 +702,16 @@ final class SettingsWindowController: NSWindowController {
         sidebar.addArrangedSubview(vinylDeck)
         sidebar.setCustomSpacing(16, after: vinylDeck)
 
-        let sectionHeader = NSTextField(labelWithString: "")
-        sectionHeader.attributedStringValue = NSAttributedString(
-            string: "DECK",
-            attributes: [
-                .font: NSFont.monospacedSystemFont(ofSize: 10, weight: .semibold),
-                .foregroundColor: NSColor.tertiaryLabelColor,
-                .kern: 1.2
-            ]
-        )
-        let sectionWrap = NSStackView(views: [sectionHeader])
-        sectionWrap.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 2, right: 0)
-        sidebar.addArrangedSubview(sectionWrap)
-        sidebar.setCustomSpacing(6, after: sectionWrap)
-        for page in SettingsPage.allCases {
+        sidebarNavDeck.translatesAutoresizingMaskIntoConstraints = false
+        sidebarNavDeck.widthAnchor.constraint(equalToConstant: 200).isActive = true
+        sidebarNavDeck.heightAnchor.constraint(equalToConstant: SidebarNavDeckView.totalHeight).isActive = true
+        let navButtons = SettingsPage.allCases.map { page -> SidebarNavButton in
             let button = sidebarButton(for: page)
             sidebarButtons[page] = button
-            sidebar.addArrangedSubview(button)
+            return button
         }
+        sidebarNavDeck.configure(buttons: navButtons)
+        sidebar.addArrangedSubview(sidebarNavDeck)
         updateSidebarSelection()
         let sidebarPanel = HiFiSidebarView()
         sidebarPanel.translatesAutoresizingMaskIntoConstraints = false
@@ -742,6 +736,8 @@ final class SettingsWindowController: NSWindowController {
         previewContents.orientation = .vertical
         previewContents.spacing = 16
         let previewCard = card(content: previewContents)
+        self.previewCard = previewCard
+        previewCard.isHidden = selectedPage != .display
         preview.widthAnchor.constraint(equalTo: previewCard.widthAnchor, constant: -40).isActive = true
         preview.heightAnchor.constraint(equalToConstant: 196).isActive = true
         previewHeader.widthAnchor.constraint(equalTo: preview.widthAnchor).isActive = true
@@ -871,11 +867,9 @@ final class SettingsWindowController: NSWindowController {
         return row
     }
 
-    private func sidebarButton(for page: SettingsPage) -> NSButton {
+    private func sidebarButton(for page: SettingsPage) -> SidebarNavButton {
         let button = SidebarNavButton(page: page, target: self, action: #selector(pageChanged))
         button.identifier = NSUserInterfaceItemIdentifier(page.rawValue)
-        button.widthAnchor.constraint(equalToConstant: 200).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 38).isActive = true
         button.toolTip = L10n.text(page.help)
         return button
     }
@@ -1680,6 +1674,7 @@ final class SettingsWindowController: NSWindowController {
             artistName: artistName,
             playerName: playerConnected ? playerName : nil
         )
+        sidebarNavDeck.updateGeneralActive(playerConnected && (isPlaying || isPaused))
         updateLiveLyricLine(liveLyricLine)
     }
 
@@ -1740,26 +1735,32 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func pageChanged(_ sender: NSButton) {
         guard let page = SettingsPage(rawValue: sender.identifier?.rawValue ?? "") else { return }
+        let didChange = page != selectedPage
+        if didChange {
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+        }
         selectedPage = page
+        previewCard?.isHidden = page != .display
         displayPage.isHidden = page != .display
         appearancePage.isHidden = page != .appearance
         generalPage.isHidden = page != .general
+        sidebarNavDeck.select(page, animated: didChange)
         window?.contentView?.layoutSubtreeIfNeeded()
         settingsScrollView?.layoutDocument()
         DispatchQueue.main.async {
-            self.updateSidebarSelection()
+            self.updateSidebarSelection(animated: false)
             self.settingsScrollView?.hideIdleScroller()
         }
     }
 
-    private func updateSidebarSelection() {
+    private func updateSidebarSelection(animated: Bool = false) {
         guard let window else { return }
         window.effectiveAppearance.performAsCurrentDrawingAppearance {
             sidebarButtons.forEach { page, button in
-                let selected = page == selectedPage
-                button.state = selected ? .on : .off
-                (button as? SidebarNavButton)?.setSelected(selected)
+                button.state = page == selectedPage ? .on : .off
             }
+            sidebarNavDeck.select(selectedPage, animated: animated)
+            sidebarNavDeck.refreshAppearance()
         }
     }
 
@@ -1823,8 +1824,9 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func updatePreview() {
+        let colors = BrandStyle.gradientColors(for: AppPreferences.colorPreset, customColor: AppPreferences.customLyricsColor, customEndColor: AppPreferences.customLyricsEndColor)
         preview.apply(
-            colors: BrandStyle.gradientColors(for: AppPreferences.colorPreset, customColor: AppPreferences.customLyricsColor, customEndColor: AppPreferences.customLyricsEndColor),
+            colors: colors,
             usesGradient: AppPreferences.colorPreset.isGradient,
             fontSize: AppPreferences.fontSize,
             opacity: AppPreferences.opacity,
@@ -1839,6 +1841,8 @@ final class SettingsWindowController: NSWindowController {
             customWidth: AppPreferences.customWidth,
             statusBarOffset: AppPreferences.statusBarOffset
         )
+        sidebarNavDeck.updateDisplayMode(AppPreferences.displayMode)
+        sidebarNavDeck.updateAppearanceColor(colors.first ?? AppearanceSurfaceColors.accent)
     }
 }
 
@@ -2340,13 +2344,6 @@ private enum SettingsPage: String, CaseIterable {
         case .general: return "slider.horizontal.3"
         }
     }
-    var indexLabel: String {
-        switch self {
-        case .display: return "01"
-        case .appearance: return "02"
-        case .general: return "03"
-        }
-    }
     var help: String {
         switch self {
         case .display: return "Lyrics display mode, position, and screen."
@@ -2357,16 +2354,136 @@ private enum SettingsPage: String, CaseIterable {
 }
 
 @MainActor
+private final class SidebarNavDeckView: NSView {
+    static let rowHeight: CGFloat = 38
+    static let rowSpacing: CGFloat = 4
+    static var totalHeight: CGFloat {
+        CGFloat(SettingsPage.allCases.count) * rowHeight + CGFloat(max(0, SettingsPage.allCases.count - 1)) * rowSpacing
+    }
+
+    override var isFlipped: Bool { true }
+
+    private let selectionBackdrop = NSView()
+    private let selectionLed = NSView()
+    private var buttons: [SettingsPage: SidebarNavButton] = [:]
+    private var currentPage: SettingsPage = .display
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.masksToBounds = false
+
+        selectionBackdrop.wantsLayer = true
+        selectionBackdrop.layer?.cornerRadius = 9
+        selectionBackdrop.layer?.cornerCurve = .continuous
+        selectionBackdrop.layer?.borderWidth = 0.5
+        selectionBackdrop.frame = NSRect(x: 0, y: 0, width: 200, height: Self.rowHeight)
+
+        selectionLed.wantsLayer = true
+        selectionLed.layer?.cornerRadius = 1.5
+        selectionLed.layer?.masksToBounds = false
+        selectionLed.frame = NSRect(x: 8, y: (Self.rowHeight - 16) / 2, width: 3, height: 16)
+        selectionBackdrop.addSubview(selectionLed)
+
+        addSubview(selectionBackdrop)
+        refreshAppearance()
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    func configure(buttons orderedButtons: [SidebarNavButton]) {
+        for (index, button) in orderedButtons.enumerated() {
+            let y = CGFloat(index) * (Self.rowHeight + Self.rowSpacing)
+            button.frame = NSRect(x: 0, y: y, width: 200, height: Self.rowHeight)
+            addSubview(button)
+            buttons[button.page] = button
+        }
+        select(currentPage, animated: false)
+    }
+
+    func select(_ page: SettingsPage, animated: Bool) {
+        let didChange = page != currentPage
+        currentPage = page
+        let index = SettingsPage.allCases.firstIndex(of: page) ?? 0
+        let targetY = CGFloat(index) * (Self.rowHeight + Self.rowSpacing)
+        let targetFrame = NSRect(x: 0, y: targetY, width: 200, height: Self.rowHeight)
+
+        if animated {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.22
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                selectionBackdrop.animator().frame = targetFrame
+            }
+        } else {
+            selectionBackdrop.frame = targetFrame
+        }
+
+        for (buttonPage, button) in buttons {
+            button.setSelected(buttonPage == page, animated: animated && didChange && buttonPage == page)
+        }
+        refreshAppearance()
+    }
+
+    func updateDisplayMode(_ mode: DisplayMode) {
+        let isZh = AppPreferences.language == .simplifiedChinese
+        let badge: String
+        switch mode {
+        case .notch: badge = isZh ? "刘海" : "Notch"
+        case .statusBar: badge = isZh ? "状态栏" : "Bar"
+        case .free: badge = isZh ? "悬浮" : "Float"
+        }
+        buttons[.display]?.updateDisplayModeBadge(badge)
+    }
+
+    func updateAppearanceColor(_ color: NSColor) {
+        buttons[.appearance]?.updateAppearanceDotColor(color)
+    }
+
+    func updateGeneralActive(_ active: Bool) {
+        buttons[.general]?.updateGeneralStatus(active: active)
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshAppearance()
+    }
+
+    func refreshAppearance() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            selectionBackdrop.layer?.backgroundColor = AppearanceSurfaceColors.accentSoft.cgColor
+            selectionBackdrop.layer?.borderColor = AppearanceSurfaceColors.accentBorder.cgColor
+            selectionLed.layer?.backgroundColor = AppearanceSurfaceColors.accent.cgColor
+            selectionLed.layer?.shadowColor = AppearanceSurfaceColors.accent.cgColor
+            selectionLed.layer?.shadowRadius = 4
+            selectionLed.layer?.shadowOpacity = 0.65
+            selectionLed.layer?.shadowOffset = .zero
+        }
+        buttons.values.forEach { $0.refreshAppearance() }
+    }
+}
+
+@MainActor
 private final class SidebarNavButton: NSButton {
-    private let ledView = NSView()
+    let page: SettingsPage
+    private let ledSlotView = NSView()
     private let iconView = NSImageView()
     private let titleLabel = NSTextField(labelWithString: "")
-    private let indexLabel = NSTextField(labelWithString: "")
+    private var iconLeadingConstraint: NSLayoutConstraint?
+
+    // Live micro-indicators (one per page)
+    private let modePill = NSView()
+    private let modePillLabel = NSTextField(labelWithString: "")
+    private let colorDot = NSView()
+    private var currentLyricColor: NSColor = AppearanceSurfaceColors.accent
+    private let statusDot = NSView()
+    private var isPlayerActive = false
+
     private var tracking: NSTrackingArea?
     private var isHovered = false
     private var isRowSelected = false
 
     init(page: SettingsPage, target: AnyObject?, action: Selector?) {
+        self.page = page
         super.init(frame: .zero)
         self.title = ""
         self.target = target
@@ -2377,17 +2494,15 @@ private final class SidebarNavButton: NSButton {
         self.wantsLayer = true
         self.layer?.cornerRadius = 9
         self.layer?.cornerCurve = .continuous
-        self.layer?.borderWidth = 0.5
-        self.layer?.borderColor = NSColor.clear.cgColor
 
-        ledView.wantsLayer = true
-        ledView.layer?.cornerRadius = 1.5
-        ledView.layer?.masksToBounds = false
-        ledView.translatesAutoresizingMaskIntoConstraints = false
+        ledSlotView.wantsLayer = true
+        ledSlotView.layer?.cornerRadius = 1.5
+        ledSlotView.translatesAutoresizingMaskIntoConstraints = false
 
         let symbolImage = NSImage(systemSymbolName: page.symbol, accessibilityDescription: nil)?
             .withSymbolConfiguration(.init(pointSize: 13.5, weight: .medium))
         iconView.image = symbolImage
+        iconView.wantsLayer = true
         iconView.contentTintColor = .secondaryLabelColor
         iconView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -2397,40 +2512,136 @@ private final class SidebarNavButton: NSButton {
         titleLabel.lineBreakMode = .byTruncatingTail
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        indexLabel.stringValue = page.indexLabel
-        indexLabel.font = .monospacedDigitSystemFont(ofSize: 10, weight: .medium)
-        indexLabel.textColor = .tertiaryLabelColor
-        indexLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        addSubview(ledView)
+        addSubview(ledSlotView)
         addSubview(iconView)
         addSubview(titleLabel)
-        addSubview(indexLabel)
-        NSLayoutConstraint.activate([
-            ledView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            ledView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            ledView.widthAnchor.constraint(equalToConstant: 3),
-            ledView.heightAnchor.constraint(equalToConstant: 16),
 
-            iconView.leadingAnchor.constraint(equalTo: ledView.trailingAnchor, constant: 10),
+        let iconLeading = iconView.leadingAnchor.constraint(equalTo: ledSlotView.trailingAnchor, constant: 10)
+        iconLeadingConstraint = iconLeading
+
+        var constraints: [NSLayoutConstraint] = [
+            ledSlotView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            ledSlotView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            ledSlotView.widthAnchor.constraint(equalToConstant: 3),
+            ledSlotView.heightAnchor.constraint(equalToConstant: 16),
+
+            iconLeading,
             iconView.centerYAnchor.constraint(equalTo: centerYAnchor),
             iconView.widthAnchor.constraint(equalToConstant: 18),
             iconView.heightAnchor.constraint(equalToConstant: 18),
 
             titleLabel.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 8),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: indexLabel.leadingAnchor, constant: -8),
-            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
+        ]
 
-            indexLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
-            indexLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
-        ])
+        switch page {
+        case .display:
+            modePill.wantsLayer = true
+            modePill.layer?.cornerRadius = 4.5
+            modePill.layer?.cornerCurve = .continuous
+            modePill.translatesAutoresizingMaskIntoConstraints = false
+
+            modePillLabel.font = .systemFont(ofSize: 10.5, weight: .medium)
+            modePillLabel.textColor = .tertiaryLabelColor
+            modePillLabel.translatesAutoresizingMaskIntoConstraints = false
+            modePill.addSubview(modePillLabel)
+            addSubview(modePill)
+
+            constraints += [
+                modePillLabel.leadingAnchor.constraint(equalTo: modePill.leadingAnchor, constant: 6),
+                modePillLabel.trailingAnchor.constraint(equalTo: modePill.trailingAnchor, constant: -6),
+                modePillLabel.topAnchor.constraint(equalTo: modePill.topAnchor, constant: 2),
+                modePillLabel.bottomAnchor.constraint(equalTo: modePill.bottomAnchor, constant: -2),
+                modePill.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+                modePill.centerYAnchor.constraint(equalTo: centerYAnchor),
+                titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: modePill.leadingAnchor, constant: -6)
+            ]
+
+        case .appearance:
+            colorDot.wantsLayer = true
+            colorDot.layer?.cornerRadius = 4
+            colorDot.layer?.borderWidth = 0.5
+            colorDot.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(colorDot)
+
+            constraints += [
+                colorDot.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+                colorDot.centerYAnchor.constraint(equalTo: centerYAnchor),
+                colorDot.widthAnchor.constraint(equalToConstant: 8),
+                colorDot.heightAnchor.constraint(equalToConstant: 8),
+                titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: colorDot.leadingAnchor, constant: -8)
+            ]
+
+        case .general:
+            statusDot.wantsLayer = true
+            statusDot.layer?.cornerRadius = 3
+            statusDot.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(statusDot)
+
+            constraints += [
+                statusDot.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -13),
+                statusDot.centerYAnchor.constraint(equalTo: centerYAnchor),
+                statusDot.widthAnchor.constraint(equalToConstant: 6),
+                statusDot.heightAnchor.constraint(equalToConstant: 6),
+                titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: statusDot.leadingAnchor, constant: -8)
+            ]
+        }
+
+        NSLayoutConstraint.activate(constraints)
+        refreshAppearance()
     }
 
     required init?(coder: NSCoder) { nil }
 
-    func setSelected(_ selected: Bool) {
+    func setSelected(_ selected: Bool, animated: Bool = false) {
         isRowSelected = selected
+        updateHoverNudge(animated: animated)
         refreshAppearance()
+        if selected && animated {
+            animateIconPop()
+        }
+    }
+
+    func updateDisplayModeBadge(_ text: String) {
+        modePillLabel.stringValue = text
+    }
+
+    func updateAppearanceDotColor(_ color: NSColor) {
+        currentLyricColor = color
+        refreshAppearance()
+    }
+
+    func updateGeneralStatus(active: Bool) {
+        isPlayerActive = active
+        refreshAppearance()
+    }
+
+    private func animateIconPop() {
+        guard let iconLayer = iconView.layer else { return }
+        let bounds = iconLayer.bounds
+        let center = CGPoint(x: bounds.midX, y: bounds.midY)
+        iconLayer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        iconLayer.position = CGPoint(x: iconView.frame.minX + center.x, y: iconView.frame.minY + center.y)
+        let pop = CAKeyframeAnimation(keyPath: "transform.scale")
+        pop.values = [1.0, 1.15, 1.0]
+        pop.keyTimes = [0, 0.45, 1.0]
+        pop.duration = 0.20
+        pop.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        iconLayer.add(pop, forKey: "iconPop")
+    }
+
+    private func updateHoverNudge(animated: Bool) {
+        let targetOffset: CGFloat = (isHovered && !isRowSelected) ? 12 : 10
+        guard iconLeadingConstraint?.constant != targetOffset else { return }
+        if animated {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.15
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                iconLeadingConstraint?.animator().constant = targetOffset
+            }
+        } else {
+            iconLeadingConstraint?.constant = targetOffset
+        }
     }
 
     override func updateTrackingAreas() {
@@ -2443,11 +2654,13 @@ private final class SidebarNavButton: NSButton {
 
     override func mouseEntered(with event: NSEvent) {
         isHovered = true
+        updateHoverNudge(animated: true)
         refreshAppearance()
     }
 
     override func mouseExited(with event: NSEvent) {
         isHovered = false
+        updateHoverNudge(animated: true)
         refreshAppearance()
     }
 
@@ -2456,38 +2669,41 @@ private final class SidebarNavButton: NSButton {
         refreshAppearance()
     }
 
-    private func refreshAppearance() {
+    func refreshAppearance() {
         effectiveAppearance.performAsCurrentDrawingAppearance {
+            ledSlotView.isHidden = isRowSelected
+            ledSlotView.layer?.backgroundColor = AppearanceSurfaceColors.ledOff.cgColor
+
             if isRowSelected {
-                layer?.backgroundColor = AppearanceSurfaceColors.accentSoft.cgColor
-                layer?.borderColor = AppearanceSurfaceColors.accentBorder.cgColor
-                ledView.layer?.backgroundColor = AppearanceSurfaceColors.accent.cgColor
-                ledView.layer?.shadowColor = AppearanceSurfaceColors.accent.cgColor
-                ledView.layer?.shadowRadius = 4
-                ledView.layer?.shadowOpacity = 0.65
-                ledView.layer?.shadowOffset = .zero
+                layer?.backgroundColor = NSColor.clear.cgColor
                 iconView.contentTintColor = .labelColor
                 titleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
                 titleLabel.textColor = .labelColor
-                indexLabel.textColor = AppearanceSurfaceColors.accent
             } else if isHovered {
                 layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.05).cgColor
-                layer?.borderColor = NSColor.clear.cgColor
-                ledView.layer?.backgroundColor = AppearanceSurfaceColors.ledOff.cgColor
-                ledView.layer?.shadowOpacity = 0
                 iconView.contentTintColor = .labelColor
                 titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
                 titleLabel.textColor = .labelColor
-                indexLabel.textColor = .secondaryLabelColor
             } else {
                 layer?.backgroundColor = NSColor.clear.cgColor
-                layer?.borderColor = NSColor.clear.cgColor
-                ledView.layer?.backgroundColor = AppearanceSurfaceColors.ledOff.cgColor
-                ledView.layer?.shadowOpacity = 0
                 iconView.contentTintColor = .secondaryLabelColor
                 titleLabel.font = .systemFont(ofSize: 13, weight: .medium)
                 titleLabel.textColor = .secondaryLabelColor
-                indexLabel.textColor = .tertiaryLabelColor
+            }
+
+            switch page {
+            case .display:
+                modePill.layer?.backgroundColor = isRowSelected
+                    ? AppearanceSurfaceColors.accentSoft.cgColor
+                    : NSColor.labelColor.withAlphaComponent(0.06).cgColor
+                modePillLabel.textColor = isRowSelected ? AppearanceSurfaceColors.accent : .tertiaryLabelColor
+            case .appearance:
+                colorDot.layer?.backgroundColor = currentLyricColor.cgColor
+                colorDot.layer?.borderColor = NSColor.labelColor.withAlphaComponent(0.24).cgColor
+            case .general:
+                statusDot.layer?.backgroundColor = isPlayerActive
+                    ? NSColor.systemGreen.cgColor
+                    : NSColor.tertiaryLabelColor.withAlphaComponent(0.55).cgColor
             }
         }
     }

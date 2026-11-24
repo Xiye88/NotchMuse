@@ -561,6 +561,10 @@ final class MenuBarController: NSObject {
         settingsWindowController?.updateLiveStatus(
             playerName: activeSource.displayName(),
             playerConnected: latestPlayerFeedback == .connected,
+            isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
+            isPaused: !isPlayerStopped && isPlaybackPaused && currentTrack != nil,
+            trackTitle: currentTrack?.name,
+            artistName: currentTrack?.artist,
             trackText: trackText,
             lyricsFeedback: latestLyricsFeedback,
             needsPermission: needsPermission,

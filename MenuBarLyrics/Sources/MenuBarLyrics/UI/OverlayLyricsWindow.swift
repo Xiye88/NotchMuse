@@ -291,12 +291,18 @@ final class OverlayLyricsWindow: NSObject {
     private final class GradientLyricView: NSView {
         var text = "" {
             didSet {
-                if !oldValue.isEmpty, oldValue != text {
-                    let transition = CATransition()
-                    transition.duration = 0.12
-                    transition.type = .fade
-                    transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                    layer?.add(transition, forKey: "lyricFade")
+                if !oldValue.isEmpty, oldValue != text, let layer {
+                    let group = CAAnimationGroup()
+                    group.duration = 0.20
+                    group.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                    let rise = CABasicAnimation(keyPath: "transform.translation.y")
+                    rise.fromValue = -6.0
+                    rise.toValue = 0.0
+                    let fade = CABasicAnimation(keyPath: "opacity")
+                    fade.fromValue = 0.0
+                    fade.toValue = 1.0
+                    group.animations = [rise, fade]
+                    layer.add(group, forKey: "lyricMicroRise")
                 }
                 needsDisplay = true
             }
@@ -441,11 +447,18 @@ final class OverlayLyricsWindow: NSObject {
     private final class NotchLyricsView: NSView {
         var lyric = "" {
             didSet {
-                if !oldValue.isEmpty, oldValue != lyric {
-                    let transition = CATransition()
-                    transition.duration = 0.12
-                    transition.type = .fade
-                    layer?.add(transition, forKey: "notchLyricFade")
+                if !oldValue.isEmpty, oldValue != lyric, let layer {
+                    let group = CAAnimationGroup()
+                    group.duration = 0.20
+                    group.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                    let rise = CABasicAnimation(keyPath: "transform.translation.y")
+                    rise.fromValue = -6.0
+                    rise.toValue = 0.0
+                    let fade = CABasicAnimation(keyPath: "opacity")
+                    fade.fromValue = 0.0
+                    fade.toValue = 1.0
+                    group.animations = [rise, fade]
+                    layer.add(group, forKey: "notchLyricMicroRise")
                 }
             }
         }
@@ -471,8 +484,10 @@ final class OverlayLyricsWindow: NSObject {
         override func draw(_ dirtyRect: NSRect) {
             let cornerRadius = vertical ? 16 : style == .lyricOnly ? bounds.height / 2 : min(16, bounds.height * 0.28)
             if drawsBackground {
-                NSColor.white.withAlphaComponent(0.12).setStroke()
-                NSBezierPath(roundedRect: backgroundRect.insetBy(dx: 0.5, dy: 0.5), xRadius: cornerRadius, yRadius: cornerRadius).stroke()
+                NSColor.white.withAlphaComponent(0.14).setStroke()
+                let border = NSBezierPath(roundedRect: backgroundRect.insetBy(dx: 0.25, dy: 0.25), xRadius: cornerRadius, yRadius: cornerRadius)
+                border.lineWidth = 0.5
+                border.stroke()
             }
 
             let lineHeight = ceil(font.pointSize * 1.3)
@@ -621,6 +636,23 @@ final class OverlayLyricsWindow: NSObject {
         }
 
         private func drawLyricText(attributes: [NSAttributedString.Key: Any]) {
+            if !drawsBackground {
+                var ambientAttrs = attributes
+                let ambient = NSShadow()
+                ambient.shadowColor = NSColor.black.withAlphaComponent(0.28)
+                ambient.shadowBlurRadius = 8
+                ambient.shadowOffset = NSSize(width: 0, height: -2)
+                ambientAttrs[.shadow] = ambient
+                if lyricWraps {
+                    (lyric as NSString).draw(
+                        with: lyricTextRect,
+                        options: [.usesLineFragmentOrigin, .usesFontLeading, .truncatesLastVisibleLine],
+                        attributes: ambientAttrs
+                    )
+                } else {
+                    (lyric as NSString).draw(in: lyricTextRect, withAttributes: ambientAttrs)
+                }
+            }
             if lyricWraps {
                 (lyric as NSString).draw(
                     with: lyricTextRect,
@@ -634,9 +666,9 @@ final class OverlayLyricsWindow: NSObject {
 
         private func textShadow() -> NSShadow {
             let shadow = NSShadow()
-            shadow.shadowColor = NSColor.black.withAlphaComponent(0.5)
-            shadow.shadowBlurRadius = 2
-            shadow.shadowOffset = NSSize(width: 0, height: -1)
+            shadow.shadowColor = NSColor.black.withAlphaComponent(drawsBackground ? 0.45 : 0.72)
+            shadow.shadowBlurRadius = drawsBackground ? 2 : 1.5
+            shadow.shadowOffset = NSSize(width: 0, height: -0.5)
             return shadow
         }
     }
@@ -673,7 +705,9 @@ final class OverlayLyricsWindow: NSObject {
             materialView.blendingMode = .behindWindow
             materialView.state = .active
             materialView.wantsLayer = true
+            materialView.layer?.cornerCurve = .continuous
             tintView.wantsLayer = true
+            tintView.layer?.cornerCurve = .continuous
             containerView.wantsLayer = true
             containerView.addSubview(lyricGroup)
             lyricGroup.addSubview(materialView)

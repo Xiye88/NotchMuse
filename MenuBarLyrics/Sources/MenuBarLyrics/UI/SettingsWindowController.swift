@@ -350,16 +350,17 @@ final class SettingsWindowController: NSWindowController {
         self.onSettingsChange = onSettingsChange
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 1040, height: 730),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            contentRect: NSRect(x: 0, y: 0, width: 780, height: 600),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         window.title = Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true
             ? "NotchMuse Preview · Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development")"
             : "NotchMuse"
-        window.minSize = NSSize(width: 900, height: 610)
+        window.minSize = NSSize(width: 720, height: 540)
         window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
         window.isReleasedWhenClosed = false
         window.center()
         window.setFrameAutosaveName("NotchMuseSettings")
@@ -684,30 +685,29 @@ final class SettingsWindowController: NSWindowController {
         let sidebar = NSStackView()
         sidebar.orientation = .vertical
         sidebar.alignment = .leading
-        sidebar.spacing = 10
+        sidebar.spacing = 4
         sidebar.translatesAutoresizingMaskIntoConstraints = false
         sidebar.addArrangedSubview(sidebarTitle())
-        sidebar.setCustomSpacing(28, after: sidebar.arrangedSubviews[0])
+        sidebar.setCustomSpacing(18, after: sidebar.arrangedSubviews[0])
         for page in SettingsPage.allCases {
             let button = sidebarButton(for: page)
             sidebarButtons[page] = button
             sidebar.addArrangedSubview(button)
         }
         updateSidebarSelection()
-        let sidebarPanel = AppearanceSurfaceView()
-        sidebarPanel.wantsLayer = true
-        sidebarPanel.surfaceColor = AppearanceSurfaceColors.sidebar
-        sidebarPanel.layer?.cornerRadius = 14
-        sidebarPanel.layer?.borderWidth = 1
+        let sidebarPanel = NSVisualEffectView()
+        sidebarPanel.material = .sidebar
+        sidebarPanel.blendingMode = .behindWindow
+        sidebarPanel.state = .followsWindowActiveState
         sidebarPanel.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebar)
-        let sidebarFooter = SettingsSidebarFooterView()
-        sidebarFooter.onSupport = { [weak self] in self?.showSupport() }
-        sidebarFooter.translatesAutoresizingMaskIntoConstraints = false
-        sidebarPanel.addSubview(sidebarFooter)
+        let sidebarDivider = NSBox()
+        sidebarDivider.boxType = .separator
+        sidebarDivider.translatesAutoresizingMaskIntoConstraints = false
         sidebarQuickActions.onThemeToggle = { [weak self] appearance in
             self?.selectAppAppearance(AppAppearanceController.selection.toggled(for: appearance))
         }
+        sidebarQuickActions.onSupport = { [weak self] in self?.showSupport() }
         sidebarQuickActions.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebarQuickActions)
 
@@ -756,31 +756,32 @@ final class SettingsWindowController: NSWindowController {
         document.addSubview(contentStack)
         scrollView.documentView = document
         contentView.addSubview(sidebarPanel)
+        contentView.addSubview(sidebarDivider)
         contentView.addSubview(scrollView)
         NSLayoutConstraint.activate(cards.map { $0.widthAnchor.constraint(equalTo: contentStack.widthAnchor) } + [
-            sidebarPanel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            sidebarPanel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
-            sidebarPanel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -18),
-            sidebarPanel.widthAnchor.constraint(equalToConstant: 205),
-            sidebar.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 14),
-            sidebar.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -14),
-            sidebar.topAnchor.constraint(equalTo: sidebarPanel.topAnchor, constant: 24),
-            sidebarFooter.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 14),
-            sidebarFooter.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -14),
-            sidebarFooter.bottomAnchor.constraint(equalTo: sidebarQuickActions.topAnchor, constant: -10),
-            sidebarFooter.heightAnchor.constraint(equalToConstant: 172),
-            sidebarQuickActions.leadingAnchor.constraint(equalTo: sidebarFooter.leadingAnchor),
-            sidebarQuickActions.trailingAnchor.constraint(equalTo: sidebarFooter.trailingAnchor),
-            sidebarQuickActions.bottomAnchor.constraint(equalTo: sidebarPanel.bottomAnchor, constant: -14),
+            sidebarPanel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            sidebarPanel.topAnchor.constraint(equalTo: contentView.topAnchor),
+            sidebarPanel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            sidebarPanel.widthAnchor.constraint(equalToConstant: 200),
+            sidebarDivider.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor),
+            sidebarDivider.topAnchor.constraint(equalTo: contentView.topAnchor),
+            sidebarDivider.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            sidebarDivider.widthAnchor.constraint(equalToConstant: 1),
+            sidebar.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 12),
+            sidebar.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -12),
+            sidebar.topAnchor.constraint(equalTo: sidebarPanel.topAnchor, constant: 42),
+            sidebarQuickActions.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 12),
+            sidebarQuickActions.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -12),
+            sidebarQuickActions.bottomAnchor.constraint(equalTo: sidebarPanel.bottomAnchor, constant: -12),
             sidebarQuickActions.heightAnchor.constraint(equalToConstant: 36),
-            scrollView.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: 18),
+            scrollView.leadingAnchor.constraint(equalTo: sidebarDivider.trailingAnchor, constant: 16),
             scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
-            scrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -18),
+            scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+            scrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             contentStack.leadingAnchor.constraint(equalTo: document.leadingAnchor),
             contentStack.topAnchor.constraint(equalTo: document.topAnchor),
             contentStack.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -8),
-            contentStack.bottomAnchor.constraint(lessThanOrEqualTo: document.bottomAnchor, constant: -18)
+            contentStack.bottomAnchor.constraint(lessThanOrEqualTo: document.bottomAnchor, constant: -16)
         ])
         DispatchQueue.main.async { scrollView.hideIdleScroller() }
     }
@@ -799,16 +800,17 @@ final class SettingsWindowController: NSWindowController {
 
     private func sidebarTitle() -> NSView {
         let title = NSTextField(labelWithString: "NotchMuse")
-        title.font = .systemFont(ofSize: 20, weight: .bold)
+        title.font = .systemFont(ofSize: 15, weight: .semibold)
         title.textColor = .labelColor
         let icon = NSImageView(image: notchMuseAppIcon())
         icon.setAccessibilityLabel("NotchMuse")
-        icon.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        icon.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        icon.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 20).isActive = true
         let row = NSStackView(views: [icon, title])
         row.orientation = .horizontal
         row.alignment = .centerY
-        row.spacing = 10
+        row.spacing = 8
+        row.edgeInsets = NSEdgeInsets(top: 0, left: 6, bottom: 0, right: 0)
         return row
     }
 
@@ -816,16 +818,15 @@ final class SettingsWindowController: NSWindowController {
         let button = NSButton(title: L10n.text(page.title), target: self, action: #selector(pageChanged))
         button.isBordered = false
         button.setButtonType(.toggle)
-        button.cell?.wraps = true
         button.alignment = .left
         button.image = NSImage(systemSymbolName: page.symbol, accessibilityDescription: L10n.text(page.title))
         button.imagePosition = .imageLeading
         button.identifier = NSUserInterfaceItemIdentifier(page.rawValue)
         button.wantsLayer = true
-        button.layer?.cornerRadius = 9
-        button.widthAnchor.constraint(equalToConstant: 177).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        button.image = button.image?.withSymbolConfiguration(.init(pointSize: 17, weight: .regular))
+        button.layer?.cornerRadius = 7
+        button.widthAnchor.constraint(equalToConstant: 176).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        button.image = button.image?.withSymbolConfiguration(.init(pointSize: 14, weight: .medium))
         button.toolTip = L10n.text(page.help)
         return button
     }
@@ -834,19 +835,15 @@ final class SettingsWindowController: NSWindowController {
         let box = AppearanceSurfaceView()
         box.wantsLayer = true
         box.surfaceColor = AppearanceSurfaceColors.card
-        box.layer?.borderWidth = 1
-        box.layer?.cornerRadius = 14
-        box.layer?.shadowColor = NSColor(calibratedRed: 0.19, green: 0.31, blue: 0.53, alpha: 1).cgColor
-        box.layer?.shadowOpacity = 0.12
-        box.layer?.shadowRadius = 14
-        box.layer?.shadowOffset = CGSize(width: 0, height: -4)
+        box.layer?.borderWidth = 0.5
+        box.layer?.cornerRadius = 10
         box.addSubview(content)
         content.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 20),
-            content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -20),
-            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 18),
-            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -18)
+            content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 16),
+            content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -16),
+            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 14),
+            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -14)
         ])
         box.translatesAutoresizingMaskIntoConstraints = false
         cards.append(box)
@@ -858,7 +855,7 @@ final class SettingsWindowController: NSWindowController {
         let body = NSStackView(views: [header, grid])
         body.orientation = .vertical
         body.alignment = .leading
-        body.spacing = 18
+        body.spacing = 14
         header.widthAnchor.constraint(equalTo: grid.widthAnchor).isActive = true
         grid.widthAnchor.constraint(equalTo: body.widthAnchor).isActive = true
         return body
@@ -866,76 +863,61 @@ final class SettingsWindowController: NSWindowController {
 
     private func cardHeader(title: String, subtitle: String, trailing: NSView) -> NSStackView {
         let heading = NSTextField(labelWithString: L10n.text(title))
-        heading.font = .systemFont(ofSize: 17, weight: .semibold)
+        heading.font = .systemFont(ofSize: 13.5, weight: .semibold)
+        heading.textColor = .labelColor
         heading.setContentCompressionResistancePriority(.required, for: .vertical)
-        let detail = NSTextField(labelWithString: L10n.text(subtitle))
-        detail.textColor = .secondaryLabelColor
-        detail.font = .systemFont(ofSize: 13)
-        detail.setContentCompressionResistancePriority(.required, for: .vertical)
-        if title == "Free Position" {
-            detail.maximumNumberOfLines = 2
-            detail.usesSingleLineMode = false
-            detail.lineBreakMode = .byWordWrapping
-        }
-        let symbol: String
-        switch title {
-        case "Display": symbol = "rectangle.on.rectangle"
-        case "Appearance": symbol = "sparkles"
-        default: symbol = "gearshape"
-        }
-        let icon = NSImageView(image: NSImage(systemSymbolName: symbol, accessibilityDescription: L10n.text(title)) ?? NSImage())
-        icon.contentTintColor = .systemBlue
-        icon.widthAnchor.constraint(equalToConstant: 22).isActive = true
-        let labels = NSStackView(views: [heading, detail])
-        labels.orientation = .vertical
-        labels.alignment = .leading
-        labels.spacing = 2
-        let headingGroup = NSStackView(views: [icon, labels])
-        headingGroup.orientation = .horizontal
-        headingGroup.spacing = 10
-        headingGroup.alignment = .centerY
-        let header = NSStackView(views: [headingGroup, trailing])
+        let header = NSStackView(views: [heading, trailing])
         header.orientation = .horizontal
         header.distribution = .equalSpacing
-        header.alignment = .top
+        header.alignment = .centerY
         return header
     }
 
     private func resetButton(for page: SettingsPage) -> NSButton {
-        NSButton(title: L10n.text("Restore Defaults"), target: self, action: #selector(resetSection))
+        let btn = NSButton(title: L10n.text("Restore Defaults"), target: self, action: #selector(resetSection))
+        btn.controlSize = .small
+        return btn
     }
 
     private func quickPresetsCard() -> NSView {
-        let titles = ["Warm Orange", "Fresh Minimal", "Dreamy Soft", "Pure"]
-        let colors: [NSColor] = [.systemOrange, .systemTeal, .systemPurple, .systemGreen]
-        let tiles = zip(titles, colors).enumerated().map { index, entry in
+        let entries: [(title: String, sample: String, color: NSColor)] = [
+            ("Warm Orange", "♪ Warm", .systemOrange),
+            ("Fresh Minimal", "♪ Minimal", .white),
+            ("Dreamy Soft", "♪ Soft", .systemPurple),
+            ("Pure", "♪ Pure", .systemGreen)
+        ]
+        let tiles = entries.enumerated().map { index, entry in
             let tile = AppearanceSurfaceView()
             tile.wantsLayer = true
-            tile.surfaceColor = entry.1.withAlphaComponent(0.09)
-            tile.surfaceBorderColor = entry.1.withAlphaComponent(0.25)
-            tile.layer?.borderWidth = 1
-            tile.layer?.cornerRadius = 10
-            tile.widthAnchor.constraint(greaterThanOrEqualToConstant: 130).isActive = true
-            tile.heightAnchor.constraint(equalToConstant: 72).isActive = true
-            let icon = NSImageView(image: NSImage(systemSymbolName: "waveform", accessibilityDescription: nil) ?? NSImage())
-            icon.contentTintColor = entry.1
-            let title = NSTextField(labelWithString: L10n.text(entry.0))
-            title.font = .systemFont(ofSize: 12, weight: .medium)
-            title.textColor = entry.1
-            let content = NSStackView(views: [icon, title])
+            tile.surfaceColor = AppearanceSurfaceColors.adaptive(
+                light: NSColor(calibratedWhite: 0.14, alpha: 0.90),
+                dark: NSColor(calibratedWhite: 1.0, alpha: 0.06)
+            )
+            tile.surfaceBorderColor = AppearanceSurfaceColors.border
+            tile.layer?.borderWidth = 0.5
+            tile.layer?.cornerRadius = 8
+            tile.widthAnchor.constraint(greaterThanOrEqualToConstant: 108).isActive = true
+            tile.heightAnchor.constraint(equalToConstant: 56).isActive = true
+            let sampleLabel = NSTextField(labelWithString: entry.sample)
+            sampleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
+            sampleLabel.textColor = entry.color
+            let title = NSTextField(labelWithString: L10n.text(entry.title))
+            title.font = .systemFont(ofSize: 10.5, weight: .regular)
+            title.textColor = NSColor.white.withAlphaComponent(0.72)
+            let content = NSStackView(views: [sampleLabel, title])
             content.orientation = .vertical
             content.alignment = .centerX
-            content.spacing = 7
+            content.spacing = 3
             tile.addSubview(content)
             content.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 content.centerXAnchor.constraint(equalTo: tile.centerXAnchor),
-                content.centerYAnchor.constraint(equalTo: tile.centerYAnchor, constant: 4)
+                content.centerYAnchor.constraint(equalTo: tile.centerYAnchor)
             ])
             let button = NSButton(title: "", target: self, action: #selector(presetButtonChanged))
             button.tag = index + 1
             button.isBordered = false
-            button.setAccessibilityLabel(L10n.text(entry.0))
+            button.setAccessibilityLabel(L10n.text(entry.title))
             tile.addSubview(button)
             button.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -950,11 +932,11 @@ final class SettingsWindowController: NSWindowController {
         row.orientation = .horizontal
         row.distribution = .fillEqually
         row.setHuggingPriority(.defaultLow, for: .horizontal)
-        row.spacing = 12
+        row.spacing = 10
         let contents = NSStackView(views: [sectionTitle(L10n.text("Quick Presets")), row])
         contents.orientation = .vertical
         contents.alignment = .leading
-        contents.spacing = 14
+        contents.spacing = 10
         contents.setHuggingPriority(.defaultLow, for: .horizontal)
         row.widthAnchor.constraint(equalTo: contents.widthAnchor).isActive = true
         return card(content: contents)
@@ -1033,35 +1015,34 @@ final class SettingsWindowController: NSWindowController {
             return button
         }
         colorButtons = buttons
+        lyricsColorWell.colorWellStyle = .minimal
+        gradientStartWell.colorWellStyle = .minimal
+        lyricsColorEndWell.colorWellStyle = .minimal
         lyricsColorWell.toolTip = L10n.text("Custom Color / Gradient Start")
-        lyricsColorWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        lyricsColorWell.widthAnchor.constraint(equalToConstant: 32).isActive = true
         gradientStartWell.toolTip = L10n.text("Custom Gradient Start")
-        gradientStartWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        gradientStartWell.widthAnchor.constraint(equalToConstant: 32).isActive = true
         lyricsColorEndWell.toolTip = L10n.text("Custom Gradient End")
-        lyricsColorEndWell.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        func rows(_ controls: [NSView], in stack: NSStackView) {
-            stack.orientation = .vertical
-            stack.alignment = .leading
-            stack.spacing = 5
-            for offset in stride(from: 0, to: controls.count, by: 6) {
-                let row = NSStackView(views: Array(controls[offset..<min(offset + 6, controls.count)]))
-                row.orientation = .horizontal
-                row.spacing = 7
-                stack.addArrangedSubview(row)
-            }
-        }
-        rows(Array(buttons.prefix(LyricsColorPreset.solidPresets.count)), in: solidPalette)
-        rows(Array(buttons.dropFirst(LyricsColorPreset.solidPresets.count)), in: gradientPalette)
-        let customSolid = NSStackView(views: [label(L10n.text("Custom")), lyricsColorWell])
-        let customGradient = NSStackView(views: [label(L10n.text("Custom Gradient Start")), gradientStartWell,
-                                                label(L10n.text("Custom Gradient End")), lyricsColorEndWell])
-        for row in [customSolid, customGradient] {
-            row.orientation = .horizontal
-            row.alignment = .centerY
-            row.spacing = 8
-        }
-        solidPalette.addArrangedSubview(customSolid)
-        gradientPalette.addArrangedSubview(customGradient)
+        lyricsColorEndWell.widthAnchor.constraint(equalToConstant: 32).isActive = true
+
+        let solidCurated: [NSView] = Array(buttons.prefix(8)) + [lyricsColorWell]
+        let solidRow = NSStackView(views: solidCurated)
+        solidRow.orientation = .horizontal
+        solidRow.alignment = .centerY
+        solidRow.spacing = 6
+        solidPalette.orientation = .vertical
+        solidPalette.alignment = .leading
+        solidPalette.addArrangedSubview(solidRow)
+
+        let gradStart = LyricsColorPreset.solidPresets.count
+        let gradCurated: [NSView] = Array(buttons[gradStart..<min(gradStart + 8, buttons.count)]) + [gradientStartWell, lyricsColorEndWell]
+        let gradRow = NSStackView(views: gradCurated)
+        gradRow.orientation = .horizontal
+        gradRow.alignment = .centerY
+        gradRow.spacing = 6
+        gradientPalette.orientation = .vertical
+        gradientPalette.alignment = .leading
+        gradientPalette.addArrangedSubview(gradRow)
         let palette = NSStackView(views: [colorModeControl, solidPalette, gradientPalette])
         palette.orientation = .vertical
         palette.alignment = .leading
@@ -1714,26 +1695,22 @@ final class SettingsWindowController: NSWindowController {
     private func updateSidebarSelection() {
         guard let window else { return }
         window.effectiveAppearance.performAsCurrentDrawingAppearance {
-        sidebarButtons.forEach { page, button in
-            let selected = page == selectedPage
-            button.state = selected ? .on : .off
-            button.layer?.backgroundColor = selected
-                ? NSColor.controlAccentColor.withAlphaComponent(0.09).cgColor
-                : NSColor.clear.cgColor
-            button.contentTintColor = selected ? .controlAccentColor : NSColor.secondaryLabelColor
-            let text = NSMutableAttributedString(string: L10n.text(page.title) + "\n" + L10n.text(page.help))
-            let paragraph = NSMutableParagraphStyle()
-            paragraph.lineSpacing = 4
-            text.addAttribute(.paragraphStyle, value: paragraph, range: NSRange(location: 0, length: text.length))
-            text.addAttributes([.font: NSFont.systemFont(ofSize: 15, weight: .semibold),
-                                .foregroundColor: NSColor.labelColor],
-                               range: NSRange(location: 0, length: L10n.text(page.title).utf16.count))
-            let subtitleStart = L10n.text(page.title).utf16.count + 1
-            text.addAttributes([.font: NSFont.systemFont(ofSize: 11),
-                                .foregroundColor: NSColor.secondaryLabelColor],
-                               range: NSRange(location: subtitleStart, length: text.length - subtitleStart))
-            button.attributedTitle = text
-        }
+            sidebarButtons.forEach { page, button in
+                let selected = page == selectedPage
+                button.state = selected ? .on : .off
+                button.layer?.backgroundColor = selected
+                    ? NSColor.selectedContentBackgroundColor.withAlphaComponent(0.18).cgColor
+                    : NSColor.clear.cgColor
+                button.contentTintColor = selected ? .controlAccentColor : .secondaryLabelColor
+                let text = NSAttributedString(
+                    string: "  " + L10n.text(page.title),
+                    attributes: [
+                        .font: NSFont.systemFont(ofSize: 13, weight: selected ? .semibold : .medium),
+                        .foregroundColor: selected ? NSColor.labelColor : NSColor.secondaryLabelColor
+                    ]
+                )
+                button.attributedTitle = text
+            }
         }
     }
 
@@ -1820,112 +1797,58 @@ private final class SettingsBackdropView: AppearanceSurfaceView {
     override var wantsUpdateLayer: Bool { false }
 
     override func draw(_ dirtyRect: NSRect) {
-        NSGradient(starting: AppearanceSurfaceColors.backdropStart,
-                   ending: AppearanceSurfaceColors.backdropEnd)?
-            .draw(in: bounds, angle: 18)
-        AppearanceSurfaceColors.sidebar.withAlphaComponent(0.22).setFill()
-        NSBezierPath(roundedRect: bounds.insetBy(dx: 8, dy: 8), xRadius: 18, yRadius: 18).fill()
-    }
-}
-
-private final class SettingsSidebarFooterView: AppearanceSurfaceView {
-    override var wantsUpdateLayer: Bool { false }
-    var onSupport: (() -> Void)?
-
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-        wantsLayer = true
-        layer?.cornerRadius = 18
-        layer?.masksToBounds = true
-        layer?.borderWidth = 1
-
-        let symbol = NSImageView(image: notchMuseAppIcon())
-        symbol.setAccessibilityLabel("NotchMuse")
-        symbol.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(symbol)
-
-        let slogan = NSTextField(wrappingLabelWithString: L10n.text("Lyrics, right where you look."))
-        slogan.font = .systemFont(ofSize: 17, weight: .semibold)
-        slogan.textColor = .labelColor
-        slogan.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(slogan)
-
-        let support = NSButton(title: L10n.text("Support NotchMuse"), target: self, action: #selector(openSupport))
-        support.bezelStyle = .inline
-        support.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(support)
-
-        NSLayoutConstraint.activate([
-            symbol.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 22),
-            symbol.topAnchor.constraint(equalTo: topAnchor, constant: 20),
-            symbol.widthAnchor.constraint(equalToConstant: 42),
-            symbol.heightAnchor.constraint(equalToConstant: 42),
-            slogan.leadingAnchor.constraint(equalTo: symbol.leadingAnchor),
-            slogan.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
-            slogan.topAnchor.constraint(equalTo: symbol.bottomAnchor, constant: 10),
-            support.leadingAnchor.constraint(equalTo: slogan.leadingAnchor),
-            support.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
-        ])
-    }
-
-    @objc private func openSupport() { onSupport?() }
-
-    required init?(coder: NSCoder) { nil }
-
-    override func draw(_ dirtyRect: NSRect) {
-        layer?.borderColor = AppearanceSurfaceColors.border.cgColor
-        NSGradient(starting: AppearanceSurfaceColors.card,
-                   ending: AppearanceSurfaceColors.backdropEnd)?
-            .draw(in: bounds, angle: 45)
-        for (offset, color) in [(0.0, NSColor.systemPurple.withAlphaComponent(0.12)),
-                                (13.0, NSColor.systemBlue.withAlphaComponent(0.12)),
-                                (26.0, NSColor.white.withAlphaComponent(0.32))] {
-            let wave = NSBezierPath()
-            wave.move(to: NSPoint(x: -16, y: 20 + offset))
-            wave.curve(to: NSPoint(x: bounds.maxX + 16, y: 26 + offset),
-                       controlPoint1: NSPoint(x: bounds.midX * 0.7, y: 76 + offset),
-                       controlPoint2: NSPoint(x: bounds.midX * 1.5, y: -12 + offset))
-            wave.line(to: NSPoint(x: bounds.maxX + 16, y: 0))
-            wave.line(to: NSPoint(x: -16, y: 0))
-            wave.close()
-            color.setFill()
-            wave.fill()
-        }
+        NSColor.windowBackgroundColor.setFill()
+        dirtyRect.fill()
     }
 }
 
 private final class SettingsSidebarQuickActionsView: AppearanceSurfaceView {
     var onThemeToggle: ((NSAppearance) -> Void)?
+    var onSupport: (() -> Void)?
     private let themeButton = NSButton()
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         themeButton.target = self
         themeButton.action = #selector(toggleTheme)
-        themeButton.bezelStyle = .rounded
+        themeButton.isBordered = false
         themeButton.imagePosition = .imageOnly
+        themeButton.contentTintColor = .tertiaryLabelColor
         themeButton.setAccessibilityIdentifier("settings.themeQuickAction")
         themeButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(themeButton)
 
-        let githubButton = NSButton(title: L10n.text("GitHub Star"), target: self, action: #selector(openGitHub))
-        githubButton.bezelStyle = .rounded
-        githubButton.image = NSImage(systemSymbolName: "star", accessibilityDescription: nil)
-        githubButton.imagePosition = .imageLeading
+        let supportButton = NSButton(title: "", target: self, action: #selector(openSupport))
+        supportButton.isBordered = false
+        supportButton.image = NSImage(systemSymbolName: "heart", accessibilityDescription: L10n.text("Support NotchMuse"))?
+            .withSymbolConfiguration(.init(pointSize: 13, weight: .regular))
+        supportButton.imagePosition = .imageOnly
+        supportButton.contentTintColor = .tertiaryLabelColor
+        supportButton.toolTip = L10n.text("Support NotchMuse")
+        supportButton.setAccessibilityLabel(L10n.text("Support NotchMuse"))
+        supportButton.translatesAutoresizingMaskIntoConstraints = false
+
+        let githubButton = NSButton(title: "", target: self, action: #selector(openGitHub))
+        githubButton.isBordered = false
+        githubButton.image = NSImage(systemSymbolName: "star", accessibilityDescription: L10n.text("GitHub Star"))?
+            .withSymbolConfiguration(.init(pointSize: 13, weight: .regular))
+        githubButton.imagePosition = .imageOnly
+        githubButton.contentTintColor = .tertiaryLabelColor
         githubButton.toolTip = L10n.text("Open NotchMuse on GitHub to leave a star.")
         githubButton.setAccessibilityIdentifier("settings.githubQuickAction")
         githubButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(githubButton)
+
+        let stack = NSStackView(views: [themeButton, supportButton, githubButton])
+        stack.orientation = .horizontal
+        stack.distribution = .fillEqually
+        stack.spacing = 6
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(stack)
 
         NSLayoutConstraint.activate([
-            themeButton.leadingAnchor.constraint(equalTo: leadingAnchor),
-            themeButton.topAnchor.constraint(equalTo: topAnchor),
-            themeButton.bottomAnchor.constraint(equalTo: bottomAnchor),
-            themeButton.widthAnchor.constraint(equalToConstant: 36),
-            githubButton.leadingAnchor.constraint(equalTo: themeButton.trailingAnchor, constant: 10),
-            githubButton.trailingAnchor.constraint(equalTo: trailingAnchor),
-            githubButton.topAnchor.constraint(equalTo: topAnchor),
-            githubButton.bottomAnchor.constraint(equalTo: bottomAnchor)
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.topAnchor.constraint(equalTo: topAnchor),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
         updateThemeButton()
     }
@@ -1940,12 +1863,14 @@ private final class SettingsSidebarQuickActionsView: AppearanceSurfaceView {
     func updateThemeButton() {
         let isDark = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
         let action = L10n.text(isDark ? "Switch to Light Mode" : "Switch to Dark Mode")
-        themeButton.image = NSImage(systemSymbolName: isDark ? "moon.fill" : "sun.max.fill", accessibilityDescription: nil)
+        themeButton.image = NSImage(systemSymbolName: isDark ? "moon.fill" : "sun.max.fill", accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 13, weight: .regular))
         themeButton.toolTip = action
         themeButton.setAccessibilityLabel(action)
     }
 
     @objc private func toggleTheme() { onThemeToggle?(effectiveAppearance) }
+    @objc private func openSupport() { onSupport?() }
 
     @objc private func openGitHub() {
         NSWorkspace.shared.open(URL(string: "https://github.com/Xiye88/NotchMuse")!)

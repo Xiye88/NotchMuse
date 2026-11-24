@@ -917,7 +917,7 @@ final class MenuBarController: NSObject {
         _ = NSApp.sendAction(lockControl.action!, to: lockControl.target, from: lockControl)
         precondition(!controller.overlay.isEditing, "Locking from settings must end temporary editing")
         precondition(defaults.bool(forKey: FreeLyricsPreferences.lockedKey), "Settings lock persists")
-        precondition(!(controller.overlay.freeInteraction.testToolbar.subviews[0] as! NSButton).isEnabled, "Settings lock disables native drag control")
+        precondition(!controller.overlay.freeInteraction.testDragSurface.isDragEnabled, "Settings lock disables direct drag surface")
         print("PASS: display-mode selection reopens closed lyrics, including same-mode reselection; settings locking ends editing")
     }
     #endif

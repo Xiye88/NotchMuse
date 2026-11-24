@@ -29,6 +29,61 @@ enum FreeLyricsGeometry {
     }
 }
 
+enum FreeLyricsSnap {
+    static let threshold: CGFloat = 10
+    static let horizontalInset: CGFloat = 16
+    static let verticalInset: CGFloat = 12
+
+    struct Result: Equatable {
+        let origin: NSPoint
+        let snappedCenterX: Bool
+        let snappedEdge: Bool
+        var snappedAny: Bool { snappedCenterX || snappedEdge }
+    }
+
+    static func snappedOrigin(
+        proposed: NSPoint,
+        size: NSSize,
+        visible: NSRect,
+        bypass: Bool = false
+    ) -> Result {
+        let maxX = max(visible.minX, visible.maxX - size.width)
+        let maxY = max(visible.minY, visible.maxY - size.height)
+        var x = min(max(proposed.x, visible.minX), maxX)
+        var y = min(max(proposed.y, visible.minY), maxY)
+        var snappedCenterX = false
+        var snappedEdge = false
+
+        if !bypass {
+            let centerX = visible.midX - size.width / 2
+            let leftEdge = min(maxX, visible.minX + horizontalInset)
+            let rightEdge = max(visible.minX, visible.maxX - horizontalInset - size.width)
+            let bottomEdge = min(maxY, visible.minY + verticalInset)
+            let topEdge = max(visible.minY, visible.maxY - verticalInset - size.height)
+
+            if abs(x - centerX) <= threshold {
+                x = centerX
+                snappedCenterX = true
+            } else if abs(x - leftEdge) <= threshold {
+                x = leftEdge
+                snappedEdge = true
+            } else if abs(x - rightEdge) <= threshold {
+                x = rightEdge
+                snappedEdge = true
+            }
+
+            if abs(y - bottomEdge) <= threshold {
+                y = bottomEdge
+                snappedEdge = true
+            } else if abs(y - topEdge) <= threshold {
+                y = topEdge
+                snappedEdge = true
+            }
+        }
+        return Result(origin: NSPoint(x: x, y: y), snappedCenterX: snappedCenterX, snappedEdge: snappedEdge)
+    }
+}
+
 enum FreeLyricsPreferences {
     static let verticalKey = "FreeLyricsVertical"
     static let lockedKey = "FreeLyricsLocked"
@@ -74,34 +129,116 @@ private final class FreeLyricsHoverView: NSVisualEffectView {
 }
 
 @MainActor
-private final class LyricsMoveButton: NSButton {
+private final class PillIconButton: NSButton {
+    private var tracking: NSTrackingArea?
+    private var isPointerInside = false {
+        didSet {
+            layer?.backgroundColor = isPointerInside ? NSColor.white.withAlphaComponent(0.14).cgColor : NSColor.clear.cgColor
+        }
+    }
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.cornerRadius = 14
+        layer?.cornerCurve = .continuous
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(rect: .zero, options: [.activeAlways, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) { isPointerInside = true }
+    override func mouseExited(with event: NSEvent) { isPointerInside = false }
+}
+
+@MainActor
+final class FreeLyricsDragSurfaceView: NSView {
+    var isDragEnabled = false {
+        didSet { window?.invalidateCursorRects(for: self) }
+    }
+    var isDraggingNow = false {
+        didSet {
+            layer?.borderColor = isDraggingNow ? NSColor.controlAccentColor.withAlphaComponent(0.45).cgColor : NSColor.clear.cgColor
+            layer?.backgroundColor = isDraggingNow ? NSColor.black.withAlphaComponent(0.18).cgColor : NSColor.clear.cgColor
+            window?.invalidateCursorRects(for: self)
+        }
+    }
     var onDragStart: ((NSEvent) -> Void)?
     var onDrag: ((NSEvent) -> Void)?
     var onDragEnd: (() -> Void)?
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.cornerRadius = 14
+        layer?.cornerCurve = .continuous
+        layer?.borderWidth = 1
+        layer?.borderColor = NSColor.clear.cgColor
+    }
+
+    required init?(coder: NSCoder) { nil }
+
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        guard isDragEnabled else { return }
+        addCursorRect(bounds, cursor: isDraggingNow ? .closedHand : .openHand)
+    }
+
     override func mouseDown(with event: NSEvent) {
-        guard isEnabled else { return }
+        guard isDragEnabled else { return }
         onDragStart?(event)
     }
-    override func mouseDragged(with event: NSEvent) { onDrag?(event) }
-    override func mouseUp(with event: NSEvent) { onDragEnd?() }
+
+    override func mouseDragged(with event: NSEvent) {
+        onDrag?(event)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        onDragEnd?()
+    }
+}
+
+@MainActor
+private final class CenterSnapGuideView: NSView {
+    override func draw(_ dirtyRect: NSRect) {
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: bounds.midX, y: 0))
+        path.line(to: NSPoint(x: bounds.midX, y: bounds.maxY))
+        path.lineWidth = 1
+        let pattern: [CGFloat] = [5, 5]
+        path.setLineDash(pattern, count: pattern.count, phase: 0)
+        NSColor.white.withAlphaComponent(0.28).setStroke()
+        path.stroke()
+    }
 }
 
 /// Adds interaction to the existing renderer; no lyric selection or playback clock lives here.
 @MainActor
 final class FreeLyricsInteraction: NSObject {
     static let toolbarHeight: CGFloat = 38
-    static let expandedToolbarWidth: CGFloat = 188
+    static let expandedToolbarWidth: CGFloat = 176
     let window: NSWindow
     private let lyricViews: [NSView]
     private let container: NSView
+    private let dragSurface = FreeLyricsDragSurfaceView()
     private let unlockWindow = NSPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+    private let snapGuideWindow = NSPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
     private let defaults: UserDefaults
     private let toolbar = FreeLyricsHoverView()
-    private let moveButton = LyricsMoveButton()
-    private let lockButton = NSButton()
-    private let orientationButton = NSButton()
+    private let lockButton = PillIconButton()
+    private let orientationButton = PillIconButton()
     private let colorButton = NSPopUpButton(frame: .zero, pullsDown: true)
+    private let settingsButton = PillIconButton()
+    private let closeButton = PillIconButton()
     private var policy = FreeLyricsPolicy()
     private var hovered = false
     private var hoverTimer: Timer?
@@ -113,6 +250,7 @@ final class FreeLyricsInteraction: NSObject {
     private var dragging = false
     private var dragStart = NSPoint.zero
     private var dragOrigin = NSPoint.zero
+    private var wasSnapped = false
     var onSettings: (() -> Void)?
     var onClose: (() -> Void)?
     var onColor: (() -> Void)?
@@ -125,6 +263,13 @@ final class FreeLyricsInteraction: NSObject {
         self.defaults = defaults
         self.lyricViews = lyricViews
         super.init()
+
+        dragSurface.autoresizingMask = [.width, .height]
+        dragSurface.onDragStart = { [weak self] event in self?.beginDrag(with: event) }
+        dragSurface.onDrag = { [weak self] event in self?.continueDrag(with: event) }
+        dragSurface.onDragEnd = { [weak self] in self?.endDrag() }
+        container.addSubview(dragSurface)
+
         unlockWindow.isOpaque = false
         unlockWindow.backgroundColor = .clear
         unlockWindow.hasShadow = false
@@ -134,20 +279,31 @@ final class FreeLyricsInteraction: NSObject {
         unlockWindow.collectionBehavior = window.collectionBehavior
         unlockWindow.title = L10n.text("Unlock Position")
         window.addChildWindow(unlockWindow, ordered: .above)
+
+        snapGuideWindow.isOpaque = false
+        snapGuideWindow.backgroundColor = .clear
+        snapGuideWindow.hasShadow = false
+        snapGuideWindow.ignoresMouseEvents = true
+        snapGuideWindow.hidesOnDeactivate = false
+        snapGuideWindow.isReleasedWhenClosed = false
+        snapGuideWindow.level = window.level
+        snapGuideWindow.collectionBehavior = window.collectionBehavior
+        snapGuideWindow.contentView = CenterSnapGuideView()
+
         toolbar.material = .hudWindow
         toolbar.blendingMode = .behindWindow
         toolbar.state = .active
         toolbar.wantsLayer = true
-        toolbar.layer?.cornerRadius = 16
+        toolbar.layer?.cornerRadius = 17
+        toolbar.layer?.cornerCurve = .continuous
         toolbar.layer?.borderWidth = 0.5
         toolbar.layer?.borderColor = NSColor.white.withAlphaComponent(0.16).cgColor
         toolbar.layer?.masksToBounds = true
         toolbar.onHover = { [weak self] in self?.setHovered($0) }
         container.addSubview(toolbar)
-        configure(moveButton, symbol: "arrow.up.and.down.and.arrow.left.and.right", label: "Move Lyrics", action: nil)
-        moveButton.onDragStart = { [weak self] event in self?.beginDrag(with: event) }
-        moveButton.onDrag = { [weak self] event in self?.continueDrag(with: event) }
-        moveButton.onDragEnd = { [weak self] in self?.endDrag() }
+
+        configure(lockButton, symbol: "lock.open", label: "Lock Position", action: #selector(toggleLock))
+        configure(orientationButton, symbol: "rectangle.portrait", label: "Switch to Vertical", action: #selector(toggleOrientation))
         colorButton.addItem(withTitle: L10n.text("Lyrics Color"))
         colorButton.item(at: 0)?.image = NSImage(systemSymbolName: "paintpalette", accessibilityDescription: L10n.text("Lyrics Color"))
         for preset in [LyricsColorPreset.white, .orange, .blue, .purple, .green, .mintGradient] {
@@ -160,13 +316,10 @@ final class FreeLyricsInteraction: NSObject {
         colorButton.toolTip = L10n.text("Lyrics Color")
         colorButton.setAccessibilityLabel(L10n.text("Lyrics Color"))
         toolbar.addSubview(colorButton)
-        let settings = NSButton()
-        configure(settings, symbol: "gearshape", label: "Open NotchMuse", action: #selector(openSettings))
-        let close = NSButton()
-        configure(close, symbol: "xmark", label: "Hide Lyrics", action: #selector(closeLyrics))
-        configure(lockButton, symbol: "lock.open", label: "Lock Position", action: #selector(toggleLock))
-        configure(orientationButton, symbol: "rectangle.portrait", label: "Switch to Vertical", action: #selector(toggleOrientation))
+        configure(settingsButton, symbol: "gearshape", label: "Open NotchMuse", action: #selector(openSettings))
+        configure(closeButton, symbol: "xmark", label: "Hide Lyrics", action: #selector(closeLyrics))
         toolbar.alphaValue = 0
+
         screenObserver = NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.reposition() }
         }
@@ -218,11 +371,11 @@ final class FreeLyricsInteraction: NSObject {
         policy.passThrough = defaults.bool(forKey: FreeLyricsPreferences.passThroughKey)
         policy.hideOnHover = hideOnHover
         let unlocked = policy.editing || !policy.locked
-        // Returning nil from a view hit-test does not pass an event to a window behind it.
-        // The locked lyric window ignores events; only the small child panel receives unlock clicks.
         window.ignoresMouseEvents = policy.ignoresMouseEvents || !unlocked
         unlockWindow.ignoresMouseEvents = policy.ignoresMouseEvents
-        moveButton.isEnabled = policy.canMove
+        dragSurface.isDragEnabled = policy.canMove
+        dragSurface.frame = NSRect(x: 0, y: Self.toolbarHeight, width: container.bounds.width, height: max(0, container.bounds.height - Self.toolbarHeight))
+
         let lockAction = L10n.text(unlocked ? "Lock Position" : "Unlock Position")
         lockButton.image = NSImage(systemSymbolName: unlocked ? "lock.open" : "lock", accessibilityDescription: lockAction)
         lockButton.toolTip = lockAction
@@ -231,29 +384,29 @@ final class FreeLyricsInteraction: NSObject {
         orientationButton.toolTip = orientationAction
         orientationButton.setAccessibilityLabel(orientationAction)
         orientationButton.image = NSImage(systemSymbolName: defaults.bool(forKey: FreeLyricsPreferences.verticalKey) ? "rectangle" : "rectangle.portrait", accessibilityDescription: orientationAction)
-        let controls = [moveButton, colorButton, lockButton, orientationButton, toolbar.subviews[2], toolbar.subviews[3]]
+
+        let controls: [NSView] = [lockButton, orientationButton, colorButton, settingsButton, closeButton]
         let width: CGFloat = unlocked ? Self.expandedToolbarWidth : 38
+        let height: CGFloat = 34
         if unlocked {
             unlockWindow.orderOut(nil)
             if toolbar.superview !== container {
                 unlockWindow.contentView = nil
                 container.addSubview(toolbar)
             }
-            toolbar.frame = NSRect(x: (window.frame.width - width) / 2, y: 3, width: width, height: 32)
+            toolbar.frame = NSRect(x: (window.frame.width - width) / 2, y: 2, width: width, height: height)
         } else {
             if unlockWindow.contentView !== toolbar {
                 toolbar.removeFromSuperview()
                 unlockWindow.contentView = toolbar
             }
-            toolbar.frame = NSRect(x: 0, y: 0, width: width, height: 32)
+            toolbar.frame = NSRect(x: 0, y: 0, width: width, height: height)
             positionUnlockWindow()
         }
         for (index, child) in controls.enumerated() {
             child.isHidden = !unlocked && child !== lockButton
-            child.frame = NSRect(x: unlocked ? 4 + CGFloat(index) * 30 : 4, y: 1, width: 30, height: 30)
+            child.frame = NSRect(x: unlocked ? 6 + CGFloat(index) * 34 : 5, y: 3, width: 28, height: 28)
         }
-        // Position-only polling also works when the entire window intentionally ignores events.
-        // No event tap, permission, or global mouse-event interception is required.
         if hoverTimer == nil {
             hoverTimer = Timer.scheduledTimer(withTimeInterval: 0.06, repeats: true) { [weak self] _ in
                 MainActor.assumeIsolated {
@@ -298,6 +451,9 @@ final class FreeLyricsInteraction: NSObject {
         guard policy.canMove else { return }
         beginEditing()
         dragging = true
+        wasSnapped = false
+        dragSurface.isDraggingNow = true
+        NSCursor.closedHand.push()
         applyVisibility(animated: false)
         dragStart = window.convertPoint(toScreen: event.locationInWindow)
         dragOrigin = window.frame.origin
@@ -306,15 +462,40 @@ final class FreeLyricsInteraction: NSObject {
     private func continueDrag(with event: NSEvent) {
         guard dragging else { return }
         let point = window.convertPoint(toScreen: event.locationInWindow)
-        window.setFrameOrigin(NSPoint(x: dragOrigin.x + point.x - dragStart.x, y: dragOrigin.y + point.y - dragStart.y))
+        let proposed = NSPoint(x: dragOrigin.x + point.x - dragStart.x, y: dragOrigin.y + point.y - dragStart.y)
+        let bypass = event.modifierFlags.contains(.option)
+        if let screen = window.screen ?? NSScreen.main {
+            let snapped = FreeLyricsSnap.snappedOrigin(
+                proposed: proposed,
+                size: window.frame.size,
+                visible: screen.visibleFrame,
+                bypass: bypass
+            )
+            window.setFrameOrigin(snapped.origin)
+            if snapped.snappedAny && !wasSnapped {
+                NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+            }
+            wasSnapped = snapped.snappedAny
+            if snapped.snappedCenterX {
+                let guideFrame = NSRect(x: screen.visibleFrame.midX - 1, y: screen.visibleFrame.minY, width: 2, height: screen.visibleFrame.height)
+                if snapGuideWindow.frame != guideFrame { snapGuideWindow.setFrame(guideFrame, display: true) }
+                if !snapGuideWindow.isVisible { snapGuideWindow.orderFrontRegardless() }
+            } else {
+                snapGuideWindow.orderOut(nil)
+            }
+        } else {
+            window.setFrameOrigin(proposed)
+        }
     }
 
     private func endDrag() {
         guard dragging else { return }
         dragging = false
+        wasSnapped = false
+        dragSurface.isDraggingNow = false
+        NSCursor.pop()
+        snapGuideWindow.orderOut(nil)
         savePosition()
-        // AppKit responder events only: no event tap or global mouse interception.
-        // Locking restores stored hover/pass-through preferences; controls still follow hover.
         applyVisibility(animated: false)
     }
 
@@ -353,7 +534,6 @@ final class FreeLyricsInteraction: NSObject {
         } else {
             unlockWindow.orderOut(nil)
         }
-        // Do not restart an in-flight fade on each lyric-progress update.
         guard lyricViews.contains(where: { $0.alphaValue != lyricsAlpha }) || toolbar.alphaValue != toolbarAlpha else { return }
         NSAnimationContext.runAnimationGroup { context in
             context.duration = animated ? 0.14 : 0
@@ -363,7 +543,7 @@ final class FreeLyricsInteraction: NSObject {
     }
 
     private func positionUnlockWindow() {
-        let frame = window.convertToScreen(NSRect(x: (window.frame.width - 38) / 2, y: 3, width: 38, height: 32))
+        let frame = window.convertToScreen(NSRect(x: (window.frame.width - 38) / 2, y: 2, width: 38, height: 34))
         if unlockWindow.frame != frame { unlockWindow.setFrame(frame, display: true) }
     }
 
@@ -381,6 +561,9 @@ final class FreeLyricsInteraction: NSObject {
         hovered = false
         policy.editing = false
         dragging = false
+        wasSnapped = false
+        dragSurface.isDraggingNow = false
+        snapGuideWindow.orderOut(nil)
         applyVisibility(animated: false)
     }
 
@@ -392,6 +575,7 @@ final class FreeLyricsInteraction: NSObject {
         applyVisibility(animated: false)
     }
     var testToolbar: NSView { toolbar }
+    var testDragSurface: FreeLyricsDragSurfaceView { dragSurface }
     var testUnlockWindow: NSWindow { unlockWindow }
     #endif
 

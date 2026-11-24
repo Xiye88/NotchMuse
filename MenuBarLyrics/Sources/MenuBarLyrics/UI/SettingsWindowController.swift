@@ -589,8 +589,12 @@ final class SettingsWindowController: NSWindowController {
         previewModeControl.target = self
         previewModeControl.action = #selector(displayModeChanged)
         previewModeControl.selectedSegment = 0
+        previewModeControl.isHidden = true
         preview.onModeClick = { [weak self] mode in
             guard let self else { return }
+            if AppPreferences.displayMode != mode {
+                NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+            }
             self.previewModeControl.selectedSegment = DisplayMode.allCases.firstIndex(of: mode) ?? 0
             self.displayModeChanged()
         }
@@ -734,12 +738,12 @@ final class SettingsWindowController: NSWindowController {
         previewHeader.alignment = .centerY
         let previewContents = NSStackView(views: [previewHeader, preview])
         previewContents.orientation = .vertical
-        previewContents.spacing = 16
+        previewContents.spacing = 12
         let previewCard = card(content: previewContents)
         self.previewCard = previewCard
         previewCard.isHidden = selectedPage != .display
-        preview.widthAnchor.constraint(equalTo: previewCard.widthAnchor, constant: -40).isActive = true
-        preview.heightAnchor.constraint(equalToConstant: 196).isActive = true
+        preview.widthAnchor.constraint(equalTo: previewCard.widthAnchor, constant: -32).isActive = true
+        preview.heightAnchor.constraint(equalToConstant: 218).isActive = true
         previewHeader.widthAnchor.constraint(equalTo: preview.widthAnchor).isActive = true
 
         contentStack.orientation = .vertical
@@ -2794,189 +2798,437 @@ private final class SettingsPreviewView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        let gap: CGFloat = 12
-        let panelWidth = (bounds.width - gap * 2) / 3
-        for (index, mode) in Mode.allCases.enumerated() {
-            drawPanel(NSRect(x: CGFloat(index) * (panelWidth + gap), y: 0, width: panelWidth, height: bounds.height), panelMode: mode)
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            let gap: CGFloat = 12
+            let panelWidth = (bounds.width - gap * 2) / 3
+            for (index, mode) in Mode.allCases.enumerated() {
+                drawPanel(
+                    NSRect(x: CGFloat(index) * (panelWidth + gap), y: 0, width: panelWidth, height: bounds.height),
+                    panelMode: mode
+                )
+            }
         }
     }
 
     private func drawPanel(_ rect: NSRect, panelMode: Mode) {
-        let notch = panelMode != .statusBar
         let selected = mode == panelMode
         let hovered = hoveredMode == panelMode
-        (selected || hovered ? NSColor.controlAccentColor.withAlphaComponent(hovered ? 0.10 : 0.05) : NSColor.clear).setFill()
-        NSBezierPath(roundedRect: rect, xRadius: 11, yRadius: 11).fill()
-        let title = L10n.text(panelMode == .free ? "Free Position" : (notch ? "Notch Preview" : "Status Bar Preview"))
-        (title as NSString).draw(in: NSRect(x: rect.minX + 10, y: rect.minY + 2, width: rect.width - 20, height: 22),
-                                 withAttributes: [.font: NSFont.systemFont(ofSize: 12, weight: .semibold),
-                                                  .foregroundColor: NSColor.secondaryLabelColor])
-        let screen = NSRect(x: rect.minX + 2, y: rect.minY + 26, width: rect.width - 4, height: rect.height - 29)
+        let isDark = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+
+        // 1. Card background & selection/hover chrome
+        let cardPath = NSBezierPath(roundedRect: rect.insetBy(dx: 0.75, dy: 0.75), xRadius: 11, yRadius: 11)
+        if selected {
+            AppearanceSurfaceColors.accentSoft.withAlphaComponent(isDark ? 0.14 : 0.10).setFill()
+            cardPath.fill()
+        } else if hovered {
+            NSColor.labelColor.withAlphaComponent(0.04).setFill()
+            cardPath.fill()
+        } else {
+            (isDark ? NSColor.white.withAlphaComponent(0.02) : NSColor.black.withAlphaComponent(0.015)).setFill()
+            cardPath.fill()
+        }
+
+        // 2. Miniature 16:10 MacBook Desktop Screen (~72% of card height)
+        let screenInset: CGFloat = 8
+        let footerHeight: CGFloat = 56
+        let screen = NSRect(
+            x: rect.minX + screenInset,
+            y: rect.minY + screenInset + (hovered && !selected ? -1 : 0),
+            width: rect.width - screenInset * 2,
+            height: max(84, rect.height - screenInset - footerHeight)
+        )
+
         NSGraphicsContext.saveGraphicsState()
-        NSBezierPath(roundedRect: screen, xRadius: 11, yRadius: 11).addClip()
-        if let wallpaper {
-            let cropHeight = wallpaper.size.width * screen.height / screen.width
-            let crop = NSRect(x: 0, y: (wallpaper.size.height - cropHeight) / 2,
-                              width: wallpaper.size.width, height: cropHeight)
-            wallpaper.draw(in: screen, from: crop, operation: .sourceOver, fraction: 1,
-                           respectFlipped: true, hints: nil)
+        let screenClip = NSBezierPath(roundedRect: screen, xRadius: 8, yRadius: 8)
+        screenClip.addClip()
+
+        // Adaptive macOS desktop wallpaper gradient
+        let wallpaperGradient: NSGradient?
+        if isDark {
+            wallpaperGradient = NSGradient(colors: [
+                NSColor(calibratedRed: 0.08, green: 0.10, blue: 0.17, alpha: 1),
+                NSColor(calibratedRed: 0.13, green: 0.11, blue: 0.20, alpha: 1),
+                NSColor(calibratedRed: 0.18, green: 0.12, blue: 0.15, alpha: 1)
+            ])
         } else {
-            NSGradient(starting: NSColor.systemOrange, ending: NSColor.systemBlue)?
-                .draw(in: screen, angle: -18)
+            wallpaperGradient = NSGradient(colors: [
+                NSColor(calibratedRed: 0.77, green: 0.84, blue: 0.92, alpha: 1),
+                NSColor(calibratedRed: 0.89, green: 0.87, blue: 0.83, alpha: 1),
+                NSColor(calibratedRed: 0.94, green: 0.88, blue: 0.81, alpha: 1)
+            ])
+        }
+        wallpaperGradient?.draw(in: screen, angle: -25)
+
+        // Subtle warm ambient radial wash
+        let glowRect = NSRect(x: screen.midX - screen.width * 0.45, y: screen.minY + 12, width: screen.width * 0.9, height: screen.height * 0.75)
+        let glowColor = AppearanceSurfaceColors.accent.withAlphaComponent(isDark ? 0.10 : 0.08)
+        NSGradient(starting: glowColor, ending: .clear)?.draw(in: glowRect, relativeCenterPosition: .zero)
+
+        // Top translucent macOS menu bar strip (15pt tall)
+        let menuBarHeight: CGFloat = 15
+        let menuBar = NSRect(x: screen.minX, y: screen.minY, width: screen.width, height: menuBarHeight)
+        (isDark ? NSColor.black.withAlphaComponent(0.50) : NSColor.white.withAlphaComponent(0.76)).setFill()
+        NSBezierPath(rect: menuBar).fill()
+        (isDark ? NSColor.white.withAlphaComponent(0.10) : NSColor.black.withAlphaComponent(0.08)).setFill()
+        NSBezierPath(rect: NSRect(x: menuBar.minX, y: menuBar.maxY - 0.5, width: menuBar.width, height: 0.5)).fill()
+
+        // Menu bar left dots & skeleton items
+        let menuInk = isDark ? NSColor.white.withAlphaComponent(0.55) : NSColor.black.withAlphaComponent(0.45)
+        menuInk.setFill()
+        NSBezierPath(ovalIn: NSRect(x: menuBar.minX + 6, y: menuBar.midY - 2, width: 4, height: 4)).fill()
+        NSBezierPath(roundedRect: NSRect(x: menuBar.minX + 13, y: menuBar.midY - 1, width: 10, height: 2), xRadius: 1, yRadius: 1).fill()
+        NSBezierPath(roundedRect: NSRect(x: menuBar.minX + 26, y: menuBar.midY - 1, width: 12, height: 2), xRadius: 1, yRadius: 1).fill()
+
+        // Menu bar right micro status dots
+        for i in 0..<3 {
+            let dotX = menuBar.maxX - 7 - CGFloat(i) * 5.5
+            NSBezierPath(ovalIn: NSRect(x: dotX - 1.25, y: menuBar.midY - 1.25, width: 2.5, height: 2.5)).fill()
         }
 
-        if notch {
-            let previewScale = WidthGeometry.previewScale(screenWidth: screen.width)
-            let cutout = NSRect(x: screen.midX - 54, y: screen.minY - 1, width: 108, height: 28)
-            NSColor.black.setFill()
-            NSBezierPath(roundedRect: cutout, xRadius: 14, yRadius: 14).fill()
-            let lineHeight = ceil(min(lyricFontSize, 17) * 1.3)
-            let availableWidth = max(0, screen.width - 22)
-            let overlayWidth = min(availableWidth, max(min(180 * previewScale, availableWidth), WidthGeometry.notchWidth(
-                mode: lyricWidth, availableWidth: availableWidth, style: notchStyle, customWidth: customWidth * previewScale
-            )))
-            let overlayHeight: CGFloat
-            switch notchStyle {
-            case .lyricOnly: overlayHeight = lineHeight + 14
-            case .songLyric: overlayHeight = lineHeight * 2 + 18
-            case .expanded: overlayHeight = lineHeight * 4 + 22
-            }
-            let overlay: NSRect
-            let notchPlacement: NotchPlacement = panelMode == .free ? (FreeLyricsPreferences.vertical ? .left : .bottom) : self.notchPlacement
-            switch notchPlacement {
-            case .top: overlay = NSRect(x: screen.midX - overlayWidth / 2, y: cutout.maxY + 6, width: overlayWidth, height: overlayHeight)
-            case .bottom: overlay = NSRect(x: screen.midX - overlayWidth / 2, y: screen.maxY - overlayHeight - 8, width: overlayWidth, height: overlayHeight)
-            case .left, .right:
-                let sideWidth: CGFloat = 54
-                let sideHeight = screen.height * 0.72
-                overlay = NSRect(x: notchPlacement == .left ? screen.minX + 8 : screen.maxX - sideWidth - 8,
-                                 y: screen.midY - sideHeight / 2, width: sideWidth, height: sideHeight)
-            }
-            let sampleLyric = liveLyricText ?? L10n.text("Preview lyric sample")
-            let previewText = "♪ " + sampleLyric
-            let previewFont = NSFont.systemFont(ofSize: min(lyricFontSize, 17), weight: .medium)
-            let previewTextWidth = (previewText as NSString).size(withAttributes: [.font: previewFont]).width
-            let previewMetadataWidth = notchStyle == .lyricOnly ? 0 : (L10n.text("Preview song · Preview artist") as NSString).size(withAttributes: [.font: previewFont]).width
-            let background = (notchPlacement.isVertical ? NSRect(origin: .zero, size: overlay.size) : NotchGeometry.backgroundRect(in: overlay, contentWidth: max(previewTextWidth, previewMetadataWidth), padding: notchBackgroundPadding))
-                .offsetBy(dx: overlay.minX, dy: overlay.minY)
-            if notchBackground {
-                notchBackgroundColor.withAlphaComponent(backgroundOpacity).setFill()
-                NSBezierPath(roundedRect: background, xRadius: overlayHeight / 2, yRadius: overlayHeight / 2).fill()
-            }
-            if notchPlacement.isVertical {
-                let sample = Array(liveLyricText ?? L10n.text("Preview lyric sample"))
-                let cell: CGFloat = 16
-                let rows = max(1, Int((overlay.height - 12) / cell))
-                for (index, glyph) in sample.prefix(rows * 2).enumerated() {
-                    let color = usesGradient ? lyricColors[min(index * lyricColors.count / max(1, sample.count), lyricColors.count - 1)] : lyricColors[min(1, lyricColors.count - 1)]
-                    drawText(String(glyph), in: NSRect(x: overlay.minX + CGFloat(index / rows) * overlay.width / 2,
-                                                       y: overlay.minY + 6 + CGFloat(index % rows) * cell,
-                                                       width: overlay.width / 2, height: cell), color: color, size: 12, alignment: .center)
-                }
-            } else if notchStyle == .songLyric {
-                drawText(L10n.text("Preview song · Preview artist"),
-                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
-                                    width: overlay.width - 24, height: lineHeight),
-                         color: notchPreviewForeground, size: max(10, min(lyricFontSize - 2, 13)), alignment: .center)
-            } else if notchStyle == .expanded {
-                drawText(L10n.text("Preview song"),
-                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + 4,
-                                    width: overlay.width - 24, height: lineHeight),
-                         color: notchPreviewForeground, size: max(10, min(lyricFontSize, 13)), alignment: .left)
-                drawText(L10n.text("Preview artist"),
-                         in: NSRect(x: overlay.minX + 12, y: overlay.minY + lineHeight + 4,
-                                    width: overlay.width - 24, height: lineHeight),
-                         color: notchPreviewForeground, size: max(10, min(lyricFontSize - 2, 12)), alignment: .left)
-            }
-            if !notchPlacement.isVertical {
-                drawLyric(in: NSRect(x: overlay.minX + 12, y: overlay.maxY - lineHeight - 7,
-                                    width: overlay.width - 24, height: lineHeight), notch: true,
-                          backgroundColor: notchBackground ? notchBackgroundColor : nil)
-            }
-        } else {
-            let bar = NSRect(x: screen.minX, y: screen.minY, width: screen.width, height: 28)
-            NSColor.white.withAlphaComponent(0.86).setFill()
-            NSBezierPath(rect: bar).fill()
-            NSImage(systemSymbolName: "apple.logo", accessibilityDescription: nil)?
-                .draw(in: NSRect(x: bar.minX + 12, y: bar.minY + 6, width: 16, height: 16))
-            let previewScale = WidthGeometry.previewScale(screenWidth: screen.width)
-            let leftMinX = bar.minX + 328 * previewScale
-            let rightMaxX = bar.maxX - 368 * previewScale
-            let centerGap = 8 * previewScale
-            let safeLane = position == .left
-                ? NSRect(x: leftMinX, y: bar.minY + 5, width: max(0, bar.midX - leftMinX - centerGap), height: 20)
-                : NSRect(x: bar.midX + centerGap, y: bar.minY + 5, width: max(0, rightMaxX - bar.midX - centerGap), height: 20)
-            let width = WidthGeometry.statusBarWidth(mode: lyricWidth, availableWidth: safeLane.width, customWidth: customWidth * previewScale)
-            let baseFrame = WidthGeometry.constrainedFrame(safeLane, width: width, alignToTrailingEdge: position == .left)
-            let frame = OverlayLaneGeometry.offsetFrame(baseFrame, within: safeLane, by: statusBarOffset * previewScale)
-            drawLyric(in: frame, notch: false)
-            let symbols = ["wifi", "speaker.wave.2.fill", "battery.100percent"]
-            for (index, symbol) in symbols.enumerated() {
-                NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
-                    .draw(in: NSRect(x: bar.maxX - 48 + CGFloat(index) * 14,
-                                     y: bar.minY + 8, width: 12, height: 12))
-            }
+        // Physical black MacBook notch cutout (top-center, rounded bottom corners)
+        let notchWidth: CGFloat = min(44, screen.width * 0.28)
+        let notchHeight: CGFloat = 11
+        let notchRect = NSRect(x: screen.midX - notchWidth / 2, y: screen.minY - 3, width: notchWidth, height: notchHeight + 3)
+
+        // Subtle miniature workspace window in desktop center ("my open app")
+        let winWidth = screen.width * 0.64
+        let winHeight = max(46, (screen.height - menuBarHeight - 24) * 0.68)
+        let winRect = NSRect(
+            x: screen.midX - winWidth / 2,
+            y: menuBar.maxY + (screen.height - menuBarHeight - 20 - winHeight) * 0.45,
+            width: winWidth,
+            height: winHeight
+        )
+        drawMiniatureWorkspaceWindow(in: winRect, isDark: isDark)
+
+        // Tiny frosted bottom Dock pill with 5 micro app dots
+        let dockWidth: CGFloat = min(58, screen.width * 0.36)
+        let dockHeight: CGFloat = 11
+        let dockRect = NSRect(
+            x: screen.midX - dockWidth / 2,
+            y: screen.maxY - dockHeight - 5,
+            width: dockWidth,
+            height: dockHeight
+        )
+        drawMiniatureDock(in: dockRect, isDark: isDark)
+
+        // Mode-specific unmistakable lyric overlay
+        let sampleLyric = shortPreviewLyric()
+        switch panelMode {
+        case .statusBar:
+            // Draw notch first, then highlight lyric lane right inside top menu bar
+            drawNotchCutout(notchRect)
+            drawStatusBarOverlay(menuBar: menuBar, notchRect: notchRect, text: sampleLyric, isDark: isDark)
+        case .notch:
+            // Frosted dark rounded-bottom capsule hugging/extending cleanly around top-center notch
+            drawNotchModeOverlay(screen: screen, notchRect: notchRect, text: sampleLyric)
+        case .free:
+            // Draw notch, then dashed vertical snap guide + floating lyric capsule over the workspace window
+            drawNotchCutout(notchRect)
+            drawFreeFloatingOverlay(screen: screen, winRect: winRect, text: sampleLyric, isDark: isDark)
         }
+
         NSGraphicsContext.restoreGraphicsState()
-        (selected ? NSColor.controlAccentColor : NSColor.white.withAlphaComponent(0.85)).setStroke()
-        let outline = NSBezierPath(roundedRect: screen.insetBy(dx: 0.5, dy: 0.5), xRadius: 11, yRadius: 11)
-        outline.lineWidth = selected ? 2.5 : hovered ? 2 : 1.5
-        outline.stroke()
-        (selected ? NSColor.controlAccentColor : hovered ? NSColor.controlAccentColor.withAlphaComponent(0.7) : NSColor.clear).setStroke()
-        let cardOutline = NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 11, yRadius: 11)
-        cardOutline.lineWidth = selected ? 2 : 1.5
-        cardOutline.stroke()
-    }
 
-    private var notchPreviewForeground: NSColor {
-        notchBackground ? NotchBackgroundContrast.foreground(on: notchBackgroundColor) : .white
-    }
+        // Miniature MacBook bezel frame
+        let bezelColor = isDark ? NSColor.white.withAlphaComponent(0.14) : NSColor.black.withAlphaComponent(0.16)
+        bezelColor.setStroke()
+        let bezel = NSBezierPath(roundedRect: screen.insetBy(dx: 0.5, dy: 0.5), xRadius: 8, yRadius: 8)
+        bezel.lineWidth = 0.75
+        bezel.stroke()
 
-    private func drawLyric(in rect: NSRect, notch: Bool, backgroundColor: NSColor? = nil) {
-        let text = "♪ " + (liveLyricText ?? L10n.text("Preview lyric sample"))
-        let size = min(lyricFontSize, notch ? 17 : 15)
-        let colors = lyricColors
-        let base = colors[min(1, colors.count - 1)].withAlphaComponent(0.72)
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = .center
-        if usesGradient {
-            BrandStyle.gradientLyric(text, colors: colors.map { $0.withAlphaComponent(0.58 * (notch ? 1 : lyricOpacity)) }, attributes: [
-                .font: NSFont.systemFont(ofSize: size, weight: .medium), .paragraphStyle: paragraph
-            ]).draw(in: rect)
-        } else {
-            drawText(text, in: rect, color: base.withAlphaComponent(notch ? 0.7 : lyricOpacity), size: size,
-                     alignment: .center, shadow: notch)
+        // 3. Clean Card Footer (Title + Active Pill + Concise Caption)
+        let isZh = AppPreferences.language == .simplifiedChinese
+        let titleText: String
+        let captionText: String
+        switch panelMode {
+        case .statusBar:
+            titleText = isZh ? "菜单栏" : "Status Bar"
+            captionText = isZh ? "融入顶部菜单栏，极简常驻" : "Quietly docked in the menu bar"
+        case .notch:
+            titleText = isZh ? "刘海环绕" : "Notch"
+            captionText = isZh ? "贴合屏幕刘海，不占工作区" : "Hugs your MacBook notch cleanly"
+        case .free:
+            titleText = isZh ? "自由悬浮" : "Free Floating"
+            captionText = isZh ? "任意位置拖动，支持穿透" : "Drag anywhere, click-through ready"
         }
+
+        let footerTop = screen.maxY + 9
+        let titleFont = NSFont.systemFont(ofSize: 12.5, weight: .semibold)
+        let titleColor: NSColor = (selected || hovered) ? .labelColor : .secondaryLabelColor
+        let activeBadgeWidth: CGFloat = selected ? (isZh ? 34 : 42) : 0
+        (titleText as NSString).draw(
+            in: NSRect(x: rect.minX + 10, y: footerTop, width: rect.width - 20 - activeBadgeWidth, height: 17),
+            withAttributes: [.font: titleFont, .foregroundColor: titleColor]
+        )
+
+        if selected {
+            let badgeText = isZh ? "当前" : "Active"
+            let badgeRect = NSRect(x: rect.maxX - 10 - activeBadgeWidth, y: footerTop + 1, width: activeBadgeWidth, height: 15)
+            AppearanceSurfaceColors.accentSoft.setFill()
+            NSBezierPath(roundedRect: badgeRect, xRadius: 4, yRadius: 4).fill()
+            let badgeStyle = NSMutableParagraphStyle()
+            badgeStyle.alignment = .center
+            (badgeText as NSString).draw(
+                in: NSRect(x: badgeRect.minX, y: badgeRect.minY + 1, width: badgeRect.width, height: 13),
+                withAttributes: [
+                    .font: NSFont.systemFont(ofSize: 9.5, weight: .semibold),
+                    .foregroundColor: AppearanceSurfaceColors.accent,
+                    .paragraphStyle: badgeStyle
+                ]
+            )
+        }
+
+        let captionStyle = NSMutableParagraphStyle()
+        captionStyle.lineBreakMode = .byTruncatingTail
+        (captionText as NSString).draw(
+            in: NSRect(x: rect.minX + 10, y: footerTop + 20, width: rect.width - 20, height: 15),
+            withAttributes: [
+                .font: NSFont.systemFont(ofSize: 10.5, weight: .regular),
+                .foregroundColor: selected ? NSColor.secondaryLabelColor : NSColor.tertiaryLabelColor,
+                .paragraphStyle: captionStyle
+            ]
+        )
+
+        // 4. Outer Card Border (1.5pt warm amber when selected, 0.5pt quiet border when idle)
+        if selected {
+            AppearanceSurfaceColors.accent.setStroke()
+            cardPath.lineWidth = 1.5
+            cardPath.stroke()
+        } else if hovered {
+            AppearanceSurfaceColors.accent.withAlphaComponent(0.45).setStroke()
+            cardPath.lineWidth = 1.0
+            cardPath.stroke()
+        } else {
+            AppearanceSurfaceColors.border.setStroke()
+            cardPath.lineWidth = 0.5
+            cardPath.stroke()
+        }
+    }
+
+    private func shortPreviewLyric() -> String {
+        let raw = liveLyricText ?? L10n.text("Preview lyric sample")
+        return "♪ " + raw
+    }
+
+    private func drawNotchCutout(_ notchRect: NSRect) {
+        NSColor(calibratedRed: 0.04, green: 0.04, blue: 0.05, alpha: 1).setFill()
+        NSBezierPath(roundedRect: notchRect, xRadius: 4, yRadius: 4).fill()
+    }
+
+    private func drawMiniatureWorkspaceWindow(in rect: NSRect, isDark: Bool) {
         NSGraphicsContext.saveGraphicsState()
-        NSBezierPath(rect: NSRect(x: rect.minX, y: rect.minY, width: rect.width * 0.58, height: rect.height)).addClip()
-        if usesGradient {
-            BrandStyle.gradientLyric(text, colors: colors.map { $0.withAlphaComponent(notch ? 1 : lyricOpacity) }, attributes: [
-                .font: NSFont.systemFont(ofSize: size, weight: .medium), .paragraphStyle: paragraph
-            ]).draw(in: rect)
-        } else {
-            drawText(text, in: rect, color: colors[min(1, colors.count - 1)].withAlphaComponent(notch ? 1 : lyricOpacity),
-                     size: size, alignment: .center, shadow: notch)
-        }
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor.black.withAlphaComponent(isDark ? 0.35 : 0.14)
+        shadow.shadowBlurRadius = 6
+        shadow.shadowOffset = NSSize(width: 0, height: -2)
+        shadow.set()
+
+        let windowBg = isDark
+            ? NSColor(calibratedRed: 0.14, green: 0.145, blue: 0.17, alpha: 0.90)
+            : NSColor.white.withAlphaComponent(0.86)
+        windowBg.setFill()
+        let path = NSBezierPath(roundedRect: rect, xRadius: 5, yRadius: 5)
+        path.fill()
         NSGraphicsContext.restoreGraphicsState()
+
+        (isDark ? NSColor.white.withAlphaComponent(0.10) : NSColor.black.withAlphaComponent(0.08)).setStroke()
+        path.lineWidth = 0.5
+        path.stroke()
+
+        // Traffic lights
+        let lights: [NSColor] = [
+            NSColor(calibratedRed: 1.0, green: 0.37, blue: 0.34, alpha: 0.9),
+            NSColor(calibratedRed: 1.0, green: 0.74, blue: 0.18, alpha: 0.9),
+            NSColor(calibratedRed: 0.15, green: 0.79, blue: 0.25, alpha: 0.9)
+        ]
+        for (i, color) in lights.enumerated() {
+            color.setFill()
+            NSBezierPath(ovalIn: NSRect(x: rect.minX + 6 + CGFloat(i) * 5.5, y: rect.minY + 4.5, width: 3, height: 3)).fill()
+        }
+
+        // Subtle titlebar hairline
+        (isDark ? NSColor.white.withAlphaComponent(0.06) : NSColor.black.withAlphaComponent(0.05)).setFill()
+        NSBezierPath(rect: NSRect(x: rect.minX, y: rect.minY + 11, width: rect.width, height: 0.5)).fill()
+
+        // 3 faint horizontal skeleton content lines
+        let lineInk = isDark ? NSColor.white.withAlphaComponent(0.11) : NSColor.black.withAlphaComponent(0.08)
+        lineInk.setFill()
+        let ratios: [CGFloat] = [0.56, 0.74, 0.42]
+        for (i, ratio) in ratios.enumerated() {
+            let lineRect = NSRect(
+                x: rect.minX + 7,
+                y: rect.minY + 17 + CGFloat(i) * 7,
+                width: (rect.width - 14) * ratio,
+                height: 2.5
+            )
+            NSBezierPath(roundedRect: lineRect, xRadius: 1.25, yRadius: 1.25).fill()
+        }
     }
 
-    private func drawText(_ text: String, in rect: NSRect, color: NSColor, size: CGFloat,
-                          alignment: NSTextAlignment, shadow: Bool = false) {
+    private func drawMiniatureDock(in rect: NSRect, isDark: Bool) {
+        (isDark ? NSColor.white.withAlphaComponent(0.13) : NSColor.white.withAlphaComponent(0.68)).setFill()
+        let pill = NSBezierPath(roundedRect: rect, xRadius: 4.5, yRadius: 4.5)
+        pill.fill()
+        (isDark ? NSColor.white.withAlphaComponent(0.16) : NSColor.black.withAlphaComponent(0.10)).setStroke()
+        pill.lineWidth = 0.5
+        pill.stroke()
+
+        let dotColors: [NSColor] = [
+            NSColor(calibratedRed: 0.24, green: 0.62, blue: 1.0, alpha: 0.85),
+            NSColor(calibratedRed: 0.30, green: 0.82, blue: 0.46, alpha: 0.85),
+            AppearanceSurfaceColors.accent.withAlphaComponent(0.9),
+            NSColor(calibratedRed: 0.68, green: 0.44, blue: 0.96, alpha: 0.85),
+            NSColor(calibratedRed: 0.96, green: 0.36, blue: 0.48, alpha: 0.85)
+        ]
+        let dotSize: CGFloat = 5.5
+        let spacing: CGFloat = 3.5
+        let total = CGFloat(dotColors.count) * dotSize + CGFloat(dotColors.count - 1) * spacing
+        let startX = rect.midX - total / 2
+        for (i, color) in dotColors.enumerated() {
+            color.setFill()
+            let dotRect = NSRect(x: startX + CGFloat(i) * (dotSize + spacing), y: rect.midY - dotSize / 2, width: dotSize, height: dotSize)
+            NSBezierPath(roundedRect: dotRect, xRadius: 1.5, yRadius: 1.5).fill()
+        }
+    }
+
+    private func drawStatusBarOverlay(menuBar: NSRect, notchRect: NSRect, text: String, isDark: Bool) {
+        let isLeft = position == .left
+        let laneX = isLeft ? menuBar.minX + 18 : notchRect.maxX + 4
+        let laneMaxX = isLeft ? notchRect.minX - 4 : menuBar.maxX - 22
+        let laneWidth = max(36, laneMaxX - laneX)
+        let highlightRect = NSRect(x: laneX, y: menuBar.minY + 1.5, width: laneWidth, height: menuBar.height - 3)
+
+        // Warm amber glow pill right inside the top menu bar
+        AppearanceSurfaceColors.accent.withAlphaComponent(isDark ? 0.24 : 0.18).setFill()
+        let glowPath = NSBezierPath(roundedRect: highlightRect, xRadius: 3, yRadius: 3)
+        glowPath.fill()
+        AppearanceSurfaceColors.accent.withAlphaComponent(0.65).setStroke()
+        glowPath.lineWidth = 0.6
+        glowPath.stroke()
+
+        drawMiniLyric(text, in: highlightRect.insetBy(dx: 3, dy: 0), fontSize: 7.5, alignment: .center, shadow: false)
+    }
+
+    private func drawNotchModeOverlay(screen: NSRect, notchRect: NSRect, text: String) {
+        let capsuleWidth = min(screen.width - 20, max(notchRect.width + 52, screen.width * 0.66))
+        let capsuleHeight: CGFloat = 25
+        let capsuleRect = NSRect(
+            x: screen.midX - capsuleWidth / 2,
+            y: screen.minY - 4,
+            width: capsuleWidth,
+            height: capsuleHeight + 4
+        )
+
+        NSGraphicsContext.saveGraphicsState()
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor.black.withAlphaComponent(0.45)
+        shadow.shadowBlurRadius = 6
+        shadow.shadowOffset = NSSize(width: 0, height: -2)
+        shadow.set()
+
+        let fillColor = notchBackground
+            ? notchBackgroundColor.withAlphaComponent(max(0.78, backgroundOpacity))
+            : NSColor(calibratedRed: 0.05, green: 0.05, blue: 0.065, alpha: 0.96)
+        fillColor.setFill()
+        let capsule = NSBezierPath(roundedRect: capsuleRect, xRadius: 8, yRadius: 8)
+        capsule.fill()
+        NSGraphicsContext.restoreGraphicsState()
+
+        AppearanceSurfaceColors.accent.withAlphaComponent(0.45).setStroke()
+        capsule.lineWidth = 0.75
+        capsule.stroke()
+
+        // Physical notch camera silhouette seamlessly merged at top center
+        drawNotchCutout(notchRect)
+
+        // Glowing lyric text right below the notch cutout
+        let textRect = NSRect(x: capsuleRect.minX + 6, y: notchRect.maxY + 1, width: capsuleRect.width - 12, height: 12)
+        drawMiniLyric(text, in: textRect, fontSize: 8.5, alignment: .center, shadow: true)
+    }
+
+    private func drawFreeFloatingOverlay(screen: NSRect, winRect: NSRect, text: String, isDark: Bool) {
+        // Subtle 1pt dashed vertical magnetic snap guide
+        NSGraphicsContext.saveGraphicsState()
+        let guide = NSBezierPath()
+        guide.move(to: NSPoint(x: screen.midX, y: screen.minY + 16))
+        guide.line(to: NSPoint(x: screen.midX, y: screen.maxY - 18))
+        let pattern: [CGFloat] = [2.5, 2.5]
+        guide.setLineDash(pattern, count: 2, phase: 0)
+        AppearanceSurfaceColors.accent.withAlphaComponent(0.45).setStroke()
+        guide.lineWidth = 0.85
+        guide.stroke()
+        NSGraphicsContext.restoreGraphicsState()
+
+        // Independent frosted dark capsule floating over the miniature workspace window
+        let pillWidth = min(screen.width - 20, max(92, screen.width * 0.68))
+        let pillHeight: CGFloat = 21
+        let pillRect = NSRect(
+            x: screen.midX - pillWidth / 2,
+            y: winRect.midY - pillHeight / 2 + 6,
+            width: pillWidth,
+            height: pillHeight
+        )
+
+        NSGraphicsContext.saveGraphicsState()
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor.black.withAlphaComponent(isDark ? 0.55 : 0.28)
+        shadow.shadowBlurRadius = 8
+        shadow.shadowOffset = NSSize(width: 0, height: -3)
+        shadow.set()
+
+        let fillColor = notchBackground
+            ? notchBackgroundColor.withAlphaComponent(max(0.82, backgroundOpacity))
+            : NSColor(calibratedRed: 0.08, green: 0.08, blue: 0.10, alpha: 0.92)
+        fillColor.setFill()
+        let pillPath = NSBezierPath(roundedRect: pillRect, xRadius: pillHeight / 2, yRadius: pillHeight / 2)
+        pillPath.fill()
+        NSGraphicsContext.restoreGraphicsState()
+
+        NSColor.white.withAlphaComponent(0.22).setStroke()
+        pillPath.lineWidth = 0.75
+        pillPath.stroke()
+
+        // Tiny subtle 6-dot drag grip on left edge
+        NSColor.white.withAlphaComponent(0.38).setFill()
+        for col in 0..<2 {
+            for row in 0..<3 {
+                let gx = pillRect.minX + 7 + CGFloat(col) * 2.5
+                let gy = pillRect.midY - 3.25 + CGFloat(row) * 2.5
+                NSBezierPath(ovalIn: NSRect(x: gx, y: gy, width: 1.5, height: 1.5)).fill()
+            }
+        }
+
+        let textRect = NSRect(x: pillRect.minX + 14, y: pillRect.midY - 5.5, width: pillRect.width - 20, height: 12)
+        drawMiniLyric(text, in: textRect, fontSize: 8.5, alignment: .center, shadow: true)
+    }
+
+    private func drawMiniLyric(_ text: String, in rect: NSRect, fontSize: CGFloat, alignment: NSTextAlignment, shadow: Bool) {
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = alignment
         paragraph.lineBreakMode = .byTruncatingTail
-        var attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: size, weight: .medium),
-            .foregroundColor: color,
-            .paragraphStyle: paragraph
-        ]
-        if shadow {
-            let textShadow = NSShadow()
-            textShadow.shadowColor = NSColor.black.withAlphaComponent(0.5)
-            textShadow.shadowBlurRadius = 2
-            textShadow.shadowOffset = NSSize(width: 0, height: -1)
-            attributes[.shadow] = textShadow
+        let font = NSFont.systemFont(ofSize: fontSize, weight: .semibold)
+        if usesGradient {
+            BrandStyle.gradientLyric(
+                text,
+                colors: lyricColors.map { $0.withAlphaComponent(max(0.75, lyricOpacity)) },
+                attributes: [.font: font, .paragraphStyle: paragraph]
+            ).draw(in: rect)
+        } else {
+            let color = lyricColors[min(1, lyricColors.count - 1)].withAlphaComponent(max(0.85, lyricOpacity))
+            var attributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: color,
+                .paragraphStyle: paragraph
+            ]
+            if shadow {
+                let textShadow = NSShadow()
+                textShadow.shadowColor = NSColor.black.withAlphaComponent(0.6)
+                textShadow.shadowBlurRadius = 2
+                textShadow.shadowOffset = NSSize(width: 0, height: -0.5)
+                attributes[.shadow] = textShadow
+            }
+            (text as NSString).draw(in: rect, withAttributes: attributes)
         }
-        (text as NSString).draw(in: rect, withAttributes: attributes)
     }
 }

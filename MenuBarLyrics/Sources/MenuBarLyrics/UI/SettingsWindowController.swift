@@ -347,6 +347,7 @@ final class SettingsWindowController: NSWindowController {
     private let sidebarQuickActions = SettingsSidebarQuickActionsView()
     var onRetryLyricsMatch: (() -> Void)?
     var onMediaCommand: ((MediaTransportCommand) -> Void)?
+    var onMediaSeek: ((TimeInterval) -> Void)?
     private var supportWindow: SupportWindowController?
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
@@ -513,10 +514,15 @@ final class SettingsWindowController: NSWindowController {
             if let savedAnim { defaults.set(savedAnim, forKey: AppPreferences.missingLyricsAnimationStyleKey) }
             else { defaults.removeObject(forKey: AppPreferences.missingLyricsAnimationStyleKey) }
         }
+        precondition(MissingLyricsAnimationStyle.allCases.count == 6, "Must expose all 6 missing-lyrics micro-animations")
         for (idx, style) in MissingLyricsAnimationStyle.allCases.enumerated() {
             controller.missingLyricsStylePopUp.selectItem(at: idx)
             controller.missingLyricsStyleChanged()
             precondition(AppPreferences.missingLyricsAnimationStyle == style && controller.immersiveLyricsView.animationStyle == style, "Missing lyrics animation style must persist")
+            for lang in AppLanguage.allCases {
+                precondition(!style.playfulCaption(language: lang).contains("404"), "Caption must never contain 404")
+                precondition(!style.shortBarCaption(language: lang).contains("404"), "Short bar caption must never contain 404")
+            }
         }
         // E22/E23 checks: idle preview of 3-style animation, 404 state, exact vertical centering (<2pt), MediaRemote codes, and palette preferences
         controller.updateImmersiveLyrics(lines: [], activeIndex: -1, lineProgress: 0, trackTitle: nil, artistName: nil, isPlaying: false, isPaused: false, position: 0, duration: 0, lyricsFeedback: .waiting)
@@ -882,6 +888,7 @@ final class SettingsWindowController: NSWindowController {
 
         immersiveLyricsView.onRetryMatch = { [weak self] in self?.onRetryLyricsMatch?() }
         immersiveLyricsView.onTransportCommand = { [weak self] cmd in self?.onMediaCommand?(cmd) }
+        immersiveLyricsView.onSeek = { [weak self] seconds in self?.onMediaSeek?(seconds) }
         immersiveLyricsView.animationStyle = AppPreferences.missingLyricsAnimationStyle
         immersiveLyricsView.setStageVisible(selectedPage == .lyrics)
 

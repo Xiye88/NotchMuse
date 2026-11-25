@@ -903,6 +903,14 @@ final class MenuBarController: NSObject {
                     self.startPoll()
                 }
             }
+            settingsWindowController?.onMediaSeek = { [weak self] seconds in
+                guard let self else { return }
+                let activeSource = self.currentPlayerTrack?.playerSource ?? self.player.source
+                SystemMediaTransport.seek(to: seconds, activeSource: activeSource)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    self.startPoll()
+                }
+            }
         }
         settingsWindowController?.show()
         pushLiveStatusToSettings()

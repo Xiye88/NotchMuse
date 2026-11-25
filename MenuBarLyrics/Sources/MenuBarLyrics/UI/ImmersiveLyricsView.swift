@@ -7,24 +7,36 @@ enum MissingLyricsAnimationStyle: String, CaseIterable, Equatable, Sendable {
     case vinylSeek = "Vinyl Seek (Default)"
     case cassetteB = "Cassette Side B"
     case runawayNotes = "Runaway Notes"
+    case radarPulse = "Sound Radar"
+    case floatingCloud = "Drifting Cloud"
+    case equalizerBounce = "Rhythm Bars"
 
     func displayName(language: AppLanguage = AppPreferences.language) -> String {
         switch (self, language) {
         case (.vinylSeek, .simplifiedChinese): return "黑胶寻轨（默认）"
         case (.cassetteB, .simplifiedChinese): return "复古磁带"
         case (.runawayNotes, .simplifiedChinese): return "小音符逃跑"
+        case (.radarPulse, .simplifiedChinese): return "声波雷达"
+        case (.floatingCloud, .simplifiedChinese): return "云端漂浮"
+        case (.equalizerBounce, .simplifiedChinese): return "律动音柱"
         default: return rawValue
         }
     }
 
     func playfulCaption(language: AppLanguage = AppPreferences.language) -> String {
         switch (self, language) {
-        case (.vinylSeek, .simplifiedChinese): return "404 · 唱针没找到这首歌的词，正在黑胶纹路里打捞…"
-        case (.cassetteB, .simplifiedChinese): return "404 · 歌词走失在磁带 B 面"
+        case (.vinylSeek, .simplifiedChinese): return "唱针没找到这首歌的词，正在黑胶纹路里打捞…"
+        case (.cassetteB, .simplifiedChinese): return "歌词走失在磁带 B 面，正在帮你倒带找回…"
         case (.runawayNotes, .simplifiedChinese): return "歌词溜走了，这首大概是纯音乐？"
-        case (.vinylSeek, _): return "404 · Tonearm couldn't find lyrics in the grooves…"
-        case (.cassetteB, _): return "404 · Lyrics wandered off to Cassette Side B"
+        case (.radarPulse, .simplifiedChinese): return "正在声波雷达里搜寻这首歌的词…"
+        case (.floatingCloud, .simplifiedChinese): return "歌词飘在云端，先听听旋律吧~"
+        case (.equalizerBounce, .simplifiedChinese): return "纯享旋律时刻，歌词休假去了~"
+        case (.vinylSeek, _): return "Tonearm couldn't find lyrics in the grooves…"
+        case (.cassetteB, _): return "Lyrics wandered off to Cassette Side B…"
         case (.runawayNotes, _): return "Lyrics ran away — maybe an instrumental?"
+        case (.radarPulse, _): return "Scanning the sound radar for lyrics…"
+        case (.floatingCloud, _): return "Lyrics are drifting in the clouds — enjoy the melody~"
+        case (.equalizerBounce, _): return "Pure melody time — lyrics are on vacation~"
         }
     }
 
@@ -33,9 +45,15 @@ enum MissingLyricsAnimationStyle: String, CaseIterable, Equatable, Sendable {
         case (.vinylSeek, .simplifiedChinese): return "歌词跑丢了…"
         case (.cassetteB, .simplifiedChinese): return "歌词走失在磁带B面…"
         case (.runawayNotes, .simplifiedChinese): return "歌词溜走了，纯享旋律~"
+        case (.radarPulse, .simplifiedChinese): return "声波搜词中…"
+        case (.floatingCloud, .simplifiedChinese): return "歌词飘在云端~"
+        case (.equalizerBounce, .simplifiedChinese): return "纯享旋律时刻~"
         case (.vinylSeek, _): return "Lyrics wandered off…"
         case (.cassetteB, _): return "Lyrics lost on Side B…"
         case (.runawayNotes, _): return "Lyrics slipped away~"
+        case (.radarPulse, _): return "Scanning radar…"
+        case (.floatingCloud, _): return "Drifting in the clouds~"
+        case (.equalizerBounce, _): return "Pure melody time~"
         }
     }
 }
@@ -56,14 +74,18 @@ enum MediaTransportCommand: Sendable {
 
 enum SystemMediaTransport {
     private typealias SendCommandFn = @convention(c) (UInt32, CFDictionary?) -> DarwinBoolean
+    private typealias SetElapsedTimeFn = @convention(c) (Double) -> Void
 
     private static let sendCommandSymbol: SendCommandFn? = {
-        let path = "/System/Library/PrivateFrameworks/MediaRemote.framework/MediaRemote"
-        guard let handle = dlopen(path, RTLD_LAZY),
-              let sym = dlsym(handle, "MRMediaRemoteSendCommand") else {
-            return nil
-        }
+        guard let handle = dlopen("/System/Library/PrivateFrameworks/MediaRemote.framework/MediaRemote", RTLD_LAZY),
+              let sym = dlsym(handle, "MRMediaRemoteSendCommand") else { return nil }
         return unsafeBitCast(sym, to: SendCommandFn.self)
+    }()
+
+    private static let setElapsedTimeSymbol: SetElapsedTimeFn? = {
+        guard let handle = dlopen("/System/Library/PrivateFrameworks/MediaRemote.framework/MediaRemote", RTLD_LAZY),
+              let sym = dlsym(handle, "MRMediaRemoteSetElapsedTime") else { return nil }
+        return unsafeBitCast(sym, to: SetElapsedTimeFn.self)
     }()
 
     static var isMediaRemoteCommandAvailable: Bool {
@@ -72,14 +94,12 @@ enum SystemMediaTransport {
 
     @discardableResult
     static func send(_ command: MediaTransportCommand, activeSource: PlayerSource?) -> Bool {
-        // 1. Primary: Private MediaRemote.framework MRMediaRemoteSendCommand (works across Soda, NetEase, QQ, Kugou, YouTube Music, Spotify, Apple Music)
         if let sendFn = sendCommandSymbol {
             if sendFn(command.mediaRemoteCode, nil).boolValue {
                 return true
             }
         }
 
-        // 2. Fallback: AppleScript for Spotify & Apple Music
         if activeSource == .spotify {
             let verb: String
             switch command {
@@ -98,7 +118,6 @@ enum SystemMediaTransport {
             if runAppleScript("tell application \"Music\" to \(verb)") { return true }
         }
 
-        // 3. Final fallback: hardware media key event
         let keyCode: Int
         switch command {
         case .playPause: keyCode = 16
@@ -107,6 +126,18 @@ enum SystemMediaTransport {
         }
         postMediaKey(keyCode)
         return true
+    }
+
+    static func seek(to seconds: TimeInterval, activeSource: PlayerSource?) {
+        let target = max(0, seconds)
+        if activeSource == .spotify {
+            if runAppleScript("tell application \"Spotify\" to set player position to \(target)") { return }
+        } else if activeSource == .appleMusic {
+            if runAppleScript("tell application \"Music\" to set player position to \(target)") { return }
+        }
+        if let seekFn = setElapsedTimeSymbol {
+            seekFn(target)
+        }
     }
 
     private static func postMediaKey(_ keyCode: Int) {
@@ -134,142 +165,6 @@ enum SystemMediaTransport {
         var error: NSDictionary?
         NSAppleScript(source: source)?.executeAndReturnError(&error)
         return error == nil
-    }
-}
-
-@MainActor
-final class IdleVinylWaveView: NSView {
-    private let stageView = NSView()
-    private let label = NSTextField(labelWithString: "")
-    private var ringLayers: [CAShapeLayer] = []
-    private var barLayers: [CALayer] = []
-    private var isActive = false
-
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-        translatesAutoresizingMaskIntoConstraints = false
-
-        stageView.wantsLayer = true
-        stageView.layer?.masksToBounds = false
-        stageView.translatesAutoresizingMaskIntoConstraints = false
-
-        label.stringValue = AppPreferences.language == .simplifiedChinese ? "等待播放音乐…" : "Waiting for music…"
-        label.font = .systemFont(ofSize: 13.5, weight: .medium)
-        label.textColor = .secondaryLabelColor
-        label.alignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-
-        addSubview(stageView)
-        addSubview(label)
-        NSLayoutConstraint.activate([
-            stageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            stageView.centerYAnchor.constraint(equalTo: centerYAnchor, constant: -24),
-            stageView.widthAnchor.constraint(equalToConstant: 96),
-            stageView.heightAnchor.constraint(equalToConstant: 96),
-
-            label.topAnchor.constraint(equalTo: stageView.bottomAnchor, constant: 12),
-            label.centerXAnchor.constraint(equalTo: centerXAnchor)
-        ])
-
-        rebuildArtwork()
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        if window == nil { stopAnimations() }
-        else if isActive && !isHidden { startAnimations() }
-    }
-
-    override func viewDidChangeEffectiveAppearance() {
-        super.viewDidChangeEffectiveAppearance()
-        rebuildArtwork()
-        if isActive && !isHidden { startAnimations() }
-    }
-
-    func setActive(_ active: Bool) {
-        isActive = active
-        if active && !isHidden && window != nil {
-            startAnimations()
-        } else {
-            stopAnimations()
-        }
-    }
-
-    private func stopAnimations() {
-        ringLayers.forEach { $0.removeAllAnimations() }
-        barLayers.forEach { $0.removeAllAnimations() }
-    }
-
-    private func rebuildArtwork() {
-        stopAnimations()
-        ringLayers.removeAll()
-        barLayers.removeAll()
-        stageView.layer?.sublayers?.forEach { $0.removeFromSuperlayer() }
-        guard let root = stageView.layer else { return }
-
-        effectiveAppearance.performAsCurrentDrawingAppearance {
-            let accent = AppearanceSurfaceColors.accent.cgColor
-            for (idx, radius) in [CGFloat(22), CGFloat(32), CGFloat(42)].enumerated() {
-                let ring = CAShapeLayer()
-                ring.bounds = CGRect(x: 0, y: 0, width: radius * 2, height: radius * 2)
-                ring.position = CGPoint(x: 48, y: 48)
-                ring.path = CGPath(ellipseIn: ring.bounds, transform: nil)
-                ring.fillColor = nil
-                ring.strokeColor = AppearanceSurfaceColors.accent.withAlphaComponent(0.32 - CGFloat(idx) * 0.08).cgColor
-                ring.lineWidth = 1.1
-                root.addSublayer(ring)
-                ringLayers.append(ring)
-            }
-
-            // 3 soft breathing warm-amber bars in the center
-            for i in 0..<3 {
-                let bar = CALayer()
-                bar.anchorPoint = CGPoint(x: 0.5, y: 0)
-                bar.bounds = CGRect(x: 0, y: 0, width: 3, height: 8)
-                bar.position = CGPoint(x: 41 + CGFloat(i) * 7, y: 40)
-                bar.cornerRadius = 1.5
-                bar.backgroundColor = accent
-                root.addSublayer(bar)
-                barLayers.append(bar)
-            }
-        }
-    }
-
-    private func startAnimations() {
-        stopAnimations()
-        for (idx, ring) in ringLayers.enumerated() {
-            let scale = CABasicAnimation(keyPath: "transform.scale")
-            scale.fromValue = 0.94
-            scale.toValue = 1.07
-            scale.duration = 2.4 + Double(idx) * 0.45
-            scale.autoreverses = true
-            scale.repeatCount = .infinity
-            scale.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            ring.add(scale, forKey: "breathScale")
-
-            let fade = CABasicAnimation(keyPath: "opacity")
-            fade.fromValue = 0.45
-            fade.toValue = 1.0
-            fade.duration = 2.4 + Double(idx) * 0.45
-            fade.autoreverses = true
-            fade.repeatCount = .infinity
-            fade.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            ring.add(fade, forKey: "breathFade")
-        }
-        let heights: [CGFloat] = [14, 20, 12]
-        let durations: [CFTimeInterval] = [1.1, 1.4, 0.95]
-        for (idx, bar) in barLayers.enumerated() {
-            let pulse = CABasicAnimation(keyPath: "bounds.size.height")
-            pulse.fromValue = 5
-            pulse.toValue = heights[idx]
-            pulse.duration = durations[idx]
-            pulse.autoreverses = true
-            pulse.repeatCount = .infinity
-            pulse.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            bar.add(pulse, forKey: "idleBar")
-        }
     }
 }
 
@@ -509,6 +404,90 @@ final class MissingLyricsAnimationView: NSView {
                 glass.position = CGPoint(x: 108, y: 44)
                 root.addSublayer(glass)
                 animatedLayers.append(glass)
+
+            case .radarPulse:
+                // Static outer guide rings
+                for r: CGFloat in [18, 30, 42] {
+                    let ring = CAShapeLayer()
+                    ring.path = CGPath(ellipseIn: CGRect(x: 70 - r, y: 48 - r, width: r * 2, height: r * 2), transform: nil)
+                    ring.fillColor = nil
+                    ring.strokeColor = subtle
+                    ring.lineWidth = 0.8
+                    root.addSublayer(ring)
+                }
+                // 2 expanding radar pulse rings
+                for _ in 0..<2 {
+                    let pulseRing = CAShapeLayer()
+                    pulseRing.bounds = CGRect(x: 0, y: 0, width: 84, height: 84)
+                    pulseRing.position = CGPoint(x: 70, y: 48)
+                    pulseRing.path = CGPath(ellipseIn: pulseRing.bounds, transform: nil)
+                    pulseRing.fillColor = nil
+                    pulseRing.strokeColor = accent
+                    pulseRing.lineWidth = 1.4
+                    root.addSublayer(pulseRing)
+                    animatedLayers.append(pulseRing)
+                }
+                // Rotating sweep hand
+                let sweep = CAShapeLayer()
+                sweep.bounds = CGRect(x: 0, y: 0, width: 84, height: 84)
+                sweep.position = CGPoint(x: 70, y: 48)
+                let sp = CGMutablePath()
+                sp.move(to: CGPoint(x: 42, y: 42))
+                sp.addLine(to: CGPoint(x: 42, y: 82))
+                sweep.path = sp
+                sweep.strokeColor = accent
+                sweep.lineWidth = 1.8
+                sweep.lineCap = .round
+                root.addSublayer(sweep)
+                animatedLayers.append(sweep)
+
+                let dot = CAShapeLayer()
+                dot.path = CGPath(ellipseIn: CGRect(x: 67, y: 45, width: 6, height: 6), transform: nil)
+                dot.fillColor = accent
+                root.addSublayer(dot)
+
+            case .floatingCloud:
+                // Minimalist cloud vector
+                let cloud = CAShapeLayer()
+                cloud.bounds = CGRect(x: 0, y: 0, width: 76, height: 40)
+                cloud.position = CGPoint(x: 70, y: 44)
+                let cp = CGMutablePath()
+                cp.addRoundedRect(in: CGRect(x: 10, y: 6, width: 56, height: 18), cornerWidth: 9, cornerHeight: 9)
+                cp.addEllipse(in: CGRect(x: 18, y: 12, width: 24, height: 22))
+                cp.addEllipse(in: CGRect(x: 36, y: 15, width: 22, height: 20))
+                cloud.path = cp
+                cloud.fillColor = AppearanceSurfaceColors.card.cgColor
+                cloud.strokeColor = ink
+                cloud.lineWidth = 1.2
+                root.addSublayer(cloud)
+                animatedLayers.append(cloud)
+
+                let star1 = makeTextLayer("✦", size: 12, color: accent)
+                star1.position = CGPoint(x: 34, y: 68)
+                root.addSublayer(star1)
+                animatedLayers.append(star1)
+
+                let star2 = makeTextLayer("✦", size: 10, color: ink)
+                star2.position = CGPoint(x: 106, y: 62)
+                root.addSublayer(star2)
+                animatedLayers.append(star2)
+
+                let note = makeTextLayer("♪", size: 16, color: accent)
+                note.position = CGPoint(x: 96, y: 74)
+                root.addSublayer(note)
+                animatedLayers.append(note)
+
+            case .equalizerBounce:
+                for i in 0..<5 {
+                    let bar = CALayer()
+                    bar.anchorPoint = CGPoint(x: 0.5, y: 0)
+                    bar.bounds = CGRect(x: 0, y: 0, width: 7, height: 18)
+                    bar.position = CGPoint(x: 42 + CGFloat(i) * 14, y: 24)
+                    bar.cornerRadius = 3.5
+                    bar.backgroundColor = (i == 2 || i == 1 || i == 3) ? accent : ink
+                    root.addSublayer(bar)
+                    animatedLayers.append(bar)
+                }
             }
         }
     }
@@ -610,6 +589,79 @@ final class MissingLyricsAnimationView: NSView {
                 chase.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 animatedLayers[2].add(chase, forKey: "chase")
             }
+
+        case .radarPulse:
+            for i in 0..<min(2, animatedLayers.count) {
+                let scale = CABasicAnimation(keyPath: "transform.scale")
+                scale.fromValue = 0.25
+                scale.toValue = 1.05
+                scale.duration = 2.2
+                scale.timeOffset = Double(i) * 1.1
+                scale.repeatCount = .infinity
+                scale.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                animatedLayers[i].add(scale, forKey: "radarScale")
+
+                let opacity = CABasicAnimation(keyPath: "opacity")
+                opacity.fromValue = 0.85
+                opacity.toValue = 0.0
+                opacity.duration = 2.2
+                opacity.timeOffset = Double(i) * 1.1
+                opacity.repeatCount = .infinity
+                animatedLayers[i].add(opacity, forKey: "radarOpacity")
+            }
+            if animatedLayers.indices.contains(2) {
+                let rot = CABasicAnimation(keyPath: "transform.rotation.z")
+                rot.fromValue = 0
+                rot.toValue = -CGFloat.pi * 2
+                rot.duration = 3.2
+                rot.repeatCount = .infinity
+                animatedLayers[2].add(rot, forKey: "radarSweep")
+            }
+
+        case .floatingCloud:
+            if animatedLayers.indices.contains(0) {
+                let bob = CABasicAnimation(keyPath: "position.y")
+                bob.fromValue = 40
+                bob.toValue = 50
+                bob.duration = 2.2
+                bob.autoreverses = true
+                bob.repeatCount = .infinity
+                bob.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                animatedLayers[0].add(bob, forKey: "cloudBob")
+            }
+            for i in 1..<min(3, animatedLayers.count) {
+                let twinkle = CABasicAnimation(keyPath: "opacity")
+                twinkle.fromValue = 0.25
+                twinkle.toValue = 1.0
+                twinkle.duration = 1.1 + Double(i) * 0.35
+                twinkle.autoreverses = true
+                twinkle.repeatCount = .infinity
+                animatedLayers[i].add(twinkle, forKey: "starTwinkle")
+            }
+            if animatedLayers.indices.contains(3) {
+                let drift = CABasicAnimation(keyPath: "position.y")
+                drift.fromValue = 68
+                drift.toValue = 82
+                drift.duration = 1.8
+                drift.autoreverses = true
+                drift.repeatCount = .infinity
+                drift.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                animatedLayers[3].add(drift, forKey: "noteDrift")
+            }
+
+        case .equalizerBounce:
+            let peaks: [CGFloat] = [32, 46, 54, 42, 28]
+            let durations: [CFTimeInterval] = [0.58, 0.46, 0.64, 0.52, 0.60]
+            for (idx, bar) in animatedLayers.prefix(5).enumerated() {
+                let bounce = CABasicAnimation(keyPath: "bounds.size.height")
+                bounce.fromValue = 10
+                bounce.toValue = peaks[idx]
+                bounce.duration = durations[idx]
+                bounce.autoreverses = true
+                bounce.repeatCount = .infinity
+                bounce.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                bar.add(bounce, forKey: "eqBounce")
+            }
         }
     }
 }
@@ -618,6 +670,8 @@ final class MissingLyricsAnimationView: NSView {
 private final class SweepLyricLineView: NSView {
     let primaryText: String
     let translationText: String?
+    let lineTime: TimeInterval
+    var onSeek: ((TimeInterval) -> Void)?
 
     var isActive: Bool = false { didSet { if isActive != oldValue { invalidateIntrinsicContentSize(); needsDisplay = true } } }
     var distanceFromActive: Int = 99 { didSet { if distanceFromActive != oldValue { needsDisplay = true } } }
@@ -625,23 +679,53 @@ private final class SweepLyricLineView: NSView {
     var customSweepColor: NSColor? { didSet { needsDisplay = true } }
     var customNormalColor: NSColor? { didSet { needsDisplay = true } }
 
+    private var tracking: NSTrackingArea?
+    private var isHovered = false { didSet { if isHovered != oldValue { needsDisplay = true } } }
+    private var isPressed = false { didSet { if isPressed != oldValue { needsDisplay = true } } }
+
     override var isFlipped: Bool { true }
 
-    init(primaryText: String, translationText: String?) {
+    init(primaryText: String, translationText: String?, lineTime: TimeInterval) {
         self.primaryText = primaryText
         self.translationText = translationText
+        self.lineTime = lineTime
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
     }
 
     required init?(coder: NSCoder) { nil }
 
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(rect: .zero, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) { isHovered = true }
+    override func mouseExited(with event: NSEvent) { isHovered = false; isPressed = false }
+
+    override func mouseDown(with event: NSEvent) {
+        isPressed = true
+        NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+        onSeek?(lineTime)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.14) { [weak self] in
+            self?.isPressed = false
+        }
+    }
+
     override var intrinsicContentSize: NSSize {
-        let width = max(220, bounds.width > 0 ? bounds.width : 420)
+        let width = max(220, (bounds.width > 0 ? bounds.width : 420) - 84)
         let font = currentFont()
         let primaryHeight = measuredHeight(primaryText, font: font, width: width)
         let transHeight = translationText.map { measuredHeight($0, font: .systemFont(ofSize: isActive ? 13 : 11.5, weight: .regular), width: width) + 4 } ?? 0
-        return NSSize(width: NSView.noIntrinsicMetric, height: ceil(primaryHeight + transHeight + 6))
+        return NSSize(width: NSView.noIntrinsicMetric, height: ceil(primaryHeight + transHeight + 14))
     }
 
     override func setFrameSize(_ newSize: NSSize) {
@@ -668,37 +752,51 @@ private final class SweepLyricLineView: NSView {
         return rect.height
     }
 
+    private func formattedTimestamp() -> String {
+        let total = max(0, Int(lineTime.rounded()))
+        return String(format: "%02d:%02d", total / 60, total % 60)
+    }
+
     override func draw(_ dirtyRect: NSRect) {
         effectiveAppearance.performAsCurrentDrawingAppearance {
+            // Soft hover / press rounded pill backdrop
+            if isHovered || isPressed {
+                let bgAlpha: CGFloat = isPressed ? 0.13 : 0.065
+                let baseTint = customNormalColor ?? NSColor.labelColor
+                baseTint.withAlphaComponent(bgAlpha).setFill()
+                NSBezierPath(roundedRect: bounds.insetBy(dx: 2, dy: 1), xRadius: 10, yRadius: 10).fill()
+            }
+
             let font = currentFont()
             let style = NSMutableParagraphStyle()
             style.alignment = .center
             style.lineBreakMode = .byWordWrapping
 
+            let horizontalPad: CGFloat = 42
+            let textAreaWidth = max(140, bounds.width - horizontalPad * 2)
             let baseNormal = customNormalColor ?? NSColor.labelColor
-            let primaryH = measuredHeight(primaryText, font: font, width: bounds.width)
-            let primaryRect = NSRect(x: 0, y: 2, width: bounds.width, height: ceil(primaryH + 2))
+            let primaryH = measuredHeight(primaryText, font: font, width: textAreaWidth)
+            let primaryRect = NSRect(x: horizontalPad, y: 6, width: textAreaWidth, height: ceil(primaryH + 2))
 
             if isActive {
                 let sweepColor = customSweepColor ?? AppearanceSurfaceColors.accent
-                let unsweptColor = baseNormal.withAlphaComponent(0.32)
+                let unsweptColor = baseNormal.withAlphaComponent(isHovered ? 0.48 : 0.32)
                 (primaryText as NSString).draw(
                     with: primaryRect,
                     options: [.usesLineFragmentOrigin, .usesFontLeading],
                     attributes: [.font: font, .foregroundColor: unsweptColor, .paragraphStyle: style]
                 )
 
-                // Compute tight text bounding width so sweep tracks the actual text span left-to-right
                 let lineSize = (primaryText as NSString).size(withAttributes: [.font: font])
-                let textWidth = min(bounds.width, lineSize.width + 6)
-                let startX = max(0, (bounds.width - textWidth) / 2)
+                let textWidth = min(textAreaWidth, lineSize.width + 6)
+                let startX = primaryRect.minX + max(0, (textAreaWidth - textWidth) / 2)
                 let clamped = min(1, max(0, sweepProgress))
                 let clipRect = NSRect(x: startX, y: primaryRect.minY - 4, width: textWidth * clamped, height: primaryRect.height + 8)
 
                 NSGraphicsContext.saveGraphicsState()
                 NSBezierPath(rect: clipRect).addClip()
                 let glow = NSShadow()
-                glow.shadowColor = sweepColor.withAlphaComponent(0.40)
+                glow.shadowColor = sweepColor.withAlphaComponent(0.42)
                 glow.shadowBlurRadius = 8
                 glow.shadowOffset = .zero
                 (primaryText as NSString).draw(
@@ -708,8 +806,9 @@ private final class SweepLyricLineView: NSView {
                 )
                 NSGraphicsContext.restoreGraphicsState()
             } else {
-                let alpha: CGFloat = distanceFromActive == 1 ? 0.62 : 0.34
-                let color = customNormalColor?.withAlphaComponent(alpha) ?? (distanceFromActive == 1 ? NSColor.secondaryLabelColor : NSColor.tertiaryLabelColor)
+                let alpha: CGFloat = isHovered ? 0.92 : (distanceFromActive == 1 ? 0.62 : 0.34)
+                let color = customNormalColor?.withAlphaComponent(alpha)
+                    ?? (isHovered ? NSColor.labelColor : (distanceFromActive == 1 ? NSColor.secondaryLabelColor : NSColor.tertiaryLabelColor))
                 (primaryText as NSString).draw(
                     with: primaryRect,
                     options: [.usesLineFragmentOrigin, .usesFontLeading],
@@ -719,12 +818,28 @@ private final class SweepLyricLineView: NSView {
 
             if let translationText {
                 let transFont = NSFont.systemFont(ofSize: isActive ? 13 : 11.5, weight: .regular)
-                let transColor = (customNormalColor ?? NSColor.secondaryLabelColor).withAlphaComponent(isActive ? 0.78 : 0.40)
-                let transRect = NSRect(x: 0, y: primaryRect.maxY + 2, width: bounds.width, height: bounds.height - primaryRect.maxY - 2)
+                let transColor = (customNormalColor ?? NSColor.secondaryLabelColor).withAlphaComponent(isActive || isHovered ? 0.80 : 0.40)
+                let transRect = NSRect(x: horizontalPad, y: primaryRect.maxY + 2, width: textAreaWidth, height: bounds.height - primaryRect.maxY - 4)
                 (translationText as NSString).draw(
                     with: transRect,
                     options: [.usesLineFragmentOrigin, .usesFontLeading],
                     attributes: [.font: transFont, .foregroundColor: transColor, .paragraphStyle: style]
+                )
+            }
+
+            // Hover timestamp badge on right side (Soda Music style)
+            if isHovered {
+                let ts = formattedTimestamp()
+                let tsStyle = NSMutableParagraphStyle()
+                tsStyle.alignment = .right
+                let tsColor = (customSweepColor ?? AppearanceSurfaceColors.accent).withAlphaComponent(0.88)
+                (ts as NSString).draw(
+                    in: NSRect(x: bounds.width - 44, y: (bounds.height - 13) / 2, width: 36, height: 13),
+                    withAttributes: [
+                        .font: NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .medium),
+                        .foregroundColor: tsColor,
+                        .paragraphStyle: tsStyle
+                    ]
                 )
             }
         }
@@ -754,22 +869,22 @@ enum ImmersiveLyricsThemePreset: String, CaseIterable, Equatable, Sendable {
     var backgroundColor: NSColor? {
         switch self {
         case .followTheme: return nil
-        case .warmAmber: return NSColor(calibratedRed: 0.078, green: 0.078, blue: 0.086, alpha: 1)      // #141416
-        case .midnightAurora: return NSColor(calibratedRed: 0.059, green: 0.090, blue: 0.165, alpha: 1) // #0F172A
-        case .pineGlow: return NSColor(calibratedRed: 0.059, green: 0.122, blue: 0.102, alpha: 1)       // #0F1F1A
-        case .warmPaper: return NSColor(calibratedRed: 0.973, green: 0.965, blue: 0.941, alpha: 1)      // #F8F6F0
-        case .sakuraMist: return NSColor(calibratedRed: 1.0, green: 0.961, blue: 0.969, alpha: 1)       // #FFF5F7
+        case .warmAmber: return NSColor(calibratedRed: 0.078, green: 0.078, blue: 0.086, alpha: 1)
+        case .midnightAurora: return NSColor(calibratedRed: 0.059, green: 0.090, blue: 0.165, alpha: 1)
+        case .pineGlow: return NSColor(calibratedRed: 0.059, green: 0.122, blue: 0.102, alpha: 1)
+        case .warmPaper: return NSColor(calibratedRed: 0.973, green: 0.965, blue: 0.941, alpha: 1)
+        case .sakuraMist: return NSColor(calibratedRed: 1.0, green: 0.961, blue: 0.969, alpha: 1)
         }
     }
 
     var sweepColor: NSColor? {
         switch self {
         case .followTheme: return nil
-        case .warmAmber: return NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1)        // #FF8A36
-        case .midnightAurora: return NSColor(calibratedRed: 0.220, green: 0.741, blue: 0.973, alpha: 1) // #38BDF8
-        case .pineGlow: return NSColor(calibratedRed: 0.204, green: 0.827, blue: 0.600, alpha: 1)       // #34D399
-        case .warmPaper: return NSColor(calibratedRed: 0.851, green: 0.420, blue: 0.153, alpha: 1)      // #D96B27
-        case .sakuraMist: return NSColor(calibratedRed: 0.882, green: 0.114, blue: 0.282, alpha: 1)     // #E11D48
+        case .warmAmber: return NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1)
+        case .midnightAurora: return NSColor(calibratedRed: 0.220, green: 0.741, blue: 0.973, alpha: 1)
+        case .pineGlow: return NSColor(calibratedRed: 0.204, green: 0.827, blue: 0.600, alpha: 1)
+        case .warmPaper: return NSColor(calibratedRed: 0.851, green: 0.420, blue: 0.153, alpha: 1)
+        case .sakuraMist: return NSColor(calibratedRed: 0.882, green: 0.114, blue: 0.282, alpha: 1)
         }
     }
 
@@ -828,11 +943,11 @@ private final class ThemeSwatchDotButton: NSButton {
 
     override func draw(_ dirtyRect: NSRect) {
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            let outerRect = bounds.insetBy(dx: 1.2, dy: 1.2)
-            let dotRect = bounds.insetBy(dx: 3.2, dy: 3.2)
+            let outerRect = bounds.insetBy(dx: 1.0, dy: 1.0)
+            let inset: CGFloat = isHovered ? 2.6 : 3.2
+            let dotRect = bounds.insetBy(dx: inset, dy: inset)
 
             if preset == .followTheme {
-                // Half-dark / half-light split circle
                 NSGraphicsContext.saveGraphicsState()
                 NSBezierPath(ovalIn: dotRect).addClip()
                 NSColor(calibratedWhite: 0.12, alpha: 1).setFill()
@@ -845,24 +960,22 @@ private final class ThemeSwatchDotButton: NSButton {
                 NSBezierPath(ovalIn: dotRect).fill()
                 if let accent = preset.sweepColor {
                     accent.setFill()
-                    NSBezierPath(ovalIn: dotRect.insetBy(dx: 3.2, dy: 3.2)).fill()
+                    NSBezierPath(ovalIn: dotRect.insetBy(dx: 3.0, dy: 3.0)).fill()
                 }
             }
 
-            // Subtle inner rim
             NSColor.labelColor.withAlphaComponent(0.22).setStroke()
             let innerRim = NSBezierPath(ovalIn: dotRect)
             innerRim.lineWidth = 0.6
             innerRim.stroke()
 
-            // Crisp selected / hover ring
             if isSelectedPreset {
                 (preset.sweepColor ?? AppearanceSurfaceColors.accent).setStroke()
                 let ring = NSBezierPath(ovalIn: outerRect)
                 ring.lineWidth = 1.6
                 ring.stroke()
             } else if isHovered {
-                NSColor.labelColor.withAlphaComponent(0.45).setStroke()
+                NSColor.labelColor.withAlphaComponent(0.50).setStroke()
                 let ring = NSBezierPath(ovalIn: outerRect)
                 ring.lineWidth = 1.0
                 ring.stroke()
@@ -873,13 +986,13 @@ private final class ThemeSwatchDotButton: NSButton {
 
 @MainActor
 private final class TransportButton: NSButton {
-    let isPrimary: Bool
+    let isCapsulePrimary: Bool
     private var tracking: NSTrackingArea?
     private var isHovered = false
     private var isPressed = false
 
-    init(symbol: String, size: CGFloat, isPrimary: Bool, target: AnyObject?, action: Selector?) {
-        self.isPrimary = isPrimary
+    init(symbol: String, size: CGFloat, isCapsulePrimary: Bool, target: AnyObject?, action: Selector?) {
+        self.isCapsulePrimary = isCapsulePrimary
         super.init(frame: .zero)
         self.title = ""
         self.isBordered = false
@@ -887,7 +1000,7 @@ private final class TransportButton: NSButton {
         self.target = target
         self.action = action
         self.wantsLayer = true
-        self.layer?.cornerRadius = isPrimary ? 16 : 13
+        self.layer?.cornerRadius = isCapsulePrimary ? 17 : 14
         self.layer?.cornerCurve = .continuous
         self.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
             .withSymbolConfiguration(.init(pointSize: size, weight: .semibold))
@@ -936,17 +1049,19 @@ private final class TransportButton: NSButton {
 
     func refreshStyle() {
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            if isPrimary {
+            if isCapsulePrimary {
                 contentTintColor = .white
                 let base = AppearanceSurfaceColors.accent
+                layer?.borderWidth = 0.5
+                layer?.borderColor = NSColor.white.withAlphaComponent(0.22).cgColor
                 if isPressed {
                     layer?.backgroundColor = base.blended(withFraction: 0.25, of: .black)?.cgColor ?? base.cgColor
-                    alphaValue = 0.82
+                    alphaValue = 0.84
                 } else if isHovered {
                     layer?.backgroundColor = base.blended(withFraction: 0.14, of: .white)?.cgColor ?? base.cgColor
                     alphaValue = 1.0
                 } else {
-                    layer?.backgroundColor = base.cgColor
+                    layer?.backgroundColor = base.withAlphaComponent(0.94).cgColor
                     alphaValue = 1.0
                 }
             } else {
@@ -967,32 +1082,135 @@ private final class TransportButton: NSButton {
 }
 
 @MainActor
+private final class InteractiveProgressBarView: NSView {
+    var progress: CGFloat = 0 { didSet { needsDisplay = true } }
+    var onSeekFraction: ((CGFloat) -> Void)?
+    private var isHovered = false { didSet { if isHovered != oldValue { needsDisplay = true } } }
+    private var tracking: NSTrackingArea?
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        translatesAutoresizingMaskIntoConstraints = false
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(rect: .zero, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) { isHovered = true }
+    override func mouseExited(with event: NSEvent) { isHovered = false }
+
+    override func mouseDown(with event: NSEvent) {
+        let pt = convert(event.locationInWindow, from: nil)
+        guard bounds.width > 0 else { return }
+        let frac = min(1, max(0, pt.x / bounds.width))
+        progress = frac
+        onSeekFraction?(frac)
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            let barH: CGFloat = isHovered ? 5 : 2.5
+            let barY = (bounds.height - barH) / 2
+            let trackRect = NSRect(x: 0, y: barY, width: bounds.width, height: barH)
+            NSColor.labelColor.withAlphaComponent(isHovered ? 0.14 : 0.09).setFill()
+            NSBezierPath(roundedRect: trackRect, xRadius: barH / 2, yRadius: barH / 2).fill()
+
+            let clamped = min(1, max(0, progress))
+            let fillW = bounds.width * clamped
+            if fillW > 0 {
+                let fillRect = NSRect(x: 0, y: barY, width: fillW, height: barH)
+                AppearanceSurfaceColors.accent.setFill()
+                NSBezierPath(roundedRect: fillRect, xRadius: barH / 2, yRadius: barH / 2).fill()
+            }
+
+            if isHovered {
+                let thumbD: CGFloat = 10
+                let thumbX = min(max(0, fillW - thumbD / 2), max(0, bounds.width - thumbD))
+                let thumbRect = NSRect(x: thumbX, y: (bounds.height - thumbD) / 2, width: thumbD, height: thumbD)
+                NSGraphicsContext.saveGraphicsState()
+                let glow = NSShadow()
+                glow.shadowColor = AppearanceSurfaceColors.accent.withAlphaComponent(0.65)
+                glow.shadowBlurRadius = 6
+                glow.shadowOffset = .zero
+                glow.set()
+                AppearanceSurfaceColors.accent.setFill()
+                NSBezierPath(ovalIn: thumbRect).fill()
+                NSGraphicsContext.restoreGraphicsState()
+            }
+        }
+    }
+}
+
+@MainActor
+private final class FadedScrollContainerView: NSView {
+    private let maskLayer = CAGradientLayer()
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        translatesAutoresizingMaskIntoConstraints = false
+        maskLayer.colors = [
+            NSColor.clear.cgColor,
+            NSColor.black.cgColor,
+            NSColor.black.cgColor,
+            NSColor.clear.cgColor
+        ]
+        maskLayer.locations = [0.0, 0.12, 0.88, 1.0]
+        maskLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        maskLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        layer?.mask = maskLayer
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func layout() {
+        super.layout()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        maskLayer.frame = bounds
+        CATransaction.commit()
+    }
+}
+
+@MainActor
 final class ImmersiveLyricsView: NSView {
     var onTransportCommand: ((MediaTransportCommand) -> Void)?
+    var onSeek: ((TimeInterval) -> Void)?
     var onRetryMatch: (() -> Void)?
 
     private let stageBackground = AppearanceSurfaceView()
+    private let scrollFadeContainer = FadedScrollContainerView()
     private let scrollView = ImmersiveLyricsScrollView()
     private let documentView = FlippedImmersiveDocumentView()
     private let linesStack = NSStackView()
     private var lineViews: [SweepLyricLineView] = []
     private var currentLines: [LyricLine] = []
     private var activeIndex: Int = -1
+    private var currentDuration: TimeInterval = 0
     private var userBrowsingUntil: TimeInterval = 0
 
     let missingView = MissingLyricsAnimationView()
-    let idleWaveView = IdleVinylWaveView()
 
     private let transportBar = AppearanceSurfaceView()
-    private let progressTrack = NSView()
-    private let progressFill = NSView()
-    private var progressFillWidth: NSLayoutConstraint?
+    private let progressBar = InteractiveProgressBarView()
     private let trackTitleLabel = NSTextField(labelWithString: "")
     private let trackArtistLabel = NSTextField(labelWithString: "")
-    private let timeLabel = NSTextField(labelWithString: "0:00 / 0:00")
-    private lazy var prevButton = TransportButton(symbol: "backward.fill", size: 13, isPrimary: false, target: self, action: #selector(prevClicked))
-    private lazy var playPauseButton = TransportButton(symbol: "play.fill", size: 14, isPrimary: true, target: self, action: #selector(playPauseClicked))
-    private lazy var nextButton = TransportButton(symbol: "forward.fill", size: 13, isPrimary: false, target: self, action: #selector(nextClicked))
+    private let timeLabel = NSTextField(labelWithString: "00:00 / 00:00")
+    private lazy var prevButton = TransportButton(symbol: "backward.fill", size: 13, isCapsulePrimary: false, target: self, action: #selector(prevClicked))
+    private lazy var playPauseButton = TransportButton(symbol: "play.fill", size: 15, isCapsulePrimary: true, target: self, action: #selector(playPauseClicked))
+    private lazy var nextButton = TransportButton(symbol: "forward.fill", size: 13, isCapsulePrimary: false, target: self, action: #selector(nextClicked))
     private var swatchButtons: [ThemeSwatchDotButton] = []
     private var isPlayingState = false
 
@@ -1013,7 +1231,6 @@ final class ImmersiveLyricsView: NSView {
     func setStageVisible(_ visible: Bool) {
         isHidden = !visible
         missingView.setActive(visible && !missingView.isHidden)
-        idleWaveView.setActive(visible && !idleWaveView.isHidden)
         if visible && activeIndex >= 0 {
             scrollActiveLineToCenterIfAllowed(animated: false)
         }
@@ -1061,18 +1278,17 @@ final class ImmersiveLyricsView: NSView {
 
         linesStack.orientation = .vertical
         linesStack.alignment = .centerX
-        linesStack.spacing = 18
-        linesStack.edgeInsets = NSEdgeInsets(top: 180, left: 28, bottom: 180, right: 28)
+        linesStack.spacing = 14
+        linesStack.edgeInsets = NSEdgeInsets(top: 180, left: 16, bottom: 180, right: 16)
         linesStack.translatesAutoresizingMaskIntoConstraints = false
 
         documentView.addSubview(linesStack)
         scrollView.documentView = documentView
+        scrollFadeContainer.addSubview(scrollView)
 
         missingView.isIdlePreview = true
         missingView.isHidden = false
         missingView.onRetry = { [weak self] in self?.onRetryMatch?() }
-
-        idleWaveView.isHidden = true
 
         transportBar.wantsLayer = true
         transportBar.surfaceColor = AppearanceSurfaceColors.card
@@ -1082,14 +1298,10 @@ final class ImmersiveLyricsView: NSView {
         transportBar.layer?.borderWidth = 0.5
         transportBar.translatesAutoresizingMaskIntoConstraints = false
 
-        progressTrack.wantsLayer = true
-        progressTrack.layer?.cornerRadius = 1.5
-        progressTrack.translatesAutoresizingMaskIntoConstraints = false
-
-        progressFill.wantsLayer = true
-        progressFill.layer?.cornerRadius = 1.5
-        progressFill.translatesAutoresizingMaskIntoConstraints = false
-        progressTrack.addSubview(progressFill)
+        progressBar.onSeekFraction = { [weak self] frac in
+            guard let self, self.currentDuration > 0 else { return }
+            self.onSeek?(self.currentDuration * Double(frac))
+        }
 
         trackTitleLabel.stringValue = isZh ? "未在播放" : "Not Playing"
         trackTitleLabel.font = .systemFont(ofSize: 12, weight: .semibold)
@@ -1107,9 +1319,14 @@ final class ImmersiveLyricsView: NSView {
 
         timeLabel.font = .monospacedDigitSystemFont(ofSize: 10, weight: .regular)
         timeLabel.textColor = .tertiaryLabelColor
-        timeLabel.alignment = .right
         timeLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let metaBottomRow = NSStackView(views: [trackArtistLabel, timeLabel])
+        metaBottomRow.orientation = .horizontal
+        metaBottomRow.alignment = .centerY
+        metaBottomRow.spacing = 6
+        metaBottomRow.translatesAutoresizingMaskIntoConstraints = false
 
         swatchButtons = ImmersiveLyricsThemePreset.allCases.map { preset in
             ThemeSwatchDotButton(preset: preset, target: self, action: #selector(swatchClicked(_:)))
@@ -1120,28 +1337,18 @@ final class ImmersiveLyricsView: NSView {
         swatchRow.spacing = 4
         swatchRow.translatesAutoresizingMaskIntoConstraints = false
 
-        let rightControls = NSStackView(views: [swatchRow, timeLabel])
-        rightControls.orientation = .horizontal
-        rightControls.alignment = .centerY
-        rightControls.spacing = 8
-        rightControls.translatesAutoresizingMaskIntoConstraints = false
-
-        transportBar.addSubview(progressTrack)
+        transportBar.addSubview(progressBar)
         transportBar.addSubview(trackTitleLabel)
-        transportBar.addSubview(trackArtistLabel)
+        transportBar.addSubview(metaBottomRow)
         transportBar.addSubview(prevButton)
         transportBar.addSubview(playPauseButton)
         transportBar.addSubview(nextButton)
-        transportBar.addSubview(rightControls)
+        transportBar.addSubview(swatchRow)
 
         addSubview(stageBackground)
-        addSubview(scrollView)
+        addSubview(scrollFadeContainer)
         addSubview(missingView)
-        addSubview(idleWaveView)
         addSubview(transportBar)
-
-        let widthConstraint = progressFill.widthAnchor.constraint(equalToConstant: 0)
-        progressFillWidth = widthConstraint
 
         NSLayoutConstraint.activate([
             stageBackground.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
@@ -1149,10 +1356,15 @@ final class ImmersiveLyricsView: NSView {
             stageBackground.topAnchor.constraint(equalTo: topAnchor),
             stageBackground.bottomAnchor.constraint(equalTo: transportBar.topAnchor, constant: -10),
 
-            scrollView.leadingAnchor.constraint(equalTo: stageBackground.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: stageBackground.trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: stageBackground.topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: stageBackground.bottomAnchor),
+            scrollFadeContainer.leadingAnchor.constraint(equalTo: stageBackground.leadingAnchor),
+            scrollFadeContainer.trailingAnchor.constraint(equalTo: stageBackground.trailingAnchor),
+            scrollFadeContainer.topAnchor.constraint(equalTo: stageBackground.topAnchor),
+            scrollFadeContainer.bottomAnchor.constraint(equalTo: stageBackground.bottomAnchor),
+
+            scrollView.leadingAnchor.constraint(equalTo: scrollFadeContainer.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: scrollFadeContainer.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: scrollFadeContainer.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: scrollFadeContainer.bottomAnchor),
 
             linesStack.leadingAnchor.constraint(equalTo: documentView.leadingAnchor),
             linesStack.trailingAnchor.constraint(equalTo: documentView.trailingAnchor),
@@ -1164,52 +1376,44 @@ final class ImmersiveLyricsView: NSView {
             missingView.topAnchor.constraint(equalTo: stageBackground.topAnchor),
             missingView.bottomAnchor.constraint(equalTo: stageBackground.bottomAnchor),
 
-            idleWaveView.leadingAnchor.constraint(equalTo: stageBackground.leadingAnchor),
-            idleWaveView.trailingAnchor.constraint(equalTo: stageBackground.trailingAnchor),
-            idleWaveView.topAnchor.constraint(equalTo: stageBackground.topAnchor),
-            idleWaveView.bottomAnchor.constraint(equalTo: stageBackground.bottomAnchor),
-
             transportBar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
             transportBar.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
             transportBar.bottomAnchor.constraint(equalTo: bottomAnchor),
-            transportBar.heightAnchor.constraint(equalToConstant: 64),
+            transportBar.heightAnchor.constraint(equalToConstant: 66),
 
-            progressTrack.leadingAnchor.constraint(equalTo: transportBar.leadingAnchor, constant: 14),
-            progressTrack.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -14),
-            progressTrack.topAnchor.constraint(equalTo: transportBar.topAnchor, constant: 8),
-            progressTrack.heightAnchor.constraint(equalToConstant: 3),
-
-            progressFill.leadingAnchor.constraint(equalTo: progressTrack.leadingAnchor),
-            progressFill.topAnchor.constraint(equalTo: progressTrack.topAnchor),
-            progressFill.bottomAnchor.constraint(equalTo: progressTrack.bottomAnchor),
-            widthConstraint,
+            // Edge-to-edge interactive progress bar along very top of transport bar
+            progressBar.leadingAnchor.constraint(equalTo: transportBar.leadingAnchor, constant: 10),
+            progressBar.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -10),
+            progressBar.topAnchor.constraint(equalTo: transportBar.topAnchor, constant: 3),
+            progressBar.heightAnchor.constraint(equalToConstant: 12),
 
             trackTitleLabel.leadingAnchor.constraint(equalTo: transportBar.leadingAnchor, constant: 14),
-            trackTitleLabel.topAnchor.constraint(equalTo: progressTrack.bottomAnchor, constant: 8),
+            trackTitleLabel.topAnchor.constraint(equalTo: progressBar.bottomAnchor, constant: 4),
             trackTitleLabel.trailingAnchor.constraint(lessThanOrEqualTo: prevButton.leadingAnchor, constant: -10),
 
-            trackArtistLabel.leadingAnchor.constraint(equalTo: trackTitleLabel.leadingAnchor),
-            trackArtistLabel.topAnchor.constraint(equalTo: trackTitleLabel.bottomAnchor, constant: 2),
-            trackArtistLabel.trailingAnchor.constraint(lessThanOrEqualTo: prevButton.leadingAnchor, constant: -10),
+            metaBottomRow.leadingAnchor.constraint(equalTo: trackTitleLabel.leadingAnchor),
+            metaBottomRow.topAnchor.constraint(equalTo: trackTitleLabel.bottomAnchor, constant: 2),
+            metaBottomRow.trailingAnchor.constraint(lessThanOrEqualTo: prevButton.leadingAnchor, constant: -10),
 
+            // Soda Music iconic 56x34 rounded capsule Play/Pause button centered
             playPauseButton.centerXAnchor.constraint(equalTo: transportBar.centerXAnchor),
             playPauseButton.centerYAnchor.constraint(equalTo: transportBar.centerYAnchor, constant: 6),
-            playPauseButton.widthAnchor.constraint(equalToConstant: 32),
-            playPauseButton.heightAnchor.constraint(equalToConstant: 32),
+            playPauseButton.widthAnchor.constraint(equalToConstant: 56),
+            playPauseButton.heightAnchor.constraint(equalToConstant: 34),
 
-            prevButton.trailingAnchor.constraint(equalTo: playPauseButton.leadingAnchor, constant: -8),
+            prevButton.trailingAnchor.constraint(equalTo: playPauseButton.leadingAnchor, constant: -10),
             prevButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
-            prevButton.widthAnchor.constraint(equalToConstant: 26),
-            prevButton.heightAnchor.constraint(equalToConstant: 26),
+            prevButton.widthAnchor.constraint(equalToConstant: 28),
+            prevButton.heightAnchor.constraint(equalToConstant: 28),
 
-            nextButton.leadingAnchor.constraint(equalTo: playPauseButton.trailingAnchor, constant: 8),
+            nextButton.leadingAnchor.constraint(equalTo: playPauseButton.trailingAnchor, constant: 10),
             nextButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
-            nextButton.widthAnchor.constraint(equalToConstant: 26),
-            nextButton.heightAnchor.constraint(equalToConstant: 26),
+            nextButton.widthAnchor.constraint(equalToConstant: 28),
+            nextButton.heightAnchor.constraint(equalToConstant: 28),
 
-            rightControls.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -12),
-            rightControls.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
-            rightControls.leadingAnchor.constraint(greaterThanOrEqualTo: nextButton.trailingAnchor, constant: 8)
+            swatchRow.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -14),
+            swatchRow.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
+            swatchRow.leadingAnchor.constraint(greaterThanOrEqualTo: nextButton.trailingAnchor, constant: 10)
         ])
         refreshTransportAppearance()
     }
@@ -1229,7 +1433,7 @@ final class ImmersiveLyricsView: NSView {
         let visibleH = max(200, scrollView.contentView.bounds.height)
         let pad = max(80, ceil(visibleH / 2))
         if abs(linesStack.edgeInsets.top - pad) > 1 {
-            linesStack.edgeInsets = NSEdgeInsets(top: pad, left: 28, bottom: pad, right: 28)
+            linesStack.edgeInsets = NSEdgeInsets(top: pad, left: 16, bottom: pad, right: 16)
         }
         let width = max(200, scrollView.contentView.bounds.width)
         let height = max(visibleH, linesStack.fittingSize.height)
@@ -1240,8 +1444,7 @@ final class ImmersiveLyricsView: NSView {
 
     private func refreshTransportAppearance() {
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            progressTrack.layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.10).cgColor
-            progressFill.layer?.backgroundColor = AppearanceSurfaceColors.accent.cgColor
+            progressBar.needsDisplay = true
             prevButton.refreshStyle()
             playPauseButton.refreshStyle()
             nextButton.refreshStyle()
@@ -1261,8 +1464,9 @@ final class ImmersiveLyricsView: NSView {
         lyricsMissing: Bool
     ) {
         isPlayingState = isPlaying
+        currentDuration = max(0, duration)
         playPauseButton.image = NSImage(systemSymbolName: isPlaying ? "pause.fill" : "play.fill", accessibilityDescription: nil)?
-            .withSymbolConfiguration(.init(pointSize: 14, weight: .semibold))
+            .withSymbolConfiguration(.init(pointSize: 15, weight: .semibold))
 
         let hasTrack = (trackTitle?.isEmpty == false)
         if let title = trackTitle, !title.isEmpty {
@@ -1273,20 +1477,12 @@ final class ImmersiveLyricsView: NSView {
             trackArtistLabel.stringValue = "NotchMuse"
         }
 
-        let safeDuration = max(0, duration)
-        let safePos = min(max(0, position), safeDuration > 0 ? safeDuration : max(0, position))
-        timeLabel.stringValue = "\(formatClock(safePos)) / \(formatClock(safeDuration))"
-        let trackWidth = progressTrack.bounds.width
-        if trackWidth > 0 && safeDuration > 0 {
-            progressFillWidth?.constant = trackWidth * CGFloat(safePos / safeDuration)
-        } else {
-            progressFillWidth?.constant = 0
-        }
+        let safePos = min(max(0, position), currentDuration > 0 ? currentDuration : max(0, position))
+        timeLabel.stringValue = "\(formatClock(safePos)) / \(formatClock(currentDuration))"
+        progressBar.progress = currentDuration > 0 ? CGFloat(safePos / currentDuration) : 0
 
         if !hasTrack {
-            scrollView.isHidden = true
-            idleWaveView.isHidden = true
-            idleWaveView.setActive(false)
+            scrollFadeContainer.isHidden = true
             missingView.isIdlePreview = true
             missingView.isHidden = false
             missingView.setActive(!isHidden)
@@ -1294,20 +1490,16 @@ final class ImmersiveLyricsView: NSView {
         }
 
         if lines.isEmpty {
-            scrollView.isHidden = true
-            idleWaveView.isHidden = true
-            idleWaveView.setActive(false)
+            scrollFadeContainer.isHidden = true
             missingView.isIdlePreview = !lyricsMissing
             missingView.isHidden = false
             missingView.setActive(!isHidden)
             return
         }
 
-        idleWaveView.isHidden = true
-        idleWaveView.setActive(false)
         missingView.isHidden = true
         missingView.setActive(false)
-        scrollView.isHidden = false
+        scrollFadeContainer.isHidden = false
 
         if lines != currentLines {
             rebuildLines(lines)
@@ -1335,11 +1527,14 @@ final class ImmersiveLyricsView: NSView {
         let sweep = preset.sweepColor
         let normal = preset.normalTextColor
         for line in lines {
-            let view = SweepLyricLineView(primaryText: line.text, translationText: line.translation)
+            let view = SweepLyricLineView(primaryText: line.text, translationText: line.translation, lineTime: line.time)
             view.customSweepColor = sweep
             view.customNormalColor = normal
+            view.onSeek = { [weak self] seconds in
+                self?.onSeek?(seconds)
+            }
             linesStack.addArrangedSubview(view)
-            view.widthAnchor.constraint(equalTo: linesStack.widthAnchor, constant: -56).isActive = true
+            view.widthAnchor.constraint(equalTo: linesStack.widthAnchor, constant: -32).isActive = true
             lineViews.append(view)
         }
         layoutSubtreeIfNeeded()
@@ -1364,7 +1559,6 @@ final class ImmersiveLyricsView: NSView {
         layoutDocumentWidth()
         documentView.layoutSubtreeIfNeeded()
         let target = lineViews[activeIndex]
-        // Convert from unflipped NSStackView coordinates into flipped documentView coordinates!
         let centerInDoc = documentView.convert(NSPoint(x: target.bounds.midX, y: target.bounds.midY), from: target)
         let visibleHeight = scrollView.contentView.bounds.height
         let maxY = max(0, documentView.bounds.height - visibleHeight)
@@ -1396,7 +1590,7 @@ final class ImmersiveLyricsView: NSView {
 
     private func formatClock(_ seconds: TimeInterval) -> String {
         let total = max(0, Int(seconds.rounded()))
-        return String(format: "%d:%02d", total / 60, total % 60)
+        return String(format: "%02d:%02d", total / 60, total % 60)
     }
 
     @objc private func prevClicked() { onTransportCommand?(.previous) }

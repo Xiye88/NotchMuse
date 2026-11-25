@@ -1,4 +1,5 @@
 import AppKit
+import LyricsCore
 import QuartzCore
 import ServiceManagement
 
@@ -30,6 +31,10 @@ enum AppPreferences {
     static let showMenuBarIconKey = "ShowMenuBarIcon"
     static let hiddenControlsNoticeKey = "HiddenControlsNoticeShown"
     static let bilingualLyricsKey = "BilingualLyricsEnabled"
+    static let missingLyricsAnimationStyleKey = "MissingLyricsAnimationStyle"
+    static var missingLyricsAnimationStyle: MissingLyricsAnimationStyle {
+        MissingLyricsAnimationStyle(rawValue: UserDefaults.standard.string(forKey: missingLyricsAnimationStyleKey) ?? "") ?? .vinylSeek
+    }
     static var bilingualLyricsEnabled: Bool {
         Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true &&
         UserDefaults.standard.bool(forKey: bilingualLyricsKey)
@@ -309,6 +314,7 @@ final class SettingsWindowController: NSWindowController {
     private let appAppearanceControl = NSSegmentedControl(labels: AppAppearance.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let playerPopUp = NSPopUpButton()
     private let playerStopBehaviorPopUp = NSPopUpButton()
+    private let missingLyricsStylePopUp = NSPopUpButton()
     private let notchBackgroundSwitch = NSSwitch()
     private let notchBackgroundPresetPopUp = NSPopUpButton()
     private let notchBackgroundColorWell = NSColorWell()
@@ -323,12 +329,20 @@ final class SettingsWindowController: NSWindowController {
     private let displayPage = NSStackView()
     private let appearancePage = NSStackView()
     private let generalPage = NSStackView()
-    private var selectedPage: SettingsPage = .display
+    private let immersiveLyricsView = ImmersiveLyricsView()
+    private var liveStatusStripView: NSView?
+    private var selectedPage: SettingsPage = .lyrics
     private weak var settingsScrollView: SettingsScrollView?
+    private var sidebarPanelView: NSView?
+    private var sidebarWidthConstraint: NSLayoutConstraint?
+    private let sidebarExpandButton = NSButton()
+    private(set) var isSidebarCollapsed = false
     private var sidebarButtons: [SettingsPage: NSButton] = [:]
     private let sidebarNavDeck = SidebarNavDeckView()
     private let vinylDeck = VinylDeckCardView()
     private let sidebarQuickActions = SettingsSidebarQuickActionsView()
+    var onRetryLyricsMatch: (() -> Void)?
+    var onMediaCommand: ((MediaTransportCommand) -> Void)?
     private var supportWindow: SupportWindowController?
     private var positionRow: NSGridRow?
     private var notchStyleRow: NSGridRow?
@@ -485,6 +499,21 @@ final class SettingsWindowController: NSWindowController {
         restoredController.window?.close()
         controller.window?.close()
         precondition(SupportWindowController().window?.contentView is NSStackView, "Support page must build")
+        precondition(SettingsPage.allCases == [.lyrics, .display, .appearance, .general], "Navigation order must be Lyrics -> Display -> Appearance -> General")
+        controller.setSidebarCollapsed(true, animated: false)
+        precondition(controller.isSidebarCollapsed && controller.sidebarWidthConstraint?.constant == 0 && !controller.sidebarExpandButton.isHidden, "Sidebar collapse hides sidebar and shows expand button")
+        controller.setSidebarCollapsed(false, animated: false)
+        precondition(!controller.isSidebarCollapsed && controller.sidebarWidthConstraint?.constant == 224 && controller.sidebarExpandButton.isHidden, "Sidebar expand restores 224pt sidebar")
+        let savedAnim = defaults.object(forKey: AppPreferences.missingLyricsAnimationStyleKey)
+        defer {
+            if let savedAnim { defaults.set(savedAnim, forKey: AppPreferences.missingLyricsAnimationStyleKey) }
+            else { defaults.removeObject(forKey: AppPreferences.missingLyricsAnimationStyleKey) }
+        }
+        for (idx, style) in MissingLyricsAnimationStyle.allCases.enumerated() {
+            controller.missingLyricsStylePopUp.selectItem(at: idx)
+            controller.missingLyricsStyleChanged()
+            precondition(AppPreferences.missingLyricsAnimationStyle == style && controller.immersiveLyricsView.animationStyle == style, "Missing lyrics animation style must persist")
+        }
         print("Settings interaction self-test passed")
     }
     #endif
@@ -598,6 +627,11 @@ final class SettingsWindowController: NSWindowController {
         }
         playerStopBehaviorPopUp.target = self
         playerStopBehaviorPopUp.action = #selector(playerStopBehaviorChanged)
+        for style in MissingLyricsAnimationStyle.allCases {
+            missingLyricsStylePopUp.addItem(withTitle: style.displayName())
+        }
+        missingLyricsStylePopUp.target = self
+        missingLyricsStylePopUp.action = #selector(missingLyricsStyleChanged)
 
         previewModeControl.target = self
         previewModeControl.action = #selector(displayModeChanged)
@@ -652,6 +686,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch],
             [label(L10n.text("Auto-Install Updates")), automaticInstallSwitch],
             [label(L10n.text("Appearance Mode")), appAppearanceControl],
+            [label(L10n.text("Missing Lyrics Animation")), missingLyricsStylePopUp],
             [label(L10n.text("Language")), languagePopUp]
         ]
         if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true {
@@ -731,19 +766,49 @@ final class SettingsWindowController: NSWindowController {
         sidebar.addArrangedSubview(sidebarNavDeck)
         updateSidebarSelection()
         let sidebarPanel = HiFiSidebarView()
+        sidebarPanelView = sidebarPanel
         sidebarPanel.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebar)
-        let sidebarDivider = AppearanceSurfaceView()
-        sidebarDivider.wantsLayer = true
-        sidebarDivider.surfaceColor = AppearanceSurfaceColors.border
-        sidebarDivider.surfaceBorderColor = .clear
-        sidebarDivider.translatesAutoresizingMaskIntoConstraints = false
+        let sidebarDivider = SidebarResizeDividerView()
+        sidebarDivider.onDragDelta = { [weak self] delta in
+            guard let self, let constraint = self.sidebarWidthConstraint else { return }
+            let base: CGFloat = self.isSidebarCollapsed ? 0 : 224
+            let target = min(224, max(0, base + delta))
+            constraint.constant = target
+            self.sidebarPanelView?.isHidden = target < 8
+        }
+        sidebarDivider.onDragEnd = { [weak self] _ in
+            guard let self, let current = self.sidebarWidthConstraint?.constant else { return }
+            let shouldCollapse = self.isSidebarCollapsed ? current < 72 : current < 130
+            self.setSidebarCollapsed(shouldCollapse, animated: true)
+        }
         sidebarQuickActions.onThemeToggle = { [weak self] appearance in
             self?.selectAppAppearance(AppAppearanceController.selection.toggled(for: appearance))
         }
         sidebarQuickActions.onSupport = { [weak self] in self?.showSupport() }
         sidebarQuickActions.translatesAutoresizingMaskIntoConstraints = false
         sidebarPanel.addSubview(sidebarQuickActions)
+
+        let compactBanner = makeAnnouncementBanner()
+        announcementBanner = compactBanner
+        sidebarPanel.addSubview(compactBanner)
+        updateAnnouncementBanner()
+        announcementObserver = NotificationCenter.default.addObserver(forName: AnnouncementManager.notification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.updateAnnouncementBanner() }
+        }
+
+        sidebarExpandButton.title = ""
+        sidebarExpandButton.isBordered = false
+        sidebarExpandButton.image = NSImage(systemSymbolName: "sidebar.left", accessibilityDescription: L10n.text("Toggle Sidebar"))?
+            .withSymbolConfiguration(.init(pointSize: 13, weight: .medium))
+        sidebarExpandButton.contentTintColor = .secondaryLabelColor
+        sidebarExpandButton.target = self
+        sidebarExpandButton.action = #selector(toggleSidebar)
+        sidebarExpandButton.keyEquivalent = "s"
+        sidebarExpandButton.keyEquivalentModifierMask = [.command, .option]
+        sidebarExpandButton.toolTip = L10n.text("Show Sidebar")
+        sidebarExpandButton.isHidden = true
+        sidebarExpandButton.translatesAutoresizingMaskIntoConstraints = false
 
         let previewHeader = NSStackView(views: [sectionTitle(L10n.text("Live Preview")), previewModeControl])
         previewHeader.orientation = .horizontal
@@ -764,22 +829,16 @@ final class SettingsWindowController: NSWindowController {
         contentStack.spacing = 18
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         let statusStrip = makeLiveStatusStrip()
+        liveStatusStripView = statusStrip
         contentStack.addArrangedSubview(statusStrip)
         statusStrip.widthAnchor.constraint(equalTo: contentStack.widthAnchor).isActive = true
         contentStack.addArrangedSubview(previewCard)
         contentStack.addArrangedSubview(displayPage)
         contentStack.addArrangedSubview(appearancePage)
-        let banner = makeAnnouncementBanner()
-        announcementBanner = banner
-        contentStack.insertArrangedSubview(banner, at: 0)
-        banner.widthAnchor.constraint(equalTo: contentStack.widthAnchor).isActive = true
-        updateAnnouncementBanner()
-        announcementObserver = NotificationCenter.default.addObserver(forName: AnnouncementManager.notification, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.updateAnnouncementBanner() }
-        }
         contentStack.addArrangedSubview(generalPage)
-        appearancePage.isHidden = true
-        generalPage.isHidden = true
+        displayPage.isHidden = selectedPage != .display
+        appearancePage.isHidden = selectedPage != .appearance
+        generalPage.isHidden = selectedPage != .general
         let scrollView = SettingsScrollView()
         settingsScrollView = scrollView
         scrollView.drawsBackground = false
@@ -787,33 +846,58 @@ final class SettingsWindowController: NSWindowController {
         scrollView.autohidesScrollers = true
         scrollView.scrollerStyle = .overlay
         scrollView.hasHorizontalScroller = false
+        scrollView.isHidden = selectedPage == .lyrics
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         let document = FlippedSettingsDocumentView()
         document.addSubview(contentStack)
         scrollView.documentView = document
+
+        immersiveLyricsView.onRetryMatch = { [weak self] in self?.onRetryLyricsMatch?() }
+        immersiveLyricsView.onTransportCommand = { [weak self] cmd in self?.onMediaCommand?(cmd) }
+        immersiveLyricsView.animationStyle = AppPreferences.missingLyricsAnimationStyle
+        immersiveLyricsView.setStageVisible(selectedPage == .lyrics)
+
         contentView.addSubview(sidebarPanel)
         contentView.addSubview(sidebarDivider)
         contentView.addSubview(scrollView)
+        contentView.addSubview(immersiveLyricsView)
+        contentView.addSubview(sidebarExpandButton)
+
+        let widthConstraint = sidebarPanel.widthAnchor.constraint(equalToConstant: 224)
+        sidebarWidthConstraint = widthConstraint
+
         NSLayoutConstraint.activate(cards.map { $0.widthAnchor.constraint(equalTo: contentStack.widthAnchor) } + [
             sidebarPanel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             sidebarPanel.topAnchor.constraint(equalTo: contentView.topAnchor),
             sidebarPanel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            sidebarPanel.widthAnchor.constraint(equalToConstant: 224),
+            widthConstraint,
             sidebarDivider.leadingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor),
             sidebarDivider.topAnchor.constraint(equalTo: contentView.topAnchor),
             sidebarDivider.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            sidebarDivider.widthAnchor.constraint(equalToConstant: 1),
+            sidebarDivider.widthAnchor.constraint(equalToConstant: 7),
             sidebar.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 12),
             sidebar.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -12),
             sidebar.topAnchor.constraint(equalTo: sidebarPanel.topAnchor, constant: 40),
+            compactBanner.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 12),
+            compactBanner.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -12),
+            compactBanner.bottomAnchor.constraint(equalTo: sidebarQuickActions.topAnchor, constant: -8),
+            compactBanner.heightAnchor.constraint(equalToConstant: 30),
             sidebarQuickActions.leadingAnchor.constraint(equalTo: sidebarPanel.leadingAnchor, constant: 12),
             sidebarQuickActions.trailingAnchor.constraint(equalTo: sidebarPanel.trailingAnchor, constant: -12),
             sidebarQuickActions.bottomAnchor.constraint(equalTo: sidebarPanel.bottomAnchor, constant: -12),
             sidebarQuickActions.heightAnchor.constraint(equalToConstant: 36),
-            scrollView.leadingAnchor.constraint(equalTo: sidebarDivider.trailingAnchor, constant: 16),
+            sidebarExpandButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 76),
+            sidebarExpandButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
+            sidebarExpandButton.widthAnchor.constraint(equalToConstant: 24),
+            sidebarExpandButton.heightAnchor.constraint(equalToConstant: 24),
+            scrollView.leadingAnchor.constraint(equalTo: sidebarDivider.trailingAnchor, constant: 12),
             scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
             scrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            immersiveLyricsView.leadingAnchor.constraint(equalTo: sidebarDivider.trailingAnchor, constant: 12),
+            immersiveLyricsView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            immersiveLyricsView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
+            immersiveLyricsView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
             contentStack.leadingAnchor.constraint(equalTo: document.leadingAnchor),
             contentStack.topAnchor.constraint(equalTo: document.topAnchor),
             contentStack.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -8),
@@ -854,33 +938,22 @@ final class SettingsWindowController: NSWindowController {
         leftStack.alignment = .centerY
         leftStack.spacing = 7
 
-        let shortVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.9"
-        let versionPill = AppearanceSurfaceView()
-        versionPill.wantsLayer = true
-        versionPill.surfaceColor = AppearanceSurfaceColors.card
-        versionPill.surfaceBorderColor = AppearanceSurfaceColors.border
-        versionPill.layer?.cornerRadius = 5
-        versionPill.layer?.cornerCurve = .continuous
-        versionPill.layer?.borderWidth = 0.5
-        versionPill.translatesAutoresizingMaskIntoConstraints = false
+        let collapseButton = NSButton(title: "", target: self, action: #selector(toggleSidebar))
+        collapseButton.isBordered = false
+        collapseButton.image = NSImage(systemSymbolName: "sidebar.left", accessibilityDescription: L10n.text("Toggle Sidebar"))?
+            .withSymbolConfiguration(.init(pointSize: 13, weight: .medium))
+        collapseButton.contentTintColor = .secondaryLabelColor
+        collapseButton.toolTip = L10n.text("Hide Sidebar")
+        collapseButton.keyEquivalent = "s"
+        collapseButton.keyEquivalentModifierMask = [.command, .option]
+        collapseButton.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        collapseButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
 
-        let versionLabel = NSTextField(labelWithString: "v\(shortVersion)")
-        versionLabel.font = .monospacedSystemFont(ofSize: 9.5, weight: .medium)
-        versionLabel.textColor = .secondaryLabelColor
-        versionLabel.translatesAutoresizingMaskIntoConstraints = false
-        versionPill.addSubview(versionLabel)
-        NSLayoutConstraint.activate([
-            versionLabel.leadingAnchor.constraint(equalTo: versionPill.leadingAnchor, constant: 6),
-            versionLabel.trailingAnchor.constraint(equalTo: versionPill.trailingAnchor, constant: -6),
-            versionLabel.topAnchor.constraint(equalTo: versionPill.topAnchor, constant: 2),
-            versionLabel.bottomAnchor.constraint(equalTo: versionPill.bottomAnchor, constant: -2)
-        ])
-
-        let row = NSStackView(views: [leftStack, versionPill])
+        let row = NSStackView(views: [leftStack, collapseButton])
         row.orientation = .horizontal
         row.distribution = .equalSpacing
         row.alignment = .centerY
-        row.edgeInsets = NSEdgeInsets(top: 0, left: 4, bottom: 0, right: 2)
+        row.edgeInsets = NSEdgeInsets(top: 0, left: 4, bottom: 0, right: 0)
         return row
     }
 
@@ -1191,6 +1264,8 @@ final class SettingsWindowController: NSWindowController {
             playerPopUp.selectItem(at: 0)
         }
         playerStopBehaviorPopUp.selectItem(at: PlayerStopBehavior.allCases.firstIndex(of: AppPreferences.playerStopBehavior) ?? 0)
+        missingLyricsStylePopUp.selectItem(at: MissingLyricsAnimationStyle.allCases.firstIndex(of: AppPreferences.missingLyricsAnimationStyle) ?? 0)
+        immersiveLyricsView.animationStyle = AppPreferences.missingLyricsAnimationStyle
         languagePopUp.selectItem(at: AppLanguage.allCases.firstIndex(of: AppPreferences.language) ?? 0)
         updateControlAvailability()
         updatePreview()
@@ -1526,37 +1601,40 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func makeAnnouncementBanner() -> NSView {
-        let box = NSView()
+        let box = AppearanceSurfaceView()
         box.wantsLayer = true
-        box.layer?.cornerRadius = 12
-        box.layer?.borderWidth = 1
-        box.layer?.borderColor = NSColor(calibratedRed: 1.0, green: 0.54, blue: 0.21, alpha: 0.42).cgColor
-        box.layer?.backgroundColor = NSColor(calibratedRed: 1.0, green: 0.54, blue: 0.21, alpha: 0.10).cgColor
+        box.surfaceColor = AppearanceSurfaceColors.accentSoft
+        box.surfaceBorderColor = AppearanceSurfaceColors.accentBorder
+        box.layer?.cornerRadius = 8
+        box.layer?.cornerCurve = .continuous
+        box.layer?.borderWidth = 0.5
         box.translatesAutoresizingMaskIntoConstraints = false
 
         let icon = NSImageView()
-        icon.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
-        icon.contentTintColor = NSColor(calibratedRed: 1.0, green: 0.62, blue: 0.28, alpha: 1.0)
+        icon.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 11, weight: .semibold))
+        icon.contentTintColor = AppearanceSurfaceColors.accent
         icon.translatesAutoresizingMaskIntoConstraints = false
 
         let titleButton = NSButton(title: "", target: self, action: #selector(openAnnouncement))
         titleButton.isBordered = false
         titleButton.alignment = .left
-        titleButton.font = .systemFont(ofSize: 12.5, weight: .medium)
+        titleButton.font = .systemFont(ofSize: 11.5, weight: .medium)
         titleButton.lineBreakMode = .byTruncatingTail
         titleButton.translatesAutoresizingMaskIntoConstraints = false
         announcementTitleButton = titleButton
 
         let unreadDot = NSView()
         unreadDot.wantsLayer = true
-        unreadDot.layer?.cornerRadius = 3.5
+        unreadDot.layer?.cornerRadius = 3
         unreadDot.layer?.backgroundColor = NSColor(calibratedRed: 1.0, green: 0.45, blue: 0.14, alpha: 1.0).cgColor
         unreadDot.translatesAutoresizingMaskIntoConstraints = false
         announcementUnreadDot = unreadDot
 
         let chevron = NSImageView()
-        chevron.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
-        chevron.contentTintColor = .secondaryLabelColor
+        chevron.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 10, weight: .semibold))
+        chevron.contentTintColor = .tertiaryLabelColor
         chevron.translatesAutoresizingMaskIntoConstraints = false
 
         box.addSubview(icon)
@@ -1564,23 +1642,21 @@ final class SettingsWindowController: NSWindowController {
         box.addSubview(unreadDot)
         box.addSubview(chevron)
         NSLayoutConstraint.activate([
-            box.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
-            icon.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
+            icon.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 9),
             icon.centerYAnchor.constraint(equalTo: box.centerYAnchor),
-            icon.widthAnchor.constraint(equalToConstant: 16),
-            icon.heightAnchor.constraint(equalToConstant: 16),
-            titleButton.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 8),
-            titleButton.trailingAnchor.constraint(lessThanOrEqualTo: unreadDot.leadingAnchor, constant: -8),
-            titleButton.topAnchor.constraint(equalTo: box.topAnchor, constant: 8),
-            titleButton.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -8),
-            unreadDot.trailingAnchor.constraint(equalTo: chevron.leadingAnchor, constant: -8),
+            icon.widthAnchor.constraint(equalToConstant: 13),
+            icon.heightAnchor.constraint(equalToConstant: 13),
+            titleButton.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
+            titleButton.trailingAnchor.constraint(lessThanOrEqualTo: unreadDot.leadingAnchor, constant: -6),
+            titleButton.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+            unreadDot.trailingAnchor.constraint(equalTo: chevron.leadingAnchor, constant: -6),
             unreadDot.centerYAnchor.constraint(equalTo: box.centerYAnchor),
-            unreadDot.widthAnchor.constraint(equalToConstant: 7),
-            unreadDot.heightAnchor.constraint(equalToConstant: 7),
-            chevron.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
+            unreadDot.widthAnchor.constraint(equalToConstant: 6),
+            unreadDot.heightAnchor.constraint(equalToConstant: 6),
+            chevron.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -8),
             chevron.centerYAnchor.constraint(equalTo: box.centerYAnchor),
-            chevron.widthAnchor.constraint(equalToConstant: 12),
-            chevron.heightAnchor.constraint(equalToConstant: 12)
+            chevron.widthAnchor.constraint(equalToConstant: 10),
+            chevron.heightAnchor.constraint(equalToConstant: 10)
         ])
         return box
     }
@@ -1753,6 +1829,72 @@ final class SettingsWindowController: NSWindowController {
         save(behaviors[playerStopBehaviorPopUp.indexOfSelectedItem], key: AppPreferences.playerStopBehaviorKey)
     }
 
+    @objc private func missingLyricsStyleChanged() {
+        let styles = MissingLyricsAnimationStyle.allCases
+        guard styles.indices.contains(missingLyricsStylePopUp.indexOfSelectedItem) else { return }
+        let chosen = styles[missingLyricsStylePopUp.indexOfSelectedItem]
+        UserDefaults.standard.set(chosen.rawValue, forKey: AppPreferences.missingLyricsAnimationStyleKey)
+        immersiveLyricsView.animationStyle = chosen
+    }
+
+    @objc func toggleSidebar() {
+        setSidebarCollapsed(!isSidebarCollapsed, animated: true)
+    }
+
+    func setSidebarCollapsed(_ collapsed: Bool, animated: Bool) {
+        let didChange = collapsed != isSidebarCollapsed
+        isSidebarCollapsed = collapsed
+        if didChange {
+            NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+        }
+        let targetWidth: CGFloat = collapsed ? 0 : 224
+        if !collapsed {
+            sidebarPanelView?.isHidden = false
+        }
+        sidebarExpandButton.isHidden = !collapsed
+        if animated {
+            NSAnimationContext.runAnimationGroup({ ctx in
+                ctx.duration = 0.22
+                ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                self.sidebarWidthConstraint?.animator().constant = targetWidth
+            }, completionHandler: { [weak self] in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.sidebarPanelView?.isHidden = self.isSidebarCollapsed
+                }
+            })
+        } else {
+            sidebarWidthConstraint?.constant = targetWidth
+            sidebarPanelView?.isHidden = collapsed
+        }
+    }
+
+    func updateImmersiveLyrics(
+        lines: [LyricLine],
+        activeIndex: Int,
+        trackTitle: String?,
+        artistName: String?,
+        isPlaying: Bool,
+        isPaused: Bool,
+        position: TimeInterval,
+        duration: TimeInterval,
+        lyricsFeedback: LyricsFeedback
+    ) {
+        let synced = !lines.isEmpty && lyricsFeedback == .available
+        sidebarNavDeck.updateLyricsStatus(isPlaying: isPlaying, synced: synced)
+        immersiveLyricsView.update(
+            lines: lines,
+            activeIndex: activeIndex,
+            trackTitle: trackTitle,
+            artistName: artistName,
+            isPlaying: isPlaying,
+            isPaused: isPaused,
+            position: position,
+            duration: duration,
+            lyricsNotFound: lyricsFeedback == .notFound
+        )
+    }
+
     @objc private func pageChanged(_ sender: NSButton) {
         guard let page = SettingsPage(rawValue: sender.identifier?.rawValue ?? "") else { return }
         let didChange = page != selectedPage
@@ -1760,6 +1902,10 @@ final class SettingsWindowController: NSWindowController {
             NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         }
         selectedPage = page
+        let isLyrics = page == .lyrics
+        settingsScrollView?.isHidden = isLyrics
+        immersiveLyricsView.setStageVisible(isLyrics)
+        liveStatusStripView?.isHidden = isLyrics
         previewCard?.isHidden = page != .display
         displayPage.isHidden = page != .display
         appearancePage.isHidden = page != .appearance
@@ -1825,6 +1971,8 @@ final class SettingsWindowController: NSWindowController {
         let page = selectedPage
         let keys: [String]
         switch page {
+        case .lyrics:
+            keys = []
         case .display:
             keys = [AppPreferences.displayModeKey, AppPreferences.positionKey, AppPreferences.statusBarOffsetKey, AppPreferences.notchStyleKey, AppPreferences.notchPlacementKey, AppPreferences.displayTargetKey, AppPreferences.displayWidthKey, AppPreferences.customWidthKey] + FreeLyricsPreferences.keys
         case .appearance:
@@ -2354,11 +2502,12 @@ private final class FlippedSettingsDocumentView: NSView {
 }
 
 private enum SettingsPage: String, CaseIterable {
-    case display, appearance, general
+    case lyrics, display, appearance, general
 
     var title: String { rawValue.capitalized }
     var symbol: String {
         switch self {
+        case .lyrics: return "music.note.list"
         case .display: return "menubar.rectangle"
         case .appearance: return "paintpalette"
         case .general: return "slider.horizontal.3"
@@ -2366,6 +2515,7 @@ private enum SettingsPage: String, CaseIterable {
     }
     var help: String {
         switch self {
+        case .lyrics: return "Full synchronized lyrics and playback controls."
         case .display: return "Lyrics display mode, position, and screen."
         case .appearance: return "Lyrics color, typography, and motion."
         case .general: return "Player selection and system behavior."
@@ -2386,7 +2536,7 @@ private final class SidebarNavDeckView: NSView {
     private let selectionBackdrop = NSView()
     private let selectionLed = NSView()
     private var buttons: [SettingsPage: SidebarNavButton] = [:]
-    private var currentPage: SettingsPage = .display
+    private var currentPage: SettingsPage = .lyrics
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -2463,6 +2613,10 @@ private final class SidebarNavDeckView: NSView {
         buttons[.general]?.updateGeneralStatus(active: active)
     }
 
+    func updateLyricsStatus(isPlaying: Bool, synced: Bool) {
+        buttons[.lyrics]?.updateLyricsStatus(isPlaying: isPlaying, synced: synced)
+    }
+
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         refreshAppearance()
@@ -2497,6 +2651,9 @@ private final class SidebarNavButton: NSButton {
     private var currentLyricColor: NSColor = AppearanceSurfaceColors.accent
     private let statusDot = NSView()
     private var isPlayerActive = false
+    private let lyricsDot = NSView()
+    private var isLyricsPlaying = false
+    private var isLyricsSynced = false
 
     private var tracking: NSTrackingArea?
     private var isHovered = false
@@ -2555,6 +2712,20 @@ private final class SidebarNavButton: NSButton {
         ]
 
         switch page {
+        case .lyrics:
+            lyricsDot.wantsLayer = true
+            lyricsDot.layer?.cornerRadius = 3
+            lyricsDot.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(lyricsDot)
+
+            constraints += [
+                lyricsDot.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -13),
+                lyricsDot.centerYAnchor.constraint(equalTo: centerYAnchor),
+                lyricsDot.widthAnchor.constraint(equalToConstant: 6),
+                lyricsDot.heightAnchor.constraint(equalToConstant: 6),
+                titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: lyricsDot.leadingAnchor, constant: -8)
+            ]
+
         case .display:
             modePill.wantsLayer = true
             modePill.layer?.cornerRadius = 4.5
@@ -2636,6 +2807,12 @@ private final class SidebarNavButton: NSButton {
         refreshAppearance()
     }
 
+    func updateLyricsStatus(isPlaying: Bool, synced: Bool) {
+        isLyricsPlaying = isPlaying
+        isLyricsSynced = synced
+        refreshAppearance()
+    }
+
     private func animateIconPop() {
         guard let iconLayer = iconView.layer else { return }
         let bounds = iconLayer.bounds
@@ -2712,6 +2889,14 @@ private final class SidebarNavButton: NSButton {
             }
 
             switch page {
+            case .lyrics:
+                if isLyricsPlaying && isLyricsSynced {
+                    lyricsDot.layer?.backgroundColor = AppearanceSurfaceColors.accent.cgColor
+                } else if isLyricsSynced {
+                    lyricsDot.layer?.backgroundColor = NSColor.systemGreen.cgColor
+                } else {
+                    lyricsDot.layer?.backgroundColor = NSColor.tertiaryLabelColor.withAlphaComponent(0.55).cgColor
+                }
             case .display:
                 modePill.layer?.backgroundColor = isRowSelected
                     ? AppearanceSurfaceColors.accentSoft.cgColor

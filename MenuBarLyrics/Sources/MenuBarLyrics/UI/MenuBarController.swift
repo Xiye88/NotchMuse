@@ -570,6 +570,19 @@ final class MenuBarController: NSObject {
             needsPermission: needsPermission,
             liveLyricLine: liveLyric
         )
+        let currentPos = latestPlayerPosition ?? 0
+        let activeIdx = currentLines.lastIndex { $0.time <= currentPos } ?? -1
+        settingsWindowController?.updateImmersiveLyrics(
+            lines: currentLines,
+            activeIndex: activeIdx,
+            trackTitle: currentTrack?.name,
+            artistName: currentTrack?.artist,
+            isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
+            isPaused: !isPlayerStopped && isPlaybackPaused && currentTrack != nil,
+            position: currentPos,
+            duration: currentTrack?.duration ?? 0,
+            lyricsFeedback: latestLyricsFeedback
+        )
     }
 
     private func updateScrollTimer(overflows: Bool) {
@@ -835,6 +848,17 @@ final class MenuBarController: NSObject {
                 guard let self else { return }
                 self.isLyricsHidden = false
                 self.updateDisplay()
+            }
+            settingsWindowController?.onRetryLyricsMatch = { [weak self] in
+                self?.startPoll(forceLyricsRefresh: true)
+            }
+            settingsWindowController?.onMediaCommand = { [weak self] command in
+                guard let self else { return }
+                let activeSource = self.currentPlayerTrack?.playerSource ?? self.player.source
+                SystemMediaTransport.send(command, activeSource: activeSource)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    self.startPoll()
+                }
             }
         }
         settingsWindowController?.show()

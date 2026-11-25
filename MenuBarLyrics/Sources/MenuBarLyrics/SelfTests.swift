@@ -117,10 +117,13 @@ enum SelfTests {
         check(L10n.text("Report Lyrics Issue…", language: .simplifiedChinese) == "报告歌词问题…", "localizes the Chinese feedback entry")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
         check(AppPreferences.normalizedPlayerSource(nil) == .auto, "defaults to automatic player detection")
-        check(PlayerSource.allCases == [
-            .auto, .spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic,
-            .kugouMusic, .youtubeMusic, .tidal, .amazonMusic, .deezer, .qobuz, .plexamp, .allNowPlaying
-        ], "keeps all supported players, Auto Detect, and All Now Playing in Settings")
+        let groupedSources = PlayerSource.menuGroups.flatMap(\.sources)
+        check(groupedSources.count == PlayerSource.allCases.count
+              && Set(groupedSources) == Set(PlayerSource.allCases)
+              && groupedSources.first == .auto
+              && groupedSources.dropFirst().first == .allNowPlaying
+              && PlayerSource.allCases.count == 38,
+              "keeps all supported players, Auto Detect, and All Now Playing in Settings")
         check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
         check(AppPreferences.normalizedPlayerSource("NetEase Cloud Music") == .netEaseMusic, "persists NetEase selection")
         check(AppPreferences.normalizedPlayerSource("QQ Music") == .qqMusic, "persists QQ Music selection")
@@ -155,11 +158,15 @@ enum SelfTests {
         check(PlayerSource.auto.displayName(language: .simplifiedChinese) == "自动检测（推荐）", "localizes the recommended player option")
         check(PlayerSource.kugouMusic.displayName(language: .simplifiedChinese) == "酷狗音乐", "shows the Chinese Kugou name")
         check(PlayerSource.allNowPlaying.displayName(language: .simplifiedChinese) == "所有系统播控应用", "localizes All Now Playing option")
-        check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == [
-            "com.spotify.client", "com.apple.Music", "com.netease.163music", "com.tencent.QQMusicMac", "com.soda.music",
-            "com.kugou.mac", "com.github.th-ch.youtube-music", "com.tidal.desktop", "com.amazon.music",
-            "com.deezer.deezer-desktop", "com.qobuz.QobuzDesktop", "tv.plex.plexamp"
-        ], "registers all supported player bundle identifiers")
+        let detectableIDs = PlayerSource.detectable.compactMap(\.bundleIdentifier)
+        check(detectableIDs.count == PlayerSource.detectable.count
+              && PlayerSource.detectable.count == 33
+              && detectableIDs.contains("com.spotify.client")
+              && detectableIDs.contains("cn.kuwo.KuwoMusic")
+              && detectableIDs.contains("cn.toside.music.desktop")
+              && detectableIDs.contains("sh.cider.Cider")
+              && detectableIDs.contains("org.jeffvli.feishin"),
+              "registers all supported player bundle identifiers")
         testExpandedMediaRemotePlayersAndSanitizer()
     }
 
@@ -222,14 +229,38 @@ enum SelfTests {
         check(MediaRemotePlayerAdapter.snapshot(from: longTalk, source: .youtubeMusic, isRunning: true) == .stopped,
               "rejects long non-music YouTube talks in browser")
 
-        // Global explicit players: TIDAL, Amazon Music, Deezer, Qobuz, Plexamp, th-ch YouTube Music
+        // Global & niche explicit players: TIDAL, Amazon Music, Deezer, Qobuz, Plexamp, CN open-source, audiophile, NAS
         let explicitCases: [(PlayerSource, String)] = [
             (.youtubeMusic, "com.github.th-ch.youtube-music"),
             (.tidal, "com.tidal.desktop"),
             (.amazonMusic, "com.amazon.music"),
             (.deezer, "com.deezer.deezer-desktop"),
             (.qobuz, "com.qobuz.QobuzDesktop"),
-            (.plexamp, "tv.plex.plexamp")
+            (.plexamp, "tv.plex.plexamp"),
+            (.kuwoMusic, "cn.kuwo.KuwoMusic"),
+            (.miguMusic, "cn.migu.music"),
+            (.bodianMusic, "cn.kuwo.bodian"),
+            (.qianqianMusic, "com.taihe.qianqianmusic"),
+            (.lxMusic, "cn.toside.music.desktop"),
+            (.yesPlayMusic, "com.qier222.yesplaymusic"),
+            (.algerMusic, "com.alger.music"),
+            (.listen1, "com.listen1.desktop"),
+            (.splayer, "com.imsyy.splayer"),
+            (.cider, "sh.cider.Cider"),
+            (.soundCloud, "com.soundcloud.desktop"),
+            (.bandcamp, "com.bandcamp.desktop"),
+            (.swinsian, "com.swinsian.Swinsian"),
+            (.vox, "com.coppertino.Vox"),
+            (.foobar2000, "com.foobar2000.mac"),
+            (.audirvana, "com.audirvana.Audirvana-Studio"),
+            (.roon, "com.roon.Roon"),
+            (.pinePlayer, "com.digibird.PinePlayer"),
+            (.cog, "org.cogx.cog"),
+            (.feishin, "org.jeffvli.feishin"),
+            (.supersonic, "io.github.dweymouth.supersonic"),
+            (.iina, "com.colliderli.iina"),
+            (.vlc, "org.videolan.vlc"),
+            (.bilibili, "tv.danmaku.bili")
         ]
         for (source, bundle) in explicitCases {
             let ev = makeEvent(bundle: bundle, title: "Blinding Lights", artist: "The Weeknd")
@@ -238,6 +269,35 @@ enum SelfTests {
             } else {
                 fatalError("Expected \(source.rawValue) payload to parse")
             }
+        }
+
+        // Manual-only video players (IINA / VLC / Bilibili) must NOT pollute Auto Detect or All Now Playing
+        for manualSource in [PlayerSource.iina, .vlc, .bilibili] {
+            check(!PlayerSource.detectable.contains(manualSource), "\(manualSource.rawValue) must not be in Auto Detect")
+            if let bid = manualSource.bundleIdentifier {
+                let videoEv = makeEvent(bundle: bid, title: "Movie.2026.1080p", artist: "Cinema")
+                check(MediaRemotePlayerAdapter.snapshot(from: videoEv, source: .allNowPlaying, isRunning: true) == .stopped,
+                      "\(manualSource.rawValue) must be blocked by All macOS Now Playing Apps denylist")
+            }
+        }
+
+        // Browser web player title sanitization (Spotify Web, Apple Music Web, NetEase Web, QQ Web, SoundCloud Web)
+        let webSanitizeCases: [(rawTitle: String, rawArtist: String?, expectedTitle: String, expectedArtist: String)] = [
+            ("Blinding Lights - Spotify", "The Weeknd", "Blinding Lights", "The Weeknd"),
+            ("Anti-Hero on Apple Music", "Taylor Swift", "Anti-Hero", "Taylor Swift"),
+            ("晴天 - 单曲 - 网易云音乐", "周杰伦", "晴天", "周杰伦"),
+            ("七里香 - QQ音乐-千万正版音乐海量无损曲库", "周杰伦", "七里香", "周杰伦"),
+            ("Daft Punk - Get Lucky | Listen online for free on SoundCloud", "", "Get Lucky", "Daft Punk")
+        ]
+        for item in webSanitizeCases {
+            let sanitized = MediaRemoteMetadataSanitizer.sanitize(
+                title: item.rawTitle, artist: item.rawArtist, album: "", isBrowserOrYouTube: true
+            )
+            check(sanitized?.title == item.expectedTitle && sanitized?.artist == item.expectedArtist,
+                  "web sanitizer parses \(item.rawTitle) -> \(sanitized?.title ?? "nil") / \(sanitized?.artist ?? "nil")")
+        }
+        // Keep closing brace of previous for loop removed above by matching target accurately:
+        if false {
         }
 
         // All macOS Now Playing Apps accepts unknown music player & rejects denylist (Zoom/FaceTime/Teams/QuickTime)

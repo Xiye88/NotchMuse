@@ -758,8 +758,7 @@ final class MenuBarController: NSObject {
         case .spotify: SpotifyAdapter()
         case .appleMusic: AppleMusicAdapter()
         case .netEaseMusic: NetEaseMusicAdapter()
-        case .qqMusic, .sodaMusic, .kugouMusic, .youtubeMusic, .tidal, .amazonMusic, .deezer, .qobuz, .plexamp, .allNowPlaying:
-            MediaRemotePlayerAdapter(source: source)
+        default: MediaRemotePlayerAdapter(source: source)
         }
     }
 

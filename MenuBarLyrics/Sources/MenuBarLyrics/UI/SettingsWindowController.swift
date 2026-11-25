@@ -575,8 +575,21 @@ final class SettingsWindowController: NSWindowController {
         languagePopUp.action = #selector(languageChanged)
         appAppearanceControl.target = self
         appAppearanceControl.action = #selector(appAppearanceChanged)
-        for source in PlayerSource.allCases {
-            playerPopUp.addItem(withTitle: source.displayName())
+        playerPopUp.autoenablesItems = false
+        for (groupIndex, group) in PlayerSource.menuGroups.enumerated() {
+            if groupIndex > 0 {
+                playerPopUp.menu?.addItem(.separator())
+            }
+            if let headerTitle = group.title {
+                let header = NSMenuItem(title: L10n.text(headerTitle), action: nil, keyEquivalent: "")
+                header.isEnabled = false
+                playerPopUp.menu?.addItem(header)
+            }
+            for source in group.sources {
+                let item = NSMenuItem(title: source.displayName(), action: nil, keyEquivalent: "")
+                item.representedObject = source
+                playerPopUp.menu?.addItem(item)
+            }
         }
         playerPopUp.target = self
         playerPopUp.action = #selector(playerChanged)
@@ -1172,7 +1185,11 @@ final class SettingsWindowController: NSWindowController {
         automaticInstallSwitch.state = UpdateController.shared.automaticallyDownloadsUpdates ? .on : .off
         bilingualLyricsSwitch.state = AppPreferences.bilingualLyricsEnabled ? .on : .off
         automaticInstallSwitch.isEnabled = UpdateController.shared.isAvailable && UpdateController.shared.allowsAutomaticUpdates
-        playerPopUp.selectItem(at: PlayerSource.allCases.firstIndex(of: AppPreferences.playerSource) ?? 0)
+        if let idx = playerPopUp.itemArray.firstIndex(where: { ($0.representedObject as? PlayerSource) == AppPreferences.playerSource }) {
+            playerPopUp.selectItem(at: idx)
+        } else {
+            playerPopUp.selectItem(at: 0)
+        }
         playerStopBehaviorPopUp.selectItem(at: PlayerStopBehavior.allCases.firstIndex(of: AppPreferences.playerStopBehavior) ?? 0)
         languagePopUp.selectItem(at: AppLanguage.allCases.firstIndex(of: AppPreferences.language) ?? 0)
         updateControlAvailability()
@@ -1725,9 +1742,8 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func playerChanged() {
-        let sources = PlayerSource.allCases
-        guard sources.indices.contains(playerPopUp.indexOfSelectedItem) else { return }
-        AppPreferences.setPlayerSource(sources[playerPopUp.indexOfSelectedItem])
+        guard let source = playerPopUp.selectedItem?.representedObject as? PlayerSource else { return }
+        AppPreferences.setPlayerSource(source)
         onSettingsChange()
     }
 

@@ -228,3 +228,14 @@
 "Open Permission Settings" = "前往授权";
 "Accessibility permission needed for Left status bar" = "左侧状态栏布局需要“辅助功能”权限";
 "Automation permission needed for %@" = "连接 %@ 需要“自动化”权限";
+
+"Mainstream Players" = "主流播放器";
+"Chinese & Open-Source Players" = "国内与开源播放器";
+"Global, Audiophile & NAS" = "海外、发烧友与自建库";
+"Video & Media (Manual Only)" = "视频与媒体（仅手动）";
+"Kuwo Music" = "酷我音乐";
+"Migu Music" = "咪咕音乐";
+"Bodian Music" = "波点音乐";
+"Qianqian Music" = "千千音乐";
+"LX Music" = "洛雪音乐 (LX Music)";
+"Bilibili" = "哔哩哔哩 (Bilibili)";

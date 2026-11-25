@@ -67,8 +67,18 @@ enum MediaRemoteMetadataSanitizer {
     }
 
     private static let trailingSitePatterns = [
-        #"\s*[-–—|]\s*YouTube Music\s*$"#,
-        #"\s*[-–—|]\s*YouTube\s*$"#
+        #"\s*[-–—|•]\s*YouTube Music\s*$"#,
+        #"\s*[-–—|•]\s*YouTube\s*$"#,
+        #"\s*[-–—|•]\s*Spotify\s*$"#,
+        #"\s+(?:on\s+)?Apple Music\s*$"#,
+        #"\s*[-–—|•]\s*Apple Music\s*$"#,
+        #"\s*[-–—|•]\s*(?:单曲\s*[-–—]\s*)?网易云音乐\s*$"#,
+        #"\s*[-–—|•]\s*QQ音乐(?:[-–—].*)?\s*$"#,
+        #"\s*\|\s*Listen online for free on SoundCloud\s*$"#,
+        #"\s*(?:[-–—|•]|on)\s*SoundCloud\s*$"#,
+        #"\s*\|\s*Bandcamp\s*$"#,
+        #"\s*[_-]\s*哔哩哔哩[_-]bilibili\s*$"#,
+        #"\s*[-–—|•]\s*bilibili\s*$"#
     ]
 
     private static let videoNoisePatterns = [
@@ -399,6 +409,11 @@ final class MediaRemotePlayerAdapter: @unchecked Sendable, MusicPlayerAdapter {
         guard let event, matches(event: event, source: source) else { return .stopped }
 
         let isBrowserOrYT = source == .youtubeMusic
+            || source == .soundCloud
+            || source == .bilibili
+            || source == .iina
+            || source == .vlc
+            || source == .allNowPlaying
             || PlayerSource.browserBundleIdentifiers.contains(event.bundleIdentifier)
             || (event.parentApplicationBundleIdentifier.map { PlayerSource.browserBundleIdentifiers.contains($0) } ?? false)
 

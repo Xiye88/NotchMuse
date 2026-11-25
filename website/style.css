@@ -76,7 +76,7 @@ nav a:hover,.text-link:hover{color:var(--orange)}
 .marquee-group{display:flex;gap:12px;flex:none}
 .marquee-chip{display:inline-flex;align-items:center;gap:10px;padding:10px 15px;border:1px solid var(--line);border-radius:12px;background:#ffffff05;color:var(--text);text-decoration:none;white-space:nowrap;transition:border-color .2s ease,background-color .2s ease,transform .2s ease}
 .marquee-chip:hover{border-color:#ff8a3680;background:#ff8a3610;transform:translateY(-1px)}
-.marquee-chip img{width:24px;height:24px;border-radius:6px;object-fit:contain;flex:none}
+.marquee-chip img{width:20px;height:20px;border-radius:5px;object-fit:contain;flex:none}
 .marquee-badge{width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:750;letter-spacing:-.02em;color:#f3f2ef;background:linear-gradient(135deg,#24344d,#162133);border:1px solid rgba(255,255,255,0.12);flex:none}
 .marquee-chip strong{font-size:.88rem;font-weight:600}
 .marquee-chip small{font-size:.72rem;color:var(--muted);padding:1px 6px;border-radius:999px;background:#ffffff08}

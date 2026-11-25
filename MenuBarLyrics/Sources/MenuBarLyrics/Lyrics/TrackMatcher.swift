@@ -32,13 +32,16 @@ enum TrackMatcher {
         let a = artistKeys(expectedArtists)
         let b = artistKeys([artist] + titleCollaborators(in: title))
         let candidateGroup = artistGroupKey(artist, expectedArtists: expectedArtists)
-        if a.members != b.members && a.group != candidateGroup { return "artist_mismatch" }
+        let exactArtist = a.members == b.members || a.group == candidateGroup
+        let collabSubset = artistsMatchWithCollabFallback(source: a.group, candidate: candidateGroup, allowReverse: track.relaxedDurationMatching)
+        if !exactArtist && !collabSubset { return "artist_mismatch" }
         func versions(_ value: String) -> Set<String> {
             var result = parsedTitle(value).versions
             for hint in ["现场", "翻唱", "伴奏", "混音", "重录"] where value.contains(hint) { result.insert(hint) }
             return result
         }
-        if let album, versions(track.name + " " + track.album) != versions(title + " " + album) { return "album_version_mismatch" }
+        if let album, !track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           versions(track.name + " " + track.album) != versions(title + " " + album) { return "album_version_mismatch" }
         return nil
     }
 
@@ -47,7 +50,7 @@ enum TrackMatcher {
         let candidateTitle = parsedTitle(candidate.title)
         let durationDifference = abs(track.duration - Double(candidate.durationMs) / 1000)
 
-        let maxDurationDelta: TimeInterval = track.relaxedDurationMatching ? 15 : 8
+        let maxDurationDelta: TimeInterval = track.relaxedDurationMatching ? 22 : 8
 
         guard sourceTitle.name == candidateTitle.name,
               sourceTitle.versions == candidateTitle.versions,
@@ -58,9 +61,14 @@ enum TrackMatcher {
         let candidateAllArtists = candidate.artists + titleCollaborators(in: candidate.title)
         let candidateArtists = artistKeys(candidateAllArtists)
         let contextCandidateGroup = Set(candidateAllArtists.flatMap { artistGroupKey($0, expectedArtists: expectedArtists) })
-        let artistsMatch = artistsMatch(source: sourceArtists.members, candidate: candidateArtists.members)
+        let exactArtistMatch = artistsMatch(source: sourceArtists.members, candidate: candidateArtists.members)
             || artistsMatch(source: sourceArtists.group, candidate: contextCandidateGroup)
-        let artistScore = artistsMatch ? 30 : 0
+        let collabSubsetMatch = !exactArtistMatch && artistsMatchWithCollabFallback(
+            source: sourceArtists.group,
+            candidate: contextCandidateGroup,
+            allowReverse: track.relaxedDurationMatching
+        )
+        let artistScore = exactArtistMatch ? 30 : (collabSubsetMatch ? 27 : 0)
         let durationScore: Int
         switch durationDifference {
         case ...2: durationScore = 15
@@ -295,7 +303,22 @@ enum TrackMatcher {
         "세븐틴": "seventeen",
         "트와이스": "twice",
         "아이유": "iu",
-        "지드래곤": "gdragon"
+        "지드래곤": "gdragon",
+        "kenshiyonezu": "米津玄师",
+        "米津玄師": "米津玄师",
+        "hikaruutada": "宇多田ヒカル",
+        "utadahikaru": "宇多田ヒカル",
+        "officialhigedandism": "official髭男dism",
+        "fujiikaze": "藤井風",
+        "yorushika": "ヨルシカ",
+        "aimyon": "あいみょん",
+        "sakanaction": "サカナクション",
+        "sukimaswitch": "スキマスイッチ",
+        "mrsgreenapple": "mrsgreenapple",
+        "kinggnu": "kinggnu",
+        "vaundy": "vaundy",
+        "ado": "ado",
+        "lisa": "lisa"
     ]
 
     static func artistKeys(_ artists: [String]) -> (members: Set<String>, group: Set<String>) {
@@ -324,6 +347,17 @@ enum TrackMatcher {
 
     private static func artistsMatch(source: Set<String>, candidate: Set<String>) -> Bool {
         source == candidate
+    }
+
+    private static func artistsMatchWithCollabFallback(source: Set<String>, candidate: Set<String>, allowReverse: Bool) -> Bool {
+        guard !source.isEmpty, !candidate.isEmpty else { return false }
+        if source.count == 1, candidate.count >= 2, let primary = source.first, candidate.contains(primary) {
+            return true
+        }
+        if allowReverse, candidate.count == 1, source.count >= 2, let primary = candidate.first, source.contains(primary) {
+            return true
+        }
+        return false
     }
 
     private static func normalize(_ text: String) -> String {

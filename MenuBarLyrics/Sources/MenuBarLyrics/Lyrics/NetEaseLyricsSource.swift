@@ -94,7 +94,8 @@ struct NetEaseLyricsSource {
             name: track.name,
             artist: track.artist.replacingOccurrences(of: "/", with: ","),
             album: track.album,
-            duration: track.duration
+            duration: track.duration,
+            relaxedDurationMatching: track.relaxedDurationMatching
         )
         if let index = TrackMatcher.bestMatchIndex(for: matchingTrack, candidates: candidates, provider: "NetEase") {
             return index

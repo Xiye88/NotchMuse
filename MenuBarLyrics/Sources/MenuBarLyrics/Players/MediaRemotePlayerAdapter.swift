@@ -154,7 +154,11 @@ enum MediaRemoteMetadataSanitizer {
                 title = title.replacingOccurrences(of: pattern, with: "", options: [.regularExpression, .caseInsensitive])
             }
             artist = cleanYouTubeArtist(artist)
-            title = cleanYouTubeTitle(title)
+            let cleanedTitle = cleanYouTubeTitleAndExtractFeature(title)
+            title = cleanedTitle.title
+            if let featured = cleanedTitle.featured, !artistOverlaps(artist, with: featured) {
+                artist = "\(artist), \(featured)"
+            }
         }
 
         title = title.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -253,11 +257,26 @@ enum MediaRemoteMetadataSanitizer {
         return value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private static func cleanYouTubeTitle(_ raw: String) -> String {
+    private static func cleanYouTubeTitleAndExtractFeature(_ raw: String) -> (title: String, featured: String?) {
         var value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Strip trailing feat./ft. credits from YouTube MV titles so provider search queries stay clean
-        value = value.replacingOccurrences(of: #"\s*[\(\[]\s*(?:feat\.?|ft\.?|featuring)\s+[^\)\]]+[\)\]]\s*$"#, with: "", options: [.regularExpression, .caseInsensitive])
-        value = value.replacingOccurrences(of: #"\s+(?:feat\.?|ft\.?|featuring)\s+.*$"#, with: "", options: [.regularExpression, .caseInsensitive])
+        var featured: String?
+        let featurePatterns = [
+            #"\s*[\(\[]\s*(?:feat\.?|ft\.?|featuring)\s+([^\)\]]+)[\)\]]\s*$"#,
+            #"\s+(?:feat\.?|ft\.?|featuring)\s+(.+)$"#
+        ]
+        for pattern in featurePatterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: value, range: NSRange(value.startIndex..., in: value)),
+               match.numberOfRanges >= 2,
+               let r1 = Range(match.range(at: 1), in: value),
+               let fullRange = Range(match.range(at: 0), in: value) {
+                let candidate = String(value[r1]).trimmingCharacters(in: .whitespacesAndNewlines)
+                if !candidate.isEmpty { featured = candidate }
+                value.removeSubrange(fullRange)
+                value = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                break
+            }
+        }
         if let regex = try? NSRegularExpression(pattern: #"^([A-Za-z0-9\s.'!?&-]+?)\s*\([\uAC00-\uD7A3\s]+\)\s*$"#),
            let match = regex.firstMatch(in: value, range: NSRange(value.startIndex..., in: value)),
            let r1 = Range(match.range(at: 1), in: value) {
@@ -271,7 +290,7 @@ enum MediaRemoteMetadataSanitizer {
                 value = candidate
             }
         }
-        return value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return (value.trimmingCharacters(in: .whitespacesAndNewlines), featured)
     }
 }
 

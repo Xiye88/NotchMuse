@@ -32,9 +32,15 @@ enum AppPreferences {
     static let hiddenControlsNoticeKey = "HiddenControlsNoticeShown"
     static let bilingualLyricsKey = "BilingualLyricsEnabled"
     static let missingLyricsAnimationStyleKey = "MissingLyricsAnimationStyle"
+    static let immersiveBackgroundColorKey = "ImmersiveLyricsBackgroundColor"
+    static let immersiveSweepColorKey = "ImmersiveLyricsSweepColor"
+    static let immersiveNormalColorKey = "ImmersiveLyricsNormalColor"
     static var missingLyricsAnimationStyle: MissingLyricsAnimationStyle {
         MissingLyricsAnimationStyle(rawValue: UserDefaults.standard.string(forKey: missingLyricsAnimationStyleKey) ?? "") ?? .vinylSeek
     }
+    static var immersiveBackgroundColor: NSColor? { color(forKey: immersiveBackgroundColorKey) }
+    static var immersiveSweepColor: NSColor? { color(forKey: immersiveSweepColorKey) }
+    static var immersiveNormalColor: NSColor? { color(forKey: immersiveNormalColorKey) }
     static var bilingualLyricsEnabled: Bool {
         Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true &&
         UserDefaults.standard.bool(forKey: bilingualLyricsKey)
@@ -514,6 +520,21 @@ final class SettingsWindowController: NSWindowController {
             controller.missingLyricsStyleChanged()
             precondition(AppPreferences.missingLyricsAnimationStyle == style && controller.immersiveLyricsView.animationStyle == style, "Missing lyrics animation style must persist")
         }
+        // E22 checks: 404 state visibility, idle wave visibility, MediaRemote transport command codes, and palette preferences
+        controller.updateImmersiveLyrics(lines: [], activeIndex: -1, lineProgress: 0, trackTitle: nil, artistName: nil, isPlaying: false, isPaused: false, position: 0, duration: 0, lyricsFeedback: .waiting)
+        precondition(!controller.immersiveLyricsView.idleWaveView.isHidden && controller.immersiveLyricsView.missingView.isHidden, "Idle state shows vinyl wave animation")
+        controller.updateImmersiveLyrics(lines: [], activeIndex: -1, lineProgress: 0, trackTitle: "Instrumental Track", artistName: "Artist", isPlaying: true, isPaused: false, position: 12, duration: 180, lyricsFeedback: .notFound)
+        precondition(!controller.immersiveLyricsView.missingView.isHidden && controller.immersiveLyricsView.idleWaveView.isHidden, "Missing lyrics state shows 404 animation")
+        precondition(MediaTransportCommand.playPause.mediaRemoteCode == 2 && MediaTransportCommand.next.mediaRemoteCode == 4 && MediaTransportCommand.previous.mediaRemoteCode == 5, "MediaRemote command codes match macOS MediaRemote")
+        let savedPaletteKeys = [AppPreferences.immersiveBackgroundColorKey, AppPreferences.immersiveSweepColorKey, AppPreferences.immersiveNormalColorKey]
+        let savedPalette = savedPaletteKeys.map { defaults.object(forKey: $0) }
+        defer {
+            for (k, v) in zip(savedPaletteKeys, savedPalette) {
+                if let v { defaults.set(v, forKey: k) } else { defaults.removeObject(forKey: k) }
+            }
+        }
+        AppPreferences.setColor(.systemOrange, forKey: AppPreferences.immersiveSweepColorKey)
+        precondition(AppPreferences.immersiveSweepColor != nil, "Immersive sweep color preference persists")
         print("Settings interaction self-test passed")
     }
     #endif
@@ -1872,6 +1893,7 @@ final class SettingsWindowController: NSWindowController {
     func updateImmersiveLyrics(
         lines: [LyricLine],
         activeIndex: Int,
+        lineProgress: CGFloat,
         trackTitle: String?,
         artistName: String?,
         isPlaying: Bool,
@@ -1881,17 +1903,19 @@ final class SettingsWindowController: NSWindowController {
         lyricsFeedback: LyricsFeedback
     ) {
         let synced = !lines.isEmpty && lyricsFeedback == .available
+        let missing = lyricsFeedback == .notFound || lyricsFeedback == .timeout || lyricsFeedback == .networkFailure
         sidebarNavDeck.updateLyricsStatus(isPlaying: isPlaying, synced: synced)
         immersiveLyricsView.update(
             lines: lines,
             activeIndex: activeIndex,
+            lineProgress: lineProgress,
             trackTitle: trackTitle,
             artistName: artistName,
             isPlaying: isPlaying,
             isPaused: isPaused,
             position: position,
             duration: duration,
-            lyricsNotFound: lyricsFeedback == .notFound
+            lyricsMissing: missing
         )
     }
 

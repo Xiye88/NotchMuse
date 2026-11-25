@@ -570,11 +570,13 @@ final class MenuBarController: NSObject {
             needsPermission: needsPermission,
             liveLyricLine: liveLyric
         )
-        let currentPos = latestPlayerPosition ?? 0
+        let currentPos = currentPlaybackPosition() ?? latestPlayerPosition ?? 0
         let activeIdx = currentLines.lastIndex { $0.time <= currentPos } ?? -1
+        let lineProg = computeImmersiveLineProgress(position: currentPos, activeIndex: activeIdx)
         settingsWindowController?.updateImmersiveLyrics(
             lines: currentLines,
             activeIndex: activeIdx,
+            lineProgress: lineProg,
             trackTitle: currentTrack?.name,
             artistName: currentTrack?.artist,
             isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
@@ -617,12 +619,53 @@ final class MenuBarController: NSObject {
             setDisplay(moment.text, progress: moment.progress, identity: moment.identity, highlight: moment.highlight,
                        staticText: moment.timingFidelity == .lineStartOnly || moment.timingFidelity == .estimated)
             settingsWindowController?.updateLiveLyricLine(moment.text)
+            let activeIdx = currentLines.lastIndex { $0.time <= position } ?? -1
+            let lineProg = computeImmersiveLineProgress(position: position, activeIndex: activeIdx)
+            settingsWindowController?.updateImmersiveLyrics(
+                lines: currentLines,
+                activeIndex: activeIdx,
+                lineProgress: lineProg,
+                trackTitle: currentTrack?.name,
+                artistName: currentTrack?.artist,
+                isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
+                isPaused: !isPlayerStopped && isPlaybackPaused && currentTrack != nil,
+                position: position,
+                duration: currentTrack?.duration ?? 0,
+                lyricsFeedback: latestLyricsFeedback
+            )
         } else {
             displayTranslation = nil
             setDisplay(fallbackText())
             settingsWindowController?.updateLiveLyricLine(nil)
+            settingsWindowController?.updateImmersiveLyrics(
+                lines: currentLines,
+                activeIndex: -1,
+                lineProgress: 0,
+                trackTitle: currentTrack?.name,
+                artistName: currentTrack?.artist,
+                isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
+                isPaused: !isPlayerStopped && isPlaybackPaused && currentTrack != nil,
+                position: position,
+                duration: currentTrack?.duration ?? 0,
+                lyricsFeedback: latestLyricsFeedback
+            )
         }
         updateProgressTimer()
+    }
+
+    private func computeImmersiveLineProgress(position: TimeInterval, activeIndex: Int) -> CGFloat {
+        guard currentLines.indices.contains(activeIndex) else { return 0 }
+        let line = currentLines[activeIndex]
+        let nextTime: TimeInterval
+        if let end = line.endTime, end > line.time + 0.2 {
+            nextTime = end
+        } else if currentLines.indices.contains(activeIndex + 1) {
+            nextTime = currentLines[activeIndex + 1].time
+        } else {
+            nextTime = max(line.time + 3.0, currentTrack?.duration ?? (line.time + 4.0))
+        }
+        let span = max(0.35, nextTime - line.time)
+        return CGFloat(min(1, max(0, (position - line.time) / span)))
     }
 
     private func currentPlaybackPosition() -> TimeInterval? {

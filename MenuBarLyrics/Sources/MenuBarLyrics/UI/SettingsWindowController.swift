@@ -548,6 +548,17 @@ final class SettingsWindowController: NSWindowController {
             defaults.set(preset.rawValue, forKey: AppPreferences.immersiveThemePresetKey)
             precondition(AppPreferences.immersiveThemePreset == preset, "Immersive theme preset \(preset.rawValue) must persist")
         }
+        // E25: liveStatusStripView visible ONLY on .display (compact ~42pt), hidden on .appearance, .general, .lyrics
+        controller.pageChanged(controller.sidebarButtons[.display]!)
+        controller.window?.contentView?.layoutSubtreeIfNeeded()
+        precondition(controller.liveStatusStripView?.isHidden == false, "Live status strip must be visible on Display tab")
+        let stripH = controller.liveStatusStripView?.frame.height ?? 0
+        precondition(abs(stripH - 42) <= 2, "Live status strip must stay compact (~42pt), got \(stripH)")
+        for hiddenPage in [SettingsPage.appearance, .general, .lyrics] {
+            controller.pageChanged(controller.sidebarButtons[hiddenPage]!)
+            controller.window?.contentView?.layoutSubtreeIfNeeded()
+            precondition(controller.liveStatusStripView?.isHidden == true, "Live status strip must be hidden on \(hiddenPage.rawValue) tab")
+        }
         print("Settings interaction self-test passed")
     }
     #endif
@@ -864,6 +875,7 @@ final class SettingsWindowController: NSWindowController {
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         let statusStrip = makeLiveStatusStrip()
         liveStatusStripView = statusStrip
+        statusStrip.isHidden = selectedPage != .display
         contentStack.addArrangedSubview(statusStrip)
         statusStrip.widthAnchor.constraint(equalTo: contentStack.widthAnchor).isActive = true
         contentStack.addArrangedSubview(previewCard)
@@ -1751,8 +1763,10 @@ final class SettingsWindowController: NSWindowController {
         box.addSubview(liveStatusDot)
         box.addSubview(liveStatusLabel)
         box.addSubview(permissionFixButton)
+        box.setContentHuggingPriority(.required, for: .vertical)
+        box.setContentCompressionResistancePriority(.required, for: .vertical)
         NSLayoutConstraint.activate([
-            box.heightAnchor.constraint(greaterThanOrEqualToConstant: 38),
+            box.heightAnchor.constraint(equalToConstant: 42),
             liveStatusDot.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
             liveStatusDot.centerYAnchor.constraint(equalTo: box.centerYAnchor),
             liveStatusDot.widthAnchor.constraint(equalToConstant: 8),
@@ -1943,7 +1957,7 @@ final class SettingsWindowController: NSWindowController {
         let isLyrics = page == .lyrics
         settingsScrollView?.isHidden = isLyrics
         immersiveLyricsView.setStageVisible(isLyrics)
-        liveStatusStripView?.isHidden = isLyrics
+        liveStatusStripView?.isHidden = page != .display
         previewCard?.isHidden = page != .display
         displayPage.isHidden = page != .display
         appearancePage.isHidden = page != .appearance

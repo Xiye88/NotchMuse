@@ -46,12 +46,22 @@ enum LyricsSelection {
         }
         // Unknown album evidence needs independent corroboration; it cannot veto an
         // explicitly matched album before its own recording identity is established.
+        // Exception: when the player itself provides no album (e.g. YouTube Music / Kugou),
+        // a single direct high-confidence provider with full vocal span and zero conflicts
+        // may serve as a controlled fallback.
         let evidencePool = eligible
+        let trackHasNoAlbum = context.track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         eligible = evidencePool.compactMap { item in
             guard item.tier == 4 else { return item }
             let bound = evidencePool.filter { identityTier($0.candidate, context: context) == 3 && $0.candidate.provider != "LRCMux" }
             let compatibleWithBound = !bound.contains { disagreement(item.candidate, $0.candidate) == "timeline_conflict" }
+            let singleDirectEmptyAlbumFallback = trackHasNoAlbum
+                && direct.count == 1
+                && item.candidate.provider != "LRCMux"
+                && (item.candidate.matcherScore ?? 0) >= 88
+                && anchors(item.candidate).values.reduce(0) { $0 + $1.count } >= 5
             let corroborated = compatibleWithBound && (
+                singleDirectEmptyAlbumFallback ||
                 (item.candidate.provider == "LRCMux" && direct.isEmpty && strongResolverFallback(item.candidate, context: context)) ||
                 evidencePool.contains { other in
                     guard item.candidate.provider != other.candidate.provider,
@@ -311,7 +321,8 @@ enum LyricsSelection {
            source != isrc { return "isrc_mismatch" }
         guard let duration = candidate.sourceDuration, duration.isFinite, duration > 0 else { return "source_duration_unknown" }
         let delta = abs(duration - context.track.duration)
-        if delta > (tier == 1 ? 5 : 2) { return "duration_risk" }
+        let maxAllowedDelta: Double = context.track.relaxedDurationMatching ? 15 : (tier == 1 ? 5 : 4)
+        if delta > maxAllowedDelta { return "duration_risk" }
         return nil
     }
 
@@ -344,9 +355,10 @@ enum LyricsSelection {
         let raw = line.text.trimmingCharacters(in: .whitespacesAndNewlines), text = normalized(raw)
         guard !text.isEmpty,
               text != normalized(candidate.sourceTitle + candidate.sourceArtist),
-              !["作词", "作曲", "编曲", "制作", "词", "曲", "lyrics", "composer", "produced", "written"].contains(where: { text.hasPrefix($0) }) else { return nil }
+              text != normalized(candidate.sourceArtist + candidate.sourceTitle),
+              !["作词", "作曲", "编曲", "制作", "词", "曲", "监制", "出品", "发行", "统筹", "企划", "文案", "宣传", "版权", "未经许可", "lyrics", "composer", "produced", "written"].contains(where: { text.hasPrefix($0) }) else { return nil }
         if raw.range(of: "[:：]", options: .regularExpression) != nil,
-           ["录音", "混音", "母带", "人声", "和声", "弦乐", "音乐录音", "音乐工作", "插画", "吉他", "古典吉他", "贝斯", "鼓", "键盘"].contains(where: { raw.hasPrefix($0) }) { return nil }
+           ["录音", "混音", "母带", "人声", "和声", "弦乐", "音乐录音", "音乐工作", "插画", "吉他", "古典吉他", "贝斯", "鼓", "键盘", "OP", "SP", "op", "sp"].contains(where: { raw.hasPrefix($0) }) { return nil }
         return text
     }
     private static func anchors(_ candidate: LyricsCandidate) -> [String: [Double]] {
@@ -361,8 +373,22 @@ enum LyricsSelection {
         if let shifts = completeBodyBoundaryDeltas(a, b) { return shifts }
         let aa = anchors(a), bb = anchors(b)
         var exact = aa.keys.sorted().flatMap { key -> [Double] in
-            guard let av = aa[key], let bv = bb[key], av.count == bv.count else { return [] }
-            return zip(av, bv).map { abs($0 - $1) }
+            guard let av = aa[key], let bv = bb[key] else { return [] }
+            if av.count == bv.count {
+                return zip(av, bv).map { abs($0 - $1) }
+            }
+            // Pair each occurrence in the shorter list with its closest unused timestamp in the longer list
+            // so a single extra/missing chorus repetition doesn't wipe out all occurrences of that line.
+            let shorter = av.count <= bv.count ? av : bv
+            var longer = av.count <= bv.count ? bv : av
+            var matched: [Double] = []
+            for t in shorter {
+                if let bestIdx = longer.indices.min(by: { abs(longer[$0] - t) < abs(longer[$1] - t) }) {
+                    matched.append(abs(longer[bestIdx] - t))
+                    longer.remove(at: bestIdx)
+                }
+            }
+            return matched
         }
         // Providers frequently merge two consecutive short lines into one line (e.g. LRCLIB vs QQ/Kugou).
         // Match unique >=5-char line-start prefixes when exact line equality is sparse.

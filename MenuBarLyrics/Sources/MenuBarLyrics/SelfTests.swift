@@ -99,7 +99,7 @@ enum SelfTests {
         check(PlayerFeedback.notRunning.menuTitle(for: .spotify, language: .english) == "Spotify: Not Running", "explains when Spotify is not running")
         check(PlayerFeedback.connected.menuTitle(for: .appleMusic, language: .english) == "Apple Music: Connected", "shows the selected player state")
         check(LyricsFeedback.searching.displayText == L10n.text("Searching lyrics..."), "explains that lyrics are still being searched")
-        check(LyricsFeedback.notFound.displayText == L10n.text("No lyrics found"), "explains missing lyrics")
+        check(LyricsFeedback.notFound.displayText == AppPreferences.missingLyricsAnimationStyle.shortBarCaption(), "explains missing lyrics")
         check(LyricsFeedback.timeout.displayText == L10n.text("Lyrics search timed out"), "explains lyric search timeouts")
         check(LyricsFeedback.networkFailure.displayText == L10n.text("Lyrics network unavailable"), "explains lyric network failures")
         check(LyricsClient.shouldSurfaceTimeout(candidates: [], statuses: ["LRCLIB": "timeout"]), "surfaces an all-timeout search distinctly")

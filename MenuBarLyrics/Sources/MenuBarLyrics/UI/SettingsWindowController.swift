@@ -32,15 +32,13 @@ enum AppPreferences {
     static let hiddenControlsNoticeKey = "HiddenControlsNoticeShown"
     static let bilingualLyricsKey = "BilingualLyricsEnabled"
     static let missingLyricsAnimationStyleKey = "MissingLyricsAnimationStyle"
-    static let immersiveBackgroundColorKey = "ImmersiveLyricsBackgroundColor"
-    static let immersiveSweepColorKey = "ImmersiveLyricsSweepColor"
-    static let immersiveNormalColorKey = "ImmersiveLyricsNormalColor"
+    static let immersiveThemePresetKey = "ImmersiveLyricsThemePreset"
     static var missingLyricsAnimationStyle: MissingLyricsAnimationStyle {
         MissingLyricsAnimationStyle(rawValue: UserDefaults.standard.string(forKey: missingLyricsAnimationStyleKey) ?? "") ?? .vinylSeek
     }
-    static var immersiveBackgroundColor: NSColor? { color(forKey: immersiveBackgroundColorKey) }
-    static var immersiveSweepColor: NSColor? { color(forKey: immersiveSweepColorKey) }
-    static var immersiveNormalColor: NSColor? { color(forKey: immersiveNormalColorKey) }
+    static var immersiveThemePreset: ImmersiveLyricsThemePreset {
+        ImmersiveLyricsThemePreset(rawValue: UserDefaults.standard.string(forKey: immersiveThemePresetKey) ?? "") ?? .followTheme
+    }
     static var bilingualLyricsEnabled: Bool {
         Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true &&
         UserDefaults.standard.bool(forKey: bilingualLyricsKey)
@@ -520,21 +518,30 @@ final class SettingsWindowController: NSWindowController {
             controller.missingLyricsStyleChanged()
             precondition(AppPreferences.missingLyricsAnimationStyle == style && controller.immersiveLyricsView.animationStyle == style, "Missing lyrics animation style must persist")
         }
-        // E22 checks: 404 state visibility, idle wave visibility, MediaRemote transport command codes, and palette preferences
+        // E22/E23 checks: idle preview of 3-style animation, 404 state, exact vertical centering (<2pt), MediaRemote codes, and palette preferences
         controller.updateImmersiveLyrics(lines: [], activeIndex: -1, lineProgress: 0, trackTitle: nil, artistName: nil, isPlaying: false, isPaused: false, position: 0, duration: 0, lyricsFeedback: .waiting)
-        precondition(!controller.immersiveLyricsView.idleWaveView.isHidden && controller.immersiveLyricsView.missingView.isHidden, "Idle state shows vinyl wave animation")
+        precondition(!controller.immersiveLyricsView.missingView.isHidden && controller.immersiveLyricsView.missingView.isIdlePreview, "Idle state previews selected 3-style animation")
         controller.updateImmersiveLyrics(lines: [], activeIndex: -1, lineProgress: 0, trackTitle: "Instrumental Track", artistName: "Artist", isPlaying: true, isPaused: false, position: 12, duration: 180, lyricsFeedback: .notFound)
-        precondition(!controller.immersiveLyricsView.missingView.isHidden && controller.immersiveLyricsView.idleWaveView.isHidden, "Missing lyrics state shows 404 animation")
-        precondition(MediaTransportCommand.playPause.mediaRemoteCode == 2 && MediaTransportCommand.next.mediaRemoteCode == 4 && MediaTransportCommand.previous.mediaRemoteCode == 5, "MediaRemote command codes match macOS MediaRemote")
-        let savedPaletteKeys = [AppPreferences.immersiveBackgroundColorKey, AppPreferences.immersiveSweepColorKey, AppPreferences.immersiveNormalColorKey]
-        let savedPalette = savedPaletteKeys.map { defaults.object(forKey: $0) }
-        defer {
-            for (k, v) in zip(savedPaletteKeys, savedPalette) {
-                if let v { defaults.set(v, forKey: k) } else { defaults.removeObject(forKey: k) }
-            }
+        precondition(!controller.immersiveLyricsView.missingView.isHidden && !controller.immersiveLyricsView.missingView.isIdlePreview, "Missing lyrics state shows 404 animation with retry")
+        // Verify flipped coordinate centering on line 0, line 2, middle line, and last line (never jumps to tail)
+        let sampleLines = (0..<24).map { LyricLine(time: Double($0) * 5, text: "Sample lyric line number \($0)") }
+        controller.pageChanged(controller.sidebarButtons[.lyrics]!)
+        controller.updateImmersiveLyrics(lines: sampleLines, activeIndex: 0, lineProgress: 0.2, trackTitle: "Song", artistName: "Artist", isPlaying: true, isPaused: false, position: 1, duration: 130, lyricsFeedback: .available)
+        controller.window?.contentView?.layoutSubtreeIfNeeded()
+        for checkIdx in [0, 2, 12, 23] {
+            let pair = controller.immersiveLyricsView.debugLineCenterAndVisibleMidY(for: checkIdx)!
+            precondition(abs(pair.lineMidY - pair.visibleMidY) < 2.0, "Line \(checkIdx) must stay vertically centered: lineMidY=\(pair.lineMidY) visibleMidY=\(pair.visibleMidY)")
         }
-        AppPreferences.setColor(.systemOrange, forKey: AppPreferences.immersiveSweepColorKey)
-        precondition(AppPreferences.immersiveSweepColor != nil, "Immersive sweep color preference persists")
+        precondition(MediaTransportCommand.playPause.mediaRemoteCode == 2 && MediaTransportCommand.next.mediaRemoteCode == 4 && MediaTransportCommand.previous.mediaRemoteCode == 5, "MediaRemote command codes match macOS MediaRemote")
+        let savedThemePreset = defaults.object(forKey: AppPreferences.immersiveThemePresetKey)
+        defer {
+            if let savedThemePreset { defaults.set(savedThemePreset, forKey: AppPreferences.immersiveThemePresetKey) }
+            else { defaults.removeObject(forKey: AppPreferences.immersiveThemePresetKey) }
+        }
+        for preset in ImmersiveLyricsThemePreset.allCases {
+            defaults.set(preset.rawValue, forKey: AppPreferences.immersiveThemePresetKey)
+            precondition(AppPreferences.immersiveThemePreset == preset, "Immersive theme preset \(preset.rawValue) must persist")
+        }
         print("Settings interaction self-test passed")
     }
     #endif

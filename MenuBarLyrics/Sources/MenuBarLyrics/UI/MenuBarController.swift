@@ -43,7 +43,7 @@ enum LyricsFeedback {
         case .waiting: return L10n.text("Waiting for Spotify")
         case .searching: return L10n.text("Searching lyrics...")
         case .available: return L10n.text("Lyrics available")
-        case .notFound: return L10n.text("No lyrics found")
+        case .notFound: return AppPreferences.missingLyricsAnimationStyle.shortBarCaption()
         case .timeout: return L10n.text("Lyrics search timed out")
         case .networkFailure: return L10n.text("Lyrics network unavailable")
         }

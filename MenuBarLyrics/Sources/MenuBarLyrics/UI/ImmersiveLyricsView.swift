@@ -27,6 +27,17 @@ enum MissingLyricsAnimationStyle: String, CaseIterable, Equatable, Sendable {
         case (.runawayNotes, _): return "Lyrics ran away — maybe an instrumental?"
         }
     }
+
+    func shortBarCaption(language: AppLanguage = AppPreferences.language) -> String {
+        switch (self, language) {
+        case (.vinylSeek, .simplifiedChinese): return "歌词跑丢了…"
+        case (.cassetteB, .simplifiedChinese): return "歌词走失在磁带B面…"
+        case (.runawayNotes, .simplifiedChinese): return "歌词溜走了，纯享旋律~"
+        case (.vinylSeek, _): return "Lyrics wandered off…"
+        case (.cassetteB, _): return "Lyrics lost on Side B…"
+        case (.runawayNotes, _): return "Lyrics slipped away~"
+        }
+    }
 }
 
 enum MediaTransportCommand: Sendable {
@@ -273,6 +284,13 @@ final class MissingLyricsAnimationView: NSView {
             }
         }
     }
+    var isIdlePreview: Bool = false {
+        didSet {
+            if isIdlePreview != oldValue {
+                updateCaption()
+            }
+        }
+    }
     var onRetry: (() -> Void)?
 
     private let stageView = NSView()
@@ -354,7 +372,13 @@ final class MissingLyricsAnimationView: NSView {
     }
 
     private func updateCaption() {
-        captionLabel.stringValue = style.playfulCaption()
+        if isIdlePreview {
+            captionLabel.stringValue = AppPreferences.language == .simplifiedChinese ? "等待播放音乐…" : "Waiting for music…"
+            retryButton.isHidden = true
+        } else {
+            captionLabel.stringValue = style.playfulCaption()
+            retryButton.isHidden = false
+        }
     }
 
     private func stopAnimations() {
@@ -707,133 +731,238 @@ private final class SweepLyricLineView: NSView {
     }
 }
 
+enum ImmersiveLyricsThemePreset: String, CaseIterable, Equatable, Sendable {
+    case followTheme = "Follow Theme"
+    case warmAmber = "Warm Amber Vinyl"
+    case midnightAurora = "Midnight Aurora"
+    case pineGlow = "Pine Glow"
+    case warmPaper = "Warm Paper"
+    case sakuraMist = "Sakura Mist"
+
+    func displayName(language: AppLanguage = AppPreferences.language) -> String {
+        switch (self, language) {
+        case (.followTheme, .simplifiedChinese): return "跟随主题"
+        case (.warmAmber, .simplifiedChinese): return "暖琥珀黑胶"
+        case (.midnightAurora, .simplifiedChinese): return "午夜极光"
+        case (.pineGlow, .simplifiedChinese): return "松林微光"
+        case (.warmPaper, .simplifiedChinese): return "暖纸墨黑"
+        case (.sakuraMist, .simplifiedChinese): return "樱花粉雾"
+        default: return rawValue
+        }
+    }
+
+    var backgroundColor: NSColor? {
+        switch self {
+        case .followTheme: return nil
+        case .warmAmber: return NSColor(calibratedRed: 0.078, green: 0.078, blue: 0.086, alpha: 1)      // #141416
+        case .midnightAurora: return NSColor(calibratedRed: 0.059, green: 0.090, blue: 0.165, alpha: 1) // #0F172A
+        case .pineGlow: return NSColor(calibratedRed: 0.059, green: 0.122, blue: 0.102, alpha: 1)       // #0F1F1A
+        case .warmPaper: return NSColor(calibratedRed: 0.973, green: 0.965, blue: 0.941, alpha: 1)      // #F8F6F0
+        case .sakuraMist: return NSColor(calibratedRed: 1.0, green: 0.961, blue: 0.969, alpha: 1)       // #FFF5F7
+        }
+    }
+
+    var sweepColor: NSColor? {
+        switch self {
+        case .followTheme: return nil
+        case .warmAmber: return NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1)        // #FF8A36
+        case .midnightAurora: return NSColor(calibratedRed: 0.220, green: 0.741, blue: 0.973, alpha: 1) // #38BDF8
+        case .pineGlow: return NSColor(calibratedRed: 0.204, green: 0.827, blue: 0.600, alpha: 1)       // #34D399
+        case .warmPaper: return NSColor(calibratedRed: 0.851, green: 0.420, blue: 0.153, alpha: 1)      // #D96B27
+        case .sakuraMist: return NSColor(calibratedRed: 0.882, green: 0.114, blue: 0.282, alpha: 1)     // #E11D48
+        }
+    }
+
+    var normalTextColor: NSColor? {
+        switch self {
+        case .followTheme: return nil
+        case .warmAmber: return NSColor(calibratedRed: 0.82, green: 0.82, blue: 0.85, alpha: 1)
+        case .midnightAurora: return NSColor(calibratedRed: 0.80, green: 0.85, blue: 0.92, alpha: 1)
+        case .pineGlow: return NSColor(calibratedRed: 0.72, green: 0.84, blue: 0.79, alpha: 1)
+        case .warmPaper: return NSColor(calibratedRed: 0.20, green: 0.19, blue: 0.17, alpha: 1)
+        case .sakuraMist: return NSColor(calibratedRed: 0.36, green: 0.29, blue: 0.32, alpha: 1)
+        }
+    }
+}
+
 @MainActor
-private final class LyricsPalettePopoverController: NSViewController {
-    var onColorsChanged: (() -> Void)?
+private final class ThemeSwatchDotButton: NSButton {
+    let preset: ImmersiveLyricsThemePreset
+    var isSelectedPreset: Bool = false { didSet { needsDisplay = true } }
+    private var isHovered = false { didSet { needsDisplay = true } }
+    private var tracking: NSTrackingArea?
 
-    private let bgWell = NSColorWell()
-    private let sweepWell = NSColorWell()
-    private let normalWell = NSColorWell()
-
-    override func loadView() {
-        let container = NSView(frame: NSRect(x: 0, y: 0, width: 256, height: 186))
-        let isZh = AppPreferences.language == .simplifiedChinese
-
-        let heading = NSTextField(labelWithString: isZh ? "歌词页配色" : "Lyrics Stage Colors")
-        heading.font = .systemFont(ofSize: 12.5, weight: .semibold)
-        heading.textColor = .labelColor
-
-        let presetRow = NSStackView()
-        presetRow.orientation = .horizontal
-        presetRow.spacing = 6
-        let presets: [(String, NSColor?)] = [
-            (isZh ? "跟随主题" : "Theme", nil),
-            (isZh ? "黑曜" : "Obsidian", NSColor(calibratedRed: 0.06, green: 0.06, blue: 0.08, alpha: 1)),
-            (isZh ? "暖纸" : "Paper", NSColor(calibratedRed: 0.96, green: 0.94, blue: 0.89, alpha: 1)),
-            (isZh ? "午夜" : "Midnight", NSColor(calibratedRed: 0.08, green: 0.10, blue: 0.16, alpha: 1))
-        ]
-        for (idx, preset) in presets.enumerated() {
-            let btn = NSButton(title: preset.0, target: self, action: #selector(presetClicked(_:)))
-            btn.bezelStyle = .rounded
-            btn.controlSize = .mini
-            btn.tag = idx
-            presetRow.addArrangedSubview(btn)
-        }
-
-        bgWell.color = AppPreferences.immersiveBackgroundColor ?? AppearanceSurfaceColors.windowBackground
-        bgWell.target = self
-        bgWell.action = #selector(bgChanged)
-
-        sweepWell.color = AppPreferences.immersiveSweepColor ?? AppearanceSurfaceColors.accent
-        sweepWell.target = self
-        sweepWell.action = #selector(sweepChanged)
-
-        normalWell.color = AppPreferences.immersiveNormalColor ?? .labelColor
-        normalWell.target = self
-        normalWell.action = #selector(normalChanged)
-
-        func row(_ title: String, _ well: NSColorWell) -> NSStackView {
-            let lbl = NSTextField(labelWithString: title)
-            lbl.font = .systemFont(ofSize: 11.5, weight: .regular)
-            lbl.textColor = .secondaryLabelColor
-            well.widthAnchor.constraint(equalToConstant: 42).isActive = true
-            well.heightAnchor.constraint(equalToConstant: 22).isActive = true
-            let s = NSStackView(views: [lbl, well])
-            s.orientation = .horizontal
-            s.distribution = .equalSpacing
-            s.alignment = .centerY
-            return s
-        }
-
-        let resetBtn = NSButton(title: isZh ? "恢复默认" : "Reset Defaults", target: self, action: #selector(resetClicked))
-        resetBtn.bezelStyle = .rounded
-        resetBtn.controlSize = .small
-
-        let stack = NSStackView(views: [
-            heading,
-            presetRow,
-            row(isZh ? "歌词页背景色" : "Background", bgWell),
-            row(isZh ? "歌词掠过色" : "Sweep Highlight", sweepWell),
-            row(isZh ? "普通歌词色" : "Normal Text", normalWell),
-            resetBtn
-        ])
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 9
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(stack)
-
+    init(preset: ImmersiveLyricsThemePreset, target: AnyObject?, action: Selector?) {
+        self.preset = preset
+        super.init(frame: .zero)
+        self.title = ""
+        self.isBordered = false
+        self.target = target
+        self.action = action
+        self.toolTip = preset.displayName()
+        self.setAccessibilityLabel(preset.displayName())
+        self.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 14),
-            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -14),
-            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 12),
-            stack.bottomAnchor.constraint(lessThanOrEqualTo: container.bottomAnchor, constant: -12)
+            widthAnchor.constraint(equalToConstant: 18),
+            heightAnchor.constraint(equalToConstant: 18)
         ])
-        for v in stack.arrangedSubviews where v is NSStackView {
-            v.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(rect: .zero, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) { isHovered = true }
+    override func mouseExited(with event: NSEvent) { isHovered = false }
+
+    override func draw(_ dirtyRect: NSRect) {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            let outerRect = bounds.insetBy(dx: 1.2, dy: 1.2)
+            let dotRect = bounds.insetBy(dx: 3.2, dy: 3.2)
+
+            if preset == .followTheme {
+                // Half-dark / half-light split circle
+                NSGraphicsContext.saveGraphicsState()
+                NSBezierPath(ovalIn: dotRect).addClip()
+                NSColor(calibratedWhite: 0.12, alpha: 1).setFill()
+                NSRect(x: dotRect.minX, y: dotRect.minY, width: dotRect.width / 2, height: dotRect.height).fill()
+                NSColor(calibratedWhite: 0.96, alpha: 1).setFill()
+                NSRect(x: dotRect.midX, y: dotRect.minY, width: dotRect.width / 2, height: dotRect.height).fill()
+                NSGraphicsContext.restoreGraphicsState()
+            } else {
+                (preset.backgroundColor ?? .black).setFill()
+                NSBezierPath(ovalIn: dotRect).fill()
+                if let accent = preset.sweepColor {
+                    accent.setFill()
+                    NSBezierPath(ovalIn: dotRect.insetBy(dx: 3.2, dy: 3.2)).fill()
+                }
+            }
+
+            // Subtle inner rim
+            NSColor.labelColor.withAlphaComponent(0.22).setStroke()
+            let innerRim = NSBezierPath(ovalIn: dotRect)
+            innerRim.lineWidth = 0.6
+            innerRim.stroke()
+
+            // Crisp selected / hover ring
+            if isSelectedPreset {
+                (preset.sweepColor ?? AppearanceSurfaceColors.accent).setStroke()
+                let ring = NSBezierPath(ovalIn: outerRect)
+                ring.lineWidth = 1.6
+                ring.stroke()
+            } else if isHovered {
+                NSColor.labelColor.withAlphaComponent(0.45).setStroke()
+                let ring = NSBezierPath(ovalIn: outerRect)
+                ring.lineWidth = 1.0
+                ring.stroke()
+            }
         }
-        self.view = container
+    }
+}
+
+@MainActor
+private final class TransportButton: NSButton {
+    let isPrimary: Bool
+    private var tracking: NSTrackingArea?
+    private var isHovered = false
+    private var isPressed = false
+
+    init(symbol: String, size: CGFloat, isPrimary: Bool, target: AnyObject?, action: Selector?) {
+        self.isPrimary = isPrimary
+        super.init(frame: .zero)
+        self.title = ""
+        self.isBordered = false
+        self.isEnabled = true
+        self.target = target
+        self.action = action
+        self.wantsLayer = true
+        self.layer?.cornerRadius = isPrimary ? 16 : 13
+        self.layer?.cornerCurve = .continuous
+        self.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: size, weight: .semibold))
+        self.translatesAutoresizingMaskIntoConstraints = false
+        refreshStyle()
     }
 
-    @objc private func presetClicked(_ sender: NSButton) {
-        switch sender.tag {
-        case 0:
-            UserDefaults.standard.removeObject(forKey: AppPreferences.immersiveBackgroundColorKey)
-        case 1:
-            AppPreferences.setColor(NSColor(calibratedRed: 0.06, green: 0.06, blue: 0.08, alpha: 1), forKey: AppPreferences.immersiveBackgroundColorKey)
-        case 2:
-            AppPreferences.setColor(NSColor(calibratedRed: 0.96, green: 0.94, blue: 0.89, alpha: 1), forKey: AppPreferences.immersiveBackgroundColorKey)
-        case 3:
-            AppPreferences.setColor(NSColor(calibratedRed: 0.08, green: 0.10, blue: 0.16, alpha: 1), forKey: AppPreferences.immersiveBackgroundColorKey)
-        default: break
+    required init?(coder: NSCoder) { nil }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(rect: .zero, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        isHovered = true
+        refreshStyle()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        isHovered = false
+        isPressed = false
+        refreshStyle()
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        isPressed = true
+        refreshStyle()
+        super.mouseDown(with: event)
+        isPressed = false
+        refreshStyle()
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        refreshStyle()
+    }
+
+    func refreshStyle() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            if isPrimary {
+                contentTintColor = .white
+                let base = AppearanceSurfaceColors.accent
+                if isPressed {
+                    layer?.backgroundColor = base.blended(withFraction: 0.25, of: .black)?.cgColor ?? base.cgColor
+                    alphaValue = 0.82
+                } else if isHovered {
+                    layer?.backgroundColor = base.blended(withFraction: 0.14, of: .white)?.cgColor ?? base.cgColor
+                    alphaValue = 1.0
+                } else {
+                    layer?.backgroundColor = base.cgColor
+                    alphaValue = 1.0
+                }
+            } else {
+                contentTintColor = isHovered ? .labelColor : .secondaryLabelColor
+                if isPressed {
+                    layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.18).cgColor
+                    alphaValue = 0.72
+                } else if isHovered {
+                    layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.10).cgColor
+                    alphaValue = 1.0
+                } else {
+                    layer?.backgroundColor = NSColor.clear.cgColor
+                    alphaValue = 1.0
+                }
+            }
         }
-        bgWell.color = AppPreferences.immersiveBackgroundColor ?? AppearanceSurfaceColors.windowBackground
-        onColorsChanged?()
-    }
-
-    @objc private func bgChanged() {
-        AppPreferences.setColor(bgWell.color, forKey: AppPreferences.immersiveBackgroundColorKey)
-        onColorsChanged?()
-    }
-
-    @objc private func sweepChanged() {
-        AppPreferences.setColor(sweepWell.color, forKey: AppPreferences.immersiveSweepColorKey)
-        onColorsChanged?()
-    }
-
-    @objc private func normalChanged() {
-        AppPreferences.setColor(normalWell.color, forKey: AppPreferences.immersiveNormalColorKey)
-        onColorsChanged?()
-    }
-
-    @objc private func resetClicked() {
-        UserDefaults.standard.removeObject(forKey: AppPreferences.immersiveBackgroundColorKey)
-        UserDefaults.standard.removeObject(forKey: AppPreferences.immersiveSweepColorKey)
-        UserDefaults.standard.removeObject(forKey: AppPreferences.immersiveNormalColorKey)
-        bgWell.color = AppearanceSurfaceColors.windowBackground
-        sweepWell.color = AppearanceSurfaceColors.accent
-        normalWell.color = .labelColor
-        onColorsChanged?()
     }
 }
 
@@ -861,11 +990,10 @@ final class ImmersiveLyricsView: NSView {
     private let trackTitleLabel = NSTextField(labelWithString: "")
     private let trackArtistLabel = NSTextField(labelWithString: "")
     private let timeLabel = NSTextField(labelWithString: "0:00 / 0:00")
-    private let prevButton = NSButton()
-    private let playPauseButton = NSButton()
-    private let nextButton = NSButton()
-    private let paletteButton = NSButton()
-    private var palettePopover: NSPopover?
+    private lazy var prevButton = TransportButton(symbol: "backward.fill", size: 13, isPrimary: false, target: self, action: #selector(prevClicked))
+    private lazy var playPauseButton = TransportButton(symbol: "play.fill", size: 14, isPrimary: true, target: self, action: #selector(playPauseClicked))
+    private lazy var nextButton = TransportButton(symbol: "forward.fill", size: 13, isPrimary: false, target: self, action: #selector(nextClicked))
+    private var swatchButtons: [ThemeSwatchDotButton] = []
     private var isPlayingState = false
 
     override init(frame frameRect: NSRect) {
@@ -892,8 +1020,9 @@ final class ImmersiveLyricsView: NSView {
     }
 
     func applyCustomColors() {
+        let preset = AppPreferences.immersiveThemePreset
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            if let customBg = AppPreferences.immersiveBackgroundColor {
+            if let customBg = preset.backgroundColor {
                 stageBackground.surfaceColor = customBg
                 stageBackground.layer?.cornerRadius = 12
                 stageBackground.layer?.borderWidth = 0.5
@@ -903,8 +1032,11 @@ final class ImmersiveLyricsView: NSView {
                 stageBackground.layer?.borderWidth = 0
                 stageBackground.surfaceBorderColor = .clear
             }
-            let sweep = AppPreferences.immersiveSweepColor
-            let normal = AppPreferences.immersiveNormalColor
+            for btn in swatchButtons {
+                btn.isSelectedPreset = (btn.preset == preset)
+            }
+            let sweep = preset.sweepColor
+            let normal = preset.normalTextColor
             for view in lineViews {
                 view.customSweepColor = sweep
                 view.customNormalColor = normal
@@ -913,6 +1045,8 @@ final class ImmersiveLyricsView: NSView {
     }
 
     private func setupLayout() {
+        let isZh = AppPreferences.language == .simplifiedChinese
+
         stageBackground.wantsLayer = true
         stageBackground.layer?.cornerCurve = .continuous
         stageBackground.translatesAutoresizingMaskIntoConstraints = false
@@ -934,10 +1068,11 @@ final class ImmersiveLyricsView: NSView {
         documentView.addSubview(linesStack)
         scrollView.documentView = documentView
 
-        missingView.isHidden = true
+        missingView.isIdlePreview = true
+        missingView.isHidden = false
         missingView.onRetry = { [weak self] in self?.onRetryMatch?() }
 
-        idleWaveView.isHidden = false
+        idleWaveView.isHidden = true
 
         transportBar.wantsLayer = true
         transportBar.surfaceColor = AppearanceSurfaceColors.card
@@ -956,35 +1091,40 @@ final class ImmersiveLyricsView: NSView {
         progressFill.translatesAutoresizingMaskIntoConstraints = false
         progressTrack.addSubview(progressFill)
 
-        trackTitleLabel.stringValue = AppPreferences.language == .simplifiedChinese ? "未在播放" : "Not Playing"
-        trackTitleLabel.font = .systemFont(ofSize: 12.5, weight: .semibold)
+        trackTitleLabel.stringValue = isZh ? "未在播放" : "Not Playing"
+        trackTitleLabel.font = .systemFont(ofSize: 12, weight: .semibold)
         trackTitleLabel.textColor = .labelColor
         trackTitleLabel.lineBreakMode = .byTruncatingTail
         trackTitleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         trackTitleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         trackArtistLabel.stringValue = "NotchMuse"
-        trackArtistLabel.font = .systemFont(ofSize: 11, weight: .regular)
+        trackArtistLabel.font = .systemFont(ofSize: 10.5, weight: .regular)
         trackArtistLabel.textColor = .secondaryLabelColor
         trackArtistLabel.lineBreakMode = .byTruncatingTail
         trackArtistLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         trackArtistLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        timeLabel.font = .monospacedDigitSystemFont(ofSize: 10.5, weight: .regular)
+        timeLabel.font = .monospacedDigitSystemFont(ofSize: 10, weight: .regular)
         timeLabel.textColor = .tertiaryLabelColor
         timeLabel.alignment = .right
+        timeLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        configureTransportButton(prevButton, symbol: "backward.fill", size: 13, action: #selector(prevClicked))
-        configureTransportButton(playPauseButton, symbol: "play.fill", size: 14, action: #selector(playPauseClicked))
-        configureTransportButton(nextButton, symbol: "forward.fill", size: 13, action: #selector(nextClicked))
-        configureTransportButton(paletteButton, symbol: "paintpalette", size: 13, action: #selector(paletteClicked))
-        paletteButton.contentTintColor = .secondaryLabelColor
-        paletteButton.toolTip = AppPreferences.language == .simplifiedChinese ? "自定义歌词页颜色" : "Customize Lyrics Colors"
+        swatchButtons = ImmersiveLyricsThemePreset.allCases.map { preset in
+            ThemeSwatchDotButton(preset: preset, target: self, action: #selector(swatchClicked(_:)))
+        }
+        let swatchRow = NSStackView(views: swatchButtons)
+        swatchRow.orientation = .horizontal
+        swatchRow.alignment = .centerY
+        swatchRow.spacing = 4
+        swatchRow.translatesAutoresizingMaskIntoConstraints = false
 
-        playPauseButton.wantsLayer = true
-        playPauseButton.layer?.cornerRadius = 16
-        playPauseButton.contentTintColor = .white
+        let rightControls = NSStackView(views: [swatchRow, timeLabel])
+        rightControls.orientation = .horizontal
+        rightControls.alignment = .centerY
+        rightControls.spacing = 8
+        rightControls.translatesAutoresizingMaskIntoConstraints = false
 
         transportBar.addSubview(progressTrack)
         transportBar.addSubview(trackTitleLabel)
@@ -992,8 +1132,7 @@ final class ImmersiveLyricsView: NSView {
         transportBar.addSubview(prevButton)
         transportBar.addSubview(playPauseButton)
         transportBar.addSubview(nextButton)
-        transportBar.addSubview(timeLabel)
-        transportBar.addSubview(paletteButton)
+        transportBar.addSubview(rightControls)
 
         addSubview(stageBackground)
         addSubview(scrollView)
@@ -1058,23 +1197,19 @@ final class ImmersiveLyricsView: NSView {
             playPauseButton.widthAnchor.constraint(equalToConstant: 32),
             playPauseButton.heightAnchor.constraint(equalToConstant: 32),
 
-            prevButton.trailingAnchor.constraint(equalTo: playPauseButton.leadingAnchor, constant: -10),
+            prevButton.trailingAnchor.constraint(equalTo: playPauseButton.leadingAnchor, constant: -8),
             prevButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
             prevButton.widthAnchor.constraint(equalToConstant: 26),
             prevButton.heightAnchor.constraint(equalToConstant: 26),
 
-            nextButton.leadingAnchor.constraint(equalTo: playPauseButton.trailingAnchor, constant: 10),
+            nextButton.leadingAnchor.constraint(equalTo: playPauseButton.trailingAnchor, constant: 8),
             nextButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
             nextButton.widthAnchor.constraint(equalToConstant: 26),
             nextButton.heightAnchor.constraint(equalToConstant: 26),
 
-            paletteButton.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -10),
-            paletteButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
-            paletteButton.widthAnchor.constraint(equalToConstant: 26),
-            paletteButton.heightAnchor.constraint(equalToConstant: 26),
-
-            timeLabel.trailingAnchor.constraint(equalTo: paletteButton.leadingAnchor, constant: -6),
-            timeLabel.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor)
+            rightControls.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -12),
+            rightControls.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
+            rightControls.leadingAnchor.constraint(greaterThanOrEqualTo: nextButton.trailingAnchor, constant: 8)
         ])
         refreshTransportAppearance()
     }
@@ -1092,8 +1227,8 @@ final class ImmersiveLyricsView: NSView {
 
     private func layoutDocumentWidth() {
         let visibleH = max(200, scrollView.contentView.bounds.height)
-        let pad = max(80, visibleH / 2 - 22)
-        if abs(linesStack.edgeInsets.top - pad) > 2 {
+        let pad = max(80, ceil(visibleH / 2))
+        if abs(linesStack.edgeInsets.top - pad) > 1 {
             linesStack.edgeInsets = NSEdgeInsets(top: pad, left: 28, bottom: pad, right: 28)
         }
         let width = max(200, scrollView.contentView.bounds.width)
@@ -1103,23 +1238,13 @@ final class ImmersiveLyricsView: NSView {
         }
     }
 
-    private func configureTransportButton(_ button: NSButton, symbol: String, size: CGFloat, action: Selector) {
-        button.title = ""
-        button.isBordered = false
-        button.isEnabled = true
-        button.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
-            .withSymbolConfiguration(.init(pointSize: size, weight: .semibold))
-        button.contentTintColor = .labelColor
-        button.target = self
-        button.action = action
-        button.translatesAutoresizingMaskIntoConstraints = false
-    }
-
     private func refreshTransportAppearance() {
         effectiveAppearance.performAsCurrentDrawingAppearance {
             progressTrack.layer?.backgroundColor = NSColor.labelColor.withAlphaComponent(0.10).cgColor
             progressFill.layer?.backgroundColor = AppearanceSurfaceColors.accent.cgColor
-            playPauseButton.layer?.backgroundColor = AppearanceSurfaceColors.accent.cgColor
+            prevButton.refreshStyle()
+            playPauseButton.refreshStyle()
+            nextButton.refreshStyle()
         }
     }
 
@@ -1160,20 +1285,21 @@ final class ImmersiveLyricsView: NSView {
 
         if !hasTrack {
             scrollView.isHidden = true
-            missingView.isHidden = true
-            missingView.setActive(false)
-            idleWaveView.isHidden = false
-            idleWaveView.setActive(!isHidden)
+            idleWaveView.isHidden = true
+            idleWaveView.setActive(false)
+            missingView.isIdlePreview = true
+            missingView.isHidden = false
+            missingView.setActive(!isHidden)
             return
         }
 
         if lines.isEmpty {
             scrollView.isHidden = true
-            let show404 = lyricsMissing
-            missingView.isHidden = !show404
-            missingView.setActive(!isHidden && show404)
-            idleWaveView.isHidden = show404
-            idleWaveView.setActive(!isHidden && !show404)
+            idleWaveView.isHidden = true
+            idleWaveView.setActive(false)
+            missingView.isIdlePreview = !lyricsMissing
+            missingView.isHidden = false
+            missingView.setActive(!isHidden)
             return
         }
 
@@ -1205,8 +1331,9 @@ final class ImmersiveLyricsView: NSView {
         }
         lineViews.removeAll()
 
-        let sweep = AppPreferences.immersiveSweepColor
-        let normal = AppPreferences.immersiveNormalColor
+        let preset = AppPreferences.immersiveThemePreset
+        let sweep = preset.sweepColor
+        let normal = preset.normalTextColor
         for line in lines {
             let view = SweepLyricLineView(primaryText: line.text, translationText: line.translation)
             view.customSweepColor = sweep
@@ -1230,15 +1357,18 @@ final class ImmersiveLyricsView: NSView {
         layoutDocumentWidth()
     }
 
-    private func scrollActiveLineToCenterIfAllowed(animated: Bool) {
+    func scrollActiveLineToCenterIfAllowed(animated: Bool) {
         guard ProcessInfo.processInfo.systemUptime >= userBrowsingUntil,
               lineViews.indices.contains(activeIndex) else { return }
+        layoutSubtreeIfNeeded()
         layoutDocumentWidth()
+        documentView.layoutSubtreeIfNeeded()
         let target = lineViews[activeIndex]
+        // Convert from unflipped NSStackView coordinates into flipped documentView coordinates!
+        let centerInDoc = documentView.convert(NSPoint(x: target.bounds.midX, y: target.bounds.midY), from: target)
         let visibleHeight = scrollView.contentView.bounds.height
-        let targetY = max(0, target.frame.midY - visibleHeight * 0.5)
         let maxY = max(0, documentView.bounds.height - visibleHeight)
-        let clampedY = min(targetY, maxY)
+        let clampedY = min(max(0, centerInDoc.y - visibleHeight * 0.5), maxY)
         if animated {
             NSAnimationContext.runAnimationGroup { ctx in
                 ctx.duration = 0.28
@@ -1250,6 +1380,20 @@ final class ImmersiveLyricsView: NSView {
         }
     }
 
+    #if DEBUG
+    func debugLineCenterAndVisibleMidY(for index: Int) -> (lineMidY: CGFloat, visibleMidY: CGFloat)? {
+        guard lineViews.indices.contains(index) else { return nil }
+        activeIndex = index
+        highlightActiveLine(progress: 0.5)
+        userBrowsingUntil = 0
+        scrollActiveLineToCenterIfAllowed(animated: false)
+        let target = lineViews[index]
+        let centerInDoc = documentView.convert(NSPoint(x: target.bounds.midX, y: target.bounds.midY), from: target)
+        let visibleMidY = scrollView.contentView.bounds.origin.y + scrollView.contentView.bounds.height * 0.5
+        return (centerInDoc.y, visibleMidY)
+    }
+    #endif
+
     private func formatClock(_ seconds: TimeInterval) -> String {
         let total = max(0, Int(seconds.rounded()))
         return String(format: "%d:%02d", total / 60, total % 60)
@@ -1259,19 +1403,11 @@ final class ImmersiveLyricsView: NSView {
     @objc private func playPauseClicked() { onTransportCommand?(.playPause) }
     @objc private func nextClicked() { onTransportCommand?(.next) }
 
-    @objc private func paletteClicked() {
-        if let popover = palettePopover, popover.isShown {
-            popover.performClose(nil)
-            return
-        }
-        let vc = LyricsPalettePopoverController()
-        vc.onColorsChanged = { [weak self] in self?.applyCustomColors() }
-        let popover = NSPopover()
-        popover.contentViewController = vc
-        popover.behavior = .transient
-        popover.animates = true
-        palettePopover = popover
-        popover.show(relativeTo: paletteButton.bounds, of: paletteButton, preferredEdge: .maxY)
+    @objc private func swatchClicked(_ sender: NSButton) {
+        guard let dot = sender as? ThemeSwatchDotButton else { return }
+        NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+        UserDefaults.standard.set(dot.preset.rawValue, forKey: AppPreferences.immersiveThemePresetKey)
+        applyCustomColors()
     }
 }
 

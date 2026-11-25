@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b101a">
   <meta name="description" content="用 NotchMuse 在 Mac 桌面或菜单栏显示同步歌词，支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。适用于 macOS 14 及以上的 Apple 芯片 Mac，免费下载，无需注册。">
-  <title>NotchMuse｜Mac 桌面歌词与菜单栏歌词工具</title>
+  <title>NotchMuse｜Mac 与 Windows 同步桌面歌词与菜单栏歌词工具</title>
   <link rel="canonical" href="https://notchmuse.com/zh/">
   <link rel="alternate" hreflang="en" href="https://notchmuse.com/">
   <link rel="alternate" hreflang="zh-Hans" href="https://notchmuse.com/zh/">
   <link rel="alternate" hreflang="x-default" href="https://notchmuse.com/">
-  <meta property="og:title" content="NotchMuse｜Mac 桌面歌词与菜单栏歌词工具">
+  <meta property="og:title" content="NotchMuse｜Mac 与 Windows 同步桌面歌词与菜单栏歌词工具">
   <meta property="og:description" content="用 NotchMuse 在 Mac 桌面或菜单栏显示同步歌词，支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。适用于 macOS 14 及以上的 Apple 芯片 Mac，免费下载，无需注册。">
   <meta property="og:url" content="https://notchmuse.com/zh/">
   <meta property="og:type" content="website">
@@ -18,13 +18,13 @@
   <meta property="og:image" content="https://notchmuse.com/assets/real-notch-mode.png">
   <meta property="og:image:alt" content="NotchMuse 在 Mac 刘海旁显示同步歌词">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="NotchMuse｜Mac 桌面歌词与菜单栏歌词工具">
+  <meta name="twitter:title" content="NotchMuse｜Mac 与 Windows 同步桌面歌词与菜单栏歌词工具">
   <meta name="twitter:description" content="用 NotchMuse 在 Mac 桌面或菜单栏显示同步歌词，支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。适用于 macOS 14 及以上的 Apple 芯片 Mac，免费下载，无需注册。">
   <meta name="twitter:image" content="https://notchmuse.com/assets/real-notch-mode.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/guides.css?v=3">
+  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/guides.css?v=4">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -32,7 +32,7 @@
   "name": "NotchMuse",
   "url": "https://notchmuse.com/zh/",
   "inLanguage": "zh-Hans",
-  "operatingSystem": "macOS 14 或更高版本",
+  "operatingSystem": "macOS 14 或更高版本，Windows 10/11（预览版即将推出）",
   "applicationCategory": "MultimediaApplication",
   "offers": {
     "@type": "Offer",
@@ -52,9 +52,9 @@
   <header class="site-header wrap">
     <a class="brand" href="#top" aria-label="NotchMuse 首页"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
     <nav aria-label="主导航">
-      <a class="nav-desktop-only" href="https://github.com/Xiye88/NotchMuse">GitHub</a>
-      <a class="nav-desktop-only" href="#modes">模式</a>
-      <a href="/zh/lyrics-downloader/">歌词下载</a>
+      <a class="nav-desktop-only" href="/zh/compatible-players/">兼容播放器</a>
+      <a class="nav-desktop-only" href="/zh/windows/">Windows 版</a>
+      <a href="/zh/lrc-tools/">LRC 工具</a>
       <a class="nav-desktop-only" href="#faq">常见问题</a>
       <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav"><span>下载</span></a>
       <a class="language-toggle" id="language-toggle" href="/" lang="en" aria-label="Switch to English"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>English</span></a>
@@ -65,15 +65,16 @@
     <section class="hero wrap">
       <div class="hero-copy">
         <p class="eyebrow">让音乐融入你的节奏</p>
-        <h1>Mac 桌面与<span class="nowrap">菜单栏</span>歌词</h1>
-        <p class="lead">工作时也能随时查看歌词。支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。</p>
-        <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="hero"><span>下载 Mac 版</span> <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#modes"><span>了解使用方式</span></a></div>
-        <p class="fine">NotchMuse v0.8.5 · macOS 14+ · Apple 芯片</p>
+        <h1>Mac 与 Windows <span class="nowrap">同步桌面歌词</span></h1>
+        <p class="lead">专注工作时也能随时跟上歌词。支持刘海旁、顶部菜单栏与点击穿透悬浮模式，覆盖 36+ 款音乐播放器。</p>
+        <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="hero"><span>下载 Mac 版</span> <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="/zh/windows/"><span>Windows 预览版</span> <span aria-hidden="true">→</span></a></div>
+        <p class="fine">NotchMuse v0.8.5 (Build 83) · macOS 14+（Apple 芯片）· Windows 11/10 即将推出</p>
       </div>
       <figure class="hero-visual live-showcase">
         <div class="demo-tabs" role="tablist" aria-label="歌词显示模式">
           <button id="status-tab" type="button" role="tab" aria-selected="true" aria-controls="status-panel" data-demo-tab>菜单栏</button>
           <button id="notch-tab" type="button" role="tab" aria-selected="false" aria-controls="notch-panel" tabindex="-1" data-demo-tab>刘海</button>
+          <button id="v09-tab" type="button" role="tab" aria-selected="false" aria-controls="v09-panel" tabindex="-1" data-demo-tab>v0.9 沉浸歌词</button>
         </div>
         <div id="status-panel" role="tabpanel" aria-labelledby="status-tab">
           <div class="live-demo" data-demo>
@@ -93,20 +94,38 @@
             </video>
           </div>
         </div>
-        <figcaption>macOS 真实播放画面 · 使用 Spotify 录制</figcaption>
+        <div id="v09-panel" role="tabpanel" aria-labelledby="v09-tab" hidden>
+          <div class="recording-slot" role="img" aria-label="v0.9 新版黑胶 UI 与沉浸歌词 16:9 录屏展示位">
+            <span class="recording-badge">v0.9 新版录屏槽位 · 16:9</span>
+            <strong>新版黑胶唱片室 UI 与沉浸式歌词演示</strong>
+            <p>预留给 v0.9 实机录屏：展示点击歌词跳转进度、通栏播控条与 6 套精选主题配色一键切换。</p>
+            <div class="recording-specs">
+              <span>推荐 1920 × 1080 (16:9)</span>
+              <span>60 fps · MP4 / WebM</span>
+              <span>10–15 秒循环</span>
+            </div>
+          </div>
+        </div>
+        <figcaption>macOS 真实播放画面 · 已预留 v0.9 16:9 录屏展示位（推荐 1920×1080）</figcaption>
       </figure>
     </section>
 
     <section class="section wrap players" aria-labelledby="players-title">
-      <h2 id="players-title">你喜欢的音乐平台，均已支持。</h2>
-      <p class="section-intro">选择音乐平台，让歌词始终在视线之中。</p>
-      <ul class="player-list">
-        <li><a href="/zh/spotify-lyrics-mac/"><img class="player-icon" src="/assets/players/spotify.png" alt=""><span><strong>Spotify</strong><small>已支持</small></span></a></li>
-        <li><a href="/zh/apple-music-desktop-lyrics-mac/"><img class="player-icon" src="/assets/players/apple-music.png" alt=""><span><strong>Apple Music</strong><small>已支持</small></span></a></li>
-        <li><a href="/zh/netease-cloud-music-lyrics-mac/"><img class="player-icon" src="/assets/players/netease.png" alt=""><span><strong>网易云音乐</strong><small>已支持</small></span></a></li>
-        <li><a href="/zh/qq-music-lyrics-mac/"><img class="player-icon" src="/assets/players/qq-music.jpg" alt=""><span><strong>QQ 音乐</strong><small>已支持</small></span></a></li>
-        <li><a href="/zh/soda-music-lyrics-mac/"><img class="player-icon" src="/assets/players/soda-music.jpg" alt=""><span><strong>汽水音乐</strong><small>已支持</small></span></a></li>
-      </ul>
+      <h2 id="players-title">36+ 款音乐播放器，开箱即用。</h2>
+      <p class="section-intro">涵盖主流流媒体、国内与开源播放器、Hi-Res 发烧友与 NAS 自建曲库及网页端听歌。</p>
+      <div class="marquee-wall" aria-label="36+ 款支持播放器滚动展示墙">
+        <div class="marquee-track marquee-track-fwd">
+          <div class="marquee-group"><a class="marquee-chip" href="/zh/spotify-lyrics-mac/"><img src="/assets/players/spotify.png" width="24" height="24" alt="" loading="lazy"><strong>Spotify</strong></a><a class="marquee-chip" href="/zh/apple-music-desktop-lyrics-mac/"><img src="/assets/players/apple-music.png" width="24" height="24" alt="" loading="lazy"><strong>Apple Music</strong></a><a class="marquee-chip" href="/zh/compatible-players/#youtube-music"><span class="marquee-badge" aria-hidden="true">YT</span><strong>YouTube Music</strong></a><a class="marquee-chip" href="/zh/netease-cloud-music-lyrics-mac/"><img src="/assets/players/netease.png" width="24" height="24" alt="" loading="lazy"><strong>网易云音乐</strong></a><a class="marquee-chip" href="/zh/qq-music-lyrics-mac/"><img src="/assets/players/qq-music.jpg" width="24" height="24" alt="" loading="lazy"><strong>QQ 音乐</strong></a><a class="marquee-chip" href="/zh/soda-music-lyrics-mac/"><img src="/assets/players/soda-music.jpg" width="24" height="24" alt="" loading="lazy"><strong>汽水音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#kugou"><span class="marquee-badge" aria-hidden="true">KG</span><strong>酷狗音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#kuwo"><span class="marquee-badge" aria-hidden="true">KW</span><strong>酷我音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#migu"><span class="marquee-badge" aria-hidden="true">MG</span><strong>咪咕音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#bodian"><span class="marquee-badge" aria-hidden="true">BD</span><strong>波点音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#qianqian"><span class="marquee-badge" aria-hidden="true">QQ</span><strong>千千音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#lx-music"><span class="marquee-badge" aria-hidden="true">LX</span><strong>洛雪音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#yesplaymusic"><span class="marquee-badge" aria-hidden="true">YP</span><strong>YesPlayMusic</strong></a><a class="marquee-chip" href="/zh/compatible-players/#algermusic"><span class="marquee-badge" aria-hidden="true">AG</span><strong>AlgerMusicPlayer</strong></a><a class="marquee-chip" href="/zh/compatible-players/#listen1"><span class="marquee-badge" aria-hidden="true">L1</span><strong>Listen 1</strong></a><a class="marquee-chip" href="/zh/compatible-players/#splayer"><span class="marquee-badge" aria-hidden="true">SL</span><strong>SPlayer</strong></a><a class="marquee-chip" href="/zh/compatible-players/#tidal"><span class="marquee-badge" aria-hidden="true">TD</span><strong>TIDAL</strong></a><a class="marquee-chip" href="/zh/compatible-players/#qobuz"><span class="marquee-badge" aria-hidden="true">QB</span><strong>Qobuz</strong></a><a class="marquee-chip" href="/zh/compatible-players/#amazon-music"><span class="marquee-badge" aria-hidden="true">AZ</span><strong>Amazon Music</strong></a></div>
+          <div class="marquee-group" aria-hidden="true"><a class="marquee-chip" href="/zh/spotify-lyrics-mac/" tabindex="-1"><img src="/assets/players/spotify.png" width="24" height="24" alt="" loading="lazy"><strong>Spotify</strong></a><a class="marquee-chip" href="/zh/apple-music-desktop-lyrics-mac/" tabindex="-1"><img src="/assets/players/apple-music.png" width="24" height="24" alt="" loading="lazy"><strong>Apple Music</strong></a><a class="marquee-chip" href="/zh/compatible-players/#youtube-music" tabindex="-1"><span class="marquee-badge" aria-hidden="true">YT</span><strong>YouTube Music</strong></a><a class="marquee-chip" href="/zh/netease-cloud-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/netease.png" width="24" height="24" alt="" loading="lazy"><strong>网易云音乐</strong></a><a class="marquee-chip" href="/zh/qq-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/qq-music.jpg" width="24" height="24" alt="" loading="lazy"><strong>QQ 音乐</strong></a><a class="marquee-chip" href="/zh/soda-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/soda-music.jpg" width="24" height="24" alt="" loading="lazy"><strong>汽水音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#kugou" tabindex="-1"><span class="marquee-badge" aria-hidden="true">KG</span><strong>酷狗音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#kuwo" tabindex="-1"><span class="marquee-badge" aria-hidden="true">KW</span><strong>酷我音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#migu" tabindex="-1"><span class="marquee-badge" aria-hidden="true">MG</span><strong>咪咕音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#bodian" tabindex="-1"><span class="marquee-badge" aria-hidden="true">BD</span><strong>波点音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#qianqian" tabindex="-1"><span class="marquee-badge" aria-hidden="true">QQ</span><strong>千千音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#lx-music" tabindex="-1"><span class="marquee-badge" aria-hidden="true">LX</span><strong>洛雪音乐</strong></a><a class="marquee-chip" href="/zh/compatible-players/#yesplaymusic" tabindex="-1"><span class="marquee-badge" aria-hidden="true">YP</span><strong>YesPlayMusic</strong></a><a class="marquee-chip" href="/zh/compatible-players/#algermusic" tabindex="-1"><span class="marquee-badge" aria-hidden="true">AG</span><strong>AlgerMusicPlayer</strong></a><a class="marquee-chip" href="/zh/compatible-players/#listen1" tabindex="-1"><span class="marquee-badge" aria-hidden="true">L1</span><strong>Listen 1</strong></a><a class="marquee-chip" href="/zh/compatible-players/#splayer" tabindex="-1"><span class="marquee-badge" aria-hidden="true">SL</span><strong>SPlayer</strong></a><a class="marquee-chip" href="/zh/compatible-players/#tidal" tabindex="-1"><span class="marquee-badge" aria-hidden="true">TD</span><strong>TIDAL</strong></a><a class="marquee-chip" href="/zh/compatible-players/#qobuz" tabindex="-1"><span class="marquee-badge" aria-hidden="true">QB</span><strong>Qobuz</strong></a><a class="marquee-chip" href="/zh/compatible-players/#amazon-music" tabindex="-1"><span class="marquee-badge" aria-hidden="true">AZ</span><strong>Amazon Music</strong></a></div>
+        </div>
+        <div class="marquee-track marquee-track-rev">
+          <div class="marquee-group"><a class="marquee-chip" href="/zh/compatible-players/#deezer"><span class="marquee-badge" aria-hidden="true">DZ</span><strong>Deezer</strong></a><a class="marquee-chip" href="/zh/compatible-players/#cider"><span class="marquee-badge" aria-hidden="true">CD</span><strong>Cider</strong></a><a class="marquee-chip" href="/zh/compatible-players/#plexamp"><span class="marquee-badge" aria-hidden="true">PX</span><strong>Plexamp</strong></a><a class="marquee-chip" href="/zh/compatible-players/#roon"><span class="marquee-badge" aria-hidden="true">RN</span><strong>Roon</strong></a><a class="marquee-chip" href="/zh/compatible-players/#foobar2000"><span class="marquee-badge" aria-hidden="true">FB</span><strong>foobar2000</strong></a><a class="marquee-chip" href="/zh/compatible-players/#musicbee"><span class="marquee-badge" aria-hidden="true">MB</span><strong>MusicBee</strong></a><a class="marquee-chip" href="/zh/compatible-players/#audirvana"><span class="marquee-badge" aria-hidden="true">AU</span><strong>Audirvana</strong></a><a class="marquee-chip" href="/zh/compatible-players/#swinsian"><span class="marquee-badge" aria-hidden="true">SW</span><strong>Swinsian</strong></a><a class="marquee-chip" href="/zh/compatible-players/#vox"><span class="marquee-badge" aria-hidden="true">VX</span><strong>VOX</strong></a><a class="marquee-chip" href="/zh/compatible-players/#pine-player"><span class="marquee-badge" aria-hidden="true">PP</span><strong>Pine Player</strong></a><a class="marquee-chip" href="/zh/compatible-players/#cog"><span class="marquee-badge" aria-hidden="true">CG</span><strong>Cog</strong></a><a class="marquee-chip" href="/zh/compatible-players/#feishin"><span class="marquee-badge" aria-hidden="true">FS</span><strong>Feishin</strong></a><a class="marquee-chip" href="/zh/compatible-players/#supersonic"><span class="marquee-badge" aria-hidden="true">SS</span><strong>Supersonic</strong></a><a class="marquee-chip" href="/zh/compatible-players/#soundcloud"><span class="marquee-badge" aria-hidden="true">SC</span><strong>SoundCloud</strong></a><a class="marquee-chip" href="/zh/compatible-players/#bandcamp"><span class="marquee-badge" aria-hidden="true">BC</span><strong>Bandcamp</strong></a><a class="marquee-chip" href="/zh/compatible-players/#web-players"><span class="marquee-badge" aria-hidden="true">WB</span><strong>浏览器网页播放器（Chrome / Safari / Arc / Edge / Firefox）</strong></a><a class="marquee-chip" href="/zh/compatible-players/#iina"><span class="marquee-badge" aria-hidden="true">II</span><strong>IINA</strong></a><a class="marquee-chip" href="/zh/compatible-players/#vlc"><span class="marquee-badge" aria-hidden="true">VL</span><strong>VLC</strong></a><a class="marquee-chip" href="/zh/compatible-players/#bilibili"><span class="marquee-badge" aria-hidden="true">BL</span><strong>哔哩哔哩</strong></a></div>
+          <div class="marquee-group" aria-hidden="true"><a class="marquee-chip" href="/zh/compatible-players/#deezer" tabindex="-1"><span class="marquee-badge" aria-hidden="true">DZ</span><strong>Deezer</strong></a><a class="marquee-chip" href="/zh/compatible-players/#cider" tabindex="-1"><span class="marquee-badge" aria-hidden="true">CD</span><strong>Cider</strong></a><a class="marquee-chip" href="/zh/compatible-players/#plexamp" tabindex="-1"><span class="marquee-badge" aria-hidden="true">PX</span><strong>Plexamp</strong></a><a class="marquee-chip" href="/zh/compatible-players/#roon" tabindex="-1"><span class="marquee-badge" aria-hidden="true">RN</span><strong>Roon</strong></a><a class="marquee-chip" href="/zh/compatible-players/#foobar2000" tabindex="-1"><span class="marquee-badge" aria-hidden="true">FB</span><strong>foobar2000</strong></a><a class="marquee-chip" href="/zh/compatible-players/#musicbee" tabindex="-1"><span class="marquee-badge" aria-hidden="true">MB</span><strong>MusicBee</strong></a><a class="marquee-chip" href="/zh/compatible-players/#audirvana" tabindex="-1"><span class="marquee-badge" aria-hidden="true">AU</span><strong>Audirvana</strong></a><a class="marquee-chip" href="/zh/compatible-players/#swinsian" tabindex="-1"><span class="marquee-badge" aria-hidden="true">SW</span><strong>Swinsian</strong></a><a class="marquee-chip" href="/zh/compatible-players/#vox" tabindex="-1"><span class="marquee-badge" aria-hidden="true">VX</span><strong>VOX</strong></a><a class="marquee-chip" href="/zh/compatible-players/#pine-player" tabindex="-1"><span class="marquee-badge" aria-hidden="true">PP</span><strong>Pine Player</strong></a><a class="marquee-chip" href="/zh/compatible-players/#cog" tabindex="-1"><span class="marquee-badge" aria-hidden="true">CG</span><strong>Cog</strong></a><a class="marquee-chip" href="/zh/compatible-players/#feishin" tabindex="-1"><span class="marquee-badge" aria-hidden="true">FS</span><strong>Feishin</strong></a><a class="marquee-chip" href="/zh/compatible-players/#supersonic" tabindex="-1"><span class="marquee-badge" aria-hidden="true">SS</span><strong>Supersonic</strong></a><a class="marquee-chip" href="/zh/compatible-players/#soundcloud" tabindex="-1"><span class="marquee-badge" aria-hidden="true">SC</span><strong>SoundCloud</strong></a><a class="marquee-chip" href="/zh/compatible-players/#bandcamp" tabindex="-1"><span class="marquee-badge" aria-hidden="true">BC</span><strong>Bandcamp</strong></a><a class="marquee-chip" href="/zh/compatible-players/#web-players" tabindex="-1"><span class="marquee-badge" aria-hidden="true">WB</span><strong>浏览器网页播放器（Chrome / Safari / Arc / Edge / Firefox）</strong></a><a class="marquee-chip" href="/zh/compatible-players/#iina" tabindex="-1"><span class="marquee-badge" aria-hidden="true">II</span><strong>IINA</strong></a><a class="marquee-chip" href="/zh/compatible-players/#vlc" tabindex="-1"><span class="marquee-badge" aria-hidden="true">VL</span><strong>VLC</strong></a><a class="marquee-chip" href="/zh/compatible-players/#bilibili" tabindex="-1"><span class="marquee-badge" aria-hidden="true">BL</span><strong>哔哩哔哩</strong></a></div>
+        </div>
+      </div>
+      <div class="players-cta">
+        <a class="button button-quiet" href="/zh/compatible-players/">查看全部 36+ 兼容播放器 →</a>
+      </div>
     </section>
 
     <section class="section wrap" id="modes" aria-labelledby="modes-title">
@@ -177,7 +196,9 @@
             <li><a href="/zh/floating-lyrics-mac/"><strong>Mac 桌面悬浮歌词</strong><span>点击穿透与位置锁定 ↗</span></a></li>
             <li><a href="/zh/best-macbook-notch-apps/"><strong>MacBook 刘海软件推荐</strong><span>4 款实用工具对比 ↗</span></a></li>
             <li><a href="/zh/lyricsx-alternative/"><strong>LyricsX 替代选择</strong><span>macOS 14+ 原生对比 ↗</span></a></li>
-            <li><a href="/zh/lyrics-downloader/"><strong>在线歌词下载器</strong><span>免费搜索下载 .LRC ↗</span></a></li>
+            <li><a href="/zh/lrc-tools/"><strong>纯本地 LRC 转 SRT 与偏移工具</strong><span>浏览器离线处理 ↗</span></a></li>
+            <li><a href="/zh/compatible-players/"><strong>36+ 款兼容播放器目录</strong><span>macOS 与 Windows 完整支持清单 ↗</span></a></li>
+            <li><a href="/zh/windows/"><strong>NotchMuse Windows 版</strong><span>Spotify 悬浮歌词与任务栏预览 ↗</span></a></li>
           </ul>
         </div>
       </div>
@@ -185,12 +206,12 @@
 
     <section class="section wrap faq" id="faq" aria-labelledby="faq-title">
       <h2 id="faq-title">常见问题</h2>
-      <details><summary>NotchMuse 支持哪些音乐平台？</summary><p>目前支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。</p></details>
+      <details><summary>NotchMuse 支持哪些音乐平台？</summary><p>目前已覆盖 36+ 款主流、开源、发烧友及网页端播放器，包括 Spotify、Apple Music、YouTube Music、网易云音乐、QQ 音乐、汽水音乐、洛雪音乐、YesPlayMusic、foobar2000、MusicBee、TIDAL、Qobuz、Roon 等，详见 <a href="/zh/compatible-players/">兼容播放器完整目录</a>。</p></details>
       <details><summary>需要什么样的 Mac？</summary><p>NotchMuse 需要 macOS 14 或更新版本，以及 Apple 芯片 Mac。</p></details>
       <details><summary>为什么 macOS 会请求权限？</summary><p>NotchMuse 需要“自动化”权限读取所选音乐应用的当前曲目和播放进度。菜单栏左侧布局还需要“辅助功能”权限。</p></details>
       <details><summary>NotchMuse 会上传或监听我的音频吗？</summary><p>不会。应用不会读取或上传音频。为匹配歌词，曲目信息可能会发送给第三方歌词服务提供方。NotchMuse 不需要账户，也不收集遥测数据。</p></details>
       <details><summary>macOS 提示无法打开 NotchMuse 时该怎么办？</summary><p><span>官网下载包尚未经过 Apple 公证，首次打开时 macOS 可能需要你确认。请参阅</span> <a href="https://github.com/Xiye88/NotchMuse/blob/main/docs/community/SUPPORT.md"><span>安装帮助</span></a> <span>了解具体步骤。</span></p></details>
-      <details><summary>自动更新如何使用？</summary><p>已有正式版可在“设置 → 通用 → 检查更新”中下载安装 v0.8.5（Build70）。开启自动检查后，应用会在下一次定时检查时提示新版，安装需要你的确认。Beta 3 及更早版本需手动安装一次；Preview 保持独立。</p></details>
+      <details><summary>自动更新如何使用？</summary><p>已有正式版可在“设置 → 通用 → 检查更新”中下载安装 v0.8.5（Build 83）。开启自动检查后，应用会在下一次定时检查时提示新版，安装需要你的确认。Beta 3 及更早版本需手动安装一次；Preview 保持独立。</p></details>
       <details><summary>如何支持 NotchMuse？</summary><p><span>在应用内打开支持作者页面，使用微信支付或 USDT，也可以查看</span> <a href="https://github.com/Xiye88/NotchMuse#support-notchmuse">支持页面</a>。</p></details>
     </section>
 

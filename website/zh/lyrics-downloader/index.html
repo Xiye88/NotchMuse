@@ -4,115 +4,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b101a">
-  <title>在线歌词下载器：免费搜索与下载 LRC 同步歌词｜NotchMuse</title>
-  <meta name="description" content="免费在线搜索并下载 LRC 时间轴同步歌词与纯文本歌词。基于公共社区歌词库，无需注册登录，支持一键保存 .lrc 与 .txt 文件。纯净无广告。">
-  <link rel="canonical" href="https://notchmuse.com/zh/lyrics-downloader/">
-  <link rel="alternate" hreflang="en" href="https://notchmuse.com/lyrics-downloader/">
-  <link rel="alternate" hreflang="zh-Hans" href="https://notchmuse.com/zh/lyrics-downloader/">
-  <link rel="alternate" hreflang="x-default" href="https://notchmuse.com/lyrics-downloader/">
-  <meta property="og:title" content="在线歌词下载器：免费搜索与下载 LRC 同步歌词｜NotchMuse">
-  <meta property="og:description" content="免费在线搜索并下载 LRC 时间轴同步歌词与纯文本歌词。基于公共社区歌词库，无需注册登录，支持一键保存 .lrc 与 .txt 文件。纯净无广告。">
-  <meta property="og:url" content="https://notchmuse.com/zh/lyrics-downloader/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="NotchMuse">
-  <meta property="og:image" content="https://notchmuse.com/assets/media/status-bar-poster.webp">
-  <meta property="og:image:alt" content="NotchMuse 歌词同步与 LRC 歌词下载工具">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="在线歌词下载器：免费搜索与下载 LRC 同步歌词｜NotchMuse">
-  <meta name="twitter:description" content="免费在线搜索并下载 LRC 时间轴同步歌词与纯文本歌词。基于公共社区歌词库，无需注册登录，支持一键保存 .lrc 与 .txt 文件。纯净无广告。">
-  <meta name="twitter:image" content="https://notchmuse.com/assets/media/status-bar-poster.webp">
+  <meta name="robots" content="noindex, follow">
+  <title>已迁移至纯本地 LRC 工具箱 | NotchMuse</title>
+  <meta name="description" content="原第三方在线搜词页面已合规下线，已全新升级为 100% 浏览器纯本地运行的 LRC 转 SRT 与 LRC 时间轴偏移工具。">
+  <link rel="canonical" href="https://notchmuse.com/zh/lrc-tools/">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/guides.css?v=3">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"NotchMuse","item":"https://notchmuse.com/zh/"},{"@type":"ListItem","position":2,"name":"在线歌词下载器","item":"https://notchmuse.com/zh/lyrics-downloader/"}]}</script>
-  <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "NotchMuse",
-  "url": "https://notchmuse.com/zh/lyrics-downloader/",
-  "inLanguage": "zh-Hans",
-  "operatingSystem": "macOS 14 或更高版本",
-  "applicationCategory": "MultimediaApplication",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "downloadUrl": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg",
-  "sameAs": "https://github.com/Xiye88/NotchMuse"
-}
-  </script>
-  <script defer src="https://www.pvuv.ai/f.js"
-          data-site="f9FFRntt"
-          data-api="https://in.pvuv.ai"></script>
+  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/guides.css?v=4">
+  <!--
+    正式上线时在 Nginx server {} 块内启用 301 永久重定向：
+    location = /zh/lyrics-downloader/ { return 301 https://notchmuse.com/zh/lrc-tools/; }
+    location = /zh/lyrics-downloader  { return 301 https://notchmuse.com/zh/lrc-tools/; }
+  -->
 </head>
 <body class="guide-page">
-  <a class="skip-link" href="#guide-content">跳到正文</a>
   <header class="site-header wrap">
     <a class="brand" href="/zh/" aria-label="NotchMuse 首页"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
     <nav aria-label="主导航">
-      <a href="/zh/#guides">使用指南</a>
-      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav">下载</a>
-      <a class="language-toggle" id="language-toggle" href="/lyrics-downloader/" lang="en" aria-label="Switch to English"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>English</span></a>
+      <a href="/zh/lrc-tools/">LRC 工具</a>
+      <a class="language-toggle" id="language-toggle" href="/lrc-tools/" lang="en"><span>English</span></a>
     </nav>
   </header>
-  <main>
-    <nav class="guide-breadcrumb wrap" aria-label="当前位置"><a href="/zh/">首页</a><span aria-hidden="true">/</span><span aria-current="page">在线歌词下载器</span></nav>
-    <section class="lyrics-tool-hero wrap" aria-labelledby="tool-heading">
-      <p class="eyebrow">免费在线歌词工具</p>
-      <h1 id="tool-heading">在线歌词下载器：免费搜索与下载 LRC 同步歌词</h1>
-      <p class="lead">在线快速检索海量歌曲，一键免费下载带时间轴的 LRC 同步歌词文件或纯文本歌词。无需注册登录，开箱即用。</p>
-      <form id="lyrics-search-form" class="lyrics-search-form" role="search">
-        <label class="skip-link" for="lyrics-search-input">搜索歌曲或歌手</label>
-        <input id="lyrics-search-input" type="search" autocomplete="off" required placeholder="输入歌曲名或歌手名（例如：晴天、七里香、Taylor Swift）...">
-        <button id="lyrics-search-btn" class="button" type="submit">搜索歌词</button>
-      </form>
-      <div class="lyrics-examples" aria-label="示例搜索"><span>试试看：</span><button type="button" class="example-chip" data-query="晴天">晴天</button><button type="button" class="example-chip" data-query="七里香">七里香</button><button type="button" class="example-chip" data-query="Bohemian Rhapsody">Bohemian Rhapsody</button></div>
-      <p class="lyrics-disclaimer">仅提供歌词文本与 .lrc 时间轴文件（不含音频）· 数据来源 <a href="https://lrclib.net/">LRCLIB</a>。</p>
-      <p id="lyrics-status" class="lyrics-status" aria-live="polite"></p>
-      <div id="lyrics-workspace" class="lyrics-workspace" hidden>
-        <div id="lyrics-results-list" class="lyrics-results" role="listbox" aria-label="搜索结果"></div>
-        <div id="lyrics-preview-container" class="lyrics-preview" hidden>
-          <div class="lyrics-preview-header">
-            <h2 id="lyrics-preview-title" class="lyrics-preview-head"></h2>
-            <div class="lyrics-actions">
-              <button id="lyrics-download-lrc-btn" type="button" class="button button-small" disabled>下载 .LRC</button>
-              <button id="lyrics-download-txt-btn" type="button" class="language-toggle" disabled>下载 .TXT</button>
-              <button id="lyrics-copy-btn" type="button" class="language-toggle" disabled>复制歌词</button>
-            </div>
-          </div>
-          <pre id="lyrics-preview-text" class="lyrics-preview-box"></pre>
-        </div>
-      </div>
-      <div class="lyrics-funnel">
-        <p>厌倦了每次手动下载歌词文件？在 Mac 上，NotchMuse 能在播放 Spotify、Apple Music、网易云或 QQ 音乐时，自动为你实时匹配并在刘海或状态栏滚动呈现同步歌词。完全免费，适配 macOS 14+ Apple 芯片。</p>
-        <a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="hero">免费下载 NotchMuse Mac 版 <span aria-hidden="true">↗</span></a>
+  <main class="wrap">
+    <section class="migration-card">
+      <p class="eyebrow">页面已迁移</p>
+      <h1>原歌词工具已升级并迁移至纯本地 LRC 工具箱</h1>
+      <p>为确保版权合规与隐私安全，原第三方公共歌词搜索与下载功能已下线。现在你可以直接使用全新 100% 浏览器纯本地运行的 <strong>LRC 转 SRT 字幕</strong>、<strong>LRC 时间轴偏移</strong> 以及 <strong>SRT 转 LRC / 纯文本提取</strong> 工具，文件绝不上传服务器。</p>
+      <div class="actions">
+        <a class="button" href="/zh/lrc-tools/">前往 LRC 工具箱 →</a>
+        <a class="button button-quiet" href="/zh/">返回 NotchMuse 首页</a>
       </div>
     </section>
-
-    <div class="guide-layout wrap">
-      <article id="guide-content" class="guide-content" tabindex="-1">
-        <section id="what-is-lrc" class="guide-section"><h2>什么是 LRC 同步歌词文件？</h2><p>LRC（LyRiCs）是一种通用的纯文本时间轴歌词格式，每行歌词前附带类似 <code>[00:15.20]</code> 的时间标记。音乐播放器读取这些时间戳后，可以在播放到对应时刻时高亮并自动滚动当前歌词。</p><p>与不带时间轴的普通 TXT 文本相比，LRC 文件更适合便携播放器、车载音乐和本地音乐库管理。</p></section>
-        <section id="how-to-use" class="guide-section"><h2>如何在本地播放器中使用下载的 LRC 文件</h2><ol><li>在上方搜索歌曲并点击“下载 .LRC 同步歌词”，获得 UTF-8 编码的 <code>.lrc</code> 文件。</li><li>将 <code>.lrc</code> 文件重命名为与本地 MP3 / FLAC 音频文件完全一致的文件名（仅扩展名不同）。</li><li>把音频与 <code>.lrc</code> 文件放入同一文件夹，重新打开播放器即可自动加载同步歌词。</li></ol></section>
-        <section id="auto-macos" class="guide-section"><h2>在 macOS 上自动同步歌词，无需手动维护文件</h2><p>对于日常在 Mac 上听流媒体的用户，手动搜索和保存 LRC 非常繁琐。NotchMuse 是一款轻量级原生 Swift/AppKit 应用，通过 macOS 播控接口自动识别 Spotify、Apple Music、网易云音乐、QQ 音乐与汽水音乐，并将实时同步歌词呈现在 <a href="/zh/macbook-notch-lyrics/">MacBook 刘海旁</a> 或 <a href="/zh/menu-bar-lyrics/">顶部菜单栏</a>。</p></section>
-        <section id="questions" class="guide-section faq"><h2>常见问题</h2><details><summary>LRC 文件和 TXT 文件有什么区别？</summary><p>LRC 文件在每行歌词前包含时间标签（例如 [00:15.20]），支持同步歌词的播放器可以据此随歌曲进度自动高亮滚动；TXT 文件则是不含时间轴的纯文本歌词。</p></details><details><summary>下载的 LRC 文件可以用于手机、播放器或车载音乐吗？</summary><p>可以。多数本地音乐播放器、便携音频播放器（如海贝、飞傲、索尼 Walkman）及车载 U 盘播放系统，只需将 .lrc 文件与音频文件同名并放在同一目录即可自动显示同步歌词。</p></details><details><summary>这个工具会下载 MP3 或音乐音频文件吗？</summary><p>不会。本工具仅检索并下载歌词文本文件（.lrc 与 .txt），不托管、处理或下载任何受版权保护的音频流。</p></details><details><summary>歌词数据来自哪里？</summary><p>搜索结果与时间轴歌词实时来自开源社区歌词库 LRCLIB，感谢社区维护公共歌词索引。</p></details><details><summary>NotchMuse Mac 应用与手动下载 LRC 有什么不同？</summary><p>如果你在 Mac 上使用 Spotify、Apple Music、网易云音乐、QQ 音乐或汽水音乐听歌，NotchMuse 无需你手动下载歌词文件，它通过 macOS 播控接口自动识别当前曲目，并在刘海旁或菜单栏实时滚动显示歌词。</p></details></section>
-        
-        
-      </article>
-      <aside class="guide-toc" aria-label="本页目录"><p class="eyebrow">本页目录</p><a href="#what-is-lrc">什么是 LRC 同步歌词文件？</a><a href="#how-to-use">如何在播放器中使用</a><a href="#auto-macos">macOS 自动同步歌词</a><a href="#questions">常见问题</a></aside>
-    </div>
-
-    <section class="section wrap guide-related" aria-labelledby="related-title"><p class="eyebrow">继续了解</p><h2 id="related-title">找到适合你的歌词显示方式。</h2><div class="guide-card-grid"><a class="guide-card" href="/zh/menu-bar-lyrics/"><h3>Mac 菜单栏歌词<span aria-hidden="true">↗</span></h3><p>在 macOS 顶部状态栏实时显示同步歌词。</p></a><a class="guide-card" href="/zh/spotify-lyrics-mac/"><h3>Spotify 桌面歌词<span aria-hidden="true">↗</span></h3><p>使用其他应用时，继续查看 Spotify 同步歌词。</p></a><a class="guide-card" href="/zh/best-macbook-notch-apps/"><h3>MacBook 刘海软件推荐<span aria-hidden="true">↗</span></h3><p>客观对比主流 MacBook 刘海实用工具。</p></a><a class="guide-card" href="/zh/floating-lyrics-mac/"><h3>Mac 桌面悬浮歌词<span aria-hidden="true">↗</span></h3><p>支持点击穿透与位置锁定的自由悬浮浮层。</p></a></div></section>
-    <section class="closing"><div class="wrap"><p class="eyebrow">让音乐融入你的节奏</p><h2>在你的 Mac 上试试看。</h2><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="footer">下载 Mac 版 <span aria-hidden="true">↗</span></a><p class="fine">NotchMuse v0.8.5 · macOS 14+ · Apple 芯片</p></div></section>
   </main>
-  <footer class="site-footer wrap"><a class="brand" href="/zh/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="页脚导航"><a href="/zh/#guides">使用指南</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="/zh/#privacy">隐私</a><button class="footer-link-btn" type="button" data-analytics-settings hidden>统计设置</button></nav><p>© NotchMuse · 让每一天的音乐体验更自在。</p></footer>
-  <aside class="analytics-consent" data-analytics-consent role="region" aria-labelledby="consent-title" hidden>
-    <div><strong id="consent-title">允许官网统计吗？</strong><p>经你同意，Google Analytics 统计访问和下载按钮点击。选择不会影响应用或下载。<a href="/zh/#privacy">隐私说明</a></p></div>
-    <div class="consent-actions"><button type="button" class="language-toggle" data-consent-reject>拒绝统计</button><button type="button" class="button button-small" data-consent-accept>同意统计</button><button type="button" class="language-toggle" data-consent-close hidden>关闭</button></div>
-  </aside>
-  <script src="/analytics.js?v=1" defer></script>
-  <script src="/lyrics-downloader/app.js?v=2" defer></script>
+  <footer class="site-footer wrap"><a class="brand" href="/zh/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="页脚导航"><a href="/zh/lrc-tools/">LRC 工具</a><a href="/zh/compatible-players/">兼容播放器</a><a href="/zh/windows/">Windows 版</a></nav><p>© NotchMuse</p></footer>
 </body>
 </html>

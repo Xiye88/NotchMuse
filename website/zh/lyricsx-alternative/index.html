@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://notchmuse.com/assets/media/status-bar-poster.webp">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/guides.css?v=3">
+  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/guides.css?v=4">
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "NotchMuse", "item": "https://notchmuse.com/zh/"}, {"@type": "ListItem", "position": 2, "name": "LyricsX 替代选择", "item": "https://notchmuse.com/zh/lyricsx-alternative/"}]}</script>
   <script type="application/ld+json">
 {
@@ -54,7 +54,7 @@
     <a class="brand" href="/zh/" aria-label="NotchMuse 首页"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
     <nav aria-label="主导航">
       <a class="nav-desktop-only" href="/zh/#guides">使用指南</a>
-      <a class="nav-desktop-only" href="/zh/lyrics-downloader/">歌词下载</a>
+      <a class="nav-desktop-only" href="/zh/lrc-tools/">LRC 工具</a>
       <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav">下载</a>
       <a class="language-toggle" id="language-toggle" href="/lyricsx-alternative/" lang="en" aria-label="Switch to English"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>English</span></a>
     </nav>
@@ -68,6 +68,7 @@
       </div>
       <figure class="guide-figure"><div class="live-demo" data-demo><img class="demo-poster" src="/assets/media/status-bar-poster.webp" width="1920" height="1080" alt="NotchMuse 菜单栏模式，使用 Spotify 录制；这不是两款应用的性能对测。"><video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"><source data-src="/assets/media/status-bar-demo.webm" type="video/webm"><source data-src="/assets/media/status-bar-demo.mp4" type="video/mp4"></video></div><figcaption>NotchMuse 菜单栏模式，使用 Spotify 录制；这不是两款应用的性能对测。</figcaption></figure>
     </section>
+    <div class="wrap"><p class="cross-os-banner"><span>正在使用 Windows？NotchMuse Windows 版同样提供点击穿透悬浮与任务栏歌词。</span><a href="/zh/windows/">查看 NotchMuse Windows 版 →</a></p></div>
     <div class="guide-layout wrap">
       <article id="guide-content" class="guide-content" tabindex="-1">
         <section id="comparison" class="guide-section"><h2>NotchMuse 与 LyricsX 功能对比</h2><div class="guide-table-scroll"><table><caption>功能与系统要求概览</caption><thead><tr><th scope="col">项目</th><th scope="col">NotchMuse</th><th scope="col">LyricsX</th></tr></thead><tbody><tr><th scope="row">歌词显示</th><td>菜单栏，以及刘海附近或 Dock 上方的浮层。</td><td>桌面与菜单栏，可调整字体、颜色和位置。</td></tr><tr><th scope="row">Mac 要求</th><td>macOS 14+、Apple 芯片，不支持 Intel。</td><td>README 标明 macOS 10.11+；这不代表已经验证所有当前系统与芯片。</td></tr><tr><th scope="row">播放器选择</th><td>五个桌面播放器：Spotify、Apple Music、网易云、QQ 音乐与汽水音乐；自动检测或手动选择。</td><td>README 提供支持播放器列表链接，可按自己的播放器核对。</td></tr><tr><th scope="row">歌词文件</th><td>本次核对的公开文档尚未证实 LRC/LRCX 导入导出流程。</td><td>README 说明支持拖放导入导出歌词文件，并介绍 LRCX。</td></tr><tr><th scope="row">歌词交互</th><td>本指南尚未证实点击歌词跳转播放进度的流程。</td><td>README 说明双击歌词行可跳转，也可调整歌词偏移。</td></tr><tr><th scope="row">获取方式</th><td>直接下载 DMG；尚无 Developer ID 签名及 Apple 公证，首次打开可能需要确认。</td><td>项目列出 Homebrew、Mac App Store 与 Release 下载，当前可用性请以原始入口为准。</td></tr></tbody></table></div></section><section id="choose" class="guide-section"><h2>哪些情况可以考虑 NotchMuse</h2><p>如果你使用符合要求的 Apple 芯片 Mac，想要本页演示的菜单栏、刘海附近或 Dock 上方显示方式，可以考虑 NotchMuse。下载前可先看<a href="/zh/menu-bar-lyrics/">菜单栏指南</a>和<a href="/zh/macbook-notch-lyrics/">浮层位置说明</a>。</p><p>如果 LyricsX 已满足你的需求，是否切换完全由你决定。依赖歌词文件导入导出、LRCX 或点击歌词跳转时，不要假定所有功能可以直接替代，应先保留现有工作流并逐项核实。</p></section><section id="try" class="guide-section"><h2>先试用，再决定是否切换</h2><ol><li>确认系统和芯片要求，下载 NotchMuse 并按首次打开说明安装。</li><li>使用同一个音乐播放器，选择几首熟悉的歌曲，检查曲目读取、歌词匹配和想要的显示位置。</li><li>两款应用同时显示歌词时，可暂时关闭其中一个歌词显示，再判断可读性。</li><li>保留原有歌词文件和设置。本指南不提供自动导入 LyricsX 数据或迁移的工具。</li></ol><p>几首歌能匹配，不足以证明整体曲库覆盖更好。不同录音与歌词服务可能返回不同结果，请用自己实际常听的音乐比较。</p></section><section id="troubleshooting" class="guide-section"><h2>如果你是因为 LyricsX 出现问题而来</h2><p>先区分是播放器连接问题，还是歌词服务缺少匹配。可以按具体症状查看 LyricsX 文档与问题记录。本页不诊断你的安装环境，也不声称 LyricsX 已失效、停止维护或不兼容所有新 Mac。</p><p>替代工具可以提供不同的显示体验，但它自己的歌词服务缺少歌曲时，同样不能保证匹配。建议结合下方原始资料判断，而不是依赖未经核实的“最佳替代品”结论。</p></section>

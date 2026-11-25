@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b101a">
   <meta name="description" content="Show synced lyrics on your Mac desktop or in the menu bar. Works with Spotify, Apple Music and more. Free to download. No account required.">
-  <title>NotchMuse — Desktop &amp; Menu Bar Lyrics for Mac</title>
+  <title>NotchMuse — Synced Desktop Lyrics for Mac and Windows</title>
   <link rel="canonical" href="https://notchmuse.com/">
   <link rel="alternate" hreflang="en" href="https://notchmuse.com/">
   <link rel="alternate" hreflang="zh-Hans" href="https://notchmuse.com/zh/">
   <link rel="alternate" hreflang="x-default" href="https://notchmuse.com/">
-  <meta property="og:title" content="NotchMuse — Desktop &amp; Menu Bar Lyrics for Mac">
+  <meta property="og:title" content="NotchMuse — Synced Desktop Lyrics for Mac and Windows">
   <meta property="og:description" content="Show synced lyrics on your Mac desktop or in the menu bar. Works with Spotify, Apple Music and more. Free to download. No account required.">
   <meta property="og:url" content="https://notchmuse.com/">
   <meta property="og:type" content="website">
@@ -18,13 +18,13 @@
   <meta property="og:image" content="https://notchmuse.com/assets/real-notch-mode.png">
   <meta property="og:image:alt" content="NotchMuse synced lyrics near the Mac notch">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="NotchMuse — Desktop &amp; Menu Bar Lyrics for Mac">
+  <meta name="twitter:title" content="NotchMuse — Synced Desktop Lyrics for Mac and Windows">
   <meta name="twitter:description" content="Show synced lyrics on your Mac desktop or in the menu bar. Works with Spotify, Apple Music and more. Free to download. No account required.">
   <meta name="twitter:image" content="https://notchmuse.com/assets/real-notch-mode.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/guides.css?v=3">
+  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/guides.css?v=4">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -32,7 +32,7 @@
   "name": "NotchMuse",
   "url": "https://notchmuse.com/",
   "inLanguage": "en",
-  "operatingSystem": "macOS 14 or later",
+  "operatingSystem": "macOS 14 or later, Windows 10/11 (Preview Coming Soon)",
   "applicationCategory": "MultimediaApplication",
   "offers": {
     "@type": "Offer",
@@ -52,9 +52,9 @@
   <header class="site-header wrap">
     <a class="brand" href="#top" aria-label="NotchMuse home"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
     <nav aria-label="Main navigation">
-      <a class="nav-desktop-only" href="https://github.com/Xiye88/NotchMuse">GitHub</a>
-      <a class="nav-desktop-only" href="#modes">Modes</a>
-      <a href="/lyrics-downloader/">Lyrics Tool</a>
+      <a class="nav-desktop-only" href="/compatible-players/">Players</a>
+      <a class="nav-desktop-only" href="/windows/">Windows</a>
+      <a href="/lrc-tools/">LRC Tools</a>
       <a class="nav-desktop-only" href="#faq">FAQ</a>
       <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav"><span>Download</span></a>
       <a class="language-toggle" id="language-toggle" href="/zh/" lang="zh-Hans" aria-label="Switch to Simplified Chinese"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>简体中文</span></a>
@@ -65,15 +65,16 @@
     <section class="hero wrap">
       <div class="hero-copy">
         <p class="eyebrow">MUSIC BELONGS IN YOUR FLOW</p>
-        <h1>Live lyrics for your Mac.</h1>
-        <p class="lead">Keep lyrics in view while you work. Supports Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music.</p>
-        <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="hero"><span>Download for Mac</span> <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#modes"><span>See how it works</span></a></div>
-        <p class="fine">NotchMuse v0.8.5 · macOS 14+ · Apple silicon</p>
+        <h1>Synced Desktop Lyrics for Mac and Windows</h1>
+        <p class="lead">Keep live lyrics in view while you work—around the MacBook notch, in the menu bar, or as a click-through overlay across 36+ music players.</p>
+        <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="hero"><span>Download for Mac</span> <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="/windows/"><span>Windows Preview</span> <span aria-hidden="true">→</span></a></div>
+        <p class="fine">NotchMuse v0.8.5 (Build 83) · macOS 14+ (Apple silicon) · Windows 11/10 Coming Soon</p>
       </div>
       <figure class="hero-visual live-showcase">
         <div class="demo-tabs" role="tablist" aria-label="Lyric display mode">
           <button id="status-tab" type="button" role="tab" aria-selected="true" aria-controls="status-panel" data-demo-tab>Status Bar</button>
           <button id="notch-tab" type="button" role="tab" aria-selected="false" aria-controls="notch-panel" tabindex="-1" data-demo-tab>Notch</button>
+          <button id="v09-tab" type="button" role="tab" aria-selected="false" aria-controls="v09-panel" tabindex="-1" data-demo-tab>v0.9 Immersive</button>
         </div>
         <div id="status-panel" role="tabpanel" aria-labelledby="status-tab">
           <div class="live-demo" data-demo>
@@ -93,20 +94,38 @@
             </video>
           </div>
         </div>
-        <figcaption>Real playback on macOS · Recorded with Spotify</figcaption>
+        <div id="v09-panel" role="tabpanel" aria-labelledby="v09-tab" hidden>
+          <div class="recording-slot" role="img" aria-label="16:9 recording slot for v0.9 Vinyl Studio UI and Immersive Lyrics">
+            <span class="recording-badge">v0.9 Recording Slot · 16:9</span>
+            <strong>New Vinyl Studio UI &amp; Immersive Lyrics Demo</strong>
+            <p>Reserved for the v0.9 screen recording: click-to-seek lyrics, edge-to-edge transport bar, and 6 theme presets.</p>
+            <div class="recording-specs">
+              <span>1920 × 1080 (16:9)</span>
+              <span>60 fps · MP4 / WebM</span>
+              <span>10–15s loop</span>
+            </div>
+          </div>
+        </div>
+        <figcaption>Real playback on macOS · v0.9 16:9 showcase slot ready (1920×1080)</figcaption>
       </figure>
     </section>
 
     <section class="section wrap players" aria-labelledby="players-title">
-      <h2 id="players-title">Your favorite players, supported.</h2>
-      <p class="section-intro">Choose a player. Keep the lyrics in view.</p>
-      <ul class="player-list">
-        <li><a href="/spotify-lyrics-mac/"><img class="player-icon" src="/assets/players/spotify.png" alt=""><span><strong>Spotify</strong><small>Supported</small></span></a></li>
-        <li><a href="/apple-music-desktop-lyrics-mac/"><img class="player-icon" src="/assets/players/apple-music.png" alt=""><span><strong>Apple Music</strong><small>Supported</small></span></a></li>
-        <li><a href="/netease-cloud-music-lyrics-mac/"><img class="player-icon" src="/assets/players/netease.png" alt=""><span><strong>NetEase Cloud Music</strong><small>Supported</small></span></a></li>
-        <li><a href="/qq-music-lyrics-mac/"><img class="player-icon" src="/assets/players/qq-music.jpg" alt=""><span><strong>QQ Music</strong><small>Supported</small></span></a></li>
-        <li><a href="/soda-music-lyrics-mac/"><img class="player-icon" src="/assets/players/soda-music.jpg" alt=""><span><strong>Soda Music</strong><small>Supported</small></span></a></li>
-      </ul>
+      <h2 id="players-title">36+ music players, ready out of the box.</h2>
+      <p class="section-intro">Mainstream streaming, open-source clients, audiophile &amp; NAS libraries, and web players—all synced cleanly.</p>
+      <div class="marquee-wall" aria-label="36+ supported music players wall">
+        <div class="marquee-track marquee-track-fwd">
+          <div class="marquee-group"><a class="marquee-chip" href="/spotify-lyrics-mac/"><img src="/assets/players/spotify.png" width="24" height="24" alt="" loading="lazy"><strong>Spotify</strong></a><a class="marquee-chip" href="/apple-music-desktop-lyrics-mac/"><img src="/assets/players/apple-music.png" width="24" height="24" alt="" loading="lazy"><strong>Apple Music</strong></a><a class="marquee-chip" href="/compatible-players/#youtube-music"><span class="marquee-badge" aria-hidden="true">YT</span><strong>YouTube Music</strong></a><a class="marquee-chip" href="/netease-cloud-music-lyrics-mac/"><img src="/assets/players/netease.png" width="24" height="24" alt="" loading="lazy"><strong>NetEase Cloud Music</strong></a><a class="marquee-chip" href="/qq-music-lyrics-mac/"><img src="/assets/players/qq-music.jpg" width="24" height="24" alt="" loading="lazy"><strong>QQ Music</strong></a><a class="marquee-chip" href="/soda-music-lyrics-mac/"><img src="/assets/players/soda-music.jpg" width="24" height="24" alt="" loading="lazy"><strong>Soda Music</strong></a><a class="marquee-chip" href="/compatible-players/#kugou"><span class="marquee-badge" aria-hidden="true">KG</span><strong>Kugou Music</strong></a><a class="marquee-chip" href="/compatible-players/#kuwo"><span class="marquee-badge" aria-hidden="true">KW</span><strong>Kuwo Music</strong></a><a class="marquee-chip" href="/compatible-players/#migu"><span class="marquee-badge" aria-hidden="true">MG</span><strong>Migu Music</strong></a><a class="marquee-chip" href="/compatible-players/#bodian"><span class="marquee-badge" aria-hidden="true">BD</span><strong>Bodian Music</strong></a><a class="marquee-chip" href="/compatible-players/#qianqian"><span class="marquee-badge" aria-hidden="true">QQ</span><strong>Qianqian Music</strong></a><a class="marquee-chip" href="/compatible-players/#lx-music"><span class="marquee-badge" aria-hidden="true">LX</span><strong>LX Music</strong></a><a class="marquee-chip" href="/compatible-players/#yesplaymusic"><span class="marquee-badge" aria-hidden="true">YP</span><strong>YesPlayMusic</strong></a><a class="marquee-chip" href="/compatible-players/#algermusic"><span class="marquee-badge" aria-hidden="true">AG</span><strong>AlgerMusicPlayer</strong></a><a class="marquee-chip" href="/compatible-players/#listen1"><span class="marquee-badge" aria-hidden="true">L1</span><strong>Listen 1</strong></a><a class="marquee-chip" href="/compatible-players/#splayer"><span class="marquee-badge" aria-hidden="true">SL</span><strong>SPlayer</strong></a><a class="marquee-chip" href="/compatible-players/#tidal"><span class="marquee-badge" aria-hidden="true">TD</span><strong>TIDAL</strong></a><a class="marquee-chip" href="/compatible-players/#qobuz"><span class="marquee-badge" aria-hidden="true">QB</span><strong>Qobuz</strong></a><a class="marquee-chip" href="/compatible-players/#amazon-music"><span class="marquee-badge" aria-hidden="true">AZ</span><strong>Amazon Music</strong></a></div>
+          <div class="marquee-group" aria-hidden="true"><a class="marquee-chip" href="/spotify-lyrics-mac/" tabindex="-1"><img src="/assets/players/spotify.png" width="24" height="24" alt="" loading="lazy"><strong>Spotify</strong></a><a class="marquee-chip" href="/apple-music-desktop-lyrics-mac/" tabindex="-1"><img src="/assets/players/apple-music.png" width="24" height="24" alt="" loading="lazy"><strong>Apple Music</strong></a><a class="marquee-chip" href="/compatible-players/#youtube-music" tabindex="-1"><span class="marquee-badge" aria-hidden="true">YT</span><strong>YouTube Music</strong></a><a class="marquee-chip" href="/netease-cloud-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/netease.png" width="24" height="24" alt="" loading="lazy"><strong>NetEase Cloud Music</strong></a><a class="marquee-chip" href="/qq-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/qq-music.jpg" width="24" height="24" alt="" loading="lazy"><strong>QQ Music</strong></a><a class="marquee-chip" href="/soda-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/soda-music.jpg" width="24" height="24" alt="" loading="lazy"><strong>Soda Music</strong></a><a class="marquee-chip" href="/compatible-players/#kugou" tabindex="-1"><span class="marquee-badge" aria-hidden="true">KG</span><strong>Kugou Music</strong></a><a class="marquee-chip" href="/compatible-players/#kuwo" tabindex="-1"><span class="marquee-badge" aria-hidden="true">KW</span><strong>Kuwo Music</strong></a><a class="marquee-chip" href="/compatible-players/#migu" tabindex="-1"><span class="marquee-badge" aria-hidden="true">MG</span><strong>Migu Music</strong></a><a class="marquee-chip" href="/compatible-players/#bodian" tabindex="-1"><span class="marquee-badge" aria-hidden="true">BD</span><strong>Bodian Music</strong></a><a class="marquee-chip" href="/compatible-players/#qianqian" tabindex="-1"><span class="marquee-badge" aria-hidden="true">QQ</span><strong>Qianqian Music</strong></a><a class="marquee-chip" href="/compatible-players/#lx-music" tabindex="-1"><span class="marquee-badge" aria-hidden="true">LX</span><strong>LX Music</strong></a><a class="marquee-chip" href="/compatible-players/#yesplaymusic" tabindex="-1"><span class="marquee-badge" aria-hidden="true">YP</span><strong>YesPlayMusic</strong></a><a class="marquee-chip" href="/compatible-players/#algermusic" tabindex="-1"><span class="marquee-badge" aria-hidden="true">AG</span><strong>AlgerMusicPlayer</strong></a><a class="marquee-chip" href="/compatible-players/#listen1" tabindex="-1"><span class="marquee-badge" aria-hidden="true">L1</span><strong>Listen 1</strong></a><a class="marquee-chip" href="/compatible-players/#splayer" tabindex="-1"><span class="marquee-badge" aria-hidden="true">SL</span><strong>SPlayer</strong></a><a class="marquee-chip" href="/compatible-players/#tidal" tabindex="-1"><span class="marquee-badge" aria-hidden="true">TD</span><strong>TIDAL</strong></a><a class="marquee-chip" href="/compatible-players/#qobuz" tabindex="-1"><span class="marquee-badge" aria-hidden="true">QB</span><strong>Qobuz</strong></a><a class="marquee-chip" href="/compatible-players/#amazon-music" tabindex="-1"><span class="marquee-badge" aria-hidden="true">AZ</span><strong>Amazon Music</strong></a></div>
+        </div>
+        <div class="marquee-track marquee-track-rev">
+          <div class="marquee-group"><a class="marquee-chip" href="/compatible-players/#deezer"><span class="marquee-badge" aria-hidden="true">DZ</span><strong>Deezer</strong></a><a class="marquee-chip" href="/compatible-players/#cider"><span class="marquee-badge" aria-hidden="true">CD</span><strong>Cider</strong></a><a class="marquee-chip" href="/compatible-players/#plexamp"><span class="marquee-badge" aria-hidden="true">PX</span><strong>Plexamp</strong></a><a class="marquee-chip" href="/compatible-players/#roon"><span class="marquee-badge" aria-hidden="true">RN</span><strong>Roon</strong></a><a class="marquee-chip" href="/compatible-players/#foobar2000"><span class="marquee-badge" aria-hidden="true">FB</span><strong>foobar2000</strong></a><a class="marquee-chip" href="/compatible-players/#musicbee"><span class="marquee-badge" aria-hidden="true">MB</span><strong>MusicBee</strong></a><a class="marquee-chip" href="/compatible-players/#audirvana"><span class="marquee-badge" aria-hidden="true">AU</span><strong>Audirvana</strong></a><a class="marquee-chip" href="/compatible-players/#swinsian"><span class="marquee-badge" aria-hidden="true">SW</span><strong>Swinsian</strong></a><a class="marquee-chip" href="/compatible-players/#vox"><span class="marquee-badge" aria-hidden="true">VX</span><strong>VOX</strong></a><a class="marquee-chip" href="/compatible-players/#pine-player"><span class="marquee-badge" aria-hidden="true">PP</span><strong>Pine Player</strong></a><a class="marquee-chip" href="/compatible-players/#cog"><span class="marquee-badge" aria-hidden="true">CG</span><strong>Cog</strong></a><a class="marquee-chip" href="/compatible-players/#feishin"><span class="marquee-badge" aria-hidden="true">FS</span><strong>Feishin</strong></a><a class="marquee-chip" href="/compatible-players/#supersonic"><span class="marquee-badge" aria-hidden="true">SS</span><strong>Supersonic</strong></a><a class="marquee-chip" href="/compatible-players/#soundcloud"><span class="marquee-badge" aria-hidden="true">SC</span><strong>SoundCloud</strong></a><a class="marquee-chip" href="/compatible-players/#bandcamp"><span class="marquee-badge" aria-hidden="true">BC</span><strong>Bandcamp</strong></a><a class="marquee-chip" href="/compatible-players/#web-players"><span class="marquee-badge" aria-hidden="true">WB</span><strong>Browser Web Players</strong></a><a class="marquee-chip" href="/compatible-players/#iina"><span class="marquee-badge" aria-hidden="true">II</span><strong>IINA</strong></a><a class="marquee-chip" href="/compatible-players/#vlc"><span class="marquee-badge" aria-hidden="true">VL</span><strong>VLC</strong></a><a class="marquee-chip" href="/compatible-players/#bilibili"><span class="marquee-badge" aria-hidden="true">BL</span><strong>Bilibili</strong></a></div>
+          <div class="marquee-group" aria-hidden="true"><a class="marquee-chip" href="/compatible-players/#deezer" tabindex="-1"><span class="marquee-badge" aria-hidden="true">DZ</span><strong>Deezer</strong></a><a class="marquee-chip" href="/compatible-players/#cider" tabindex="-1"><span class="marquee-badge" aria-hidden="true">CD</span><strong>Cider</strong></a><a class="marquee-chip" href="/compatible-players/#plexamp" tabindex="-1"><span class="marquee-badge" aria-hidden="true">PX</span><strong>Plexamp</strong></a><a class="marquee-chip" href="/compatible-players/#roon" tabindex="-1"><span class="marquee-badge" aria-hidden="true">RN</span><strong>Roon</strong></a><a class="marquee-chip" href="/compatible-players/#foobar2000" tabindex="-1"><span class="marquee-badge" aria-hidden="true">FB</span><strong>foobar2000</strong></a><a class="marquee-chip" href="/compatible-players/#musicbee" tabindex="-1"><span class="marquee-badge" aria-hidden="true">MB</span><strong>MusicBee</strong></a><a class="marquee-chip" href="/compatible-players/#audirvana" tabindex="-1"><span class="marquee-badge" aria-hidden="true">AU</span><strong>Audirvana</strong></a><a class="marquee-chip" href="/compatible-players/#swinsian" tabindex="-1"><span class="marquee-badge" aria-hidden="true">SW</span><strong>Swinsian</strong></a><a class="marquee-chip" href="/compatible-players/#vox" tabindex="-1"><span class="marquee-badge" aria-hidden="true">VX</span><strong>VOX</strong></a><a class="marquee-chip" href="/compatible-players/#pine-player" tabindex="-1"><span class="marquee-badge" aria-hidden="true">PP</span><strong>Pine Player</strong></a><a class="marquee-chip" href="/compatible-players/#cog" tabindex="-1"><span class="marquee-badge" aria-hidden="true">CG</span><strong>Cog</strong></a><a class="marquee-chip" href="/compatible-players/#feishin" tabindex="-1"><span class="marquee-badge" aria-hidden="true">FS</span><strong>Feishin</strong></a><a class="marquee-chip" href="/compatible-players/#supersonic" tabindex="-1"><span class="marquee-badge" aria-hidden="true">SS</span><strong>Supersonic</strong></a><a class="marquee-chip" href="/compatible-players/#soundcloud" tabindex="-1"><span class="marquee-badge" aria-hidden="true">SC</span><strong>SoundCloud</strong></a><a class="marquee-chip" href="/compatible-players/#bandcamp" tabindex="-1"><span class="marquee-badge" aria-hidden="true">BC</span><strong>Bandcamp</strong></a><a class="marquee-chip" href="/compatible-players/#web-players" tabindex="-1"><span class="marquee-badge" aria-hidden="true">WB</span><strong>Browser Web Players</strong></a><a class="marquee-chip" href="/compatible-players/#iina" tabindex="-1"><span class="marquee-badge" aria-hidden="true">II</span><strong>IINA</strong></a><a class="marquee-chip" href="/compatible-players/#vlc" tabindex="-1"><span class="marquee-badge" aria-hidden="true">VL</span><strong>VLC</strong></a><a class="marquee-chip" href="/compatible-players/#bilibili" tabindex="-1"><span class="marquee-badge" aria-hidden="true">BL</span><strong>Bilibili</strong></a></div>
+        </div>
+      </div>
+      <div class="players-cta">
+        <a class="button button-quiet" href="/compatible-players/">Browse all 36+ compatible players →</a>
+      </div>
     </section>
 
     <section class="section wrap" id="modes" aria-labelledby="modes-title">
@@ -177,7 +196,9 @@
             <li><a href="/floating-lyrics-mac/"><strong>Floating lyrics overlay</strong><span>Click-through &amp; lock ↗</span></a></li>
             <li><a href="/best-macbook-notch-apps/"><strong>Best MacBook notch apps</strong><span>Use-case comparison ↗</span></a></li>
             <li><a href="/lyricsx-alternative/"><strong>LyricsX alternative</strong><span>Modern macOS 14+ compare ↗</span></a></li>
-            <li><a href="/lyrics-downloader/"><strong>Free online lyrics downloader</strong><span>Search &amp; download .LRC ↗</span></a></li>
+            <li><a href="/lrc-tools/"><strong>Free local LRC to SRT &amp; Shifter</strong><span>100% in-browser LRC tools ↗</span></a></li>
+            <li><a href="/compatible-players/"><strong>36+ compatible players</strong><span>Full macOS &amp; Windows directory ↗</span></a></li>
+            <li><a href="/windows/"><strong>NotchMuse for Windows</strong><span>Spotify overlay &amp; taskbar preview ↗</span></a></li>
           </ul>
         </div>
       </div>
@@ -185,12 +206,12 @@
 
     <section class="section wrap faq" id="faq" aria-labelledby="faq-title">
       <h2 id="faq-title">Frequently asked questions</h2>
-      <details><summary>Which music players work with NotchMuse?</summary><p>Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music are supported.</p></details>
+      <details><summary>Which music players work with NotchMuse?</summary><p>NotchMuse supports 36+ players including Spotify, Apple Music, YouTube Music, NetEase Cloud Music, QQ Music, Soda Music, foobar2000, MusicBee, TIDAL, Qobuz, Roon, Cider, and browser players. See the <a href="/compatible-players/">full compatible players directory</a>.</p></details>
       <details><summary>What Mac do I need?</summary><p>NotchMuse requires macOS 14 or later and an Apple silicon Mac.</p></details>
       <details><summary>Why does macOS ask for permission?</summary><p>NotchMuse needs Automation permission to read the selected player’s current track and playback position. The left-side menu bar layout also needs Accessibility permission.</p></details>
       <details><summary>Does NotchMuse upload or listen to my audio?</summary><p>No. It does not read or upload audio. Track details may be sent to third-party lyrics providers for matching. No NotchMuse account or telemetry is required.</p></details>
       <details><summary>macOS warned me when I opened NotchMuse. What should I do?</summary><p><span>Direct downloads are not yet notarized, so macOS may ask you to confirm the first launch. Follow the</span> <a href="https://github.com/Xiye88/NotchMuse/blob/main/docs/community/SUPPORT.md"><span>setup help</span></a> <span>for the current steps.</span></p></details>
-      <details><summary>How do automatic updates work?</summary><p>Existing Stable apps can download and install v0.8.5 (Build70) through Settings → General → Check for Updates. With automatic checks enabled, the app offers the release at its next scheduled check; installation needs your confirmation. Beta 3 and earlier need one manual installation. Preview stays separate.</p></details>
+      <details><summary>How do automatic updates work?</summary><p>Existing Stable apps can download and install v0.8.5 (Build 83) through Settings → General → Check for Updates. With automatic checks enabled, the app offers the release at its next scheduled check; installation needs your confirmation. Beta 3 and earlier need one manual installation. Preview stays separate.</p></details>
       <details><summary>How can I support NotchMuse?</summary><p><span>Open Support NotchMuse in the app for WeChat Pay or USDT, or visit the</span> <a href="https://github.com/Xiye88/NotchMuse#support-notchmuse">support page</a>.</p></details>
     </section>
 

@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://notchmuse.com/assets/media/notch-poster.webp">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/guides.css?v=3">
+  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/guides.css?v=4">
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "NotchMuse", "item": "https://notchmuse.com/zh/"}, {"@type": "ListItem", "position": 2, "name": "Spotify 桌面歌词", "item": "https://notchmuse.com/zh/spotify-lyrics-mac/"}]}</script>
   <script type="application/ld+json">
 {
@@ -54,7 +54,7 @@
     <a class="brand" href="/zh/" aria-label="NotchMuse 首页"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
     <nav aria-label="主导航">
       <a class="nav-desktop-only" href="/zh/#guides">使用指南</a>
-      <a class="nav-desktop-only" href="/zh/lyrics-downloader/">歌词下载</a>
+      <a class="nav-desktop-only" href="/zh/lrc-tools/">LRC 工具</a>
       <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav">下载</a>
       <a class="language-toggle" id="language-toggle" href="/spotify-lyrics-mac/" lang="en" aria-label="Switch to English"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>English</span></a>
     </nav>
@@ -68,6 +68,7 @@
       </div>
       <figure class="guide-figure"><div class="live-demo" data-demo><img class="demo-poster" src="/assets/media/notch-poster.webp" width="1920" height="1080" alt="NotchMuse 配合 Spotify 的真实录屏：歌词从顶部移动到 Dock 上方。"><video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"><source data-src="/assets/media/notch-demo.webm" type="video/webm"><source data-src="/assets/media/notch-demo.mp4" type="video/mp4"></video></div><figcaption>NotchMuse 配合 Spotify 的真实录屏：歌词从顶部移动到 Dock 上方。</figcaption></figure>
     </section>
+    <div class="wrap"><p class="cross-os-banner"><span>正在使用 Windows？NotchMuse Windows 版同样提供点击穿透悬浮与任务栏歌词。</span><a href="/zh/windows/">查看 NotchMuse Windows 版 →</a></p></div>
     <div class="guide-layout wrap">
       <article id="guide-content" class="guide-content" tabindex="-1">
         <section id="native" class="guide-section"><h2>先看看 Spotify 自带歌词</h2><p>如果你只想在 Spotify 内阅读歌词，可以先播放一首歌，再点击桌面客户端底部的歌词按钮。歌词是否可用，取决于歌曲和设备。</p><p>当你希望在写作、浏览网页或处理其他工作时继续看到歌词，NotchMuse 提供独立、紧凑的显示区域。它读取桌面播放器的播放信息，再通过第三方歌词服务匹配歌曲。</p></section><section id="setup" class="guide-section"><h2>设置 Spotify 悬浮歌词</h2><ol><li>安装 NotchMuse，在 Mac 上打开 Spotify 桌面客户端并播放歌曲。</li><li>打开 NotchMuse 设置，保留“自动检测”；如果同时运行多个播放器，也可以手动选择 Spotify。</li><li>macOS 请求权限时，允许 NotchMuse 通过“自动化”读取 Spotify 当前曲目和播放进度。</li><li>选择“刘海模式”显示浮层，再调整位置和宽度；希望只占菜单栏空间时，选择“菜单栏”。</li></ol><p>如果曾拒绝权限，可前往“系统设置”→“隐私与安全性”→“自动化”检查。菜单栏左侧布局还需要“辅助功能”权限，并非每种歌词位置都需要它。</p></section><section id="placement" class="guide-section"><h2>选择适合工作习惯的位置</h2><div class="guide-options"><div><h3>菜单栏</h3><p>让当前歌词留在屏幕顶部，尽量少占桌面空间。位置与权限说明见<a href="/zh/menu-bar-lyrics/">菜单栏歌词指南</a>。</p></div><div><h3>独立浮层</h3><p>在“刘海模式”中把歌词放在顶部或 Dock 上方，再调整宽度、颜色和背景。具体效果见<a href="/zh/macbook-notch-lyrics/">刘海与 Dock 歌词指南</a>。</p></div></div></section><section id="missing" class="guide-section"><h2>没有歌词或匹配不对时</h2><p>先确认歌曲正在 Mac 桌面客户端播放，且 NotchMuse 选择了正确的播放器。如果曲目信息不更新，检查“自动化”权限；如果曲目信息会更新，但不显示歌词，可以换一首歌，区分播放器读取问题和歌曲匹配缺失。</p><p>Spotify 自带歌词与 NotchMuse 使用的歌词服务彼此独立，一方有歌词不保证另一方也能匹配。悬浮歌词不能保证修复所有“Spotify 不显示歌词”的情况；本指南也不承诺支持 Spotify 网页播放器。</p></section>

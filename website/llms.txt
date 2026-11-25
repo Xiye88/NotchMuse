@@ -1,27 +1,31 @@
 # NotchMuse
 
-> NotchMuse is a free, lightweight native Swift/AppKit macOS app that displays live synced lyrics around the MacBook notch, in the menu bar, or as a click-through floating desktop overlay. No account or login is required.
+> NotchMuse is a free, lightweight native desktop lyrics app for macOS (Swift/AppKit) and Windows (Preview Coming Soon) that displays live synced lyrics around the MacBook notch, in the menu bar / taskbar, or as a click-through floating desktop overlay across 36+ music players. No account or login is required.
 
 ## Core Facts
 
 - **Price & Account**: Free to download and use; no account or login required.
-- **System Requirements**: macOS 14 or later on Apple silicon Macs (M1 series or later; Intel Macs are not supported).
-- **Supported Players**: Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music desktop apps on macOS (via macOS Now Playing / MediaRemote and Automation where prompted).
+- **Platforms & Requirements**:
+  - **macOS**: macOS 14 or later on Apple silicon Macs (M1 series or later; latest stable v0.8.5 Build 83).
+  - **Windows**: Windows 11 / Windows 10 (64-bit), target installer < 30 MB (Preview Coming Soon).
+- **Supported Players (36+)**: Spotify, Apple Music, YouTube Music, NetEase Cloud Music, QQ Music, Soda Music, Kugou, Kuwo, Migu, Bodian, Qianqian, LX Music, YesPlayMusic, AlgerMusicPlayer, Listen 1, SPlayer, TIDAL, Qobuz, Amazon Music, Deezer, Cider, Plexamp, Roon, foobar2000, MusicBee, Audirvana, Swinsian, VOX, Pine Player, Cog, Feishin, Supersonic, SoundCloud, Bandcamp, browser web players, plus manual-only IINA, VLC, and Bilibili.
 - **Display Modes**:
-  - **Notch Mode**: Dynamic Island–style synced lyrics around the MacBook notch or positioned above the Dock.
-  - **Status Bar Mode**: Compact scrolling lyrics in the macOS menu bar (left-side layout uses Accessibility permission).
+  - **Notch Mode (macOS)**: Dynamic Island–style synced lyrics around the MacBook notch or positioned above the Dock.
+  - **Status Bar / Taskbar Mode**: Compact scrolling lyrics in the macOS menu bar or Windows taskbar.
   - **Floating Overlay**: Click-through, freely positionable desktop overlay with position lock, color presets, opacity, width, and animation speed controls.
-- **Lyrics Sync**: Displays synchronized lyrics from public lyric sources, including word-timed progression when the source provides it.
-- **Privacy**: The macOS app does not read or upload audio and requires no account. Track metadata (such as title and artist) may be sent to third-party lyric providers to fetch matching lyrics.
-- **Trademark Notice**: Dynamic Island and MacBook are trademarks of Apple Inc. NotchMuse is an independent utility and is not affiliated with Apple.
+  - **Immersive Lyrics View**: Full-page synced lyrics with click-to-seek, smooth line sweep, and curated theme presets.
+- **Local LRC Tools**: 100% in-browser LRC to SRT converter, LRC time shifter (±ms / ±s with automatic zero-clamping), SRT to LRC converter, and plain-text extractor. Zero file uploads.
+- **Privacy**: The desktop app does not read or upload audio and requires no account. Track metadata (title and artist) may be sent to lyrics providers to find a match.
 - **Latest Download**: https://github.com/Xiye88/NotchMuse/releases/latest
 - **GitHub Repository**: https://github.com/Xiye88/NotchMuse
 - **Support**: support@notchmuse.com
 
 ## English Pages
 
-- [NotchMuse Home](https://notchmuse.com/): Product overview, live macOS recordings, installation steps, and FAQ.
-- [Free Online Lyrics Downloader](https://notchmuse.com/lyrics-downloader/): Search and download synced `.lrc` or plain `.txt` lyric files (lyrics text only, powered by public LRCLIB).
+- [NotchMuse Home](https://notchmuse.com/): Dual-platform product overview (Mac & Windows), 36+ player marquee, live recordings, installation steps, and FAQ.
+- [NotchMuse for Windows](https://notchmuse.com/windows/): Synced desktop lyrics for Windows 11/10, Spotify lyrics overlay workflow, taskbar mode, and preview download slot.
+- [36+ Compatible Music Players](https://notchmuse.com/compatible-players/): Full filterable directory of 36+ supported macOS and Windows music players.
+- [Free Local LRC Tools](https://notchmuse.com/lrc-tools/): 100% in-browser LRC to SRT converter, LRC time shifter, SRT to LRC, and plain-text extractor.
 - [Best MacBook Notch Apps](https://notchmuse.com/best-macbook-notch-apps/): Objective use-case comparison of NotchMuse, Boring Notch, NotchNook, and Alcove.
 - [Menu Bar Lyrics for Mac](https://notchmuse.com/menu-bar-lyrics/): Setup, placement, width, and permissions for Status Bar Mode.
 - [Spotify Lyrics on Mac](https://notchmuse.com/spotify-lyrics-mac/): Live synced Spotify lyrics in the menu bar, notch, or floating overlay.
@@ -36,8 +40,10 @@
 
 ## Simplified Chinese Pages (简体中文)
 
-- [NotchMuse 中文首页](https://notchmuse.com/zh/): 产品介绍、macOS 实机演示、安装指引与常见问题。
-- [在线歌词下载器](https://notchmuse.com/zh/lyrics-downloader/): 免费在线搜索并下载 `.lrc` 时间轴同步歌词与 `.txt` 纯文本歌词（仅歌词文本，基于公共 LRCLIB）。
+- [NotchMuse 中文首页](https://notchmuse.com/zh/): Mac 与 Windows 双端产品介绍、36+ 播放器滚动墙、实机演示、安装指引与常见问题。
+- [NotchMuse Windows 版](https://notchmuse.com/zh/windows/): Windows 11/10 同步桌面歌词、Spotify 悬浮歌词实操与任务栏歌词预告。
+- [36+ 兼容音乐播放器目录](https://notchmuse.com/zh/compatible-players/): 完整可筛选的 macOS 与 Windows 36+ 款兼容播放器清单。
+- [免费纯本地 LRC 工具箱](https://notchmuse.com/zh/lrc-tools/): 100% 浏览器纯本地 LRC 转 SRT、LRC 时间轴偏移、SRT 转 LRC 与纯文本提取工具。
 - [MacBook 刘海软件推荐与对比](https://notchmuse.com/zh/best-macbook-notch-apps/): 客观对比 NotchMuse、Boring Notch、NotchNook 与 Alcove。
 - [Mac 菜单栏歌词](https://notchmuse.com/zh/menu-bar-lyrics/): 菜单栏模式设置、显示宽度与权限说明。
 - [Spotify Mac 桌面歌词](https://notchmuse.com/zh/spotify-lyrics-mac/): 在 Mac 桌面、刘海旁与菜单栏实时显示 Spotify 同步歌词。

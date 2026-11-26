@@ -7,6 +7,8 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Forms = System.Windows.Forms;
 
@@ -80,6 +82,7 @@ public partial class MainWindow : Window
         RegisterHotKey(windowHandle, HotkeyId, ModControl | ModAlt, (uint)Forms.Keys.L);
         media.Changed += OnMediaChanged; media.Error += OnMediaError;
         ApplyTheme(); SetMode(mode); frameTimer.Start(); fullscreenTimer.Start();
+        StartVisualMotion();
         try { await media.StartAsync(); } catch (Exception ex) when (ex is COMException or InvalidOperationException) { StatusLabel.Text = "系统播控暂不可用：" + ex.Message; }
     }
 
@@ -103,6 +106,7 @@ public partial class MainWindow : Window
             var winner = result.Decision.Winner;
             StatusLabel.Text = winner is null ? "歌词跑丢了…" : winner.Provider + " · " + result.Decision.Reason;
             LyricsItems.ItemsSource = winner?.Document.Normalized.Select(l => new LyricView(string.IsNullOrWhiteSpace(l.Text) ? "♪" : l.Text, l.Start)).ToArray();
+            AnimateLyricArrival();
         }
         catch (OperationCanceledException) { }
     }
@@ -120,6 +124,12 @@ public partial class MainWindow : Window
     private async void OnProgressRelease(object sender, System.Windows.Input.MouseButtonEventArgs e) { draggingProgress = false; await media.SeekAsync(ProgressSlider.Value - timeOffset); }
     private void OnProgressChanged(object sender, RoutedPropertyChangedEventArgs<double> e) { }
     private void OnAccentClick(object sender, RoutedEventArgs e) { if (sender is System.Windows.Controls.Button b) { Resources["AccentBrush"] = b.Background; } }
+    private void OnAppearanceClick(object sender, RoutedEventArgs e) => OnNavigate(new System.Windows.Controls.Button { Tag = "Appearance" }, e);
+    private void OnSettingsClick(object sender, RoutedEventArgs e) => OnNavigate(new System.Windows.Controls.Button { Tag = "General" }, e);
+    private void OnSidebarToggle(object sender, RoutedEventArgs e)
+    {
+        SidebarColumn.Width = SidebarColumn.Width.Value > 0 ? new GridLength(0) : new GridLength(224);
+    }
     private void OnNavigate(object sender, RoutedEventArgs e)
     {
         if (sender is not System.Windows.Controls.Button b) return;
@@ -154,6 +164,33 @@ public partial class MainWindow : Window
         else { SidebarColumn.Width = new GridLength(0); Width = 760; Height = 108; PositionWindow(); }
     }
     private void OnModeChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) { if (ModeCombo.SelectedItem is System.Windows.Controls.ComboBoxItem item && Enum.TryParse<DisplayMode>(item.Tag?.ToString(), out var next) && IsLoaded) SetMode(next); }
+    private void StartVisualMotion()
+    {
+        var sweep = new DoubleAnimation
+        {
+            From = 0,
+            To = 500,
+            Duration = TimeSpan.FromSeconds(2.4),
+            RepeatBehavior = RepeatBehavior.Forever
+        };
+        SweepLine.RenderTransform = new TranslateTransform();
+        ((TranslateTransform)SweepLine.RenderTransform).BeginAnimation(TranslateTransform.YProperty, sweep);
+        var rotation = new DoubleAnimation
+        {
+            From = 0,
+            To = 360,
+            Duration = TimeSpan.FromSeconds(18),
+            RepeatBehavior = RepeatBehavior.Forever
+        };
+        VinylRotation.BeginAnimation(RotateTransform.AngleProperty, rotation);
+    }
+    private void AnimateLyricArrival()
+    {
+        var transform = new TranslateTransform(0, 6);
+        LyricsPage.RenderTransform = transform;
+        LyricsPage.BeginAnimation(OpacityProperty, new DoubleAnimation(0.6, 1, TimeSpan.FromSeconds(0.20)));
+        transform.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(6, 0, TimeSpan.FromSeconds(0.20)));
+    }
     private void PositionWindow()
     {
         WindowStartupLocation = WindowStartupLocation.Manual;

@@ -19,13 +19,27 @@
             <Setter Property="Margin" Value="4,0"/><Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="11"/></ControlTemplate></Setter.Value></Setter>
         </Style>
+        <Style x:Key="LyricLineButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#24242A"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid x:Name="WorkspaceRoot">
         <Grid.ColumnDefinitions><ColumnDefinition x:Name="SidebarColumn" Width="224"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-        <Border Grid.Column="0" Background="#17171B" Padding="18,22,16,16">
+        <Border x:Name="SidebarPanel" Grid.Column="0" Background="#17171B" Padding="18,22,16,16">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Top">
-                    <TextBlock Text="NotchMuse" FontSize="22" FontWeight="SemiBold" Foreground="#F7B45D" Margin="0,0,0,24"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                        <TextBlock Text="NotchMuse" FontSize="22" FontWeight="SemiBold" Foreground="#F7B45D"/>
+                        <Button Content="‹" Click="OnSidebarToggle" Style="{StaticResource CapsuleButton}" Margin="12,0,0,0" Padding="7,2"/>
+                    </StackPanel>
                     <Button Content="歌词" Tag="Lyrics" Click="OnNavigate" Style="{StaticResource NavButton}"/>
                     <Button Content="显示" Tag="Display" Click="OnNavigate" Style="{StaticResource NavButton}"/>
                     <Button Content="外观" Tag="Appearance" Click="OnNavigate" Style="{StaticResource NavButton}"/>
@@ -36,6 +50,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,48">
                     <Border Background="#27272C" CornerRadius="50" Width="84" Height="84" HorizontalAlignment="Center" Margin="0,0,0,12">
+                        <Border.RenderTransform><RotateTransform x:Name="VinylRotation"/></Border.RenderTransform>
                         <TextBlock Text="◉" FontSize="46" Foreground="#F7B45D" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <TextBlock x:Name="SidebarTrack" Text="等待播放音乐…" TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
@@ -51,14 +66,19 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="LockButton" Content="锁定" Click="OnLockClick" Style="{StaticResource CapsuleButton}"/>
                     <Button Content="悬浮" Click="OnFloatClick" Style="{StaticResource CapsuleButton}"/>
+                    <Button Content="配色" Click="OnAppearanceClick" Style="{StaticResource CapsuleButton}"/>
+                    <Button Content="设置" Click="OnSettingsClick" Style="{StaticResource CapsuleButton}"/>
                     <Button Content="隐藏" Click="OnHideClick" Style="{StaticResource CapsuleButton}"/>
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="1" x:Name="LyricsPage">
                 <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="4,10,4,10">
-                    <ItemsControl x:Name="LyricsItems"><ItemsControl.ItemTemplate><DataTemplate><Button Content="{Binding DisplayText}" Tag="{Binding Time}" Click="OnLyricClick" HorizontalContentAlignment="Left" Background="Transparent" BorderThickness="0" Foreground="#D7D3D0" FontSize="22" Padding="10,9" Margin="0,1"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+                    <ItemsControl x:Name="LyricsItems"><ItemsControl.ItemTemplate><DataTemplate><Button Content="{Binding DisplayText}" Tag="{Binding Time}" Click="OnLyricClick" HorizontalContentAlignment="Left" Style="{StaticResource LyricLineButton}" Foreground="#D7D3D0" FontSize="22" Padding="10,9" Margin="0,1"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
                 </ScrollViewer>
+                <Border VerticalAlignment="Top" Height="42" IsHitTestVisible="False"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#101013" Offset="0"/><GradientStop Color="#00101013" Offset="1"/></LinearGradientBrush></Border.Background></Border>
+                <Border VerticalAlignment="Bottom" Height="42" IsHitTestVisible="False"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#00101013" Offset="0"/><GradientStop Color="#101013" Offset="1"/></LinearGradientBrush></Border.Background></Border>
+                <Border x:Name="SweepLine" Height="1" Background="#88F7B45D" VerticalAlignment="Top" Opacity="0.7" IsHitTestVisible="False"/>
                 <StackPanel Grid.Row="1" Margin="0,12,0,0">
                     <Slider x:Name="ProgressSlider" Minimum="0" Maximum="1" ValueChanged="OnProgressChanged" PreviewMouseDown="OnProgressGrab" PreviewMouseUp="OnProgressRelease" Height="18"/>
                     <Grid Margin="0,8,0,0"><TextBlock x:Name="StatusLabel" Text="歌词跑丢了…" Foreground="#F7B45D"/><Button x:Name="PlayButton" Content="播放" Click="OnPlayClick" Width="78" Height="30" HorizontalAlignment="Center" Style="{StaticResource CapsuleButton}"/></Grid>

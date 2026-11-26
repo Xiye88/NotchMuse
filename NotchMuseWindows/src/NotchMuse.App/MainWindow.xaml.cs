@@ -2,11 +2,11 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Interop;
 using NotchMuse.Core;
 using NotchMuse.Platform;
 using NotchMuse.Sources;
+using Forms = System.Windows.Forms;
 
 namespace NotchMuse.App;
 public partial class MainWindow : Window
@@ -16,22 +16,42 @@ public partial class MainWindow : Window
     private readonly LyricsEngine engine;
     private CancellationTokenSource? lookup;
     private Track? lastTrack;
-    private bool started;
     private bool closed;
+    private bool locked;
+    private readonly Forms.NotifyIcon tray = new() { Icon = System.Drawing.SystemIcons.Application, Visible = true, Text = "NotchMuse" };
+    private HwndSource? source;
+    private const int HotkeyId = 0x4E4D;
+    private const uint ModAlt = 0x0001;
+    private const uint ModControl = 0x0002;
+    private const uint WmHotkey = 0x0312;
+    private const int GwlExstyle = -20;
+    private const int WsExTransparent = 0x20;
+    private const int WsExLayered = 0x80000;
+    [DllImport("user32.dll")] private static extern bool RegisterHotKey(IntPtr hwnd, int id, uint modifiers, uint key);
+    [DllImport("user32.dll")] private static extern bool UnregisterHotKey(IntPtr hwnd, int id);
+    [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr hwnd, int index);
+    [DllImport("user32.dll")] private static extern int SetWindowLong(IntPtr hwnd, int index, int value);
     [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
     public MainWindow()
     {
         InitializeComponent(); engine = LyricsEngine.Create(client);
-        var profiles = new[] { new PlayerProfile("auto", "自动检测（推荐）", "顶部置顶", []), new PlayerProfile("all", "所有 Windows 系统播控应用", "顶部置顶", []) }.Concat(PlayerCatalog.Players);
-        var view = new ListCollectionView(profiles.ToList()); view.GroupDescriptions.Add(new PropertyGroupDescription("Group"));
-        SourcePicker.GroupStyle.Add(new GroupStyle { HeaderTemplate = (DataTemplate)System.Windows.Markup.XamlReader.Parse("<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'><TextBlock Text='{Binding Name}' FontWeight='Bold' Margin='4,8,4,4'/></DataTemplate>") });
-        SourcePicker.ItemsSource = view; SourcePicker.SelectedValue = "auto";
+        var menu = new Forms.ContextMenuStrip();
+        menu.Items.Add("自由悬浮", null, (_, _) => Show());
+        menu.Items.Add("顶部悬浮岛", null, (_, _) => MoveToTopIsland());
+        menu.Items.Add("锁定穿透", null, (_, _) => ToggleLock());
+        menu.Items.Add("打开主窗口", null, (_, _) => { Show(); Activate(); });
+        menu.Items.Add("退出", null, (_, _) => Close());
+        tray.ContextMenuStrip = menu;
+        tray.DoubleClick += (_, _) => { Show(); Activate(); };
     }
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        var dark = 1; DwmSetWindowAttribute(new WindowInteropHelper(this).Handle, 20, ref dark, sizeof(int));
+        var handle = new WindowInteropHelper(this).Handle;
+        var dark = 1; DwmSetWindowAttribute(handle, 20, ref dark, sizeof(int));
+        source = HwndSource.FromHwnd(handle); source?.AddHook(WindowMessage);
+        RegisterHotKey(handle, HotkeyId, ModControl | ModAlt, (uint)System.Windows.Forms.Keys.L);
         media.Changed += OnMediaChanged; media.Error += OnMediaError;
-        try { await media.StartAsync(); started = true; }
+        try { await media.StartAsync(); }
         catch (Exception ex) when (ex is COMException or InvalidOperationException) { StatusLabel.Text = "系统播控暂不可用：" + ex.Message; }
     }
     private void OnMediaError(string error) => Dispatcher.InvokeAsync(() => StatusLabel.Text = error);
@@ -51,13 +71,37 @@ public partial class MainWindow : Window
             var result = await engine.FindAsync(snapshot.Track, ct);
             if (ct.IsCancellationRequested || closed) return;
             StatusLabel.Text = result.Decision.Winner is { } winner ? winner.Provider + " · " + result.Decision.Reason : "歌词跑丢了，正在黑胶纹路里打捞…";
-            LyricsLabel.Text = result.Decision.Winner is { } c ? string.Join('\n', c.Document.Normalized.Select(l => l.Text)) :
-                string.Join('\n', result.Sources.Select(s => s.Provider + ": " + s.Status + (s.Error is null ? "" : " · " + s.Error)));
+            LyricsLabel.Text = result.Decision.Winner is { } c ? c.Document.Normalized.FirstOrDefault()?.Text ?? "歌词跑丢了…" : "歌词跑丢了…";
         }
         catch (OperationCanceledException) { }
     }
-    private async void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    { if (started && SourcePicker.SelectedValue is string selection) await media.SelectAsync(selection); }
+    private void OnDrag(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    { if (!locked) DragMove(); }
+    private void OnLockClick(object sender, RoutedEventArgs e) => ToggleLock();
+    private void OnSettingsClick(object sender, RoutedEventArgs e) { Show(); Activate(); }
+    private void OnHideClick(object sender, RoutedEventArgs e) => Hide();
+    private void ToggleLock()
+    {
+        locked = !locked; LockButton.Content = locked ? "解锁" : "锁定";
+        var handle = new WindowInteropHelper(this).Handle;
+        var style = GetWindowLong(handle, GwlExstyle);
+        style |= WsExLayered;
+        if (locked) style |= WsExTransparent; else style &= ~WsExTransparent;
+        SetWindowLong(handle, GwlExstyle, style);
+        Capsule.BorderBrush = locked ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x55, 0xFF, 0xB1, 0x5A)) : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x33, 0xF5, 0xA6, 0x23));
+    }
+    private void MoveToTopIsland()
+    {
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        Left = SystemParameters.WorkArea.Left + (SystemParameters.WorkArea.Width - Width) / 2;
+        Top = SystemParameters.WorkArea.Top + 18;
+        Show(); Activate();
+    }
+    private IntPtr WindowMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (message == WmHotkey && wParam.ToInt32() == HotkeyId) { ToggleLock(); handled = true; }
+        return IntPtr.Zero;
+    }
     private void OnClosed(object? sender, EventArgs e)
-    { closed = true; lookup?.Cancel(); lookup?.Dispose(); media.Changed -= OnMediaChanged; media.Error -= OnMediaError; media.Dispose(); client.Dispose(); }
+    { closed = true; lookup?.Cancel(); lookup?.Dispose(); var handle = new WindowInteropHelper(this).Handle; UnregisterHotKey(handle, HotkeyId); source?.RemoveHook(WindowMessage); tray.Visible = false; tray.Dispose(); media.Changed -= OnMediaChanged; media.Error -= OnMediaError; media.Dispose(); client.Dispose(); }
 }

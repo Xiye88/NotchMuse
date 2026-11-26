@@ -1,1 +1,13 @@
-<Application x:Class="NotchMuse.App.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" StartupUri="MainWindow.xaml" />
+<Application x:Class="NotchMuse.App.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" StartupUri="MainWindow.xaml">
+  <Application.Resources>
+    <Style x:Key="CapsuleButton" TargetType="Button">
+      <Setter Property="Background" Value="#221F1F24"/>
+      <Setter Property="Foreground" Value="#D8D5CF"/>
+      <Setter Property="BorderBrush" Value="#33FFFFFF"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="9,4"/>
+      <Setter Property="Margin" Value="3,0,0,0"/>
+      <Setter Property="FontSize" Value="11"/>
+    </Style>
+  </Application.Resources>
+</Application>

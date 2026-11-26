@@ -1,9 +1,17 @@
-<Window x:Class="NotchMuse.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="NotchMuse" Width="840" Height="620" MinWidth="680" MinHeight="520" Background="#141416" Foreground="#F3F2EF" Loaded="OnLoaded" Closed="OnClosed">
-  <Grid Margin="28">
-    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-    <StackPanel><TextBlock Text="NotchMuse" FontSize="25" FontWeight="Bold"/><TextBlock Text="Windows · M1 引擎诊断" Foreground="#9A9AA2" Margin="0,8,0,20"/></StackPanel>
-    <ComboBox x:Name="SourcePicker" Grid.Row="1" DisplayMemberPath="Label" SelectedValuePath="Id" SelectionChanged="OnSelectionChanged" Margin="0,0,0,18"/>
-    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"><StackPanel><TextBlock x:Name="TrackLabel" Text="等待播放音乐…" FontSize="22" TextWrapping="Wrap"/><TextBlock x:Name="StatusLabel" Foreground="#FF8A36" Margin="0,12" TextWrapping="Wrap"/><TextBlock x:Name="LyricsLabel" Foreground="#9A9AA2" FontSize="17" TextWrapping="Wrap"/></StackPanel></ScrollViewer>
-    <TextBlock Grid.Row="3" Text="v0.9.0 · SMTC 事件驱动 · 无需登录" Foreground="#9A9AA2" Margin="0,16,0,0"/>
-  </Grid>
+<Window x:Class="NotchMuse.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="NotchMuse" Width="760" Height="180" MinWidth="420" MinHeight="120" WindowStyle="None" AllowsTransparency="True" Background="Transparent" Foreground="#F3F2EF" Loaded="OnLoaded" Closed="OnClosed" MouseLeftButtonDown="OnDrag">
+  <Border x:Name="Capsule" CornerRadius="28" Background="#E6141416" BorderBrush="#33F5A623" BorderThickness="1" Padding="22,14">
+    <Grid>
+      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+      <StackPanel>
+        <TextBlock x:Name="TrackLabel" Text="等待播放音乐…" FontSize="14" Foreground="#B8B6B2" TextTrimming="CharacterEllipsis"/>
+        <TextBlock x:Name="LyricsLabel" Text="歌词跑丢了…" FontSize="27" FontWeight="SemiBold" Margin="0,5,0,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+        <TextBlock x:Name="StatusLabel" Foreground="#FFB15A" FontSize="11" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+        <Button x:Name="LockButton" Content="锁定" Click="OnLockClick" Style="{StaticResource CapsuleButton}"/>
+        <Button Content="设置" Click="OnSettingsClick" Style="{StaticResource CapsuleButton}"/>
+        <Button Content="×" Click="OnHideClick" Style="{StaticResource CapsuleButton}"/>
+      </StackPanel>
+    </Grid>
+  </Border>
 </Window>

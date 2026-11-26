@@ -1,4 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><OutputType>WinExe</OutputType><UseWPF>true</UseWPF><Version>0.9.0</Version><ApplicationManifest>app.manifest</ApplicationManifest><ServerGarbageCollection>false</ServerGarbageCollection><PublishSingleFile>true</PublishSingleFile><SelfContained>true</SelfContained><RuntimeIdentifier>win-x64</RuntimeIdentifier></PropertyGroup>
+  <PropertyGroup><OutputType>WinExe</OutputType><UseWPF>true</UseWPF><UseWindowsForms>true</UseWindowsForms><Version>0.9.0</Version><ApplicationManifest>app.manifest</ApplicationManifest><ServerGarbageCollection>false</ServerGarbageCollection><PublishSingleFile>true</PublishSingleFile><SelfContained>true</SelfContained><RuntimeIdentifier>win-x64</RuntimeIdentifier></PropertyGroup>
   <ItemGroup><ProjectReference Include="../NotchMuse.Platform/NotchMuse.Platform.csproj" /><ProjectReference Include="../NotchMuse.Sources/NotchMuse.Sources.csproj" /></ItemGroup>
 </Project>

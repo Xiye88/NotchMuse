@@ -34,6 +34,10 @@ enum AppearanceSurfaceColors {
         light: NSColor(calibratedRed: 0.094, green: 0.094, blue: 0.106, alpha: 0.09),
         dark: NSColor.white.withAlphaComponent(0.09)
     )
+    static let hairline = adaptive(
+        light: NSColor.black.withAlphaComponent(0.07),
+        dark: NSColor.white.withAlphaComponent(0.07)
+    )
     static let accent = adaptive(
         light: NSColor(calibratedRed: 0.878, green: 0.427, blue: 0.106, alpha: 1),
         dark: NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1)

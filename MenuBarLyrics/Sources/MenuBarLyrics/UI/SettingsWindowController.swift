@@ -559,6 +559,17 @@ final class SettingsWindowController: NSWindowController {
             controller.window?.contentView?.layoutSubtreeIfNeeded()
             precondition(controller.liveStatusStripView?.isHidden == true, "Live status strip must be hidden on \(hiddenPage.rawValue) tab")
         }
+        // E28: borderless open-canvas sections (zero outer card frame/border)
+        precondition(!controller.cards.isEmpty, "Settings sections must exist")
+        for section in controller.cards {
+            precondition((section.layer?.borderWidth ?? 0) == 0, "Open-canvas sections must have zero outer border")
+            if let surface = section as? AppearanceSurfaceView {
+                precondition(surface.surfaceColor == .clear, "Open-canvas sections must have transparent background")
+            }
+        }
+        if let statusSurface = controller.liveStatusStripView as? AppearanceSurfaceView {
+            precondition(statusSurface.surfaceColor == .clear && (statusSurface.layer?.borderWidth ?? 0) == 0, "Live status strip must be borderless open-canvas")
+        }
         print("Settings interaction self-test passed")
     }
     #endif
@@ -719,7 +730,7 @@ final class SettingsWindowController: NSWindowController {
         notchBackgroundRow = appearanceGrid.row(at: 4)
         notchBackgroundColorRow = appearanceGrid.row(at: 5)
         notchHideOnHoverRow = appearanceGrid.row(at: 7)
-        appearancePage.addArrangedSubview(card(content: cardBody(title: "Appearance", subtitle: "Customize the look of your lyrics.", grid: appearanceGrid, trailing: resetButton(for: .appearance))))
+        appearancePage.addArrangedSubview(card(content: cardBody(title: "Appearance", subtitle: "Customize the look of your lyrics.", grid: appearanceGrid, trailing: resetButton(for: .appearance)), showTopDivider: false))
         appearancePage.addArrangedSubview(quickPresetsCard())
         configure(page: generalPage)
         var generalRows: [[NSView]] = [
@@ -738,11 +749,10 @@ final class SettingsWindowController: NSWindowController {
             generalRows.append([label(L10n.text("Bilingual Lyrics")), bilingualLyricsSwitch])
         }
         let generalGrid = grid(generalRows)
-        generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general))))
+        generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general)), showTopDivider: false))
         let updateHelp = NSTextField(wrappingLabelWithString: L10n.text("Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared."))
-        updateHelp.font = .systemFont(ofSize: 11)
+        updateHelp.font = .systemFont(ofSize: 11.5)
         updateHelp.textColor = .secondaryLabelColor
-        generalPage.addArrangedSubview(updateHelp)
         let checkUpdates = NSButton(title: L10n.text("Check for Updates…"), target: self, action: #selector(checkForUpdates))
         checkUpdates.isEnabled = UpdateController.shared.isAvailable
         let shortVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
@@ -758,9 +768,13 @@ final class SettingsWindowController: NSWindowController {
         updateActionRow.orientation = .horizontal
         updateActionRow.alignment = .centerY
         updateActionRow.spacing = 12
-        generalPage.addArrangedSubview(updateActionRow)
+        let updateSection = NSStackView(views: [updateHelp, updateActionRow])
+        updateSection.orientation = .vertical
+        updateSection.alignment = .leading
+        updateSection.spacing = 12
+        generalPage.addArrangedSubview(card(content: updateSection, showTopDivider: true))
 
-        displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how and where lyrics appear."), grid: displayGrid, trailing: resetButton(for: .display))))
+        displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how and where lyrics appear."), grid: displayGrid, trailing: resetButton(for: .display)), showTopDivider: true))
         freeOrientation.target = self
         freeOrientation.action = #selector(freeOptionsChanged)
         freeLock.target = self
@@ -862,16 +876,16 @@ final class SettingsWindowController: NSWindowController {
         let previewContents = NSStackView(views: [previewHeader, preview])
         previewContents.orientation = .vertical
         previewContents.spacing = 12
-        let previewCard = card(content: previewContents)
+        let previewCard = card(content: previewContents, showTopDivider: false)
         self.previewCard = previewCard
         previewCard.isHidden = selectedPage != .display
-        preview.widthAnchor.constraint(equalTo: previewCard.widthAnchor, constant: -32).isActive = true
+        preview.widthAnchor.constraint(equalTo: previewCard.widthAnchor).isActive = true
         preview.heightAnchor.constraint(equalToConstant: 218).isActive = true
         previewHeader.widthAnchor.constraint(equalTo: preview.widthAnchor).isActive = true
 
         contentStack.orientation = .vertical
         contentStack.alignment = .leading
-        contentStack.spacing = 18
+        contentStack.spacing = 0
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         let statusStrip = makeLiveStatusStrip()
         liveStatusStripView = statusStrip
@@ -937,32 +951,33 @@ final class SettingsWindowController: NSWindowController {
             sidebarExpandButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
             sidebarExpandButton.widthAnchor.constraint(equalToConstant: 24),
             sidebarExpandButton.heightAnchor.constraint(equalToConstant: 24),
-            scrollView.leadingAnchor.constraint(equalTo: sidebarDivider.trailingAnchor, constant: 12),
-            scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+            scrollView.leadingAnchor.constraint(equalTo: sidebarDivider.trailingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
             scrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
             immersiveLyricsView.leadingAnchor.constraint(equalTo: sidebarDivider.trailingAnchor, constant: 12),
             immersiveLyricsView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
             immersiveLyricsView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
             immersiveLyricsView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
-            contentStack.leadingAnchor.constraint(equalTo: document.leadingAnchor),
-            contentStack.topAnchor.constraint(equalTo: document.topAnchor),
-            contentStack.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -8),
-            contentStack.bottomAnchor.constraint(lessThanOrEqualTo: document.bottomAnchor, constant: -16)
+            contentStack.leadingAnchor.constraint(equalTo: document.leadingAnchor, constant: 28),
+            contentStack.topAnchor.constraint(equalTo: document.topAnchor, constant: 6),
+            contentStack.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -28),
+            contentStack.bottomAnchor.constraint(lessThanOrEqualTo: document.bottomAnchor, constant: -24)
         ])
         DispatchQueue.main.async { scrollView.hideIdleScroller() }
     }
 
     private func sectionTitle(_ title: String) -> NSTextField {
         let label = NSTextField(labelWithString: title)
-        label.font = .systemFont(ofSize: 17, weight: .semibold)
+        label.font = .systemFont(ofSize: 15, weight: .semibold)
+        label.textColor = .labelColor
         return label
     }
 
     private func configure(page: NSStackView) {
         page.orientation = .vertical
         page.alignment = .leading
-        page.spacing = 12
+        page.spacing = 0
     }
 
     private func sidebarTitle() -> NSView {
@@ -1011,20 +1026,42 @@ final class SettingsWindowController: NSWindowController {
         return button
     }
 
-    private func card(content: NSView) -> NSView {
+    private func makeHairlineDivider() -> NSView {
+        let line = AppearanceSurfaceView()
+        line.wantsLayer = true
+        line.surfaceColor = AppearanceSurfaceColors.hairline
+        line.surfaceBorderColor = .clear
+        line.layer?.borderWidth = 0
+        line.translatesAutoresizingMaskIntoConstraints = false
+        line.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        return line
+    }
+
+    private func card(content: NSView, showTopDivider: Bool = true) -> NSView {
         let box = AppearanceSurfaceView()
         box.wantsLayer = true
-        box.surfaceColor = AppearanceSurfaceColors.card
-        box.layer?.borderWidth = 0.5
-        box.layer?.cornerRadius = 10
+        box.surfaceColor = .clear
+        box.surfaceBorderColor = .clear
+        box.layer?.borderWidth = 0
+        box.layer?.cornerRadius = 0
         box.addSubview(content)
         content.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            content.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 16),
-            content.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -16),
-            content.topAnchor.constraint(equalTo: box.topAnchor, constant: 14),
-            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -14)
-        ])
+        var constraints: [NSLayoutConstraint] = [
+            content.leadingAnchor.constraint(equalTo: box.leadingAnchor),
+            content.trailingAnchor.constraint(equalTo: box.trailingAnchor),
+            content.topAnchor.constraint(equalTo: box.topAnchor, constant: showTopDivider ? 22 : 16),
+            content.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -22)
+        ]
+        if showTopDivider {
+            let divider = makeHairlineDivider()
+            box.addSubview(divider)
+            constraints.append(contentsOf: [
+                divider.leadingAnchor.constraint(equalTo: box.leadingAnchor),
+                divider.trailingAnchor.constraint(equalTo: box.trailingAnchor),
+                divider.topAnchor.constraint(equalTo: box.topAnchor)
+            ])
+        }
+        NSLayoutConstraint.activate(constraints)
         box.translatesAutoresizingMaskIntoConstraints = false
         cards.append(box)
         return box
@@ -1035,7 +1072,7 @@ final class SettingsWindowController: NSWindowController {
         let body = NSStackView(views: [header, grid])
         body.orientation = .vertical
         body.alignment = .leading
-        body.spacing = 14
+        body.spacing = 16
         header.widthAnchor.constraint(equalTo: grid.widthAnchor).isActive = true
         grid.widthAnchor.constraint(equalTo: body.widthAnchor).isActive = true
         return body
@@ -1043,7 +1080,7 @@ final class SettingsWindowController: NSWindowController {
 
     private func cardHeader(title: String, subtitle: String, trailing: NSView) -> NSStackView {
         let heading = NSTextField(labelWithString: L10n.text(title))
-        heading.font = .systemFont(ofSize: 13.5, weight: .semibold)
+        heading.font = .systemFont(ofSize: 15, weight: .semibold)
         heading.textColor = .labelColor
         heading.setContentCompressionResistancePriority(.required, for: .vertical)
         let header = NSStackView(views: [heading, trailing])
@@ -1736,9 +1773,10 @@ final class SettingsWindowController: NSWindowController {
     private func makeLiveStatusStrip() -> NSView {
         let box = AppearanceSurfaceView()
         box.wantsLayer = true
-        box.surfaceColor = AppearanceSurfaceColors.card
-        box.layer?.cornerRadius = 10
-        box.layer?.borderWidth = 1
+        box.surfaceColor = .clear
+        box.surfaceBorderColor = .clear
+        box.layer?.cornerRadius = 0
+        box.layer?.borderWidth = 0
         box.translatesAutoresizingMaskIntoConstraints = false
 
         liveStatusDot.wantsLayer = true
@@ -1760,22 +1798,28 @@ final class SettingsWindowController: NSWindowController {
         permissionFixButton.isHidden = true
         permissionFixButton.translatesAutoresizingMaskIntoConstraints = false
 
+        let bottomDivider = makeHairlineDivider()
+
         box.addSubview(liveStatusDot)
         box.addSubview(liveStatusLabel)
         box.addSubview(permissionFixButton)
+        box.addSubview(bottomDivider)
         box.setContentHuggingPriority(.required, for: .vertical)
         box.setContentCompressionResistancePriority(.required, for: .vertical)
         NSLayoutConstraint.activate([
             box.heightAnchor.constraint(equalToConstant: 42),
-            liveStatusDot.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
+            liveStatusDot.leadingAnchor.constraint(equalTo: box.leadingAnchor),
             liveStatusDot.centerYAnchor.constraint(equalTo: box.centerYAnchor),
             liveStatusDot.widthAnchor.constraint(equalToConstant: 8),
             liveStatusDot.heightAnchor.constraint(equalToConstant: 8),
             liveStatusLabel.leadingAnchor.constraint(equalTo: liveStatusDot.trailingAnchor, constant: 10),
             liveStatusLabel.trailingAnchor.constraint(lessThanOrEqualTo: permissionFixButton.leadingAnchor, constant: -10),
             liveStatusLabel.centerYAnchor.constraint(equalTo: box.centerYAnchor),
-            permissionFixButton.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
-            permissionFixButton.centerYAnchor.constraint(equalTo: box.centerYAnchor)
+            permissionFixButton.trailingAnchor.constraint(equalTo: box.trailingAnchor),
+            permissionFixButton.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+            bottomDivider.leadingAnchor.constraint(equalTo: box.leadingAnchor),
+            bottomDivider.trailingAnchor.constraint(equalTo: box.trailingAnchor),
+            bottomDivider.bottomAnchor.constraint(equalTo: box.bottomAnchor)
         ])
         return box
     }

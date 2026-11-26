@@ -30,6 +30,10 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="SlimScrollBar" TargetType="ScrollBar">
+            <Setter Property="Width" Value="5"/>
+            <Setter Property="Opacity" Value="0.7"/>
+        </Style>
     </Window.Resources>
     <Grid x:Name="WorkspaceRoot">
         <Grid.ColumnDefinitions><ColumnDefinition x:Name="SidebarColumn" Width="224"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
@@ -74,6 +78,7 @@
             <Grid Grid.Row="1" x:Name="LyricsPage">
                 <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="4,10,4,10">
+                    <ScrollViewer.Resources><Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource SlimScrollBar}"/></ScrollViewer.Resources>
                     <ItemsControl x:Name="LyricsItems"><ItemsControl.ItemTemplate><DataTemplate><Button Content="{Binding DisplayText}" Tag="{Binding Time}" Click="OnLyricClick" HorizontalContentAlignment="Left" Style="{StaticResource LyricLineButton}" Foreground="#D7D3D0" FontSize="22" Padding="10,9" Margin="0,1"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
                 </ScrollViewer>
                 <Border VerticalAlignment="Top" Height="42" IsHitTestVisible="False"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#101013" Offset="0"/><GradientStop Color="#00101013" Offset="1"/></LinearGradientBrush></Border.Background></Border>

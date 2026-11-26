@@ -24,6 +24,9 @@ public partial class MainWindow : Window
     private readonly Forms.NotifyIcon tray = new() { Icon = System.Drawing.SystemIcons.Application, Visible = true, Text = "NotchMuse" };
     private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(41) };
     private readonly DispatcherTimer fullscreenTimer = new() { Interval = TimeSpan.FromSeconds(2) };
+    private readonly DispatcherTimer noLyricsTimer = new() { Interval = TimeSpan.FromSeconds(2.2) };
+    private readonly string[] noLyricsLines = ["歌词跑丢了…", "先听一会儿旋律吧", "这句藏在黑胶纹路里", "正在把歌词捞回来", "换个姿势继续听", "留一点空白给音乐"];
+    private int noLyricsIndex;
     private CancellationTokenSource? lookup;
     private PlaybackSnapshot? snapshot;
     private HwndSource? source;
@@ -44,6 +47,7 @@ public partial class MainWindow : Window
     [DllImport("user32.dll")] private static extern int SetWindowLong(IntPtr hwnd, int index, int value);
     [DllImport("user32.dll")] private static extern IntPtr FindWindow(string? className, string? windowName);
     [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd, out RectNative rect);
+    [DllImport("user32.dll")] private static extern uint GetDpiForWindow(IntPtr hwnd);
     [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int cx, int cy, uint flags);
     [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
@@ -70,6 +74,7 @@ public partial class MainWindow : Window
         tray.DoubleClick += (_, _) => { Show(); Activate(); };
         frameTimer.Tick += (_, _) => RefreshProgress();
         fullscreenTimer.Tick += (_, _) => HideForFullscreenIfNeeded();
+        noLyricsTimer.Tick += (_, _) => StatusLabel.Text = noLyricsLines[noLyricsIndex++ % noLyricsLines.Length];
         SystemParameters.StaticPropertyChanged += (_, _) => Dispatcher.Invoke(ApplyTheme);
         SystemEvents.DisplaySettingsChanged += (_, _) => Dispatcher.Invoke(() => { if (!closed) PositionWindow(); });
     }
@@ -96,7 +101,7 @@ public partial class MainWindow : Window
         TrackLabel.Text = value is null ? "等待播放音乐…" : value.Track.Title + " · " + value.Track.Artist;
         SidebarTrack.Text = value is null ? "等待播放音乐…" : value.Track.Title;
         PlayButton.Content = value?.Playing == true ? "暂停" : "播放";
-        if (value is null) { LyricsItems.ItemsSource = null; StatusLabel.Text = "歌词跑丢了…"; return; }
+        if (value is null) { LyricsItems.ItemsSource = null; BeginNoLyricsMotion(); return; }
         lookup?.Cancel(); lookup?.Dispose(); lookup = new(); var ct = lookup.Token;
         StatusLabel.Text = "正在寻找歌词…";
         try
@@ -104,7 +109,12 @@ public partial class MainWindow : Window
             var result = await engine.FindAsync(value.Track, ct);
             if (ct.IsCancellationRequested || closed) return;
             var winner = result.Decision.Winner;
-            StatusLabel.Text = winner is null ? "歌词跑丢了…" : winner.Provider + " · " + result.Decision.Reason;
+            if (winner is null) BeginNoLyricsMotion();
+            else
+            {
+                noLyricsTimer.Stop();
+                StatusLabel.Text = winner.Provider + " · " + result.Decision.Reason;
+            }
             LyricsItems.ItemsSource = winner?.Document.Normalized.Select(l => new LyricView(string.IsNullOrWhiteSpace(l.Text) ? "♪" : l.Text, l.Start)).ToArray();
             AnimateLyricArrival();
         }
@@ -198,7 +208,12 @@ public partial class MainWindow : Window
         if (mode == DisplayMode.Taskbar)
         {
             var trayWindow = FindWindow("Shell_TrayWnd", null);
-            if (trayWindow != IntPtr.Zero && GetWindowRect(trayWindow, out var rect)) { Left = rect.Left + 12; Top = rect.Top - Height - 6; }
+            if (trayWindow != IntPtr.Zero && GetWindowRect(trayWindow, out var rect))
+            {
+                var scale = GetDpiForWindow(windowHandle) / 96.0;
+                Left = rect.Left / scale + 12;
+                Top = rect.Top / scale - Height - 6;
+            }
             else { Left = work.Left + 12; Top = work.Bottom - Height - 6; }
         }
         else if (mode == DisplayMode.TopIsland) { Left = work.Left + (work.Width - Width) / 2; Top = work.Top + 18; }
@@ -206,12 +221,19 @@ public partial class MainWindow : Window
     }
     private void HideForFullscreenIfNeeded()
     {
-        if (mode == DisplayMode.FreeFloat || !IsVisible) return;
+        if (mode == DisplayMode.FreeFloat) return;
         var foreground = GetForegroundWindow(); if (foreground == IntPtr.Zero || foreground == windowHandle) return;
         if (!GetWindowRect(foreground, out var rect)) return;
         var work = SystemParameters.WorkArea;
         var fullscreen = rect.Left <= work.Left && rect.Top <= work.Top && rect.Right >= work.Right && rect.Bottom >= work.Bottom;
-        if (fullscreen) Hide(); else if (!IsVisible) { Show(); PositionWindow(); }
+        if (fullscreen) Hide();
+        else if (!IsVisible) { Show(); PositionWindow(); }
+    }
+    private void BeginNoLyricsMotion()
+    {
+        noLyricsIndex = 0;
+        StatusLabel.Text = noLyricsLines[0];
+        noLyricsTimer.Start();
     }
     private void ChangeOffset(double delta) { timeOffset = Math.Clamp(timeOffset + delta, -10, 10); }
     private void OnOffsetMinus(object sender, RoutedEventArgs e) => ChangeOffset(-.5);
@@ -227,7 +249,7 @@ public partial class MainWindow : Window
     private IntPtr WindowMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled) { if (message == WmHotkey && wParam.ToInt32() == HotkeyId) { ToggleLock(); handled = true; } return IntPtr.Zero; }
     private void OnClosed(object? sender, EventArgs e)
     {
-        closed = true; lookup?.Cancel(); lookup?.Dispose(); frameTimer.Stop(); fullscreenTimer.Stop(); UnregisterHotKey(windowHandle, HotkeyId); source?.RemoveHook(WindowMessage); tray.Visible = false; tray.Dispose(); media.Changed -= OnMediaChanged; media.Error -= OnMediaError; media.Dispose(); client.Dispose(); SystemEvents.DisplaySettingsChanged -= (_, _) => { };
+        closed = true; lookup?.Cancel(); lookup?.Dispose(); frameTimer.Stop(); fullscreenTimer.Stop(); noLyricsTimer.Stop(); UnregisterHotKey(windowHandle, HotkeyId); source?.RemoveHook(WindowMessage); tray.Visible = false; tray.Dispose(); media.Changed -= OnMediaChanged; media.Error -= OnMediaError; media.Dispose(); client.Dispose(); SystemEvents.DisplaySettingsChanged -= (_, _) => { };
     }
 }
 

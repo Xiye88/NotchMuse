@@ -1,17 +1,75 @@
-<Window x:Class="NotchMuse.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="NotchMuse" Width="760" Height="180" MinWidth="420" MinHeight="120" WindowStyle="None" AllowsTransparency="True" Background="Transparent" Foreground="#F3F2EF" Loaded="OnLoaded" Closed="OnClosed" MouseLeftButtonDown="OnDrag">
-  <Border x:Name="Capsule" CornerRadius="28" Background="#E6141416" BorderBrush="#33F5A623" BorderThickness="1" Padding="22,14">
-    <Grid>
-      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-      <StackPanel>
-        <TextBlock x:Name="TrackLabel" Text="等待播放音乐…" FontSize="14" Foreground="#B8B6B2" TextTrimming="CharacterEllipsis"/>
-        <TextBlock x:Name="LyricsLabel" Text="歌词跑丢了…" FontSize="27" FontWeight="SemiBold" Margin="0,5,0,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
-        <TextBlock x:Name="StatusLabel" Foreground="#FFB15A" FontSize="11" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
-      </StackPanel>
-      <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-        <Button x:Name="LockButton" Content="锁定" Click="OnLockClick" Style="{StaticResource CapsuleButton}"/>
-        <Button Content="设置" Click="OnSettingsClick" Style="{StaticResource CapsuleButton}"/>
-        <Button Content="×" Click="OnHideClick" Style="{StaticResource CapsuleButton}"/>
-      </StackPanel>
+<Window x:Class="NotchMuse.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NotchMuse" Width="1120" Height="720" MinWidth="760" MinHeight="480"
+        WindowStartupLocation="CenterScreen" Background="#101013" Foreground="#F3F2EF"
+        WindowStyle="None" AllowsTransparency="False" Loaded="OnLoaded" Closed="OnClosed"
+        StateChanged="OnStateChanged">
+    <Window.Resources>
+        <Style x:Key="NavButton" TargetType="Button" BasedOn="{StaticResource CapsuleButton}">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Margin" Value="0,3,0,3"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="DotButton" TargetType="Button">
+            <Setter Property="Width" Value="22"/><Setter Property="Height" Value="22"/>
+            <Setter Property="Margin" Value="4,0"/><Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="11"/></ControlTemplate></Setter.Value></Setter>
+        </Style>
+    </Window.Resources>
+    <Grid x:Name="WorkspaceRoot">
+        <Grid.ColumnDefinitions><ColumnDefinition x:Name="SidebarColumn" Width="224"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Background="#17171B" Padding="18,22,16,16">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Text="NotchMuse" FontSize="22" FontWeight="SemiBold" Foreground="#F7B45D" Margin="0,0,0,24"/>
+                    <Button Content="歌词" Tag="Lyrics" Click="OnNavigate" Style="{StaticResource NavButton}"/>
+                    <Button Content="显示" Tag="Display" Click="OnNavigate" Style="{StaticResource NavButton}"/>
+                    <Button Content="外观" Tag="Appearance" Click="OnNavigate" Style="{StaticResource NavButton}"/>
+                    <Button Content="通用" Tag="General" Click="OnNavigate" Style="{StaticResource NavButton}"/>
+                </StackPanel>
+                <Border DockPanel.Dock="Bottom" Height="30" CornerRadius="15" Background="#24242A" Padding="12,0" VerticalAlignment="Bottom">
+                    <TextBlock Text="让每一句歌词都有位置" VerticalAlignment="Center" FontSize="10" Foreground="#A9A6A0" TextTrimming="CharacterEllipsis"/>
+                </Border>
+                <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,48">
+                    <Border Background="#27272C" CornerRadius="50" Width="84" Height="84" HorizontalAlignment="Center" Margin="0,0,0,12">
+                        <TextBlock Text="◉" FontSize="46" Foreground="#F7B45D" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock x:Name="SidebarTrack" Text="等待播放音乐…" TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="NotchMuse for Windows" TextAlignment="Center" Foreground="#77747A" FontSize="10" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+        <GridSplitter Grid.Column="1" Width="1" HorizontalAlignment="Center" Background="#303037" ShowsPreview="True"/>
+        <Grid Grid.Column="2" Background="#101013" Margin="26,20,26,18">
+            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="0,0,0,18" MouseLeftButtonDown="OnDrag">
+                <StackPanel><TextBlock x:Name="PageTitle" Text="歌词" FontSize="29" FontWeight="SemiBold"/><TextBlock x:Name="TrackLabel" Text="等待播放音乐…" Foreground="#97949A" Margin="0,5,0,0"/></StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="LockButton" Content="锁定" Click="OnLockClick" Style="{StaticResource CapsuleButton}"/>
+                    <Button Content="悬浮" Click="OnFloatClick" Style="{StaticResource CapsuleButton}"/>
+                    <Button Content="隐藏" Click="OnHideClick" Style="{StaticResource CapsuleButton}"/>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1" x:Name="LyricsPage">
+                <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="4,10,4,10">
+                    <ItemsControl x:Name="LyricsItems"><ItemsControl.ItemTemplate><DataTemplate><Button Content="{Binding DisplayText}" Tag="{Binding Time}" Click="OnLyricClick" HorizontalContentAlignment="Left" Background="Transparent" BorderThickness="0" Foreground="#D7D3D0" FontSize="22" Padding="10,9" Margin="0,1"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+                </ScrollViewer>
+                <StackPanel Grid.Row="1" Margin="0,12,0,0">
+                    <Slider x:Name="ProgressSlider" Minimum="0" Maximum="1" ValueChanged="OnProgressChanged" PreviewMouseDown="OnProgressGrab" PreviewMouseUp="OnProgressRelease" Height="18"/>
+                    <Grid Margin="0,8,0,0"><TextBlock x:Name="StatusLabel" Text="歌词跑丢了…" Foreground="#F7B45D"/><Button x:Name="PlayButton" Content="播放" Click="OnPlayClick" Width="78" Height="30" HorizontalAlignment="Center" Style="{StaticResource CapsuleButton}"/></Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,-30,0,0"><Button Content="" Background="#F7B45D" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#8FC7FF" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#B69CFF" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#85D3B0" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#F18F8F" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#ECE7D5" Style="{StaticResource DotButton}" Click="OnAccentClick"/></StackPanel>
+                </StackPanel>
+            </Grid>
+            <StackPanel Grid.Row="1" x:Name="SettingsPage" Visibility="Collapsed" Margin="0,8,0,0">
+                <TextBlock Text="设置" FontSize="18" Margin="0,0,0,12"/><TextBlock Text="显示模式" Foreground="#97949A"/><ComboBox x:Name="ModeCombo" SelectionChanged="OnModeChanged" Margin="0,8,0,18" SelectedIndex="0"><ComboBoxItem Content="自由悬浮" Tag="FreeFloat"/><ComboBoxItem Content="顶部悬浮岛" Tag="TopIsland"/><ComboBoxItem Content="任务栏贴边" Tag="Taskbar"/></ComboBox><CheckBox x:Name="StartupCheck" Content="开机自启" Checked="OnStartupChanged" Unchecked="OnStartupChanged" Margin="0,0,0,10"/><TextBlock Text="时间偏移" Foreground="#97949A"/><StackPanel Orientation="Horizontal"><Button Content="−0.5s" Click="OnOffsetMinus" Style="{StaticResource CapsuleButton}"/><Button Content="重置" Click="OnOffsetReset" Style="{StaticResource CapsuleButton}"/><Button Content="+0.5s" Click="OnOffsetPlus" Style="{StaticResource CapsuleButton}"/></StackPanel>
+            </StackPanel>
+        </Grid>
+        <Border x:Name="CenterGuide" Width="1" Background="#55F7B45D" HorizontalAlignment="Center" VerticalAlignment="Stretch" Visibility="Collapsed" IsHitTestVisible="False"/>
     </Grid>
-  </Border>
 </Window>
+

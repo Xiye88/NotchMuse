@@ -95,15 +95,15 @@ public partial class MainWindow : Window
     {
         if (SystemParameters.HighContrast)
         {
-            WorkspaceRoot.Background = Brushes.Black;
-            SidebarPanel.Background = Brushes.Black;
+            WorkspaceRoot.Background = System.Windows.Media.Brushes.Black;
+            SidebarPanel.Background = System.Windows.Media.Brushes.Black;
             return;
         }
 
         var glass = SystemParameters.WindowGlassColor;
         var lightTaskbar = (glass.R * 0.299 + glass.G * 0.587 + glass.B * 0.114) > 168;
-        WorkspaceRoot.Background = new SolidColorBrush(lightTaskbar ? Color.FromRgb(247, 246, 242) : Color.FromRgb(16, 16, 19));
-        SidebarPanel.Background = new SolidColorBrush(lightTaskbar ? Color.FromRgb(235, 233, 228) : Color.FromRgb(23, 23, 27));
+        WorkspaceRoot.Background = new System.Windows.Media.SolidColorBrush(lightTaskbar ? System.Windows.Media.Color.FromRgb(247, 246, 242) : System.Windows.Media.Color.FromRgb(16, 16, 19));
+        SidebarPanel.Background = new System.Windows.Media.SolidColorBrush(lightTaskbar ? System.Windows.Media.Color.FromRgb(235, 233, 228) : System.Windows.Media.Color.FromRgb(23, 23, 27));
     }
     private void OnMediaError(string error) => Dispatcher.InvokeAsync(() => StatusLabel.Text = error);
     private void OnMediaChanged(PlaybackSnapshot? value) => Dispatcher.InvokeAsync(() => UpdateTrack(value));

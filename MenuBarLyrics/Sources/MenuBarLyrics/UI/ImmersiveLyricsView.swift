@@ -1211,6 +1211,8 @@ final class ImmersiveLyricsView: NSView {
     private lazy var prevButton = TransportButton(symbol: "backward.fill", size: 13, isCapsulePrimary: false, target: self, action: #selector(prevClicked))
     private lazy var playPauseButton = TransportButton(symbol: "play.fill", size: 15, isCapsulePrimary: true, target: self, action: #selector(playPauseClicked))
     private lazy var nextButton = TransportButton(symbol: "forward.fill", size: 13, isCapsulePrimary: false, target: self, action: #selector(nextClicked))
+    private lazy var shareButton = TransportButton(symbol: "square.and.arrow.up", size: 12.5, isCapsulePrimary: false, target: self, action: #selector(shareCardClicked))
+    private var sharePopover: NSPopover?
     private var swatchButtons: [ThemeSwatchDotButton] = []
     private var isPlayingState = false
 
@@ -1269,7 +1271,10 @@ final class ImmersiveLyricsView: NSView {
         stageBackground.translatesAutoresizingMaskIntoConstraints = false
 
         scrollView.drawsBackground = false
-        scrollView.hasVerticalScroller = false
+        scrollView.hasVerticalScroller = true
+        scrollView.autohidesScrollers = true
+        scrollView.scrollerStyle = .overlay
+        scrollView.verticalScroller = SlimOverlayScroller()
         scrollView.hasHorizontalScroller = false
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.onUserScroll = { [weak self] in
@@ -1331,6 +1336,10 @@ final class ImmersiveLyricsView: NSView {
         swatchButtons = ImmersiveLyricsThemePreset.allCases.map { preset in
             ThemeSwatchDotButton(preset: preset, target: self, action: #selector(swatchClicked(_:)))
         }
+        shareButton.toolTip = isZh ? "生成歌词分享卡" : "Create Lyric Share Card"
+        shareButton.isEnabled = false
+        shareButton.alphaValue = 0.45
+
         let swatchRow = NSStackView(views: swatchButtons)
         swatchRow.orientation = .horizontal
         swatchRow.alignment = .centerY
@@ -1344,6 +1353,7 @@ final class ImmersiveLyricsView: NSView {
         transportBar.addSubview(playPauseButton)
         transportBar.addSubview(nextButton)
         transportBar.addSubview(swatchRow)
+        transportBar.addSubview(shareButton)
 
         addSubview(stageBackground)
         addSubview(scrollFadeContainer)
@@ -1411,7 +1421,12 @@ final class ImmersiveLyricsView: NSView {
             nextButton.widthAnchor.constraint(equalToConstant: 28),
             nextButton.heightAnchor.constraint(equalToConstant: 28),
 
-            swatchRow.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -14),
+            shareButton.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -12),
+            shareButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
+            shareButton.widthAnchor.constraint(equalToConstant: 26),
+            shareButton.heightAnchor.constraint(equalToConstant: 26),
+
+            swatchRow.trailingAnchor.constraint(equalTo: shareButton.leadingAnchor, constant: -8),
             swatchRow.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
             swatchRow.leadingAnchor.constraint(greaterThanOrEqualTo: nextButton.trailingAnchor, constant: 10)
         ])
@@ -1448,6 +1463,8 @@ final class ImmersiveLyricsView: NSView {
             prevButton.refreshStyle()
             playPauseButton.refreshStyle()
             nextButton.refreshStyle()
+            shareButton.refreshStyle()
+            if !shareButton.isEnabled { shareButton.alphaValue = 0.42 }
         }
     }
 
@@ -1482,6 +1499,8 @@ final class ImmersiveLyricsView: NSView {
         progressBar.progress = currentDuration > 0 ? CGFloat(safePos / currentDuration) : 0
 
         if !hasTrack {
+            shareButton.isEnabled = false
+            shareButton.alphaValue = 0.42
             scrollFadeContainer.isHidden = true
             missingView.isIdlePreview = true
             missingView.isHidden = false
@@ -1490,12 +1509,17 @@ final class ImmersiveLyricsView: NSView {
         }
 
         if lines.isEmpty {
+            shareButton.isEnabled = false
+            shareButton.alphaValue = 0.42
             scrollFadeContainer.isHidden = true
             missingView.isIdlePreview = !lyricsMissing
             missingView.isHidden = false
             missingView.setActive(!isHidden)
             return
         }
+
+        shareButton.isEnabled = true
+        shareButton.alphaValue = 1.0
 
         missingView.isHidden = true
         missingView.setActive(false)
@@ -1602,6 +1626,28 @@ final class ImmersiveLyricsView: NSView {
         NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         UserDefaults.standard.set(dot.preset.rawValue, forKey: AppPreferences.immersiveThemePresetKey)
         applyCustomColors()
+    }
+
+    @objc private func shareCardClicked() {
+        guard !currentLines.isEmpty else { return }
+        if let existing = sharePopover, existing.isShown {
+            existing.close()
+            sharePopover = nil
+            return
+        }
+        NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+        let vc = LyricSharePopoverController(
+            lines: currentLines,
+            activeIndex: activeIndex,
+            trackTitle: trackTitleLabel.stringValue,
+            artistName: trackArtistLabel.stringValue
+        )
+        let popover = NSPopover()
+        popover.behavior = .transient
+        popover.contentViewController = vc
+        popover.contentSize = NSSize(width: 580, height: 420)
+        popover.show(relativeTo: shareButton.bounds, of: shareButton, preferredEdge: .maxY)
+        sharePopover = popover
     }
 }
 

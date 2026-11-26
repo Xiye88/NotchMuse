@@ -78,3 +78,62 @@ class AppearanceSurfaceView: NSView {
 
     override var wantsUpdateLayer: Bool { true }
 }
+
+@MainActor
+final class SlimOverlayScroller: NSScroller {
+    static let pillWidth: CGFloat = 4
+    static let minPillHeight: CGFloat = 48
+    static let maxPillHeight: CGFloat = 72
+
+    override class var isCompatibleWithOverlayScrollers: Bool { true }
+
+    override class func scrollerWidth(for controlSize: NSControl.ControlSize, scrollerStyle: NSScroller.Style) -> CGFloat {
+        10
+    }
+
+    static func visualKnobRect(in bounds: NSRect, nativeKnobRect: NSRect, scrollProportion: CGFloat) -> NSRect {
+        let insetY: CGFloat = 6
+        let usableH = max(0, bounds.height - insetY * 2)
+        guard usableH > 8 else { return .zero }
+
+        let targetH: CGFloat
+        if nativeKnobRect.height > maxPillHeight {
+            targetH = min(maxPillHeight, max(minPillHeight, usableH * 0.16))
+        } else {
+            targetH = min(maxPillHeight, max(min(minPillHeight, usableH), nativeKnobRect.height))
+        }
+        let clampedH = min(usableH, targetH)
+        let travel = max(0, usableH - clampedH)
+        let p = min(1, max(0, scrollProportion))
+        let y = insetY + travel * p
+        let x = max(0, bounds.maxX - pillWidth - 3)
+        return NSRect(x: x, y: y, width: pillWidth, height: clampedH)
+    }
+
+    override func drawKnobSlot(in slotRect: NSRect, highlight flag: Bool) {
+        // Intentionally empty: zero gray track trough
+    }
+
+    override func drawKnob() {
+        let nativeRect = rect(for: .knob)
+        guard nativeRect.height > 0, bounds.height > 12 else { return }
+        let pillRect = Self.visualKnobRect(
+            in: bounds,
+            nativeKnobRect: nativeRect,
+            scrollProportion: CGFloat(doubleValue)
+        )
+        guard pillRect.height > 0 else { return }
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            let isDark = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            let tint = isDark
+                ? NSColor.white.withAlphaComponent(0.22)
+                : NSColor.black.withAlphaComponent(0.22)
+            tint.setFill()
+            NSBezierPath(
+                roundedRect: pillRect,
+                xRadius: Self.pillWidth / 2,
+                yRadius: Self.pillWidth / 2
+            ).fill()
+        }
+    }
+}

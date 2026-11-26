@@ -570,6 +570,29 @@ final class SettingsWindowController: NSWindowController {
         if let statusSurface = controller.liveStatusStripView as? AppearanceSurfaceView {
             precondition(statusSurface.surfaceColor == .clear && (statusSurface.layer?.borderWidth ?? 0) == 0, "Live status strip must be borderless open-canvas")
         }
+        // E29: SlimOverlayScroller + LyricShareCardRenderer @2x PNG rendering across all 3 templates
+        precondition(controller.settingsScrollView?.verticalScroller is SlimOverlayScroller, "Settings scroll view must use SlimOverlayScroller")
+        precondition(SlimOverlayScroller.isCompatibleWithOverlayScrollers, "SlimOverlayScroller must support overlay style")
+        let tallKnob = SlimOverlayScroller.visualKnobRect(
+            in: NSRect(x: 0, y: 0, width: 10, height: 500),
+            nativeKnobRect: NSRect(x: 0, y: 0, width: 10, height: 420),
+            scrollProportion: 0.5
+        )
+        precondition(abs(tallKnob.width - 4) < 0.01, "SlimOverlayScroller pill width must be 4pt")
+        precondition(tallKnob.height >= 48 && tallKnob.height <= 72, "SlimOverlayScroller must cap overly tall knob to 48-72pt, got \(tallKnob.height)")
+        precondition(LyricShareTemplate.allCases.count == 3, "Must expose 3 editorial lyric share card templates")
+        for template in LyricShareTemplate.allCases {
+            let rendered = LyricShareCardRenderer.renderPNG(
+                lines: ["Lantern light across the quiet bay", "Every chorus finds its steady pace", "Softly glowing while you work right here"],
+                trackTitle: "Midnight Harbor",
+                artistName: "NotchMuse Studio",
+                template: template
+            )
+            precondition(rendered != nil, "Lyric share card must render for \(template.rawValue)")
+            precondition(rendered!.pngData.count > 1000, "Rendered PNG data must be non-empty for \(template.rawValue)")
+            precondition(rendered!.pngData.starts(with: [0x89, 0x50, 0x4E, 0x47]), "Rendered bytes must have valid PNG signature")
+            precondition(rendered!.image.size.width == LyricShareCardRenderer.logicalWidth && rendered!.image.size.height >= 500, "Rendered card dimensions must be valid")
+        }
         print("Settings interaction self-test passed")
     }
     #endif
@@ -905,6 +928,7 @@ final class SettingsWindowController: NSWindowController {
         scrollView.hasVerticalScroller = true
         scrollView.autohidesScrollers = true
         scrollView.scrollerStyle = .overlay
+        scrollView.verticalScroller = SlimOverlayScroller()
         scrollView.hasHorizontalScroller = false
         scrollView.isHidden = selectedPage == .lyrics
         scrollView.translatesAutoresizingMaskIntoConstraints = false

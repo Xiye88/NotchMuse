@@ -4,7 +4,9 @@ using NotchMuse.Platform;
 using NotchMuse.Sources;
 using System.Net;
 using System.Net.Http;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -21,18 +23,21 @@ public partial class MainWindow : Window
     private readonly SmtcService media = new();
     private readonly HttpClient client = new(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All }) { Timeout = TimeSpan.FromSeconds(12) };
     private readonly LyricsEngine engine;
-    private readonly Forms.NotifyIcon tray = new() { Icon = System.Drawing.SystemIcons.Application, Visible = true, Text = "NotchMuse" };
+    private readonly Forms.NotifyIcon tray = new() { Icon = CreateTrayIcon(), Visible = true, Text = "NotchMuse" };
+    private readonly UpdateService updateService;
     private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(41) };
     private readonly DispatcherTimer fullscreenTimer = new() { Interval = TimeSpan.FromSeconds(2) };
     private readonly DispatcherTimer noLyricsTimer = new() { Interval = TimeSpan.FromSeconds(2.2) };
-    private readonly string[] noLyricsLines = ["歌词跑丢了…", "先听一会儿旋律吧", "这句藏在黑胶纹路里", "正在把歌词捞回来", "换个姿势继续听", "留一点空白给音乐"];
+    private readonly string[] noLyricsLines = MicroAnimationCatalog.Phrases.ToArray();
     private int noLyricsIndex;
     private CancellationTokenSource? lookup;
     private PlaybackSnapshot? snapshot;
+    private LyricsCandidate? activeCandidate;
     private HwndSource? source;
     private bool closed;
     private bool locked;
     private bool draggingProgress;
+    private bool english;
     private double timeOffset;
     private DisplayMode mode = DisplayMode.FreeFloat;
     private IntPtr windowHandle;
@@ -54,10 +59,19 @@ public partial class MainWindow : Window
     [StructLayout(LayoutKind.Sequential)] private readonly record struct RectNative(int Left, int Top, int Right, int Bottom);
     private enum DisplayMode { FreeFloat, TopIsland, Taskbar }
 
+    private static System.Drawing.Icon CreateTrayIcon()
+    {
+        var executable = Environment.ProcessPath;
+        return executable is not null
+            ? System.Drawing.Icon.ExtractAssociatedIcon(executable) ?? System.Drawing.SystemIcons.Application
+            : System.Drawing.SystemIcons.Application;
+    }
+
     public MainWindow()
     {
         InitializeComponent();
         engine = LyricsEngine.Create(client);
+        updateService = new UpdateService(client);
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add("自由悬浮", null, (_, _) => SetMode(DisplayMode.FreeFloat));
         menu.Items.Add("顶部悬浮岛", null, (_, _) => SetMode(DisplayMode.TopIsland));
@@ -88,6 +102,7 @@ public partial class MainWindow : Window
         media.Changed += OnMediaChanged; media.Error += OnMediaError;
         ApplyTheme(); SetMode(mode); frameTimer.Start(); fullscreenTimer.Start();
         StartVisualMotion();
+        _ = RefreshReleaseInfoAsync();
         try { await media.StartAsync(); } catch (Exception ex) when (ex is COMException or InvalidOperationException) { StatusLabel.Text = "系统播控暂不可用：" + ex.Message; }
     }
 
@@ -114,7 +129,7 @@ public partial class MainWindow : Window
         TrackLabel.Text = value is null ? "等待播放音乐…" : value.Track.Title + " · " + value.Track.Artist;
         SidebarTrack.Text = value is null ? "等待播放音乐…" : value.Track.Title;
         PlayButton.Content = value?.Playing == true ? "暂停" : "播放";
-        if (value is null) { LyricsItems.ItemsSource = null; BeginNoLyricsMotion(); return; }
+        if (value is null) { activeCandidate = null; LyricsItems.ItemsSource = null; BeginNoLyricsMotion(); return; }
         lookup?.Cancel(); lookup?.Dispose(); lookup = new(); var ct = lookup.Token;
         StatusLabel.Text = "正在寻找歌词…";
         try
@@ -122,13 +137,14 @@ public partial class MainWindow : Window
             var result = await engine.FindAsync(value.Track, ct);
             if (ct.IsCancellationRequested || closed) return;
             var winner = result.Decision.Winner;
+            activeCandidate = winner;
             if (winner is null) BeginNoLyricsMotion();
             else
             {
                 noLyricsTimer.Stop();
                 StatusLabel.Text = winner.Provider + " · " + result.Decision.Reason;
             }
-            LyricsItems.ItemsSource = winner?.Document.Normalized.Select(l => new LyricView(string.IsNullOrWhiteSpace(l.Text) ? "♪" : l.Text, l.Start)).ToArray();
+            RenderLyrics();
             AnimateLyricArrival();
         }
         catch (OperationCanceledException) { }
@@ -147,6 +163,99 @@ public partial class MainWindow : Window
     private async void OnProgressRelease(object sender, System.Windows.Input.MouseButtonEventArgs e) { draggingProgress = false; await media.SeekAsync(ProgressSlider.Value - timeOffset); }
     private void OnProgressChanged(object sender, RoutedPropertyChangedEventArgs<double> e) { }
     private void OnAccentClick(object sender, RoutedEventArgs e) { if (sender is System.Windows.Controls.Button b) { Resources["AccentBrush"] = b.Background; } }
+    private void OnChineseClick(object sender, RoutedEventArgs e) { english = false; ApplyLanguage(); }
+    private void OnEnglishClick(object sender, RoutedEventArgs e) { english = true; ApplyLanguage(); }
+    private void ApplyLanguage()
+    {
+        LyricsNavButton.Content = english ? "Lyrics" : "歌词";
+        DisplayNavButton.Content = english ? "Display" : "显示";
+        AppearanceNavButton.Content = english ? "Appearance" : "外观";
+        GeneralNavButton.Content = english ? "General" : "通用";
+        CheckUpdateButton.Content = english ? "Check for updates" : "检查更新";
+        RenderLyrics();
+    }
+    private void OnBilingualChanged(object sender, RoutedEventArgs e) => RenderLyrics();
+    private void RenderLyrics()
+    {
+        LyricsItems.ItemsSource = activeCandidate?.Document.Normalized.Select(line =>
+        {
+            var text = string.IsNullOrWhiteSpace(line.Text) ? "♪" : line.Text;
+            if (BilingualLyricsCheck.IsChecked == true && !string.IsNullOrWhiteSpace(line.Translation))
+                text += Environment.NewLine + line.Translation;
+            return new LyricView(text, line.Start);
+        }).ToArray();
+    }
+    private async void OnCheckUpdateClick(object sender, RoutedEventArgs e)
+    {
+        CheckUpdateButton.IsEnabled = false;
+        try
+        {
+            var latest = await updateService.GetLatestAsync(CancellationToken.None);
+            CheckUpdateButton.Content = latest is not null && UpdateService.IsNewer("0.9.0", latest)
+                ? (english ? $"Update available {latest.TagName}" : $"发现新版本 {latest.TagName}")
+                : (english ? "Already up to date" : "已是最新版本");
+        }
+        catch (HttpRequestException) { CheckUpdateButton.Content = english ? "Update check unavailable" : "暂时无法检查更新"; }
+        finally { CheckUpdateButton.IsEnabled = true; }
+    }
+    private async Task RefreshReleaseInfoAsync()
+    {
+        try
+        {
+            var latest = await updateService.GetLatestAsync(CancellationToken.None);
+            if (latest is null || string.IsNullOrWhiteSpace(latest.Body)) return;
+            var notice = latest.Body.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(line => !line.StartsWith("#", StringComparison.Ordinal));
+            if (string.IsNullOrWhiteSpace(notice)) return;
+            await Dispatcher.InvokeAsync(() =>
+            {
+                AnnouncementText.Text = notice.Trim();
+                AnnouncementCapsule.Visibility = Visibility.Visible;
+            });
+        }
+        catch (HttpRequestException) { }
+        catch (JsonException) { }
+    }
+    private void OnShareClick(object sender, RoutedEventArgs e)
+    {
+        ShareLinesList.Items.Clear();
+        if (LyricsItems.ItemsSource is IEnumerable<LyricView> lines)
+        {
+            foreach (var line in lines.Take(6))
+            {
+                ShareLinesList.Items.Add(line);
+                ShareLinesList.SelectedItems.Add(line);
+            }
+        }
+        ShareStatusLabel.Text = "";
+        SharePopup.IsOpen = true;
+    }
+    private async void OnCopyShareClick(object sender, RoutedEventArgs e)
+    {
+        var png = RenderSelectedShareCard();
+        System.Windows.Clipboard.SetImage(ShareCardRenderer.Decode(png));
+        ShareStatusLabel.Text = "已复制 ✓";
+        await Task.Delay(1200);
+        if (!closed) ShareStatusLabel.Text = "";
+    }
+    private void OnSaveShareClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog { Filter = "PNG 图片|*.png", FileName = "NotchMuse-lyrics.png" };
+        if (dialog.ShowDialog(this) != true) return;
+        File.WriteAllBytes(dialog.FileName, RenderSelectedShareCard());
+        ShareStatusLabel.Text = "已保存 ✓";
+    }
+    private byte[] RenderSelectedShareCard()
+    {
+        var lines = ShareLinesList.SelectedItems.Cast<LyricView>().Take(6).Select(line => line.DisplayText).ToArray();
+        if (lines.Length == 0) lines = ["♪"];
+        var theme = ShareThemeCombo.SelectedIndex switch
+        {
+            1 => ShareCardTheme.WarmAlabaster,
+            2 => ShareCardTheme.SodaMist,
+            _ => ShareCardTheme.VinylNight
+        };
+        return ShareCardRenderer.RenderPng(snapshot?.Track.Title ?? "NotchMuse", snapshot?.Track.Artist ?? "Lyrics", lines, theme);
+    }
     private void OnAppearanceClick(object sender, RoutedEventArgs e) => OnNavigate(new System.Windows.Controls.Button { Tag = "Appearance" }, e);
     private void OnSettingsClick(object sender, RoutedEventArgs e) => OnNavigate(new System.Windows.Controls.Button { Tag = "General" }, e);
     private void OnSidebarToggle(object sender, RoutedEventArgs e)
@@ -268,6 +377,7 @@ public partial class MainWindow : Window
         closed = true; lookup?.Cancel(); lookup?.Dispose(); frameTimer.Stop(); fullscreenTimer.Stop(); noLyricsTimer.Stop(); UnregisterHotKey(windowHandle, HotkeyId); source?.RemoveHook(WindowMessage); tray.Visible = false; tray.Dispose(); media.Changed -= OnMediaChanged; media.Error -= OnMediaError; media.Dispose(); client.Dispose(); SystemEvents.DisplaySettingsChanged -= (_, _) => { };
     }
 }
+
 
 
 

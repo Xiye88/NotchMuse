@@ -4,7 +4,7 @@
         Title="NotchMuse" Width="1120" Height="720" MinWidth="760" MinHeight="480"
         WindowStartupLocation="CenterScreen" Background="#101013" Foreground="#F3F2EF"
         WindowStyle="None" AllowsTransparency="False" Loaded="OnLoaded" Closed="OnClosed"
-        StateChanged="OnStateChanged">
+        StateChanged="OnStateChanged" Icon="NotchMuse.ico">
     <Window.Resources>
         <Style x:Key="NavButton" TargetType="Button" BasedOn="{StaticResource CapsuleButton}">
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -44,13 +44,13 @@
                         <TextBlock Text="NotchMuse" FontSize="22" FontWeight="SemiBold" Foreground="#F7B45D"/>
                         <Button Content="‹" Click="OnSidebarToggle" Style="{StaticResource CapsuleButton}" Margin="12,0,0,0" Padding="7,2"/>
                     </StackPanel>
-                    <Button Content="歌词" Tag="Lyrics" Click="OnNavigate" Style="{StaticResource NavButton}"/>
-                    <Button Content="显示" Tag="Display" Click="OnNavigate" Style="{StaticResource NavButton}"/>
-                    <Button Content="外观" Tag="Appearance" Click="OnNavigate" Style="{StaticResource NavButton}"/>
-                    <Button Content="通用" Tag="General" Click="OnNavigate" Style="{StaticResource NavButton}"/>
+                    <Button x:Name="LyricsNavButton" Content="歌词" Tag="Lyrics" Click="OnNavigate" Style="{StaticResource NavButton}"/>
+                    <Button x:Name="DisplayNavButton" Content="显示" Tag="Display" Click="OnNavigate" Style="{StaticResource NavButton}"/>
+                    <Button x:Name="AppearanceNavButton" Content="外观" Tag="Appearance" Click="OnNavigate" Style="{StaticResource NavButton}"/>
+                    <Button x:Name="GeneralNavButton" Content="通用" Tag="General" Click="OnNavigate" Style="{StaticResource NavButton}"/>
                 </StackPanel>
-                <Border DockPanel.Dock="Bottom" Height="30" CornerRadius="15" Background="#24242A" Padding="12,0" VerticalAlignment="Bottom">
-                    <TextBlock Text="让每一句歌词都有位置" VerticalAlignment="Center" FontSize="10" Foreground="#A9A6A0" TextTrimming="CharacterEllipsis"/>
+                <Border x:Name="AnnouncementCapsule" DockPanel.Dock="Bottom" Height="30" CornerRadius="15" Background="#24242A" Padding="12,0" VerticalAlignment="Bottom" Visibility="Collapsed">
+                    <TextBlock x:Name="AnnouncementText" Text="" VerticalAlignment="Center" FontSize="10" Foreground="#A9A6A0" TextTrimming="CharacterEllipsis"/>
                 </Border>
                 <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,48">
                     <Border Background="#27272C" CornerRadius="50" Width="84" Height="84" HorizontalAlignment="Center" Margin="0,0,0,12">
@@ -87,12 +87,18 @@
                 <StackPanel Grid.Row="1" Margin="0,12,0,0">
                     <Slider x:Name="ProgressSlider" Minimum="0" Maximum="1" ValueChanged="OnProgressChanged" PreviewMouseDown="OnProgressGrab" PreviewMouseUp="OnProgressRelease" Height="18"/>
                     <Grid Margin="0,8,0,0"><TextBlock x:Name="StatusLabel" Text="歌词跑丢了…" Foreground="#F7B45D"/><Button x:Name="PlayButton" Content="播放" Click="OnPlayClick" Width="78" Height="30" HorizontalAlignment="Center" Style="{StaticResource CapsuleButton}"/></Grid>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,-30,0,0"><Button Content="" Background="#F7B45D" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#8FC7FF" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#B69CFF" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#85D3B0" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#F18F8F" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#ECE7D5" Style="{StaticResource DotButton}" Click="OnAccentClick"/></StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,-30,0,0"><Button Content="" Background="#F7B45D" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#8FC7FF" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#B69CFF" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#85D3B0" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#F18F8F" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#ECE7D5" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button x:Name="ShareButton" Content="分享" Click="OnShareClick" Style="{StaticResource CapsuleButton}"/></StackPanel>
                 </StackPanel>
             </Grid>
             <StackPanel Grid.Row="1" x:Name="SettingsPage" Visibility="Collapsed" Margin="0,8,0,0">
                 <StackPanel x:Name="DisplaySettingsPage">
                     <TextBlock Text="显示" FontSize="22" FontWeight="SemiBold"/>
+                    <Border Height="42" Background="#24242A" CornerRadius="12" Padding="12,0" Margin="0,12,0,0"><TextBlock Text="Win11 桌面预览 · 当前模式可实时切换" VerticalAlignment="Center" Foreground="#C6C2BA"/></Border>
+                    <UniformGrid Columns="3" Margin="0,12,0,10">
+                        <Border Height="70" Background="#1D2428" CornerRadius="10" Margin="0,0,6,0"><TextBlock Text="任务栏贴边" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#9ED2C6"/></Border>
+                        <Border Height="70" Background="#24221F" CornerRadius="10" Margin="3,0"><TextBlock Text="顶部悬浮岛" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#F7B45D"/></Border>
+                        <Border Height="70" Background="#22212A" CornerRadius="10" Margin="6,0,0,0"><TextBlock Text="自由悬浮" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#B69CFF"/></Border>
+                    </UniformGrid>
                     <Border Height="1" Background="#303037" Margin="0,14,0,18"/>
                     <TextBlock Text="显示模式" Foreground="#97949A"/>
                     <ComboBox x:Name="ModeCombo" SelectionChanged="OnModeChanged" Margin="0,8,0,18" SelectedIndex="0">
@@ -111,6 +117,11 @@
                 <StackPanel x:Name="GeneralSettingsPage" Visibility="Collapsed">
                     <TextBlock Text="通用" FontSize="22" FontWeight="SemiBold"/>
                     <Border Height="1" Background="#303037" Margin="0,14,0,18"/>
+                    <TextBlock x:Name="VersionText" Text="当前版本 0.9.0" Foreground="#AAA7A0"/>
+                    <Button x:Name="CheckUpdateButton" Content="检查更新" Click="OnCheckUpdateClick" HorizontalAlignment="Left" Style="{StaticResource CapsuleButton}" Margin="0,10,0,16"/>
+                    <TextBlock Text="语言" Foreground="#97949A"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,14"><Button Content="简体中文" Click="OnChineseClick" Style="{StaticResource CapsuleButton}"/><Button Content="English" Click="OnEnglishClick" Style="{StaticResource CapsuleButton}"/></StackPanel>
+                    <CheckBox x:Name="BilingualLyricsCheck" Content="显示双语歌词（已有翻译时）" IsChecked="True" Checked="OnBilingualChanged" Unchecked="OnBilingualChanged" Margin="0,0,0,14"/>
                     <CheckBox Content="锁定时启用鼠标穿透" IsChecked="True" IsEnabled="False" Margin="0,0,0,12"/>
                     <TextBlock Text="全局快捷键" Foreground="#97949A"/>
                     <TextBlock Text="Ctrl + Alt + L    锁定 / 解锁" Margin="0,6,0,0"/>
@@ -118,6 +129,22 @@
             </StackPanel>
         </Grid>
         <Border x:Name="CenterGuide" Width="1" Background="#55F7B45D" HorizontalAlignment="Center" VerticalAlignment="Stretch" Visibility="Collapsed" IsHitTestVisible="False"/>
+        <Popup x:Name="SharePopup" PlacementTarget="{Binding ElementName=ShareButton}" Placement="Top" StaysOpen="False" AllowsTransparency="True">
+            <Border Background="#F21B1B20" BorderBrush="#55FFFFFF" BorderThickness="1" CornerRadius="16" Padding="16" Width="310">
+                <StackPanel>
+                    <TextBlock Text="生成歌词卡片" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="模板" Foreground="#AAA7A0" Margin="0,12,0,4"/>
+                    <ComboBox x:Name="ShareThemeCombo" SelectedIndex="0"><ComboBoxItem Content="黑胶暗夜"/><ComboBoxItem Content="暖雪花石"/><ComboBoxItem Content="汽水雾青"/></ComboBox>
+                    <TextBlock Text="选择 1–6 句歌词" Foreground="#AAA7A0" Margin="0,12,0,4"/>
+                    <ListBox x:Name="ShareLinesList" Height="120" SelectionMode="Multiple" Background="Transparent" BorderThickness="0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                        <Button Content="复制图片" Click="OnCopyShareClick" Style="{StaticResource CapsuleButton}"/>
+                        <Button Content="保存为 PNG…" Click="OnSaveShareClick" Style="{StaticResource CapsuleButton}"/>
+                    </StackPanel>
+                    <TextBlock x:Name="ShareStatusLabel" Text="" Foreground="#F7B45D" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </Window>
 

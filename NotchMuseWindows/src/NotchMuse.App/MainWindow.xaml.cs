@@ -158,6 +158,9 @@ public partial class MainWindow : Window
         if (sender is not System.Windows.Controls.Button b) return;
         var tag = b.Tag?.ToString() ?? "Lyrics";
         var isLyrics = tag == "Lyrics"; LyricsPage.Visibility = isLyrics ? Visibility.Visible : Visibility.Collapsed; SettingsPage.Visibility = isLyrics ? Visibility.Collapsed : Visibility.Visible;
+        DisplaySettingsPage.Visibility = tag == "Display" ? Visibility.Visible : Visibility.Collapsed;
+        AppearanceSettingsPage.Visibility = tag == "Appearance" ? Visibility.Visible : Visibility.Collapsed;
+        GeneralSettingsPage.Visibility = tag == "General" ? Visibility.Visible : Visibility.Collapsed;
         PageTitle.Text = tag switch { "Display" => "显示", "Appearance" => "外观", "General" => "通用", _ => "歌词" };
     }
     private void OnDrag(object sender, System.Windows.Input.MouseButtonEventArgs e)

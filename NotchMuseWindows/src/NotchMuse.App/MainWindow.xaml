@@ -91,7 +91,30 @@
                 </StackPanel>
             </Grid>
             <StackPanel Grid.Row="1" x:Name="SettingsPage" Visibility="Collapsed" Margin="0,8,0,0">
-                <TextBlock Text="设置" FontSize="18" Margin="0,0,0,12"/><TextBlock Text="显示模式" Foreground="#97949A"/><ComboBox x:Name="ModeCombo" SelectionChanged="OnModeChanged" Margin="0,8,0,18" SelectedIndex="0"><ComboBoxItem Content="自由悬浮" Tag="FreeFloat"/><ComboBoxItem Content="顶部悬浮岛" Tag="TopIsland"/><ComboBoxItem Content="任务栏贴边" Tag="Taskbar"/></ComboBox><CheckBox x:Name="StartupCheck" Content="开机自启" Checked="OnStartupChanged" Unchecked="OnStartupChanged" Margin="0,0,0,10"/><TextBlock Text="时间偏移" Foreground="#97949A"/><StackPanel Orientation="Horizontal"><Button Content="−0.5s" Click="OnOffsetMinus" Style="{StaticResource CapsuleButton}"/><Button Content="重置" Click="OnOffsetReset" Style="{StaticResource CapsuleButton}"/><Button Content="+0.5s" Click="OnOffsetPlus" Style="{StaticResource CapsuleButton}"/></StackPanel>
+                <StackPanel x:Name="DisplaySettingsPage">
+                    <TextBlock Text="显示" FontSize="22" FontWeight="SemiBold"/>
+                    <Border Height="1" Background="#303037" Margin="0,14,0,18"/>
+                    <TextBlock Text="显示模式" Foreground="#97949A"/>
+                    <ComboBox x:Name="ModeCombo" SelectionChanged="OnModeChanged" Margin="0,8,0,18" SelectedIndex="0">
+                        <ComboBoxItem Content="自由悬浮" Tag="FreeFloat"/><ComboBoxItem Content="顶部悬浮岛" Tag="TopIsland"/><ComboBoxItem Content="任务栏贴边" Tag="Taskbar"/>
+                    </ComboBox>
+                    <CheckBox x:Name="StartupCheck" Content="开机自启" Checked="OnStartupChanged" Unchecked="OnStartupChanged" Margin="0,0,0,12"/>
+                    <TextBlock Text="时间偏移" Foreground="#97949A"/>
+                    <StackPanel Orientation="Horizontal"><Button Content="−0.5s" Click="OnOffsetMinus" Style="{StaticResource CapsuleButton}"/><Button Content="重置" Click="OnOffsetReset" Style="{StaticResource CapsuleButton}"/><Button Content="+0.5s" Click="OnOffsetPlus" Style="{StaticResource CapsuleButton}"/></StackPanel>
+                </StackPanel>
+                <StackPanel x:Name="AppearanceSettingsPage" Visibility="Collapsed">
+                    <TextBlock Text="外观" FontSize="22" FontWeight="SemiBold"/>
+                    <Border Height="1" Background="#303037" Margin="0,14,0,18"/>
+                    <TextBlock Text="歌词颜色" Foreground="#97949A" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal"><Button Content="" Background="#F7B45D" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#8FC7FF" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#B69CFF" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#85D3B0" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#F18F8F" Style="{StaticResource DotButton}" Click="OnAccentClick"/><Button Content="" Background="#ECE7D5" Style="{StaticResource DotButton}" Click="OnAccentClick"/></StackPanel>
+                </StackPanel>
+                <StackPanel x:Name="GeneralSettingsPage" Visibility="Collapsed">
+                    <TextBlock Text="通用" FontSize="22" FontWeight="SemiBold"/>
+                    <Border Height="1" Background="#303037" Margin="0,14,0,18"/>
+                    <CheckBox Content="锁定时启用鼠标穿透" IsChecked="True" IsEnabled="False" Margin="0,0,0,12"/>
+                    <TextBlock Text="全局快捷键" Foreground="#97949A"/>
+                    <TextBlock Text="Ctrl + Alt + L    锁定 / 解锁" Margin="0,6,0,0"/>
+                </StackPanel>
             </StackPanel>
         </Grid>
         <Border x:Name="CenterGuide" Width="1" Background="#55F7B45D" HorizontalAlignment="Center" VerticalAlignment="Stretch" Visibility="Collapsed" IsHitTestVisible="False"/>

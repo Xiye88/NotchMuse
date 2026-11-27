@@ -600,14 +600,36 @@
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,4,0,16"/>
 
-                        <!-- Background Capsule Toggle -->
-                        <Grid Margin="0,0,0,20">
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock x:Name="BgCapsuleLabel" Text="悬浮背景胶囊" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBlock x:Name="BgCapsuleDesc" Text="为桌面自由悬浮歌词叠加柔和磨砂胶囊底衬" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                        <!-- Floating Capsule Background Palette (5 Curated Presets + Custom + Opacity) -->
+                        <StackPanel Margin="0,0,0,16">
+                            <Grid Margin="0,0,0,10">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="BgCapsuleLabel" Text="胶囊背景颜色" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <TextBlock x:Name="BgCapsuleDesc" Text="实时作用于桌面自由悬浮歌词与顶部悬浮岛，自动适配浅/深字色" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <WrapPanel x:Name="CapsulePresetPanel" Margin="0,0,0,10"/>
+
+                            <!-- Custom Color Input + Native Picker (visible when Custom is selected) -->
+                            <StackPanel x:Name="CustomCapsuleBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12" Visibility="Collapsed">
+                                <Border x:Name="CustomCapsuleSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,0,8,0" MouseLeftButtonUp="OnPickCustomCapsuleColor"/>
+                                <TextBox x:Name="CustomCapsuleHexBox" Width="108" Height="30" Text="#3E3E44" MaxLength="9" TextChanged="OnCustomCapsuleHexChanged"/>
+                                <Button x:Name="PickCustomColorBtn" Content="系统取色…" Margin="8,0,0,0" Padding="12,5" Click="OnPickCustomCapsuleColor"/>
                             </StackPanel>
-                            <CheckBox x:Name="BgCapsuleToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnBgCapsuleChanged" Unchecked="OnBgCapsuleChanged"/>
-                        </Grid>
+
+                            <!-- Background Opacity Slider (30% - 100%) -->
+                            <Grid x:Name="CapsuleOpacityRow" Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="58"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="CapsuleOpacityLabel" Grid.Column="0" Text="背景不透明度" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                <Slider x:Name="CapsuleOpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="0.82" Margin="12,0" ValueChanged="OnCapsuleOpacityChanged"/>
+                                <TextBlock x:Name="CapsuleOpacityValueText" Grid.Column="2" Text="82%" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
 

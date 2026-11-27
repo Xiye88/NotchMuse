@@ -8,17 +8,11 @@ namespace NotchMuse.App.Overlays;
 
 public partial class TaskbarLyricsWindow : Window
 {
-    private const int GwlExStyle = -20;
-    private const int WsExTransparent = 0x00000020;
-    private const int WsExToolWindow = 0x00000080;
-    private const int WsExNoActivate = 0x08000000;
     private const uint SwpNoSize = 0x0001;
     private const uint SwpNoMove = 0x0002;
     private const uint SwpNoActivate = 0x0010;
     private static readonly IntPtr HwndTopmost = new(-1);
 
-    [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr hwnd, int index);
-    [DllImport("user32.dll")] private static extern int SetWindowLong(IntPtr hwnd, int index, int value);
     [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int cx, int cy, uint flags);
 
     private bool isLightTaskbar = true;
@@ -51,9 +45,7 @@ public partial class TaskbarLyricsWindow : Window
     private void ApplyWindowStyles()
     {
         if (handle == IntPtr.Zero) return;
-        var style = GetWindowLong(handle, GwlExStyle) | WsExToolWindow | WsExNoActivate;
-        style = locked ? (style | WsExTransparent) : (style & ~WsExTransparent);
-        SetWindowLong(handle, GwlExStyle, style);
+        WindowClickThroughHelper.ApplyClickThrough(handle, locked);
     }
 
     public void Reposition()

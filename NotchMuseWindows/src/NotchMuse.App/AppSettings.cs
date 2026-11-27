@@ -23,6 +23,16 @@ public enum LyricColorMode
     Gradient
 }
 
+public enum CapsuleBackgroundPreset
+{
+    SoftGray,
+    FrostedPaper,
+    ObsidianDark,
+    SlateBlue,
+    Transparent,
+    Custom
+}
+
 public enum PlayerStopBehavior
 {
     Hide,
@@ -58,6 +68,9 @@ public sealed class AppSettings
     public double AnimationSpeed { get; set; } = 1.0;
     public double LyricOpacity { get; set; } = 1.0;
     public bool BackgroundCapsuleEnabled { get; set; } = true;
+    public CapsuleBackgroundPreset CapsulePreset { get; set; } = CapsuleBackgroundPreset.SoftGray;
+    public string CapsuleCustomHex { get; set; } = "#3E3E44";
+    public double CapsuleBackgroundOpacity { get; set; } = 0.82;
     public AppearanceStylePreset StylePreset { get; set; } = AppearanceStylePreset.Warm;
     public string PlayerSelection { get; set; } = "auto";
     public PlayerStopBehavior StopBehavior { get; set; } = PlayerStopBehavior.Hide;
@@ -87,7 +100,12 @@ public sealed class AppSettings
                     parsed.FontSize = Math.Clamp(parsed.FontSize, 12, 40);
                     parsed.AnimationSpeed = Math.Clamp(parsed.AnimationSpeed, 0.5, 2.0);
                     parsed.LyricOpacity = Math.Clamp(parsed.LyricOpacity, 0.3, 1.0);
+                    parsed.CapsuleBackgroundOpacity = Math.Clamp(parsed.CapsuleBackgroundOpacity, 0.3, 1.0);
                     parsed.TimeOffsetSeconds = Math.Clamp(parsed.TimeOffsetSeconds, -10, 10);
+                    if (!parsed.BackgroundCapsuleEnabled && parsed.CapsulePreset == CapsuleBackgroundPreset.SoftGray)
+                    {
+                        parsed.CapsulePreset = CapsuleBackgroundPreset.Transparent;
+                    }
                     return parsed;
                 }
             }
@@ -110,4 +128,14 @@ public sealed class AppSettings
         catch (IOException) { }
         catch (UnauthorizedAccessException) { }
     }
+
+    public static (string Hex, double DefaultOpacity) GetCapsulePresetDefaults(CapsuleBackgroundPreset preset) => preset switch
+    {
+        CapsuleBackgroundPreset.SoftGray => ("#3E3E44", 0.82),
+        CapsuleBackgroundPreset.FrostedPaper => ("#F8F6F1", 0.88),
+        CapsuleBackgroundPreset.ObsidianDark => ("#18181C", 0.84),
+        CapsuleBackgroundPreset.SlateBlue => ("#1E293B", 0.82),
+        CapsuleBackgroundPreset.Transparent => ("#000000", 0.0),
+        _ => ("#3E3E44", 0.82)
+    };
 }

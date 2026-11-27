@@ -52,6 +52,7 @@ public partial class MainWindow : Window
     private readonly List<DesktopPreviewCard> previewCards = [];
     private readonly List<SweepLyricLineControl> lyricLineControls = [];
     private readonly Dictionary<AppearanceStylePreset, Border> presetCardMap = [];
+    private readonly Dictionary<CapsuleBackgroundPreset, Border> capsuleChipMap = [];
 
     private CancellationTokenSource? lookupCts;
     private PlaybackSnapshot? snapshot;
@@ -150,8 +151,9 @@ public partial class MainWindow : Window
         // 5. Missing Lyrics 6-Style Dropdown
         PopulateMissingAnimationCombo();
 
-        // 6. Appearance Swatches & 4 Typographic Style Preset Cards
+        // 6. Appearance Swatches, Capsule Background Presets & 4 Typographic Style Preset Cards
         RebuildAppearanceSwatches();
+        BuildCapsulePresetChips();
         BuildStylePresetCards();
     }
 
@@ -245,7 +247,9 @@ public partial class MainWindow : Window
         FontSizeSlider.Value = settings.FontSize;
         AnimSpeedSlider.Value = settings.AnimationSpeed;
         OpacitySlider.Value = settings.LyricOpacity;
-        BgCapsuleToggle.IsChecked = settings.BackgroundCapsuleEnabled;
+        CapsuleOpacitySlider.Value = settings.CapsuleBackgroundOpacity;
+        CustomCapsuleHexBox.Text = settings.CapsuleCustomHex;
+        UpdateCustomCapsuleControls();
 
         LangZhRadio.IsChecked = !settings.EnglishLanguage;
         LangEnRadio.IsChecked = settings.EnglishLanguage;
@@ -393,6 +397,135 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BuildCapsulePresetChips()
+    {
+        CapsulePresetPanel.Children.Clear();
+        capsuleChipMap.Clear();
+
+        var en = settings.EnglishLanguage;
+        var items = new (CapsuleBackgroundPreset Preset, string NameZh, string NameEn, string Hex)[]
+        {
+            (CapsuleBackgroundPreset.SoftGray, "柔和雾灰", "Soft Gray", "#3E3E44"),
+            (CapsuleBackgroundPreset.FrostedPaper, "磨砂奶白", "Frosted Paper", "#F8F6F1"),
+            (CapsuleBackgroundPreset.ObsidianDark, "经典黑胶", "Obsidian Dark", "#18181C"),
+            (CapsuleBackgroundPreset.SlateBlue, "深海雾蓝", "Slate Blue", "#1E293B"),
+            (CapsuleBackgroundPreset.Transparent, "极简无背景", "Transparent", ""),
+            (CapsuleBackgroundPreset.Custom, "自定义", "Custom", settings.CapsuleCustomHex)
+        };
+
+        foreach (var item in items)
+        {
+            var chip = new Border
+            {
+                CornerRadius = new CornerRadius(9),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(10, 6, 12, 6),
+                Margin = new Thickness(0, 0, 8, 8),
+                Cursor = System.Windows.Input.Cursors.Hand
+            };
+
+            var row = new StackPanel { Orientation = System.Windows.Controls.Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+
+            UIElement swatch;
+            if (item.Preset == CapsuleBackgroundPreset.Transparent)
+            {
+                // Clean diagonal slash circle indicating pure transparent mode
+                var grid = new Grid { Width = 15, Height = 15, Margin = new Thickness(0, 0, 7, 0) };
+                var ring = new System.Windows.Shapes.Ellipse { Width = 15, Height = 15, StrokeThickness = 1.2 };
+                ring.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, "TextSecondaryBrush");
+                var slash = new System.Windows.Shapes.Line { X1 = 3, Y1 = 12, X2 = 12, Y2 = 3, StrokeThickness = 1.2 };
+                slash.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, "AccentBrush");
+                grid.Children.Add(ring);
+                grid.Children.Add(slash);
+                swatch = grid;
+            }
+            else
+            {
+                swatch = new Border
+                {
+                    Width = 15,
+                    Height = 15,
+                    CornerRadius = new CornerRadius(7.5),
+                    Margin = new Thickness(0, 0, 7, 0),
+                    Background = new SolidColorBrush(ThemeManager.ParseColor(item.Hex, System.Windows.Media.Color.FromRgb(62, 62, 68))),
+                    BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(65, 128, 128, 128)),
+                    BorderThickness = new Thickness(0.8)
+                };
+            }
+
+            var label = new TextBlock
+            {
+                Text = en ? item.NameEn : item.NameZh,
+                FontSize = 12,
+                FontWeight = FontWeights.Medium,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            label.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+
+            row.Children.Add(swatch);
+            row.Children.Add(label);
+            chip.Child = row;
+
+            var captured = item.Preset;
+            chip.MouseLeftButtonUp += (_, _) => SelectCapsulePreset(captured);
+            capsuleChipMap[item.Preset] = chip;
+            CapsulePresetPanel.Children.Add(chip);
+        }
+
+        HighlightSelectedCapsuleChip();
+    }
+
+    private void SelectCapsulePreset(CapsuleBackgroundPreset preset)
+    {
+        initializing = true;
+        settings.CapsulePreset = preset;
+        settings.BackgroundCapsuleEnabled = preset != CapsuleBackgroundPreset.Transparent;
+        if (preset != CapsuleBackgroundPreset.Transparent && preset != CapsuleBackgroundPreset.Custom)
+        {
+            settings.CapsuleBackgroundOpacity = AppSettings.GetCapsulePresetDefaults(preset).DefaultOpacity;
+            CapsuleOpacitySlider.Value = settings.CapsuleBackgroundOpacity;
+        }
+        UpdateCustomCapsuleControls();
+        initializing = false;
+
+        settings.Save();
+        HighlightSelectedCapsuleChip();
+        ApplyAppearanceToAllViews();
+    }
+
+    private void HighlightSelectedCapsuleChip()
+    {
+        foreach (var (preset, chip) in capsuleChipMap)
+        {
+            if (preset == settings.CapsulePreset)
+            {
+                chip.SetResourceReference(Border.BackgroundProperty, "AccentSoftBrush");
+                chip.SetResourceReference(Border.BorderBrushProperty, "AccentBrush");
+                chip.BorderThickness = new Thickness(1.5);
+            }
+            else
+            {
+                chip.SetResourceReference(Border.BackgroundProperty, "CardBrush");
+                chip.SetResourceReference(Border.BorderBrushProperty, "BorderSubtleBrush");
+                chip.BorderThickness = new Thickness(1);
+            }
+        }
+    }
+
+    private void UpdateCustomCapsuleControls()
+    {
+        CustomCapsuleBar.Visibility = settings.CapsulePreset == CapsuleBackgroundPreset.Custom
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        CustomCapsuleSwatch.Background = new SolidColorBrush(
+            ThemeManager.ParseColor(settings.CapsuleCustomHex, System.Windows.Media.Color.FromRgb(62, 62, 68)));
+        CapsuleOpacityRow.IsEnabled = settings.CapsulePreset != CapsuleBackgroundPreset.Transparent;
+        CapsuleOpacityRow.Opacity = settings.CapsulePreset == CapsuleBackgroundPreset.Transparent ? 0.42 : 1.0;
+        CapsuleOpacityValueText.Text = settings.CapsulePreset == CapsuleBackgroundPreset.Transparent
+            ? "0%"
+            : $"{Math.Round(settings.CapsuleBackgroundOpacity * 100):0}%";
+    }
+
     private void BuildStylePresetCards()
     {
         StylePresetsHost.Children.Clear();
@@ -471,11 +604,21 @@ public partial class MainWindow : Window
         settings.FontSize = fontSize;
         settings.LyricOpacity = opacity;
         settings.BackgroundCapsuleEnabled = capsule;
+        settings.CapsulePreset = preset switch
+        {
+            AppearanceStylePreset.Warm => CapsuleBackgroundPreset.SoftGray,
+            AppearanceStylePreset.Minimal => CapsuleBackgroundPreset.FrostedPaper,
+            AppearanceStylePreset.Soft => CapsuleBackgroundPreset.SlateBlue,
+            _ => CapsuleBackgroundPreset.Transparent
+        };
+        if (settings.CapsulePreset != CapsuleBackgroundPreset.Transparent)
+            settings.CapsuleBackgroundOpacity = AppSettings.GetCapsulePresetDefaults(settings.CapsulePreset).DefaultOpacity;
         SyncControlsFromSettings();
         initializing = false;
 
         settings.Save();
         RebuildAppearanceSwatches();
+        HighlightSelectedCapsuleChip();
         HighlightSelectedPresetCard();
         ApplyAppearanceToAllViews();
     }
@@ -523,6 +666,7 @@ public partial class MainWindow : Window
         FontSizeValueText.Text = $"{Math.Round(settings.FontSize):0} px";
         AnimSpeedValueText.Text = $"{settings.AnimationSpeed:0.0}×";
         OpacityValueText.Text = $"{Math.Round(settings.LyricOpacity * 100):0}%";
+        UpdateCustomCapsuleControls();
     }
 
     private void UpdateOffsetReadout()
@@ -1009,8 +1153,10 @@ public partial class MainWindow : Window
         FontSizeLabel.Text = en ? "Font Size" : "字体大小";
         AnimSpeedLabel.Text = en ? "Animation Speed" : "动画速度";
         OpacityLabel.Text = en ? "Lyrics Opacity" : "歌词不透明度";
-        BgCapsuleLabel.Text = en ? "Background Capsule" : "悬浮背景胶囊";
-        BgCapsuleDesc.Text = en ? "Add a frosted backdrop capsule behind desktop floating lyrics" : "为桌面自由悬浮歌词叠加柔和磨砂胶囊底衬";
+        BgCapsuleLabel.Text = en ? "Capsule Background" : "胶囊背景颜色";
+        BgCapsuleDesc.Text = en ? "Applies live to Desktop Free Float and Top Island with adaptive ink" : "实时作用于桌面自由悬浮歌词与顶部悬浮岛，自动适配浅/深字色";
+        CapsuleOpacityLabel.Text = en ? "Background Opacity" : "背景不透明度";
+        PickCustomColorBtn.Content = en ? "Pick Color…" : "系统取色…";
         QuickPresetsLabel.Text = en ? "QUICK STYLE PRESETS" : "风格快捷预设";
 
         GeneralHeaderTitle.Text = en ? "General" : "通用";
@@ -1051,6 +1197,7 @@ public partial class MainWindow : Window
         }
         initializing = false;
 
+        BuildCapsulePresetChips();
         BuildStylePresetCards();
         UpdateNavVisuals();
         UpdateOffsetReadout();
@@ -1173,11 +1320,56 @@ public partial class MainWindow : Window
         ApplyAppearanceToAllViews();
     }
 
-    private void OnBgCapsuleChanged(object sender, RoutedEventArgs e)
+    private void OnCapsuleOpacityChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (initializing) return;
-        settings.BackgroundCapsuleEnabled = BgCapsuleToggle.IsChecked == true;
+        settings.CapsuleBackgroundOpacity = Math.Round(CapsuleOpacitySlider.Value, 2);
         settings.Save();
+        ApplyAppearanceToAllViews();
+    }
+
+    private void OnCustomCapsuleHexChanged(object sender, TextChangedEventArgs e)
+    {
+        if (initializing) return;
+        var raw = CustomCapsuleHexBox.Text.Trim();
+        if (!raw.StartsWith('#')) raw = "#" + raw;
+        if (raw.Length is 7 or 9)
+        {
+            var fallback = System.Windows.Media.Color.FromRgb(62, 62, 68);
+            var parsed = ThemeManager.ParseColor(raw, fallback);
+            if (parsed != fallback || string.Equals(raw, "#3E3E44", StringComparison.OrdinalIgnoreCase))
+            {
+                settings.CapsuleCustomHex = $"#{parsed.R:X2}{parsed.G:X2}{parsed.B:X2}";
+                settings.CapsulePreset = CapsuleBackgroundPreset.Custom;
+                settings.BackgroundCapsuleEnabled = true;
+                settings.Save();
+                BuildCapsulePresetChips();
+                ApplyAppearanceToAllViews();
+            }
+        }
+    }
+
+    private void OnPickCustomCapsuleColor(object sender, RoutedEventArgs e)
+    {
+        var current = ThemeManager.ParseColor(settings.CapsuleCustomHex, System.Windows.Media.Color.FromRgb(62, 62, 68));
+        using var dialog = new Forms.ColorDialog
+        {
+            FullOpen = true,
+            Color = System.Drawing.Color.FromArgb(current.R, current.G, current.B)
+        };
+        if (dialog.ShowDialog() != Forms.DialogResult.OK) return;
+
+        var c = dialog.Color;
+        var hex = $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+        initializing = true;
+        settings.CapsuleCustomHex = hex;
+        settings.CapsulePreset = CapsuleBackgroundPreset.Custom;
+        settings.BackgroundCapsuleEnabled = true;
+        CustomCapsuleHexBox.Text = hex;
+        initializing = false;
+
+        settings.Save();
+        BuildCapsulePresetChips();
         ApplyAppearanceToAllViews();
     }
 

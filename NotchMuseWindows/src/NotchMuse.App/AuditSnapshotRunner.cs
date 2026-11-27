@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -218,49 +219,74 @@ public static class AuditSnapshotRunner
         var canvas = new Grid
         {
             Width = 1040,
-            Height = 420,
+            Height = 520,
             Background = new LinearGradientBrush(
-                System.Windows.Media.Color.FromRgb(30, 33, 44),
-                System.Windows.Media.Color.FromRgb(18, 20, 27),
-                45)
+                System.Windows.Media.Color.FromRgb(42, 49, 64),
+                System.Windows.Media.Color.FromRgb(22, 24, 32),
+                35)
         };
 
-        // Top Island Overlay at top center
+        // 1. Top Island Overlay (Soft Gray #3E3E44 @ 82%)
+        var islandSettings = new AppSettings { AccentHex = settings.AccentHex, CapsulePreset = CapsuleBackgroundPreset.SoftGray, CapsuleBackgroundOpacity = 0.82, FontSize = 22 };
         var island = new FloatingLyricsWindow();
-        island.ConfigureMode(LyricsDisplayMode.TopIsland, settings);
+        island.ConfigureMode(LyricsDisplayMode.TopIsland, islandSettings);
         island.UpdateLyric("请你打开电视看看", "Please turn on the TV and take a look", 0.58, true);
         var islandVisual = (UIElement)island.Content;
         island.Content = null;
-        var islandHost = new Border
+        canvas.Children.Add(new Border
         {
             Width = 540,
             Height = 76,
             HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
             Child = islandVisual
-        };
-        canvas.Children.Add(islandHost);
+        });
 
-        // Free-Floating Desktop Overlay with Hover Mini-Toolbar in lower center
-        var floating = new FloatingLyricsWindow();
-        ThemeManager.ApplyAppTheme(AppThemeMode.Dark);
-        floating.ConfigureMode(LyricsDisplayMode.FreeFloat, settings);
-        floating.ShowHoverToolbarForPreview(true);
-        floating.UpdateLyric("多少人为生命在努力勇敢的走下去", "So many keep walking bravely for life", 0.66, true);
-        var floatVisual = (UIElement)floating.Content;
-        floating.Content = null;
-        var floatHost = new Border
+        // 2. Free-Floating Frosted Paper (#F8F6F1 @ 88%) with hover warm amber glow border + 5-button toolbar
+        var paperSettings = new AppSettings { AccentHex = "#E06D1B", CapsulePreset = CapsuleBackgroundPreset.FrostedPaper, CapsuleBackgroundOpacity = 0.88, FontSize = 22 };
+        var paperFloat = new FloatingLyricsWindow();
+        paperFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, paperSettings);
+        paperFloat.ShowHoverToolbarForPreview(true);
+        paperFloat.UpdateLyric("多少人为生命在努力勇敢的走下去", "So many keep walking bravely for life", 0.66, true);
+        var paperVisual = (UIElement)paperFloat.Content;
+        paperFloat.Content = null;
+        canvas.Children.Add(new Border
         {
             Width = 680,
             Height = 140,
             HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 70, 0, 0),
-            Child = floatVisual
-        };
-        canvas.Children.Add(floatHost);
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Thickness(0, 118, 0, 0),
+            Child = paperVisual
+        });
 
-        SaveVisualPng(canvas, filePath, 1040, 420);
+        // 3. Free-Floating Slate Blue (#1E293B @ 82%) + Transparent dual-layer shadow comparison row
+        var bottomRow = new UniformGrid
+        {
+            Columns = 2,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(24, 0, 24, 34)
+        };
+
+        var slateSettings = new AppSettings { AccentHex = "#38BDF8", CapsulePreset = CapsuleBackgroundPreset.SlateBlue, CapsuleBackgroundOpacity = 0.82, FontSize = 19 };
+        var slateFloat = new FloatingLyricsWindow();
+        slateFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, slateSettings);
+        slateFloat.UpdateLyric("深海雾蓝 · 晚风轻轻吹过", "Slate Blue capsule @ 82%", 0.72, true);
+        var slateVisual = (UIElement)slateFloat.Content;
+        slateFloat.Content = null;
+        bottomRow.Children.Add(new Border { Height = 110, Child = slateVisual });
+
+        var transSettings = new AppSettings { AccentHex = "#FF8A36", CapsulePreset = CapsuleBackgroundPreset.Transparent, FontSize = 19 };
+        var transFloat = new FloatingLyricsWindow();
+        transFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, transSettings);
+        transFloat.UpdateLyric("极简无背景 · 双层阴影高对比", "Transparent mode with adaptive text halo", 0.64, true);
+        var transVisual = (UIElement)transFloat.Content;
+        transFloat.Content = null;
+        bottomRow.Children.Add(new Border { Height = 110, Child = transVisual });
+
+        canvas.Children.Add(bottomRow);
+
+        SaveVisualPng(canvas, filePath, 1040, 520);
     }
 
     private static void WritePng(BitmapSource source, string filePath)

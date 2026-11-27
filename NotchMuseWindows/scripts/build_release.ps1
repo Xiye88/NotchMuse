@@ -9,7 +9,7 @@ $output = Join-Path $windowsRoot "artifacts\release"
 New-Item -ItemType Directory -Force $output | Out-Null
 $env:LIB = $null
 $dotnet = (Get-Command dotnet -ErrorAction Stop).Source
-& $dotnet publish $project -c $Configuration -r $Runtime --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true -o (Join-Path $output "publish")
+& $dotnet publish $project -c $Configuration -r $Runtime --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true -o (Join-Path $output "publish")
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 $portable = Join-Path $output "NotchMuse-Windows-win-x64-portable.exe"
 Copy-Item (Join-Path $output "publish\NotchMuse.App.exe") $portable -Force

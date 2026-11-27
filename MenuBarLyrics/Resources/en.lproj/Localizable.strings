@@ -228,3 +228,12 @@
 "Open Permission Settings" = "Open Permission Settings";
 "Accessibility permission needed for Left status bar" = "Accessibility permission needed for Left status bar";
 "Automation permission needed for %@" = "Automation permission needed for %@";
+
+/* E30: Default launch player & capsule background controls */
+"Default Launch Player" = "Default Launch Player";
+"Auto (Installed Music App)" = "Auto (Installed Music App)";
+"Do Not Auto-Launch" = "Do Not Auto-Launch";
+"Show Background Capsule" = "Show Background Capsule";
+"Background Opacity" = "Background Opacity";
+"Frosted Cream" = "Frosted Cream";
+"Deep Sea Mist" = "Deep Sea Mist";

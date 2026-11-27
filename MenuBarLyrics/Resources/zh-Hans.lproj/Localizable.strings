@@ -245,3 +245,12 @@
 "Toggle Sidebar" = "切换侧边栏";
 "Hide Sidebar" = "折叠侧边栏";
 "Show Sidebar" = "展开侧边栏";
+
+/* E30: 默认启动播放器与背景胶囊控制 */
+"Default Launch Player" = "默认启动播放器";
+"Auto (Installed Music App)" = "自动（优先已安装音乐软件）";
+"Do Not Auto-Launch" = "不自动启动";
+"Show Background Capsule" = "显示背景胶囊";
+"Background Opacity" = "背景不透明度";
+"Frosted Cream" = "磨砂奶白";
+"Deep Sea Mist" = "深海雾蓝";

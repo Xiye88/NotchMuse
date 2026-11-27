@@ -339,12 +339,20 @@ final class LyricSharePopoverController: NSViewController {
     private var selectedTemplate: LyricShareTemplate = .vinylDark
     private var lastRendered: (image: NSImage, pngData: Data)?
 
+    private let previewFrame = AppearanceSurfaceView()
     private let previewImageView = NSImageView()
     private let countLabel = NSTextField(labelWithString: "")
     private let copyButton = NSButton(title: "", target: nil, action: nil)
     private let saveButton = NSButton(title: "", target: nil, action: nil)
     private var templateButtons: [NSButton] = []
     private var lineCheckboxes: [NSButton] = []
+
+    var debugPreviewImage: NSImage? { previewImageView.image }
+
+    func debugSelectTemplate(_ template: LyricShareTemplate) {
+        selectedTemplate = template
+        refreshPreview()
+    }
 
     init(lines: [LyricLine], activeIndex: Int, trackTitle: String, artistName: String) {
         self.lines = lines
@@ -358,14 +366,34 @@ final class LyricSharePopoverController: NSViewController {
 
     override func loadView() {
         let isZh = AppPreferences.language == .simplifiedChinese
-        let root = NSView(frame: NSRect(x: 0, y: 0, width: 580, height: 420))
+        let root = NSView(frame: NSRect(x: 0, y: 0, width: 610, height: 456))
 
-        // Left: Live preview + template switcher + actions
+        // Left: Live @2x HD preview container + template switcher + actions
+        let previewBadge = NSTextField(labelWithString: isZh ? "实时预览 · @2x 高清出图" : "Live Preview · @2x Retina PNG")
+        previewBadge.font = .systemFont(ofSize: 11, weight: .medium)
+        previewBadge.textColor = .secondaryLabelColor
+        previewBadge.translatesAutoresizingMaskIntoConstraints = false
+
+        previewFrame.wantsLayer = true
+        previewFrame.surfaceColor = AppearanceSurfaceColors.deck
+        previewFrame.surfaceBorderColor = AppearanceSurfaceColors.border
+        previewFrame.layer?.cornerRadius = 12
+        previewFrame.layer?.cornerCurve = .continuous
+        previewFrame.layer?.borderWidth = 1
+        previewFrame.shadow = NSShadow()
+        previewFrame.layer?.shadowColor = NSColor.black.withAlphaComponent(0.24).cgColor
+        previewFrame.layer?.shadowOpacity = 0.25
+        previewFrame.layer?.shadowRadius = 10
+        previewFrame.layer?.shadowOffset = CGSize(width: 0, height: -4)
+        previewFrame.translatesAutoresizingMaskIntoConstraints = false
+
         previewImageView.imageScaling = .scaleProportionallyUpOrDown
         previewImageView.wantsLayer = true
-        previewImageView.layer?.cornerRadius = 10
+        previewImageView.layer?.cornerRadius = 9
+        previewImageView.layer?.cornerCurve = .continuous
         previewImageView.layer?.masksToBounds = true
         previewImageView.translatesAutoresizingMaskIntoConstraints = false
+        previewFrame.addSubview(previewImageView)
 
         let templateRow = NSStackView()
         templateRow.orientation = .horizontal
@@ -446,7 +474,8 @@ final class LyricSharePopoverController: NSViewController {
         listScroll.documentView = listDoc
         listScroll.translatesAutoresizingMaskIntoConstraints = false
 
-        root.addSubview(previewImageView)
+        root.addSubview(previewBadge)
+        root.addSubview(previewFrame)
         root.addSubview(templateRow)
         root.addSubview(actionRow)
         root.addSubview(listHeader)
@@ -454,21 +483,29 @@ final class LyricSharePopoverController: NSViewController {
         root.addSubview(listScroll)
 
         NSLayoutConstraint.activate([
-            previewImageView.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 16),
-            previewImageView.topAnchor.constraint(equalTo: root.topAnchor, constant: 16),
-            previewImageView.widthAnchor.constraint(equalToConstant: 248),
-            previewImageView.heightAnchor.constraint(equalToConstant: 312),
+            previewBadge.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 16),
+            previewBadge.topAnchor.constraint(equalTo: root.topAnchor, constant: 14),
 
-            templateRow.leadingAnchor.constraint(equalTo: previewImageView.leadingAnchor),
-            templateRow.trailingAnchor.constraint(equalTo: previewImageView.trailingAnchor),
-            templateRow.topAnchor.constraint(equalTo: previewImageView.bottomAnchor, constant: 10),
+            previewFrame.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 16),
+            previewFrame.topAnchor.constraint(equalTo: previewBadge.bottomAnchor, constant: 6),
+            previewFrame.widthAnchor.constraint(equalToConstant: 268),
+            previewFrame.heightAnchor.constraint(equalToConstant: 336),
 
-            actionRow.leadingAnchor.constraint(equalTo: previewImageView.leadingAnchor),
-            actionRow.trailingAnchor.constraint(equalTo: previewImageView.trailingAnchor),
-            actionRow.topAnchor.constraint(equalTo: templateRow.bottomAnchor, constant: 10),
+            previewImageView.leadingAnchor.constraint(equalTo: previewFrame.leadingAnchor, constant: 8),
+            previewImageView.trailingAnchor.constraint(equalTo: previewFrame.trailingAnchor, constant: -8),
+            previewImageView.topAnchor.constraint(equalTo: previewFrame.topAnchor, constant: 8),
+            previewImageView.bottomAnchor.constraint(equalTo: previewFrame.bottomAnchor, constant: -8),
 
-            listHeader.leadingAnchor.constraint(equalTo: previewImageView.trailingAnchor, constant: 16),
-            listHeader.topAnchor.constraint(equalTo: root.topAnchor, constant: 16),
+            templateRow.leadingAnchor.constraint(equalTo: previewFrame.leadingAnchor),
+            templateRow.trailingAnchor.constraint(equalTo: previewFrame.trailingAnchor),
+            templateRow.topAnchor.constraint(equalTo: previewFrame.bottomAnchor, constant: 10),
+
+            actionRow.leadingAnchor.constraint(equalTo: previewFrame.leadingAnchor),
+            actionRow.trailingAnchor.constraint(equalTo: previewFrame.trailingAnchor),
+            actionRow.topAnchor.constraint(equalTo: templateRow.bottomAnchor, constant: 8),
+
+            listHeader.leadingAnchor.constraint(equalTo: previewFrame.trailingAnchor, constant: 16),
+            listHeader.topAnchor.constraint(equalTo: root.topAnchor, constant: 14),
 
             countLabel.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -16),
             countLabel.centerYAnchor.constraint(equalTo: listHeader.centerYAnchor),

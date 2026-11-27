@@ -33,11 +33,21 @@ enum AppPreferences {
     static let bilingualLyricsKey = "BilingualLyricsEnabled"
     static let missingLyricsAnimationStyleKey = "MissingLyricsAnimationStyle"
     static let immersiveThemePresetKey = "ImmersiveLyricsThemePreset"
+    static let preferredLaunchPlayerKey = "PreferredLaunchPlayer"
     static var missingLyricsAnimationStyle: MissingLyricsAnimationStyle {
         MissingLyricsAnimationStyle(rawValue: UserDefaults.standard.string(forKey: missingLyricsAnimationStyleKey) ?? "") ?? .vinylSeek
     }
     static var immersiveThemePreset: ImmersiveLyricsThemePreset {
         ImmersiveLyricsThemePreset(rawValue: UserDefaults.standard.string(forKey: immersiveThemePresetKey) ?? "") ?? .followTheme
+    }
+    static var preferredLaunchPlayer: PreferredLaunchPlayer {
+        preferredLaunchPlayer(in: .standard)
+    }
+    static func preferredLaunchPlayer(in defaults: UserDefaults) -> PreferredLaunchPlayer {
+        PreferredLaunchPlayer.fromStored(defaults.string(forKey: preferredLaunchPlayerKey))
+    }
+    static func setPreferredLaunchPlayer(_ value: PreferredLaunchPlayer, in defaults: UserDefaults = .standard) {
+        defaults.set(value.storedValue, forKey: preferredLaunchPlayerKey)
     }
     static var bilingualLyricsEnabled: Bool {
         Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true &&
@@ -236,11 +246,72 @@ enum NotchBackgroundMode: String, CaseIterable {
     case custom = "Custom"
 }
 
+enum PreferredLaunchPlayer: Equatable, Sendable {
+    case auto
+    case none
+    case player(PlayerSource)
+
+    var storedValue: String {
+        switch self {
+        case .auto: return "auto"
+        case .none: return "none"
+        case .player(let source): return source.rawValue
+        }
+    }
+
+    static func fromStored(_ raw: String?) -> PreferredLaunchPlayer {
+        guard let raw, !raw.isEmpty, raw != "auto" else { return .auto }
+        if raw == "none" { return .none }
+        if let source = PlayerSource(rawValue: raw) {
+            return .player(source)
+        }
+        return .auto
+    }
+
+    @MainActor
+    static func installedPlayers() -> [PlayerSource] {
+        let priority: [PlayerSource] = [
+            .spotify, .sodaMusic, .netEaseMusic, .qqMusic, .kugouMusic, .youtubeMusic,
+            .lxMusic, .yesPlayMusic, .appleMusic
+        ]
+        let rest = PlayerSource.detectable.filter { !priority.contains($0) }
+        return (priority + rest).filter { source in
+            source.bundleIdentifiers.contains { NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) != nil }
+        }
+    }
+
+    @MainActor
+    func resolveApplicationURL() -> (url: URL, source: PlayerSource)? {
+        switch self {
+        case .none:
+            return nil
+        case .player(let source):
+            for bid in source.bundleIdentifiers {
+                if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bid) {
+                    return (url, source)
+                }
+            }
+            return nil
+        case .auto:
+            for source in Self.installedPlayers() {
+                for bid in source.bundleIdentifiers {
+                    if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bid) {
+                        return (url, source)
+                    }
+                }
+            }
+            return nil
+        }
+    }
+}
+
 enum NotchBackgroundPreset: String, CaseIterable {
     case orange = "Orange"
     case black = "Black"
     case white = "White"
     case softGray = "Soft Gray"
+    case frostedCream = "Frosted Cream"
+    case deepSeaMist = "Deep Sea Mist"
     case blue = "Blue"
     case custom = "Custom"
 
@@ -250,6 +321,8 @@ enum NotchBackgroundPreset: String, CaseIterable {
         case .black: NSColor(calibratedWhite: 0.22, alpha: 1)
         case .white: NSColor(calibratedWhite: 0.94, alpha: 1)
         case .softGray: NSColor(calibratedWhite: 0.27, alpha: 1)
+        case .frostedCream: NSColor(calibratedRed: 0.96, green: 0.95, blue: 0.92, alpha: 1)
+        case .deepSeaMist: NSColor(calibratedRed: 0.14, green: 0.24, blue: 0.36, alpha: 1)
         case .blue: NSColor(calibratedRed: 0.38, green: 0.56, blue: 0.72, alpha: 1)
         case .custom: nil
         }
@@ -317,11 +390,14 @@ final class SettingsWindowController: NSWindowController {
     private let languagePopUp = NSPopUpButton()
     private let appAppearanceControl = NSSegmentedControl(labels: AppAppearance.allCases.map { L10n.text($0.rawValue) }, trackingMode: .selectOne, target: nil, action: nil)
     private let playerPopUp = NSPopUpButton()
+    private let preferredLaunchPlayerPopUp = NSPopUpButton()
     private let playerStopBehaviorPopUp = NSPopUpButton()
     private let missingLyricsStylePopUp = NSPopUpButton()
     private let notchBackgroundSwitch = NSSwitch()
     private let notchBackgroundPresetPopUp = NSPopUpButton()
     private let notchBackgroundColorWell = NSColorWell()
+    private let notchBackgroundOpacitySlider = NSSlider(value: 82, minValue: 30, maxValue: 100, target: nil, action: nil)
+    private let notchBackgroundOpacityValue = NSTextField(string: "")
     private let notchBackgroundPaddingSlider = NSSlider(value: 40, minValue: 0, maxValue: 120, target: nil, action: nil)
     private let notchBackgroundPaddingValue = NSTextField(string: "")
     private let notchHideOnHoverSwitch = NSSwitch()
@@ -593,6 +669,47 @@ final class SettingsWindowController: NSWindowController {
             precondition(rendered!.pngData.starts(with: [0x89, 0x50, 0x4E, 0x47]), "Rendered bytes must have valid PNG signature")
             precondition(rendered!.image.size.width == LyricShareCardRenderer.logicalWidth && rendered!.image.size.height >= 500, "Rendered card dimensions must be valid")
         }
+        // E30: preferredLaunchPlayer persistence, live share card popover preview image, custom capsule background color + opacity
+        let savedLaunch = defaults.object(forKey: AppPreferences.preferredLaunchPlayerKey)
+        defer {
+            if let savedLaunch { defaults.set(savedLaunch, forKey: AppPreferences.preferredLaunchPlayerKey) }
+            else { defaults.removeObject(forKey: AppPreferences.preferredLaunchPlayerKey) }
+        }
+        AppPreferences.setPreferredLaunchPlayer(.none)
+        precondition(AppPreferences.preferredLaunchPlayer == .none, "Do Not Auto-Launch must persist")
+        AppPreferences.setPreferredLaunchPlayer(.player(.spotify))
+        precondition(AppPreferences.preferredLaunchPlayer == .player(.spotify), "Explicit launch player must persist")
+        AppPreferences.setPreferredLaunchPlayer(.auto)
+        precondition(AppPreferences.preferredLaunchPlayer == .auto, "Auto launch player must persist")
+
+        let shareVC = LyricSharePopoverController(
+            lines: sampleLines,
+            activeIndex: 2,
+            trackTitle: "Midnight Harbor",
+            artistName: "NotchMuse Studio"
+        )
+        _ = shareVC.view
+        precondition(shareVC.debugPreviewImage != nil, "Share popover must render live preview image on load")
+        shareVC.debugSelectTemplate(.mistySage)
+        precondition(shareVC.debugPreviewImage != nil, "Share popover must refresh live preview image on template switch")
+
+        let savedBgEnabled = defaults.object(forKey: AppPreferences.notchBackgroundEnabledKey)
+        let savedBgColor = defaults.object(forKey: AppPreferences.notchBackgroundColorKey)
+        let savedBgOpacity = defaults.object(forKey: AppPreferences.notchBackgroundOpacityKey)
+        defer {
+            if let savedBgEnabled { defaults.set(savedBgEnabled, forKey: AppPreferences.notchBackgroundEnabledKey) }
+            else { defaults.removeObject(forKey: AppPreferences.notchBackgroundEnabledKey) }
+            if let savedBgColor { defaults.set(savedBgColor, forKey: AppPreferences.notchBackgroundColorKey) }
+            else { defaults.removeObject(forKey: AppPreferences.notchBackgroundColorKey) }
+            if let savedBgOpacity { defaults.set(savedBgOpacity, forKey: AppPreferences.notchBackgroundOpacityKey) }
+            else { defaults.removeObject(forKey: AppPreferences.notchBackgroundOpacityKey) }
+        }
+        precondition(NotchBackgroundPreset.frostedCream.color != nil && NotchBackgroundPreset.deepSeaMist.color != nil, "New background presets must have valid colors")
+        let customTeal = NSColor(calibratedRed: 0.12, green: 0.48, blue: 0.52, alpha: 1)
+        AppPreferences.setColor(customTeal, forKey: AppPreferences.notchBackgroundColorKey)
+        precondition(AppPreferences.notchBackgroundPreset() == .custom, "Custom capsule background color must persist as custom")
+        defaults.set(0.65, forKey: AppPreferences.notchBackgroundOpacityKey)
+        precondition(abs(AppPreferences.notchBackgroundOpacity - 0.65) < 0.001, "Capsule background opacity must persist")
         print("Settings interaction self-test passed")
     }
     #endif
@@ -701,6 +818,12 @@ final class SettingsWindowController: NSWindowController {
         }
         playerPopUp.target = self
         playerPopUp.action = #selector(playerChanged)
+        populatePreferredLaunchPlayerPopUp()
+        preferredLaunchPlayerPopUp.target = self
+        preferredLaunchPlayerPopUp.action = #selector(preferredLaunchPlayerChanged)
+        notchBackgroundOpacitySlider.target = self
+        notchBackgroundOpacitySlider.action = #selector(notchBackgroundOpacityChanged)
+        configureNumericField(notchBackgroundOpacityValue, action: #selector(notchBackgroundOpacityEntered))
         for behavior in PlayerStopBehavior.allCases {
             playerStopBehaviorPopUp.addItem(withTitle: L10n.text(behavior.rawValue))
         }
@@ -745,19 +868,21 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue, unit: "pt")],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue, unit: "×")],
             [opacityLabel, valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
-            [label(L10n.text("Notch Background")), notchBackgroundSwitch],
+            [label(L10n.text("Show Background Capsule")), notchBackgroundSwitch],
             [label(L10n.text("Background Color")), backgroundColorControls()],
+            [label(L10n.text("Background Opacity")), valueRow(slider: notchBackgroundOpacitySlider, value: notchBackgroundOpacityValue, unit: "%")],
             [label(L10n.text("Background Side Padding")), valueRow(slider: notchBackgroundPaddingSlider, value: notchBackgroundPaddingValue, unit: "pt")],
             [label(L10n.text("Hide on Hover")), notchHideOnHoverSwitch]
         ])
         notchBackgroundRow = appearanceGrid.row(at: 4)
         notchBackgroundColorRow = appearanceGrid.row(at: 5)
-        notchHideOnHoverRow = appearanceGrid.row(at: 7)
+        notchHideOnHoverRow = appearanceGrid.row(at: 8)
         appearancePage.addArrangedSubview(card(content: cardBody(title: "Appearance", subtitle: "Customize the look of your lyrics.", grid: appearanceGrid, trailing: resetButton(for: .appearance)), showTopDivider: false))
         appearancePage.addArrangedSubview(quickPresetsCard())
         configure(page: generalPage)
         var generalRows: [[NSView]] = [
             [label(L10n.text("Music Player")), playerPopUp],
+            [label(L10n.text("Default Launch Player")), preferredLaunchPlayerPopUp],
             [label(L10n.text("When Player Stops")), playerStopBehaviorPopUp],
             [label(L10n.text("Launch at Login")), launchAtLoginSwitch],
             [label(L10n.text("Show in Dock")), showInDockSwitch],
@@ -1347,6 +1472,9 @@ final class SettingsWindowController: NSWindowController {
         notchBackgroundSwitch.state = AppPreferences.notchBackgroundEnabled ? .on : .off
         notchBackgroundPresetPopUp.selectItem(at: NotchBackgroundPreset.allCases.firstIndex(of: AppPreferences.notchBackgroundPreset()) ?? 1)
         notchBackgroundColorWell.color = AppPreferences.notchBackgroundColor
+        let bgOpacityPct = min(100, max(30, round(Double(AppPreferences.notchBackgroundOpacity) * 100)))
+        notchBackgroundOpacitySlider.doubleValue = bgOpacityPct
+        notchBackgroundOpacityValue.stringValue = String(format: "%.0f", bgOpacityPct)
         notchBackgroundPaddingSlider.doubleValue = Double(AppPreferences.notchBackgroundPadding)
         notchBackgroundPaddingValue.stringValue = String(format: "%.0f", notchBackgroundPaddingSlider.doubleValue)
         notchHideOnHoverSwitch.state = AppPreferences.notchHideOnHover ? .on : .off
@@ -1370,6 +1498,12 @@ final class SettingsWindowController: NSWindowController {
             playerPopUp.selectItem(at: idx)
         } else {
             playerPopUp.selectItem(at: 0)
+        }
+        let storedLaunch = AppPreferences.preferredLaunchPlayer.storedValue
+        if let idx = preferredLaunchPlayerPopUp.itemArray.firstIndex(where: { ($0.representedObject as? String) == storedLaunch }) {
+            preferredLaunchPlayerPopUp.selectItem(at: idx)
+        } else {
+            preferredLaunchPlayerPopUp.selectItem(at: 0)
         }
         playerStopBehaviorPopUp.selectItem(at: PlayerStopBehavior.allCases.firstIndex(of: AppPreferences.playerStopBehavior) ?? 0)
         missingLyricsStylePopUp.selectItem(at: MissingLyricsAnimationStyle.allCases.firstIndex(of: AppPreferences.missingLyricsAnimationStyle) ?? 0)
@@ -1404,9 +1538,12 @@ final class SettingsWindowController: NSWindowController {
         customWidthValue.isEnabled = customWidthSlider.isEnabled
         notchBackgroundRow?.isHidden = false
         notchBackgroundColorRow?.isHidden = false
-        notchBackgroundColorWell.isHidden = NotchBackgroundPreset.allCases.indices.contains(notchBackgroundPresetPopUp.indexOfSelectedItem)
-            ? NotchBackgroundPreset.allCases[notchBackgroundPresetPopUp.indexOfSelectedItem] != .custom
-            : true
+        notchBackgroundColorWell.isHidden = false
+        let bgOn = AppPreferences.notchBackgroundEnabled
+        notchBackgroundPresetPopUp.isEnabled = bgOn
+        notchBackgroundColorWell.isEnabled = bgOn
+        notchBackgroundOpacitySlider.isEnabled = bgOn
+        notchBackgroundOpacityValue.isEnabled = bgOn
         notchHideOnHoverRow?.isHidden = statusBarMode
     }
 
@@ -1621,6 +1758,62 @@ final class SettingsWindowController: NSWindowController {
     @objc private func notchBackgroundPaddingEntered() {
         commit(notchBackgroundPaddingValue, slider: notchBackgroundPaddingSlider,
                key: AppPreferences.notchBackgroundPaddingKey, minimum: 0, maximum: 120, format: "%.0f")
+    }
+
+    @objc private func notchBackgroundOpacityChanged() {
+        let pct = min(100, max(30, round(notchBackgroundOpacitySlider.doubleValue)))
+        UserDefaults.standard.set(pct / 100.0, forKey: AppPreferences.notchBackgroundOpacityKey)
+        notchBackgroundOpacityValue.stringValue = String(format: "%.0f", pct)
+        onSettingsChange()
+        updatePreview()
+    }
+
+    @objc private func notchBackgroundOpacityEntered() {
+        guard let pct = NumericInput.parse(notchBackgroundOpacityValue.stringValue, minimum: 30, maximum: 100) else {
+            notchBackgroundOpacityValue.stringValue = String(format: "%.0f", notchBackgroundOpacitySlider.doubleValue)
+            NSSound.beep()
+            return
+        }
+        notchBackgroundOpacitySlider.doubleValue = pct
+        notchBackgroundOpacityValue.stringValue = String(format: "%.0f", pct)
+        UserDefaults.standard.set(pct / 100.0, forKey: AppPreferences.notchBackgroundOpacityKey)
+        onSettingsChange()
+        updatePreview()
+    }
+
+    private func populatePreferredLaunchPlayerPopUp() {
+        preferredLaunchPlayerPopUp.removeAllItems()
+        let autoItem = NSMenuItem(title: L10n.text("Auto (Installed Music App)"), action: nil, keyEquivalent: "")
+        autoItem.representedObject = PreferredLaunchPlayer.auto.storedValue
+        preferredLaunchPlayerPopUp.menu?.addItem(autoItem)
+
+        let noneItem = NSMenuItem(title: L10n.text("Do Not Auto-Launch"), action: nil, keyEquivalent: "")
+        noneItem.representedObject = PreferredLaunchPlayer.none.storedValue
+        preferredLaunchPlayerPopUp.menu?.addItem(noneItem)
+
+        let installed = PreferredLaunchPlayer.installedPlayers()
+        if !installed.isEmpty {
+            preferredLaunchPlayerPopUp.menu?.addItem(.separator())
+            for source in installed {
+                let item = NSMenuItem(title: "\(L10n.text(source.rawValue))", action: nil, keyEquivalent: "")
+                item.representedObject = PreferredLaunchPlayer.player(source).storedValue
+                preferredLaunchPlayerPopUp.menu?.addItem(item)
+            }
+        }
+        let others = PlayerSource.detectable.filter { !installed.contains($0) }
+        if !others.isEmpty {
+            preferredLaunchPlayerPopUp.menu?.addItem(.separator())
+            for source in others {
+                let item = NSMenuItem(title: L10n.text(source.rawValue), action: nil, keyEquivalent: "")
+                item.representedObject = PreferredLaunchPlayer.player(source).storedValue
+                preferredLaunchPlayerPopUp.menu?.addItem(item)
+            }
+        }
+    }
+
+    @objc private func preferredLaunchPlayerChanged() {
+        guard let raw = preferredLaunchPlayerPopUp.selectedItem?.representedObject as? String else { return }
+        AppPreferences.setPreferredLaunchPlayer(PreferredLaunchPlayer.fromStored(raw))
     }
 
     private func updateCustomColorSwatch() {

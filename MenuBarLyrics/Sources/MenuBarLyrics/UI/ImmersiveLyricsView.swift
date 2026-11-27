@@ -1645,7 +1645,7 @@ final class ImmersiveLyricsView: NSView {
         let popover = NSPopover()
         popover.behavior = .transient
         popover.contentViewController = vc
-        popover.contentSize = NSSize(width: 580, height: 420)
+        popover.contentSize = NSSize(width: 610, height: 456)
         popover.show(relativeTo: shareButton.bounds, of: shareButton, preferredEdge: .maxY)
         sharePopover = popover
     }

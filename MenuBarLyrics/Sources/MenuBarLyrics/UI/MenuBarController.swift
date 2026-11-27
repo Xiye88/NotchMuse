@@ -897,6 +897,25 @@ final class MenuBarController: NSObject {
             }
             settingsWindowController?.onMediaCommand = { [weak self] command in
                 guard let self else { return }
+                if command == .playPause, self.currentPlayerTrack == nil {
+                    let preferred = AppPreferences.preferredLaunchPlayer
+                    if preferred == .none {
+                        return
+                    }
+                    if let target = preferred.resolveApplicationURL() {
+                        let config = NSWorkspace.OpenConfiguration()
+                        config.activates = false
+                        NSWorkspace.shared.openApplication(at: target.url, configuration: config) { _, _ in
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { [weak self] in
+                                SystemMediaTransport.send(.playPause, activeSource: target.source)
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                                    self?.startPoll()
+                                }
+                            }
+                        }
+                        return
+                    }
+                }
                 let activeSource = self.currentPlayerTrack?.playerSource ?? self.player.source
                 SystemMediaTransport.send(command, activeSource: activeSource)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {

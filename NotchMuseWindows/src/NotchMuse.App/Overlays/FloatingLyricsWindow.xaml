@@ -8,18 +8,20 @@
         Topmost="True"
         ResizeMode="NoResize"
         ShowActivated="False"
-        Width="680" Height="138"
+        FocusVisualStyle="{x:Null}"
+        Width="700" Height="176"
         MouseEnter="OnOverlayMouseEnter"
         MouseLeave="OnOverlayMouseLeave">
     <Window.Resources>
-        <!-- Dedicated high-contrast button template immune to global TextBlock Foreground style! -->
+        <!-- Dedicated high-contrast 6-button toolbar style immune to global light TextBlock style -->
         <Style x:Key="FloatingToolbarButton" TargetType="Button">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Foreground" Value="#F3F2EF"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Padding" Value="9,4"/>
+            <Setter Property="Padding" Value="8,4"/>
             <Setter Property="Margin" Value="1,0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -39,11 +41,46 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2AFFFFFF"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#2CFFFFFF"/>
                                 <Setter Property="Foreground" Value="#FF8A36"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#3DFFFFFF"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#42FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Clean 1-row quick color swatch dot -->
+        <Style x:Key="FloatingColorDot" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="Margin" Value="3.5,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Ring"
+                                CornerRadius="11"
+                                Padding="2"
+                                BorderThickness="1.6"
+                                BorderBrush="Transparent">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="9"
+                                    BorderBrush="#55FFFFFF"
+                                    BorderThickness="0.8"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Ring" Property="BorderBrush" Value="#D8FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Selected">
+                                <Setter TargetName="Ring" Property="BorderBrush" Value="#FF8A36"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -52,10 +89,10 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid FocusVisualStyle="{x:Null}">
         <!-- 1px Vertical Dashed Magnetic Center Snap Guide (shown while dragging in FreeFloat mode) -->
         <Line x:Name="SnapGuide"
-              X1="0" Y1="4" X2="0" Y2="134"
+              X1="0" Y1="4" X2="0" Y2="172"
               HorizontalAlignment="Center"
               VerticalAlignment="Stretch"
               Stroke="#CCE06D1B"
@@ -64,49 +101,80 @@
               Visibility="Collapsed"
               IsHitTestVisible="False"/>
 
-        <!-- Contiguous Hover Zone wrapping Toolbar + Capsule (#01000000 bridge prevents hover drop) -->
-        <StackPanel x:Name="OverlayStack"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Center"
-                    Background="Transparent">
-            <!-- Compact 5-Action Hover Mini-Toolbar (always high-contrast light text on dark frosted pill) -->
+        <!-- 3-Row Layout: Row 0 = Top Toolbar Slot (default), Row 1 = Lyric Capsule, Row 2 = Bottom Auto-Flip Slot -->
+        <Grid x:Name="OverlayGrid"
+              VerticalAlignment="Center"
+              HorizontalAlignment="Center"
+              Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Compact 6-Action Hover Mini-Toolbar + Inline 7-Dot Quick Color Tray -->
             <Border x:Name="HoverToolbarHost"
+                    Grid.Row="0"
                     HorizontalAlignment="Center"
                     Padding="8,0,8,7"
                     Background="#01000000"
                     Visibility="Collapsed">
-                <Border x:Name="HoverToolbar"
-                        Padding="5,3"
-                        CornerRadius="11"
-                        Background="#F219191F"
-                        BorderBrush="#42FFFFFF"
-                        BorderThickness="1">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#55000000" BlurRadius="12" ShadowDepth="2" Opacity="0.38"/>
-                    </Border.Effect>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button x:Name="LockMiniBtn" Content="锁定" Style="{StaticResource FloatingToolbarButton}" Click="OnLockClick"/>
-                        <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                        <Button x:Name="ModeMiniBtn" Content="任务栏" Style="{StaticResource FloatingToolbarButton}" Click="OnCycleModeClick"/>
-                        <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                        <Button x:Name="ThemeMiniBtn" Content="配色" Style="{StaticResource FloatingToolbarButton}" Click="OnOpenAppearanceClick"/>
-                        <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                        <Button x:Name="SettingsMiniBtn" Content="设置" Style="{StaticResource FloatingToolbarButton}" Click="OnOpenSettingsClick"/>
-                        <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                        <Button x:Name="HideMiniBtn" Content="隐藏" Style="{StaticResource FloatingToolbarButton}" Foreground="#D2D0CA" Click="OnHideClick"/>
-                    </StackPanel>
-                </Border>
+                <StackPanel HorizontalAlignment="Center">
+                    <!-- Feather-light 1-Row 7-Dot Quick Color Popover (toggled by 快捷配色) -->
+                    <Border x:Name="QuickColorPopover"
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,6"
+                            Padding="8,5"
+                            CornerRadius="14"
+                            Background="#F419191F"
+                            BorderBrush="#46FFFFFF"
+                            BorderThickness="1"
+                            Visibility="Collapsed">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#55000000" BlurRadius="12" ShadowDepth="2" Opacity="0.38"/>
+                        </Border.Effect>
+                        <StackPanel x:Name="QuickColorDotsHost" Orientation="Horizontal" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Main 6-Button Floating Control Bar -->
+                    <Border x:Name="HoverToolbar"
+                            Padding="5,3"
+                            CornerRadius="11"
+                            Background="#F219191F"
+                            BorderBrush="#42FFFFFF"
+                            BorderThickness="1">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#55000000" BlurRadius="12" ShadowDepth="2" Opacity="0.38"/>
+                        </Border.Effect>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="LockMiniBtn" Content="锁定" Style="{StaticResource FloatingToolbarButton}" ToolTip="锁定歌词并开启鼠标穿透 (Ctrl+Alt+L)" Click="OnLockClick"/>
+                            <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
+                            <Button x:Name="OrientationMiniBtn" Content="竖排" Style="{StaticResource FloatingToolbarButton}" ToolTip="切换横排 / 竖排歌词布局" Click="OnOrientationClick"/>
+                            <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
+                            <Button x:Name="ColorMiniBtn" Content="配色" Style="{StaticResource FloatingToolbarButton}" ToolTip="快捷切换 7 款主流歌词配色" Click="OnToggleQuickColorClick"/>
+                            <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
+                            <Button x:Name="OpenMainMiniBtn" Content="主窗口" Style="{StaticResource FloatingToolbarButton}" ToolTip="一键召唤并置前 NotchMuse 主界面" Click="OnOpenMainClick"/>
+                            <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
+                            <Button x:Name="SettingsMiniBtn" Content="设置" Style="{StaticResource FloatingToolbarButton}" ToolTip="打开 NotchMuse 设置页" Click="OnOpenSettingsClick"/>
+                            <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
+                            <Button x:Name="HideMiniBtn" Content="隐藏" Style="{StaticResource FloatingToolbarButton}" Foreground="#D2D0CA" ToolTip="隐藏桌面悬浮歌词（可从托盘恢复）" Click="OnHideClick"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </Border>
 
-            <!-- Draggable Frosted Lyrics Capsule (always >= #01000000 when unlocked for 100% Win32 HitTest) -->
+            <!-- Draggable Lyrics Capsule (zero blue focus ring; transparent mode gains soft frosted gray hover backdrop) -->
             <Border x:Name="LyricCapsule"
-                    CornerRadius="18"
-                    Padding="24,11"
+                    Grid.Row="1"
+                    CornerRadius="16"
+                    Padding="26,12"
                     Background="#D13E3E44"
                     BorderBrush="#2EFFFFFF"
                     BorderThickness="1"
                     HorizontalAlignment="Center"
                     Cursor="SizeAll"
+                    Focusable="False"
+                    FocusVisualStyle="{x:Null}"
                     MouseLeftButtonDown="OnCapsuleMouseDown"
                     MouseMove="OnCapsuleMouseMove"
                     MouseLeftButtonUp="OnCapsuleMouseUp"
@@ -114,7 +182,7 @@
                 <Border.Effect>
                     <DropShadowEffect x:Name="CapsuleShadow" Color="#50000000" BlurRadius="18" ShadowDepth="4" Opacity="0.30"/>
                 </Border.Effect>
-                <StackPanel HorizontalAlignment="Center">
+                <StackPanel x:Name="LyricContentStack" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid x:Name="SweepHost" HorizontalAlignment="Center">
                         <!-- Adaptive Shadow Backing Layer (activated in Transparent mode for dual-layer crisp outline) -->
                         <TextBlock x:Name="OutlineLyricText"
@@ -174,6 +242,6 @@
                                Visibility="Collapsed"/>
                 </StackPanel>
             </Border>
-        </StackPanel>
+        </Grid>
     </Grid>
 </Window>

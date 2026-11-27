@@ -162,8 +162,22 @@ public partial class MainWindow : Window
     {
         taskbarOverlay.OpenMainRequested += BringMainToFront;
         floatingOverlay.LockToggled += ToggleOverlayLock;
-        floatingOverlay.CycleModeRequested += () => SelectDisplayMode(LyricsDisplayMode.Taskbar);
-        floatingOverlay.OpenAppearanceRequested += () => { BringMainToFront(); NavigateTo("Appearance"); };
+        floatingOverlay.OrientationToggled += vertical =>
+        {
+            settings.FloatingVerticalLayout = vertical;
+            settings.Save();
+            floatingOverlay.ConfigureMode(LyricsDisplayMode.FreeFloat, settings);
+        };
+        floatingOverlay.QuickColorSelected += hex =>
+        {
+            initializing = true;
+            settings.ColorMode = LyricColorMode.Solid;
+            SolidColorRadio.IsChecked = true;
+            GradientColorRadio.IsChecked = false;
+            initializing = false;
+            SelectAccentColors(hex, settings.GradientEndHex);
+        };
+        floatingOverlay.OpenMainRequested += BringMainToFront;
         floatingOverlay.OpenSettingsRequested += () => { BringMainToFront(); NavigateTo("General"); };
         floatingOverlay.HideRequested += () => { overlaysEnabled = false; RefreshOverlayVisibility(); };
         floatingOverlay.PositionCommitted += (left, top) =>
@@ -196,7 +210,11 @@ public partial class MainWindow : Window
     {
         if (!IsVisible) Show();
         if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+        // Brief Topmost pulse reliably raises the window above browsers/players when summoned from a WS_EX_NOACTIVATE overlay
+        Topmost = true;
         Activate();
+        Topmost = false;
+        Focus();
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -1142,7 +1160,7 @@ public partial class MainWindow : Window
             var prog = distance == 0 ? currentLineSweepProgress : (i < targetIndex ? 1.0 : 0.0);
             if (forceAll || distance <= 4)
             {
-                lyricLineControls[i].ApplyVisualState(distance, prog, settings.FontSize, accentBrush, settings.LyricOpacity);
+                lyricLineControls[i].ApplyVisualState(distance, prog, settings.FontSize, accentBrush, settings.LyricOpacity, animate: !auditMode && !forceAll);
             }
         }
     }

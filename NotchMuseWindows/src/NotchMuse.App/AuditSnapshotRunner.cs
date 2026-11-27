@@ -266,47 +266,54 @@ public static class AuditSnapshotRunner
             Child = islandVisual
         });
 
-        // 2. Free-Floating Frosted Paper (#F8F6F1 @ 88%) with hover warm amber glow border + 5-button toolbar
-        var paperSettings = new AppSettings { AccentHex = "#E06D1B", CapsulePreset = CapsuleBackgroundPreset.FrostedPaper, CapsuleBackgroundOpacity = 0.88, FontSize = 22 };
-        var paperFloat = new FloatingLyricsWindow();
-        paperFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, paperSettings);
-        paperFloat.ShowHoverToolbarForPreview(true);
-        paperFloat.UpdateLyric("多少人为生命在努力勇敢的走下去", "So many keep walking bravely for life", 0.66, true);
-        var paperVisual = (UIElement)paperFloat.Content;
-        paperFloat.Content = null;
+        // 2. Transparent Mode on Hover: Soft translucent gray grab-backdrop + 6-button toolbar + 1-row 7-dot quick color popover ABOVE lyrics!
+        var transHoverSettings = new AppSettings
+        {
+            AccentHex = "#FF8A36",
+            BackgroundCapsuleEnabled = false,
+            CapsulePreset = CapsuleBackgroundPreset.Transparent,
+            FontSize = 22
+        };
+        var transHoverFloat = new FloatingLyricsWindow();
+        transHoverFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, transHoverSettings);
+        transHoverFloat.ShowHoverToolbarForPreview(show: true, openQuickColors: true, forceBelow: false);
+        transHoverFloat.UpdateLyric("多少人为生命在努力勇敢的走下去", "So many keep walking bravely for life", 0.66, true);
+        var transHoverVisual = (UIElement)transHoverFloat.Content;
+        transHoverFloat.Content = null;
         canvas.Children.Add(new Border
         {
-            Width = 680,
-            Height = 140,
+            Width = 700,
+            Height = 190,
             HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 118, 0, 0),
-            Child = paperVisual
+            Margin = new Thickness(0, 96, 0, 0),
+            Child = transHoverVisual
         });
 
-        // 3. Free-Floating Slate Blue (#1E293B @ 82%) + Transparent dual-layer shadow comparison row
+        // 3. Bottom comparison: Frosted Paper capsule + Slate Blue capsule
         var bottomRow = new UniformGrid
         {
             Columns = 2,
             VerticalAlignment = VerticalAlignment.Bottom,
-            Margin = new Thickness(24, 0, 24, 34)
+            Margin = new Thickness(24, 0, 24, 28)
         };
+
+        var paperSettings = new AppSettings { AccentHex = "#E06D1B", CapsulePreset = CapsuleBackgroundPreset.FrostedPaper, CapsuleBackgroundOpacity = 0.88, FontSize = 19 };
+        var paperFloat = new FloatingLyricsWindow();
+        paperFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, paperSettings);
+        paperFloat.UpdateLyric("磨砂奶白 · 柔和百搭浅色桌面", "Frosted Paper @ 88% · adaptive dark ink", 0.70, true);
+        var paperVisual = (UIElement)paperFloat.Content;
+        paperFloat.Content = null;
+        bottomRow.Children.Add(new Border { Height = 120, Child = paperVisual });
 
         var slateSettings = new AppSettings { AccentHex = "#38BDF8", CapsulePreset = CapsuleBackgroundPreset.SlateBlue, CapsuleBackgroundOpacity = 0.82, FontSize = 19 };
         var slateFloat = new FloatingLyricsWindow();
         slateFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, slateSettings);
-        slateFloat.UpdateLyric("深海雾蓝 · 晚风轻轻吹过", "Slate Blue capsule @ 82%", 0.72, true);
+        slateFloat.ShowHoverToolbarForPreview(show: true, openQuickColors: false, forceBelow: true);
+        slateFloat.UpdateLyric("贴近顶部边缘 · 工具栏自动翻转至下方", "Auto-flip toolbar below near screen top", 0.64, true);
         var slateVisual = (UIElement)slateFloat.Content;
         slateFloat.Content = null;
-        bottomRow.Children.Add(new Border { Height = 110, Child = slateVisual });
-
-        var transSettings = new AppSettings { AccentHex = "#FF8A36", CapsulePreset = CapsuleBackgroundPreset.Transparent, FontSize = 19 };
-        var transFloat = new FloatingLyricsWindow();
-        transFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, transSettings);
-        transFloat.UpdateLyric("极简无背景 · 双层阴影高对比", "Transparent mode with adaptive text halo", 0.64, true);
-        var transVisual = (UIElement)transFloat.Content;
-        transFloat.Content = null;
-        bottomRow.Children.Add(new Border { Height = 110, Child = transVisual });
+        bottomRow.Children.Add(new Border { Height = 148, Child = slateVisual });
 
         canvas.Children.Add(bottomRow);
 

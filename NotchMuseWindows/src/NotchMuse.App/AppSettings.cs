@@ -81,6 +81,7 @@ public sealed class AppSettings
     public double TimeOffsetSeconds { get; set; }
     public string DisplayScreen { get; set; } = "Primary";
     public bool OverlayLocked { get; set; }
+    public bool FloatingVerticalLayout { get; set; }
     public double? FloatingLeft { get; set; }
     public double? FloatingTop { get; set; }
 

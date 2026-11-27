@@ -212,5 +212,13 @@ public sealed class M4Tests
         Assert.Contains(players, p => p.Id == "soda");
         Assert.Contains(players, p => p.Id == "apple");
     }
+
+    [Theory]
+    [InlineData(0, 0, true)]
+    [InlineData(40, 0, true)]
+    [InlineData(72, 0, false)]
+    [InlineData(650, 0, false)]
+    public void FloatingToolbarAnchorsAboveAndFlipsOnlyNearTopEdge(double windowTop, double workTop, bool expectedBelow) =>
+        Assert.Equal(expectedBelow, NotchMuse.App.Overlays.FloatingLyricsWindow.ShouldFlipToolbarBelow(windowTop, workTop));
 }
 

@@ -1,15 +1,15 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 
 namespace NotchMuse.App.Controls;
 
 /// <summary>
-/// Centered lyric row with true glyph-clipped left-to-right color sweep (zero horizontal bar!)
-/// plus hover backdrop, right-aligned MM:SS timestamp, and click-to-seek.
+/// Centered lyric row with true glyph-clipped left-to-right color sweep (zero horizontal bar)
+/// and silky opacity + subtle vertical glide transitions — ZERO abrupt font-size scaling jump!
 /// </summary>
 public sealed class SweepLyricLineControl : Border
 {
@@ -20,10 +20,12 @@ public sealed class SweepLyricLineControl : Border
     private readonly TextBlock translationBlock = new();
     private readonly Border timePill = new();
     private readonly TextBlock timeText = new();
+    private readonly TranslateTransform glideTransform = new();
 
     private double sweepProgress;
     private int distanceFromActive = 99;
     private double baseFontSize = 22;
+    private bool wasActive;
 
     public double StartTime { get; }
     public string PrimaryText { get; }
@@ -38,10 +40,12 @@ public sealed class SweepLyricLineControl : Border
         TranslationText = translationText;
 
         CornerRadius = new CornerRadius(12);
-        Padding = new Thickness(24, 11, 24, 11);
+        // Constant uniform padding prevents any layout-reflow vertical jump on line transitions!
+        Padding = new Thickness(24, 12, 24, 12);
         Margin = new Thickness(12, 3, 12, 3);
         Background = System.Windows.Media.Brushes.Transparent;
         Cursor = System.Windows.Input.Cursors.Hand;
+        RenderTransform = glideTransform;
 
         var root = new Grid();
 
@@ -115,7 +119,7 @@ public sealed class SweepLyricLineControl : Border
             SeekRequested?.Invoke(StartTime);
         };
 
-        ApplyVisualState(99, 0, 22, null, 1.0);
+        ApplyVisualState(99, 0, 22, null, 1.0, animate: false);
     }
 
     public void SetShowBilingual(bool showBilingual)
@@ -125,68 +129,95 @@ public sealed class SweepLyricLineControl : Border
             : Visibility.Collapsed;
     }
 
-    public void ApplyVisualState(int distance, double progress, double activeFontSize, System.Windows.Media.Brush? customAccentBrush, double lyricOpacity)
+    public void ApplyVisualState(int distance, double progress, double activeFontSize, System.Windows.Media.Brush? customAccentBrush, double lyricOpacity, bool animate = true)
     {
         distanceFromActive = distance;
         sweepProgress = Math.Clamp(progress, 0, 1);
         baseFontSize = Math.Clamp(activeFontSize, 14, 34);
 
         var isActive = distance == 0;
-        var fontSize = isActive
-            ? baseFontSize
-            : distance == 1
-                ? Math.Max(13.5, baseFontSize * 0.74)
-                : Math.Max(12.5, baseFontSize * 0.67);
 
-        var weight = isActive ? FontWeights.Bold : (distance == 1 ? FontWeights.Medium : FontWeights.Normal);
+        // Uniform stable font size across all lines eliminates jarring block-scaling jumps!
+        // Visual hierarchy is expressed purely through crisp glyph sweep, weight, and smooth opacity/glide.
+        var stablePrimarySize = Math.Max(15, baseFontSize * 0.92);
+        var stableSubSize = Math.Max(11.5, stablePrimarySize * 0.62);
+        var weight = isActive ? FontWeights.Bold : FontWeights.Medium;
 
-        basePrimary.FontSize = fontSize;
+        basePrimary.FontSize = stablePrimarySize;
         basePrimary.FontWeight = weight;
-        sweepPrimary.FontSize = fontSize;
+        sweepPrimary.FontSize = stablePrimarySize;
         sweepPrimary.FontWeight = weight;
+        translationBlock.FontSize = stableSubSize;
 
-        translationBlock.FontSize = isActive ? Math.Max(12, baseFontSize * 0.59) : Math.Max(11, baseFontSize * 0.52);
+        var duration = TimeSpan.FromMilliseconds(220);
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
 
         if (isActive)
         {
-            basePrimary.Opacity = 0.34 * lyricOpacity;
             sweepPrimary.Visibility = Visibility.Visible;
-            sweepPrimary.Opacity = lyricOpacity;
             if (customAccentBrush is not null)
-            {
                 sweepPrimary.Foreground = customAccentBrush;
-            }
             else
-            {
                 sweepPrimary.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
-            }
+
             sweepPrimary.Effect = new DropShadowEffect
             {
-                Color = System.Windows.Media.Color.FromArgb(65, 224, 109, 27),
+                Color = System.Windows.Media.Color.FromArgb(62, 224, 109, 27),
                 BlurRadius = 10,
                 ShadowDepth = 0,
-                Opacity = 0.45
+                Opacity = 0.42
             };
-            translationBlock.Opacity = 0.82 * lyricOpacity;
-            Padding = new Thickness(24, 14, 24, 14);
+
+            AnimateOpacity(basePrimary, 0.36 * lyricOpacity, animate, duration, ease);
+            AnimateOpacity(sweepPrimary, lyricOpacity, animate, duration, ease);
+            AnimateOpacity(translationBlock, 0.86 * lyricOpacity, animate, duration, ease);
+
+            if (animate && !wasActive)
+            {
+                glideTransform.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(3.5, 0, TimeSpan.FromMilliseconds(240)) { EasingFunction = ease });
+            }
+            else if (!animate)
+            {
+                glideTransform.BeginAnimation(TranslateTransform.YProperty, null);
+                glideTransform.Y = 0;
+            }
         }
         else
         {
             var fade = distance switch
             {
-                1 => 0.62,
-                2 => 0.40,
-                3 => 0.28,
-                _ => 0.20
+                1 => 0.56,
+                2 => 0.36,
+                3 => 0.25,
+                _ => 0.18
             };
-            basePrimary.Opacity = fade * lyricOpacity;
             sweepPrimary.Visibility = Visibility.Collapsed;
             sweepPrimary.Effect = null;
-            translationBlock.Opacity = fade * 0.78 * lyricOpacity;
-            Padding = new Thickness(24, 10, 24, 10);
+
+            AnimateOpacity(basePrimary, fade * lyricOpacity, animate, duration, ease);
+            AnimateOpacity(translationBlock, fade * 0.78 * lyricOpacity, animate, duration, ease);
+            if (!animate)
+            {
+                glideTransform.BeginAnimation(TranslateTransform.YProperty, null);
+                glideTransform.Y = 0;
+            }
         }
 
+        wasActive = isActive;
         UpdateClipGeometry();
+    }
+
+    private static void AnimateOpacity(UIElement target, double to, bool animate, TimeSpan duration, IEasingFunction ease)
+    {
+        if (animate)
+        {
+            target.BeginAnimation(OpacityProperty, new DoubleAnimation(to, duration) { EasingFunction = ease });
+        }
+        else
+        {
+            target.BeginAnimation(OpacityProperty, null);
+            target.Opacity = to;
+        }
     }
 
     public void UpdateSweepProgress(double progress)

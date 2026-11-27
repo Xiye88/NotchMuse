@@ -260,3 +260,8 @@
 "Quick Colors" = "快捷配色";
 "Open Main Window" = "打开主窗口（歌词页）";
 "Preferences" = "偏好设置";
+
+/* E33: 悬浮歌词单/双行模式 */
+"Floating Lines" = "悬浮歌词行数";
+"Single Line" = "单行";
+"Double Line" = "双行";

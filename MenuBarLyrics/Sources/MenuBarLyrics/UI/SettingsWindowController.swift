@@ -434,6 +434,7 @@ final class SettingsWindowController: NSWindowController {
     private var notchBackgroundColorRow: NSGridRow?
     private var notchHideOnHoverRow: NSGridRow?
     private let freeOrientation = NSSegmentedControl(labels: [L10n.text("Horizontal"), L10n.text("Vertical")], trackingMode: .selectOne, target: nil, action: nil)
+    private let freeLineModeControl = NSSegmentedControl(labels: [L10n.text("Single Line"), L10n.text("Double Line")], trackingMode: .selectOne, target: nil, action: nil)
     private let freeLock = NSSwitch()
     private let freePassThrough = NSSwitch()
     private var freeCard: NSView?
@@ -961,12 +962,15 @@ final class SettingsWindowController: NSWindowController {
         displayPage.addArrangedSubview(card(content: cardBody(title: "Display", subtitle: L10n.text("Choose how and where lyrics appear."), grid: displayGrid, trailing: resetButton(for: .display)), showTopDivider: true))
         freeOrientation.target = self
         freeOrientation.action = #selector(freeOptionsChanged)
+        freeLineModeControl.target = self
+        freeLineModeControl.action = #selector(freeOptionsChanged)
         freeLock.target = self
         freeLock.action = #selector(freeLockChanged)
         freePassThrough.target = self
         freePassThrough.action = #selector(freeOptionsChanged)
         let freeGrid = grid([
             [label(L10n.text("Orientation")), freeOrientation],
+            [label(L10n.text("Floating Lines")), freeLineModeControl],
             [label(L10n.text("Lock Position")), freeLock],
             [label(L10n.text("Click Through")), freePassThrough],
             [NSButton(title: L10n.text("Move Lyrics"), target: self, action: #selector(editFreeLyrics)),
@@ -1488,6 +1492,7 @@ final class SettingsWindowController: NSWindowController {
         previewModeControl.selectedSegment = displayModeControl.selectedSegment
         preview.mode = AppPreferences.displayMode
         freeOrientation.selectedSegment = FreeLyricsPreferences.vertical ? 1 : 0
+        freeLineModeControl.selectedSegment = FreeLyricsPreferences.lineMode == .double ? 1 : 0
         freeLock.state = UserDefaults.standard.bool(forKey: FreeLyricsPreferences.lockedKey) ? .on : .off
         freePassThrough.state = UserDefaults.standard.bool(forKey: FreeLyricsPreferences.passThroughKey) ? .on : .off
         positionControl.selectedSegment = LyricsPosition.allCases.firstIndex(of: AppPreferences.position) ?? 1
@@ -1590,6 +1595,8 @@ final class SettingsWindowController: NSWindowController {
 
     @objc private func freeOptionsChanged() {
         UserDefaults.standard.set(freeOrientation.selectedSegment == 1, forKey: FreeLyricsPreferences.verticalKey)
+        let lineMode: FreeLyricsLineMode = freeLineModeControl.selectedSegment == 1 ? .double : .single
+        UserDefaults.standard.set(lineMode.rawValue, forKey: FreeLyricsPreferences.lineModeKey)
         UserDefaults.standard.set(freeLock.state == .on, forKey: FreeLyricsPreferences.lockedKey)
         UserDefaults.standard.set(freePassThrough.state == .on, forKey: FreeLyricsPreferences.passThroughKey)
         onSettingsChange()

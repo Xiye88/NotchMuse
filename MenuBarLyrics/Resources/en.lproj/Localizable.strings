@@ -243,3 +243,8 @@
 "Quick Colors" = "Quick Colors";
 "Open Main Window" = "Open Main Window (Lyrics)";
 "Preferences" = "Preferences";
+
+/* E33: Floating single/double line mode */
+"Floating Lines" = "Floating Lines";
+"Single Line" = "Single Line";
+"Double Line" = "Double Line";

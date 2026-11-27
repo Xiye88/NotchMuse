@@ -154,7 +154,22 @@ enum FreeLyricsSelfTests {
         check(FreeLyricsPreferences.load(vertical: false, defaults: defaults) != nil, "mouse up persists position")
         interaction.selectQuickColorPreset(.orange)
         check(defaults.string(forKey: AppPreferences.colorPresetKey) == LyricsColorPreset.orange.rawValue, "toolbar color shortcut uses existing palette preference")
+        // E33 checks: 3 curated gradients, tight hover frame width, single/double line mode, and 6-button tooltips
+        check(FreeLyricsInteraction.testCuratedGradientCount == 3, "quick color popover exposes 3 curated gradients")
+        let sunsetStart = NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1)
+        let sunsetEnd = NSColor(calibratedRed: 1.0, green: 0.302, blue: 0.553, alpha: 1)
+        interaction.selectQuickColorPreset(.customGradient, customColor: sunsetStart, customEndColor: sunsetEnd)
+        check(defaults.string(forKey: AppPreferences.colorPresetKey) == LyricsColorPreset.customGradient.rawValue, "quick gradient dot switches to custom gradient preset")
+        interaction.updateContentLayout(rect: NSRect(x: 120, y: 0, width: 180, height: 48), hasCapsuleBackground: false)
+        check(dragSurface.activeHighlightFrame.width == 180 && dragSurface.activeHighlightFrame.width < dragSurface.bounds.width, "hover frame tightly fits lyric width instead of full window")
+        defaults.set(FreeLyricsLineMode.double.rawValue, forKey: FreeLyricsPreferences.lineModeKey)
+        check(FreeLyricsPreferences.lineMode(in: defaults) == .double, "double-line floating lyrics mode persists")
+        defaults.set(FreeLyricsLineMode.single.rawValue, forKey: FreeLyricsPreferences.lineModeKey)
+        check(FreeLyricsPreferences.lineMode(in: defaults) == .single, "single-line floating lyrics mode persists")
         check(interaction.testToolbar.subviews.count == 6, "toolbar exposes 6 icon controls with tooltips")
+        for subview in interaction.testToolbar.subviews {
+            check((subview.toolTip ?? "").isEmpty == false, "every toolbar button carries a clear tooltip")
+        }
         var openedMain = false
         interaction.onOpenMainWindow = { openedMain = true }
         (interaction.testToolbar.subviews[3] as! NSButton).performClick(nil)

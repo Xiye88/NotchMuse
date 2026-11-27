@@ -84,14 +84,24 @@ enum FreeLyricsSnap {
     }
 }
 
+enum FreeLyricsLineMode: String, CaseIterable, Sendable {
+    case single = "Single"
+    case double = "Double"
+}
+
 enum FreeLyricsPreferences {
     static let verticalKey = "FreeLyricsVertical"
     static let lockedKey = "FreeLyricsLocked"
     static let passThroughKey = "FreeLyricsPassThrough"
+    static let lineModeKey = "FreeLyricsLineMode"
     static let horizontalAnchorKey = "FreeLyricsHorizontalAnchor"
     static let verticalAnchorKey = "FreeLyricsVerticalAnchor"
-    static let keys = [verticalKey, lockedKey, passThroughKey, horizontalAnchorKey, verticalAnchorKey]
+    static let keys = [verticalKey, lockedKey, passThroughKey, lineModeKey, horizontalAnchorKey, verticalAnchorKey]
     static var vertical: Bool { UserDefaults.standard.bool(forKey: verticalKey) }
+    static var lineMode: FreeLyricsLineMode { lineMode(in: .standard) }
+    static func lineMode(in defaults: UserDefaults) -> FreeLyricsLineMode {
+        FreeLyricsLineMode(rawValue: defaults.string(forKey: lineModeKey) ?? "") ?? .single
+    }
     static func anchorKey(vertical: Bool) -> String { vertical ? verticalAnchorKey : horizontalAnchorKey }
     static func load(vertical: Bool, defaults: UserDefaults = .standard) -> FreeLyricsAnchor? {
         defaults.data(forKey: anchorKey(vertical: vertical)).flatMap { try? JSONDecoder().decode(FreeLyricsAnchor.self, from: $0) }
@@ -130,10 +140,14 @@ private final class FreeLyricsHoverView: NSVisualEffectView {
 
 @MainActor
 private final class PillIconButton: NSButton {
+    var onHoverChange: ((Bool) -> Void)?
     private var tracking: NSTrackingArea?
     private var isPointerInside = false {
         didSet {
-            layer?.backgroundColor = isPointerInside ? NSColor.white.withAlphaComponent(0.14).cgColor : NSColor.clear.cgColor
+            if isPointerInside != oldValue {
+                layer?.backgroundColor = isPointerInside ? NSColor.white.withAlphaComponent(0.14).cgColor : NSColor.clear.cgColor
+                onHoverChange?(isPointerInside)
+            }
         }
     }
 
@@ -160,6 +174,10 @@ private final class PillIconButton: NSButton {
 
 @MainActor
 final class FreeLyricsDragSurfaceView: NSView {
+    private let highlightLayer = CALayer()
+    private(set) var tightContentRect: NSRect = .zero
+    private(set) var hasCapsuleBackground = false
+
     var isDragEnabled = false {
         didSet {
             updateSurfaceStyle()
@@ -186,25 +204,58 @@ final class FreeLyricsDragSurfaceView: NSView {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
-        layer?.cornerRadius = 14
-        layer?.cornerCurve = .continuous
-        layer?.borderWidth = 0.75
-        layer?.borderColor = NSColor.clear.cgColor
         layer?.backgroundColor = NSColor.clear.cgColor
+        highlightLayer.cornerRadius = 14
+        highlightLayer.cornerCurve = .continuous
+        highlightLayer.borderWidth = 0.75
+        highlightLayer.borderColor = NSColor.clear.cgColor
+        highlightLayer.backgroundColor = NSColor.clear.cgColor
+        layer?.addSublayer(highlightLayer)
     }
 
     required init?(coder: NSCoder) { nil }
 
+    func updateContentLayout(rect: NSRect, hasCapsuleBackground: Bool) {
+        self.tightContentRect = rect
+        self.hasCapsuleBackground = hasCapsuleBackground
+        updateSurfaceStyle()
+    }
+
+    override func layout() {
+        super.layout()
+        updateSurfaceStyle()
+    }
+
+    var activeHighlightFrame: NSRect {
+        let candidate = tightContentRect.isEmpty ? bounds : tightContentRect
+        let clampedW = min(bounds.width, max(60, candidate.width))
+        let clampedH = min(bounds.height, max(28, candidate.height))
+        let x = min(max(0, candidate.minX), max(0, bounds.width - clampedW))
+        let y = min(max(0, candidate.minY), max(0, bounds.height - clampedH))
+        return NSRect(x: x, y: y, width: clampedW, height: clampedH)
+    }
+
     private func updateSurfaceStyle() {
         CATransaction.begin()
         CATransaction.setAnimationDuration(0.14)
+        let targetFrame = activeHighlightFrame
+        highlightLayer.frame = targetFrame
+        highlightLayer.cornerRadius = min(16, targetFrame.height / 2)
         if isDragEnabled && (isHoveredNow || isDraggingNow) {
-            let alpha: CGFloat = isDraggingNow ? 0.56 : 0.42
-            layer?.backgroundColor = NSColor(calibratedRed: 0.16, green: 0.16, blue: 0.18, alpha: alpha).cgColor
-            layer?.borderColor = NSColor.white.withAlphaComponent(isDraggingNow ? 0.24 : 0.14).cgColor
+            if hasCapsuleBackground {
+                // Never draw a second gray box behind an existing capsule; highlight with crisp 1.5pt warm amber border
+                highlightLayer.backgroundColor = NSColor.clear.cgColor
+                highlightLayer.borderWidth = 1.5
+                highlightLayer.borderColor = NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: isDraggingNow ? 0.92 : 0.75).cgColor
+            } else {
+                let alpha: CGFloat = isDraggingNow ? 0.54 : 0.40
+                highlightLayer.backgroundColor = NSColor(calibratedRed: 0.16, green: 0.16, blue: 0.18, alpha: alpha).cgColor
+                highlightLayer.borderWidth = 0.75
+                highlightLayer.borderColor = NSColor.white.withAlphaComponent(isDraggingNow ? 0.24 : 0.14).cgColor
+            }
         } else {
-            layer?.backgroundColor = NSColor.clear.cgColor
-            layer?.borderColor = NSColor.clear.cgColor
+            highlightLayer.backgroundColor = NSColor.clear.cgColor
+            highlightLayer.borderColor = NSColor.clear.cgColor
         }
         CATransaction.commit()
     }
@@ -247,16 +298,26 @@ private final class CenterSnapGuideView: NSView {
 
 @MainActor
 private final class QuickColorDotButton: NSButton {
-    let swatchColor: NSColor
+    let swatchColors: [NSColor]
     let preset: LyricsColorPreset
-    let customSolidColor: NSColor?
+    let customStartColor: NSColor?
+    let customEndColor: NSColor?
     private var isHovered = false { didSet { needsDisplay = true } }
     private var tracking: NSTrackingArea?
 
-    init(title: String, swatchColor: NSColor, preset: LyricsColorPreset, customSolidColor: NSColor? = nil, target: AnyObject?, action: Selector?) {
-        self.swatchColor = swatchColor
+    init(
+        title: String,
+        swatchColors: [NSColor],
+        preset: LyricsColorPreset,
+        customStartColor: NSColor? = nil,
+        customEndColor: NSColor? = nil,
+        target: AnyObject?,
+        action: Selector?
+    ) {
+        self.swatchColors = swatchColors
         self.preset = preset
-        self.customSolidColor = customSolidColor
+        self.customStartColor = customStartColor
+        self.customEndColor = customEndColor
         super.init(frame: .zero)
         self.title = ""
         self.isBordered = false
@@ -266,8 +327,8 @@ private final class QuickColorDotButton: NSButton {
         self.action = action
         self.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            widthAnchor.constraint(equalToConstant: 24),
-            heightAnchor.constraint(equalToConstant: 24)
+            widthAnchor.constraint(equalToConstant: 22),
+            heightAnchor.constraint(equalToConstant: 22)
         ])
     }
 
@@ -290,22 +351,30 @@ private final class QuickColorDotButton: NSButton {
     override func mouseExited(with event: NSEvent) { isHovered = false }
 
     override func draw(_ dirtyRect: NSRect) {
-        let inset: CGFloat = isHovered ? 2.5 : 3.5
+        let inset: CGFloat = isHovered ? 2.0 : 3.0
         let dotRect = bounds.insetBy(dx: inset, dy: inset)
-        swatchColor.setFill()
-        NSBezierPath(ovalIn: dotRect).fill()
-        NSColor.white.withAlphaComponent(isHovered ? 0.72 : 0.28).setStroke()
-        let ring = NSBezierPath(ovalIn: dotRect)
-        ring.lineWidth = isHovered ? 1.5 : 0.75
-        ring.stroke()
+        let circle = NSBezierPath(ovalIn: dotRect)
+        if swatchColors.count >= 2, let gradient = NSGradient(colors: swatchColors) {
+            NSGraphicsContext.saveGraphicsState()
+            circle.addClip()
+            gradient.draw(in: dotRect, angle: -45)
+            NSGraphicsContext.restoreGraphicsState()
+        } else {
+            (swatchColors.first ?? .white).setFill()
+            circle.fill()
+        }
+        NSColor.white.withAlphaComponent(isHovered ? 0.78 : 0.28).setStroke()
+        circle.lineWidth = isHovered ? 1.5 : 0.75
+        circle.stroke()
     }
 }
 
 @MainActor
 private final class QuickColorPopoverController: NSViewController {
-    private let onPick: (LyricsColorPreset, NSColor?) -> Void
+    static let curatedGradientCount = 3
+    private let onPick: (LyricsColorPreset, NSColor?, NSColor?) -> Void
 
-    init(onPick: @escaping (LyricsColorPreset, NSColor?) -> Void) {
+    init(onPick: @escaping (LyricsColorPreset, NSColor?, NSColor?) -> Void) {
         self.onPick = onPick
         super.init(nibName: nil, bundle: nil)
     }
@@ -314,7 +383,7 @@ private final class QuickColorPopoverController: NSViewController {
 
     override func loadView() {
         let isZh = AppPreferences.language == .simplifiedChinese
-        let entries: [(String, NSColor, LyricsColorPreset, NSColor?)] = [
+        let solids: [(String, NSColor, LyricsColorPreset, NSColor?)] = [
             (isZh ? "纯白" : "Pure White", .white, .white, nil),
             (isZh ? "暖琥珀" : "Warm Amber", NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1), .orange, nil),
             (isZh ? "天青蓝" : "Sky Blue", NSColor(calibratedRed: 0.220, green: 0.741, blue: 0.973, alpha: 1), .blue, nil),
@@ -323,24 +392,57 @@ private final class QuickColorPopoverController: NSViewController {
             (isZh ? "柔紫" : "Soft Purple", NSColor(calibratedRed: 0.72, green: 0.54, blue: 0.96, alpha: 1), .purple, nil),
             (isZh ? "墨黑" : "Ink Black", NSColor(calibratedRed: 0.11, green: 0.11, blue: 0.13, alpha: 1), .custom, NSColor(calibratedRed: 0.11, green: 0.11, blue: 0.13, alpha: 1))
         ]
-        let buttons = entries.map { entry in
+        let gradients: [(String, NSColor, NSColor)] = [
+            (isZh ? "暖日落橙粉" : "Warm Sunset",
+             NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1),
+             NSColor(calibratedRed: 1.0, green: 0.302, blue: 0.553, alpha: 1)),
+            (isZh ? "极光青紫" : "Aurora Sky",
+             NSColor(calibratedRed: 0.220, green: 0.741, blue: 0.973, alpha: 1),
+             NSColor(calibratedRed: 0.659, green: 0.333, blue: 0.969, alpha: 1)),
+            (isZh ? "薄荷晴空" : "Mint Breeze",
+             NSColor(calibratedRed: 0.204, green: 0.827, blue: 0.600, alpha: 1),
+             NSColor(calibratedRed: 0.055, green: 0.647, blue: 0.914, alpha: 1))
+        ]
+
+        var views: [NSView] = solids.map { entry in
             QuickColorDotButton(
                 title: entry.0,
-                swatchColor: entry.1,
+                swatchColors: [entry.1],
                 preset: entry.2,
-                customSolidColor: entry.3,
+                customStartColor: entry.3,
                 target: self,
                 action: #selector(dotClicked(_:))
             )
         }
-        let stack = NSStackView(views: buttons)
+        let divider = NSView()
+        divider.wantsLayer = true
+        divider.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.18).cgColor
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            divider.widthAnchor.constraint(equalToConstant: 1),
+            divider.heightAnchor.constraint(equalToConstant: 14)
+        ])
+        views.append(divider)
+        views.append(contentsOf: gradients.map { entry in
+            QuickColorDotButton(
+                title: entry.0,
+                swatchColors: [entry.1, entry.2],
+                preset: .customGradient,
+                customStartColor: entry.1,
+                customEndColor: entry.2,
+                target: self,
+                action: #selector(dotClicked(_:))
+            )
+        })
+
+        let stack = NSStackView(views: views)
         stack.orientation = .horizontal
         stack.alignment = .centerY
         stack.spacing = 6
         stack.edgeInsets = NSEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        let root = NSView(frame: NSRect(x: 0, y: 0, width: 224, height: 40))
+        let root = NSView(frame: NSRect(x: 0, y: 0, width: 302, height: 38))
         root.addSubview(stack)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: root.leadingAnchor),
@@ -354,7 +456,63 @@ private final class QuickColorPopoverController: NSViewController {
     @objc private func dotClicked(_ sender: NSButton) {
         guard let dot = sender as? QuickColorDotButton else { return }
         NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
-        onPick(dot.preset, dot.customSolidColor)
+        onPick(dot.preset, dot.customStartColor, dot.customEndColor)
+    }
+}
+
+@MainActor
+private final class FloatingToolbarHintPanel: NSPanel {
+    private let label = NSTextField(labelWithString: "")
+
+    init() {
+        super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        isOpaque = false
+        backgroundColor = .clear
+        hasShadow = true
+        ignoresMouseEvents = true
+        hidesOnDeactivate = false
+        isReleasedWhenClosed = false
+
+        let bg = NSVisualEffectView()
+        bg.material = .hudWindow
+        bg.blendingMode = .behindWindow
+        bg.state = .active
+        bg.wantsLayer = true
+        bg.layer?.cornerRadius = 6
+        bg.layer?.cornerCurve = .continuous
+        bg.layer?.borderWidth = 0.5
+        bg.layer?.borderColor = NSColor.white.withAlphaComponent(0.16).cgColor
+        bg.layer?.masksToBounds = true
+
+        label.font = .systemFont(ofSize: 11, weight: .medium)
+        label.textColor = .white
+        label.alignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        bg.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: bg.leadingAnchor, constant: 8),
+            label.trailingAnchor.constraint(equalTo: bg.trailingAnchor, constant: -8),
+            label.centerYAnchor.constraint(equalTo: bg.centerYAnchor)
+        ])
+        contentView = bg
+    }
+
+    func show(text: String, above anchorScreenRect: NSRect, screenVisible: NSRect, level: NSWindow.Level) {
+        guard !text.isEmpty else { orderOut(nil); return }
+        self.level = level
+        label.stringValue = text
+        let textW = ceil((text as NSString).size(withAttributes: [.font: label.font!]).width)
+        let w = textW + 18
+        let h: CGFloat = 22
+        let x = min(max(screenVisible.minX + 6, anchorScreenRect.midX - w / 2), screenVisible.maxX - w - 6)
+        let y = min(screenVisible.maxY - h - 4, anchorScreenRect.maxY + 6)
+        setFrame(NSRect(x: x, y: y, width: w, height: h), display: true)
+        alphaValue = 0
+        orderFrontRegardless()
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.12
+            animator().alphaValue = 1
+        }
     }
 }
 
@@ -378,6 +536,8 @@ final class FreeLyricsInteraction: NSObject {
     private let settingsButton = PillIconButton()
     private let closeButton = PillIconButton()
     private var colorPopover: NSPopover?
+    private let hintPanel = FloatingToolbarHintPanel()
+    private var hintWork: DispatchWorkItem?
     private var policy = FreeLyricsPolicy()
     private var hovered = false
     private var hoverTimer: Timer?
@@ -465,7 +625,7 @@ final class FreeLyricsInteraction: NSObject {
         }
     }
 
-    private func configure(_ button: NSButton, symbol: String, label: String, action: Selector?) {
+    private func configure(_ button: PillIconButton, symbol: String, label: String, action: Selector?) {
         button.image = NSImage(systemSymbolName: symbol, accessibilityDescription: L10n.text(label))
         button.imagePosition = .imageOnly
         button.isBordered = false
@@ -473,7 +633,40 @@ final class FreeLyricsInteraction: NSObject {
         button.setAccessibilityLabel(L10n.text(label))
         button.target = self
         button.action = action
+        button.onHoverChange = { [weak self, weak button] entered in
+            guard let self, let button else { return }
+            if entered {
+                self.scheduleHint(for: button)
+            } else {
+                self.hideHint()
+            }
+        }
         toolbar.addSubview(button)
+    }
+
+    func updateContentLayout(rect: NSRect, hasCapsuleBackground: Bool) {
+        dragSurface.updateContentLayout(rect: rect, hasCapsuleBackground: hasCapsuleBackground)
+    }
+
+    private func scheduleHint(for button: NSButton) {
+        hintWork?.cancel()
+        let text = button.toolTip ?? ""
+        guard !text.isEmpty else { return }
+        let work = DispatchWorkItem { [weak self, weak button] in
+            guard let self, let button, let btnWindow = button.window, btnWindow.isVisible else { return }
+            let rectInWindow = button.convert(button.bounds, to: nil)
+            let screenRect = btnWindow.convertToScreen(rectInWindow)
+            let visible = (btnWindow.screen ?? NSScreen.main)?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+            self.hintPanel.show(text: button.toolTip ?? text, above: screenRect, screenVisible: visible, level: btnWindow.level)
+        }
+        hintWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: work)
+    }
+
+    private func hideHint() {
+        hintWork?.cancel()
+        hintWork = nil
+        hintPanel.orderOut(nil)
     }
 
     static func screenID(_ screen: NSScreen) -> String {
@@ -709,6 +902,7 @@ final class FreeLyricsInteraction: NSObject {
         hoverTimer = nil
         exitWork?.cancel()
         exitWork = nil
+        hideHint()
         colorPopover?.close()
         colorPopover = nil
         hovered = false
@@ -731,12 +925,16 @@ final class FreeLyricsInteraction: NSObject {
     var testToolbar: NSView { toolbar }
     var testDragSurface: FreeLyricsDragSurfaceView { dragSurface }
     var testUnlockWindow: NSWindow { unlockWindow }
+    static var testCuratedGradientCount: Int { QuickColorPopoverController.curatedGradientCount }
     #endif
 
-    func selectQuickColorPreset(_ preset: LyricsColorPreset, customColor: NSColor? = nil) {
+    func selectQuickColorPreset(_ preset: LyricsColorPreset, customColor: NSColor? = nil, customEndColor: NSColor? = nil) {
         defaults.set(preset.rawValue, forKey: AppPreferences.colorPresetKey)
         if let customColor {
             AppPreferences.setColor(customColor, forKey: AppPreferences.customLyricsColorKey, in: defaults)
+        }
+        if let customEndColor {
+            AppPreferences.setColor(customEndColor, forKey: AppPreferences.customLyricsEndColorKey, in: defaults)
         }
         colorPopover?.close()
         colorPopover = nil
@@ -744,18 +942,19 @@ final class FreeLyricsInteraction: NSObject {
     }
 
     @objc private func toggleQuickColorPopover() {
+        hideHint()
         if let existing = colorPopover, existing.isShown {
             existing.close()
             colorPopover = nil
             return
         }
-        let vc = QuickColorPopoverController { [weak self] preset, customColor in
-            self?.selectQuickColorPreset(preset, customColor: customColor)
+        let vc = QuickColorPopoverController { [weak self] preset, customStart, customEnd in
+            self?.selectQuickColorPreset(preset, customColor: customStart, customEndColor: customEnd)
         }
         let popover = NSPopover()
         popover.behavior = .transient
         popover.contentViewController = vc
-        popover.contentSize = NSSize(width: 224, height: 40)
+        popover.contentSize = NSSize(width: 302, height: 38)
         popover.show(relativeTo: colorButton.bounds, of: colorButton, preferredEdge: isToolbarAbove ? .maxY : .minY)
         colorPopover = popover
     }

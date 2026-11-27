@@ -788,6 +788,16 @@ final class OverlayLyricsWindow: NSObject {
             containerView.frame = NSRect(origin: .zero, size: windowFrame.size)
             let toolbarAbove = interaction?.isToolbarAbove ?? true
             lyricGroup.frame = NSRect(x: 0, y: toolbarAbove ? 0 : toolbarHeight, width: frame.width, height: frame.height)
+            let tightHoverRect: NSRect = backgroundEnabled
+                ? backgroundRect
+                : (placement.isVertical
+                    ? NSRect(origin: .zero, size: frame.size)
+                    : NotchGeometry.backgroundRect(
+                        in: NSRect(origin: .zero, size: frame.size),
+                        contentWidth: max(measuredWidth, max(metadataWidth, translationWidth)),
+                        padding: 20
+                    ))
+            interaction?.updateContentLayout(rect: tightHoverRect, hasCapsuleBackground: backgroundEnabled)
             materialView.frame = backgroundRect
             materialView.layer?.cornerRadius = placement.isVertical ? 16 : style == .lyricOnly ? frame.height / 2 : min(16, frame.height * 0.28)
             materialView.layer?.masksToBounds = true
@@ -890,6 +900,7 @@ final class OverlayLyricsWindow: NSObject {
         text: String,
         progress: CGFloat,
         translation: String? = nil,
+        nextLyric: String? = nil,
         highlight: LyricHighlight? = nil,
         staticText: Bool = false,
         mode: DisplayMode,
@@ -936,6 +947,9 @@ final class OverlayLyricsWindow: NSObject {
                 style: effectiveStyle,
                 customWidth: customWidth
             )
+            let secondaryLine: String? = (mode == .statusBar)
+                ? nil
+                : (translation ?? ((mode == .free && FreeLyricsPreferences.lineMode == .double) ? nextLyric : nil))
             var frame = NotchGeometry.frame(
                 screenFrame: screen.frame,
                 visibleFrame: screen.visibleFrame,
@@ -943,7 +957,7 @@ final class OverlayLyricsWindow: NSObject {
                 fontSize: fontSize,
                 width: width,
                 placement: placement,
-                bilingual: translation != nil && mode != .statusBar
+                bilingual: secondaryLine != nil
             )
             if mode == .free {
                 let size = NSSize(width: placement.isVertical ? FreeLyricsInteraction.expandedToolbarWidth : max(FreeLyricsInteraction.expandedToolbarWidth, frame.width),
@@ -953,7 +967,7 @@ final class OverlayLyricsWindow: NSObject {
             return lane.show(
                 frame: frame,
                 lyric: text,
-                translation: (mode == .statusBar ? nil : translation),
+                translation: secondaryLine,
                 song: song,
                 artist: artist,
                 progress: highlight.map { value in

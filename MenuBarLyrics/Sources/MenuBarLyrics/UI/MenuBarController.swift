@@ -494,10 +494,17 @@ final class MenuBarController: NSObject {
             updateScrollTimer(overflows: false)
             return
         }
+        let nextLyric: String? = displayIdentity.flatMap { idx in
+            let nextIdx = idx + 1
+            guard currentLines.indices.contains(nextIdx) else { return nil }
+            let t = currentLines[nextIdx].text.trimmingCharacters(in: .whitespacesAndNewlines)
+            return t.isEmpty ? nil : t
+        }
         let overflows = overlay.show(
             text: displaySource.isEmpty ? " " : displaySource,
             progress: displayProgress,
             translation: displayTranslation,
+            nextLyric: nextLyric,
             highlight: displayHighlight,
             staticText: displayStaticText,
             mode: displayMode,

@@ -1,0 +1,219 @@
+using System.Globalization;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+
+namespace NotchMuse.App.Controls;
+
+/// <summary>
+/// Centered lyric row with true glyph-clipped left-to-right color sweep (zero horizontal bar!)
+/// plus hover backdrop, right-aligned MM:SS timestamp, and click-to-seek.
+/// </summary>
+public sealed class SweepLyricLineControl : Border
+{
+    private readonly Grid sweepHost = new();
+    private readonly TextBlock basePrimary = new();
+    private readonly TextBlock sweepPrimary = new();
+    private readonly RectangleGeometry sweepClip = new();
+    private readonly TextBlock translationBlock = new();
+    private readonly Border timePill = new();
+    private readonly TextBlock timeText = new();
+
+    private double sweepProgress;
+    private int distanceFromActive = 99;
+    private double baseFontSize = 22;
+
+    public double StartTime { get; }
+    public string PrimaryText { get; }
+    public string? TranslationText { get; }
+
+    public event Action<double>? SeekRequested;
+
+    public SweepLyricLineControl(double startTime, string primaryText, string? translationText, bool showBilingual)
+    {
+        StartTime = startTime;
+        PrimaryText = string.IsNullOrWhiteSpace(primaryText) ? "♪" : primaryText;
+        TranslationText = translationText;
+
+        CornerRadius = new CornerRadius(12);
+        Padding = new Thickness(24, 11, 24, 11);
+        Margin = new Thickness(12, 3, 12, 3);
+        Background = System.Windows.Media.Brushes.Transparent;
+        Cursor = System.Windows.Input.Cursors.Hand;
+
+        var root = new Grid();
+
+        var textStack = new StackPanel
+        {
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(34, 0, 34, 0)
+        };
+
+        basePrimary.Text = PrimaryText;
+        basePrimary.TextAlignment = TextAlignment.Center;
+        basePrimary.TextWrapping = TextWrapping.Wrap;
+        basePrimary.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
+
+        sweepPrimary.Text = PrimaryText;
+        sweepPrimary.TextAlignment = TextAlignment.Center;
+        sweepPrimary.TextWrapping = TextWrapping.Wrap;
+        sweepPrimary.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+        sweepPrimary.Clip = sweepClip;
+        sweepPrimary.Visibility = Visibility.Collapsed;
+
+        sweepHost.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
+        sweepHost.Children.Add(basePrimary);
+        sweepHost.Children.Add(sweepPrimary);
+        sweepHost.SizeChanged += (_, _) => UpdateClipGeometry();
+        textStack.Children.Add(sweepHost);
+
+        translationBlock.Text = translationText ?? "";
+        translationBlock.TextAlignment = TextAlignment.Center;
+        translationBlock.TextWrapping = TextWrapping.Wrap;
+        translationBlock.Margin = new Thickness(0, 5, 0, 0);
+        translationBlock.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+        translationBlock.Visibility = showBilingual && !string.IsNullOrWhiteSpace(translationText)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        textStack.Children.Add(translationBlock);
+
+        // Hover MM:SS Timestamp Pill on the right
+        timeText.Text = FormatTimestamp(startTime);
+        timeText.FontSize = 10.5;
+        timeText.FontWeight = FontWeights.Medium;
+        timeText.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+
+        timePill.CornerRadius = new CornerRadius(6);
+        timePill.Padding = new Thickness(7, 2.5, 7, 2.5);
+        timePill.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+        timePill.VerticalAlignment = VerticalAlignment.Center;
+        timePill.SetResourceReference(Border.BackgroundProperty, "ControlBrush");
+        timePill.Child = timeText;
+        timePill.Opacity = 0;
+        timePill.IsHitTestVisible = false;
+
+        root.Children.Add(textStack);
+        root.Children.Add(timePill);
+        Child = root;
+
+        MouseEnter += (_, _) =>
+        {
+            SetResourceReference(Border.BackgroundProperty, "HoverRowBrush");
+            timePill.Opacity = 1;
+        };
+        MouseLeave += (_, _) =>
+        {
+            Background = System.Windows.Media.Brushes.Transparent;
+            timePill.Opacity = 0;
+        };
+        MouseLeftButtonUp += (_, e) =>
+        {
+            e.Handled = true;
+            SeekRequested?.Invoke(StartTime);
+        };
+
+        ApplyVisualState(99, 0, 22, null, 1.0);
+    }
+
+    public void SetShowBilingual(bool showBilingual)
+    {
+        translationBlock.Visibility = showBilingual && !string.IsNullOrWhiteSpace(TranslationText)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    public void ApplyVisualState(int distance, double progress, double activeFontSize, System.Windows.Media.Brush? customAccentBrush, double lyricOpacity)
+    {
+        distanceFromActive = distance;
+        sweepProgress = Math.Clamp(progress, 0, 1);
+        baseFontSize = Math.Clamp(activeFontSize, 14, 34);
+
+        var isActive = distance == 0;
+        var fontSize = isActive
+            ? baseFontSize
+            : distance == 1
+                ? Math.Max(13.5, baseFontSize * 0.74)
+                : Math.Max(12.5, baseFontSize * 0.67);
+
+        var weight = isActive ? FontWeights.Bold : (distance == 1 ? FontWeights.Medium : FontWeights.Normal);
+
+        basePrimary.FontSize = fontSize;
+        basePrimary.FontWeight = weight;
+        sweepPrimary.FontSize = fontSize;
+        sweepPrimary.FontWeight = weight;
+
+        translationBlock.FontSize = isActive ? Math.Max(12, baseFontSize * 0.59) : Math.Max(11, baseFontSize * 0.52);
+
+        if (isActive)
+        {
+            basePrimary.Opacity = 0.34 * lyricOpacity;
+            sweepPrimary.Visibility = Visibility.Visible;
+            sweepPrimary.Opacity = lyricOpacity;
+            if (customAccentBrush is not null)
+            {
+                sweepPrimary.Foreground = customAccentBrush;
+            }
+            else
+            {
+                sweepPrimary.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+            }
+            sweepPrimary.Effect = new DropShadowEffect
+            {
+                Color = System.Windows.Media.Color.FromArgb(65, 224, 109, 27),
+                BlurRadius = 10,
+                ShadowDepth = 0,
+                Opacity = 0.45
+            };
+            translationBlock.Opacity = 0.82 * lyricOpacity;
+            Padding = new Thickness(24, 14, 24, 14);
+        }
+        else
+        {
+            var fade = distance switch
+            {
+                1 => 0.62,
+                2 => 0.40,
+                3 => 0.28,
+                _ => 0.20
+            };
+            basePrimary.Opacity = fade * lyricOpacity;
+            sweepPrimary.Visibility = Visibility.Collapsed;
+            sweepPrimary.Effect = null;
+            translationBlock.Opacity = fade * 0.78 * lyricOpacity;
+            Padding = new Thickness(24, 10, 24, 10);
+        }
+
+        UpdateClipGeometry();
+    }
+
+    public void UpdateSweepProgress(double progress)
+    {
+        if (distanceFromActive != 0) return;
+        sweepProgress = Math.Clamp(progress, 0, 1);
+        UpdateClipGeometry();
+    }
+
+    private void UpdateClipGeometry()
+    {
+        if (distanceFromActive != 0) return;
+        var width = sweepHost.ActualWidth;
+        var height = sweepHost.ActualHeight;
+        if (width <= 0 || height <= 0)
+        {
+            sweepHost.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+            width = sweepHost.DesiredSize.Width;
+            height = sweepHost.DesiredSize.Height;
+        }
+        sweepClip.Rect = new Rect(0, 0, Math.Max(0, width * sweepProgress), Math.Max(48, height + 12));
+    }
+
+    private static string FormatTimestamp(double seconds)
+    {
+        var clamped = Math.Max(0, seconds);
+        var ts = TimeSpan.FromSeconds(clamped);
+        return string.Format(CultureInfo.InvariantCulture, "{0:00}:{1:00}", (int)ts.TotalMinutes, ts.Seconds);
+    }
+}

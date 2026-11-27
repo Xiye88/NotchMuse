@@ -1,0 +1,95 @@
+<Window x:Class="NotchMuse.App.Overlays.FloatingLyricsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        ShowActivated="False"
+        Width="680" Height="116"
+        MouseEnter="OnOverlayMouseEnter"
+        MouseLeave="OnOverlayMouseLeave">
+    <Grid>
+        <!-- Magnetic Center Snap Guide (shown while dragging in FreeFloat mode) -->
+        <Border x:Name="SnapGuide"
+                Width="1.5"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="#99E06D1B"
+                Visibility="Collapsed"
+                IsHitTestVisible="False"/>
+
+        <StackPanel x:Name="OverlayStack" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <!-- Compact Hover Mini-Toolbar (FreeFloat mode only — NOT inside MainWindow!) -->
+            <Border x:Name="HoverToolbar"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,6"
+                    Padding="6,3"
+                    CornerRadius="12"
+                    Background="#E818181C"
+                    BorderBrush="#2EFFFFFF"
+                    BorderThickness="1"
+                    Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="LockMiniBtn" Content="锁定" Padding="8,2.5" FontSize="10.5" Foreground="#F3F2EF" Background="Transparent" BorderThickness="0" Click="OnLockClick"/>
+                    <Button x:Name="ModeMiniBtn" Content="任务栏" Padding="8,2.5" FontSize="10.5" Foreground="#F3F2EF" Background="Transparent" BorderThickness="0" Click="OnCycleModeClick"/>
+                    <Button x:Name="ThemeMiniBtn" Content="配色" Padding="8,2.5" FontSize="10.5" Foreground="#F3F2EF" Background="Transparent" BorderThickness="0" Click="OnOpenAppearanceClick"/>
+                    <Button x:Name="SettingsMiniBtn" Content="设置" Padding="8,2.5" FontSize="10.5" Foreground="#F3F2EF" Background="Transparent" BorderThickness="0" Click="OnOpenSettingsClick"/>
+                    <Button x:Name="HideMiniBtn" Content="隐藏" Padding="8,2.5" FontSize="10.5" Foreground="#9A9AA2" Background="Transparent" BorderThickness="0" Click="OnHideClick"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Frosted Lyrics Capsule -->
+            <Border x:Name="LyricCapsule"
+                    CornerRadius="18"
+                    Padding="24,11"
+                    Background="#E619191E"
+                    BorderBrush="#26FFFFFF"
+                    BorderThickness="1"
+                    HorizontalAlignment="Center"
+                    MouseLeftButtonDown="OnCapsuleDrag">
+                <Border.Effect>
+                    <DropShadowEffect Color="#50000000" BlurRadius="18" ShadowDepth="4" Opacity="0.32"/>
+                </Border.Effect>
+                <StackPanel HorizontalAlignment="Center">
+                    <Grid x:Name="SweepHost" HorizontalAlignment="Center">
+                        <TextBlock x:Name="BaseLyricText"
+                                   Text="等待播放音乐…"
+                                   FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   TextAlignment="Center"
+                                   Foreground="#66F3F2EF"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="610"/>
+                        <TextBlock x:Name="SweepLyricText"
+                                   Text="等待播放音乐…"
+                                   FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                   FontSize="22"
+                                   FontWeight="Bold"
+                                   TextAlignment="Center"
+                                   Foreground="#FF8A36"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="610">
+                            <TextBlock.Clip>
+                                <RectangleGeometry x:Name="SweepClip" Rect="0,0,0,50"/>
+                            </TextBlock.Clip>
+                        </TextBlock>
+                    </Grid>
+                    <TextBlock x:Name="SubLyricText"
+                               Text=""
+                               FontFamily="Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI"
+                               FontSize="12.5"
+                               TextAlignment="Center"
+                               Foreground="#B4B2AC"
+                               Margin="0,4,0,0"
+                               TextTrimming="CharacterEllipsis"
+                               MaxWidth="600"
+                               Visibility="Collapsed"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,114 @@
+<Window x:Class="NotchMuse.App.ShareCardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="分享歌词卡片"
+        Width="780" Height="490"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource CanvasBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" CornerRadius="14" GlassFrameThickness="0" ResizeBorderThickness="0"/>
+    </WindowChrome.WindowChrome>
+
+    <Border Background="{DynamicResource CanvasBrush}"
+            BorderBrush="{DynamicResource BorderStrongBrush}"
+            BorderThickness="1"
+            CornerRadius="14">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="46"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Top Title Strip -->
+            <Grid Grid.Row="0" Margin="20,0,12,0" MouseLeftButtonDown="OnTitleDrag">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="HeaderTitle" Text="生成歌词分享卡" FontFamily="{StaticResource StudioDisplayFont}" FontSize="15" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="TrackBadge" Text="" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="10,1,0,0" TextTrimming="CharacterEllipsis" MaxWidth="420"/>
+                </StackPanel>
+                <Button Style="{StaticResource WindowCloseButton}" Width="28" Height="28" HorizontalAlignment="Right" VerticalAlignment="Center" Click="OnCloseClick">
+                    <Path Data="M 2,2 L 10,10 M 10,2 L 2,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                </Button>
+            </Grid>
+
+            <Border Grid.Row="0" VerticalAlignment="Bottom" Height="1" Background="{DynamicResource HairlineBrush}"/>
+
+            <!-- Main Two-Column Preview + Controls -->
+            <Grid Grid.Row="1" Margin="20,18,20,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="410"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Live Rendered High-Res Preview Card -->
+                <Border Grid.Column="0"
+                        CornerRadius="14"
+                        Background="{DynamicResource DeckBrush}"
+                        BorderBrush="{DynamicResource BorderSubtleBrush}"
+                        BorderThickness="1"
+                        Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock x:Name="PreviewHint" Grid.Row="0" Text="实时卡片预览（1200 × 800 PNG）" FontSize="11.5" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,10"/>
+                        <Border Grid.Row="1" CornerRadius="10" ClipToBounds="True" VerticalAlignment="Center">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#40000000" BlurRadius="16" ShadowDepth="4" Opacity="0.28"/>
+                            </Border.Effect>
+                            <Image x:Name="PreviewImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        </Border>
+                        <TextBlock x:Name="SelectedCountHint" Grid.Row="2" Text="已选择 4 句歌词" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                    </Grid>
+                </Border>
+
+                <!-- Right: Template Picker, 1-6 Lyric Line Checkboxes & Export Buttons -->
+                <DockPanel Grid.Column="2" LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock x:Name="TemplateLabel" Text="卡片风格模板" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"/>
+                        <Border Style="{StaticResource SegmentedContainer}" Margin="0,0,0,16">
+                            <UniformGrid Columns="3">
+                                <RadioButton x:Name="ThemeVinylRadio" Content="黑胶暗夜" GroupName="ShareTemplate" Style="{StaticResource SegmentedOption}" IsChecked="True" Checked="OnTemplateChanged"/>
+                                <RadioButton x:Name="ThemeAlabasterRadio" Content="暖雪花石" GroupName="ShareTemplate" Style="{StaticResource SegmentedOption}" Checked="OnTemplateChanged"/>
+                                <RadioButton x:Name="ThemeSodaRadio" Content="汽水雾青" GroupName="ShareTemplate" Style="{StaticResource SegmentedOption}" Checked="OnTemplateChanged"/>
+                            </UniformGrid>
+                        </Border>
+
+                        <TextBlock x:Name="LinesLabel" Text="勾选 1–6 句歌词" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"/>
+                    </StackPanel>
+
+                    <!-- Bottom Export Actions -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,14,0,0">
+                        <TextBlock x:Name="StatusFeedback" Text="" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8" MinHeight="16"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="CopyBtn" Grid.Column="0" Content="复制图片到剪贴板" Style="{StaticResource AccentPillButton}" Padding="14,9" Click="OnCopyClick"/>
+                            <Button x:Name="SaveBtn" Grid.Column="2" Content="保存为 PNG…" Padding="14,9" Click="OnSaveClick"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Selectable Lines List -->
+                    <Border CornerRadius="10"
+                            Background="{DynamicResource CardBrush}"
+                            BorderBrush="{DynamicResource BorderSubtleBrush}"
+                            BorderThickness="1"
+                            Padding="6">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel x:Name="LinesCheckHost"/>
+                        </ScrollViewer>
+                    </Border>
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

@@ -600,35 +600,38 @@
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,4,0,16"/>
 
-                        <!-- Floating Capsule Background Palette (5 Curated Presets + Custom + Opacity) -->
+                        <!-- Independent Floating Capsule Background Master Toggle + 5 Curated Presets + Custom + Opacity -->
                         <StackPanel Margin="0,0,0,16">
-                            <Grid Margin="0,0,0,10">
+                            <Grid Margin="0,0,0,12">
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock x:Name="BgCapsuleLabel" Text="胶囊背景颜色" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                    <TextBlock x:Name="BgCapsuleDesc" Text="实时作用于桌面自由悬浮歌词与顶部悬浮岛，自动适配浅/深字色" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="BgCapsuleLabel" Text="显示悬浮胶囊背景" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <TextBlock x:Name="BgCapsuleDesc" Text="关闭后自由悬浮与顶部悬浮岛立即切为纯透明文字 + 双层高对比描边阴影" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
                                 </StackPanel>
+                                <CheckBox x:Name="ShowCapsuleBgToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnShowCapsuleBgToggleChanged" Unchecked="OnShowCapsuleBgToggleChanged"/>
                             </Grid>
 
-                            <WrapPanel x:Name="CapsulePresetPanel" Margin="0,0,0,10"/>
+                            <StackPanel x:Name="CapsuleStyleControls">
+                                <WrapPanel x:Name="CapsulePresetPanel" Margin="0,0,0,10"/>
 
-                            <!-- Custom Color Input + Native Picker (visible when Custom is selected) -->
-                            <StackPanel x:Name="CustomCapsuleBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12" Visibility="Collapsed">
-                                <Border x:Name="CustomCapsuleSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,0,8,0" MouseLeftButtonUp="OnPickCustomCapsuleColor"/>
-                                <TextBox x:Name="CustomCapsuleHexBox" Width="108" Height="30" Text="#3E3E44" MaxLength="9" TextChanged="OnCustomCapsuleHexChanged"/>
-                                <Button x:Name="PickCustomColorBtn" Content="系统取色…" Margin="8,0,0,0" Padding="12,5" Click="OnPickCustomCapsuleColor"/>
+                                <!-- Custom Color Input + Native Picker (visible when Custom is selected) -->
+                                <StackPanel x:Name="CustomCapsuleBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12" Visibility="Collapsed">
+                                    <Border x:Name="CustomCapsuleSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,0,8,0" MouseLeftButtonUp="OnPickCustomCapsuleColor"/>
+                                    <TextBox x:Name="CustomCapsuleHexBox" Width="108" Height="30" Text="#3E3E44" MaxLength="9" TextChanged="OnCustomCapsuleHexChanged"/>
+                                    <Button x:Name="PickCustomColorBtn" Content="系统取色…" Margin="8,0,0,0" Padding="12,5" Click="OnPickCustomCapsuleColor"/>
+                                </StackPanel>
+
+                                <!-- Background Opacity Slider (30% - 100%) -->
+                                <Grid x:Name="CapsuleOpacityRow" Margin="0,4,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="58"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="CapsuleOpacityLabel" Grid.Column="0" Text="背景不透明度" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                    <Slider x:Name="CapsuleOpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="0.82" Margin="12,0" ValueChanged="OnCapsuleOpacityChanged"/>
+                                    <TextBlock x:Name="CapsuleOpacityValueText" Grid.Column="2" Text="82%" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                </Grid>
                             </StackPanel>
-
-                            <!-- Background Opacity Slider (30% - 100%) -->
-                            <Grid x:Name="CapsuleOpacityRow" Margin="0,4,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="180"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="58"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock x:Name="CapsuleOpacityLabel" Grid.Column="0" Text="背景不透明度" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                                <Slider x:Name="CapsuleOpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="0.82" Margin="12,0" ValueChanged="OnCapsuleOpacityChanged"/>
-                                <TextBlock x:Name="CapsuleOpacityValueText" Grid.Column="2" Text="82%" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            </Grid>
                         </StackPanel>
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
@@ -657,6 +660,17 @@
                                 <TextBlock x:Name="PlayerSourceDesc" Text="自动覆盖 36+ 主流及开源播放器与浏览器网页端" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                             <ComboBox x:Name="PlayerSourceCombo" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="220" SelectionChanged="OnPlayerSourceChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Default Launch Music Player (Mac Build 98 Parity) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="DefaultLaunchLabel" Text="默认启动播放器" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="DefaultLaunchDesc" Text="当前无活跃播放会话时，点击播放按钮自动拉起指定播放器" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ComboBox x:Name="DefaultLaunchPlayerCombo" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="220" SelectionChanged="OnDefaultLaunchPlayerChanged"/>
                         </Grid>
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
@@ -748,43 +762,6 @@
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>
-
-                <!-- Share Lyrics Card Popup (3 Templates) -->
-                <Popup x:Name="SharePopup"
-                       PlacementTarget="{Binding ElementName=ShareButton}"
-                       Placement="Top"
-                       VerticalOffset="-10"
-                       StaysOpen="False"
-                       AllowsTransparency="True">
-                    <Border Background="{DynamicResource PopupBrush}"
-                            BorderBrush="{DynamicResource BorderStrongBrush}"
-                            BorderThickness="1"
-                            CornerRadius="14"
-                            Padding="16"
-                            Width="320">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#45000000" BlurRadius="20" ShadowDepth="6" Opacity="0.28"/>
-                        </Border.Effect>
-                        <StackPanel>
-                            <TextBlock x:Name="SharePopupTitle" Text="生成歌词分享卡" FontSize="15" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="ShareTemplateLabel" Text="卡片风格" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,12,0,5"/>
-                            <ComboBox x:Name="ShareThemeCombo" SelectedIndex="0" HorizontalAlignment="Stretch">
-                                <ComboBoxItem Content="黑胶暗夜 (Vinyl Night)"/>
-                                <ComboBoxItem Content="暖雪花石 (Warm Alabaster)"/>
-                                <ComboBoxItem Content="汽水雾青 (Soda Mist)"/>
-                            </ComboBox>
-                            <TextBlock x:Name="ShareLinesLabel" Text="选择 1–6 句歌词" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,12,0,5"/>
-                            <Border CornerRadius="9" Background="{DynamicResource DeckBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" Padding="4">
-                                <ListBox x:Name="ShareLinesList" Height="132" SelectionMode="Multiple" DisplayMemberPath="DisplayText"/>
-                            </Border>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-                                <Button x:Name="CopyShareBtn" Content="复制图片" Margin="0,0,8,0" Click="OnCopyShareClick"/>
-                                <Button x:Name="SaveShareBtn" Content="保存 PNG…" Style="{StaticResource AccentPillButton}" Padding="14,6" Click="OnSaveShareClick"/>
-                            </StackPanel>
-                            <TextBlock x:Name="ShareStatusLabel" Text="" FontSize="11.5" FontWeight="Medium" Foreground="{DynamicResource AccentBrush}" Margin="0,8,0,0"/>
-                        </StackPanel>
-                    </Border>
-                </Popup>
             </Grid>
         </Grid>
     </Border>

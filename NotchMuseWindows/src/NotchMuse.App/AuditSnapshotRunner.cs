@@ -70,8 +70,32 @@ public static class AuditSnapshotRunner
         // 7: Real Win11 Centered Taskbar Bottom-Left Lyrics Showcase (Light + Dark Win11 taskbars)
         RenderTaskbarShowcase(main.CurrentSettings, Path.Combine(outputDir, "07_win11_taskbar_lyrics.png"));
 
-        // 8: Desktop Free-Floating Lyrics (with hover mini-toolbar) + Top Island Showcase
+        // 8: Desktop Overlays Showcase rendered under LIGHT THEME (explicitly verifying hover toolbar light text contrast!)
+        ThemeManager.ApplyAppTheme(AppThemeMode.Light);
         RenderDesktopOverlaysShowcase(main.CurrentSettings, Path.Combine(outputDir, "08_desktop_overlays.png"));
+
+        // 9: Live-Preview Share Card Modal Window
+        var shareWin = new ShareCardWindow(
+            "稻香 (Vinyl Studio Session)",
+            "周杰伦",
+            [
+                "对这个世界如果你有太多的抱怨",
+                "跌倒了就不敢继续往前走",
+                "请你打开电视看看",
+                "多少人为生命在努力勇敢的走下去",
+                "我们是不是该知足",
+                "珍惜一切就算没有拥有"
+            ],
+            isEnglish: false)
+        {
+            WindowStartupLocation = WindowStartupLocation.Manual,
+            Left = -3000,
+            Top = -3000
+        };
+        shareWin.Show();
+        await FlushRenderAsync();
+        SaveVisualPng(shareWin, Path.Combine(outputDir, "09_share_card_dialog.png"), 780, 490);
+        shareWin.Close();
 
         main.Close();
     }

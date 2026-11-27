@@ -42,8 +42,19 @@ public abstract class HttpLyricsSource(HttpClient client) : ILyricsSource
     protected static LyricsCandidate? Rank(Track track, IEnumerable<LyricsCandidate> candidates)
     {
         var pool = Ranked(track, candidates);
-        if (pool.Count == 0 || pool.Count > 1 && pool[0].MatcherScore - pool[1].MatcherScore < 6) return null;
-        return pool[0];
+        if (pool.Count == 0) return null;
+        if (pool.Count == 1) return pool[0];
+        if (pool[0].MatcherScore - pool[1].MatcherScore >= 6) return pool[0];
+        // If tied on metadata score, prefer the album-bound or strictly closer duration match (Mac Kugou/LRCLIB parity)
+        var d0 = Math.Abs(pool[0].Duration - track.Duration);
+        var d1 = Math.Abs(pool[1].Duration - track.Duration);
+        var a0 = TrackMatcher.AlbumMatches(pool[0].Album, track);
+        var a1 = TrackMatcher.AlbumMatches(pool[1].Album, track);
+        if (a0 != a1) return a0 ? pool[0] : pool[1];
+        if (d0 + 0.25 < d1) return pool[0];
+        if (pool[0].Document.Lines.Count >= 5 && pool[1].Document.Lines.Count >= 5 && LyricsSelection.TimelinesAgree(pool[0], pool[1]))
+            return pool[0];
+        return null;
     }
 
     protected static IReadOnlyList<LyricsCandidate> Ranked(Track track, IEnumerable<LyricsCandidate> candidates)
@@ -51,8 +62,15 @@ public abstract class HttpLyricsSource(HttpClient client) : ILyricsSource
         var all = candidates.Where(c => c.MatcherScore >= 82 && TrackMatcher.IdentityRejection(track, c.Title, c.Artist, c.Album) is null).ToArray();
         var bound = all.Where(c => TrackMatcher.AlbumMatches(c.Album, track) && Math.Abs(c.Duration - track.Duration) <= 2).ToArray();
         return (bound.Length > 0 ? bound : all)
-            .GroupBy(c => (TrackMatcher.ParseTitle(c.Title).Name, Artist: string.Join(',', TrackMatcher.ArtistGroup(c.Artist).Order()), Album: TrackMatcher.Normalize(c.Album ?? ""), Duration: Math.Round(c.Duration)))
-            .Select(g => g.First()).OrderByDescending(c => c.MatcherScore).ToArray();
+            .GroupBy(c => (TrackMatcher.ParseTitle(c.Title).Name, Artist: string.Join(',', TrackMatcher.ArtistGroup(c.Artist).Order()), Duration: Math.Round(c.Duration)))
+            .Select(g => g.OrderByDescending(c => TrackMatcher.AlbumMatches(c.Album, track))
+                .ThenByDescending(c => c.MatcherScore)
+                .ThenBy(c => Math.Abs(c.Duration - track.Duration))
+                .First())
+            .OrderByDescending(c => TrackMatcher.AlbumMatches(c.Album, track))
+            .ThenByDescending(c => c.MatcherScore)
+            .ThenBy(c => Math.Abs(c.Duration - track.Duration))
+            .ToArray();
     }
     protected LyricsCandidate Candidate(Track track, string platform, string id, string title, string artist, string? album, double duration, LyricDocument doc) =>
         new(Name, platform, id, title, artist, album, duration, doc, TrackMatcher.Score(track, title, artist, duration));

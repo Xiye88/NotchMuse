@@ -100,14 +100,8 @@ public partial class FloatingLyricsWindow : Window
         OutlineLyricText.FontSize = fontSize;
         SubLyricText.FontSize = Math.Clamp(fontSize * 0.58, 10.5, 16);
 
+        var isTransparentMode = !settings.BackgroundCapsuleEnabled || settings.CapsulePreset == CapsuleBackgroundPreset.Transparent;
         var preset = settings.CapsulePreset;
-        if (mode == LyricsDisplayMode.TopIsland && preset == CapsuleBackgroundPreset.Transparent)
-        {
-            // Top Island always retains a sleek subtle pill so it anchors neatly to the screen edge
-            preset = CapsuleBackgroundPreset.SoftGray;
-        }
-
-        var isTransparentMode = preset == CapsuleBackgroundPreset.Transparent;
         var bgOpacity = Math.Clamp(settings.CapsuleBackgroundOpacity, 0.30, 1.0);
 
         LyricCapsule.CornerRadius = mode == LyricsDisplayMode.TopIsland

@@ -21,9 +21,9 @@ public static partial class TrackMatcher
 
     public static string Normalize(string text)
     {
-        // Preserve ambiguous Chinese identity characters, matching the reference.
-        text = text.Replace('乾', '\uE000').Replace('幹', '\uE001');
-        text = Simplified(text).Replace('\uE000', '乾').Replace('\uE001', '幹').Normalize(NormalizationForm.FormD);
+        // Preserve ambiguous Chinese identity characters while unifying 妳→你, matching Mac LyricsSelection.
+        text = text.Replace('妳', '你').Replace('乾', '\uE000').Replace('幹', '\uE001').Replace('髮', '\uE002').Replace('發', '\uE003');
+        text = Simplified(text).Replace('\uE000', '乾').Replace('\uE001', '幹').Replace('\uE002', '髮').Replace('\uE003', '發').Normalize(NormalizationForm.FormD);
         return string.Concat(text.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark && char.IsLetterOrDigit(c))).ToLowerInvariant();
     }
 
@@ -90,7 +90,15 @@ public static partial class TrackMatcher
     public static bool AlbumMatches(string? album, Track track)
     {
         if (string.IsNullOrWhiteSpace(album) || string.IsNullOrWhiteSpace(track.Album)) return false;
-        static string Key(string s) => ParseTitle(Regex.Replace(s, @"\s*[-–—]\s*(Single|EP)\s*$", "", RegexOptions.IgnoreCase)).Name;
+        static string Key(string s)
+        {
+            var stripped = Regex.Replace(s, @"\s*[-–—]\s*(Single|EP)\s*$", "", RegexOptions.IgnoreCase);
+            var canonical = Simplified(stripped)
+                .Replace("十二月", "12月", StringComparison.Ordinal)
+                .Replace("十一月", "11月", StringComparison.Ordinal)
+                .Replace("十月", "10月", StringComparison.Ordinal);
+            return ParseTitle(canonical).Name;
+        }
         if (Key(album) == Key(track.Album)) return true;
         var hanA = string.Concat(Key(album).Where(c => c is >= '\u3400' and <= '\u9fff'));
         var hanB = string.Concat(Key(track.Album).Where(c => c is >= '\u3400' and <= '\u9fff'));

@@ -73,6 +73,7 @@ public sealed class AppSettings
     public double CapsuleBackgroundOpacity { get; set; } = 0.82;
     public AppearanceStylePreset StylePreset { get; set; } = AppearanceStylePreset.Warm;
     public string PlayerSelection { get; set; } = "auto";
+    public string DefaultLaunchPlayer { get; set; } = "none";
     public PlayerStopBehavior StopBehavior { get; set; } = PlayerStopBehavior.Hide;
     public MissingLyricsAnimationStyle MissingLyricsStyle { get; set; } = MissingLyricsAnimationStyle.VinylSeek;
     public bool EnglishLanguage { get; set; }

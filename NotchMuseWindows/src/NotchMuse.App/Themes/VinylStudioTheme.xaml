@@ -137,7 +137,14 @@
                             Background="{TemplateBinding Background}"
                             CornerRadius="16"
                             Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Style="{x:Null}"
+                                   Text="{TemplateBinding Content}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   FontFamily="{TemplateBinding FontFamily}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   FontWeight="{TemplateBinding FontWeight}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">

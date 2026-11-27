@@ -140,8 +140,9 @@ public partial class MainWindow : Window
         // 2. Display Screen Monitor List
         RefreshDisplayMonitors();
 
-        // 3. Five-Group Player Dropdown on General Page
+        // 3. Five-Group Player Dropdown & Default Launch Player on General Page
         PopulatePlayerCombo();
+        PopulateDefaultLaunchPlayerCombo();
 
         // 4. Stop Behavior Dropdown
         StopBehaviorCombo.Items.Clear();
@@ -247,6 +248,7 @@ public partial class MainWindow : Window
         FontSizeSlider.Value = settings.FontSize;
         AnimSpeedSlider.Value = settings.AnimationSpeed;
         OpacitySlider.Value = settings.LyricOpacity;
+        ShowCapsuleBgToggle.IsChecked = settings.BackgroundCapsuleEnabled && settings.CapsulePreset != CapsuleBackgroundPreset.Transparent;
         CapsuleOpacitySlider.Value = settings.CapsuleBackgroundOpacity;
         CustomCapsuleHexBox.Text = settings.CapsuleCustomHex;
         UpdateCustomCapsuleControls();
@@ -263,6 +265,7 @@ public partial class MainWindow : Window
         SelectComboItemByTag(StopBehaviorCombo, settings.StopBehavior);
         SelectComboItemByTag(MissingAnimCombo, settings.MissingLyricsStyle);
         SelectComboItemByTag(PlayerSourceCombo, settings.PlayerSelection);
+        SelectComboItemByTag(DefaultLaunchPlayerCombo, settings.DefaultLaunchPlayer);
         SelectComboItemByTag(DisplayScreenCombo, settings.DisplayScreen);
 
         UpdateOffsetReadout();
@@ -311,6 +314,19 @@ public partial class MainWindow : Window
         "海外、发烧友与自建库" => "Audiophile & Self-Hosted",
         _ => "Video & Media (Manual)"
     };
+
+    private void PopulateDefaultLaunchPlayerCombo()
+    {
+        DefaultLaunchPlayerCombo.Items.Clear();
+        var en = settings.EnglishLanguage;
+        foreach (var p in DefaultPlayerLauncher.DetectAll())
+        {
+            var baseLabel = en ? p.LabelEn : p.LabelZh;
+            var badge = p.IsInstalled ? (en ? " (Installed)" : "（已安装）") : "";
+            DefaultLaunchPlayerCombo.Items.Add(new ComboBoxItem { Tag = p.Id, Content = baseLabel + badge });
+        }
+        SelectComboItemByTag(DefaultLaunchPlayerCombo, settings.DefaultLaunchPlayer);
+    }
 
     private void PopulateMissingAnimationCombo()
     {
@@ -480,9 +496,30 @@ public partial class MainWindow : Window
         initializing = true;
         settings.CapsulePreset = preset;
         settings.BackgroundCapsuleEnabled = preset != CapsuleBackgroundPreset.Transparent;
+        ShowCapsuleBgToggle.IsChecked = settings.BackgroundCapsuleEnabled;
         if (preset != CapsuleBackgroundPreset.Transparent && preset != CapsuleBackgroundPreset.Custom)
         {
             settings.CapsuleBackgroundOpacity = AppSettings.GetCapsulePresetDefaults(preset).DefaultOpacity;
+            CapsuleOpacitySlider.Value = settings.CapsuleBackgroundOpacity;
+        }
+        UpdateCustomCapsuleControls();
+        initializing = false;
+
+        settings.Save();
+        HighlightSelectedCapsuleChip();
+        ApplyAppearanceToAllViews();
+    }
+
+    private void OnShowCapsuleBgToggleChanged(object sender, RoutedEventArgs e)
+    {
+        if (initializing) return;
+        var enabled = ShowCapsuleBgToggle.IsChecked == true;
+        initializing = true;
+        settings.BackgroundCapsuleEnabled = enabled;
+        if (enabled && settings.CapsulePreset == CapsuleBackgroundPreset.Transparent)
+        {
+            settings.CapsulePreset = CapsuleBackgroundPreset.SoftGray;
+            settings.CapsuleBackgroundOpacity = AppSettings.GetCapsulePresetDefaults(CapsuleBackgroundPreset.SoftGray).DefaultOpacity;
             CapsuleOpacitySlider.Value = settings.CapsuleBackgroundOpacity;
         }
         UpdateCustomCapsuleControls();
@@ -514,14 +551,18 @@ public partial class MainWindow : Window
 
     private void UpdateCustomCapsuleControls()
     {
-        CustomCapsuleBar.Visibility = settings.CapsulePreset == CapsuleBackgroundPreset.Custom
+        var bgEnabled = settings.BackgroundCapsuleEnabled && settings.CapsulePreset != CapsuleBackgroundPreset.Transparent;
+        CapsuleStyleControls.IsEnabled = bgEnabled;
+        CapsuleStyleControls.Opacity = bgEnabled ? 1.0 : 0.42;
+
+        CustomCapsuleBar.Visibility = bgEnabled && settings.CapsulePreset == CapsuleBackgroundPreset.Custom
             ? Visibility.Visible
             : Visibility.Collapsed;
         CustomCapsuleSwatch.Background = new SolidColorBrush(
             ThemeManager.ParseColor(settings.CapsuleCustomHex, System.Windows.Media.Color.FromRgb(62, 62, 68)));
-        CapsuleOpacityRow.IsEnabled = settings.CapsulePreset != CapsuleBackgroundPreset.Transparent;
-        CapsuleOpacityRow.Opacity = settings.CapsulePreset == CapsuleBackgroundPreset.Transparent ? 0.42 : 1.0;
-        CapsuleOpacityValueText.Text = settings.CapsulePreset == CapsuleBackgroundPreset.Transparent
+        CapsuleOpacityRow.IsEnabled = bgEnabled;
+        CapsuleOpacityRow.Opacity = bgEnabled ? 1.0 : 0.42;
+        CapsuleOpacityValueText.Text = !bgEnabled
             ? "0%"
             : $"{Math.Round(settings.CapsuleBackgroundOpacity * 100):0}%";
     }
@@ -1153,8 +1194,8 @@ public partial class MainWindow : Window
         FontSizeLabel.Text = en ? "Font Size" : "字体大小";
         AnimSpeedLabel.Text = en ? "Animation Speed" : "动画速度";
         OpacityLabel.Text = en ? "Lyrics Opacity" : "歌词不透明度";
-        BgCapsuleLabel.Text = en ? "Capsule Background" : "胶囊背景颜色";
-        BgCapsuleDesc.Text = en ? "Applies live to Desktop Free Float and Top Island with adaptive ink" : "实时作用于桌面自由悬浮歌词与顶部悬浮岛，自动适配浅/深字色";
+        BgCapsuleLabel.Text = en ? "Show Floating Capsule Background" : "显示悬浮胶囊背景";
+        BgCapsuleDesc.Text = en ? "Turn off for pure transparent lyrics with high-contrast adaptive text halo" : "关闭后自由悬浮与顶部悬浮岛立即切为纯透明文字 + 双层高对比描边阴影";
         CapsuleOpacityLabel.Text = en ? "Background Opacity" : "背景不透明度";
         PickCustomColorBtn.Content = en ? "Pick Color…" : "系统取色…";
         QuickPresetsLabel.Text = en ? "QUICK STYLE PRESETS" : "风格快捷预设";
@@ -1162,6 +1203,8 @@ public partial class MainWindow : Window
         GeneralHeaderTitle.Text = en ? "General" : "通用";
         PlayerSourceLabel.Text = en ? "Music Player" : "音乐播放器";
         PlayerSourceDesc.Text = en ? "Auto-detects 36+ desktop players and browser sessions" : "自动覆盖 36+ 主流及开源播放器与浏览器网页端";
+        DefaultLaunchLabel.Text = en ? "Default Launch Player" : "默认启动播放器";
+        DefaultLaunchDesc.Text = en ? "Opens your preferred player when Play is pressed with no active session" : "当前无活跃播放会话时，点击播放按钮自动拉起指定播放器";
         StopBehaviorLabel.Text = en ? "When Playback Stops" : "播放停止行为";
         StopBehaviorDesc.Text = en ? "Choose how lyrics behave when your player closes" : "当播放器退出或清空队列时的歌词显示策略";
         GeneralStartupLabel.Text = en ? "Launch at Login" : "开机自启";
@@ -1180,14 +1223,9 @@ public partial class MainWindow : Window
         VersionTitleLabel.Text = en ? "Version" : "版本信息";
         CheckUpdateButton.Content = en ? "Check for Updates" : "检查更新";
 
-        SharePopupTitle.Text = en ? "Share Lyrics Card" : "生成歌词分享卡";
-        ShareTemplateLabel.Text = en ? "Card Template" : "卡片风格";
-        ShareLinesLabel.Text = en ? "Select 1–6 lines" : "选择 1–6 句歌词";
-        CopyShareBtn.Content = en ? "Copy Image" : "复制图片";
-        SaveShareBtn.Content = en ? "Save PNG…" : "保存 PNG…";
-
         initializing = true;
         PopulatePlayerCombo();
+        PopulateDefaultLaunchPlayerCombo();
         PopulateMissingAnimationCombo();
         RefreshDisplayMonitors();
         if (StopBehaviorCombo.Items.Count >= 2)
@@ -1280,7 +1318,18 @@ public partial class MainWindow : Window
         catch (System.ComponentModel.Win32Exception) { }
     }
 
-    private async void OnPlayClick(object sender, RoutedEventArgs e) => await media.ToggleAsync();
+    private async void OnPlayClick(object sender, RoutedEventArgs e)
+    {
+        if (snapshot is null)
+        {
+            if (DefaultPlayerLauncher.TryLaunch(settings.DefaultLaunchPlayer, out var playerLabel, settings.EnglishLanguage))
+            {
+                DockSourceTag.Text = settings.EnglishLanguage ? $"Launching {playerLabel}…" : $"正在启动 {playerLabel}…";
+            }
+            return;
+        }
+        await media.ToggleAsync();
+    }
     private async void OnPreviousClick(object sender, RoutedEventArgs e) => await media.PreviousAsync();
     private async void OnNextClick(object sender, RoutedEventArgs e) => await media.NextAsync();
 
@@ -1445,6 +1494,13 @@ public partial class MainWindow : Window
         if (!auditMode) await media.SelectAsync(selection);
     }
 
+    private void OnDefaultLaunchPlayerChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (initializing || DefaultLaunchPlayerCombo.SelectedItem is not ComboBoxItem { Tag: string playerId }) return;
+        settings.DefaultLaunchPlayer = playerId;
+        settings.Save();
+    }
+
     private void OnStopBehaviorChanged(object sender, SelectionChangedEventArgs e)
     {
         if (initializing || StopBehaviorCombo.SelectedItem is not ComboBoxItem { Tag: PlayerStopBehavior behavior }) return;
@@ -1516,55 +1572,26 @@ public partial class MainWindow : Window
     }
 
     // =========================================================================
-    // SHARE CARD POPUP
+    // LIVE-PREVIEW SHARE CARD WINDOW
     // =========================================================================
     private void OnShareClick(object sender, RoutedEventArgs e)
     {
-        ShareLinesList.Items.Clear();
         var start = Math.Max(0, activeLineIndex - 1);
-        var slice = normalizedLines.Skip(start).Take(6).ToArray();
+        var slice = normalizedLines.Skip(start).Take(10).Select(l => l.Text).ToArray();
         if (slice.Length == 0)
         {
-            slice = [new LyricLine(0, "NotchMuse · Vinyl Studio Hi-Fi")];
+            slice = [settings.EnglishLanguage ? "Softly glowing across your desktop" : "晚风轻轻吹过黑胶纹路"];
         }
-        foreach (var line in slice)
+
+        var dialog = new ShareCardWindow(
+            snapshot?.Track.Title ?? "NotchMuse",
+            snapshot?.Track.Artist ?? "Vinyl Studio Hi-Fi",
+            slice,
+            settings.EnglishLanguage)
         {
-            var view = new LyricView(line.Text, line.Start);
-            ShareLinesList.Items.Add(view);
-            if (ShareLinesList.SelectedItems.Count < 4) ShareLinesList.SelectedItems.Add(view);
-        }
-        ShareStatusLabel.Text = "";
-        SharePopup.IsOpen = true;
-    }
-
-    private async void OnCopyShareClick(object sender, RoutedEventArgs e)
-    {
-        var png = RenderSelectedShareCard();
-        System.Windows.Clipboard.SetImage(ShareCardRenderer.Decode(png));
-        ShareStatusLabel.Text = settings.EnglishLanguage ? "Copied ✓" : "已复制 ✓";
-        await Task.Delay(1200);
-        if (!closed) ShareStatusLabel.Text = "";
-    }
-
-    private void OnSaveShareClick(object sender, RoutedEventArgs e)
-    {
-        var dialog = new Microsoft.Win32.SaveFileDialog { Filter = "PNG Image|*.png", FileName = "NotchMuse-lyrics.png" };
-        if (dialog.ShowDialog(this) != true) return;
-        File.WriteAllBytes(dialog.FileName, RenderSelectedShareCard());
-        ShareStatusLabel.Text = settings.EnglishLanguage ? "Saved ✓" : "已保存 ✓";
-    }
-
-    private byte[] RenderSelectedShareCard()
-    {
-        var lines = ShareLinesList.SelectedItems.Cast<LyricView>().Take(6).Select(line => line.DisplayText).ToArray();
-        if (lines.Length == 0) lines = ["♪"];
-        var theme = ShareThemeCombo.SelectedIndex switch
-        {
-            1 => ShareCardTheme.WarmAlabaster,
-            2 => ShareCardTheme.SodaMist,
-            _ => ShareCardTheme.VinylNight
+            Owner = this
         };
-        return ShareCardRenderer.RenderPng(snapshot?.Track.Title ?? "NotchMuse", snapshot?.Track.Artist ?? "Lyrics", lines, theme);
+        dialog.ShowDialog();
     }
 
     // =========================================================================

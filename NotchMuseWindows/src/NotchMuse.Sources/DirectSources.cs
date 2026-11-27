@@ -15,6 +15,20 @@ public sealed class LrclibSource(HttpClient client) : HttpLyricsSource(client)
             .Select(r => Candidate(track, "lrclib", S(r["id"]), S(r["trackName"]), S(r["artistName"]), S(r["albumName"]), D(r["duration"]), LyricParser.Parse(S(r["syncedLyrics"])))).ToArray();
         if (candidates.Length == 0)
         {
+            var fallbackQuery = TrackMatcher.SearchQuery(track);
+            if (!string.IsNullOrWhiteSpace(fallbackQuery))
+            {
+                try
+                {
+                    var qSearch = await JsonAsync(Url("https://lrclib.net/api/search", ("q", fallbackQuery)), cancellationToken);
+                    candidates = Rows(qSearch).Where(r => S(r["instrumental"]) != "true" && !string.IsNullOrWhiteSpace(S(r["syncedLyrics"])))
+                        .Select(r => Candidate(track, "lrclib", S(r["id"]), S(r["trackName"]), S(r["artistName"]), S(r["albumName"]), D(r["duration"]), LyricParser.Parse(S(r["syncedLyrics"])))).ToArray();
+                }
+                catch (HttpRequestException) { }
+            }
+        }
+        if (candidates.Length == 0)
+        {
             try
             {
                 var direct = await JsonAsync(Url("https://lrclib.net/api/get", ("track_name", track.Title), ("artist_name", track.Artist),
@@ -24,12 +38,32 @@ public sealed class LrclibSource(HttpClient client) : HttpLyricsSource(client)
             }
             catch (HttpRequestException) { }
         }
-        var contenders = candidates.Where(c => c.MatcherScore >= 82).ToArray();
-        for (var i = 0; i < contenders.Length; i++)
-        for (var j = i + 1; j < contenders.Length; j++)
-            if (TrackMatcher.AlbumMatches(contenders[i].Album, track) == TrackMatcher.AlbumMatches(contenders[j].Album, track) &&
-                Math.Abs(contenders[i].MatcherScore - contenders[j].MatcherScore) < 6 && !LyricsSelection.TimelinesAgree(contenders[i], contenders[j])) return null;
-        return Rank(track, candidates);
+        var bound = candidates.Where(c => TrackMatcher.AlbumMatches(c.Album, track) && TrackMatcher.IdentityRejection(track, c.Title, c.Artist, c.Album) is null && Math.Abs(c.Duration - track.Duration) <= 2).ToArray();
+        var usable = bound.Length > 0 ? bound : candidates;
+        var topScore = usable.Length > 0 ? usable.Max(c => c.MatcherScore) : 0;
+        var contenders = usable.Where(c => c.MatcherScore >= 82 && topScore - c.MatcherScore < 6).ToArray();
+        foreach (var group in contenders.GroupBy(c => (TrackMatcher.ParseTitle(c.Title).Name, string.Join(',', TrackMatcher.ArtistGroup(c.Artist).Order()))))
+        {
+            var items = group.ToArray();
+            for (var i = 0; i < items.Length; i++)
+            for (var j = i + 1; j < items.Length; j++)
+            {
+                var sameDuration = Math.Abs(items[i].Duration - items[j].Duration) <= 2;
+                if (!(sameDuration && LyricsSelection.TimelinesAgree(items[i], items[j])))
+                {
+                    if (LyricsSelection.TimelinesConflict(items[i], items[j])) return null;
+                }
+            }
+        }
+        // Deduplicate by (title, artist) keeping best score/closest duration just like Mac LRCLIBLyricsSource
+        var unique = usable.Where(c => c.MatcherScore >= 82 && TrackMatcher.IdentityRejection(track, c.Title, c.Artist, c.Album) is null)
+            .GroupBy(c => (TrackMatcher.ParseTitle(c.Title).Name, string.Join(',', TrackMatcher.ArtistGroup(c.Artist).Order())))
+            .Select(g => g.OrderByDescending(c => TrackMatcher.AlbumMatches(c.Album, track))
+                .ThenByDescending(c => c.MatcherScore)
+                .ThenBy(c => Math.Abs(c.Duration - track.Duration))
+                .First())
+            .ToArray();
+        return Rank(track, unique);
     }
 }
 

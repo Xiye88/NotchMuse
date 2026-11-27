@@ -27,16 +27,44 @@ public sealed class KugouSource(HttpClient client) : HttpLyricsSource(client)
     public override async Task<LyricsCandidate?> FetchAsync(Track track, CancellationToken cancellationToken)
     {
         var json = await JsonAsync(Url("http://mobilecdn.kugou.com/api/v3/search/song", ("format", "json"), ("keyword", TrackMatcher.SearchQuery(track)), ("page", "1"), ("pagesize", "20"), ("showtype", "1")), cancellationToken);
-        var song = Rank(track, Rows(json["data"]?["info"]).SelectMany(r => new[] { r }.Concat(Rows(r["group"]))).Select(r => Candidate(track, "kugou", S(r["hash"]), S(r["songname"]), S(r["singername"]), S(r["album_name"]), D(r["duration"]), new([]))));
+        var songCandidates = Rows(json["data"]?["info"])
+            .SelectMany(r => new[] { r }.Concat(Rows(r["group"])))
+            .Select(r => Candidate(track, "kugou", S(r["hash"]), S(r["songname"]), S(r["singername"]), S(r["album_name"]), D(r["duration"]), new([])))
+            .Where(c => c.MatcherScore >= 82 && TrackMatcher.IdentityRejection(track, c.Title, c.Artist, c.Album) is null)
+            .GroupBy(c => (TrackMatcher.Normalize(c.Title), TrackMatcher.Normalize(c.Artist), Math.Round(c.Duration)))
+            .Select(g => g.OrderByDescending(c => TrackMatcher.AlbumMatches(c.Album, track)).ThenByDescending(c => c.MatcherScore).First())
+            .OrderByDescending(c => TrackMatcher.AlbumMatches(c.Album, track))
+            .ThenBy(c => Math.Abs(c.Duration - track.Duration))
+            .ToArray();
+        var song = songCandidates.FirstOrDefault();
         if (song is null) return null;
+
         var search = await JsonAsync(Url("https://lyrics.kugou.com/search", ("ver", "1"), ("man", "yes"), ("client", "pc"), ("keyword", song.Title + " " + song.Artist), ("duration", (song.Duration * 1000).ToString(CultureInfo.InvariantCulture)), ("hash", song.Id!)), cancellationToken);
         var rows = Rows(search["candidates"]).ToArray();
-        var selected = Rank(track, rows.Select(r => Candidate(track, "kugou", S(r["id"]), S(r["song"]), S(r["singer"]), song.Album, D(r["duration"]) / 1000, new([]))));
-        if (selected is null) return null;
-        var raw = rows.First(r => S(r["id"]) == selected.Id);
-        var download = await JsonAsync(Url("http://lyrics.kugou.com/download", ("ver", "1"), ("client", "pc"), ("id", selected.Id!), ("accesskey", S(raw["accesskey"])), ("fmt", "krc"), ("charset", "utf8")), cancellationToken);
-        var doc = LyricParser.ParseRich(DecodeKrc(S(download["content"])), true);
-        return doc.Lines.Count > 0 ? selected with { Id = song.Id, Document = doc } : null;
+        var lyricCandidates = rows
+            .Select(r => (Raw: r, Cand: Candidate(track, "kugou", S(r["id"]), S(r["song"]), S(r["singer"]), song.Album, D(r["duration"]) / 1000, new([]))))
+            .Where(x => x.Cand.MatcherScore >= 82 && TrackMatcher.IdentityRejection(track, x.Cand.Title, x.Cand.Artist, x.Cand.Album) is null)
+            .GroupBy(x => (TrackMatcher.Normalize(x.Cand.Title), TrackMatcher.Normalize(x.Cand.Artist), Math.Round(x.Cand.Duration)))
+            .Select(g => g.First())
+            .OrderBy(x => Math.Abs(x.Cand.Duration - track.Duration))
+            .ToArray();
+        if (lyricCandidates.Length == 0) return null;
+        var picked = lyricCandidates[0];
+
+        System.Text.Json.Nodes.JsonNode? download = null;
+        foreach (var host in new[] { "http://lyrics.kugou.com/download", "http://krcs.kugou.com/download" })
+        {
+            try
+            {
+                download = await JsonAsync(Url(host, ("ver", "1"), ("client", "pc"), ("id", picked.Cand.Id!), ("accesskey", S(picked.Raw["accesskey"])), ("fmt", "krc"), ("charset", "utf8")), cancellationToken);
+                if (!string.IsNullOrWhiteSpace(S(download["content"]))) break;
+            }
+            catch (HttpRequestException) { }
+        }
+        var content = S(download?["content"]);
+        if (string.IsNullOrWhiteSpace(content)) return null;
+        var doc = LyricParser.ParseRich(DecodeKrc(content), true);
+        return doc.Lines.Count > 0 ? picked.Cand with { Id = song.Id, Document = doc } : null;
     }
 }
 

@@ -67,41 +67,124 @@ public static class MediaMetadataSanitizer
         ("网易云音乐", "netease"), ("QQ音乐", "qq"), ("QQ 音乐", "qq"),
         ("SoundCloud", "soundcloud"), ("Bandcamp", "bandcamp"), ("Bilibili", "bilibili"), ("哔哩哔哩", "bilibili")
     ];
+
+    private static readonly string[] VideoNoisePatterns =
+    [
+        @"\s*[\(\[【（［]\s*(?:Official\s+)?(?:Music\s+)?(?:Video|MV|M/V|Audio|Lyric\s+Video|Lyrics?|Visualizer|Visual|HD|4K|Live\s+Video|original\s+ver\.?)\s*[\)\]】）］]",
+        @"\s*[\(\[【（［]\s*(?:(?:官方|華納|华纳|高畫質|高画质|HD|Official)\s*)*(?:MV|完整版|高清|高畫質|纯享版|純享版|歌词版|歌詞版|动态歌词|動態歌詞)\s*[\)\]】）］]",
+        @"\s*[\(\[【（［][^()\[\]【】（）［］]*(?:官方完整版|高畫質|官方MV|动态歌词|動態歌詞|純享版|纯享版)[^()\[\]【】（）［］]*[\)\]】）］]",
+        @"\s*[\(\[]\s*(?:from\s+[^)\]]+|Spider-Man:[^)\]]+)\s*[\)\]]",
+        @"\s+(?:Official\s+Music\s+Video|Official\s+Video|Official\s+MV|Official\s+Audio|MUSIC\s+VIDEO|M/V|MV|Official)\s*$"
+    ];
+
+    private static readonly string[] ChannelArtistKeywords =
+    [
+        "vevo", "labels", "smtown", "jyp entertainment", "yg entertainment",
+        "records", "binmusic", "jvr music", "warner music", "sony music",
+        "universal music", "1thek", "youtube channel", "official channel",
+        "滚石唱片", "滾石唱片", "杰威尔音乐", "杰威爾音樂", "相信音樂", "相信音乐",
+        "華納音樂", "华纳音乐", "福茂唱片", "海蝶音乐", "海蝶音樂"
+    ];
+
     public static string? WebPlatform(string title) => Sites.FirstOrDefault(s =>
         Regex.IsMatch(title, @"(?:\s*[-–—|·]\s*|^|\s+on\s+)" + Regex.Escape(s.Suffix) + @"\s*$", RegexOptions.IgnoreCase)).Platform;
+
     public static Track Clean(Track track, bool splitGeneric = false)
     {
-        var title = track.Title.Trim(); var artist = track.Artist.Trim();
+        var title = track.Title.Trim();
+        var artist = track.Artist.Trim();
         var web = WebPlatform(title);
         var youtube = track.IsMusicVideo || track.Platform == "youtube" || web == "youtube";
+
         foreach (var site in Sites)
             title = Regex.Replace(title, @"\s*(?:[-–—|·]|\bon)\s*" + Regex.Escape(site.Suffix) + @"\s*$", "", RegexOptions.IgnoreCase);
+
         if (youtube)
         {
             for (var i = 0; i < 2; i++)
             {
-                title = Regex.Replace(title, @"\s*[\(\[【（]\s*(?:official\s*)?(?:music\s*)?(?:video|mv|m/v|audio|lyric\s*video|lyrics?|visualizer|hd|4k|live\s*video|官方(?:音乐)?(?:视频|音频)|官方完整版|高画質|高画质|纯享版|純享版|歌词版|歌詞版)[^)\]】）]*[\)\]】）]", "", RegexOptions.IgnoreCase);
-                title = Regex.Replace(title, @"\s+(?:official\s+(?:music\s+)?video|official\s+mv|official\s+audio|music\s+video|m/v|mv)\s*$", "", RegexOptions.IgnoreCase);
+                foreach (var pattern in VideoNoisePatterns)
+                    title = Regex.Replace(title, pattern, "", RegexOptions.IgnoreCase);
             }
-            title = Regex.Replace(title, @"\s*[-–—|·]\s*(?:official\s+)?(?:youtube\s+music|youtube)\s*$", "", RegexOptions.IgnoreCase);
+            title = Regex.Replace(title, @"\s*[-–—|·]\s*(?:official\s+)?(?:youtube\s+music|youtube)\s*$", "", RegexOptions.IgnoreCase).Trim();
         }
         else
         {
             title = Regex.Replace(title, @"\s*[\(\[（](?:official\s*(?:music\s*)?(?:video|audio|lyric\s*video)|lyrics?|官方(?:音乐)?(?:视频|音频)|高清|\d{3,4}p|4k)[\)\]）]", "", RegexOptions.IgnoreCase);
         }
+
         artist = Regex.Replace(artist, @"\s*-\s*Topic\s*$", "", RegexOptions.IgnoreCase).Trim();
         if (youtube)
         {
-            artist = Regex.Replace(artist, @"\s*(?:VEVO|official|官方)\s*$", "", RegexOptions.IgnoreCase).Trim();
-            if (Regex.IsMatch(artist, @"(?:vevo|records|entertainment|唱片|音乐|official channel)", RegexOptions.IgnoreCase))
+            if (artist.EndsWith("VEVO", StringComparison.OrdinalIgnoreCase) && artist.Length > 4)
+                artist = artist[..^4].Trim();
+            else if (artist.EndsWith(" official", StringComparison.OrdinalIgnoreCase) && artist.Length > 9)
+                artist = artist[..^9].Trim();
+            if (ChannelArtistKeywords.Any(k => artist.Contains(k, StringComparison.OrdinalIgnoreCase)))
                 artist = "";
         }
+
+        if (youtube)
+        {
+            // Extract "Artist【Title】..." or "Artist「Title」..." (matching Mac MediaRemoteMetadataSanitizer)
+            var bracketMatch = Regex.Match(title, @"^(.+?)\s*[【「]([^】」]+)[】」](.*)$");
+            if (bracketMatch.Success)
+            {
+                var lhs = bracketMatch.Groups[1].Value.Trim(' ', '-', '–', '—', '|');
+                var inner = bracketMatch.Groups[2].Value.Trim();
+                var trailing = bracketMatch.Groups[3].Value.Trim();
+                if (lhs.Length > 0 && inner.Length > 0)
+                {
+                    artist = lhs;
+                    title = inner;
+                    var withMatch = Regex.Match(trailing, @"\bwith\s+([^()\[\]【】]+)", RegexOptions.IgnoreCase);
+                    if (withMatch.Success)
+                    {
+                        var guest = CleanYouTubeArtist(withMatch.Groups[1].Value);
+                        if (guest.Length > 0) artist = $"{artist}, {guest}";
+                    }
+                }
+            }
+            else
+            {
+                // Extract "Artist 'Title'" or "Artist \"Title\"" (K-Pop / YouTube official MV convention)
+                var quotedMatch = Regex.Match(title, @"^(.+?)\s*(?:-\s*)?(?:'([^']{2,})'|""([^""]{2,})"")\s*$");
+                if (quotedMatch.Success)
+                {
+                    var lhs = quotedMatch.Groups[1].Value.Trim(' ', '-', '–', '—', '|');
+                    var inner = (quotedMatch.Groups[2].Success ? quotedMatch.Groups[2].Value : quotedMatch.Groups[3].Value).Trim();
+                    if (lhs.Length > 0 && inner.Length > 0)
+                    {
+                        artist = lhs;
+                        title = inner;
+                    }
+                }
+            }
+
+            // Support "Artist _ Title" as well as "Artist - Title"
+            if (SplitArtistTitle(title) is { } split && (string.IsNullOrWhiteSpace(artist) || artist.Contains('_') || title.Contains(" _ ") || TrackMatcher.ArtistKey(artist) == TrackMatcher.ArtistKey(split.Artist) || !title.Contains('(')))
+            {
+                if (string.IsNullOrWhiteSpace(artist) || title.Contains(" _ ") || TrackMatcher.ArtistKey(artist) == TrackMatcher.ArtistKey(split.Artist))
+                {
+                    artist = split.Artist;
+                    title = split.Title;
+                }
+            }
+
+            title = title.Trim('\'', '"', '“', '”', '‘', '’', ' ');
+            foreach (var pattern in VideoNoisePatterns)
+                title = Regex.Replace(title, pattern, "", RegexOptions.IgnoreCase);
+
+            artist = string.Join(", ", artist.Split(',').Select(CleanYouTubeArtist).Where(s => s.Length > 0));
+            title = CleanYouTubeTitle(title);
+        }
+
         if (title.StartsWith(artist + " - ", StringComparison.OrdinalIgnoreCase))
             title = title[(artist.Length + 3)..].Trim();
-        if ((splitGeneric || youtube || string.IsNullOrWhiteSpace(artist)) && title.Split(" - ", 2) is [var left, var right])
+        if ((splitGeneric || youtube || string.IsNullOrWhiteSpace(artist)) && SplitArtistTitle(title) is { } genericSplit)
         {
-            if (string.IsNullOrWhiteSpace(artist) || youtube || TrackMatcher.ArtistKey(artist) == TrackMatcher.ArtistKey(left))
-            { artist = left.Trim(); title = right.Trim(); }
+            if (string.IsNullOrWhiteSpace(artist) || youtube || TrackMatcher.ArtistKey(artist) == TrackMatcher.ArtistKey(genericSplit.Artist))
+            { artist = CleanYouTubeArtist(genericSplit.Artist); title = genericSplit.Title; }
         }
         var collaborators = TrackMatcher.Collaborators(title);
         if (collaborators.Length > 0)
@@ -109,7 +192,48 @@ public static class MediaMetadataSanitizer
             artist = string.Join(", ", new[] { artist }.Concat(collaborators).Where(a => a.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase));
             title = Regex.Replace(title, @"\s*(?:[\(\[（]\s*(?:feat\.?|ft\.?|featuring|with)|\s+(?:feat\.?|ft\.?|featuring))\s+[^\)\]）]+[\)\]）]?", "", RegexOptions.IgnoreCase).Trim();
         }
-        return track with { Title = title, Artist = artist, Platform = web ?? track.Platform,
-            IsMusicVideo = track.IsMusicVideo || web == "youtube" };
+        return track with
+        {
+            Title = title.Trim(),
+            Artist = artist.Trim(),
+            Platform = web ?? track.Platform,
+            IsMusicVideo = track.IsMusicVideo || web == "youtube"
+        };
+    }
+
+    private static (string Artist, string Title)? SplitArtistTitle(string value)
+    {
+        foreach (var sep in new[] { " - ", " — ", " – ", " _ " })
+        {
+            var parts = value.Split(sep, 2);
+            if (parts.Length == 2)
+            {
+                var lhs = parts[0].Trim();
+                var rhs = parts[1].Trim();
+                if (lhs.Length > 0 && rhs.Length > 0) return (lhs, rhs);
+            }
+        }
+        return null;
+    }
+
+    private static string CleanYouTubeArtist(string raw)
+    {
+        var value = raw.Trim();
+        value = Regex.Replace(value, @"\s*[\(（][^\(\)（）]+[\)）]\s*$", "").Trim();
+        var hanLatin = Regex.Match(value, @"^([\u4e00-\u9fff·\s]{2,12})\s+[A-Za-z][A-Za-z0-9\s.'-]{1,24}$");
+        if (hanLatin.Success) return hanLatin.Groups[1].Value.Trim();
+        var latinKorean = Regex.Match(value, @"^([A-Za-z0-9\s.'-]{2,20})\s+[\uac00-\ud7a3\s]{2,}$");
+        if (latinKorean.Success) return latinKorean.Groups[1].Value.Trim();
+        return value;
+    }
+
+    private static string CleanYouTubeTitle(string raw)
+    {
+        var value = raw.Trim();
+        var latinKorean = Regex.Match(value, @"^([A-Za-z0-9\s.'!?&-]+?)\s*\([\uac00-\ud7a3\s]+\)\s*$");
+        if (latinKorean.Success) value = latinKorean.Groups[1].Value.Trim();
+        var cjkEnglish = Regex.Match(value, @"^([\u4e00-\u9fff\u3040-\u30ff]{2,16})\s+[A-Za-z][A-Za-z0-9\s'’!?.,-]{2,}$");
+        if (cjkEnglish.Success) value = cjkEnglish.Groups[1].Value.Trim();
+        return value.Trim();
     }
 }

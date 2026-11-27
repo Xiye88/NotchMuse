@@ -156,5 +156,61 @@ public sealed class M4Tests
         Assert.Equal(expectedHex, hex);
         Assert.Equal(expectedOpacity, opacity, precision: 2);
     }
+
+    [Fact]
+    public void CliqueConsensusBeatsSingleShiftedOutlier()
+    {
+        var track = new Track("稻香", "周杰伦", "魔杰座", 220, Platform: "apple");
+        static LyricsCandidate Make(string provider, string platform, double shift, string? album) =>
+            new(provider, platform, "id", "稻香", "周杰伦", album, 220,
+                new(Enumerable.Range(0, 15).Select(i => new LyricLine(10 + i * 12 + shift, $"这是第{i}句歌词文本内容")).ToArray()), 100);
+
+        var decision = LyricsSelection.Select(
+            [Make("NetEase", "netease", 0, null), Make("QQ", "qq", 0.2, null), Make("Kugou", "kugou", 7.0, null)],
+            track);
+
+        Assert.NotNull(decision.Winner);
+        Assert.Contains(decision.Winner.Provider, new[] { "NetEase", "QQ" });
+    }
+
+    [Fact]
+    public void AlbumBoundStrongMetadataBeatsTier4Outlier()
+    {
+        var track = new Track("晴天", "周杰伦", "叶惠美", 269, Platform: "apple");
+        static LyricsCandidate Make(string provider, string platform, double shift, string? album) =>
+            new(provider, platform, "id", "晴天", "周杰伦", album, 269,
+                new(Enumerable.Range(0, 16).Select(i => new LyricLine(15 + i * 13 + shift, $"故事的小黄花第{i}句")).ToArray()), 100);
+
+        var decision = LyricsSelection.Select(
+            [Make("QQ", "qq", 0, "叶惠美"), Make("LRCLIB", "lrclib", 8.0, "精选集")],
+            track);
+
+        Assert.NotNull(decision.Winner);
+        Assert.Equal("QQ", decision.Winner.Provider);
+    }
+
+    [Fact]
+    public void EmptyAlbumYoutubeTrackAllowsHighConfidenceDirectFallback()
+    {
+        var track = new Track("Lemon", "米津玄师", "", 255, IsMusicVideo: true, Platform: "youtube");
+        var cand = new LyricsCandidate("NetEase", "netease", "id", "Lemon", "米津玄师", "Lemon", 252,
+            new(Enumerable.Range(0, 8).Select(i => new LyricLine(10 + i * 20, $"夢ならばどれほどよかったでしょう{i}")).ToArray()), 88);
+
+        var decision = LyricsSelection.Select([cand], track);
+        Assert.NotNull(decision.Winner);
+        Assert.Equal("NetEase", decision.Winner.Provider);
+    }
+
+    [Fact]
+    public void DefaultPlayerLauncherContainsExpectedOptions()
+    {
+        var players = DefaultPlayerLauncher.DetectAll();
+        Assert.Contains(players, p => p.Id == "none");
+        Assert.Contains(players, p => p.Id == "spotify");
+        Assert.Contains(players, p => p.Id == "netease");
+        Assert.Contains(players, p => p.Id == "qq");
+        Assert.Contains(players, p => p.Id == "soda");
+        Assert.Contains(players, p => p.Id == "apple");
+    }
 }
 

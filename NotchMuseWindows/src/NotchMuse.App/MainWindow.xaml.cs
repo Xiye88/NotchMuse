@@ -102,6 +102,7 @@ public partial class MainWindow : Window
         tray = new Forms.NotifyIcon { Icon = CreateTrayIcon(), Visible = !isAuditMode, Text = "NotchMuse" };
 
         InitializeComponent();
+        InteractionSoundEngine.Enabled = settings.InteractionSoundsEnabled;
         BuildDynamicControls();
         WireOverlays();
         SetupTrayMenu();
@@ -131,8 +132,13 @@ public partial class MainWindow : Window
         previewCards.Clear();
         foreach (var mode in new[] { LyricsDisplayMode.Taskbar, LyricsDisplayMode.TopIsland, LyricsDisplayMode.FreeFloat })
         {
-            var card = new DesktopPreviewCard(mode) { Margin = new Thickness(4, 0, 4, 0) };
-            card.ModeSelected += SelectDisplayMode;
+            var card = new DesktopPreviewCard(mode) { Margin = new Thickness(4, 0, 4, 0), RenderTransformOrigin = new System.Windows.Point(0.5, 0.5) };
+            card.ModeSelected += nextMode =>
+            {
+                InteractionMotion.Rebound(card, 0.97);
+                InteractionSoundEngine.Play(InteractionSoundCue.Tick);
+                SelectDisplayMode(nextMode);
+            };
             previewCards.Add(card);
             DesktopPreviewCardsHost.Children.Add(card);
         }
@@ -168,14 +174,24 @@ public partial class MainWindow : Window
             settings.Save();
             floatingOverlay.ConfigureMode(LyricsDisplayMode.FreeFloat, settings);
         };
-        floatingOverlay.QuickColorSelected += hex =>
+        floatingOverlay.QuickColorSelected += (startHex, endHex) =>
         {
             initializing = true;
-            settings.ColorMode = LyricColorMode.Solid;
-            SolidColorRadio.IsChecked = true;
-            GradientColorRadio.IsChecked = false;
+            if (!string.IsNullOrWhiteSpace(endHex))
+            {
+                settings.ColorMode = LyricColorMode.Gradient;
+                SolidColorRadio.IsChecked = false;
+                GradientColorRadio.IsChecked = true;
+                settings.GradientEndHex = endHex;
+            }
+            else
+            {
+                settings.ColorMode = LyricColorMode.Solid;
+                SolidColorRadio.IsChecked = true;
+                GradientColorRadio.IsChecked = false;
+            }
             initializing = false;
-            SelectAccentColors(hex, settings.GradientEndHex);
+            SelectAccentColors(startHex, settings.GradientEndHex);
         };
         floatingOverlay.OpenMainRequested += BringMainToFront;
         floatingOverlay.OpenSettingsRequested += () => { BringMainToFront(); NavigateTo("General"); };
@@ -274,6 +290,9 @@ public partial class MainWindow : Window
         LangZhRadio.IsChecked = !settings.EnglishLanguage;
         LangEnRadio.IsChecked = settings.EnglishLanguage;
         BilingualToggle.IsChecked = settings.BilingualEnabled;
+        InteractionSoundsToggle.IsChecked = settings.InteractionSoundsEnabled;
+        FloatingSingleLineRadio.IsChecked = !settings.FloatingDoubleLine;
+        FloatingDoubleLineRadio.IsChecked = settings.FloatingDoubleLine;
         OverlayLockToggle.IsChecked = settings.OverlayLocked;
 
         var startup = IsStartupEnabled();
@@ -801,7 +820,12 @@ public partial class MainWindow : Window
 
     private void OnNavRowClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        if (sender is Border { Tag: string page }) NavigateTo(page);
+        if (sender is Border { Tag: string page } row)
+        {
+            InteractionMotion.Rebound(row, 0.97);
+            InteractionSoundEngine.Play(InteractionSoundCue.Tick);
+            NavigateTo(page);
+        }
     }
 
     private void OnNavRowEnter(object sender, System.Windows.Input.MouseEventArgs e)
@@ -863,9 +887,13 @@ public partial class MainWindow : Window
         }
     }
 
+    public static bool ShouldKeepFrontAfterModeSwitch(bool isVisible, WindowState state) =>
+        isVisible && state != WindowState.Minimized;
+
     private void RefreshOverlayVisibility()
     {
         if (auditMode || closed) return;
+        var keepMainFront = ShouldKeepFrontAfterModeSwitch(IsVisible, WindowState);
 
         if (!overlaysEnabled)
         {
@@ -880,14 +908,19 @@ public partial class MainWindow : Window
             taskbarOverlay.Reposition();
             taskbarOverlay.UpdateAppearance(settings);
             taskbarOverlay.SetLocked(settings.OverlayLocked);
-            if (!taskbarOverlay.IsVisible) taskbarOverlay.Show();
+            WindowClickThroughHelper.ShowTopmostNoActivate(taskbarOverlay, settings.OverlayLocked);
             taskbarOverlay.EnsureTopmostAboveTaskbar();
         }
         else
         {
             if (taskbarOverlay.IsVisible) taskbarOverlay.Hide();
             floatingOverlay.ConfigureMode(settings.DisplayMode, settings);
-            if (!floatingOverlay.IsVisible) floatingOverlay.Show();
+            WindowClickThroughHelper.ShowTopmostNoActivate(floatingOverlay, settings.OverlayLocked);
+        }
+
+        if (keepMainFront)
+        {
+            Activate();
         }
     }
 
@@ -998,7 +1031,7 @@ public partial class MainWindow : Window
             ? "NotchMuse Hi-Fi"
             : string.IsNullOrWhiteSpace(value.Track.Artist) ? playerLabel : $"{value.Track.Artist} · {playerLabel}";
 
-        VinylDeck.UpdateState(value?.Track.Title, subtitle, isPlaying, en);
+        VinylDeck.UpdateState(value?.Track.Title, subtitle, isPlaying, en, value?.ArtworkBytes);
         DockTrackTitle.Text = hasTrack
             ? (string.IsNullOrWhiteSpace(value!.Track.Artist) ? value.Track.Title : $"{value.Track.Title} — {value.Track.Artist}")
             : (en ? "Waiting for music…" : "等待播放音乐…");
@@ -1050,7 +1083,12 @@ public partial class MainWindow : Window
         foreach (var line in normalizedLines)
         {
             var row = new SweepLyricLineControl(line.Start, line.Text, line.Translation, settings.BilingualEnabled);
-            row.SeekRequested += async target => await media.SeekAsync(Math.Max(0, target - settings.TimeOffsetSeconds));
+            row.SeekRequested += async target =>
+            {
+                InteractionMotion.Rebound(row, 0.94);
+                InteractionSoundEngine.Play(InteractionSoundCue.Step);
+                await media.SeekAsync(Math.Max(0, target - settings.TimeOffsetSeconds));
+            };
             lyricLineControls.Add(row);
             LyricsLinesHost.Children.Add(row);
         }
@@ -1095,8 +1133,9 @@ public partial class MainWindow : Window
         if (activeLineIndex >= 0 && activeLineIndex < normalizedLines.Count)
         {
             var current = normalizedLines[activeLineIndex];
+            var nextText = activeLineIndex + 1 < normalizedLines.Count ? normalizedLines[activeLineIndex + 1].Text : null;
             taskbarOverlay.UpdateLyric(current.Text, current.Translation, lineProgress, settings.BilingualEnabled);
-            floatingOverlay.UpdateLyric(current.Text, current.Translation, lineProgress, settings.BilingualEnabled);
+            floatingOverlay.UpdateLyric(current.Text, current.Translation, lineProgress, settings.BilingualEnabled, nextText);
         }
     }
 
@@ -1195,6 +1234,10 @@ public partial class MainWindow : Window
 
         DisplayHeaderTitle.Text = en ? "Display" : "显示";
         DisplayPreviewLabel.Text = en ? "LIVE DESKTOP PREVIEW · CLICK TO SWITCH MODE" : "实时预览 · 点击卡片切换模式";
+        FloatingLinesLabel.Text = en ? "Floating Lyric Lines" : "悬浮歌词行数";
+        FloatingLinesDesc.Text = en ? "Double-line default highlights current line with upcoming next line or translation" : "默认双行显示（当前句高亮 + 柔和预告下一句或译文），竖排自动双列紧凑排布";
+        FloatingSingleLineRadio.Content = en ? "Single" : "单行";
+        FloatingDoubleLineRadio.Content = en ? "Double" : "双行";
         DisplayOffsetLabel.Text = en ? "Lyrics Time Offset" : "歌词时间偏移";
         DisplayOffsetDesc.Text = en ? "Fine-tune lyric timing ahead or behind across all views" : "微调歌词提前或延后，实时作用于所有视图";
         DisplayScreenLabel.Text = en ? "Display Monitor" : "显示屏幕";
@@ -1238,6 +1281,8 @@ public partial class MainWindow : Window
         LanguageDesc.Text = en ? "Applies immediately across the entire interface" : "切换全界面语言，实时生效无需重启";
         BilingualLabel.Text = en ? "Bilingual Lyrics" : "双语歌词";
         BilingualDesc.Text = en ? "Show translated lines underneath original lyrics when available" : "当歌词源包含中文翻译时，在原文下方优雅显示译文";
+        InteractionSoundsLabel.Text = en ? "Interaction Micro-Sounds" : "交互微音效";
+        InteractionSoundsDesc.Text = en ? "Zero-asset synthesized tactile sounds with 0% idle CPU" : "零外部素材纯内存合成微触感音效，闲置 0% CPU";
         VersionTitleLabel.Text = en ? "Version" : "版本信息";
         CheckUpdateButton.Content = en ? "Check for Updates" : "检查更新";
 
@@ -1338,8 +1383,16 @@ public partial class MainWindow : Window
 
     private async void OnPlayClick(object sender, RoutedEventArgs e)
     {
+        InteractionMotion.Rebound(PlayPauseButton, 0.94);
+        InteractionSoundEngine.Play(InteractionSoundCue.Latch);
         if (snapshot is null)
         {
+            // Strictly obey DefaultLaunchPlayer: "none" stays completely silent without waking other players!
+            if (string.IsNullOrWhiteSpace(settings.DefaultLaunchPlayer) ||
+                string.Equals(settings.DefaultLaunchPlayer, "none", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
             if (DefaultPlayerLauncher.TryLaunch(settings.DefaultLaunchPlayer, out var playerLabel, settings.EnglishLanguage))
             {
                 DockSourceTag.Text = settings.EnglishLanguage ? $"Launching {playerLabel}…" : $"正在启动 {playerLabel}…";
@@ -1348,8 +1401,20 @@ public partial class MainWindow : Window
         }
         await media.ToggleAsync();
     }
-    private async void OnPreviousClick(object sender, RoutedEventArgs e) => await media.PreviousAsync();
-    private async void OnNextClick(object sender, RoutedEventArgs e) => await media.NextAsync();
+
+    private async void OnPreviousClick(object sender, RoutedEventArgs e)
+    {
+        InteractionMotion.Rebound(PrevTrackButton, 0.94);
+        InteractionSoundEngine.Play(InteractionSoundCue.Latch);
+        if (snapshot is not null) await media.PreviousAsync();
+    }
+
+    private async void OnNextClick(object sender, RoutedEventArgs e)
+    {
+        InteractionMotion.Rebound(NextTrackButton, 0.94);
+        InteractionSoundEngine.Play(InteractionSoundCue.Latch);
+        if (snapshot is not null) await media.NextAsync();
+    }
 
     private void OnProgressGrab(object sender, System.Windows.Input.MouseButtonEventArgs e) => draggingProgress = true;
     private async void OnProgressRelease(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -1360,8 +1425,10 @@ public partial class MainWindow : Window
 
     private void OnQuickColorDotClick(object sender, RoutedEventArgs e)
     {
-        if (sender is System.Windows.Controls.Button { Background: SolidColorBrush scb })
+        if (sender is System.Windows.Controls.Button { Background: SolidColorBrush scb } btn)
         {
+            InteractionMotion.Rebound(btn, 0.94);
+            InteractionSoundEngine.Play(InteractionSoundCue.Step);
             var c = scb.Color;
             var hex = $"#{c.R:X2}{c.G:X2}{c.B:X2}";
             SelectAccentColors(hex, settings.GradientEndHex);
@@ -1442,9 +1509,28 @@ public partial class MainWindow : Window
 
     private void ChangeOffset(double delta)
     {
+        InteractionSoundEngine.Play(InteractionSoundCue.Dial);
         settings.TimeOffsetSeconds = Math.Round(Math.Clamp(settings.TimeOffsetSeconds + delta, -10, 10), 1);
         settings.Save();
         UpdateOffsetReadout();
+    }
+
+    private void OnFloatingLinesModeChanged(object sender, RoutedEventArgs e)
+    {
+        if (initializing) return;
+        settings.FloatingDoubleLine = FloatingDoubleLineRadio.IsChecked == true;
+        settings.Save();
+        InteractionSoundEngine.Play(InteractionSoundCue.Tick);
+        floatingOverlay.ApplyAppearance(settings);
+    }
+
+    private void OnInteractionSoundsChanged(object sender, RoutedEventArgs e)
+    {
+        if (initializing) return;
+        var next = InteractionSoundsToggle.IsChecked == true;
+        settings.InteractionSoundsEnabled = next;
+        settings.Save();
+        InteractionSoundEngine.SetEnabledWithFeedback(next);
     }
 
     private void OnOffsetMinus(object sender, RoutedEventArgs e) => ChangeOffset(-0.5);
@@ -1605,7 +1691,9 @@ public partial class MainWindow : Window
             snapshot?.Track.Title ?? "NotchMuse",
             snapshot?.Track.Artist ?? "Vinyl Studio Hi-Fi",
             slice,
-            settings.EnglishLanguage)
+            settings.EnglishLanguage,
+            album: snapshot?.Track.Album,
+            artwork: snapshot?.ArtworkBytes)
         {
             Owner = this
         };
@@ -1615,10 +1703,10 @@ public partial class MainWindow : Window
     // =========================================================================
     // VISUAL AUDIT MODE SUPPORT (Real WPF Layout & Render Inspection)
     // =========================================================================
-    internal void LoadAuditDemoSession()
+    internal void LoadAuditDemoSession(byte[]? demoArtwork = null)
     {
         var demoTrack = new Track("稻香 (Vinyl Studio Session)", "周杰伦", "魔杰座", 223, Platform: "spotify");
-        snapshot = new PlaybackSnapshot("Spotify.exe", demoTrack, Playing: true, Position: 46.8, CapturedAt: DateTimeOffset.UtcNow, Rate: 1.0);
+        snapshot = new PlaybackSnapshot("Spotify.exe", demoTrack, Playing: true, Position: 46.8, CapturedAt: DateTimeOffset.UtcNow, Rate: 1.0, ArtworkBytes: demoArtwork);
         auditPositionOverride = 46.8;
 
         var demoLines = new List<LyricLine>

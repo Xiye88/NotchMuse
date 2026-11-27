@@ -9,7 +9,7 @@
         ResizeMode="NoResize"
         ShowActivated="False"
         FocusVisualStyle="{x:Null}"
-        Width="700" Height="176"
+        Width="700" Height="198"
         MouseEnter="OnOverlayMouseEnter"
         MouseLeave="OnOverlayMouseLeave">
     <Window.Resources>
@@ -23,6 +23,7 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -53,15 +54,16 @@
             </Setter>
         </Style>
 
-        <!-- Clean 1-row quick color swatch dot -->
+        <!-- Clean 1-row quick color swatch dot (solid or gradient) -->
         <Style x:Key="FloatingColorDot" TargetType="Button">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Width" Value="22"/>
             <Setter Property="Height" Value="22"/>
-            <Setter Property="Margin" Value="3.5,0"/>
+            <Setter Property="Margin" Value="3,0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -92,7 +94,7 @@
     <Grid FocusVisualStyle="{x:Null}">
         <!-- 1px Vertical Dashed Magnetic Center Snap Guide (shown while dragging in FreeFloat mode) -->
         <Line x:Name="SnapGuide"
-              X1="0" Y1="4" X2="0" Y2="172"
+              X1="0" Y1="4" X2="0" Y2="194"
               HorizontalAlignment="Center"
               VerticalAlignment="Stretch"
               Stroke="#CCE06D1B"
@@ -101,7 +103,7 @@
               Visibility="Collapsed"
               IsHitTestVisible="False"/>
 
-        <!-- 3-Row Layout: Row 0 = Top Toolbar Slot (default), Row 1 = Lyric Capsule, Row 2 = Bottom Auto-Flip Slot -->
+        <!-- 3-Row Layout: Row 0 = Top Toolbar Slot (default), Row 1 = Tight Lyric Capsule, Row 2 = Bottom Auto-Flip Slot -->
         <Grid x:Name="OverlayGrid"
               VerticalAlignment="Center"
               HorizontalAlignment="Center"
@@ -112,7 +114,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Compact 6-Action Hover Mini-Toolbar + Inline 7-Dot Quick Color Tray -->
+            <!-- Compact 6-Action Hover Mini-Toolbar + Borderless Dark-Ink Micro-Label + 7+3 Quick Color Popover -->
             <Border x:Name="HoverToolbarHost"
                     Grid.Row="0"
                     HorizontalAlignment="Center"
@@ -120,7 +122,28 @@
                     Background="#01000000"
                     Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center">
-                    <!-- Feather-light 1-Row 7-Dot Quick Color Popover (toggled by 快捷配色) -->
+                    <!-- Borderless, background-less, shadow-less dark-ink micro-label directly ABOVE the hovered button -->
+                    <Canvas x:Name="MicroTooltipTrack"
+                            Height="18"
+                            Margin="0,0,0,3"
+                            IsHitTestVisible="False"
+                            ClipToBounds="False">
+                        <TextBlock x:Name="MicroTooltipText"
+                                   Style="{x:Null}"
+                                   Text=""
+                                   FontFamily="Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1A1A1C"
+                                   Opacity="0"
+                                   IsHitTestVisible="False">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#F5FFFFFF" BlurRadius="4.5" ShadowDepth="0" Opacity="0.98"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Canvas>
+
+                    <!-- Feather-light 1-Row Quick Color Popover: 7 Solid Dots + Divider + 3 Curated Gradient Dots -->
                     <Border x:Name="QuickColorPopover"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,6"
@@ -136,8 +159,9 @@
                         <StackPanel x:Name="QuickColorDotsHost" Orientation="Horizontal" VerticalAlignment="Center"/>
                     </Border>
 
-                    <!-- Main 6-Button Floating Control Bar -->
+                    <!-- Main 6-Button Floating Control Bar (Dock 1.08x hover micro-magnify + 150ms borderless micro-label) -->
                     <Border x:Name="HoverToolbar"
+                            HorizontalAlignment="Center"
                             Padding="5,3"
                             CornerRadius="11"
                             Background="#F219191F"
@@ -146,31 +170,37 @@
                         <Border.Effect>
                             <DropShadowEffect Color="#55000000" BlurRadius="12" ShadowDepth="2" Opacity="0.38"/>
                         </Border.Effect>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button x:Name="LockMiniBtn" Content="锁定" Style="{StaticResource FloatingToolbarButton}" ToolTip="锁定歌词并开启鼠标穿透 (Ctrl+Alt+L)" Click="OnLockClick"/>
+                        <StackPanel x:Name="ToolbarButtonsPanel" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="LockMiniBtn" Content="锁定" Style="{StaticResource FloatingToolbarButton}"
+                                    MouseEnter="OnToolbarButtonEnter" MouseLeave="OnToolbarButtonLeave" Click="OnLockClick"/>
                             <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                            <Button x:Name="OrientationMiniBtn" Content="竖排" Style="{StaticResource FloatingToolbarButton}" ToolTip="切换横排 / 竖排歌词布局" Click="OnOrientationClick"/>
+                            <Button x:Name="OrientationMiniBtn" Content="竖排" Style="{StaticResource FloatingToolbarButton}"
+                                    MouseEnter="OnToolbarButtonEnter" MouseLeave="OnToolbarButtonLeave" Click="OnOrientationClick"/>
                             <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                            <Button x:Name="ColorMiniBtn" Content="配色" Style="{StaticResource FloatingToolbarButton}" ToolTip="快捷切换 7 款主流歌词配色" Click="OnToggleQuickColorClick"/>
+                            <Button x:Name="ColorMiniBtn" Content="配色" Style="{StaticResource FloatingToolbarButton}"
+                                    MouseEnter="OnToolbarButtonEnter" MouseLeave="OnToolbarButtonLeave" Click="OnToggleQuickColorClick"/>
                             <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                            <Button x:Name="OpenMainMiniBtn" Content="主窗口" Style="{StaticResource FloatingToolbarButton}" ToolTip="一键召唤并置前 NotchMuse 主界面" Click="OnOpenMainClick"/>
+                            <Button x:Name="OpenMainMiniBtn" Content="主窗口" Style="{StaticResource FloatingToolbarButton}"
+                                    MouseEnter="OnToolbarButtonEnter" MouseLeave="OnToolbarButtonLeave" Click="OnOpenMainClick"/>
                             <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                            <Button x:Name="SettingsMiniBtn" Content="设置" Style="{StaticResource FloatingToolbarButton}" ToolTip="打开 NotchMuse 设置页" Click="OnOpenSettingsClick"/>
+                            <Button x:Name="SettingsMiniBtn" Content="设置" Style="{StaticResource FloatingToolbarButton}"
+                                    MouseEnter="OnToolbarButtonEnter" MouseLeave="OnToolbarButtonLeave" Click="OnOpenSettingsClick"/>
                             <Border Width="1" Height="12" Background="#28FFFFFF" Margin="1,0" VerticalAlignment="Center"/>
-                            <Button x:Name="HideMiniBtn" Content="隐藏" Style="{StaticResource FloatingToolbarButton}" Foreground="#D2D0CA" ToolTip="隐藏桌面悬浮歌词（可从托盘恢复）" Click="OnHideClick"/>
+                            <Button x:Name="HideMiniBtn" Content="隐藏" Style="{StaticResource FloatingToolbarButton}" Foreground="#D2D0CA"
+                                    MouseEnter="OnToolbarButtonEnter" MouseLeave="OnToolbarButtonLeave" Click="OnHideClick"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
             </Border>
 
-            <!-- Draggable Lyrics Capsule (zero blue focus ring; transparent mode gains soft frosted gray hover backdrop) -->
+            <!-- Draggable Lyrics Capsule: tightly hugs actual lyric width (20px L/R margin, zero oversized bar!) -->
             <Border x:Name="LyricCapsule"
                     Grid.Row="1"
                     CornerRadius="16"
-                    Padding="26,12"
+                    Padding="20,10"
                     Background="#D13E3E44"
                     BorderBrush="#2EFFFFFF"
-                    BorderThickness="1"
+                    BorderThickness="0.75"
                     HorizontalAlignment="Center"
                     Cursor="SizeAll"
                     Focusable="False"
@@ -180,67 +210,132 @@
                     MouseLeftButtonUp="OnCapsuleMouseUp"
                     LostMouseCapture="OnCapsuleLostCapture">
                 <Border.Effect>
-                    <DropShadowEffect x:Name="CapsuleShadow" Color="#50000000" BlurRadius="18" ShadowDepth="4" Opacity="0.30"/>
+                    <DropShadowEffect x:Name="CapsuleShadow" Color="#50000000" BlurRadius="18" ShadowDepth="4" Opacity="0.28"/>
                 </Border.Effect>
-                <StackPanel x:Name="LyricContentStack" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Grid x:Name="SweepHost" HorizontalAlignment="Center">
-                        <!-- Adaptive Shadow Backing Layer (activated in Transparent mode for dual-layer crisp outline) -->
-                        <TextBlock x:Name="OutlineLyricText"
-                                   Style="{x:Null}"
-                                   Text="等待播放音乐…"
-                                   FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
-                                   FontSize="22"
-                                   FontWeight="Bold"
-                                   TextAlignment="Center"
-                                   Foreground="#E0000000"
-                                   TextTrimming="CharacterEllipsis"
-                                   MaxWidth="610"
-                                   Margin="0,1.2,0,0"
-                                   Visibility="Collapsed"
-                                   IsHitTestVisible="False">
-                            <TextBlock.Effect>
-                                <DropShadowEffect Color="#F0000000" BlurRadius="7" ShadowDepth="0" Opacity="0.95"/>
-                            </TextBlock.Effect>
-                        </TextBlock>
 
-                        <TextBlock x:Name="BaseLyricText"
-                                   Style="{x:Null}"
-                                   Text="等待播放音乐…"
-                                   FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
-                                   FontSize="22"
-                                   FontWeight="Bold"
-                                   TextAlignment="Center"
-                                   Foreground="#99F3F2EF"
-                                   TextTrimming="CharacterEllipsis"
-                                   MaxWidth="610"/>
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- Horizontal Layout Host (Single or Double-Line) -->
+                    <StackPanel x:Name="HorizontalLyricsHost" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid x:Name="SweepHost" HorizontalAlignment="Center">
+                            <!-- Adaptive Shadow Backing Layer (activated in Transparent mode for dual-layer crisp outline) -->
+                            <TextBlock x:Name="OutlineLyricText"
+                                       Style="{x:Null}"
+                                       Text="等待播放音乐…"
+                                       FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       TextAlignment="Center"
+                                       Foreground="#E0000000"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="610"
+                                       Margin="0,1.2,0,0"
+                                       Visibility="Collapsed"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#F0000000" BlurRadius="7" ShadowDepth="0" Opacity="0.95"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
 
-                        <TextBlock x:Name="SweepLyricText"
+                            <TextBlock x:Name="BaseLyricText"
+                                       Style="{x:Null}"
+                                       Text="等待播放音乐…"
+                                       FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       TextAlignment="Center"
+                                       Foreground="#99F3F2EF"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="610"/>
+
+                            <TextBlock x:Name="SweepLyricText"
+                                       Style="{x:Null}"
+                                       Text="等待播放音乐…"
+                                       FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                       FontSize="22"
+                                       FontWeight="Bold"
+                                       TextAlignment="Center"
+                                       Foreground="#FF8A36"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="610">
+                                <TextBlock.Clip>
+                                    <RectangleGeometry x:Name="SweepClip" Rect="0,0,0,50"/>
+                                </TextBlock.Clip>
+                            </TextBlock>
+                        </Grid>
+
+                        <!-- Secondary Line: Bilingual Translation OR Upcoming Next Lyric (Horizontal Double-Line only!) -->
+                        <TextBlock x:Name="SubLyricText"
                                    Style="{x:Null}"
-                                   Text="等待播放音乐…"
-                                   FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
-                                   FontSize="22"
-                                   FontWeight="Bold"
+                                   Text=""
+                                   FontFamily="Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI"
+                                   FontSize="13.5"
                                    TextAlignment="Center"
-                                   Foreground="#FF8A36"
+                                   Foreground="#C8C6C0"
+                                   Margin="0,5,0,0"
                                    TextTrimming="CharacterEllipsis"
-                                   MaxWidth="610">
-                            <TextBlock.Clip>
-                                <RectangleGeometry x:Name="SweepClip" Rect="0,0,0,50"/>
-                            </TextBlock.Clip>
-                        </TextBlock>
-                    </Grid>
-                    <TextBlock x:Name="SubLyricText"
-                               Style="{x:Null}"
-                               Text=""
-                               FontFamily="Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI"
-                               FontSize="12.5"
-                               TextAlignment="Center"
-                               Foreground="#C8C6C0"
-                               Margin="0,4,0,0"
-                               TextTrimming="CharacterEllipsis"
-                               MaxWidth="600"
-                               Visibility="Collapsed"/>
-                </StackPanel>
+                                   MaxWidth="590"
+                                   Visibility="Collapsed"/>
+                    </StackPanel>
+
+                    <!-- Vertical Layout Host (Strictly zero horizontal bottom text; tight 12px 2-column gap!) -->
+                    <StackPanel x:Name="VerticalLyricsHost"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Visibility="Collapsed">
+                        <!-- Left Column: Upcoming Next Line (visible only in Double-Line Vertical mode, 12px gap to right column!) -->
+                        <TextBlock x:Name="VerticalNextText"
+                                   Style="{x:Null}"
+                                   Text=""
+                                   FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                   FontSize="17"
+                                   FontWeight="Medium"
+                                   TextAlignment="Center"
+                                   Foreground="#88F3F2EF"
+                                   Margin="0,0,12,0"
+                                   VerticalAlignment="Top"
+                                   Visibility="Collapsed"/>
+
+                        <!-- Right Column: Active Vertical Lyric with Top-to-Bottom Sweep -->
+                        <Grid x:Name="VerticalSweepHost" VerticalAlignment="Top">
+                            <TextBlock x:Name="VerticalOutlineText"
+                                       Style="{x:Null}"
+                                       Text=""
+                                       FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       TextAlignment="Center"
+                                       Foreground="#E0000000"
+                                       Margin="0,1.2,0,0"
+                                       Visibility="Collapsed"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#F0000000" BlurRadius="7" ShadowDepth="0" Opacity="0.95"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock x:Name="VerticalBaseText"
+                                       Style="{x:Null}"
+                                       Text=""
+                                       FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       TextAlignment="Center"
+                                       Foreground="#99F3F2EF"/>
+                            <TextBlock x:Name="VerticalSweepText"
+                                       Style="{x:Null}"
+                                       Text=""
+                                       FontFamily="Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       TextAlignment="Center"
+                                       Foreground="#FF8A36">
+                                <TextBlock.Clip>
+                                    <RectangleGeometry x:Name="VerticalSweepClip" Rect="0,0,48,0"/>
+                                </TextBlock.Clip>
+                            </TextBlock>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
             </Border>
         </Grid>
     </Grid>

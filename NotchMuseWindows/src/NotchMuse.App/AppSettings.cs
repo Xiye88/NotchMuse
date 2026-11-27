@@ -82,6 +82,8 @@ public sealed class AppSettings
     public string DisplayScreen { get; set; } = "Primary";
     public bool OverlayLocked { get; set; }
     public bool FloatingVerticalLayout { get; set; }
+    public bool FloatingDoubleLine { get; set; } = true;
+    public bool InteractionSoundsEnabled { get; set; } = true;
     public double? FloatingLeft { get; set; }
     public double? FloatingTop { get; set; }
 

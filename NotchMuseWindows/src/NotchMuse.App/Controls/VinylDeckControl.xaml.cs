@@ -1,7 +1,9 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 
 namespace NotchMuse.App.Controls;
 
@@ -11,17 +13,19 @@ public partial class VinylDeckControl : System.Windows.Controls.UserControl
     private bool hasTrack;
     private double eqPhase;
     private bool animationsRunning;
+    private byte[]? currentArtworkRef;
 
     public VinylDeckControl()
     {
         InitializeComponent();
     }
 
-    public void UpdateState(string? title, string? subtitle, bool isPlaying, bool english)
+    public void UpdateState(string? title, string? subtitle, bool isPlaying, bool english, byte[]? artworkBytes = null)
     {
         hasTrack = !string.IsNullOrWhiteSpace(title);
         TitleText.Text = hasTrack ? title! : (english ? "Waiting for music…" : "等待播放音乐…");
         SubtitleText.Text = !string.IsNullOrWhiteSpace(subtitle) ? subtitle! : "NotchMuse Hi-Fi";
+        UpdateArtwork(hasTrack ? artworkBytes : null);
 
         StateText.Text = !hasTrack ? "IDLE" : (isPlaying ? "PLAY" : "PAUSE");
         if (isPlaying)
@@ -49,6 +53,46 @@ public partial class VinylDeckControl : System.Windows.Controls.UserControl
             playing = isPlaying;
             AnimateTonearm(isPlaying);
             UpdateDiscSpin(isPlaying);
+        }
+    }
+
+    private void UpdateArtwork(byte[]? artworkBytes)
+    {
+        if (ReferenceEquals(currentArtworkRef, artworkBytes)) return;
+        currentArtworkRef = artworkBytes;
+
+        if (artworkBytes is null || artworkBytes.Length == 0)
+        {
+            AlbumArtDisc.Visibility = Visibility.Collapsed;
+            AlbumArtDisc.Fill = null;
+            DefaultCenterLabel.Visibility = Visibility.Visible;
+            return;
+        }
+
+        try
+        {
+            using var ms = new MemoryStream(artworkBytes, writable: false);
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.DecodePixelWidth = 96;
+            bmp.StreamSource = ms;
+            bmp.EndInit();
+            bmp.Freeze();
+
+            AlbumArtDisc.Fill = new ImageBrush(bmp) { Stretch = Stretch.UniformToFill };
+            AlbumArtDisc.Visibility = Visibility.Visible;
+            DefaultCenterLabel.Visibility = Visibility.Collapsed;
+        }
+        catch (NotSupportedException)
+        {
+            AlbumArtDisc.Visibility = Visibility.Collapsed;
+            DefaultCenterLabel.Visibility = Visibility.Visible;
+        }
+        catch (IOException)
+        {
+            AlbumArtDisc.Visibility = Visibility.Collapsed;
+            DefaultCenterLabel.Visibility = Visibility.Visible;
         }
     }
 

@@ -33,7 +33,8 @@ public static class AuditSnapshotRunner
 
         main.Show();
         await FlushRenderAsync();
-        main.LoadAuditDemoSession();
+        var demoArtwork = RenderDemoAlbumArtworkPng();
+        main.LoadAuditDemoSession(demoArtwork);
         await FlushRenderAsync();
 
         // 1-4: Light Braun Warm Alabaster (Lyrics, Display, Appearance, General)
@@ -74,7 +75,7 @@ public static class AuditSnapshotRunner
         ThemeManager.ApplyAppTheme(AppThemeMode.Light);
         RenderDesktopOverlaysShowcase(main.CurrentSettings, Path.Combine(outputDir, "08_desktop_overlays.png"));
 
-        // 9: Live-Preview Share Card Modal Window
+        // 9: Live-Preview Share Card Modal Window (with 56x56@2x Album Artwork + Album Header)
         var shareWin = new ShareCardWindow(
             "稻香 (Vinyl Studio Session)",
             "周杰伦",
@@ -86,7 +87,9 @@ public static class AuditSnapshotRunner
                 "我们是不是该知足",
                 "珍惜一切就算没有拥有"
             ],
-            isEnglish: false)
+            isEnglish: false,
+            album: "魔杰座",
+            artwork: demoArtwork)
         {
             WindowStartupLocation = WindowStartupLocation.Manual,
             Left = -3000,
@@ -98,6 +101,46 @@ public static class AuditSnapshotRunner
         shareWin.Close();
 
         main.Close();
+    }
+
+    private static byte[] RenderDemoAlbumArtworkPng()
+    {
+        const int s = 256;
+        var dv = new DrawingVisual();
+        using (var dc = dv.RenderOpen())
+        {
+            dc.DrawRectangle(
+                new LinearGradientBrush(
+                    System.Windows.Media.Color.FromRgb(236, 124, 52),
+                    System.Windows.Media.Color.FromRgb(48, 44, 78),
+                    new System.Windows.Point(0, 0),
+                    new System.Windows.Point(1, 1)),
+                null,
+                new Rect(0, 0, s, s));
+            dc.DrawEllipse(
+                new RadialGradientBrush(
+                    System.Windows.Media.Color.FromArgb(220, 255, 226, 168),
+                    System.Windows.Media.Color.FromArgb(0, 255, 160, 80)),
+                null,
+                new System.Windows.Point(s * 0.68, s * 0.34),
+                86, 86);
+            dc.DrawGeometry(
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(185, 22, 20, 34)),
+                null,
+                Geometry.Parse("M 0,192 Q 68,148 134,174 T 256,158 L 256,256 L 0,256 Z"));
+            dc.DrawEllipse(
+                null,
+                new System.Windows.Media.Pen(new SolidColorBrush(System.Windows.Media.Color.FromArgb(95, 255, 255, 255)), 2.2),
+                new System.Windows.Point(s * 0.5, s * 0.5),
+                74, 74);
+        }
+        var rtb = new RenderTargetBitmap(s, s, 96, 96, PixelFormats.Pbgra32);
+        rtb.Render(dv);
+        var enc = new PngBitmapEncoder();
+        enc.Frames.Add(BitmapFrame.Create(rtb));
+        using var ms = new MemoryStream();
+        enc.Save(ms);
+        return ms.ToArray();
     }
 
     private static async Task FlushRenderAsync()
@@ -242,12 +285,12 @@ public static class AuditSnapshotRunner
     {
         var canvas = new Grid
         {
-            Width = 1040,
-            Height = 520,
+            Width = 1080,
+            Height = 560,
             Background = new LinearGradientBrush(
-                System.Windows.Media.Color.FromRgb(42, 49, 64),
-                System.Windows.Media.Color.FromRgb(22, 24, 32),
-                35)
+                System.Windows.Media.Color.FromRgb(186, 198, 214),
+                System.Windows.Media.Color.FromRgb(44, 52, 68),
+                50)
         };
 
         // 1. Top Island Overlay (Soft Gray #3E3E44 @ 82%)
@@ -266,58 +309,79 @@ public static class AuditSnapshotRunner
             Child = islandVisual
         });
 
-        // 2. Transparent Mode on Hover: Soft translucent gray grab-backdrop + 6-button toolbar + 1-row 7-dot quick color popover ABOVE lyrics!
+        // 2. Transparent Double-Line Hover: Soft Airy Mist + Tight Lyric Width + Borderless Dark-Ink Micro-Tooltip + 7 Solid + 3 Gradient Dots!
         var transHoverSettings = new AppSettings
         {
+            ColorMode = LyricColorMode.Gradient,
             AccentHex = "#FF8A36",
+            GradientEndHex = "#FF4D8D",
             BackgroundCapsuleEnabled = false,
             CapsulePreset = CapsuleBackgroundPreset.Transparent,
+            FloatingDoubleLine = true,
             FontSize = 22
         };
         var transHoverFloat = new FloatingLyricsWindow();
         transHoverFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, transHoverSettings);
-        transHoverFloat.ShowHoverToolbarForPreview(show: true, openQuickColors: true, forceBelow: false);
-        transHoverFloat.UpdateLyric("多少人为生命在努力勇敢的走下去", "So many keep walking bravely for life", 0.66, true);
+        transHoverFloat.ShowHoverToolbarForPreview(show: true, openQuickColors: true, forceBelow: false, previewMicroTooltip: "7 纯色 + 3 渐变快捷配色");
+        transHoverFloat.UpdateLyric("多少人为生命在努力勇敢的走下去", null, 0.66, false, nextLine: "我们是不是该知足 珍惜一切就算没有拥有");
         var transHoverVisual = (UIElement)transHoverFloat.Content;
         transHoverFloat.Content = null;
         canvas.Children.Add(new Border
         {
             Width = 700,
-            Height = 190,
-            HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+            Height = 220,
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 96, 0, 0),
+            Margin = new Thickness(40, 102, 0, 0),
             Child = transHoverVisual
         });
 
-        // 3. Bottom comparison: Frosted Paper capsule + Slate Blue capsule
-        var bottomRow = new UniformGrid
+        // 3. Right Side: Tight 2-Column Vertical Double-Line Lyrics (12px gap, ZERO horizontal bottom text!)
+        var vertSettings = new AppSettings
         {
-            Columns = 2,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Margin = new Thickness(24, 0, 24, 28)
+            ColorMode = LyricColorMode.Gradient,
+            AccentHex = "#38BDF8",
+            GradientEndHex = "#A855F7",
+            CapsulePreset = CapsuleBackgroundPreset.SlateBlue,
+            CapsuleBackgroundOpacity = 0.84,
+            FloatingVerticalLayout = true,
+            FloatingDoubleLine = true,
+            FontSize = 20
         };
+        var vertFloat = new FloatingLyricsWindow();
+        vertFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, vertSettings);
+        vertFloat.UpdateLyric("请你打开电视看看", null, 0.62, false, nextLine: "多少人为生命努力走下去");
+        var vertVisual = (UIElement)vertFloat.Content;
+        vertFloat.Content = null;
+        canvas.Children.Add(new Border
+        {
+            Width = 220,
+            Height = 400,
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 40, 56, 0),
+            Child = vertVisual
+        });
 
-        var paperSettings = new AppSettings { AccentHex = "#E06D1B", CapsulePreset = CapsuleBackgroundPreset.FrostedPaper, CapsuleBackgroundOpacity = 0.88, FontSize = 19 };
+        // 4. Bottom Left: Frosted Paper Double-Line with Soft 0.75px Amber Hover Rim
+        var paperSettings = new AppSettings { AccentHex = "#E06D1B", CapsulePreset = CapsuleBackgroundPreset.FrostedPaper, CapsuleBackgroundOpacity = 0.88, FloatingDoubleLine = true, FontSize = 19 };
         var paperFloat = new FloatingLyricsWindow();
         paperFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, paperSettings);
-        paperFloat.UpdateLyric("磨砂奶白 · 柔和百搭浅色桌面", "Frosted Paper @ 88% · adaptive dark ink", 0.70, true);
+        paperFloat.ShowHoverToolbarForPreview(show: true, openQuickColors: false, forceBelow: true);
+        paperFloat.UpdateLyric("磨砂奶白 · 柔和百搭浅色桌面", null, 0.70, false, nextLine: "贴近屏幕顶部时工具栏自动下翻");
         var paperVisual = (UIElement)paperFloat.Content;
         paperFloat.Content = null;
-        bottomRow.Children.Add(new Border { Height = 120, Child = paperVisual });
+        canvas.Children.Add(new Border
+        {
+            Width = 620,
+            Height = 160,
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(70, 0, 0, 26),
+            Child = paperVisual
+        });
 
-        var slateSettings = new AppSettings { AccentHex = "#38BDF8", CapsulePreset = CapsuleBackgroundPreset.SlateBlue, CapsuleBackgroundOpacity = 0.82, FontSize = 19 };
-        var slateFloat = new FloatingLyricsWindow();
-        slateFloat.ConfigureMode(LyricsDisplayMode.FreeFloat, slateSettings);
-        slateFloat.ShowHoverToolbarForPreview(show: true, openQuickColors: false, forceBelow: true);
-        slateFloat.UpdateLyric("贴近顶部边缘 · 工具栏自动翻转至下方", "Auto-flip toolbar below near screen top", 0.64, true);
-        var slateVisual = (UIElement)slateFloat.Content;
-        slateFloat.Content = null;
-        bottomRow.Children.Add(new Border { Height = 148, Child = slateVisual });
-
-        canvas.Children.Add(bottomRow);
-
-        SaveVisualPng(canvas, filePath, 1040, 520);
+        SaveVisualPng(canvas, filePath, 1080, 560);
     }
 
     private static void WritePng(BitmapSource source, string filePath)

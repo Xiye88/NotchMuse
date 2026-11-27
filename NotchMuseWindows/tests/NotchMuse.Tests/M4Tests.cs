@@ -220,5 +220,57 @@ public sealed class M4Tests
     [InlineData(650, 0, false)]
     public void FloatingToolbarAnchorsAboveAndFlipsOnlyNearTopEdge(double windowTop, double workTop, bool expectedBelow) =>
         Assert.Equal(expectedBelow, NotchMuse.App.Overlays.FloatingLyricsWindow.ShouldFlipToolbarBelow(windowTop, workTop));
+
+    [Fact]
+    public void DefaultSettingsEnableDoubleLineFloatingAndInteractionSounds()
+    {
+        var defaults = new AppSettings();
+        Assert.True(defaults.FloatingDoubleLine);
+        Assert.True(defaults.InteractionSoundsEnabled);
+    }
+
+    [Fact]
+    public void QuickGradientPaletteHasThreeCuratedMacParityGradients()
+    {
+        var gradients = NotchMuse.App.Overlays.FloatingLyricsWindow.QuickGradientPalette;
+        Assert.Equal(3, gradients.Length);
+        Assert.Contains(gradients, g => g.StartHex == "#FF8A36" && g.EndHex == "#FF4D8D");
+        Assert.Contains(gradients, g => g.StartHex == "#38BDF8" && g.EndHex == "#A855F7");
+        Assert.Contains(gradients, g => g.StartHex == "#34D399" && g.EndHex == "#0EA5E9");
+    }
+
+    [Fact]
+    public void ShareCardWithAlbumAndArtworkRendersValidPng()
+    {
+        var basePng = ShareCardRenderer.RenderPng("稻香", "周杰伦", ["请你打开电视看看"], ShareCardTheme.VinylNight);
+        var withArtPng = ShareCardRenderer.RenderPng("稻香", "周杰伦", "魔杰座", ["请你打开电视看看"], ShareCardTheme.WarmAlabaster, artworkBytes: basePng);
+        Assert.True(withArtPng.Length > 1000);
+        Assert.Equal(new byte[] { 137, 80, 78, 71 }, withArtPng[..4]);
+    }
+
+    [Theory]
+    [InlineData(InteractionSoundCue.Tick)]
+    [InlineData(InteractionSoundCue.Step)]
+    [InlineData(InteractionSoundCue.Latch)]
+    [InlineData(InteractionSoundCue.Dial)]
+    [InlineData(InteractionSoundCue.Landed)]
+    [InlineData(InteractionSoundCue.Hush)]
+    public void SynthesizedPcmWaveHeadersAreValidForAllSixCues(InteractionSoundCue cue)
+    {
+        var wav = InteractionSoundEngine.SynthesizeWave(cue);
+        Assert.True(wav.Length > 44);
+        Assert.Equal("RIFF"u8.ToArray(), wav[..4]);
+        Assert.Equal("WAVE"u8.ToArray(), wav[8..12]);
+        Assert.Equal("data"u8.ToArray(), wav[36..40]);
+        Assert.InRange(InteractionSoundEngine.GetCueVolume(cue), 0.22, 0.32);
+    }
+
+    [Theory]
+    [InlineData(true, System.Windows.WindowState.Normal, true)]
+    [InlineData(true, System.Windows.WindowState.Maximized, true)]
+    [InlineData(true, System.Windows.WindowState.Minimized, false)]
+    [InlineData(false, System.Windows.WindowState.Normal, false)]
+    public void KeepMainWindowFrontOnModeSwitchStateMachine(bool isVisible, System.Windows.WindowState state, bool expectedKeepFront) =>
+        Assert.Equal(expectedKeepFront, MainWindow.ShouldKeepFrontAfterModeSwitch(isVisible, state));
 }
 

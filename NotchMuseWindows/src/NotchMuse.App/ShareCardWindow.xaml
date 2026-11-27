@@ -109,6 +109,31 @@
                     </Border>
                 </DockPanel>
             </Grid>
+
+            <!-- Non-Blocking Floating Bottom Completion Toast -->
+            <Border x:Name="CompletionToast"
+                    Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,22"
+                    CornerRadius="16"
+                    Padding="16,8"
+                    Background="#EE1C1C22"
+                    BorderBrush="#42FFFFFF"
+                    BorderThickness="1"
+                    Opacity="0"
+                    IsHitTestVisible="False">
+                <Border.Effect>
+                    <DropShadowEffect Color="#55000000" BlurRadius="14" ShadowDepth="3" Opacity="0.34"/>
+                </Border.Effect>
+                <TextBlock x:Name="CompletionToastText"
+                           Style="{x:Null}"
+                           Text="✓  已复制到剪贴板"
+                           FontFamily="{StaticResource StudioFont}"
+                           FontSize="12.5"
+                           FontWeight="SemiBold"
+                           Foreground="#F5F4F0"/>
+            </Border>
         </Grid>
     </Border>
 </Window>

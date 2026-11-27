@@ -30,9 +30,12 @@
                     <Ellipse Canvas.Left="12" Canvas.Top="12" Width="20" Height="20" Stroke="#16FFFFFF" StrokeThickness="0.65"/>
                     <!-- Subtle vinyl sheen wedge so spin is visibly tactile -->
                     <Path Data="M 22,2 A 20,20 0 0 1 39,12 L 28,18 A 7,7 0 0 0 22,15 Z" Fill="#16FFFFFF"/>
-                    <!-- Warm amber center label -->
-                    <Ellipse Canvas.Left="14" Canvas.Top="14" Width="16" Height="16" Fill="{DynamicResource AccentBrush}"/>
-                    <Ellipse Canvas.Left="19.5" Canvas.Top="19.5" Width="5" Height="5" Fill="#17171B"/>
+                    <!-- Warm amber center label (shown when no album artwork) -->
+                    <Ellipse x:Name="DefaultCenterLabel" Canvas.Left="14" Canvas.Top="14" Width="16" Height="16" Fill="{DynamicResource AccentBrush}"/>
+                    <!-- Live Circular Album Cover (~65% of 44px vinyl diameter, spins coaxially!) -->
+                    <Ellipse x:Name="AlbumArtDisc" Canvas.Left="7.5" Canvas.Top="7.5" Width="29" Height="29" Stroke="#44FFFFFF" StrokeThickness="0.7" Visibility="Collapsed"/>
+                    <!-- Center Spindle Hole (always preserved above cover art) -->
+                    <Ellipse Canvas.Left="19" Canvas.Top="19" Width="6" Height="6" Fill="#17171B" Stroke="#48FFFFFF" StrokeThickness="0.6"/>
                 </Canvas>
 
                 <!-- Pivoting Metallic Tonearm -->

@@ -365,7 +365,7 @@
 
                                 <!-- Center: Prev + Soda Frosted Pill Play/Pause + Next -->
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Button Style="{StaticResource GhostIconButton}" Width="34" Height="34" Click="OnPreviousClick" ToolTip="上一首">
+                                    <Button x:Name="PrevTrackButton" Style="{StaticResource GhostIconButton}" Width="34" Height="34" RenderTransformOrigin="0.5,0.5" Click="OnPreviousClick" ToolTip="上一首">
                                         <Path Data="M 2,2.5 V 11.5 M 11.5,2.5 L 4.5,7 L 11.5,11.5 Z"
                                               Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                               Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
@@ -376,6 +376,7 @@
                                     <Button x:Name="PlayPauseButton"
                                             Width="50" Height="34"
                                             Margin="8,0"
+                                            RenderTransformOrigin="0.5,0.5"
                                             Click="OnPlayClick"
                                             ToolTip="播放 / 暂停">
                                         <Button.Template>
@@ -406,7 +407,7 @@
                                               Stretch="Uniform"/>
                                     </Button>
 
-                                    <Button Style="{StaticResource GhostIconButton}" Width="34" Height="34" Click="OnNextClick" ToolTip="下一首">
+                                    <Button x:Name="NextTrackButton" Style="{StaticResource GhostIconButton}" Width="34" Height="34" RenderTransformOrigin="0.5,0.5" Click="OnNextClick" ToolTip="下一首">
                                         <Path Data="M 11.5,2.5 V 11.5 M 2,2.5 L 9,7 L 2,11.5 Z"
                                               Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                               Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
@@ -476,6 +477,22 @@
                         <UniformGrid x:Name="DesktopPreviewCardsHost" Columns="3" Margin="0,0,0,22"/>
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
+
+                        <!-- Floating Lyrics Line Count (Single | Double, default Double - Mac Build 103 parity) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="FloatingLinesLabel" Text="悬浮歌词行数" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock x:Name="FloatingLinesDesc" Text="默认双行显示（当前句高亮 + 柔和预告下一句或译文），竖排自动双列紧凑排布" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Border Style="{StaticResource SegmentedContainer}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="FloatingSingleLineRadio" Content="单行" GroupName="FloatingLinesMode" Style="{StaticResource SegmentedOption}" Checked="OnFloatingLinesModeChanged"/>
+                                    <RadioButton x:Name="FloatingDoubleLineRadio" Content="双行" GroupName="FloatingLinesMode" Style="{StaticResource SegmentedOption}" IsChecked="True" Checked="OnFloatingLinesModeChanged"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
 
                         <!-- Time Offset Row -->
                         <Grid Margin="0,0,0,16">
@@ -748,6 +765,17 @@
                                 <TextBlock x:Name="BilingualDesc" Text="当歌词源包含中文翻译时，在原文下方优雅显示译文" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                             <CheckBox x:Name="BilingualToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnBilingualChanged" Unchecked="OnBilingualChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Restrained Interaction Micro-Sounds Toggle (Mac Build 104 parity) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="InteractionSoundsLabel" Text="交互微音效" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="InteractionSoundsDesc" Text="零外部素材纯内存合成微触感音效，闲置 0% CPU" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="InteractionSoundsToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnInteractionSoundsChanged" Unchecked="OnInteractionSoundsChanged"/>
                         </Grid>
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>

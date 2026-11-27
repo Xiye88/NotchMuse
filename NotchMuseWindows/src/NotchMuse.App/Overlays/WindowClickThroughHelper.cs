@@ -22,6 +22,11 @@ public static class WindowClickThroughHelper
     private const uint SwpNoZOrder = 0x0004;
     private const uint SwpNoActivate = 0x0010;
     private const uint SwpFrameChanged = 0x0020;
+    private const int SwShowNoActivate = 4;
+    private static readonly IntPtr HwndTopmost = new(-1);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
 
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
     private static extern IntPtr GetWindowLongPtr64(IntPtr hwnd, int nIndex);
@@ -80,5 +85,22 @@ public static class WindowClickThroughHelper
     {
         var hwnd = new WindowInteropHelper(window).Handle;
         return ApplyClickThrough(hwnd, locked);
+    }
+
+    /// <summary>
+    /// Displays an overlay window strictly without stealing activation or pushing MainWindow behind other apps.
+    /// </summary>
+    public static void ShowTopmostNoActivate(Window overlay, bool locked)
+    {
+        overlay.ShowActivated = false;
+        if (!overlay.IsVisible)
+        {
+            overlay.Show();
+        }
+        var hwnd = new WindowInteropHelper(overlay).Handle;
+        if (hwnd == IntPtr.Zero) return;
+        ApplyClickThrough(hwnd, locked);
+        ShowWindow(hwnd, SwShowNoActivate);
+        SetWindowPos(hwnd, HwndTopmost, 0, 0, 0, 0, SwpNoMove | SwpNoSize | SwpNoActivate);
     }
 }

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using NotchMuse.App.Themes;
 
 namespace NotchMuse.App;
@@ -9,22 +10,35 @@ public partial class ShareCardWindow : Window
 {
     private readonly string trackTitle;
     private readonly string trackArtist;
+    private readonly string? trackAlbum;
+    private readonly byte[]? artworkBytes;
     private readonly bool english;
     private readonly List<(System.Windows.Controls.CheckBox Check, string Line)> lineItems = [];
     private byte[] currentPng = [];
     private bool updatingPreview;
+    private CancellationTokenSource? toastCts;
 
-    public ShareCardWindow(string title, string artist, IReadOnlyList<string> candidateLines, bool isEnglish)
+    public ShareCardWindow(
+        string title,
+        string artist,
+        IReadOnlyList<string> candidateLines,
+        bool isEnglish,
+        string? album = null,
+        byte[]? artwork = null)
     {
         trackTitle = string.IsNullOrWhiteSpace(title) ? "NotchMuse" : title;
         trackArtist = string.IsNullOrWhiteSpace(artist) ? "Vinyl Studio Hi-Fi" : artist;
+        trackAlbum = string.IsNullOrWhiteSpace(album) ? null : album.Trim();
+        artworkBytes = artwork;
         english = isEnglish;
 
         InitializeComponent();
         SourceInitialized += (_, _) => ThemeManager.ApplyWindowChrome(this, ThemeManager.IsDarkActive);
 
         ApplyLanguage();
-        TrackBadge.Text = $"· {trackTitle} — {trackArtist}";
+        TrackBadge.Text = trackAlbum is null
+            ? $"· {trackTitle} — {trackArtist}"
+            : $"· {trackTitle} — {trackArtist} · 《{trackAlbum}》";
 
         var cleanLines = candidateLines.Where(l => !string.IsNullOrWhiteSpace(l)).Take(12).ToArray();
         if (cleanLines.Length == 0)
@@ -92,7 +106,6 @@ public partial class ShareCardWindow : Window
     private void OnLineSelectionChanged(object sender, RoutedEventArgs e)
     {
         if (updatingPreview) return;
-        // Enforce 1–6 selection range cleanly
         var checkedItems = lineItems.Where(x => x.Check.IsChecked == true).ToArray();
         if (checkedItems.Length > 6 && sender is System.Windows.Controls.CheckBox cb)
         {
@@ -103,12 +116,14 @@ public partial class ShareCardWindow : Window
             return;
         }
         StatusFeedback.Text = "";
+        InteractionSoundEngine.Play(InteractionSoundCue.Tick);
         RefreshPreview();
     }
 
     private void OnTemplateChanged(object sender, RoutedEventArgs e)
     {
         if (!IsInitialized) return;
+        InteractionSoundEngine.Play(InteractionSoundCue.Step);
         RefreshPreview();
     }
 
@@ -116,24 +131,24 @@ public partial class ShareCardWindow : Window
     {
         var lines = SelectedLines;
         if (lines.Length == 0) lines = ["♪"];
-        currentPng = ShareCardRenderer.RenderPng(trackTitle, trackArtist, lines, SelectedTheme);
+        currentPng = ShareCardRenderer.RenderPng(trackTitle, trackArtist, trackAlbum, lines, SelectedTheme, artworkBytes);
         PreviewImage.Source = ShareCardRenderer.Decode(currentPng);
         SelectedCountHint.Text = english
             ? $"{SelectedLines.Length} of 6 lines selected"
             : $"已选择 {SelectedLines.Length} / 6 句歌词";
     }
 
-    private async void OnCopyClick(object sender, RoutedEventArgs e)
+    private void OnCopyClick(object sender, RoutedEventArgs e)
     {
+        InteractionMotion.Rebound(CopyBtn, 0.94);
         if (currentPng.Length == 0) RefreshPreview();
         System.Windows.Clipboard.SetImage(ShareCardRenderer.Decode(currentPng));
-        StatusFeedback.Text = english ? "Copied ✓" : "已复制 ✓";
-        await Task.Delay(1800);
-        if (IsLoaded) StatusFeedback.Text = "";
+        ShowCompletionToast(english ? "Copied image to clipboard" : "已复制高清卡片到剪贴板");
     }
 
     private void OnSaveClick(object sender, RoutedEventArgs e)
     {
+        InteractionMotion.Rebound(SaveBtn, 0.94);
         if (currentPng.Length == 0) RefreshPreview();
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
@@ -142,7 +157,33 @@ public partial class ShareCardWindow : Window
         };
         if (dialog.ShowDialog(this) != true) return;
         File.WriteAllBytes(dialog.FileName, currentPng);
-        StatusFeedback.Text = english ? "Saved PNG ✓" : "已保存 PNG ✓";
+        ShowCompletionToast(english ? "Saved PNG card" : "已保存高清 PNG 分享卡");
+    }
+
+    private async void ShowCompletionToast(string message)
+    {
+        InteractionSoundEngine.Play(InteractionSoundCue.Landed);
+        toastCts?.Cancel();
+        toastCts?.Dispose();
+        toastCts = new CancellationTokenSource();
+        var token = toastCts.Token;
+
+        CompletionToastText.Text = "✓  " + message;
+        if (InteractionMotion.AnimationsAllowed)
+            CompletionToast.BeginAnimation(OpacityProperty, new DoubleAnimation(1.0, TimeSpan.FromMilliseconds(120)));
+        else
+            CompletionToast.Opacity = 1.0;
+
+        try
+        {
+            await Task.Delay(1800, token);
+            if (!IsLoaded) return;
+            if (InteractionMotion.AnimationsAllowed)
+                CompletionToast.BeginAnimation(OpacityProperty, new DoubleAnimation(0.0, TimeSpan.FromMilliseconds(180)));
+            else
+                CompletionToast.Opacity = 0.0;
+        }
+        catch (OperationCanceledException) { }
     }
 
     private static string SanitizeFileName(string name)

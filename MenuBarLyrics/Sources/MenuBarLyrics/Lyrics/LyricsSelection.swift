@@ -13,6 +13,16 @@ enum LyricsSelection {
     static func select(_ candidates: [LyricsCandidate], context: LyricsSelectionContext) -> Decision {
         let candidates = candidates.map { repairedTiming($0, among: candidates, context: context) }
         var rejected: [String: String] = [:]
+        if let instrumentalTier = candidates.filter({ confirmsInstrumental($0, context: context) })
+            .map({ identityTier($0, context: context) }).min() {
+            let hasStrongerVocalIdentity = candidates.contains {
+                identityTier($0, context: context) < instrumentalTier && rejection($0, context: context) == nil
+            }
+            if !hasStrongerVocalIdentity {
+                for candidate in candidates { rejected[candidate.provider] = "instrumental_recording" }
+                return Decision(winner: nil, tier: nil, reason: "instrumental_recording", rejected: rejected)
+            }
+        }
         var eligible: [(candidate: LyricsCandidate, tier: Int)] = []
         for candidate in candidates {
             if let reason = rejection(candidate, context: context) {
@@ -29,6 +39,22 @@ enum LyricsSelection {
                 let sameID = item.candidate.provider == "NetEase" && item.candidate.sourcePlatform == "netease" && item.candidate.sourceTrackID == bound.sourceTrackID
                 return (item.candidate, sameID ? 1 : item.tier)
             }
+        }
+        // Community lyrics can be paired with the right catalog metadata even
+        // when the text describes a different performance of the recording.
+        let directEvidence = eligible.map(\.candidate).filter {
+            $0.provider != "LRCMux" && $0.evidence == .timedLyrics
+        }
+        eligible = eligible.filter { item in
+            let candidate = item.candidate
+            guard candidate.evidence == .userContribution else { return true }
+            let corroborated = directEvidence.contains {
+                $0.provider != candidate.provider && $0.sourcePlatform != nil &&
+                $0.sourcePlatform != candidate.sourcePlatform &&
+                timelinesAgree(candidate, $0) && disagreement(candidate, $0) == nil
+            }
+            if !corroborated { rejected[candidate.provider] = "unverified_user_contribution" }
+            return corroborated
         }
         // Resolver track metadata is not automatically bound to its lyric payload.
         // Accept LRCMux only when corroborated by a direct adapter (same or independent platform),
@@ -281,7 +307,8 @@ enum LyricsSelection {
     private static func strongResolverFallback(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> Bool {
         let trackHasNoAlbum = context.track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         guard candidate.provider == "LRCMux", candidate.sourcePlatform != nil,
-              (albumMatches(candidate, context: context) || trackHasNoAlbum),
+              (albumMatches(candidate, context: context) ||
+               (trackHasNoAlbum && candidate.sourceTrackID?.isEmpty == false)),
               rejection(candidate, context: context) == nil else { return false }
         let vocalTimes = anchors(candidate).values.flatMap { $0 }.sorted()
         guard vocalTimes.count >= 10, let first = vocalTimes.first, let last = vocalTimes.last else { return false }
@@ -337,18 +364,38 @@ enum LyricsSelection {
             provider: candidate.provider, sourcePlatform: candidate.sourcePlatform, sourceTrackID: candidate.sourceTrackID,
             sourceTitle: candidate.sourceTitle, sourceArtist: candidate.sourceArtist, sourceAlbum: candidate.sourceAlbum,
             sourceDuration: candidate.sourceDuration, sourceISRC: candidate.sourceISRC, matcherScore: candidate.matcherScore,
-            elapsed: candidate.elapsed, liveIdentityVerified: candidate.liveIdentityVerified)
+            elapsed: candidate.elapsed, liveIdentityVerified: candidate.liveIdentityVerified, evidence: candidate.evidence)
         DebugLog.lyricsDiagnostic("selection.timing_downgrade provider=\(candidate.provider) reason=repaired_trailing_overflow")
         return repaired
     }
 
+    private static func confirmsInstrumental(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> Bool {
+        guard candidate.evidence == .instrumental,
+              candidate.sourcePlatform == "netease",
+              recordingRejection(candidate, context: context) == nil else { return false }
+        if identityTier(candidate, context: context) <= 2 { return true }
+        guard (candidate.matcherScore ?? 0) == 100, let duration = candidate.sourceDuration,
+              abs(duration - context.track.duration) <= 1 else { return false }
+        return albumMatches(candidate, context: context) ||
+            context.track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     static func rejection(_ candidate: LyricsCandidate, context: LyricsSelectionContext, checkRichEnds: Bool = true) -> String? {
+        if candidate.evidence == .instrumental { return "instrumental_recording" }
         let lines = candidate.document.normalizedLines
         guard !lines.isEmpty, lines.contains(where: { !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) else { return "empty" }
+        if lines.contains(where: { isInstrumentalNotice($0.text) }),
+           !lines.contains(where: { vocalText($0, candidate: candidate) != nil }) {
+            return "instrumental_notice"
+        }
         let startCeiling = context.track.duration + (context.track.relaxedDurationMatching ? 15 : 4)
         let endCeiling = context.track.duration + (context.track.relaxedDurationMatching ? 20 : 8)
         if lines.contains(where: { !$0.time.isFinite || $0.time < -1 || $0.time > startCeiling ||
             (checkRichEnds && (!($0.endTime ?? $0.time).isFinite || ($0.endTime ?? $0.time) > endCeiling)) }) { return "timeline_out_of_recording" }
+        return recordingRejection(candidate, context: context)
+    }
+
+    private static func recordingRejection(_ candidate: LyricsCandidate, context: LyricsSelectionContext) -> String? {
         if let reason = TrackMatcher.identityRejectReason(context.track, title: candidate.sourceTitle, artist: candidate.sourceArtist, album: candidate.sourceAlbum) { return reason }
         if candidate.provider != "LRCMux", candidate.sourcePlatform == context.platform,
            context.platform != "netease", let sourceID = candidate.sourceTrackID, let native = context.nativeTrackID,
@@ -364,6 +411,18 @@ enum LyricsSelection {
 
     private static func normalizedID(_ value: String, platform: String?) -> String {
         platform == "spotify" ? value.replacingOccurrences(of: "spotify:track:", with: "") : value
+    }
+
+    private static let instrumentalNotices: Set<String> = [
+        "纯音乐请欣赏", "純音樂請欣賞", "纯音乐无歌词", "純音樂無歌詞",
+        "本歌曲为纯音乐请欣赏", "本歌曲為純音樂請欣賞",
+        "instrumental", "instrumentalonly", "instrumentalnolyric", "instrumentalnolyrics"
+    ]
+
+    private static func isInstrumentalNotice(_ value: String) -> Bool {
+        let text = value.lowercased().unicodeScalars
+            .filter(CharacterSet.alphanumerics.contains).map(String.init).joined()
+        return instrumentalNotices.contains(text)
     }
 
     /// Align matching vocal text; raw first timestamps often refer to credits.
@@ -389,7 +448,7 @@ enum LyricsSelection {
             return canonical.unicodeScalars.filter(CharacterSet.alphanumerics.contains).map(String.init).joined()
         }
         let raw = line.text.trimmingCharacters(in: .whitespacesAndNewlines), text = normalized(raw)
-        guard !text.isEmpty,
+        guard !text.isEmpty, !instrumentalNotices.contains(text),
               text != normalized(candidate.sourceTitle + candidate.sourceArtist),
               text != normalized(candidate.sourceArtist + candidate.sourceTitle),
               !["作词", "作曲", "编曲", "制作", "词", "曲", "监制", "出品", "发行", "统筹", "企划", "文案", "宣传", "版权", "未经许可", "lyrics", "composer", "produced", "written"].contains(where: { text.hasPrefix($0) }) else { return nil }

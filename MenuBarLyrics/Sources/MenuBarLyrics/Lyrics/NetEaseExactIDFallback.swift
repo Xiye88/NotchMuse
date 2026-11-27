@@ -24,12 +24,14 @@ struct NetEaseExactIDFallback {
               let candidate = await localState(for: before),
               let authorized = await snapshot(), Self.samePlayback(before, authorized) else { return nil }
         try Task.checkCancellation()
-        let lines = try await NetEaseLyricsSource().lyricLines(songID: candidate.songID)
+        let payload = try await NetEaseLyricsSource().lyricPayload(songID: candidate.songID)
         try Task.checkCancellation()
-        guard !lines.isEmpty, let after = await snapshot(), Self.samePlayback(before, after),
+        guard let payload, !payload.lines.isEmpty || payload.isInstrumental,
+              let after = await snapshot(), Self.samePlayback(before, after),
               let confirmed = await localState(for: after), confirmed.songID == candidate.songID,
               let final = await snapshot(), Self.samePlayback(before, final) else { return nil }
         try Task.checkCancellation()
+        let lines = payload.lines
         if Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true {
             Logger(subsystem: "app.notchmuse.mac.preview", category: "ExactID").notice("NetEaseExactID source=fresh_wal_queue_mediaremote song_id=\(candidate.songID, privacy: .public) line_count=\(lines.count)")
         }
@@ -38,7 +40,7 @@ struct NetEaseExactIDFallback {
         return LyricsCandidate(document: TimedLyricDocument(lines: lines), provider: "NetEaseExactID (Preview)",
             sourcePlatform: "netease", sourceTrackID: candidate.songID, sourceTitle: track.name,
             sourceArtist: track.artist, sourceAlbum: track.album, sourceDuration: candidate.duration,
-            liveIdentityVerified: true)
+            liveIdentityVerified: true, evidence: payload.evidence)
     }
 
     private func snapshot() async -> MediaRemoteEvent? {

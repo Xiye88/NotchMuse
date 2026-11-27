@@ -112,7 +112,7 @@ enum MediaRemoteMetadataSanitizer {
     ]
 
     private static let videoNoisePatterns = [
-        #"\s*[\(\[【（［]\s*(?:Official\s+)?(?:Music\s+)?(?:Video|MV|M/V|Audio|Lyric\s+Video|Lyrics?|Visualizer|Visual|HD|4K|Live\s+Video|original\s+ver\.?)\s*[\)\]】）］]"#,
+        #"\s*[\(\[【（［]\s*(?:Official\s+)?(?:Music\s+)?(?:Video|MV|M/V|Audio|Lyric\s+Video|Lyrics?|Visualizer|Visual|HD|4K|original\s+ver\.?)\s*[\)\]】）］]"#,
         #"\s*[\(\[【（［]\s*(?:(?:官方|華納|华纳|高畫質|高画质|HD|Official)\s*)*(?:MV|完整版|高清|高畫質|纯享版|純享版|歌词版|歌詞版|动态歌词|動態歌詞)\s*[\)\]】）］]"#,
         #"\s*[\(\[【（［][^()\[\]【】（）［］]*(?:官方完整版|高畫質|官方MV|动态歌词|動態歌詞|純享版|纯享版)[^()\[\]【】（）［］]*[\)\]】）］]"#,
         #"\s*[\(\[]\s*(?:from\s+[^)\]]+|Spider-Man:[^)\]]+)\s*[\)\]]"#,
@@ -174,17 +174,16 @@ enum MediaRemoteMetadataSanitizer {
                 title = split.title
             }
         } else if isBrowserOrYouTube {
-            if let bracket = extractBracketedArtistTitle(title) {
-                if artistLooksLikeChannel || artistOverlaps(artist, with: bracket.artist) || !bracket.artist.isEmpty {
-                    artist = bracket.artist
-                    title = bracket.title
-                }
-            } else if let quoted = extractQuotedArtistTitle(title) {
-                if artistLooksLikeChannel || artistOverlaps(artist, with: quoted.artist) || !quoted.artist.isEmpty {
-                    artist = quoted.artist
-                    title = quoted.title
-                }
-            } else if let split = splitArtistTitle(title) {
+            let expectedArtist = cleanYouTubeArtist(artist)
+            let splits = [
+                splitArtistTitle(title, matchingArtist: expectedArtist),
+                extractBracketedArtistTitle(title),
+                extractQuotedArtistTitle(title),
+                artistLooksLikeChannel ? splitArtistTitle(title) : nil
+            ]
+            if let split = splits.compactMap({ $0 }).first(where: {
+                artistLooksLikeChannel || sameArtist(expectedArtist, cleanYouTubeArtist($0.artist))
+            }) {
                 artist = split.artist
                 title = split.title
             }
@@ -218,24 +217,31 @@ enum MediaRemoteMetadataSanitizer {
         return false
     }
 
-    private static func splitArtistTitle(_ value: String) -> (artist: String, title: String)? {
+    private static func splitArtistTitle(_ value: String, matchingArtist: String? = nil) -> (artist: String, title: String)? {
         for separator in [" - ", " — ", " – ", " _ "] {
             let parts = value.components(separatedBy: separator)
-            if parts.count == 2 {
-                let lhs = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
-                let rhs = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
-                if !lhs.isEmpty && !rhs.isEmpty {
-                    return (lhs, rhs)
-                }
+            guard parts.count >= 2 else { continue }
+            let lhs = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+            if let matchingArtist {
+                guard sameArtist(matchingArtist, cleanYouTubeArtist(lhs)) else { continue }
+            } else if parts.count != 2 {
+                continue
             }
+            let rhs = parts.dropFirst().joined(separator: separator).trimmingCharacters(in: .whitespacesAndNewlines)
+            if !lhs.isEmpty && !rhs.isEmpty { return (lhs, rhs) }
         }
         return nil
     }
 
+    private static func sameArtist(_ lhs: String, _ rhs: String) -> Bool {
+        let expected = TrackMatcher.artistKeys([lhs]).members
+        return !expected.isEmpty && expected == TrackMatcher.artistKeys([rhs]).members
+    }
+
     private static func extractBracketedArtistTitle(_ value: String) -> (artist: String, title: String)? {
         let patterns = [
-            #"^(.+?)\s*【([^】]+)】"#,
-            #"^(.+?)\s*「([^」]+)」"#
+            #"^(.+?)\s*【([^】]+)】\s*$"#,
+            #"^(.+?)\s*「([^」]+)」\s*$"#
         ]
         for pattern in patterns {
             guard let regex = try? NSRegularExpression(pattern: pattern),

@@ -442,7 +442,11 @@ enum SelfTests {
             ("Anti-Hero on Apple Music", "Taylor Swift", "Anti-Hero", "Taylor Swift"),
             ("晴天 - 单曲 - 网易云音乐", "周杰伦", "晴天", "周杰伦"),
             ("七里香 - QQ音乐-千万正版音乐海量无损曲库", "周杰伦", "七里香", "周杰伦"),
-            ("Daft Punk - Get Lucky | Listen online for free on SoundCloud", "", "Get Lucky", "Daft Punk")
+            ("Daft Punk - Get Lucky | Listen online for free on SoundCloud", "", "Get Lucky", "Daft Punk"),
+            ("你,好不好?(TVBS連續劇【遺憾拼圖】片尾曲)【動態歌詞】", "周興哲 - Topic", "你,好不好?(TVBS連續劇【遺憾拼圖】片尾曲)", "周興哲"),
+            ("Adele - Hello - 2015 Version (Official Video)", "Adele - Topic", "Hello - 2015 Version", "Adele"),
+            ("Hello - Live", "Adele - Topic", "Hello - Live", "Adele"),
+            ("Adele - Hello (Official Live Video)", "Adele - Topic", "Hello (Official Live Video)", "Adele")
         ]
         for item in webSanitizeCases {
             let sanitized = MediaRemoteMetadataSanitizer.sanitize(

@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import LyricsCore
 
@@ -6,277 +7,257 @@ enum AppPreferences {
 }
 
 struct TrackSpec: Sendable {
+    let id: String
     let bucket: String
-    let rawTitle: String
-    let rawArtist: String
-    let rawAlbum: String
+    let title: String
+    let artist: String
+    let album: String
     let duration: Double
-    let isGuardInstrumental: Bool
+
+    var isGuard: Bool { bucket == "guard_inst" }
 }
 
-struct EvalResult: Sendable {
-    let spec: TrackSpec
-    let sanitizedTitle: String
-    let sanitizedArtist: String
+struct EvalResult: Encodable, Sendable {
+    let platform: String
+    let id: String
+    let bucket: String
+    let inputTitle: String
+    let inputArtist: String
+    let inputDuration: Double
+    let title: String
+    let artist: String
     let matched: Bool
-    let provider: String
+    let guardTrack: Bool
+    let provider: String?
+    let sourceID: String?
+    let sourceTitle: String?
+    let sourceArtist: String?
+    let sourceAlbum: String?
+    let sourceDuration: Double?
     let lineCount: Int
-    let latencyMs: Int
-    let failureCategory: String
+    let firstLine: Double?
+    let lastLine: Double?
+    let timelineDigest: String?
+    let category: String
     let detail: String
-}
-
-enum PlatformProfile: String, CaseIterable, Sendable {
-    case appleMusic = "Apple Music"
-    case spotify = "Spotify"
-    case netease = "NetEase"
-    case qqMusic = "QQ Music"
-    case kugou = "Kugou"
-    case soda = "Soda"
-    case youtubeMusic = "YouTube Music"
-
-    var usesSanitizer: Bool {
-        self == .youtubeMusic || self == .kugou || self == .qqMusic || self == .soda
-    }
-    var isBrowserOrYouTube: Bool {
-        self == .youtubeMusic
-    }
-    var relaxedDuration: Bool {
-        self == .youtubeMusic
-    }
 }
 
 @main
 enum Benchmark7Platforms {
-    static let instrumentalGuards: [TrackSpec] = [
-        TrackSpec(bucket: "guard_inst", rawTitle: "River Flows in You", rawArtist: "Yiruma", rawAlbum: "First Love", duration: 218, isGuardInstrumental: true),
-        TrackSpec(bucket: "guard_inst", rawTitle: "Kiss the Rain", rawArtist: "Yiruma", rawAlbum: "From The Yellow Room", duration: 256, isGuardInstrumental: true),
-        TrackSpec(bucket: "guard_inst", rawTitle: "Clair de Lune", rawArtist: "Claude Debussy", rawAlbum: "Suite bergamasque", duration: 310, isGuardInstrumental: true),
-        TrackSpec(bucket: "guard_inst", rawTitle: "Nocturne Op. 9 No. 2", rawArtist: "Frédéric Chopin", rawAlbum: "Nocturnes", duration: 270, isGuardInstrumental: true),
-        TrackSpec(bucket: "guard_inst", rawTitle: "Summer", rawArtist: "Joe Hisaishi", rawAlbum: "Kikujiro", duration: 153, isGuardInstrumental: true)
+    static let platforms: [PlayerSource] = [
+        .appleMusic, .spotify, .netEaseMusic, .qqMusic, .sodaMusic, .kugouMusic, .youtubeMusic
+    ]
+    static let legacyGuards: [TrackSpec] = [
+        TrackSpec(id: "guard-1", bucket: "guard_inst", title: "River Flows in You", artist: "Yiruma", album: "First Love", duration: 218),
+        TrackSpec(id: "guard-2", bucket: "guard_inst", title: "Kiss the Rain", artist: "Yiruma", album: "From The Yellow Room", duration: 256),
+        TrackSpec(id: "guard-3", bucket: "guard_inst", title: "Clair de Lune", artist: "Claude Debussy", album: "Suite bergamasque", duration: 310),
+        TrackSpec(id: "guard-4", bucket: "guard_inst", title: "Nocturne Op. 9 No. 2", artist: "Frédéric Chopin", album: "Nocturnes", duration: 270),
+        TrackSpec(id: "guard-5", bucket: "guard_inst", title: "Summer", artist: "Joe Hisaishi", album: "Kikujiro", duration: 153)
     ]
 
+    struct InvalidInput: Error, CustomStringConvertible {
+        let description: String
+        init(_ description: String) { self.description = description }
+    }
+
     static func main() async {
-        let args = CommandLine.arguments
-        guard args.count >= 3 else {
-            fputs("Usage: benchmark_7platforms <live_tracks.tsv> <ytm_100.tsv> [output_report.txt]\n", stderr)
-            exit(2)
-        }
-        let livePath = args[1]
-        let ytmPath = args[2]
-        let reportPath = args.count >= 4 ? args[3] : nil
-
         do {
-            let live100 = try loadLive100(from: livePath)
-            let ytm100 = try loadYTM100(from: ytmPath)
-
-            var fullReport = "=== NotchMuse 7-Platform x 100-Song Lyrics Benchmark ===\n"
-            var summaryTable = "| Platform | Vocal Hit Rate | Overall (incl. 5 guards) | Guard False-Positives | Top Failure Causes |\n|---|---:|---:|---:|---|\n"
-
-            let onlyPlatform = args.count >= 5 ? args[4] : nil
-            let targetPlatforms = PlatformProfile.allCases.filter { onlyPlatform == nil || $0.rawValue.lowercased() == onlyPlatform!.lowercased() }
-            for platform in targetPlatforms {
-                let specs = buildPlatformDataset(platform: platform, live100: live100, ytm100: ytm100) + instrumentalGuards
-                let results = await runWithConcurrency(rows: specs, maxConcurrency: 5) { spec in
-                    await evaluate(spec: spec, platform: platform)
-                }
-
-                let vocal = results.filter { !$0.spec.isGuardInstrumental }
-                let vocalHits = vocal.filter(\.matched)
-                let guards = results.filter { $0.spec.isGuardInstrumental }
-                let guardFPs = guards.filter(\.matched)
-                let misses = vocal.filter { !$0.matched }
-
-                var cats: [String: Int] = [:]
-                for m in misses { cats[m.failureCategory, default: 0] += 1 }
-                let topCats = cats.sorted { $0.value > $1.value }.prefix(3).map { "\($0.key)=\($0.value)" }.joined(separator: ", ")
-
-                let vocalPct = Int(round(Double(vocalHits.count) * 100.0 / Double(max(1, vocal.count))))
-                let overallHits = vocalHits.count + (guards.count - guardFPs.count)
-                let overallPct = Int(round(Double(overallHits) * 100.0 / Double(max(1, results.count))))
-
-                summaryTable += "| \(platform.rawValue) | \(vocalHits.count)/\(vocal.count) (\(vocalPct)%) | \(overallHits)/\(results.count) (\(overallPct)%) | \(guardFPs.count)/\(guards.count) | \(topCats.isEmpty ? "none" : topCats) |\n"
-
-                var section = "\n--- \(platform.rawValue): \(vocalHits.count)/\(vocal.count) (\(vocalPct)%) | Guard FP: \(guardFPs.count)/\(guards.count) ---\n"
-                if !cats.isEmpty {
-                    section += "Miss breakdown: " + cats.sorted { $0.value > $1.value }.map { "\($0.key)=\($0.value)" }.joined(separator: ", ") + "\n"
-                }
-                for fp in guardFPs {
-                    section += "  [GUARD_FP] \"\(fp.sanitizedTitle)\" - \"\(fp.sanitizedArtist)\" :: \(fp.detail)\n"
-                }
-                for m in misses {
-                    section += "  [\(m.spec.bucket)] [\(m.failureCategory)] \"\(m.spec.rawTitle)\" | \"\(m.spec.rawArtist)\" | \(Int(m.spec.duration))s -> (\"\(m.sanitizedTitle)\" | \"\(m.sanitizedArtist)\") :: \(m.detail)\n"
-                }
-                fullReport += section
-                fputs("Completed \(platform.rawValue): \(vocalHits.count)/\(vocal.count) (\(vocalPct)%) | Guard FP: \(guardFPs.count)/\(guards.count)\n", stderr)
+            let args = Array(CommandLine.arguments.dropFirst())
+            if args == ["--help"] {
+                print("Usage: benchmark_7platforms --catalog tracks.tsv --ytm ytm.tsv [--concurrency 4] [--report report.md] [--rows results.jsonl] [--http-cache directory] [--platform 'Apple Music'] [--limit 10]")
+                return
             }
-
-            let output = summaryTable + "\n" + fullReport
-            if let reportPath {
-                try output.write(toFile: reportPath, atomically: true, encoding: .utf8)
+            var options: [String: String] = [:]
+            if args.first?.hasPrefix("--") == true {
+                let flags = ["--catalog", "--ytm", "--concurrency", "--report", "--rows", "--platform", "--limit", "--http-cache"]
+                guard args.count % 2 == 0 else { throw InvalidInput("Each option requires a value") }
+                for index in stride(from: 0, to: args.count, by: 2) {
+                    guard flags.contains(args[index]) else { throw InvalidInput("Unknown option \(args[index])") }
+                    options[args[index]] = args[index + 1]
+                }
+            } else if (2...4).contains(args.count) {
+                for (flag, value) in zip(["--catalog", "--ytm", "--report", "--platform"], args) {
+                    options[flag] = value
+                }
             }
-            print(summaryTable)
+            guard let catalogPath = options["--catalog"], let ytmPath = options["--ytm"],
+                  let concurrency = Int(options["--concurrency"] ?? "4"), (1...4).contains(concurrency),
+                  let limit = Int(options["--limit"] ?? "\(Int.max)"), limit > 0 else {
+                throw InvalidInput("Provide --catalog and --ytm; --concurrency must be 1–4 and --limit positive")
+            }
+            let aliases: [String: PlayerSource] = ["netease": .netEaseMusic, "soda": .sodaMusic, "kugou": .kugouMusic]
+            let selectedPlatforms: [PlayerSource]
+            if let filter = options["--platform"]?.lowercased() {
+                guard let platform = platforms.first(where: { $0.rawValue.lowercased() == filter }) ?? aliases[filter] else {
+                    throw InvalidInput("Unknown platform \(filter)")
+                }
+                selectedPlatforms = [platform]
+            } else {
+                selectedPlatforms = platforms
+            }
+            var catalog = try load(catalogPath)
+            var youtube = try load(ytmPath)
+            if catalog.allSatisfy({ !$0.isGuard }) { catalog += legacyGuards }
+            if youtube.allSatisfy({ !$0.isGuard }) { youtube += legacyGuards }
+            guard catalog.count == youtube.count,
+                  zip(catalog, youtube).allSatisfy({ $0.id == $1.id && $0.isGuard == $1.isGuard }) else {
+                throw InvalidInput("Catalog and YouTube rows must have the same ordered recording IDs and guard labels")
+            }
+            if let path = options["--http-cache"] {
+                try await BenchmarkLyricsHTTP.shared.enableDiskCache(path)
+            }
+            let indices = catalog.indices.filter { catalog[$0].isGuard } +
+                Array(catalog.indices.filter { !catalog[$0].isGuard }.prefix(limit))
+            let catalogRows = catalog
+            let youtubeRows = youtube
+            let output: FileHandle?
+            if let path = options["--rows"] {
+                try Data().write(to: URL(fileURLWithPath: path))
+                output = try FileHandle(forWritingTo: URL(fileURLWithPath: path))
+            } else {
+                output = nil
+            }
+            defer { try? output?.close() }
+            var results: [EvalResult] = []
+            let encoder = JSONEncoder()
+            try await withThrowingTaskGroup(of: [EvalResult].self) { group in
+                var remaining = indices.makeIterator()
+                func enqueue() {
+                    guard let index = remaining.next() else { return }
+                    group.addTask {
+                        var batch: [EvalResult] = []
+                        for platform in selectedPlatforms {
+                            let spec = platform == .youtubeMusic ? youtubeRows[index] : catalogRows[index]
+                            batch.append(await evaluate(spec, index: index, platform: platform))
+                        }
+                        return batch
+                    }
+                }
+                for _ in 0..<concurrency { enqueue() }
+                while let batch = try await group.next() {
+                    results += batch
+                    if let output {
+                        for row in batch {
+                            try output.write(contentsOf: try encoder.encode(row) + Data([10]))
+                        }
+                    }
+                    let completed = results.count / selectedPlatforms.count
+                    if completed % 20 == 0 || completed == indices.count {
+                        fputs("\(completed)/\(indices.count) recordings across \(selectedPlatforms.count) platforms\n", stderr)
+                    }
+                    enqueue()
+                }
+            }
+            let summary = await BenchmarkLyricsHTTP.shared.summary()
+            var report = "| Platform | Vocal selections | Guard false positives | Vocal miss breakdown |\n|---|---:|---:|---|\n"
+            for platform in selectedPlatforms {
+                let rows = results.filter { $0.platform == platform.rawValue }
+                let guards = rows.filter(\.guardTrack)
+                let vocal = rows.filter { !$0.guardTrack }
+                let misses = Dictionary(grouping: vocal.filter { !$0.matched }, by: \.category)
+                let breakdown = misses.sorted { (-$0.value.count, $0.key) < (-$1.value.count, $1.key) }
+                    .map { "\($0.key)=\($0.value.count)" }.joined(separator: ", ")
+                let hits = vocal.filter(\.matched).count
+                let pct = String(format: "%.1f", 100 * Double(hits) / Double(vocal.count))
+                report += "| \(platform.rawValue) | \(hits)/\(vocal.count) (\(pct)%) | \(guards.filter(\.matched).count)/\(guards.count) | \(breakdown) |\n"
+            }
+            report += "\n\(summary)\n"
+            if let path = options["--report"] {
+                try report.write(toFile: path, atomically: true, encoding: .utf8)
+            }
+            print(report)
         } catch {
             fputs("Benchmark failed: \(error)\n", stderr)
             exit(1)
         }
     }
 
-    static func loadLive100(from path: String) throws -> [TrackSpec] {
-        let text = try String(contentsOfFile: path, encoding: .utf8)
-        return text.split(whereSeparator: \.isNewline).dropFirst().compactMap { line in
-            let cols = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
-            guard cols.count >= 4, let dur = Double(cols[3]) else { return nil }
-            return TrackSpec(bucket: "catalog", rawTitle: cols[0], rawArtist: cols[1], rawAlbum: cols[2], duration: dur, isGuardInstrumental: false)
+    static func load(_ path: String) throws -> [TrackSpec] {
+        let lines = try String(contentsOfFile: path, encoding: .utf8).split { $0 == "\n" || $0 == "\r\n" }
+        guard let header = lines.first else { throw InvalidInput("Empty fixture \(path)") }
+        let columns = header.split(separator: "\t").map(String.init)
+        var ids = Set<String>()
+        let rows = try lines.dropFirst().enumerated().map { index, line in
+            let fields = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+            guard fields.count == columns.count else { throw InvalidInput("Wrong column count at \(path):\(index + 2)") }
+            let values = Dictionary(zip(columns, fields), uniquingKeysWith: { first, _ in first })
+            guard let title = values["title"], !title.isEmpty, let artist = values["artist"], let album = values["album"],
+                  let rawDuration = values["duration_seconds"], let duration = Double(rawDuration), duration.isFinite, duration > 0 else {
+                throw InvalidInput("Invalid metadata at \(path):\(index + 2)")
+            }
+            let id = values["itunes_track_id"] ?? String(index)
+            guard !id.isEmpty, ids.insert(id).inserted else { throw InvalidInput("Missing or duplicate ID \(id) in \(path)") }
+            return TrackSpec(id: id, bucket: values["bucket"] ?? "catalog", title: title, artist: artist, album: album, duration: duration)
         }
+        guard rows.contains(where: { !$0.isGuard }) else { throw InvalidInput("No vocal rows in \(path)") }
+        return rows
     }
 
-    static func loadYTM100(from path: String) throws -> [TrackSpec] {
-        let text = try String(contentsOfFile: path, encoding: .utf8)
-        return text.split(whereSeparator: \.isNewline).dropFirst().compactMap { line in
-            let cols = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
-            guard cols.count >= 5, let dur = Double(cols[4]) else { return nil }
-            return TrackSpec(bucket: cols[0], rawTitle: cols[1], rawArtist: cols[2], rawAlbum: cols[3], duration: dur, isGuardInstrumental: false)
-        }
-    }
-
-    static func buildPlatformDataset(platform: PlatformProfile, live100: [TrackSpec], ytm100: [TrackSpec]) -> [TrackSpec] {
+    static func snapshot(_ spec: TrackSpec, index: Int, platform: PlayerSource) -> MusicPlayerSnapshot {
+        let tab = "\u{1F}"
         switch platform {
-        case .youtubeMusic:
-            return ytm100
         case .appleMusic:
-            return live100.enumerated().map { idx, t in
-                // Apple Music appends "- Single" on some albums
-                let album = (idx % 5 == 0 && !t.rawAlbum.isEmpty) ? "\(t.rawAlbum) - Single" : t.rawAlbum
-                return TrackSpec(bucket: t.bucket, rawTitle: t.rawTitle, rawArtist: t.rawArtist, rawAlbum: album, duration: t.duration, isGuardInstrumental: false)
-            }
+            let album = index % 5 == 0 && !spec.album.hasSuffix(" - Single") ? spec.album + " - Single" : spec.album
+            return AppleMusicAdapter.parse(["playing", spec.title, spec.artist, album, String(spec.duration), "0", ""].joined(separator: tab))
         case .spotify:
-            return live100
-        case .netease:
-            return live100
-        case .qqMusic:
-            return live100.enumerated().map { idx, t in
-                // QQ Music MediaRemote occasionally omits album
-                let album = (idx % 4 == 0) ? "" : t.rawAlbum
-                return TrackSpec(bucket: t.bucket, rawTitle: t.rawTitle, rawArtist: t.rawArtist, rawAlbum: album, duration: t.duration, isGuardInstrumental: false)
+            let payload = ["playing", spec.title, spec.artist, spec.album, String(spec.duration * 1000), "0"].joined(separator: tab)
+            return SpotifyAdapter.snapshot(from: SpotifyReader.parse(payload))
+        default:
+            let packed = platform == .kugouMusic && index % 2 == 0
+            let title = packed ? "\(spec.artist) - \(spec.title)" : spec.title
+            let omitAlbum = platform == .kugouMusic || (platform == .qqMusic && index % 4 == 0) ||
+                (platform == .sodaMusic && index % 3 == 0)
+            guard let bundle = platform == .youtubeMusic ? "com.google.Chrome" : platform.bundleIdentifier else {
+                return .unavailable
             }
-        case .kugou:
-            return live100.enumerated().map { idx, t in
-                // Kugou MediaRemote omits album and frequently packs "Artist - Title" into title
-                let packed = idx % 2 == 0
-                return TrackSpec(
-                    bucket: packed ? "kugou_packed" : "kugou_std",
-                    rawTitle: packed ? "\(t.rawArtist) - \(t.rawTitle)" : t.rawTitle,
-                    rawArtist: packed ? "" : t.rawArtist,
-                    rawAlbum: "",
-                    duration: t.duration,
-                    isGuardInstrumental: false
-                )
+            let event = MediaRemoteEvent(bundleIdentifier: bundle, playing: true, title: title, artist: packed ? nil : spec.artist,
+                                         album: omitAlbum ? nil : spec.album, duration: spec.duration)
+            if platform == .netEaseMusic {
+                return NetEaseMusicAdapter.snapshot(from: event, isRunning: true)
             }
-        case .soda:
-            return live100.enumerated().map { idx, t in
-                let album = (idx % 3 == 0) ? "" : t.rawAlbum
-                return TrackSpec(bucket: t.bucket, rawTitle: t.rawTitle, rawArtist: t.rawArtist, rawAlbum: album, duration: t.duration, isGuardInstrumental: false)
-            }
+            return MediaRemotePlayerAdapter.snapshot(from: event, source: platform, isRunning: true)
         }
-    }
-
-    static func evaluate(spec: TrackSpec, platform: PlatformProfile) async -> EvalResult {
-        let start = ContinuousClock.now
-        let title: String
-        let artist: String
-        let album: String
-        if platform.usesSanitizer {
-            guard let san = MediaRemoteMetadataSanitizer.sanitize(
-                title: spec.rawTitle,
-                artist: spec.rawArtist,
-                album: spec.rawAlbum,
-                isBrowserOrYouTube: platform.isBrowserOrYouTube
-            ) else {
-                return EvalResult(spec: spec, sanitizedTitle: "", sanitizedArtist: "", matched: false, provider: "DROPPED", lineCount: 0, latencyMs: 0, failureCategory: "sanitizer_dropped", detail: "sanitizer nil")
-            }
-            title = san.title; artist = san.artist; album = san.album
-        } else {
-            title = spec.rawTitle; artist = spec.rawArtist; album = spec.rawAlbum
-        }
-
-        let track = SpotifyTrack(name: title, artist: artist, album: album, duration: spec.duration, relaxedDurationMatching: platform.relaxedDuration)
-        let res = await runClient(track: track, playerSource: platform.rawValue)
-        let elapsed = ms(since: start)
-        return EvalResult(
-            spec: spec,
-            sanitizedTitle: title,
-            sanitizedArtist: artist,
-            matched: res.matched,
-            provider: res.provider,
-            lineCount: res.lineCount,
-            latencyMs: elapsed,
-            failureCategory: res.matched ? "OK" : classify(res.diagnostics),
-            detail: res.summary
-        )
     }
 
     @MainActor
-    static func runClient(track: SpotifyTrack, playerSource: String) async -> (matched: Bool, provider: String, lineCount: Int, diagnostics: String, summary: String) {
+    static func evaluate(_ spec: TrackSpec, index: Int, platform: PlayerSource) async -> EvalResult {
+        let track = snapshot(spec, index: index, platform: platform).currentTrack
         let client = LyricsClient(identityResolver: nil)
-        do {
-            let lines = try await client.syncedLyrics(for: track, bypassCache: true, playerSource: playerSource)
-            let diag = client.selectionDiagnostics
-            if lines.isEmpty {
-                return (false, "MISS", 0, diag, extractSummary(diag))
+        var lyrics: [LyricLine] = []
+        var failure: String?
+        if let track {
+            do {
+                lyrics = try await client.syncedLyrics(for: track.spotifyTrack, bypassCache: true,
+                    playerSource: track.playerSource.rawValue, nativeTrackID: track.nativeTrackID, isrc: track.isrc)
+            } catch {
+                failure = error as? LyricsClientError == .timeout ? "provider_timeout" : "provider_transport"
             }
-            let provider = client.selectedProvider ?? "unknown"
-            return (true, provider, lines.count, diag, "matched:\(provider)(\(lines.count)L)")
-        } catch {
-            let diag = client.selectionDiagnostics
-            return (false, "ERROR", 0, diag, "err:\(error) | \(extractSummary(diag))")
         }
-    }
-
-    static func extractSummary(_ diag: String) -> String {
-        diag.split(whereSeparator: \.isNewline).map(String.init).filter {
-            $0.hasPrefix("Sources:") || $0.hasPrefix("Rejected:") || $0.hasPrefix("No Lyrics Reason:")
+        let diagnostics = client.selectionDiagnostics
+        let detail = diagnostics.split(whereSeparator: \.isNewline).filter { line in
+            ["Sources:", "Rejected:", "No Lyrics Reason:", "Identity Tier:", "Top reject reason:"].contains { line.hasPrefix($0) }
         }.joined(separator: " | ")
+        let candidate = client.selectedCandidate
+        let category = track == nil ? "adapter_dropped" : lyrics.isEmpty ? classify(detail, failure: failure) : "selected"
+        let timeline = lyrics.map { "\($0.time)\u{1F}\($0.text)" }.joined(separator: "\u{1E}")
+        let timelineDigest = lyrics.isEmpty ? nil : SHA256.hash(data: Data(timeline.utf8)).description
+        return EvalResult(platform: platform.rawValue, id: spec.id, bucket: spec.bucket,
+                          inputTitle: spec.title, inputArtist: spec.artist, inputDuration: spec.duration,
+                          title: track?.title ?? "", artist: track?.artist ?? "", matched: !lyrics.isEmpty,
+                          guardTrack: spec.isGuard, provider: candidate?.provider, sourceID: candidate?.sourceTrackID,
+                          sourceTitle: candidate?.sourceTitle, sourceArtist: candidate?.sourceArtist,
+                          sourceAlbum: candidate?.sourceAlbum, sourceDuration: candidate?.sourceDuration,
+                          lineCount: lyrics.count, firstLine: lyrics.first?.time, lastLine: lyrics.last?.time,
+                          timelineDigest: timelineDigest, category: category, detail: detail)
     }
 
-    static func classify(_ diag: String) -> String {
-        let l = diag.lowercased()
-        if l.contains("duration_risk") { return "duration_risk" }
-        if l.contains("content_ambiguity") { return "content_ambiguity" }
-        if l.contains("timeline_out_of_recording") { return "timeline_out_of_recording" }
-        if l.contains("timeline_conflict") { return "timeline_conflict" }
-        if l.contains("identity_ambiguous") { return "identity_ambiguous" }
-        if l.contains("album_version_mismatch") || l.contains("version_mismatch") { return "version_mismatch" }
-        if l.contains("artist_mismatch") { return "artist_mismatch" }
-        if l.contains("title_mismatch") { return "title_mismatch" }
-        if l.contains("resolver_metadata_unverified") { return "resolver_unverified" }
-        return "provider_empty"
-    }
-
-    static func runWithConcurrency<T: Sendable, R: Sendable>(
-        rows: [T], maxConcurrency: Int, work: @escaping @Sendable (T) async -> R
-    ) async -> [R] {
-        var results: [(Int, R)] = []
-        results.reserveCapacity(rows.count)
-        await withTaskGroup(of: (Int, R).self) { group in
-            var next = 0
-            for _ in 0..<min(maxConcurrency, rows.count) {
-                let i = next; let item = rows[i]; next += 1
-                group.addTask { (i, await work(item)) }
-            }
-            while let done = await group.next() {
-                results.append(done)
-                if next < rows.count {
-                    let i = next; let item = rows[i]; next += 1
-                    group.addTask { (i, await work(item)) }
-                }
-            }
+    static func classify(_ diagnostics: String, failure: String?) -> String {
+        let detail = diagnostics.lowercased()
+        for category in ["instrumental_recording", "unverified_user_contribution", "content_ambiguity", "timeline_out_of_recording", "timeline_conflict", "identity_ambiguous",
+                         "duration_mismatch", "duration_risk", "version_mismatch", "artist_mismatch",
+                         "title_mismatch", "source_duration_unknown", "resolver_metadata_unverified"] where detail.contains(category) {
+            return category
         }
-        return results.sorted { $0.0 < $1.0 }.map(\.1)
-    }
-
-    static func ms(since start: ContinuousClock.Instant) -> Int {
-        let c = start.duration(to: .now).components
-        return Int(c.seconds) * 1000 + Int(c.attoseconds / 1_000_000_000_000_000)
+        return failure ?? "provider_empty"
     }
 }

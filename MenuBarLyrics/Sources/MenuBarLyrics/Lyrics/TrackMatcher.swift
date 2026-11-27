@@ -42,6 +42,13 @@ enum TrackMatcher {
         }
         if let album, !track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
            versions(track.name + " " + track.album) != versions(title + " " + album) { return "album_version_mismatch" }
+        if track.relaxedDurationMatching, track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           let album, !requested.versions.contains("live"),
+           (parsedTitle(album).versions.contains("live") ||
+            simplifiedChinese(album).contains("演唱会") ||
+            album.range(of: #"\b(?:in concert|concert recording)\b"#, options: [.regularExpression, .caseInsensitive]) != nil) {
+            return "album_version_mismatch"
+        }
         return nil
     }
 
@@ -164,9 +171,13 @@ enum TrackMatcher {
         [track.artist] + titleCollaborators(in: track.name)
     }
 
+    // These are soundtrack billing credits. Edition or performance words stay in the title.
+    private static let localizedSoundtrackSuffix =
+        #"\s*[\(（\[]\s*(?:[電电][視视][劇剧]|[連连][續续][劇剧]|[網网][劇剧]|[電电]影|[動动][畫画]|[動动]漫|[遊游][戲戏]|[綜综][藝艺])\s*《[^》]+》\s*(?:主[題题]曲|片[頭头]曲|片尾曲|插曲|心[動动]曲|[開开]場曲)\s*[\)）\]]\s*$"#
+
     static func parsedTitle(_ title: String) -> (name: String, versions: Set<String>) {
         let folded = title.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        var name = folded
+        var name = folded.replacingOccurrences(of: localizedSoundtrackSuffix, with: "", options: .regularExpression)
         for pattern in [
             #"[\(\[].*?\b(feat\.?|ft\.?|featuring|with)\b.*?[\)\]]"#,
             #"\s+\b(feat\.?|ft\.?|featuring)\b.*$"#,
@@ -227,7 +238,9 @@ enum TrackMatcher {
     }
 
     static func canonicalArtistForChineseSearch(_ artist: String) -> String {
-        let parts = artist.components(separatedBy: CharacterSet(charactersIn: ",;/×、"))
+        let hasHan = artist.range(of: #"\p{Han}"#, options: .regularExpression) != nil
+        let delimiters = CharacterSet(charactersIn: hasHan ? ",;/×、&" : ",;/×、")
+        let parts = artist.components(separatedBy: delimiters)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
         let mapped = parts.map { part -> String in
@@ -238,7 +251,7 @@ enum TrackMatcher {
     }
 
     static func chineseSearchQuery(for track: SpotifyTrack) -> String {
-        var cleanedTitle = track.name
+        var cleanedTitle = track.name.replacingOccurrences(of: localizedSoundtrackSuffix, with: "", options: .regularExpression)
         for pattern in [
             #"[\(\[]\s*(?:feat\.?|ft\.?|featuring|with)\s+[^\)\]]+[\)\]]"#,
             #"[\(\[（](?:电视剧|电影|网剧|动画|动漫|游戏|综艺)?《[^》]+》[^\)）\]]*[\)\]）]"#
@@ -294,6 +307,9 @@ enum TrackMatcher {
         "리센느": "rescene",
         "에이티즈": "ateez",
         "태연": "taeyeon",
+        "girlsgeneration": "少女时代",
+        "snsd": "少女时代",
+        "소녀시대": "少女时代",
         "방탄소년단": "bts",
         "블랙핑크": "blackpink",
         "뉴진스": "newjeans",
@@ -362,7 +378,10 @@ enum TrackMatcher {
 
     private static func normalize(_ text: String) -> String {
         let folded = text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        let simplified = folded.map { ch -> String in
+        // 乾 stays distinct in names such as 乾隆. Only the established adjective maps.
+        let contextual = folded.replacingOccurrences(of: "乾淨", with: "干净")
+            .replacingOccurrences(of: "乾净", with: "干净")
+        let simplified = contextual.map { ch -> String in
             if ch == "乾" || ch == "幹" { return String(ch) }
             let s = String(ch)
             return s.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? s

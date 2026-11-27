@@ -11,6 +11,9 @@ final class SharedMediaRemoteReader: @unchecked Sendable {
     private var cachedEvent: MediaRemoteEvent?
     private var cachedAt: TimeInterval = -.infinity
     private var lastErrorAt: TimeInterval = -.infinity
+    private var artworkOrder: [String] = []
+    private var artworkCache: [String: Data] = [:]
+    private let maxCachedArtworks = 3
 
     init(
         bridge: MediaRemoteBridge? = try? MediaRemoteBridge.bundled(),
@@ -39,11 +42,38 @@ final class SharedMediaRemoteReader: @unchecked Sendable {
             lock.withLock { didCheckBridge = true }
         }
         let event = try await Task.detached { try bridge.get() }.value
+        let decodedArtwork: Data? = event.artworkData.flatMap { Data(base64Encoded: $0, options: .ignoreUnknownCharacters) }
         lock.withLock {
             cachedEvent = event
             cachedAt = ProcessInfo.processInfo.systemUptime
+            if let decodedArtwork, !decodedArtwork.isEmpty {
+                let key = Self.artworkCacheKey(title: event.title, artist: event.artist ?? "")
+                artworkCache[key] = decodedArtwork
+                artworkOrder.removeAll { $0 == key }
+                artworkOrder.append(key)
+                while artworkOrder.count > maxCachedArtworks {
+                    let evicted = artworkOrder.removeFirst()
+                    artworkCache.removeValue(forKey: evicted)
+                }
+            }
         }
         return event
+    }
+
+    static func artworkCacheKey(title: String, artist: String) -> String {
+        "\(title.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\(artist.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())"
+    }
+
+    func cachedArtworkData(title: String, artist: String) -> Data? {
+        let key = Self.artworkCacheKey(title: title, artist: artist)
+        return lock.withLock {
+            if let exact = artworkCache[key] { return exact }
+            let lowerTitle = title.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            if !lowerTitle.isEmpty, let matchedKey = artworkOrder.last(where: { $0.hasPrefix(lowerTitle + "|") }) {
+                return artworkCache[matchedKey]
+            }
+            return nil
+        }
     }
 
     func invalidateCache() {
@@ -446,5 +476,108 @@ final class MediaRemotePlayerAdapter: @unchecked Sendable, MusicPlayerAdapter {
         if ownsReader {
             reader.shutdown()
         }
+    }
+}
+
+/// Bounded 3-entry in-memory album artwork cache with non-blocking MediaRemote + Spotify fallback.
+@MainActor
+final class AlbumArtworkCache {
+    static let shared = AlbumArtworkCache()
+
+    private var order: [String] = []
+    private var images: [String: NSImage] = [:]
+    private var inFlightKeys: Set<String> = []
+    private let maxEntries = 3
+
+    func artwork(
+        title: String,
+        artist: String,
+        source: PlayerSource,
+        onLoaded: @escaping @MainActor (NSImage?) -> Void
+    ) -> NSImage? {
+        let key = SharedMediaRemoteReader.artworkCacheKey(title: title, artist: artist)
+        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        if let cached = images[key] {
+            return cached
+        }
+        if let rawData = SharedMediaRemoteReader.shared.cachedArtworkData(title: title, artist: artist),
+           let image = NSImage(data: rawData) {
+            store(image, forKey: key)
+            return image
+        }
+        guard !inFlightKeys.contains(key) else { return nil }
+        inFlightKeys.insert(key)
+
+        Task {
+            let fetched = await Self.fetchArtworkData(title: title, artist: artist, source: source)
+            await MainActor.run {
+                self.inFlightKeys.remove(key)
+                if let fetched, let image = NSImage(data: fetched) {
+                    self.store(image, forKey: key)
+                    onLoaded(image)
+                }
+            }
+        }
+        return nil
+    }
+
+    private func store(_ image: NSImage, forKey key: String) {
+        images[key] = image
+        order.removeAll { $0 == key }
+        order.append(key)
+        while order.count > maxEntries {
+            let evicted = order.removeFirst()
+            images.removeValue(forKey: evicted)
+        }
+    }
+
+    private static func fetchArtworkData(title: String, artist: String, source: PlayerSource) async -> Data? {
+        // 1. Try SharedMediaRemoteReader (covers 36+ players including Soda/NetEase/QQ/YTM/Apple Music)
+        if SharedMediaRemoteReader.shared.isAvailable {
+            _ = try? await SharedMediaRemoteReader.shared.currentEvent()
+            if let data = SharedMediaRemoteReader.shared.cachedArtworkData(title: title, artist: artist) {
+                return data
+            }
+        }
+        // 2. Lightweight Spotify AppleScript artwork URL fallback
+        if source == .spotify {
+            let urlString: String? = await Task.detached(priority: .utility) {
+                let script = """
+                if application "Spotify" is running then
+                  tell application "Spotify"
+                    try
+                      return artwork url of current track as string
+                    end try
+                  end tell
+                end if
+                return ""
+                """
+                let process = Process()
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+                process.arguments = ["-e", script]
+                let pipe = Pipe()
+                process.standardOutput = pipe
+                process.standardError = Pipe()
+                do {
+                    try process.run()
+                    process.waitUntilExit()
+                    let out = String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                    return (out?.isEmpty == false) ? out : nil
+                } catch {
+                    return nil
+                }
+            }.value
+            if let urlString, let url = URL(string: urlString) {
+                var request = URLRequest(url: url)
+                request.timeoutInterval = 4
+                if let (data, response) = try? await URLSession.shared.data(for: request),
+                   (response as? HTTPURLResponse)?.statusCode == 200,
+                   !data.isEmpty {
+                    return data
+                }
+            }
+        }
+        return nil
     }
 }

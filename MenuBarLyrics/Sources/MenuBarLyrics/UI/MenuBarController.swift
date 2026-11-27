@@ -566,6 +566,16 @@ final class MenuBarController: NSObject {
         let activeSource = currentPlayerTrack?.playerSource ?? player.source
         let trackText = currentTrack.map { $0.artist.isEmpty ? $0.name : "\($0.name) — \($0.artist)" }
         let liveLyric: String? = (!isPlayerStopped && !isPlaybackPaused && latestLyricsFeedback == .available && !displaySource.isEmpty) ? displaySource : nil
+        let isActiveTrack = !isPlayerStopped && currentTrack != nil
+        let artworkImage: NSImage? = isActiveTrack
+            ? AlbumArtworkCache.shared.artwork(
+                title: currentTrack?.name ?? "",
+                artist: currentTrack?.artist ?? "",
+                source: activeSource
+            ) { [weak self] _ in
+                self?.pushLiveStatusToSettings()
+            }
+            : nil
         settingsWindowController?.updateLiveStatus(
             playerName: activeSource.displayName(),
             playerConnected: latestPlayerFeedback == .connected,
@@ -576,7 +586,8 @@ final class MenuBarController: NSObject {
             trackText: trackText,
             lyricsFeedback: latestLyricsFeedback,
             needsPermission: needsPermission,
-            liveLyricLine: liveLyric
+            liveLyricLine: liveLyric,
+            artworkImage: artworkImage
         )
         let currentPos = currentPlaybackPosition() ?? latestPlayerPosition ?? 0
         let activeIdx = currentLines.lastIndex { $0.time <= currentPos } ?? -1
@@ -587,6 +598,8 @@ final class MenuBarController: NSObject {
             lineProgress: lineProg,
             trackTitle: currentTrack?.name,
             artistName: currentTrack?.artist,
+            albumName: currentTrack?.album,
+            artworkImage: artworkImage,
             isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
             isPaused: !isPlayerStopped && isPlaybackPaused && currentTrack != nil,
             position: currentPos,

@@ -1276,6 +1276,8 @@ final class ImmersiveLyricsView: NSView {
     private let linesStack = NSStackView()
     private var lineViews: [SweepLyricLineView] = []
     private var currentLines: [LyricLine] = []
+    private var currentAlbumName: String = ""
+    private var currentArtworkImage: NSImage?
     private var activeIndex: Int = -1
     private(set) var hoveredLineIndex: Int?
     private var currentDuration: TimeInterval = 0
@@ -1562,6 +1564,8 @@ final class ImmersiveLyricsView: NSView {
         lineProgress: CGFloat,
         trackTitle: String?,
         artistName: String?,
+        albumName: String? = nil,
+        artworkImage: NSImage? = nil,
         isPlaying: Bool,
         isPaused: Bool,
         position: TimeInterval,
@@ -1570,6 +1574,8 @@ final class ImmersiveLyricsView: NSView {
     ) {
         isPlayingState = isPlaying
         currentDuration = max(0, duration)
+        currentAlbumName = albumName ?? ""
+        currentArtworkImage = artworkImage
         playPauseButton.image = NSImage(systemSymbolName: isPlaying ? "pause.fill" : "play.fill", accessibilityDescription: nil)?
             .withSymbolConfiguration(.init(pointSize: 15, weight: .semibold))
 
@@ -1780,7 +1786,9 @@ final class ImmersiveLyricsView: NSView {
             lines: currentLines,
             activeIndex: activeIndex,
             trackTitle: trackTitleLabel.stringValue,
-            artistName: trackArtistLabel.stringValue
+            artistName: trackArtistLabel.stringValue,
+            albumName: currentAlbumName,
+            artworkImage: currentArtworkImage
         )
         let popover = NSPopover()
         popover.behavior = .transient

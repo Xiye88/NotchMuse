@@ -747,6 +747,37 @@ final class SettingsWindowController: NSWindowController {
         precondition(controller.immersiveLyricsView.debugHoveredLineCount == 1 && controller.immersiveLyricsView.hoveredLineIndex == 5, "Hovering a second line must clear previous line (never 2 hovered)")
         controller.immersiveLyricsView.debugSimulateHover(at: nil)
         precondition(controller.immersiveLyricsView.debugHoveredLineCount == 0, "Clearing hover leaves 0 hovered lines")
+
+        // E35: Spinning album artwork on vinyl deck + share card rendering with & without artwork/album
+        let dummyArt = NSImage(size: NSSize(width: 64, height: 64))
+        dummyArt.lockFocus()
+        NSColor.systemOrange.setFill()
+        NSRect(x: 0, y: 0, width: 64, height: 64).fill()
+        dummyArt.unlockFocus()
+        controller.vinylDeck.update(isPlaying: true, isPaused: false, trackTitle: "Midnight Harbor", artistName: "NotchMuse", playerName: "Spotify", artwork: dummyArt)
+        precondition(controller.vinylDeck.debugHasArtwork, "Vinyl deck must display spinning album artwork when provided")
+        controller.vinylDeck.update(isPlaying: false, isPaused: false, trackTitle: nil, artistName: nil, playerName: nil, artwork: nil)
+        precondition(!controller.vinylDeck.debugHasArtwork, "Vinyl deck must fall back to amber label when artwork cleared or idle")
+        for template in LyricShareTemplate.allCases {
+            let withArt = LyricShareCardRenderer.renderPNG(
+                lines: ["Lantern light across the quiet bay", "Every chorus finds its steady pace"],
+                trackTitle: "Midnight Harbor",
+                artistName: "NotchMuse Studio",
+                albumName: "Harbor Sessions",
+                artworkImage: dummyArt,
+                template: template
+            )
+            let withoutArt = LyricShareCardRenderer.renderPNG(
+                lines: ["Lantern light across the quiet bay"],
+                trackTitle: "Midnight Harbor",
+                artistName: "NotchMuse Studio",
+                albumName: "Harbor Sessions",
+                artworkImage: nil,
+                template: template
+            )
+            precondition(withArt != nil && withArt!.pngData.count > 1000 && withArt!.pngData.starts(with: [0x89, 0x50, 0x4E, 0x47]), "Share card with artwork must render valid @2x PNG")
+            precondition(withoutArt != nil && withoutArt!.pngData.count > 1000 && withoutArt!.pngData.starts(with: [0x89, 0x50, 0x4E, 0x47]), "Share card without artwork must render valid fallback @2x PNG")
+        }
         print("Settings interaction self-test passed")
     }
     #endif
@@ -2094,7 +2125,8 @@ final class SettingsWindowController: NSWindowController {
         trackText: String?,
         lyricsFeedback: LyricsFeedback,
         needsPermission: PermissionFixKind?,
-        liveLyricLine: String?
+        liveLyricLine: String?,
+        artworkImage: NSImage? = nil
     ) {
         activePermissionFix = needsPermission
         permissionFixButton.isHidden = needsPermission == nil
@@ -2122,7 +2154,8 @@ final class SettingsWindowController: NSWindowController {
             isPaused: isPaused,
             trackTitle: trackTitle,
             artistName: artistName,
-            playerName: playerConnected ? playerName : nil
+            playerName: playerConnected ? playerName : nil,
+            artwork: (isPlaying || isPaused) ? artworkImage : nil
         )
         sidebarNavDeck.updateGeneralActive(playerConnected && (isPlaying || isPaused))
         updateLiveLyricLine(liveLyricLine)
@@ -2228,6 +2261,8 @@ final class SettingsWindowController: NSWindowController {
         lineProgress: CGFloat,
         trackTitle: String?,
         artistName: String?,
+        albumName: String? = nil,
+        artworkImage: NSImage? = nil,
         isPlaying: Bool,
         isPaused: Bool,
         position: TimeInterval,
@@ -2243,6 +2278,8 @@ final class SettingsWindowController: NSWindowController {
             lineProgress: lineProgress,
             trackTitle: trackTitle,
             artistName: artistName,
+            albumName: albumName,
+            artworkImage: artworkImage,
             isPlaying: isPlaying,
             isPaused: isPaused,
             position: position,
@@ -2489,9 +2526,12 @@ private final class VinylDeckCardView: AppearanceSurfaceView {
         refreshStateStyle()
     }
 
-    func update(isPlaying: Bool, isPaused: Bool, trackTitle: String?, artistName: String?, playerName: String?) {
+    var debugHasArtwork: Bool { turntableView.hasArtwork }
+
+    func update(isPlaying: Bool, isPaused: Bool, trackTitle: String?, artistName: String?, playerName: String?, artwork: NSImage? = nil) {
         isPlayingState = isPlaying
         isPausedState = isPaused
+        turntableView.setArtwork((isPlaying || isPaused) ? artwork : nil)
 
         let trimmedTitle = trackTitle?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let trimmedArtist = artistName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -2544,12 +2584,15 @@ private final class VinylDeckCardView: AppearanceSurfaceView {
 @MainActor
 private final class VinylTurntableView: NSView {
     private let discLayer = CALayer()
+    private let artworkLayer = CALayer()
     private let labelLayer = CAShapeLayer()
     private let tonearmContainer = CALayer()
     private let tonearmPathLayer = CAShapeLayer()
     private let cartridgeLayer = CAShapeLayer()
     private let pivotLayer = CAShapeLayer()
     private var isSpinning = false
+
+    var hasArtwork: Bool { !artworkLayer.isHidden && artworkLayer.contents != nil }
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -2597,7 +2640,7 @@ private final class VinylTurntableView: NSView {
         sheen.fillColor = NSColor.white.withAlphaComponent(0.09).cgColor
         discLayer.addSublayer(sheen)
 
-        // Warm amber center label (16x16pt)
+        // Warm amber center label (16x16pt, shown when no artwork)
         let labelSize: CGFloat = 16
         labelLayer.path = CGPath(
             ellipseIn: CGRect(x: (discSize - labelSize) / 2, y: (discSize - labelSize) / 2, width: labelSize, height: labelSize),
@@ -2606,10 +2649,23 @@ private final class VinylTurntableView: NSView {
         labelLayer.fillColor = NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1).cgColor
         discLayer.addSublayer(labelLayer)
 
+        // Circular album artwork embedded at center of spinning vinyl (~65% of 48pt disc = 31pt)
+        let artSize: CGFloat = 31
+        artworkLayer.frame = CGRect(x: (discSize - artSize) / 2, y: (discSize - artSize) / 2, width: artSize, height: artSize)
+        artworkLayer.cornerRadius = artSize / 2
+        artworkLayer.masksToBounds = true
+        artworkLayer.contentsGravity = .resizeAspectFill
+        artworkLayer.borderWidth = 0.75
+        artworkLayer.borderColor = NSColor.white.withAlphaComponent(0.26).cgColor
+        artworkLayer.isHidden = true
+        discLayer.addSublayer(artworkLayer)
+
         // Center spindle hole (4x4pt)
         let spindle = CAShapeLayer()
         spindle.path = CGPath(ellipseIn: CGRect(x: discSize / 2 - 2, y: discSize / 2 - 2, width: 4, height: 4), transform: nil)
         spindle.fillColor = NSColor(calibratedRed: 0.08, green: 0.08, blue: 0.095, alpha: 1).cgColor
+        spindle.strokeColor = NSColor.white.withAlphaComponent(0.24).cgColor
+        spindle.lineWidth = 0.5
         discLayer.addSublayer(spindle)
 
         root.addSublayer(discLayer)
@@ -2652,6 +2708,21 @@ private final class VinylTurntableView: NSView {
             labelLayer.fillColor = AppearanceSurfaceColors.accent.cgColor
             cartridgeLayer.fillColor = AppearanceSurfaceColors.accent.cgColor
         }
+    }
+
+    func setArtwork(_ image: NSImage?) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        if let image {
+            artworkLayer.contents = image
+            artworkLayer.isHidden = false
+            labelLayer.isHidden = true
+        } else {
+            artworkLayer.contents = nil
+            artworkLayer.isHidden = true
+            labelLayer.isHidden = false
+        }
+        CATransaction.commit()
     }
 
     func setPlaying(_ playing: Bool) {

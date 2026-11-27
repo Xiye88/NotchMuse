@@ -35,14 +35,17 @@ enum LyricShareCardRenderer {
         lines: [String],
         trackTitle: String,
         artistName: String,
+        albumName: String = "",
+        artworkImage: NSImage? = nil,
         template: LyricShareTemplate
     ) -> (image: NSImage, pngData: Data)? {
         let cleaned = lines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
         let displayLines = cleaned.isEmpty ? ["♪"] : Array(cleaned.prefix(6))
         let safeTitle = trackTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "NotchMuse" : trackTitle
         let safeArtist = artistName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let safeAlbum = albumName.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        let padX: CGFloat = 38
+        let padX: CGFloat = 36
         let textWidth = logicalWidth - padX * 2
 
         let lyricParagraph = NSMutableParagraphStyle()
@@ -77,9 +80,9 @@ enum LyricShareCardRenderer {
             totalLyricsHeight += CGFloat(displayLines.count - 1) * lineGap
         }
 
-        let headerH: CGFloat = 112
-        let footerH: CGFloat = 112
-        let logicalHeight = min(920, max(500, headerH + totalLyricsHeight + footerH + 44))
+        let headerH: CGFloat = 134
+        let footerH: CGFloat = 72
+        let logicalHeight = min(940, max(520, headerH + totalLyricsHeight + footerH + 54))
 
         let scale: CGFloat = 2
         let pixelW = Int(logicalWidth * scale)
@@ -138,16 +141,60 @@ enum LyricShareCardRenderer {
             ruleColor = NSColor.white.withAlphaComponent(0.16)
         }
 
-        // Subtle opening quotation glyph
-        let quoteAttrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont(name: "Georgia-Bold", size: 34) ?? NSFont.systemFont(ofSize: 32, weight: .bold),
-            .foregroundColor: accentColor.withAlphaComponent(template == .warmAlabaster ? 0.85 : 0.78)
+        // Top editorial header: 56x56pt rounded album artwork (left) + bold track title & artist/album (right)
+        let artSize: CGFloat = 56
+        let artRect = NSRect(x: padX, y: logicalHeight - 38 - artSize, width: artSize, height: artSize)
+        drawHeaderArtwork(artworkImage, in: artRect, accentColor: accentColor, template: template)
+
+        let metaX = artRect.maxX + 14
+        let metaW = logicalWidth - padX - metaX - 4
+        let metaParagraph = NSMutableParagraphStyle()
+        metaParagraph.lineBreakMode = .byTruncatingTail
+
+        let subtitleText: String
+        let showAlbum = !safeAlbum.isEmpty && safeAlbum.caseInsensitiveCompare(safeTitle) != .orderedSame
+        if !safeArtist.isEmpty && showAlbum {
+            subtitleText = AppPreferences.language == .simplifiedChinese
+                ? "\(safeArtist) · 《\(safeAlbum)》"
+                : "\(safeArtist) · \(safeAlbum)"
+        } else if !safeArtist.isEmpty {
+            subtitleText = safeArtist
+        } else if showAlbum {
+            subtitleText = AppPreferences.language == .simplifiedChinese ? "《\(safeAlbum)》" : safeAlbum
+        } else {
+            subtitleText = ""
+        }
+
+        let titleAttrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 16, weight: .bold),
+            .foregroundColor: primaryTextColor,
+            .paragraphStyle: metaParagraph
         ]
-        ("“" as NSString).draw(at: NSPoint(x: padX - 2, y: logicalHeight - 92), withAttributes: quoteAttrs)
+        let titleY: CGFloat = subtitleText.isEmpty ? (artRect.midY - 10) : (artRect.midY + 2)
+        (safeTitle as NSString).draw(
+            in: NSRect(x: metaX, y: titleY, width: metaW, height: 22),
+            withAttributes: titleAttrs
+        )
+        if !subtitleText.isEmpty {
+            let subAttrs: [NSAttributedString.Key: Any] = [
+                .font: NSFont.systemFont(ofSize: 12.5, weight: .regular),
+                .foregroundColor: secondaryTextColor,
+                .paragraphStyle: metaParagraph
+            ]
+            (subtitleText as NSString).draw(
+                in: NSRect(x: metaX, y: artRect.midY - 19, width: metaW, height: 18),
+                withAttributes: subAttrs
+            )
+        }
+
+        // Hairline rule below header
+        let headerDividerY = artRect.minY - 18
+        ruleColor.setFill()
+        NSRect(x: padX, y: headerDividerY, width: textWidth, height: 1).fill()
 
         // Draw lyrics centered vertically in the middle editorial band
-        let middleBottom: CGFloat = footerH + 16
-        let middleTop: CGFloat = logicalHeight - headerH
+        let middleBottom: CGFloat = footerH + 12
+        let middleTop: CGFloat = headerDividerY - 16
         let middleSpan = max(totalLyricsHeight, middleTop - middleBottom)
         var cursorY = middleBottom + (middleSpan + totalLyricsHeight) / 2
 
@@ -169,38 +216,10 @@ enum LyricShareCardRenderer {
             cursorY -= lineGap
         }
 
-        // Hairline rule above metadata footer
+        // Bottom hairline + minimal ♪ NotchMuse brand signature
         ruleColor.setFill()
-        NSRect(x: padX, y: 92, width: textWidth, height: 1).fill()
+        NSRect(x: padX, y: 62, width: textWidth, height: 1).fill()
 
-        // Track title + artist (left)
-        let titleParagraph = NSMutableParagraphStyle()
-        titleParagraph.lineBreakMode = .byTruncatingTail
-        let titleAttrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 14, weight: .semibold),
-            .foregroundColor: primaryTextColor,
-            .paragraphStyle: titleParagraph
-        ]
-        let metaMaxW = textWidth - 118
-        let titleY: CGFloat = safeArtist.isEmpty ? 46 : 58
-        (safeTitle as NSString).draw(
-            in: NSRect(x: padX, y: titleY, width: metaMaxW, height: 20),
-            withAttributes: titleAttrs
-        )
-
-        if !safeArtist.isEmpty {
-            let artistAttrs: [NSAttributedString.Key: Any] = [
-                .font: NSFont.systemFont(ofSize: 12, weight: .regular),
-                .foregroundColor: secondaryTextColor,
-                .paragraphStyle: titleParagraph
-            ]
-            (safeArtist as NSString).draw(
-                in: NSRect(x: padX, y: 38, width: metaMaxW, height: 18),
-                withAttributes: artistAttrs
-            )
-        }
-
-        // Minimal ♪ NotchMuse brand signature (bottom right)
         let brandParagraph = NSMutableParagraphStyle()
         brandParagraph.alignment = .right
         let brandString = NSMutableAttributedString(
@@ -219,7 +238,7 @@ enum LyricShareCardRenderer {
                 .paragraphStyle: brandParagraph
             ]
         ))
-        brandString.draw(in: NSRect(x: logicalWidth - padX - 110, y: 46, width: 110, height: 18))
+        brandString.draw(in: NSRect(x: logicalWidth - padX - 116, y: 34, width: 116, height: 18))
 
         NSGraphicsContext.restoreGraphicsState()
 
@@ -227,6 +246,52 @@ enum LyricShareCardRenderer {
         let image = NSImage(size: NSSize(width: logicalWidth, height: logicalHeight))
         image.addRepresentation(rep)
         return (image, pngData)
+    }
+
+    private static func drawHeaderArtwork(_ artwork: NSImage?, in rect: NSRect, accentColor: NSColor, template: LyricShareTemplate) {
+        let rounded = NSBezierPath(roundedRect: rect, xRadius: 10, yRadius: 10)
+        NSGraphicsContext.saveGraphicsState()
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor.black.withAlphaComponent(template == .warmAlabaster ? 0.16 : 0.36)
+        shadow.shadowBlurRadius = 8
+        shadow.shadowOffset = NSSize(width: 0, height: -2)
+        shadow.set()
+        NSColor(calibratedWhite: 0.09, alpha: 1).setFill()
+        rounded.fill()
+        NSGraphicsContext.restoreGraphicsState()
+
+        NSGraphicsContext.saveGraphicsState()
+        rounded.addClip()
+        if let artwork, artwork.size.width > 0, artwork.size.height > 0 {
+            let scale = max(rect.width / artwork.size.width, rect.height / artwork.size.height)
+            let drawW = artwork.size.width * scale
+            let drawH = artwork.size.height * scale
+            let drawRect = NSRect(x: rect.midX - drawW / 2, y: rect.midY - drawH / 2, width: drawW, height: drawH)
+            artwork.draw(in: drawRect, from: .zero, operation: .sourceOver, fraction: 1.0)
+        } else {
+            // Graceful fallback miniature vinyl record emblem
+            NSColor(calibratedRed: 0.10, green: 0.10, blue: 0.12, alpha: 1).setFill()
+            rect.fill()
+            let center = NSPoint(x: rect.midX, y: rect.midY)
+            for r: CGFloat in [22, 17, 12] {
+                NSColor.white.withAlphaComponent(0.12).setStroke()
+                let ring = NSBezierPath(ovalIn: NSRect(x: center.x - r, y: center.y - r, width: r * 2, height: r * 2))
+                ring.lineWidth = 0.65
+                ring.stroke()
+            }
+            accentColor.withAlphaComponent(0.94).setFill()
+            NSBezierPath(ovalIn: NSRect(x: center.x - 7.5, y: center.y - 7.5, width: 15, height: 15)).fill()
+            NSColor(calibratedWhite: 0.08, alpha: 1).setFill()
+            NSBezierPath(ovalIn: NSRect(x: center.x - 2, y: center.y - 2, width: 4, height: 4)).fill()
+        }
+        NSGraphicsContext.restoreGraphicsState()
+
+        let rimColor: NSColor = template == .warmAlabaster
+            ? NSColor.black.withAlphaComponent(0.10)
+            : NSColor.white.withAlphaComponent(0.16)
+        rimColor.setStroke()
+        rounded.lineWidth = 0.75
+        rounded.stroke()
     }
 
     private static func drawBackground(in rect: NSRect, template: LyricShareTemplate) {
@@ -346,6 +411,8 @@ final class LyricSharePopoverController: NSViewController {
     private let lines: [LyricLine]
     private let trackTitle: String
     private let artistName: String
+    private let albumName: String
+    private let artworkImage: NSImage?
     private var selectedIndices: Set<Int>
     private var selectedTemplate: LyricShareTemplate = .vinylDark
     private var lastRendered: (image: NSImage, pngData: Data)?
@@ -365,10 +432,12 @@ final class LyricSharePopoverController: NSViewController {
         refreshPreview()
     }
 
-    init(lines: [LyricLine], activeIndex: Int, trackTitle: String, artistName: String) {
+    init(lines: [LyricLine], activeIndex: Int, trackTitle: String, artistName: String, albumName: String = "", artworkImage: NSImage? = nil) {
         self.lines = lines
         self.trackTitle = trackTitle
         self.artistName = artistName
+        self.albumName = albumName
+        self.artworkImage = artworkImage
         self.selectedIndices = Set(LyricShareCardRenderer.defaultSelectedIndices(linesCount: lines.count, activeIndex: activeIndex))
         super.init(nibName: nil, bundle: nil)
     }
@@ -575,6 +644,8 @@ final class LyricSharePopoverController: NSViewController {
             lines: orderedLines,
             trackTitle: trackTitle,
             artistName: artistName,
+            albumName: albumName,
+            artworkImage: artworkImage,
             template: selectedTemplate
         ) {
             lastRendered = rendered

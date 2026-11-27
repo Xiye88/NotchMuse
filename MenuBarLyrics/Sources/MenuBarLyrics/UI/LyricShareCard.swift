@@ -408,6 +408,7 @@ enum LyricShareCardRenderer {
 
 @MainActor
 final class LyricSharePopoverController: NSViewController {
+    weak var popover: NSPopover?
     private let lines: [LyricLine]
     private let trackTitle: String
     private let artistName: String
@@ -422,6 +423,9 @@ final class LyricSharePopoverController: NSViewController {
     private let countLabel = NSTextField(labelWithString: "")
     private let copyButton = NSButton(title: "", target: nil, action: nil)
     private let saveButton = NSButton(title: "", target: nil, action: nil)
+    private let completionToast = ShareCompletionToast()
+    private let toastLabel = NSTextField(labelWithString: "")
+    private var toastDismissal: DispatchWorkItem?
     private var templateButtons: [NSButton] = []
     private var lineCheckboxes: [NSButton] = []
 
@@ -601,6 +605,26 @@ final class LyricSharePopoverController: NSViewController {
             listDoc.widthAnchor.constraint(equalTo: listScroll.contentView.widthAnchor)
         ])
 
+        completionToast.wantsLayer = true
+        completionToast.layer?.cornerRadius = 15
+        completionToast.layer?.cornerCurve = .continuous
+        completionToast.layer?.backgroundColor = NSColor(white: 0.13, alpha: 0.96).cgColor
+        completionToast.alphaValue = 0
+        completionToast.translatesAutoresizingMaskIntoConstraints = false
+        toastLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        toastLabel.textColor = .white
+        toastLabel.translatesAutoresizingMaskIntoConstraints = false
+        completionToast.addSubview(toastLabel)
+        root.addSubview(completionToast)
+        NSLayoutConstraint.activate([
+            completionToast.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -20),
+            completionToast.bottomAnchor.constraint(equalTo: root.bottomAnchor, constant: -16),
+            completionToast.heightAnchor.constraint(equalToConstant: 30),
+            toastLabel.leadingAnchor.constraint(equalTo: completionToast.leadingAnchor, constant: 14),
+            toastLabel.trailingAnchor.constraint(equalTo: completionToast.trailingAnchor, constant: -14),
+            toastLabel.centerYAnchor.constraint(equalTo: completionToast.centerYAnchor)
+        ])
+
         self.view = root
         refreshPreview()
     }
@@ -657,15 +681,33 @@ final class LyricSharePopoverController: NSViewController {
         guard let rendered = lastRendered else { return }
         let pb = NSPasteboard.general
         pb.clearContents()
-        pb.setData(rendered.pngData, forType: .png)
+        guard pb.setData(rendered.pngData, forType: .png) else { return }
         if let tiff = rendered.image.tiffRepresentation {
             pb.setData(tiff, forType: .tiff)
         }
-        let isZh = AppPreferences.language == .simplifiedChinese
-        let orig = isZh ? "复制图片到剪贴板" : "Copy Image"
-        copyButton.title = isZh ? "已复制 ✓" : "Copied ✓"
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { [weak self] in
-            self?.copyButton.title = orig
+        showCompletion(L10n.text("PNG copied"))
+    }
+
+    private func showCompletion(_ message: String) {
+        InteractionSoundEngine.shared.play(.landed)
+        toastDismissal?.cancel()
+        toastLabel.stringValue = "✓  " + message
+        NSAccessibility.post(element: view, notification: .announcementRequested, userInfo: [
+            .announcement: message,
+            .priority: NSAccessibilityPriorityLevel.medium.rawValue
+        ])
+        fadeToast(to: 1, duration: 0.12)
+        let dismissal = DispatchWorkItem { [weak self] in
+            self?.fadeToast(to: 0, duration: 0.18)
+        }
+        toastDismissal = dismissal
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: dismissal)
+    }
+
+    private func fadeToast(to alpha: CGFloat, duration: TimeInterval) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? 0 : duration
+            completionToast.animator().alphaValue = alpha
         }
     }
 
@@ -678,9 +720,22 @@ final class LyricSharePopoverController: NSViewController {
             .replacingOccurrences(of: ":", with: "-")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         panel.nameFieldStringValue = "NotchMuse-\(safeName.isEmpty ? "Lyrics" : safeName).png"
-        panel.begin { response in
+        let pngData = rendered.pngData
+        let previousBehavior = popover?.behavior
+        popover?.behavior = .applicationDefined
+        panel.begin { [weak self] response in
+            if let previousBehavior { self?.popover?.behavior = previousBehavior }
             guard response == .OK, let url = panel.url else { return }
-            try? rendered.pngData.write(to: url, options: .atomic)
+            Task { @MainActor [weak self] in
+                let saved = await Task.detached(priority: .userInitiated) {
+                    (try? pngData.write(to: url, options: .atomic)) != nil
+                }.value
+                if saved { self?.showCompletion(L10n.text("PNG saved")) }
+            }
         }
     }
+}
+
+private final class ShareCompletionToast: NSView {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }

@@ -809,6 +809,7 @@ final class MenuBarController: NSObject {
 
     @objc private func nudgeTimingOffset(_ sender: NSMenuItem) {
         guard let delta = sender.representedObject as? Double else { return }
+        InteractionSoundEngine.shared.play(.dial)
         lyricTimingOffset = ((lyricTimingOffset + delta) * 10).rounded() / 10
         updateTimingOffsetMenuTitle()
         updatePlayingDisplay()

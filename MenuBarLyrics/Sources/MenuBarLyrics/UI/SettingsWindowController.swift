@@ -32,6 +32,7 @@ enum AppPreferences {
     static let hiddenControlsNoticeKey = "HiddenControlsNoticeShown"
     static let bilingualLyricsKey = "BilingualLyricsEnabled"
     static let missingLyricsAnimationStyleKey = "MissingLyricsAnimationStyle"
+    static let interactionSoundsEnabledKey = "InteractionSoundsEnabled"
     static let immersiveThemePresetKey = "ImmersiveLyricsThemePreset"
     static let preferredLaunchPlayerKey = "PreferredLaunchPlayer"
     static var missingLyricsAnimationStyle: MissingLyricsAnimationStyle {
@@ -52,6 +53,14 @@ enum AppPreferences {
     static var bilingualLyricsEnabled: Bool {
         Bundle.main.object(forInfoDictionaryKey: "NotchMusePreview") as? Bool == true &&
         UserDefaults.standard.bool(forKey: bilingualLyricsKey)
+    }
+
+    static func interactionSoundsEnabled(in defaults: UserDefaults = .standard) -> Bool {
+        defaults.object(forKey: interactionSoundsEnabledKey) as? Bool ?? true
+    }
+
+    static func setInteractionSoundsEnabled(_ enabled: Bool, in defaults: UserDefaults = .standard) {
+        defaults.set(enabled, forKey: interactionSoundsEnabledKey)
     }
 
     static var showInDock: Bool { showInDock(in: .standard) }
@@ -378,6 +387,7 @@ final class SettingsWindowController: NSWindowController {
     private let customWidthValue = NSTextField(string: "")
     private let statusBarOffsetValue = NSTextField(string: "")
     private let launchAtLoginSwitch = NSSwitch()
+    private let interactionSoundsSwitch = NSSwitch()
     private let showInDockSwitch = NSSwitch()
     private let showMenuBarIconSwitch = NSSwitch()
     private let automaticUpdateSwitch = NSSwitch()
@@ -487,6 +497,20 @@ final class SettingsWindowController: NSWindowController {
     }
 
     #if DEBUG
+    static func testPreviewCardLayout() {
+        let preview = SettingsPreviewView(frame: NSRect(x: 0, y: 0, width: 600, height: 218))
+        for width in [600.0, 720.0] {
+            preview.setFrameSize(NSSize(width: width, height: 218))
+            preview.layoutSubtreeIfNeeded()
+            let cardWidth = (width - 24) / 3
+            let expected = (0..<3).map {
+                NSRect(x: Double($0) * (cardWidth + 12), y: 0, width: cardWidth, height: 218)
+            }
+            precondition(preview.subviews.map(\.frame) == expected, "Each preview card must retain its own frame after resizing")
+            precondition(preview.subviews.allSatisfy { $0.layer != nil }, "Each preview card must have its own animation layer")
+        }
+    }
+
     static func testModeControls() {
         _ = NSApplication.shared
         let defaults = UserDefaults.standard
@@ -849,6 +873,10 @@ final class SettingsWindowController: NSWindowController {
         configureNumericField(notchBackgroundPaddingValue, action: #selector(notchBackgroundPaddingEntered))
         notchHideOnHoverSwitch.target = self
         notchHideOnHoverSwitch.action = #selector(notchHideOnHoverChanged)
+        interactionSoundsSwitch.target = self
+        interactionSoundsSwitch.action = #selector(interactionSoundsChanged)
+        interactionSoundsSwitch.setAccessibilityLabel(L10n.text("Interaction Sounds"))
+
         launchAtLoginSwitch.target = self
         launchAtLoginSwitch.action = #selector(launchAtLoginChanged)
         showInDockSwitch.target = self
@@ -953,6 +981,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Default Launch Player")), preferredLaunchPlayerPopUp],
             [label(L10n.text("When Player Stops")), playerStopBehaviorPopUp],
             [label(L10n.text("Launch at Login")), launchAtLoginSwitch],
+            [label(L10n.text("Interaction Sounds")), interactionSoundsSwitch],
             [label(L10n.text("Show in Dock")), showInDockSwitch],
             [label(L10n.text("Show Menu Bar Icon")), showMenuBarIconSwitch],
             [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch],
@@ -1555,6 +1584,7 @@ final class SettingsWindowController: NSWindowController {
         opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
         customWidthValue.stringValue = String(format: "%.0f", customWidthSlider.doubleValue)
         statusBarOffsetValue.stringValue = String(format: "%.0f", statusBarOffsetSlider.doubleValue)
+        interactionSoundsSwitch.state = AppPreferences.interactionSoundsEnabled() ? .on : .off
         launchAtLoginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
         launchAtLoginSwitch.isEnabled = true
         appAppearanceControl.selectedSegment = AppAppearance.allCases.firstIndex(of: AppAppearanceController.selection)!
@@ -1944,6 +1974,10 @@ final class SettingsWindowController: NSWindowController {
         alert.informativeText = L10n.text("Open it again from Applications or Spotlight to show this window.")
         alert.runModal()
         UserDefaults.standard.set(true, forKey: AppPreferences.hiddenControlsNoticeKey)
+    }
+
+    @objc private func interactionSoundsChanged() {
+        InteractionSoundEngine.shared.setEnabled(interactionSoundsSwitch.state == .on)
     }
 
     @objc private func launchAtLoginChanged() {
@@ -2372,7 +2406,8 @@ final class SettingsWindowController: NSWindowController {
             keys = [AppPreferences.colorPresetKey, AppPreferences.customLyricsColorKey, AppPreferences.customLyricsEndColorKey, AppPreferences.fontSizeKey, AppPreferences.animationSpeedKey, AppPreferences.opacityKey, AppPreferences.notchBackgroundEnabledKey, AppPreferences.notchBackgroundColorKey, AppPreferences.notchBackgroundOpacityKey, AppPreferences.notchBackgroundPaddingKey, AppPreferences.notchHideOnHoverKey]
         case .general:
             keys = [AppPreferences.playerSourceKey, AppPreferences.playerStopBehaviorKey, AppPreferences.languageKey,
-                    AppPreferences.showInDockKey, AppPreferences.showMenuBarIconKey, AppAppearanceController.preferenceKey]
+                    AppPreferences.showInDockKey, AppPreferences.showMenuBarIconKey, AppAppearanceController.preferenceKey,
+                    AppPreferences.interactionSoundsEnabledKey]
         }
         keys.forEach(UserDefaults.standard.removeObject(forKey:))
         if page == .general {
@@ -3215,9 +3250,6 @@ private final class SidebarNavButton: NSButton {
         isRowSelected = selected
         updateHoverNudge(animated: animated)
         refreshAppearance()
-        if selected && animated {
-            animateIconPop()
-        }
     }
 
     func updateDisplayModeBadge(_ text: String) {
@@ -3240,20 +3272,6 @@ private final class SidebarNavButton: NSButton {
         refreshAppearance()
     }
 
-    private func animateIconPop() {
-        guard let iconLayer = iconView.layer else { return }
-        let bounds = iconLayer.bounds
-        let center = CGPoint(x: bounds.midX, y: bounds.midY)
-        iconLayer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        iconLayer.position = CGPoint(x: iconView.frame.minX + center.x, y: iconView.frame.minY + center.y)
-        let pop = CAKeyframeAnimation(keyPath: "transform.scale")
-        pop.values = [1.0, 1.15, 1.0]
-        pop.keyTimes = [0, 0.45, 1.0]
-        pop.duration = 0.20
-        pop.timingFunction = CAMediaTimingFunction(name: .easeOut)
-        iconLayer.add(pop, forKey: "iconPop")
-    }
-
     private func updateHoverNudge(animated: Bool) {
         let targetOffset: CGFloat = (isHovered && !isRowSelected) ? 12 : 10
         guard iconLeadingConstraint?.constant != targetOffset else { return }
@@ -3266,6 +3284,12 @@ private final class SidebarNavButton: NSButton {
         } else {
             iconLeadingConstraint?.constant = targetOffset
         }
+    }
+
+    override func sendAction(_ action: Selector?, to target: Any?) -> Bool {
+        InteractionMotion.rebound(layer, from: 0.97)
+        InteractionSoundEngine.shared.play(.tick)
+        return super.sendAction(action, to: target)
     }
 
     override func updateTrackingAreas() {
@@ -3342,13 +3366,37 @@ private final class SidebarNavButton: NSButton {
 }
 
 @MainActor
+private final class SettingsPreviewModeCard: NSView {
+    private let drawCard: (NSRect) -> Void
+
+    init(drawCard: @escaping (NSRect) -> Void) {
+        self.drawCard = drawCard
+        super.init(frame: .zero)
+        wantsLayer = true
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override var isFlipped: Bool { true }
+
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+    override func draw(_ dirtyRect: NSRect) {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            drawCard(bounds)
+        }
+    }
+}
+
+@MainActor
 private final class SettingsPreviewView: NSView {
     typealias Mode = DisplayMode
-    var mode: Mode = .statusBar { didSet { needsDisplay = true } }
-    var liveLyricText: String? { didSet { needsDisplay = true } }
+    var mode: Mode = .statusBar { didSet { redrawCards() } }
+    var liveLyricText: String? { didSet { redrawCards() } }
     var onModeClick: ((Mode) -> Void)?
-    private var hoveredMode: Mode? { didSet { if hoveredMode != oldValue { needsDisplay = true } } }
+    private var hoveredMode: Mode? { didSet { if hoveredMode != oldValue { redrawCards() } } }
     private var hoverTrackingArea: NSTrackingArea?
+    private var cards: [Mode: SettingsPreviewModeCard] = [:]
     private var lyricColors = BrandStyle.gradientColors
     private var usesGradient = false
     private var lyricFontSize: CGFloat = 13
@@ -3367,6 +3415,39 @@ private final class SettingsPreviewView: NSView {
         .flatMap(NSImage.init(contentsOfFile:))
 
     override var isFlipped: Bool { true }
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        for mode in Mode.allCases {
+            let card = SettingsPreviewModeCard { [weak self] rect in
+                self?.drawPanel(rect, panelMode: mode)
+            }
+            cards[mode] = card
+            addSubview(card)
+        }
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func layout() {
+        super.layout()
+        let gap: CGFloat = 12
+        let panelWidth = max(0, (bounds.width - gap * 2) / 3)
+        for (index, mode) in Mode.allCases.enumerated() {
+            cards[mode]?.frame = NSRect(
+                x: CGFloat(index) * (panelWidth + gap), y: 0, width: panelWidth, height: bounds.height
+            )
+        }
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        redrawCards()
+    }
+
+    private func redrawCards() {
+        cards.values.forEach { $0.needsDisplay = true }
+    }
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
@@ -3390,6 +3471,8 @@ private final class SettingsPreviewView: NSView {
 
     override func mouseDown(with event: NSEvent) {
         if let clickedMode = mode(at: convert(event.locationInWindow, from: nil)) {
+            InteractionMotion.rebound(cards[clickedMode]?.layer, from: 0.97)
+            InteractionSoundEngine.shared.play(.tick)
             onModeClick?(clickedMode)
         }
     }
@@ -3421,21 +3504,7 @@ private final class SettingsPreviewView: NSView {
         self.notchBackground = notchBackground
         self.notchBackgroundColor = notchBackgroundColor
         self.notchBackgroundPadding = notchBackgroundPadding
-        needsDisplay = true
-    }
-
-    override func draw(_ dirtyRect: NSRect) {
-        super.draw(dirtyRect)
-        effectiveAppearance.performAsCurrentDrawingAppearance {
-            let gap: CGFloat = 12
-            let panelWidth = (bounds.width - gap * 2) / 3
-            for (index, mode) in Mode.allCases.enumerated() {
-                drawPanel(
-                    NSRect(x: CGFloat(index) * (panelWidth + gap), y: 0, width: panelWidth, height: bounds.height),
-                    panelMode: mode
-                )
-            }
-        }
+        redrawCards()
     }
 
     private func drawPanel(_ rect: NSRect, panelMode: Mode) {

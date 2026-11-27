@@ -11,6 +11,49 @@ enum SelfTests {
         }
     }
 
+    private static func testInteractionSounds() {
+        func read<T: FixedWidthInteger>(_ type: T.Type, from data: Data, at offset: Int) -> T {
+            data.withUnsafeBytes { T(littleEndian: $0.loadUnaligned(fromByteOffset: offset, as: type)) }
+        }
+
+        var waves = Set<Data>()
+        for cue in InteractionSoundEngine.Cue.allCases {
+            let wave = InteractionSoundEngine.waveData(for: cue)
+            check(wave.count > 44, "\(cue) contains PCM samples")
+            check(wave.prefix(4) == Data("RIFF".utf8) &&
+                  wave[8..<16] == Data("WAVEfmt ".utf8) &&
+                  wave[36..<40] == Data("data".utf8), "\(cue) carries the WAV chunk identifiers")
+            check(read(UInt32.self, from: wave, at: 4) == wave.count - 8 &&
+                  read(UInt32.self, from: wave, at: 40) == wave.count - 44, "\(cue) WAV sizes match its PCM payload")
+            check(read(UInt16.self, from: wave, at: 20) == 1 &&
+                  read(UInt16.self, from: wave, at: 22) == 1 &&
+                  read(UInt32.self, from: wave, at: 24) == 24_000 &&
+                  read(UInt16.self, from: wave, at: 34) == 16, "\(cue) uses 24 kHz signed 16-bit mono PCM")
+            let samples = stride(from: 44, to: wave.count, by: 2).map { read(Int16.self, from: wave, at: $0) }
+            check(samples.count <= 2_400, "\(cue) lasts at most 100 ms")
+            check(samples.first == 0 && samples.last == 0, "\(cue) starts and ends in silence")
+            let peak = samples.map { abs(Int($0)) }.max() ?? 0
+            check(peak > 0 && peak < Int(Int16.max) / 2, "\(cue) has audible, unclipped PCM")
+            check((0.22...0.35).contains(cue.volume), "\(cue) uses restrained volume")
+            check(waves.insert(wave).inserted, "\(cue) has a distinct waveform")
+            check(NSSound(data: wave) != nil, "NSSound decodes \(cue) from memory")
+        }
+
+        let suite = "NotchMuse.InteractionSoundTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        check(AppPreferences.interactionSoundsEnabled(in: defaults), "interaction sounds default to ON")
+        AppPreferences.setInteractionSoundsEnabled(false, in: defaults)
+        let reopened = UserDefaults(suiteName: suite)!
+        check(!AppPreferences.interactionSoundsEnabled(in: reopened), "interaction sounds persist explicit OFF")
+        AppPreferences.setInteractionSoundsEnabled(true, in: reopened)
+        check(defaults.persistentDomain(forName: suite)?[AppPreferences.interactionSoundsEnabledKey] as? Bool == true,
+              "interaction sounds persist explicit ON")
+        check(L10n.text("Interaction Sounds", language: .english) == "Interaction Sounds" &&
+              L10n.text("Interaction Sounds", language: .simplifiedChinese) == "交互微音效", "interaction sounds switch is localized")
+        print("Interaction sound PCM and preference tests passed (6 cues)")
+    }
+
     @MainActor static func run() {
         check(LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: [:], isPreview: false), "fresh stable install opts into login launch")
         check(!LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: ["Language": "en"], isPreview: false), "existing preferences are preserved")
@@ -19,6 +62,8 @@ enum SelfTests {
         testMenuBarSafety()
         testStatusFeedback()
         testLocalization()
+        testInteractionSounds()
+        SettingsWindowController.testPreviewCardLayout()
         testSingleInstanceLock()
         testMusicPlayerAdapterModel()
         testAppleMusicResponseParsing()

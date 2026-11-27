@@ -146,6 +146,7 @@ private final class PillIconButton: NSButton {
         didSet {
             if isPointerInside != oldValue {
                 layer?.backgroundColor = isPointerInside ? NSColor.white.withAlphaComponent(0.14).cgColor : NSColor.clear.cgColor
+                InteractionMotion.magnify(layer, hovered: isPointerInside)
                 onHoverChange?(isPointerInside)
             }
         }
@@ -159,6 +160,11 @@ private final class PillIconButton: NSButton {
     }
 
     required init?(coder: NSCoder) { nil }
+
+    override func sendAction(_ action: Selector?, to target: Any?) -> Bool {
+        InteractionSoundEngine.shared.play(.tick)
+        return super.sendAction(action, to: target)
+    }
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
@@ -465,6 +471,7 @@ private final class QuickColorPopoverController: NSViewController {
 
     @objc private func dotClicked(_ sender: NSButton) {
         guard let dot = sender as? QuickColorDotButton else { return }
+        InteractionSoundEngine.shared.play(.tick)
         NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         onPick(dot.preset, dot.customStartColor, dot.customEndColor)
     }

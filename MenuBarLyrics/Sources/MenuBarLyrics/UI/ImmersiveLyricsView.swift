@@ -720,6 +720,11 @@ final class SweepLyricLineView: NSView {
     override func mouseExited(with event: NSEvent) { onHoverChanged?(false) }
 
     override func mouseDown(with event: NSEvent) {
+        if onSeek != nil {
+            wantsLayer = true
+            InteractionMotion.rebound(layer, from: 0.94)
+            InteractionSoundEngine.shared.play(.step)
+        }
         isPressed = true
         NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
         onSeek?(lineTime)
@@ -993,6 +998,7 @@ private final class ThemeSwatchDotButton: NSButton {
         self.isBordered = false
         self.target = target
         self.action = action
+        self.wantsLayer = true
         self.toolTip = preset.displayName()
         self.setAccessibilityLabel(preset.displayName())
         self.translatesAutoresizingMaskIntoConstraints = false
@@ -1290,9 +1296,9 @@ final class ImmersiveLyricsView: NSView {
     private let trackTitleLabel = NSTextField(labelWithString: "")
     private let trackArtistLabel = NSTextField(labelWithString: "")
     private let timeLabel = NSTextField(labelWithString: "00:00 / 00:00")
-    private lazy var prevButton = TransportButton(symbol: "backward.fill", size: 13, isCapsulePrimary: false, target: self, action: #selector(prevClicked))
-    private lazy var playPauseButton = TransportButton(symbol: "play.fill", size: 15, isCapsulePrimary: true, target: self, action: #selector(playPauseClicked))
-    private lazy var nextButton = TransportButton(symbol: "forward.fill", size: 13, isCapsulePrimary: false, target: self, action: #selector(nextClicked))
+    private lazy var prevButton = TransportButton(symbol: "backward.fill", size: 13, isCapsulePrimary: false, target: self, action: #selector(prevClicked(_:)))
+    private lazy var playPauseButton = TransportButton(symbol: "play.fill", size: 15, isCapsulePrimary: true, target: self, action: #selector(playPauseClicked(_:)))
+    private lazy var nextButton = TransportButton(symbol: "forward.fill", size: 13, isCapsulePrimary: false, target: self, action: #selector(nextClicked(_:)))
     private lazy var shareButton = TransportButton(symbol: "square.and.arrow.up", size: 12.5, isCapsulePrimary: false, target: self, action: #selector(shareCardClicked))
     private var sharePopover: NSPopover?
     private var swatchButtons: [ThemeSwatchDotButton] = []
@@ -1763,12 +1769,20 @@ final class ImmersiveLyricsView: NSView {
         return String(format: "%02d:%02d", total / 60, total % 60)
     }
 
-    @objc private func prevClicked() { onTransportCommand?(.previous) }
-    @objc private func playPauseClicked() { onTransportCommand?(.playPause) }
-    @objc private func nextClicked() { onTransportCommand?(.next) }
+    @objc private func prevClicked(_ sender: NSButton) { transport(.previous, from: sender) }
+    @objc private func playPauseClicked(_ sender: NSButton) { transport(.playPause, from: sender) }
+    @objc private func nextClicked(_ sender: NSButton) { transport(.next, from: sender) }
+
+    private func transport(_ command: MediaTransportCommand, from button: NSButton) {
+        InteractionMotion.rebound(button.layer, from: 0.94)
+        InteractionSoundEngine.shared.play(.latch)
+        onTransportCommand?(command)
+    }
 
     @objc private func swatchClicked(_ sender: NSButton) {
         guard let dot = sender as? ThemeSwatchDotButton else { return }
+        InteractionMotion.rebound(dot.layer, from: 0.94)
+        InteractionSoundEngine.shared.play(.step)
         NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         UserDefaults.standard.set(dot.preset.rawValue, forKey: AppPreferences.immersiveThemePresetKey)
         applyCustomColors()
@@ -1793,6 +1807,7 @@ final class ImmersiveLyricsView: NSView {
         let popover = NSPopover()
         popover.behavior = .transient
         popover.contentViewController = vc
+        vc.popover = popover
         popover.contentSize = NSSize(width: 610, height: 456)
         popover.show(relativeTo: shareButton.bounds, of: shareButton, preferredEdge: .maxY)
         sharePopover = popover

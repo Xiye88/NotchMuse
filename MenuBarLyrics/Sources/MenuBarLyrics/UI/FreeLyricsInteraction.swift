@@ -468,44 +468,55 @@ private final class FloatingToolbarHintPanel: NSPanel {
         super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         isOpaque = false
         backgroundColor = .clear
-        hasShadow = true
+        hasShadow = false
         ignoresMouseEvents = true
         hidesOnDeactivate = false
         isReleasedWhenClosed = false
 
-        let bg = NSVisualEffectView()
-        bg.material = .hudWindow
-        bg.blendingMode = .behindWindow
-        bg.state = .active
-        bg.wantsLayer = true
-        bg.layer?.cornerRadius = 6
-        bg.layer?.cornerCurve = .continuous
-        bg.layer?.borderWidth = 0.5
-        bg.layer?.borderColor = NSColor.white.withAlphaComponent(0.16).cgColor
-        bg.layer?.masksToBounds = true
+        let container = NSView()
+        container.wantsLayer = true
+        container.layer?.backgroundColor = NSColor.clear.cgColor
+        container.layer?.borderWidth = 0
 
-        label.font = .systemFont(ofSize: 11, weight: .medium)
-        label.textColor = .white
+        label.font = .systemFont(ofSize: 11.5, weight: .semibold)
+        label.textColor = NSColor(calibratedWhite: 0.10, alpha: 0.96)
         label.alignment = .center
+        label.drawsBackground = false
+        label.isBezeled = false
+        label.isEditable = false
         label.translatesAutoresizingMaskIntoConstraints = false
-        bg.addSubview(label)
+        container.addSubview(label)
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: bg.leadingAnchor, constant: 8),
-            label.trailingAnchor.constraint(equalTo: bg.trailingAnchor, constant: -8),
-            label.centerYAnchor.constraint(equalTo: bg.centerYAnchor)
+            label.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 6),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -6),
+            label.centerYAnchor.constraint(equalTo: container.centerYAnchor)
         ])
-        contentView = bg
+        contentView = container
     }
 
     func show(text: String, above anchorScreenRect: NSRect, screenVisible: NSRect, level: NSWindow.Level) {
         guard !text.isEmpty else { orderOut(nil); return }
         self.level = level
-        label.stringValue = text
-        let textW = ceil((text as NSString).size(withAttributes: [.font: label.font!]).width)
-        let w = textW + 18
-        let h: CGFloat = 22
+        let halo = NSShadow()
+        halo.shadowColor = NSColor.white.withAlphaComponent(0.90)
+        halo.shadowBlurRadius = 2.2
+        halo.shadowOffset = .zero
+        let style = NSMutableParagraphStyle()
+        style.alignment = .center
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 11.5, weight: .semibold),
+            .foregroundColor: NSColor(calibratedWhite: 0.10, alpha: 0.96),
+            .strokeColor: NSColor.white.withAlphaComponent(0.75),
+            .strokeWidth: -1.5,
+            .shadow: halo,
+            .paragraphStyle: style
+        ]
+        label.attributedStringValue = NSAttributedString(string: text, attributes: attrs)
+        let textW = ceil((text as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 11.5, weight: .semibold)]).width)
+        let w = textW + 16
+        let h: CGFloat = 20
         let x = min(max(screenVisible.minX + 6, anchorScreenRect.midX - w / 2), screenVisible.maxX - w - 6)
-        let y = min(screenVisible.maxY - h - 4, anchorScreenRect.maxY + 6)
+        let y = min(screenVisible.maxY - h - 4, anchorScreenRect.maxY + 5)
         setFrame(NSRect(x: x, y: y, width: w, height: h), display: true)
         alphaValue = 0
         orderFrontRegardless()

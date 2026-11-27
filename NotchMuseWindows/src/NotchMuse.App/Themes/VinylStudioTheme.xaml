@@ -295,24 +295,24 @@
         </Setter>
     </Style>
 
-    <!-- 4. Modern Vinyl Slider (replaces default Win95 Slider!) -->
+    <!-- 4. Modern Bencho-Fluid Vinyl Slider (28px hit target, active swell, centered 1.18x thumb grab) -->
     <Style TargetType="Slider">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="IsMoveToPointEnabled" Value="True"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Height" Value="22"/>
+        <Setter Property="Height" Value="28"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Slider">
-                    <Grid VerticalAlignment="Center" Background="Transparent" Height="22">
-                        <Border Height="4" CornerRadius="2" Background="{DynamicResource SliderTrackBrush}" VerticalAlignment="Center"/>
+                    <Grid VerticalAlignment="Center" Background="#01000000" Height="28">
+                        <Border x:Name="Rail" Height="4.5" CornerRadius="2.25" Background="{DynamicResource SliderTrackBrush}" VerticalAlignment="Center"/>
                         <Track x:Name="PART_Track">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="Slider.DecreaseLarge" Focusable="False">
                                     <RepeatButton.Template>
                                         <ControlTemplate TargetType="RepeatButton">
-                                            <Border Height="4" CornerRadius="2" Background="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+                                            <Border Height="4.5" CornerRadius="2.25" Background="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
                                         </ControlTemplate>
                                     </RepeatButton.Template>
                                 </RepeatButton>
@@ -321,28 +321,48 @@
                                 <RepeatButton Command="Slider.IncreaseLarge" Focusable="False">
                                     <RepeatButton.Template>
                                         <ControlTemplate TargetType="RepeatButton">
-                                            <Border Height="4" Background="Transparent" VerticalAlignment="Center"/>
+                                            <Border Height="12" Background="Transparent" VerticalAlignment="Center"/>
                                         </ControlTemplate>
                                     </RepeatButton.Template>
                                 </RepeatButton>
                             </Track.IncreaseRepeatButton>
                             <Track.Thumb>
-                                <Thumb Width="14" Height="14">
+                                <Thumb Width="18" Height="18">
                                     <Thumb.Template>
                                         <ControlTemplate TargetType="Thumb">
-                                            <Border x:Name="Knob"
-                                                    Width="14" Height="14"
-                                                    CornerRadius="7"
-                                                    Background="{DynamicResource CardBrush}"
-                                                    BorderBrush="{DynamicResource AccentBrush}"
-                                                    BorderThickness="2">
-                                                <Border.Effect>
-                                                    <DropShadowEffect Color="#40000000" BlurRadius="4" ShadowDepth="1" Opacity="0.35"/>
-                                                </Border.Effect>
-                                            </Border>
+                                            <Grid Width="18" Height="18" Background="Transparent">
+                                                <Border x:Name="Knob"
+                                                        Width="15" Height="15"
+                                                        CornerRadius="7.5"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        RenderTransformOrigin="0.5,0.5"
+                                                        Background="{DynamicResource CardBrush}"
+                                                        BorderBrush="{DynamicResource AccentBrush}"
+                                                        BorderThickness="2.2">
+                                                    <Border.Effect>
+                                                        <DropShadowEffect Color="#45000000" BlurRadius="5" ShadowDepth="1" Opacity="0.32"/>
+                                                    </Border.Effect>
+                                                </Border>
+                                            </Grid>
                                             <ControlTemplate.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
                                                     <Setter TargetName="Knob" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="Knob" Property="BorderBrush" Value="{DynamicResource CardBrush}"/>
+                                                    <Setter TargetName="Knob" Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="1.12" ScaleY="1.12"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                                <Trigger Property="IsDragging" Value="True">
+                                                    <Setter TargetName="Knob" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                    <Setter TargetName="Knob" Property="BorderBrush" Value="{DynamicResource CardBrush}"/>
+                                                    <Setter TargetName="Knob" Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+                                                        </Setter.Value>
+                                                    </Setter>
                                                 </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
@@ -351,25 +371,30 @@
                             </Track.Thumb>
                         </Track>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Rail" Property="Height" Value="5.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- Ultra-slim Interactive Stage Progress Bar -->
+    <!-- Ultra-slim Interactive Stage Progress Bar (click anywhere to seek immediately) -->
     <Style x:Key="StageProgressSlider" TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}">
-        <Setter Property="Height" Value="14"/>
+        <Setter Property="Height" Value="18"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Slider">
-                    <Grid x:Name="Root" VerticalAlignment="Center" Background="Transparent" Height="14">
-                        <Border x:Name="Rail" Height="3" CornerRadius="1.5" Background="{DynamicResource SliderTrackBrush}" VerticalAlignment="Center"/>
+                    <Grid x:Name="Root" VerticalAlignment="Center" Background="#01000000" Height="18">
+                        <Border x:Name="Rail" Height="3.5" CornerRadius="1.75" Background="{DynamicResource SliderTrackBrush}" VerticalAlignment="Center"/>
                         <Track x:Name="PART_Track">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="Slider.DecreaseLarge" Focusable="False">
                                     <RepeatButton.Template>
                                         <ControlTemplate TargetType="RepeatButton">
-                                            <Border x:Name="Fill" Height="3" CornerRadius="1.5" Background="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+                                            <Border x:Name="Fill" Height="3.5" CornerRadius="1.75" Background="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
                                         </ControlTemplate>
                                     </RepeatButton.Template>
                                 </RepeatButton>
@@ -378,19 +403,39 @@
                                 <RepeatButton Command="Slider.IncreaseLarge" Focusable="False">
                                     <RepeatButton.Template>
                                         <ControlTemplate TargetType="RepeatButton">
-                                            <Border Height="3" Background="Transparent" VerticalAlignment="Center"/>
+                                            <Border Height="14" Background="Transparent" VerticalAlignment="Center"/>
                                         </ControlTemplate>
                                     </RepeatButton.Template>
                                 </RepeatButton>
                             </Track.IncreaseRepeatButton>
                             <Track.Thumb>
-                                <Thumb Width="10" Height="10">
+                                <Thumb Width="14" Height="14">
                                     <Thumb.Template>
                                         <ControlTemplate TargetType="Thumb">
-                                            <Border x:Name="Dot" Width="10" Height="10" CornerRadius="5"
-                                                    Background="{DynamicResource AccentBrush}"
-                                                    BorderBrush="{DynamicResource CardBrush}" BorderThickness="1.5"
-                                                    Opacity="0.92"/>
+                                            <Grid Width="14" Height="14" Background="Transparent">
+                                                <Border x:Name="Dot" Width="11" Height="11" CornerRadius="5.5"
+                                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                        RenderTransformOrigin="0.5,0.5"
+                                                        Background="{DynamicResource AccentBrush}"
+                                                        BorderBrush="{DynamicResource CardBrush}" BorderThickness="1.8"
+                                                        Opacity="0.96"/>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Dot" Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="1.18" ScaleY="1.18"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                                <Trigger Property="IsDragging" Value="True">
+                                                    <Setter TargetName="Dot" Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <ScaleTransform ScaleX="1.26" ScaleY="1.26"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Thumb.Template>
                                 </Thumb>
@@ -399,7 +444,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Rail" Property="Height" Value="4.5"/>
+                            <Setter TargetName="Rail" Property="Height" Value="5"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -575,17 +620,18 @@
         </Setter>
     </Style>
 
-    <!-- Modern TextBox (replaces default Win95 TextBox for Custom Hex input) -->
+    <!-- Modern TextBox (crisp unclipped text with vertical centering) -->
     <Style TargetType="TextBox">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Setter Property="FontFamily" Value="{StaticResource StudioFont}"/>
-        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}"/>
         <Setter Property="Background" Value="{DynamicResource ControlBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="9,5"/>
+        <Setter Property="MinHeight" Value="32"/>
+        <Setter Property="Padding" Value="9,0"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -596,7 +642,11 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="8"
                             SnapsToDevicePixels="True">
-                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center"
+                                      VerticalScrollBarVisibility="Hidden"
+                                      HorizontalScrollBarVisibility="Hidden"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsKeyboardFocused" Value="True">

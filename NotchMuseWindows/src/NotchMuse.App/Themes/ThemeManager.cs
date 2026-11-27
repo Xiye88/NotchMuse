@@ -111,10 +111,46 @@ public static class ThemeManager
 
         if (settings.ColorMode == LyricColorMode.Gradient)
         {
-            var end = ParseColor(settings.GradientEndHex, System.Windows.Media.Color.FromRgb(255, 178, 102));
-            return new LinearGradientBrush(start, end, new System.Windows.Point(0, 0.5), new System.Windows.Point(1, 0.5));
+            var end = ParseColor(settings.GradientEndHex, System.Windows.Media.Color.FromRgb(255, 46, 136));
+            var gradient = new LinearGradientBrush
+            {
+                StartPoint = new System.Windows.Point(0, 0.5),
+                EndPoint = new System.Windows.Point(1, 0.5),
+                MappingMode = BrushMappingMode.RelativeToBoundingBox,
+                ColorInterpolationMode = ColorInterpolationMode.SRgbLinearInterpolation
+            };
+            gradient.GradientStops.Add(new GradientStop(start, 0.0));
+            gradient.GradientStops.Add(new GradientStop(end, 1.0));
+            return gradient;
         }
 
         return new SolidColorBrush(start);
+    }
+
+    public static bool TryParseRgbHex(string raw, out System.Windows.Media.Color color)
+    {
+        color = default;
+        if (string.IsNullOrWhiteSpace(raw)) return false;
+        var clean = raw.Trim();
+        if (!clean.StartsWith('#')) clean = "#" + clean;
+        if (clean.Length != 7) return false;
+        try
+        {
+            if (System.Windows.Media.ColorConverter.ConvertFromString(clean) is System.Windows.Media.Color parsed)
+            {
+                color = System.Windows.Media.Color.FromRgb(parsed.R, parsed.G, parsed.B);
+                return true;
+            }
+        }
+        catch (FormatException) { }
+        return false;
+    }
+
+    public static bool HasLowColorContrast(string hexA, string hexB)
+    {
+        var a = ParseColor(hexA, Colors.DarkOrange);
+        var b = ParseColor(hexB, Colors.DeepPink);
+        var dist = Math.Abs(a.R - b.R) + Math.Abs(a.G - b.G) + Math.Abs(a.B - b.B);
+        return dist < 110;
     }
 }

@@ -51,10 +51,14 @@ public enum MissingLyricsAnimationStyle
 
 public enum AppearanceStylePreset
 {
-    Warm,
-    Minimal,
-    Soft,
-    Pure
+    Warm = 0,
+    Minimal = 1,
+    Soft = 2,
+    Pure = 3,
+    SunsetGlow = 4,
+    SakuraMist = 5,
+    ObsidianGold = 6,
+    MintSoda = 7
 }
 
 public sealed class AppSettings
@@ -63,7 +67,7 @@ public sealed class AppSettings
     public LyricsDisplayMode DisplayMode { get; set; } = LyricsDisplayMode.Taskbar;
     public LyricColorMode ColorMode { get; set; } = LyricColorMode.Solid;
     public string AccentHex { get; set; } = "#E06D1B";
-    public string GradientEndHex { get; set; } = "#FF9E44";
+    public string GradientEndHex { get; set; } = "#FF2E88";
     public double FontSize { get; set; } = 22;
     public double AnimationSpeed { get; set; } = 1.0;
     public double LyricOpacity { get; set; } = 1.0;

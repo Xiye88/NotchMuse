@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>WinExe</OutputType><UseWPF>true</UseWPF><UseWindowsForms>true</UseWindowsForms><Version>0.9.0</Version><ApplicationIcon>..\..\assets\NotchMuse.ico</ApplicationIcon><ApplicationManifest>app.manifest</ApplicationManifest><ServerGarbageCollection>false</ServerGarbageCollection><PublishSingleFile>true</PublishSingleFile><EnableCompressionInSingleFile>true</EnableCompressionInSingleFile><SelfContained>true</SelfContained><RuntimeIdentifier>win-x64</RuntimeIdentifier></PropertyGroup>
-  <ItemGroup><Resource Include="..\..\assets\NotchMuse.ico" Link="NotchMuse.ico" /></ItemGroup>
+  <ItemGroup>
+    <Resource Include="..\..\assets\NotchMuse.ico" Link="NotchMuse.ico" />
+    <Resource Include="..\..\assets\WeChatSupport.jpg" Link="WeChatSupport.jpg" />
+  </ItemGroup>
   <ItemGroup><ProjectReference Include="../NotchMuse.Platform/NotchMuse.Platform.csproj" /><ProjectReference Include="../NotchMuse.Sources/NotchMuse.Sources.csproj" /></ItemGroup>
 </Project>

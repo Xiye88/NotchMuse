@@ -48,12 +48,15 @@ public partial class MainWindow : Window
     private readonly FloatingLyricsWindow floatingOverlay = new();
     private readonly DispatcherTimer frameTimer = new() { Interval = TimeSpan.FromMilliseconds(33) };
     private readonly DispatcherTimer fullscreenTimer = new() { Interval = TimeSpan.FromMilliseconds(1500) };
+    private readonly DispatcherTimer appearanceSyncTimer = new() { Interval = TimeSpan.FromMilliseconds(55) };
+    private readonly DispatcherTimer updateCheckTimer = new() { Interval = TimeSpan.FromHours(6) };
 
     private readonly List<DesktopPreviewCard> previewCards = [];
     private readonly List<SweepLyricLineControl> lyricLineControls = [];
     private readonly Dictionary<AppearanceStylePreset, Border> presetCardMap = [];
     private readonly Dictionary<CapsuleBackgroundPreset, Border> capsuleChipMap = [];
 
+    private readonly CancellationTokenSource windowCts = new();
     private CancellationTokenSource? lookupCts;
     private PlaybackSnapshot? snapshot;
     private LyricsCandidate? activeCandidate;
@@ -61,11 +64,19 @@ public partial class MainWindow : Window
     private int activeLineIndex = -1;
     private string activePage = "Lyrics";
     private string latestReleaseUrl = "https://github.com/Xiye88/NotchMuse/releases";
+    private ReleaseInfo? availableUpdate;
     private HwndSource? hwndSource;
     private IntPtr windowHandle;
     private bool initializing = true;
     private bool closed;
     private bool draggingProgress;
+    private string dragTrackKey = "";
+    private int seekGeneration;
+    private double optimisticSeekPosition;
+    private DateTimeOffset optimisticSeekStartedAt = DateTimeOffset.MinValue;
+    private DateTimeOffset optimisticSeekHoldUntil = DateTimeOffset.MinValue;
+    private DateTimeOffset lastSliderTickAt = DateTimeOffset.MinValue;
+    private string lastSliderStepKey = "";
     private bool sidebarCollapsed;
     private bool overlaysEnabled = true;
     private bool auditMode;
@@ -74,24 +85,55 @@ public partial class MainWindow : Window
 
     private static readonly (string NameZh, string NameEn, string Hex, string EndHex)[] SolidSwatches =
     [
-        ("暖琥珀", "Warm Amber", "#E06D1B", "#FF9E44"),
+        ("暖琥珀", "Warm Amber", "#E06D1B", "#FF2E88"),
         ("纯净墨", "Pure Ink", "#2A2A2E", "#5A5A64"),
-        ("晴空蓝", "Sky Blue", "#3B82F6", "#60A5FA"),
-        ("黑胶紫", "Vinyl Violet", "#8B5CF6", "#A78BFA"),
-        ("森林青", "Emerald", "#22A96B", "#52D196"),
-        ("落日红", "Sunset Coral", "#E25D6B", "#F59479"),
-        ("流沙金", "Studio Gold", "#C9A24B", "#E8C97A"),
-        ("雾海蓝", "Ocean Teal", "#0EA5A4", "#38BDF8")
+        ("晴空蓝", "Sky Blue", "#3B82F6", "#A855F7"),
+        ("黑胶紫", "Vinyl Violet", "#8B5CF6", "#EC4899"),
+        ("森林青", "Emerald", "#22A96B", "#0EA5E9"),
+        ("落日红", "Sunset Coral", "#E25D6B", "#8B5CF6"),
+        ("流沙金", "Studio Gold", "#C9A24B", "#F97316"),
+        ("雾海蓝", "Ocean Teal", "#0EA5A4", "#3B82F6")
     ];
 
     private static readonly (string NameZh, string NameEn, string StartHex, string EndHex)[] GradientSwatches =
     [
-        ("琥珀日落", "Amber Sunset", "#E06D1B", "#F59E0B"),
-        ("薄荷海风", "Mint Breeze", "#14B8A6", "#38BDF8"),
-        ("晚霞紫粉", "Rose Dusk", "#EC4899", "#8B5CF6"),
-        ("霓虹极光", "Aurora", "#22C55E", "#3B82F6"),
-        ("蜜桃暖阳", "Peach Glow", "#F97316", "#EC4899"),
-        ("曜石流金", "Liquid Gold", "#D97706", "#FDE047")
+        ("日落霓虹", "Sunset Neon", "#FF7B2C", "#FF2E88"),
+        ("极光青紫", "Aurora Violet", "#38BDF8", "#A855F7"),
+        ("海盐薄荷", "Mint Ocean", "#10B981", "#2563EB"),
+        ("微醺莓果", "Berry Dusk", "#F43F5E", "#7C3AED"),
+        ("森林晴空", "Forest Sky", "#22C55E", "#06B6D4"),
+        ("流金晚霞", "Molten Gold", "#FACC15", "#EA580C")
+    ];
+
+    public sealed record StylePresetSpec(
+        AppearanceStylePreset Preset,
+        string TitleZh,
+        string TitleEn,
+        string SubZh,
+        string SubEn,
+        string SampleText,
+        string AccentHex,
+        string EndHex,
+        double FontSize,
+        double Opacity,
+        bool CapsuleEnabled,
+        CapsuleBackgroundPreset CapsulePreset,
+        LyricColorMode ColorMode,
+        string StageBgHex1,
+        string StageBgHex2,
+        string MiniCapsuleHex,
+        bool MiniLightCapsule);
+
+    public static readonly StylePresetSpec[] StylePresetSpecs =
+    [
+        new(AppearanceStylePreset.Warm, "暖胶琥珀", "Warm Vinyl", "经典黑胶 · 雾灰底", "Classic Amber", "晚风轻吹过", "#FF8A36", "#FF2E88", 22, 1.0, true, CapsuleBackgroundPreset.SoftGray, LyricColorMode.Solid, "#2A2622", "#3E352E", "#D63E3E44", false),
+        new(AppearanceStylePreset.Minimal, "雪花极简", "Alabaster", "浅色奶白 · 晴空蓝", "Frosted Light", "故事的小黄花", "#2563EB", "#60A5FA", 20, 0.96, true, CapsuleBackgroundPreset.FrostedPaper, LyricColorMode.Solid, "#D9DDE4", "#ECE9E1", "#EBF8F6F1", true),
+        new(AppearanceStylePreset.SunsetGlow, "日落微醺", "Sunset Glow", "橙粉霓虹 · 暗黑胶", "Neon Sunset", "多少人为生命", "#FF7B2C", "#FF2E88", 23, 1.0, true, CapsuleBackgroundPreset.ObsidianDark, LyricColorMode.Gradient, "#2E1C2B", "#492435", "#DC18181C", false),
+        new(AppearanceStylePreset.Soft, "极光幻境", "Aurora", "青紫渐变 · 深海蓝", "Aurora Glow", "请你打开电视", "#38BDF8", "#A855F7", 23, 0.98, true, CapsuleBackgroundPreset.SlateBlue, LyricColorMode.Gradient, "#162036", "#2B2246", "#D91E293B", false),
+        new(AppearanceStylePreset.MintSoda, "汽水薄荷", "Mint Soda", "薄荷晴空 · 通透渐变", "Mint Breeze", "珍惜一切拥有", "#10B981", "#06B6D4", 22, 0.96, true, CapsuleBackgroundPreset.SlateBlue, LyricColorMode.Gradient, "#142B2D", "#1E3A4A", "#D61B2E35", false),
+        new(AppearanceStylePreset.SakuraMist, "樱花绯雾", "Sakura Mist", "樱粉柔紫 · 磨砂白", "Sakura Light", "跌倒了别害怕", "#EC4899", "#8B5CF6", 21, 0.96, true, CapsuleBackgroundPreset.FrostedPaper, LyricColorMode.Gradient, "#EAD8E4", "#F2E6EE", "#ECF8F6F1", true),
+        new(AppearanceStylePreset.ObsidianGold, "黑胶流金", "Studio Gold", "熔金渐变 · 曜石黑", "Liquid Gold", "我们是不是该", "#FACC15", "#F97316", 24, 1.0, true, CapsuleBackgroundPreset.ObsidianDark, LyricColorMode.Gradient, "#1E1B16", "#332A1C", "#E018181C", false),
+        new(AppearanceStylePreset.Pure, "纯享无框", "Pure Glass", "零背景框 · 纯白大字", "No Backdrop", "微风拂过耳畔", "#FFFFFF", "#38BDF8", 26, 1.0, false, CapsuleBackgroundPreset.Transparent, LyricColorMode.Solid, "#2B374B", "#495C78", "#24FFFFFF", false)
     ];
 
     public MainWindow(bool isAuditMode = false)
@@ -110,6 +152,13 @@ public partial class MainWindow : Window
 
         frameTimer.Tick += (_, _) => OnAnimationTick();
         fullscreenTimer.Tick += (_, _) => CheckFullscreenAndTaskbarZOrder();
+        appearanceSyncTimer.Tick += (_, _) =>
+        {
+            appearanceSyncTimer.Stop();
+            taskbarOverlay.UpdateAppearance(settings);
+            floatingOverlay.ApplyAppearance(settings);
+        };
+        updateCheckTimer.Tick += async (_, _) => await RefreshReleaseInfoAsync();
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
         MissingLyricsArt.RetryClicked += () => { if (snapshot is not null) UpdateTrack(snapshot); };
@@ -256,6 +305,7 @@ public partial class MainWindow : Window
             media.Error += OnMediaError;
             frameTimer.Start();
             fullscreenTimer.Start();
+            updateCheckTimer.Start();
             RefreshOverlayVisibility();
             _ = RefreshReleaseInfoAsync();
             try
@@ -278,6 +328,8 @@ public partial class MainWindow : Window
 
         SolidColorRadio.IsChecked = settings.ColorMode == LyricColorMode.Solid;
         GradientColorRadio.IsChecked = settings.ColorMode == LyricColorMode.Gradient;
+        CustomSolidHexBox.Text = settings.AccentHex;
+        UpdateCustomLyricColorControls();
 
         FontSizeSlider.Value = settings.FontSize;
         AnimSpeedSlider.Value = settings.AnimationSpeed;
@@ -609,86 +661,157 @@ public partial class MainWindow : Window
         StylePresetsHost.Children.Clear();
         presetCardMap.Clear();
 
-        var specs = new[]
-        {
-            (AppearanceStylePreset.Warm, "♪ Warm", "暖琥珀黑胶", "Warm Vinyl", "#E06D1B", "#F59E0B", 22.0, 1.0, true, LyricColorMode.Solid),
-            (AppearanceStylePreset.Minimal, "♪ Minimal", "克制极简白", "Minimal Ink", "#3B82F6", "#60A5FA", 19.0, 0.92, false, LyricColorMode.Solid),
-            (AppearanceStylePreset.Soft, "♪ Soft", "薄荷柔和渐变", "Soft Gradient", "#14B8A6", "#38BDF8", 23.0, 0.95, true, LyricColorMode.Gradient),
-            (AppearanceStylePreset.Pure, "♪ Pure", "通透纯享大字", "Pure Stage", "#8B5CF6", "#A78BFA", 26.0, 1.0, false, LyricColorMode.Solid)
-        };
-
-        foreach (var spec in specs)
+        var en = settings.EnglishLanguage;
+        foreach (var spec in StylePresetSpecs)
         {
             var card = new Border
             {
-                CornerRadius = new CornerRadius(11),
+                CornerRadius = new CornerRadius(12),
                 BorderThickness = new Thickness(1),
-                Padding = new Thickness(12, 11, 12, 11),
-                Margin = new Thickness(4, 0, 4, 0),
-                Cursor = System.Windows.Input.Cursors.Hand
+                Padding = new Thickness(7, 7, 7, 9),
+                Margin = new Thickness(4, 0, 4, 8),
+                Cursor = System.Windows.Input.Cursors.Hand,
+                RenderTransformOrigin = new System.Windows.Point(0.5, 0.5)
             };
             card.SetResourceReference(Border.BackgroundProperty, "CardBrush");
             card.SetResourceReference(Border.BorderBrushProperty, "BorderSubtleBrush");
 
             var stack = new StackPanel();
-            var swatchBar = new Border
+
+            // Miniature live lyric stage preview (shows exact backdrop + capsule + solid/gradient lyric brush!)
+            var stageBg = new LinearGradientBrush(
+                ThemeManager.ParseColor(spec.StageBgHex1, System.Windows.Media.Color.FromRgb(36, 38, 46)),
+                ThemeManager.ParseColor(spec.StageBgHex2, System.Windows.Media.Color.FromRgb(56, 60, 74)),
+                new System.Windows.Point(0, 0),
+                new System.Windows.Point(1, 1));
+
+            var stage = new Border
             {
-                Height = 4,
-                Width = 28,
-                CornerRadius = new CornerRadius(2),
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                Height = 52,
+                CornerRadius = new CornerRadius(8),
+                Background = stageBg,
+                Padding = new Thickness(6),
                 Margin = new Thickness(0, 0, 0, 8),
-                Background = spec.Item10 == LyricColorMode.Gradient
-                    ? new LinearGradientBrush(ThemeManager.ParseColor(spec.Item5, Colors.Orange), ThemeManager.ParseColor(spec.Item6, Colors.Cyan), 0)
-                    : new SolidColorBrush(ThemeManager.ParseColor(spec.Item5, Colors.Orange))
+                ClipToBounds = true
             };
+
+            System.Windows.Media.Brush sampleBrush = spec.ColorMode == LyricColorMode.Gradient
+                ? new LinearGradientBrush(
+                    ThemeManager.ParseColor(spec.AccentHex, Colors.Orange),
+                    ThemeManager.ParseColor(spec.EndHex, Colors.DeepPink),
+                    new System.Windows.Point(0, 0.5),
+                    new System.Windows.Point(1, 0.5))
+                : new SolidColorBrush(ThemeManager.ParseColor(spec.AccentHex, Colors.Orange));
+
+            var miniCapsule = new Border
+            {
+                CornerRadius = new CornerRadius(7),
+                Padding = new Thickness(8, 3.5, 8, 3.5),
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Background = spec.CapsuleEnabled
+                    ? new SolidColorBrush(ThemeManager.ParseColor(spec.MiniCapsuleHex, System.Windows.Media.Color.FromArgb(210, 40, 40, 46)))
+                    : System.Windows.Media.Brushes.Transparent,
+                BorderBrush = spec.CapsuleEnabled
+                    ? new SolidColorBrush(spec.MiniLightCapsule ? System.Windows.Media.Color.FromArgb(35, 0, 0, 0) : System.Windows.Media.Color.FromArgb(46, 255, 255, 255))
+                    : new SolidColorBrush(System.Windows.Media.Color.FromArgb(60, 255, 255, 255)),
+                BorderThickness = new Thickness(spec.CapsuleEnabled ? 0.75 : 0.6)
+            };
+
+            var miniStack = new StackPanel { HorizontalAlignment = System.Windows.HorizontalAlignment.Center };
+            miniStack.Children.Add(new TextBlock
+            {
+                Style = null,
+                Text = spec.SampleText,
+                FontFamily = (System.Windows.Media.FontFamily)FindResource("StudioDisplayFont"),
+                FontSize = 11.5,
+                FontWeight = FontWeights.Bold,
+                Foreground = sampleBrush,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center
+            });
+            miniStack.Children.Add(new TextBlock
+            {
+                Style = null,
+                Text = "♪ NotchMuse",
+                FontFamily = (System.Windows.Media.FontFamily)FindResource("StudioFont"),
+                FontSize = 8,
+                Foreground = new SolidColorBrush(spec.MiniLightCapsule ? System.Windows.Media.Color.FromArgb(150, 40, 40, 44) : System.Windows.Media.Color.FromArgb(160, 240, 240, 244)),
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                Margin = new Thickness(0, 1, 0, 0)
+            });
+            miniCapsule.Child = miniStack;
+            stage.Child = miniCapsule;
+
+            // Title row + Solid/Gradient mini tag
+            var headerRow = new Grid { Margin = new Thickness(2, 0, 2, 0) };
             var nameTb = new TextBlock
             {
-                Text = spec.Item2,
-                FontSize = 14,
-                FontWeight = FontWeights.SemiBold
+                Text = en ? spec.TitleEn : spec.TitleZh,
+                FontSize = 12.5,
+                FontWeight = FontWeights.SemiBold,
+                TextTrimming = TextTrimming.CharacterEllipsis
             };
             nameTb.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush");
 
+            var modeBadge = new Border
+            {
+                CornerRadius = new CornerRadius(4),
+                Padding = new Thickness(4, 1, 4, 1),
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            modeBadge.SetResourceReference(Border.BackgroundProperty, "ControlBrush");
+            var modeTag = new TextBlock
+            {
+                Text = spec.ColorMode == LyricColorMode.Gradient ? (en ? "Grad" : "渐变") : (en ? "Solid" : "纯色"),
+                FontSize = 9,
+                FontWeight = FontWeights.Medium
+            };
+            modeTag.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
+            modeBadge.Child = modeTag;
+
+            headerRow.Children.Add(nameTb);
+            headerRow.Children.Add(modeBadge);
+
             var descTb = new TextBlock
             {
-                Text = settings.EnglishLanguage ? spec.Item4 : spec.Item3,
-                FontSize = 11,
-                Margin = new Thickness(0, 3, 0, 0)
+                Text = en ? spec.SubEn : spec.SubZh,
+                FontSize = 10.5,
+                Margin = new Thickness(2, 2.5, 2, 0),
+                TextTrimming = TextTrimming.CharacterEllipsis
             };
             descTb.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush");
 
-            stack.Children.Add(swatchBar);
-            stack.Children.Add(nameTb);
+            stack.Children.Add(stage);
+            stack.Children.Add(headerRow);
             stack.Children.Add(descTb);
             card.Child = stack;
 
             var captured = spec;
-            card.MouseLeftButtonUp += (_, _) => ApplyStylePreset(captured.Item1, captured.Item5, captured.Item6, captured.Item7, captured.Item8, captured.Item9, captured.Item10);
-            presetCardMap[spec.Item1] = card;
+            card.MouseLeftButtonUp += (_, _) =>
+            {
+                InteractionMotion.Rebound(card, 0.97);
+                InteractionSoundEngine.Play(InteractionSoundCue.Step);
+                ApplyStylePreset(captured);
+            };
+            presetCardMap[spec.Preset] = card;
             StylePresetsHost.Children.Add(card);
         }
 
         HighlightSelectedPresetCard();
     }
 
-    private void ApplyStylePreset(AppearanceStylePreset preset, string accentHex, string endHex, double fontSize, double opacity, bool capsule, LyricColorMode colorMode)
+    private void ApplyStylePreset(StylePresetSpec spec)
     {
         initializing = true;
-        settings.StylePreset = preset;
-        settings.ColorMode = colorMode;
-        settings.AccentHex = accentHex;
-        settings.GradientEndHex = endHex;
-        settings.FontSize = fontSize;
-        settings.LyricOpacity = opacity;
-        settings.BackgroundCapsuleEnabled = capsule;
-        settings.CapsulePreset = preset switch
-        {
-            AppearanceStylePreset.Warm => CapsuleBackgroundPreset.SoftGray,
-            AppearanceStylePreset.Minimal => CapsuleBackgroundPreset.FrostedPaper,
-            AppearanceStylePreset.Soft => CapsuleBackgroundPreset.SlateBlue,
-            _ => CapsuleBackgroundPreset.Transparent
-        };
+        settings.StylePreset = spec.Preset;
+        settings.ColorMode = spec.ColorMode;
+        settings.AccentHex = spec.AccentHex;
+        settings.GradientEndHex = spec.EndHex;
+        settings.FontSize = spec.FontSize;
+        settings.LyricOpacity = spec.Opacity;
+        settings.BackgroundCapsuleEnabled = spec.CapsuleEnabled;
+        settings.CapsulePreset = spec.CapsulePreset;
         if (settings.CapsulePreset != CapsuleBackgroundPreset.Transparent)
             settings.CapsuleBackgroundOpacity = AppSettings.GetCapsulePresetDefaults(settings.CapsulePreset).DefaultOpacity;
         SyncControlsFromSettings();
@@ -709,7 +832,7 @@ public partial class MainWindow : Window
             {
                 border.SetResourceReference(Border.BackgroundProperty, "AccentSoftBrush");
                 border.SetResourceReference(Border.BorderBrushProperty, "AccentBrush");
-                border.BorderThickness = new Thickness(1.5);
+                border.BorderThickness = new Thickness(1.6);
             }
             else
             {
@@ -724,16 +847,68 @@ public partial class MainWindow : Window
     {
         settings.AccentHex = startHex;
         settings.GradientEndHex = endHex;
+        initializing = true;
+        CustomSolidHexBox.Text = startHex;
+        initializing = false;
         settings.Save();
         RebuildAppearanceSwatches();
+        UpdateCustomLyricColorControls();
         ApplyAppearanceToAllViews();
+    }
+
+    private void UpdateCustomLyricColorControls()
+    {
+        var isGradient = settings.ColorMode == LyricColorMode.Gradient;
+        CustomSolidColorBar.Visibility = isGradient ? Visibility.Collapsed : Visibility.Visible;
+        CustomGradientColorBar.Visibility = isGradient ? Visibility.Visible : Visibility.Collapsed;
+
+        var startColor = ThemeManager.ParseColor(settings.AccentHex, System.Windows.Media.Color.FromRgb(224, 109, 27));
+        var endColor = ThemeManager.ParseColor(settings.GradientEndHex, System.Windows.Media.Color.FromRgb(255, 46, 136));
+        CustomSolidSwatch.Background = new SolidColorBrush(startColor);
+        CustomGradStartSwatch.Background = new SolidColorBrush(startColor);
+        CustomGradEndSwatch.Background = new SolidColorBrush(endColor);
+        CustomGradPreviewPill.Background = new LinearGradientBrush(startColor, endColor, new System.Windows.Point(0, 0.5), new System.Windows.Point(1, 0.5));
+    }
+
+    private void UpdateAppearanceLivePreview()
+    {
+        var brush = ThemeManager.CreateLyricAccentBrush(settings);
+        AppearancePreviewPrimary.Foreground = brush;
+        AppearancePreviewPrimary.FontSize = Math.Clamp(settings.FontSize, 15, 30);
+        AppearancePreviewPrimary.Opacity = Math.Clamp(settings.LyricOpacity, 0.3, 1.0);
+        AppearancePreviewSecondary.Opacity = Math.Clamp(settings.LyricOpacity * 0.82, 0.25, 1.0);
+        NavAppearanceColorRing.Fill = brush;
+
+        var bgEnabled = settings.BackgroundCapsuleEnabled && settings.CapsulePreset != CapsuleBackgroundPreset.Transparent;
+        if (!bgEnabled)
+        {
+            AppearancePreviewCapsule.Background = System.Windows.Media.Brushes.Transparent;
+            AppearancePreviewCapsule.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(62, 255, 255, 255));
+            AppearancePreviewSecondary.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(224, 223, 218));
+        }
+        else
+        {
+            var hex = settings.CapsulePreset == CapsuleBackgroundPreset.Custom
+                ? settings.CapsuleCustomHex
+                : AppSettings.GetCapsulePresetDefaults(settings.CapsulePreset).Hex;
+            var rgb = ThemeManager.ParseColor(hex, System.Windows.Media.Color.FromRgb(62, 62, 68));
+            var alpha = (byte)Math.Clamp(Math.Round(settings.CapsuleBackgroundOpacity * 255), 76, 255);
+            var isLight = (rgb.R * 0.299 + rgb.G * 0.587 + rgb.B * 0.114) > 165;
+            AppearancePreviewCapsule.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(alpha, rgb.R, rgb.G, rgb.B));
+            AppearancePreviewCapsule.BorderBrush = new SolidColorBrush(isLight
+                ? System.Windows.Media.Color.FromArgb(36, 0, 0, 0)
+                : System.Windows.Media.Color.FromArgb(46, 255, 255, 255));
+            AppearancePreviewSecondary.Foreground = new SolidColorBrush(isLight
+                ? System.Windows.Media.Color.FromRgb(94, 92, 86)
+                : System.Windows.Media.Color.FromRgb(198, 196, 190));
+        }
     }
 
     private void ApplyAppearanceToAllViews()
     {
-        var accentBrush = ThemeManager.CreateLyricAccentBrush(settings);
-        NavAppearanceColorRing.Fill = accentBrush;
+        UpdateCustomLyricColorControls();
         UpdateAppearanceReadouts();
+        UpdateAppearanceLivePreview();
         RefreshLyricLineHighlights(forceAll: true);
         taskbarOverlay.UpdateAppearance(settings);
         floatingOverlay.ApplyAppearance(settings);
@@ -972,6 +1147,11 @@ public partial class MainWindow : Window
         if (closed) return;
         var previousKey = snapshot is null ? "" : $"{snapshot.Track.Title}|{snapshot.Track.Artist}";
         snapshot = value;
+        if (value is not null && DateTimeOffset.UtcNow < optimisticSeekHoldUntil &&
+            Math.Abs(value.Position - optimisticSeekPosition) < 2.2)
+        {
+            optimisticSeekHoldUntil = DateTimeOffset.MinValue;
+        }
         UpdateTrackChrome(value);
 
         if (value is null)
@@ -1143,9 +1323,22 @@ public partial class MainWindow : Window
     {
         if (auditPositionOverride >= 0) return auditPositionOverride;
         if (snapshot is null) return 0;
-        var elapsed = snapshot.Playing ? (DateTimeOffset.UtcNow - snapshot.CapturedAt).TotalSeconds * snapshot.Rate : 0;
+        var now = DateTimeOffset.UtcNow;
+        if (now < optimisticSeekHoldUntil)
+        {
+            var holdElapsed = snapshot.Playing ? (now - optimisticSeekStartedAt).TotalSeconds * snapshot.Rate : 0;
+            var holdPos = optimisticSeekPosition + holdElapsed;
+            return snapshot.Track.Duration > 0 ? Math.Clamp(holdPos, 0, snapshot.Track.Duration) : Math.Max(0, holdPos);
+        }
+        var elapsed = snapshot.Playing ? (now - snapshot.CapturedAt).TotalSeconds * snapshot.Rate : 0;
         var pos = snapshot.Position + elapsed;
         return snapshot.Track.Duration > 0 ? Math.Clamp(pos, 0, snapshot.Track.Duration) : Math.Max(0, pos);
+    }
+
+    public static double ComputeSeekTargetFromPoint(double clickX, double trackWidth, double duration)
+    {
+        if (trackWidth <= 0 || duration <= 0) return 0;
+        return Math.Clamp(clickX / trackWidth, 0, 1) * duration;
     }
 
     private int FindActiveLineIndex(double time)
@@ -1248,18 +1441,24 @@ public partial class MainWindow : Window
         DisplayLockDesc.Text = en ? "Pass mouse clicks straight through when locked" : "锁定后桌面悬浮歌词完全穿透点击，不影响办公与游戏";
 
         AppearanceHeaderTitle.Text = en ? "Appearance" : "外观";
+        AppearancePreviewBadge.Text = en ? "LIVE PREVIEW" : "实时效果预览";
         ColorModeLabel.Text = en ? "Lyrics Color" : "歌词颜色";
-        ColorModeDesc.Text = en ? "Solid or gradient sweep synced across stage & overlays" : "支持纯色与渐变扫光，实时同步至任务栏与悬浮歌词";
+        ColorModeDesc.Text = en ? "Solid or dual-hue gradient sweep with custom color palette" : "支持纯色与双色渐变扫光，并可自由调色盘选色";
         SolidColorRadio.Content = en ? "Solid" : "纯色";
         GradientColorRadio.Content = en ? "Gradient" : "渐变";
+        CustomSolidLabel.Text = en ? "Custom Solid" : "自定义纯色";
+        PickCustomSolidBtn.Content = en ? "Palette…" : "调色盘…";
+        CustomGradLabel.Text = en ? "Custom Gradient" : "自定义渐变";
+        PickGradStartBtn.Content = en ? "Start…" : "起点色…";
+        PickGradEndBtn.Content = en ? "End…" : "终点色…";
         FontSizeLabel.Text = en ? "Font Size" : "字体大小";
         AnimSpeedLabel.Text = en ? "Animation Speed" : "动画速度";
         OpacityLabel.Text = en ? "Lyrics Opacity" : "歌词不透明度";
         BgCapsuleLabel.Text = en ? "Show Floating Capsule Background" : "显示悬浮胶囊背景";
         BgCapsuleDesc.Text = en ? "Turn off for pure transparent lyrics with high-contrast adaptive text halo" : "关闭后自由悬浮与顶部悬浮岛立即切为纯透明文字 + 双层高对比描边阴影";
         CapsuleOpacityLabel.Text = en ? "Background Opacity" : "背景不透明度";
-        PickCustomColorBtn.Content = en ? "Pick Color…" : "系统取色…";
-        QuickPresetsLabel.Text = en ? "QUICK STYLE PRESETS" : "风格快捷预设";
+        PickCustomColorBtn.Content = en ? "Palette…" : "调色盘…";
+        QuickPresetsLabel.Text = en ? "QUICK STYLE PRESETS · 8 CURATED LOOKS" : "风格快捷预设 · 8 套精选视觉方案";
 
         GeneralHeaderTitle.Text = en ? "General" : "通用";
         PlayerSourceLabel.Text = en ? "Music Player" : "音乐播放器";
@@ -1283,8 +1482,14 @@ public partial class MainWindow : Window
         BilingualDesc.Text = en ? "Show translated lines underneath original lyrics when available" : "当歌词源包含中文翻译时，在原文下方优雅显示译文";
         InteractionSoundsLabel.Text = en ? "Interaction Micro-Sounds" : "交互微音效";
         InteractionSoundsDesc.Text = en ? "Zero-asset synthesized tactile sounds with 0% idle CPU" : "零外部素材纯内存合成微触感音效，闲置 0% CPU";
-        VersionTitleLabel.Text = en ? "Version" : "版本信息";
-        CheckUpdateButton.Content = en ? "Check for Updates" : "检查更新";
+        DesktopShortcutLabel.Text = en ? "Desktop Shortcut" : "桌面快捷方式";
+        DesktopShortcutDesc.Text = en ? "Installer includes a desktop shortcut option; portable users can create one here" : "安装包最后一步支持勾选创建，便携版也可在此一键创建桌面图标";
+        CreateShortcutButton.Content = en ? "Create Desktop Shortcut" : "创建桌面快捷方式";
+        VersionTitleLabel.Text = en ? "Version & Auto-Updates" : "版本信息与自动更新";
+        VersionValueLabel.Text = en ? "NotchMuse for Windows · v0.9.0 (auto-checks on launch & every 6h)" : "NotchMuse for Windows · v0.9.0（启动与每 6 小时自动检测新版）";
+        CheckUpdateButton.Content = availableUpdate is not null
+            ? (en ? $"Download {availableUpdate.TagName}" : $"下载新版 {availableUpdate.TagName}")
+            : (en ? "Check for Updates" : "检查更新");
 
         initializing = true;
         PopulatePlayerCombo();
@@ -1371,9 +1576,21 @@ public partial class MainWindow : Window
         SetThemeMode(mode);
     }
 
-    private void OnSponsorClick(object sender, RoutedEventArgs e) => OpenExternalUrl("https://github.com/sponsors/Xiye88");
+    private void OnSponsorClick(object sender, RoutedEventArgs e)
+    {
+        InteractionMotion.Rebound(SponsorIconBtn, 0.92);
+        InteractionSoundEngine.Play(InteractionSoundCue.Tick);
+        var dialog = new SupportWindow(settings.EnglishLanguage, client) { Owner = this };
+        dialog.ShowDialog();
+    }
+
     private void OnGitHubClick(object sender, RoutedEventArgs e) => OpenExternalUrl("https://github.com/Xiye88/NotchMuse");
-    private void OnAnnouncementClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => OpenExternalUrl(latestReleaseUrl);
+
+    private void OnAnnouncementClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        var target = availableUpdate?.DownloadUrl ?? latestReleaseUrl;
+        OpenExternalUrl(target);
+    }
 
     private static void OpenExternalUrl(string url)
     {
@@ -1416,11 +1633,96 @@ public partial class MainWindow : Window
         if (snapshot is not null) await media.NextAsync();
     }
 
-    private void OnProgressGrab(object sender, System.Windows.Input.MouseButtonEventArgs e) => draggingProgress = true;
-    private async void OnProgressRelease(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void OnProgressMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        var duration = ProgressSlider.Maximum;
+        if (duration <= 0) return;
+        dragTrackKey = snapshot is null ? "" : $"{snapshot.Track.Title}|{snapshot.Track.Artist}";
+        var target = ComputeSeekTargetFromPoint(e.GetPosition(ProgressSlider).X, ProgressSlider.ActualWidth, duration);
+        ProgressSlider.Value = target;
+        DockTimeText.Text = $"{FormatMmSs(target)} / {FormatMmSs(duration)}";
+        if (ProgressSlider.CaptureMouse())
+        {
+            draggingProgress = true;
+        }
+        else
+        {
+            _ = CommitProgressSeekAsync(target);
+        }
+        e.Handled = true;
+    }
+
+    private void OnProgressMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (!draggingProgress || e.LeftButton != System.Windows.Input.MouseButtonState.Pressed) return;
+        var duration = ProgressSlider.Maximum;
+        if (duration <= 0) return;
+        var target = ComputeSeekTargetFromPoint(e.GetPosition(ProgressSlider).X, ProgressSlider.ActualWidth, duration);
+        ProgressSlider.Value = target;
+        DockTimeText.Text = $"{FormatMmSs(target)} / {FormatMmSs(duration)}";
+        e.Handled = true;
+    }
+
+    private async void OnProgressMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (!draggingProgress) return;
+        var duration = ProgressSlider.Maximum;
+        var target = ComputeSeekTargetFromPoint(e.GetPosition(ProgressSlider).X, ProgressSlider.ActualWidth, duration);
         draggingProgress = false;
-        await media.SeekAsync(ProgressSlider.Value);
+        if (ProgressSlider.IsMouseCaptured) ProgressSlider.ReleaseMouseCapture();
+        e.Handled = true;
+
+        var currentKey = snapshot is null ? "" : $"{snapshot.Track.Title}|{snapshot.Track.Artist}";
+        if (currentKey != dragTrackKey) return;
+        await CommitProgressSeekAsync(target);
+    }
+
+    private void OnProgressLostCapture(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (!draggingProgress) return;
+        draggingProgress = false;
+        // Involuntary capture loss: restore displayed position cleanly without firing an unintended seek
+        if (snapshot is not null && snapshot.Track.Duration > 0)
+        {
+            var pos = ComputeCurrentPositionSeconds();
+            ProgressSlider.Value = Math.Clamp(pos, 0, snapshot.Track.Duration);
+            DockTimeText.Text = $"{FormatMmSs(pos)} / {FormatMmSs(snapshot.Track.Duration)}";
+        }
+    }
+
+    private async Task CommitProgressSeekAsync(double targetSeconds)
+    {
+        var duration = snapshot?.Track.Duration ?? ProgressSlider.Maximum;
+        var clamped = duration > 0 ? Math.Clamp(targetSeconds, 0, duration) : Math.Max(0, targetSeconds);
+        ProgressSlider.Value = clamped;
+        DockTimeText.Text = $"{FormatMmSs(clamped)} / {FormatMmSs(duration)}";
+
+        var myGen = Interlocked.Increment(ref seekGeneration);
+        optimisticSeekPosition = clamped;
+        optimisticSeekStartedAt = DateTimeOffset.UtcNow;
+        optimisticSeekHoldUntil = optimisticSeekStartedAt.AddMilliseconds(1100);
+
+        InteractionSoundEngine.Play(InteractionSoundCue.Step);
+        if (normalizedLines.Count > 0)
+        {
+            var eff = clamped + settings.TimeOffsetSeconds;
+            activeLineIndex = FindActiveLineIndex(eff);
+            var prog = ComputeLineSweepProgress(activeLineIndex, eff);
+            RefreshLyricLineHighlights(forceAll: false, currentProgress: prog);
+            ScrollActiveLineToCenter();
+        }
+
+        try
+        {
+            await media.SeekAsync(clamped);
+        }
+        catch (Exception ex) when (ex is COMException or InvalidOperationException)
+        {
+            if (seekGeneration == myGen)
+            {
+                optimisticSeekHoldUntil = DateTimeOffset.MinValue;
+            }
+        }
     }
 
     private void OnQuickColorDotClick(object sender, RoutedEventArgs e)
@@ -1438,48 +1740,146 @@ public partial class MainWindow : Window
     private void OnColorModeChanged(object sender, RoutedEventArgs e)
     {
         if (initializing) return;
-        settings.ColorMode = GradientColorRadio.IsChecked == true ? LyricColorMode.Gradient : LyricColorMode.Solid;
+        var nextMode = GradientColorRadio.IsChecked == true ? LyricColorMode.Gradient : LyricColorMode.Solid;
+        settings.ColorMode = nextMode;
+
+        // Auto-upgrade near-identical colors when entering Gradient mode so Gradient is immediately dramatic & unmistakable!
+        if (nextMode == LyricColorMode.Gradient && ThemeManager.HasLowColorContrast(settings.AccentHex, settings.GradientEndHex))
+        {
+            settings.AccentHex = GradientSwatches[0].StartHex;
+            settings.GradientEndHex = GradientSwatches[0].EndHex;
+            initializing = true;
+            CustomSolidHexBox.Text = settings.AccentHex;
+            initializing = false;
+        }
+
+        InteractionSoundEngine.Play(InteractionSoundCue.Tick);
         settings.Save();
         RebuildAppearanceSwatches();
         ApplyAppearanceToAllViews();
     }
 
+    private void SetColorModeRadiosSynced(LyricColorMode mode)
+    {
+        initializing = true;
+        settings.ColorMode = mode;
+        SolidColorRadio.IsChecked = mode == LyricColorMode.Solid;
+        GradientColorRadio.IsChecked = mode == LyricColorMode.Gradient;
+        initializing = false;
+    }
+
+    private void OnCustomSolidHexChanged(object sender, TextChangedEventArgs e)
+    {
+        if (initializing) return;
+        if (ThemeManager.TryParseRgbHex(CustomSolidHexBox.Text, out var parsed))
+        {
+            SetColorModeRadiosSynced(LyricColorMode.Solid);
+            settings.AccentHex = $"#{parsed.R:X2}{parsed.G:X2}{parsed.B:X2}";
+            settings.Save();
+            RebuildAppearanceSwatches();
+            ApplyAppearanceToAllViews();
+        }
+    }
+
+    private void OnPickCustomSolidColor(object sender, RoutedEventArgs e)
+    {
+        var current = ThemeManager.ParseColor(settings.AccentHex, System.Windows.Media.Color.FromRgb(224, 109, 27));
+        if (!TryPickColorFromDialog(current, out var hex)) return;
+        SetColorModeRadiosSynced(LyricColorMode.Solid);
+        InteractionSoundEngine.Play(InteractionSoundCue.Step);
+        SelectAccentColors(hex, settings.GradientEndHex);
+    }
+
+    private void OnPickGradientStartColor(object sender, RoutedEventArgs e)
+    {
+        var current = ThemeManager.ParseColor(settings.AccentHex, System.Windows.Media.Color.FromRgb(255, 123, 44));
+        if (!TryPickColorFromDialog(current, out var hex)) return;
+        SetColorModeRadiosSynced(LyricColorMode.Gradient);
+        InteractionSoundEngine.Play(InteractionSoundCue.Step);
+        SelectAccentColors(hex, settings.GradientEndHex);
+    }
+
+    private void OnPickGradientEndColor(object sender, RoutedEventArgs e)
+    {
+        var current = ThemeManager.ParseColor(settings.GradientEndHex, System.Windows.Media.Color.FromRgb(255, 46, 136));
+        if (!TryPickColorFromDialog(current, out var hex)) return;
+        SetColorModeRadiosSynced(LyricColorMode.Gradient);
+        InteractionSoundEngine.Play(InteractionSoundCue.Step);
+        SelectAccentColors(settings.AccentHex, hex);
+    }
+
+    private static bool TryPickColorFromDialog(System.Windows.Media.Color current, out string hex)
+    {
+        using var dialog = new Forms.ColorDialog
+        {
+            FullOpen = true,
+            Color = System.Drawing.Color.FromArgb(current.R, current.G, current.B)
+        };
+        if (dialog.ShowDialog() != Forms.DialogResult.OK)
+        {
+            hex = "";
+            return false;
+        }
+        var c = dialog.Color;
+        hex = $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+        return true;
+    }
+
     private void OnAppearanceSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (initializing) return;
+        // Zero disk I/O & zero full stage reflow during drag -> butter-smooth 60fps Bencho interaction!
         settings.FontSize = Math.Round(FontSizeSlider.Value);
         settings.AnimationSpeed = Math.Round(AnimSpeedSlider.Value, 1);
         settings.LyricOpacity = Math.Round(OpacitySlider.Value, 2);
-        settings.Save();
-        ApplyAppearanceToAllViews();
+
+        UpdateAppearanceReadouts();
+        UpdateAppearanceLivePreview();
+        PlayThrottledSliderTick($"{settings.FontSize:0}|{settings.AnimationSpeed:0.0}|{Math.Round(settings.LyricOpacity * 20):0}");
+        appearanceSyncTimer.Stop();
+        appearanceSyncTimer.Start();
     }
 
     private void OnCapsuleOpacityChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (initializing) return;
         settings.CapsuleBackgroundOpacity = Math.Round(CapsuleOpacitySlider.Value, 2);
+        UpdateCustomCapsuleControls();
+        UpdateAppearanceLivePreview();
+        PlayThrottledSliderTick($"cap|{Math.Round(settings.CapsuleBackgroundOpacity * 20):0}");
+        appearanceSyncTimer.Stop();
+        appearanceSyncTimer.Start();
+    }
+
+    private void OnAppearanceSliderDragCompleted(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (initializing) return;
+        appearanceSyncTimer.Stop();
         settings.Save();
         ApplyAppearanceToAllViews();
+    }
+
+    private void PlayThrottledSliderTick(string stepKey)
+    {
+        if (stepKey == lastSliderStepKey) return;
+        var now = DateTimeOffset.UtcNow;
+        if ((now - lastSliderTickAt).TotalMilliseconds < 70) return;
+        lastSliderStepKey = stepKey;
+        lastSliderTickAt = now;
+        InteractionSoundEngine.Play(InteractionSoundCue.Dial);
     }
 
     private void OnCustomCapsuleHexChanged(object sender, TextChangedEventArgs e)
     {
         if (initializing) return;
-        var raw = CustomCapsuleHexBox.Text.Trim();
-        if (!raw.StartsWith('#')) raw = "#" + raw;
-        if (raw.Length is 7 or 9)
+        if (ThemeManager.TryParseRgbHex(CustomCapsuleHexBox.Text, out var parsed))
         {
-            var fallback = System.Windows.Media.Color.FromRgb(62, 62, 68);
-            var parsed = ThemeManager.ParseColor(raw, fallback);
-            if (parsed != fallback || string.Equals(raw, "#3E3E44", StringComparison.OrdinalIgnoreCase))
-            {
-                settings.CapsuleCustomHex = $"#{parsed.R:X2}{parsed.G:X2}{parsed.B:X2}";
-                settings.CapsulePreset = CapsuleBackgroundPreset.Custom;
-                settings.BackgroundCapsuleEnabled = true;
-                settings.Save();
-                BuildCapsulePresetChips();
-                ApplyAppearanceToAllViews();
-            }
+            settings.CapsuleCustomHex = $"#{parsed.R:X2}{parsed.G:X2}{parsed.B:X2}";
+            settings.CapsulePreset = CapsuleBackgroundPreset.Custom;
+            settings.BackgroundCapsuleEnabled = true;
+            settings.Save();
+            BuildCapsulePresetChips();
+            ApplyAppearanceToAllViews();
         }
     }
 
@@ -1550,9 +1950,7 @@ public partial class MainWindow : Window
         if (initializing) return;
         settings.OverlayLocked = OverlayLockToggle.IsChecked == true;
         settings.Save();
-        taskbarOverlay.SetLocked(settings.OverlayLocked);
-        floatingOverlay.SetLocked(settings.OverlayLocked);
-        floatingOverlay.ApplyLanguage(settings.EnglishLanguage);
+        ApplyOverlayLockState();
     }
 
     private void ToggleOverlayLock()
@@ -1562,9 +1960,19 @@ public partial class MainWindow : Window
         initializing = true;
         OverlayLockToggle.IsChecked = settings.OverlayLocked;
         initializing = false;
+        ApplyOverlayLockState();
+    }
+
+    private void ApplyOverlayLockState()
+    {
+        InteractionSoundEngine.Play(InteractionSoundCue.Latch);
         taskbarOverlay.SetLocked(settings.OverlayLocked);
         floatingOverlay.SetLocked(settings.OverlayLocked);
         floatingOverlay.ApplyLanguage(settings.EnglishLanguage);
+        var en = settings.EnglishLanguage;
+        DisplayStatusLine.Text = settings.OverlayLocked
+            ? (en ? "Click-through LOCKED across all modes · Press Ctrl+Alt+L to unlock" : "鼠标穿透已开启（全部显示模式生效）· 按 Ctrl+Alt+L 解锁")
+            : (en ? "Desktop lyrics UNLOCKED · Drag freely in Free Float mode" : "鼠标穿透已解锁 · 自由悬浮模式下可直接拖动歌词");
     }
 
     private void OnStartupToggleChanged(object sender, RoutedEventArgs e)
@@ -1580,14 +1988,20 @@ public partial class MainWindow : Window
         initializing = false;
     }
 
-    private static bool IsStartupEnabled() =>
-        Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run")?.GetValue("NotchMuse") is not null;
+    private static bool IsStartupEnabled()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+        return key?.GetValue("NotchMuse") is not null;
+    }
 
     private static void SetStartup(bool enabled)
     {
         using var key = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
-        if (enabled) key?.SetValue("NotchMuse", Environment.ProcessPath ?? "");
-        else key?.DeleteValue("NotchMuse", false);
+        var exePath = Environment.ProcessPath;
+        if (enabled && !string.IsNullOrWhiteSpace(exePath))
+            key?.SetValue("NotchMuse", $"\"{exePath}\"");
+        else
+            key?.DeleteValue("NotchMuse", false);
     }
 
     private async void OnPlayerSourceChanged(object sender, SelectionChangedEventArgs e)
@@ -1636,23 +2050,74 @@ public partial class MainWindow : Window
         foreach (var ctrl in lyricLineControls) ctrl.SetShowBilingual(settings.BilingualEnabled);
     }
 
+    private void OnCreateDesktopShortcutClick(object sender, RoutedEventArgs e)
+    {
+        InteractionMotion.Rebound(CreateShortcutButton, 0.94);
+        var exePath = Environment.ProcessPath;
+        var desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        if (string.IsNullOrWhiteSpace(exePath) || string.IsNullOrWhiteSpace(desktopDir) || !Directory.Exists(desktopDir))
+        {
+            CreateShortcutButton.Content = settings.EnglishLanguage ? "Unavailable" : "路径不可用";
+            return;
+        }
+        var lnkPath = Path.Combine(desktopDir, "NotchMuse.lnk");
+        try
+        {
+            var shellType = Type.GetTypeFromProgID("WScript.Shell");
+            if (shellType is null) return;
+            dynamic shell = Activator.CreateInstance(shellType)!;
+            dynamic shortcut = shell.CreateShortcut(lnkPath);
+            shortcut.TargetPath = exePath;
+            shortcut.WorkingDirectory = Path.GetDirectoryName(exePath) ?? "";
+            shortcut.IconLocation = exePath + ",0";
+            shortcut.Description = "NotchMuse — Windows Desktop Lyrics";
+            shortcut.Save();
+            InteractionSoundEngine.Play(InteractionSoundCue.Landed);
+            CreateShortcutButton.Content = settings.EnglishLanguage ? "Created ✓" : "已创建桌面快捷方式 ✓";
+        }
+        catch (Exception ex) when (ex is COMException or UnauthorizedAccessException or Microsoft.CSharp.RuntimeBinder.RuntimeBinderException or IOException)
+        {
+            CreateShortcutButton.Content = settings.EnglishLanguage ? "Creation failed" : "创建失败";
+        }
+    }
+
     private async void OnCheckUpdateClick(object sender, RoutedEventArgs e)
     {
+        if (availableUpdate is not null)
+        {
+            OpenExternalUrl(availableUpdate.DownloadUrl ?? availableUpdate.HtmlUrl);
+            return;
+        }
+
         CheckUpdateButton.IsEnabled = false;
         try
         {
-            var latest = await updateService.GetLatestAsync(CancellationToken.None);
-            CheckUpdateButton.Content = latest is not null && UpdateService.IsNewer("0.9.0", latest)
-                ? (settings.EnglishLanguage ? $"Update {latest.TagName}" : $"发现新版本 {latest.TagName}")
-                : (settings.EnglishLanguage ? "Up to date" : "已是最新版本");
+            var latest = await updateService.GetLatestAsync(windowCts.Token);
+            if (closed || !IsLoaded) return;
+            if (latest is not null && UpdateService.IsNewer("0.9.0", latest))
+            {
+                availableUpdate = latest;
+                latestReleaseUrl = string.IsNullOrWhiteSpace(latest.HtmlUrl) ? latestReleaseUrl : latest.HtmlUrl;
+                AnnouncementText.Text = settings.EnglishLanguage
+                    ? $"✨ Update {latest.TagName} Available"
+                    : $"✨ 发现新版 {latest.TagName} · 点击更新";
+                AnnouncementCapsule.Visibility = Visibility.Visible;
+                CheckUpdateButton.Content = settings.EnglishLanguage ? $"Download {latest.TagName}" : $"下载新版 {latest.TagName}";
+            }
+            else
+            {
+                CheckUpdateButton.Content = settings.EnglishLanguage ? "Up to date" : "已是最新版本";
+            }
         }
-        catch (HttpRequestException)
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException or InvalidOperationException)
         {
-            CheckUpdateButton.Content = settings.EnglishLanguage ? "Check unavailable" : "暂时无法检查更新";
+            if (!closed && IsLoaded)
+                CheckUpdateButton.Content = settings.EnglishLanguage ? "Check unavailable" : "暂时无法检查更新";
         }
         finally
         {
-            CheckUpdateButton.IsEnabled = true;
+            if (!closed && IsLoaded)
+                CheckUpdateButton.IsEnabled = true;
         }
     }
 
@@ -1660,19 +2125,31 @@ public partial class MainWindow : Window
     {
         try
         {
-            var latest = await updateService.GetLatestAsync(CancellationToken.None);
-            if (latest is null || string.IsNullOrWhiteSpace(latest.TagName)) return;
+            var latest = await updateService.GetLatestAsync(windowCts.Token);
+            if (closed || latest is null || string.IsNullOrWhiteSpace(latest.TagName)) return;
             latestReleaseUrl = string.IsNullOrWhiteSpace(latest.HtmlUrl) ? latestReleaseUrl : latest.HtmlUrl;
+            var hasNewer = UpdateService.IsNewer("0.9.0", latest);
             await Dispatcher.InvokeAsync(() =>
             {
-                AnnouncementText.Text = settings.EnglishLanguage
-                    ? $"✨ {latest.TagName} Release Notes"
-                    : $"✨ {latest.TagName} 新公告";
+                if (closed || !IsLoaded) return;
+                if (hasNewer)
+                {
+                    availableUpdate = latest;
+                    AnnouncementText.Text = settings.EnglishLanguage
+                        ? $"✨ Update {latest.TagName} Available"
+                        : $"✨ 发现新版 {latest.TagName} · 点击更新";
+                    CheckUpdateButton.Content = settings.EnglishLanguage ? $"Download {latest.TagName}" : $"下载新版 {latest.TagName}";
+                }
+                else
+                {
+                    AnnouncementText.Text = settings.EnglishLanguage
+                        ? $"✨ {latest.TagName} Release Notes"
+                        : $"✨ {latest.TagName} 新公告";
+                }
                 AnnouncementCapsule.Visibility = Visibility.Visible;
             });
         }
-        catch (HttpRequestException) { }
-        catch (JsonException) { }
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException or InvalidOperationException) { }
     }
 
     // =========================================================================
@@ -1739,6 +2216,23 @@ public partial class MainWindow : Window
         ScrollActiveLineToCenter();
     }
 
+    internal void PrepareAppearanceAuditShowcase()
+    {
+        initializing = true;
+        settings.ColorMode = LyricColorMode.Gradient;
+        settings.AccentHex = "#FF7B2C";
+        settings.GradientEndHex = "#FF2E88";
+        settings.CapsulePreset = CapsuleBackgroundPreset.Custom;
+        settings.CapsuleCustomHex = "#3E3E44";
+        settings.BackgroundCapsuleEnabled = true;
+        SyncControlsFromSettings();
+        initializing = false;
+        RebuildAppearanceSwatches();
+        HighlightSelectedCapsuleChip();
+        HighlightSelectedPresetCard();
+        ApplyAppearanceToAllViews();
+    }
+
     internal TaskbarLyricsWindow TaskbarOverlay => taskbarOverlay;
     internal FloatingLyricsWindow FloatingOverlay => floatingOverlay;
     internal AppSettings CurrentSettings => settings;
@@ -1785,10 +2279,19 @@ public partial class MainWindow : Window
     private void OnClosed(object? sender, EventArgs e)
     {
         closed = true;
+        if (appearanceSyncTimer.IsEnabled)
+        {
+            appearanceSyncTimer.Stop();
+            settings.Save();
+        }
+        windowCts.Cancel();
+        windowCts.Dispose();
         lookupCts?.Cancel();
         lookupCts?.Dispose();
         frameTimer.Stop();
         fullscreenTimer.Stop();
+        appearanceSyncTimer.Stop();
+        updateCheckTimer.Stop();
         if (!auditMode && windowHandle != IntPtr.Zero)
         {
             UnregisterHotKey(windowHandle, HotkeyId);

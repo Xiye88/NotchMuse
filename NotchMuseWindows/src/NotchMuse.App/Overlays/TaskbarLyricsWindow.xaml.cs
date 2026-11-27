@@ -19,6 +19,7 @@ public partial class TaskbarLyricsWindow : Window
     private double sweepProgress;
     private bool locked;
     private IntPtr handle;
+    private HwndSource? hwndSource;
 
     public TaskbarSlot? CurrentSlot { get; private set; }
     public event Action? OpenMainRequested;
@@ -27,24 +28,57 @@ public partial class TaskbarLyricsWindow : Window
     {
         InitializeComponent();
         SourceInitialized += OnSourceInitialized;
+        IsVisibleChanged += (_, _) =>
+        {
+            if (IsVisible) ApplyWindowStyles();
+        };
+        Closed += (_, _) =>
+        {
+            hwndSource?.RemoveHook(WndProc);
+            hwndSource = null;
+        };
         SweepHost.SizeChanged += (_, _) => UpdateSweepClip();
     }
 
     private void OnSourceInitialized(object? sender, EventArgs e)
     {
         handle = new WindowInteropHelper(this).Handle;
+        if (handle != IntPtr.Zero && hwndSource is null)
+        {
+            hwndSource = HwndSource.FromHwnd(handle);
+            hwndSource?.AddHook(WndProc);
+        }
         ApplyWindowStyles();
     }
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        var clickThrough = WindowClickThroughHelper.HandleClickThroughMessage(msg, locked, ref handled);
+        if (handled) return clickThrough;
+
+        if (msg == WindowClickThroughHelper.WmMouseActivate)
+        {
+            handled = true;
+            return WindowClickThroughHelper.MaNoActivate;
+        }
+        return IntPtr.Zero;
+    }
+
+    private static readonly SolidColorBrush UnlockedHitBrush = new(System.Windows.Media.Color.FromArgb(6, 0, 0, 0));
 
     public void SetLocked(bool value)
     {
         locked = value;
+        RootSurface.IsHitTestVisible = !locked;
+        RootSurface.Background = locked ? System.Windows.Media.Brushes.Transparent : UnlockedHitBrush;
         ApplyWindowStyles();
     }
 
     private void ApplyWindowStyles()
     {
-        if (handle == IntPtr.Zero) return;
+        var currentHandle = handle != IntPtr.Zero ? handle : new WindowInteropHelper(this).Handle;
+        if (currentHandle == IntPtr.Zero) return;
+        handle = currentHandle;
         WindowClickThroughHelper.ApplyClickThrough(handle, locked);
     }
 
@@ -134,6 +168,7 @@ public partial class TaskbarLyricsWindow : Window
 
     private void OnSurfaceEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
+        if (locked) return;
         RootSurface.Background = new SolidColorBrush(isLightTaskbar
             ? System.Windows.Media.Color.FromArgb(20, 0, 0, 0)
             : System.Windows.Media.Color.FromArgb(24, 255, 255, 255));
@@ -141,11 +176,12 @@ public partial class TaskbarLyricsWindow : Window
 
     private void OnSurfaceLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        RootSurface.Background = System.Windows.Media.Brushes.Transparent;
+        RootSurface.Background = locked ? System.Windows.Media.Brushes.Transparent : UnlockedHitBrush;
     }
 
     private void OnSurfaceClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        if (locked) return;
         OpenMainRequested?.Invoke();
     }
 }

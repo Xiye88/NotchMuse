@@ -160,9 +160,15 @@ public sealed class SweepLyricLineControl : Border
             else
                 sweepPrimary.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
 
+            var glowColor = customAccentBrush switch
+            {
+                SolidColorBrush scb => System.Windows.Media.Color.FromArgb(62, scb.Color.R, scb.Color.G, scb.Color.B),
+                LinearGradientBrush lgb when lgb.GradientStops.Count > 0 => System.Windows.Media.Color.FromArgb(62, lgb.GradientStops[0].Color.R, lgb.GradientStops[0].Color.G, lgb.GradientStops[0].Color.B),
+                _ => System.Windows.Media.Color.FromArgb(62, 224, 109, 27)
+            };
             sweepPrimary.Effect = new DropShadowEffect
             {
-                Color = System.Windows.Media.Color.FromArgb(62, 224, 109, 27),
+                Color = glowColor,
                 BlurRadius = 10,
                 ShadowDepth = 0,
                 Opacity = 0.42

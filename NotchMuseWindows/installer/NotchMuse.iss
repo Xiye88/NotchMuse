@@ -15,14 +15,20 @@ OutputBaseFilename=NotchMuse-Setup
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
+SetupIconFile=..\assets\NotchMuse.ico
 UninstallDisplayIcon={app}\NotchMuse-Windows-win-x64-portable.exe
+WizardStyle=modern
+DisableProgramGroupPage=yes
+
+[Tasks]
+Name: "desktopicon"; Description: "创建桌面快捷方式 (Create a desktop shortcut)"; GroupDescription: "附加任务 (Additional icons):"
 
 [Files]
 Source: "..\artifacts\release\NotchMuse-Windows-win-x64-portable.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\NotchMuse"; Filename: "{app}\NotchMuse-Windows-win-x64-portable.exe"
-Name: "{autodesktop}\NotchMuse"; Filename: "{app}\NotchMuse-Windows-win-x64-portable.exe"
+Name: "{autoprograms}\NotchMuse"; Filename: "{app}\NotchMuse-Windows-win-x64-portable.exe"; IconFilename: "{app}\NotchMuse-Windows-win-x64-portable.exe"
+Name: "{autodesktop}\NotchMuse"; Filename: "{app}\NotchMuse-Windows-win-x64-portable.exe"; IconFilename: "{app}\NotchMuse-Windows-win-x64-portable.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\NotchMuse-Windows-win-x64-portable.exe"; Description: "Launch NotchMuse"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\NotchMuse-Windows-win-x64-portable.exe"; Description: "立即启动 NotchMuse (Launch NotchMuse)"; Flags: nowait postinstall skipifsilent

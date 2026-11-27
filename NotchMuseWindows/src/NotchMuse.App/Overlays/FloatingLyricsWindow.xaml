@@ -205,15 +205,12 @@
                     Cursor="SizeAll"
                     Focusable="False"
                     FocusVisualStyle="{x:Null}"
-                    MouseLeftButtonDown="OnCapsuleMouseDown"
-                    MouseMove="OnCapsuleMouseMove"
-                    MouseLeftButtonUp="OnCapsuleMouseUp"
-                    LostMouseCapture="OnCapsuleLostCapture">
+                    PreviewMouseLeftButtonDown="OnCapsuleMouseDown">
                 <Border.Effect>
                     <DropShadowEffect x:Name="CapsuleShadow" Color="#50000000" BlurRadius="18" ShadowDepth="4" Opacity="0.28"/>
                 </Border.Effect>
 
-                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
                     <!-- Horizontal Layout Host (Single or Double-Line) -->
                     <StackPanel x:Name="HorizontalLyricsHost" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Grid x:Name="SweepHost" HorizontalAlignment="Center">

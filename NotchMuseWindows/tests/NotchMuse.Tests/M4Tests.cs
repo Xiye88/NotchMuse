@@ -272,5 +272,96 @@ public sealed class M4Tests
     [InlineData(false, System.Windows.WindowState.Normal, false)]
     public void KeepMainWindowFrontOnModeSwitchStateMachine(bool isVisible, System.Windows.WindowState state, bool expectedKeepFront) =>
         Assert.Equal(expectedKeepFront, MainWindow.ShouldKeepFrontAfterModeSwitch(isVisible, state));
+
+    [Fact]
+    public void WndProcClickThroughReturnsHtTransparentOnlyWhenLocked()
+    {
+        var handled = false;
+        var resUnlocked = NotchMuse.App.Overlays.WindowClickThroughHelper.HandleClickThroughMessage(
+            NotchMuse.App.Overlays.WindowClickThroughHelper.WmNcHitTest, locked: false, ref handled);
+        Assert.False(handled);
+        Assert.Equal(IntPtr.Zero, resUnlocked);
+
+        var resLocked = NotchMuse.App.Overlays.WindowClickThroughHelper.HandleClickThroughMessage(
+            NotchMuse.App.Overlays.WindowClickThroughHelper.WmNcHitTest, locked: true, ref handled);
+        Assert.True(handled);
+        Assert.Equal(NotchMuse.App.Overlays.WindowClickThroughHelper.HtTransparent, resLocked);
+    }
+
+    [Fact]
+    public void FreeWindowSnapMagneticallySnapsCenterAndBypassesWithAlt()
+    {
+        var work = new NotchMuse.App.Overlays.NativeWindowRect { Left = 0, Top = 0, Right = 1920, Bottom = 1040 };
+        var nearCenter = new NotchMuse.App.Overlays.NativeWindowRect { Left = 616, Top = 500, Right = 1316, Bottom = 700 }; // center is 610 (within 10px)
+
+        var snapped = NotchMuse.App.Overlays.WindowClickThroughHelper.SnapFreeWindowRect(nearCenter, work, snapThresholdPx: 10, edgeInsetPx: 12, altBypass: false);
+        Assert.True(snapped.SnappedCenterX);
+        Assert.Equal(610, snapped.Rect.Left);
+
+        var bypassed = NotchMuse.App.Overlays.WindowClickThroughHelper.SnapFreeWindowRect(nearCenter, work, snapThresholdPx: 10, edgeInsetPx: 12, altBypass: true);
+        Assert.False(bypassed.SnappedCenterX);
+        Assert.Equal(616, bypassed.Rect.Left);
+    }
+
+    [Theory]
+    [InlineData(0, 400, 200, 0)]
+    [InlineData(200, 400, 200, 100)]
+    [InlineData(400, 400, 200, 200)]
+    [InlineData(-20, 400, 200, 0)]
+    [InlineData(500, 400, 200, 200)]
+    public void ProgressBarClickToSeekComputesExactTargetSeconds(double clickX, double trackWidth, double duration, double expected) =>
+        Assert.Equal(expected, MainWindow.ComputeSeekTargetFromPoint(clickX, trackWidth, duration), precision: 3);
+
+    [Fact]
+    public void AppearanceHasEightCuratedVisualStylePresets()
+    {
+        Assert.Equal(8, MainWindow.StylePresetSpecs.Length);
+        Assert.Equal(8, MainWindow.StylePresetSpecs.Select(p => p.Preset).Distinct().Count());
+        Assert.Contains(MainWindow.StylePresetSpecs, p => p.ColorMode == LyricColorMode.Gradient);
+        Assert.Contains(MainWindow.StylePresetSpecs, p => p.ColorMode == LyricColorMode.Solid);
+    }
+
+    [Fact]
+    public void QrCodeRendererEncodesEvmAndTronWalletAddresses()
+    {
+        var evmMatrix = QrCodeRenderer.EncodeVersion3M(SupportWindow.EvmAddress);
+        var tronMatrix = QrCodeRenderer.EncodeVersion3M(SupportWindow.TronAddress);
+        Assert.Equal(29, evmMatrix.GetLength(0));
+        Assert.Equal(29, evmMatrix.GetLength(1));
+        Assert.Equal(29, tronMatrix.GetLength(0));
+        // Top-left finder corners must be dark
+        Assert.True(evmMatrix[0, 0]);
+        Assert.True(evmMatrix[3, 3]);
+        Assert.True(tronMatrix[0, 0]);
+    }
+
+    [Fact]
+    public void UpdateServiceParsesSetupAssetDownloadUrl()
+    {
+        const string json = """
+        {
+          "tag_name": "v1.0.0",
+          "name": "NotchMuse v1.0.0",
+          "body": "New release",
+          "html_url": "https://github.com/Xiye88/NotchMuse/releases/tag/v1.0.0",
+          "assets": [
+            { "name": "NotchMuse-Windows-win-x64-portable.exe", "browser_download_url": "https://example.com/portable.exe" },
+            { "name": "NotchMuse-Setup.exe", "browser_download_url": "https://example.com/setup.exe" }
+          ]
+        }
+        """;
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        var info = UpdateService.ParseReleaseJson(doc.RootElement);
+        Assert.Equal("v1.0.0", info.TagName);
+        Assert.Equal("https://example.com/setup.exe", info.DownloadUrl);
+        Assert.True(UpdateService.IsNewer("0.9.0", info));
+    }
+
+    [Fact]
+    public void LowColorContrastDetectorFlagsNearIdenticalGradientEnds()
+    {
+        Assert.True(NotchMuse.App.Themes.ThemeManager.HasLowColorContrast("#E06D1B", "#F59E0B"));
+        Assert.False(NotchMuse.App.Themes.ThemeManager.HasLowColorContrast("#FF7B2C", "#FF2E88"));
+    }
 }
 

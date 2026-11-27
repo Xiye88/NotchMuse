@@ -35,20 +35,19 @@ public partial class FloatingLyricsWindow : Window
         ("薄荷晴空", "Mint Sky", "#34D399", "#0EA5E9")
     ];
 
-    [DllImport("user32.dll")]
-    private static extern bool GetCursorPos(out NativePoint pt);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private readonly record struct NativePoint(int X, int Y);
-
     private readonly DispatcherTimer microTooltipTimer = new() { Interval = TimeSpan.FromMilliseconds(150) };
+    private readonly DispatcherTimer dragPollTimer = new() { Interval = TimeSpan.FromMilliseconds(8) }; // ~120Hz silky Win32 drag without CaptureMouse or modal loop traps!
 
     private IntPtr handle;
+    private HwndSource? hwndSource;
     private LyricsDisplayMode mode = LyricsDisplayMode.FreeFloat;
     private AppSettings? activeSettings;
     private bool locked;
     private bool hovered;
     private bool dragging;
+    private NativePoint dragStartCursorPx;
+    private NativeWindowRect dragStartRectPx;
+    private bool dragMoved;
     private bool verticalLayout;
     private bool doubleLineMode = true;
     private bool isTransparentCapsule;
@@ -59,10 +58,6 @@ public partial class FloatingLyricsWindow : Window
     private string? rawTranslationText;
     private bool showBilingualActive;
     private System.Windows.Controls.Button? pendingTooltipButton;
-    private NativePoint dragStartCursorPx;
-    private double dragStartLeft;
-    private double dragStartTop;
-    private double dragDpiScale = 1.0;
     private System.Windows.Media.Brush idleBackgroundBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(209, 62, 62, 68));
     private System.Windows.Media.Brush idleBorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(46, 255, 255, 255));
     private Thickness idleBorderThickness = new(0.75);
@@ -80,13 +75,47 @@ public partial class FloatingLyricsWindow : Window
         InitializeComponent();
         BuildQuickColorDots();
         microTooltipTimer.Tick += OnMicroTooltipTimerTick;
+        dragPollTimer.Tick += OnDragPollTick;
         SourceInitialized += (_, _) =>
         {
             handle = new WindowInteropHelper(this).Handle;
+            if (handle != IntPtr.Zero && hwndSource is null)
+            {
+                hwndSource = HwndSource.FromHwnd(handle);
+                hwndSource?.AddHook(WndProc);
+            }
             ApplyClickThroughStyle();
+        };
+        IsVisibleChanged += (_, _) =>
+        {
+            if (IsVisible) ApplyClickThroughStyle();
+            else if (dragging) FinishDirectDrag(commit: false);
+        };
+        Closed += (_, _) =>
+        {
+            dragPollTimer.Stop();
+            microTooltipTimer.Stop();
+            hwndSource?.RemoveHook(WndProc);
+            hwndSource = null;
         };
         SweepHost.SizeChanged += (_, _) => UpdateSweepClip();
         VerticalSweepHost.SizeChanged += (_, _) => UpdateSweepClip();
+    }
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        // 1. Click-through guard alongside WS_EX_TRANSPARENT (covers FreeFloat & TopIsland)
+        var clickThrough = WindowClickThroughHelper.HandleClickThroughMessage(msg, locked, ref handled);
+        if (handled) return clickThrough;
+
+        // 2. Keep overlay non-activating while clicking/hovering/dragging so games & browsers never lose focus
+        if (msg == WindowClickThroughHelper.WmMouseActivate)
+        {
+            handled = true;
+            return WindowClickThroughHelper.MaNoActivate;
+        }
+
+        return IntPtr.Zero;
     }
 
     public IntPtr WindowHandle => handle;
@@ -170,6 +199,8 @@ public partial class FloatingLyricsWindow : Window
         mode = nextMode;
         activeSettings = settings;
         locked = settings.OverlayLocked;
+        LyricCapsule.IsHitTestVisible = !locked;
+        HoverToolbarHost.IsHitTestVisible = !locked;
         verticalLayout = mode == LyricsDisplayMode.FreeFloat && settings.FloatingVerticalLayout;
         doubleLineMode = settings.FloatingDoubleLine;
         ApplyClickThroughStyle();
@@ -183,12 +214,14 @@ public partial class FloatingLyricsWindow : Window
         locked = value;
         if (locked)
         {
-            EndDrag(commit: false);
+            FinishDirectDrag(commit: false);
             hovered = false;
             HideMicroTooltip();
             QuickColorPopover.Visibility = Visibility.Collapsed;
             HoverToolbarHost.Visibility = Visibility.Collapsed;
         }
+        LyricCapsule.IsHitTestVisible = !locked;
+        HoverToolbarHost.IsHitTestVisible = !locked;
         ApplyClickThroughStyle();
         if (activeSettings is not null) ApplyAppearance(activeSettings);
         UpdateHoverChrome();
@@ -258,9 +291,10 @@ public partial class FloatingLyricsWindow : Window
 
         if (isTransparentCapsule)
         {
+            // Alpha = 6 (imperceptible visually, remains >= 1 even at minimum LyricOpacity 0.30 so DWM ALWAYS hit-tests!)
             idleBackgroundBrush = new SolidColorBrush(locked
                 ? System.Windows.Media.Color.FromArgb(0, 0, 0, 0)
-                : System.Windows.Media.Color.FromArgb(1, 0, 0, 0));
+                : System.Windows.Media.Color.FromArgb(6, 0, 0, 0));
             idleBorderBrush = System.Windows.Media.Brushes.Transparent;
             idleBorderThickness = new Thickness(0.75);
             CapsuleShadow.Opacity = 0;
@@ -514,9 +548,31 @@ public partial class FloatingLyricsWindow : Window
         return new Rect(wa.Left / dpiScale, wa.Top / dpiScale, wa.Width / dpiScale, wa.Height / dpiScale);
     }
 
+    private NativeWindowRect ResolveScreenWorkAreaPixels(string deviceName)
+    {
+        var screen = Forms.Screen.AllScreens.FirstOrDefault(s =>
+            string.Equals(s.DeviceName, deviceName, StringComparison.OrdinalIgnoreCase)) ?? Forms.Screen.PrimaryScreen;
+        if (screen is null)
+        {
+            var wa = SystemParameters.WorkArea;
+            var dpi = Math.Max(1.0, VisualTreeHelper.GetDpi(this).DpiScaleX);
+            return new NativeWindowRect
+            {
+                Left = (int)Math.Round(wa.Left * dpi),
+                Top = (int)Math.Round(wa.Top * dpi),
+                Right = (int)Math.Round(wa.Right * dpi),
+                Bottom = (int)Math.Round(wa.Bottom * dpi)
+            };
+        }
+        var area = screen.WorkingArea;
+        return new NativeWindowRect { Left = area.Left, Top = area.Top, Right = area.Right, Bottom = area.Bottom };
+    }
+
     private void ApplyClickThroughStyle()
     {
-        if (handle == IntPtr.Zero) return;
+        var currentHandle = handle != IntPtr.Zero ? handle : new WindowInteropHelper(this).Handle;
+        if (currentHandle == IntPtr.Zero) return;
+        handle = currentHandle;
         WindowClickThroughHelper.ApplyClickThrough(handle, locked);
     }
 
@@ -652,75 +708,78 @@ public partial class FloatingLyricsWindow : Window
     private void OnCapsuleMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (locked || mode != LyricsDisplayMode.FreeFloat || e.LeftButton != MouseButtonState.Pressed) return;
-        if (!GetCursorPos(out dragStartCursorPx)) return;
+        var currentHandle = handle != IntPtr.Zero ? handle : new WindowInteropHelper(this).Handle;
+        if (currentHandle == IntPtr.Zero) return;
+        handle = currentHandle;
 
-        dragDpiScale = VisualTreeHelper.GetDpi(this).DpiScaleX;
-        if (dragDpiScale <= 0) dragDpiScale = 1.0;
+        if (!WindowClickThroughHelper.GetCursorPos(out dragStartCursorPx)) return;
+        if (!WindowClickThroughHelper.GetWindowRect(handle, out dragStartRectPx)) return;
 
-        dragStartLeft = Left;
-        dragStartTop = Top;
         dragging = true;
+        dragMoved = false;
         HideMicroTooltip();
         QuickColorPopover.Visibility = Visibility.Collapsed;
-        LyricCapsule.CaptureMouse();
         UpdateHoverChrome();
+        dragPollTimer.Start();
         e.Handled = true;
     }
 
-    private void OnCapsuleMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+    private void OnDragPollTick(object? sender, EventArgs e)
     {
-        if (!dragging) return;
-        if (e.LeftButton != MouseButtonState.Pressed)
+        if (!dragging || locked || mode != LyricsDisplayMode.FreeFloat || handle == IntPtr.Zero)
         {
-            EndDrag(commit: true);
+            FinishDirectDrag(commit: false);
             return;
         }
-        if (!GetCursorPos(out var nowPx)) return;
 
-        var dx = (nowPx.X - dragStartCursorPx.X) / dragDpiScale;
-        var dy = (nowPx.Y - dragStartCursorPx.Y) / dragDpiScale;
-
-        var work = ResolveScreenWorkArea(activeSettings?.DisplayScreen ?? "Primary");
-        var nextLeft = dragStartLeft + dx;
-        var nextTop = dragStartTop + dy;
-
-        var altBypass = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
-        var centerLeft = work.Left + (work.Width - Width) / 2;
-        if (!altBypass && Math.Abs(nextLeft - centerLeft) <= MagneticSnapThresholdDip)
+        if (!WindowClickThroughHelper.IsLeftMouseButtonDown())
         {
-            nextLeft = centerLeft;
-            SnapGuide.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            SnapGuide.Visibility = Visibility.Collapsed;
+            FinishDirectDrag(commit: dragMoved);
+            return;
         }
 
-        Left = Math.Clamp(nextLeft, work.Left, Math.Max(work.Left, work.Right - Width));
-        Top = Math.Clamp(nextTop, work.Top, Math.Max(work.Top, work.Bottom - Height + 24));
+        if (!WindowClickThroughHelper.GetCursorPos(out var nowPx)) return;
+        var dx = nowPx.X - dragStartCursorPx.X;
+        var dy = nowPx.Y - dragStartCursorPx.Y;
+        if (Math.Abs(dx) < 1 && Math.Abs(dy) < 1) return;
+        dragMoved = true;
+
+        var proposed = new NativeWindowRect
+        {
+            Left = dragStartRectPx.Left + dx,
+            Top = dragStartRectPx.Top + dy,
+            Right = dragStartRectPx.Right + dx,
+            Bottom = dragStartRectPx.Bottom + dy
+        };
+
+        var screen = Forms.Screen.FromPoint(new System.Drawing.Point(nowPx.X, nowPx.Y))
+            ?? Forms.Screen.PrimaryScreen;
+        var workPx = screen is not null
+            ? new NativeWindowRect { Left = screen.WorkingArea.Left, Top = screen.WorkingArea.Top, Right = screen.WorkingArea.Right, Bottom = screen.WorkingArea.Bottom }
+            : ResolveScreenWorkAreaPixels(activeSettings?.DisplayScreen ?? "Primary");
+
+        var dpi = Math.Max(1.0, VisualTreeHelper.GetDpi(this).DpiScaleX);
+        var snapPx = (int)Math.Round(MagneticSnapThresholdDip * dpi);
+        var insetPx = (int)Math.Round(12.0 * dpi);
+        var altBypass = WindowClickThroughHelper.IsAltKeyDown();
+
+        var snapped = WindowClickThroughHelper.SnapFreeWindowRect(proposed, workPx, snapPx, insetPx, altBypass);
+        WindowClickThroughHelper.MoveWindowPixelsNoActivate(handle, snapped.Rect.Left, snapped.Rect.Top);
+        SnapGuide.Visibility = snapped.SnappedCenterX ? Visibility.Visible : Visibility.Collapsed;
         UpdateToolbarPlacement();
-        e.Handled = true;
     }
 
-    private void OnCapsuleMouseUp(object sender, MouseButtonEventArgs e)
+    private void FinishDirectDrag(bool commit)
     {
-        if (!dragging) return;
-        EndDrag(commit: true);
-        e.Handled = true;
-    }
-
-    private void OnCapsuleLostCapture(object sender, System.Windows.Input.MouseEventArgs e)
-    {
-        if (!dragging) return;
-        EndDrag(commit: true);
-    }
-
-    private void EndDrag(bool commit)
-    {
+        dragPollTimer.Stop();
+        var wasDragging = dragging;
         dragging = false;
+        dragMoved = false;
         SnapGuide.Visibility = Visibility.Collapsed;
-        if (LyricCapsule.IsMouseCaptured) LyricCapsule.ReleaseMouseCapture();
-        if (commit) PositionCommitted?.Invoke(Left, Top);
+        if (!wasDragging) return;
+
+        UpdateToolbarPlacement();
+        if (commit && !locked) PositionCommitted?.Invoke(Left, Top);
         if (!IsMouseOver)
         {
             hovered = false;

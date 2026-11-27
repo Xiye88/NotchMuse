@@ -193,6 +193,7 @@
   if (typeof document === 'undefined') return;
 
   var isZh = (document.documentElement.lang || '').toLowerCase().indexOf('zh') === 0;
+  var ux = window.benchoUX;
   var msg = isZh ? {
     srtReady: function (n) { return '已实时转换 ' + n + ' 条字幕，可直接复制或导出 .srt 文件。'; },
     srtEmpty: '未检测到带时间轴的 [mm:ss.xx] 歌词行。请粘贴或拖入 .lrc 文件。',
@@ -205,6 +206,8 @@
     convTxtReady: function (n) { return '已清除全部时间轴，提取出 ' + n + ' 行纯文本歌词。'; },
     convEmpty: '请输入 .srt 或 .lrc 内容以开始转换。',
     copied: '已复制到剪贴板',
+    downloaded: '已导出文件',
+    emptyAction: '暂无可复制或导出的内容',
     copyFail: '复制失败，请手动全选复制',
     loadedFile: function (name) { return '已加载本地文件：' + name; }
   } : {
@@ -219,11 +222,20 @@
     convTxtReady: function (n) { return 'Stripped all timestamps and extracted ' + n + ' clean text lines.'; },
     convEmpty: 'Paste or drop .srt or .lrc content to convert.',
     copied: 'Copied to clipboard',
+    downloaded: 'File exported',
+    emptyAction: 'No output to copy or export yet',
     copyFail: 'Copy failed — select and copy manually',
     loadedFile: function (name) { return 'Loaded local file: ' + name; }
   };
 
-  function downloadFile(filename, content) {
+  function emptyAction(event) {
+    ux?.shake(event.currentTarget);
+    ux?.play('bump', event);
+    ux?.toast(msg.emptyAction);
+  }
+
+  function downloadFile(filename, content, event) {
+    if (!content.trim()) return emptyAction(event);
     var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -233,19 +245,19 @@
     a.click();
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    ux?.play('landed', event);
+    ux?.toast(msg.downloaded);
   }
 
-  function copyText(text, btn) {
-    if (!text) return;
-    var orig = btn.textContent;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        btn.textContent = msg.copied;
-        setTimeout(function () { btn.textContent = orig; }, 1600);
-      }).catch(function () {
-        btn.textContent = msg.copyFail;
-        setTimeout(function () { btn.textContent = orig; }, 1600);
-      });
+  async function copyText(text, event) {
+    if (!text.trim()) return emptyAction(event);
+    ux?.prepareSound(event);
+    try {
+      await navigator.clipboard.writeText(text);
+      ux?.play('landed', event);
+      ux?.toast(msg.copied);
+    } catch {
+      ux?.toast(msg.copyFail);
     }
   }
 
@@ -263,8 +275,12 @@
       reader.readAsText(file);
     }
 
-    input.addEventListener('change', function () {
-      if (input.files && input.files[0]) readFile(input.files[0]);
+    zone.addEventListener('click', function (event) { ux?.prepareSound(event); });
+    input.addEventListener('change', function (e) {
+      if (input.files && input.files[0]) {
+        ux?.play('plop', e);
+        readFile(input.files[0]);
+      }
       input.value = '';
     });
 
@@ -279,6 +295,12 @@
       e.preventDefault();
       zone.classList.remove('is-dragover');
       if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        ux?.play('plop', e);
+        if (ux && !ux.motion.matches) {
+          zone.animate([
+            { scale: '1.012' }, { scale: '.992', offset: .45 }, { scale: '1' }
+          ], { duration: 235, easing: 'ease-out' });
+        }
         readFile(e.dataTransfer.files[0]);
       }
     });
@@ -297,9 +319,22 @@
       panel.hidden = panel.getAttribute('data-lrc-panel') !== id;
     });
   }
-  tabButtons.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      activateTab(btn.getAttribute('data-lrc-tab'));
+  function selectTab(btn, event) {
+    if (btn.getAttribute('aria-selected') !== 'true') ux?.play('tick', event);
+    activateTab(btn.getAttribute('data-lrc-tab'));
+  }
+  tabButtons.forEach(function (btn, index) {
+    btn.addEventListener('click', function (event) { selectTab(btn, event); });
+    btn.addEventListener('keydown', function (event) {
+      var next;
+      if (event.key === 'ArrowRight') next = tabButtons[(index + 1) % tabButtons.length];
+      if (event.key === 'ArrowLeft') next = tabButtons[(index + tabButtons.length - 1) % tabButtons.length];
+      if (event.key === 'Home') next = tabButtons[0];
+      if (event.key === 'End') next = tabButtons[tabButtons.length - 1];
+      if (!next) return;
+      event.preventDefault();
+      selectTab(next, event);
+      next.focus();
     });
   });
 
@@ -342,10 +377,10 @@
       updateLrc2Srt();
     });
     var copyBtn1 = document.getElementById('lrc2srt-copy');
-    if (copyBtn1) copyBtn1.addEventListener('click', function () { copyText(lrc2srtOut.value, copyBtn1); });
+    if (copyBtn1) copyBtn1.addEventListener('click', function (event) { copyText(lrc2srtOut.value, event); });
     var dlBtn1 = document.getElementById('lrc2srt-download');
-    if (dlBtn1) dlBtn1.addEventListener('click', function () {
-      if (lrc2srtOut.value) downloadFile(lrc2srtBaseName + '.srt', lrc2srtOut.value);
+    if (dlBtn1) dlBtn1.addEventListener('click', function (event) {
+      downloadFile(lrc2srtBaseName + '.srt', lrc2srtOut.value, event);
     });
   }
 
@@ -365,6 +400,7 @@
 
   function updateShift() {
     if (!shiftIn || !shiftOut) return;
+    if (shiftAmount && shiftUnit) shiftAmount.step = shiftUnit.value === 's' ? '0.1' : '50';
     var delta = getShiftDeltaMs();
     var res = shiftLrc(shiftIn.value, delta);
     shiftOut.value = res.lrc;
@@ -385,8 +421,9 @@
     Array.prototype.slice.call(document.querySelectorAll('[data-shift-preset]')).forEach(function (btn) {
       btn.addEventListener('click', function () {
         var ms = parseInt(btn.getAttribute('data-shift-preset'), 10) || 0;
+        var next = getShiftDeltaMs() + ms;
         if (shiftUnit) shiftUnit.value = 'ms';
-        if (shiftAmount) shiftAmount.value = String((parseFloat(shiftAmount.value) || 0) + ms);
+        if (shiftAmount) shiftAmount.value = String(next);
         updateShift();
       });
     });
@@ -404,10 +441,10 @@
       updateShift();
     });
     var copyBtn2 = document.getElementById('shift-copy');
-    if (copyBtn2) copyBtn2.addEventListener('click', function () { copyText(shiftOut.value, copyBtn2); });
+    if (copyBtn2) copyBtn2.addEventListener('click', function (event) { copyText(shiftOut.value, event); });
     var dlBtn2 = document.getElementById('shift-download');
-    if (dlBtn2) dlBtn2.addEventListener('click', function () {
-      if (shiftOut.value) downloadFile(shiftBaseName + '.lrc', shiftOut.value);
+    if (dlBtn2) dlBtn2.addEventListener('click', function (event) {
+      downloadFile(shiftBaseName + '.lrc', shiftOut.value, event);
     });
   }
 
@@ -446,12 +483,11 @@
     });
 
     var copyBtn3 = document.getElementById('conv-copy');
-    if (copyBtn3) copyBtn3.addEventListener('click', function () { copyText(convOut.value, copyBtn3); });
+    if (copyBtn3) copyBtn3.addEventListener('click', function (event) { copyText(convOut.value, event); });
     var dlBtn3 = document.getElementById('conv-download');
-    if (dlBtn3) dlBtn3.addEventListener('click', function () {
-      if (!convOut.value) return;
+    if (dlBtn3) dlBtn3.addEventListener('click', function (event) {
       var ext = (convMode && convMode.value === 'strip') ? '.txt' : '.lrc';
-      downloadFile(convBaseName + ext, convOut.value);
+      downloadFile(convBaseName + ext, convOut.value, event);
     });
   }
 })();

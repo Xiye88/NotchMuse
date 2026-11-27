@@ -861,14 +861,14 @@ final class OverlayLyricsWindow: NSObject {
                 : windowFrame
             configuredOpacity = 1
             hidesOnHover = hideOnHover
+            if !window.isVisible {
+                window.orderFrontRegardless()
+            }
             if let interaction {
                 interaction.update(hideOnHover: hideOnHover)
             } else {
                 updateHoverTimer()
                 applyHoverVisibility()
-            }
-            if !window.isVisible {
-                window.orderFrontRegardless()
             }
             return needsScrolling
         }

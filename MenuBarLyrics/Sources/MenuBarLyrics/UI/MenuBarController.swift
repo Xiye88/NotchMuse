@@ -86,7 +86,6 @@ final class MenuBarController: NSObject {
     private let songItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private let artistItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     private var isLyricsHidden = false
-    private var freeEditObserver: NSObjectProtocol?
     private var freeResetObserver: NSObjectProtocol?
     private var isPlayerStopped = false
     private var isPlaybackPaused = false
@@ -106,6 +105,7 @@ final class MenuBarController: NSObject {
     private var pollTimer: Timer?
     private var scrollTimer: Timer?
     private var progressTimer: Timer?
+    private var seekRefresh: DispatchWorkItem?
     private var pollTask: Task<Void, Never>?
     private var lyricsTask: Task<Void, Never>?
     private var pollGeneration = 0
@@ -131,9 +131,6 @@ final class MenuBarController: NSObject {
             self?.settingsWindowController?.refresh()
             self?.updateDisplay()
         }
-        freeEditObserver = NotificationCenter.default.addObserver(forName: FreeLyricsPreferences.editNotification, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.editFreeLyrics() }
-        }
         freeResetObserver = NotificationCenter.default.addObserver(forName: FreeLyricsPreferences.resetNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.resetFreeLyrics() }
         }
@@ -151,9 +148,10 @@ final class MenuBarController: NSObject {
     }
 
     func stop() {
+        seekRefresh?.cancel()
+        seekRefresh = nil
         lyricsTask?.cancel()
         lyricsTask = nil
-        if let freeEditObserver { NotificationCenter.default.removeObserver(freeEditObserver) }
         if let freeResetObserver { NotificationCenter.default.removeObserver(freeResetObserver) }
         lyricsClient.clearDiagnostics()
         pollTimer?.invalidate()
@@ -321,11 +319,11 @@ final class MenuBarController: NSObject {
             let track = nowPlaying.spotifyTrack
             let position = nowPlaying.playbackPosition
             currentPlayerTrack = nowPlaying
+            latestPlayerPosition = position
+            latestPlayerUptime = nil
             setPlayerFeedback(.connected)
             setTrackInfo(nil)
             await updateTrackIfNeeded(track, identity: nowPlaying.observationIdentity, force: forceLyricsRefresh)
-            latestPlayerPosition = position
-            latestPlayerUptime = nil
             stopProgressTimer()
             let text = LyricClock.moment(at: position, in: currentLines)?.text ?? unpausedFallbackText()
             setDisplay(L10n.format("Paused: %@", text))
@@ -346,6 +344,7 @@ final class MenuBarController: NSObject {
     }
 
     private func handlePlayerStopped(display: String) {
+        defer { pushLiveStatusToSettings() }
         lyricsTask?.cancel()
         lyricsTask = nil
         lyricsClient.clearDiagnostics("Player: \(player.source.rawValue)\nTrack title: unavailable\nResolution Status: no current playback selection")
@@ -602,9 +601,10 @@ final class MenuBarController: NSObject {
             artworkImage: artworkImage,
             isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
             isPaused: !isPlayerStopped && isPlaybackPaused && currentTrack != nil,
-            position: currentPos,
+            position: currentPlaybackPosition(applyingLyricOffset: false) ?? 0,
             duration: currentTrack?.duration ?? 0,
-            lyricsFeedback: latestLyricsFeedback
+            lyricsFeedback: latestLyricsFeedback,
+            trackIdentity: currentPlayerTrack?.observationIdentity
         )
     }
 
@@ -650,9 +650,10 @@ final class MenuBarController: NSObject {
                 artistName: currentTrack?.artist,
                 isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
                 isPaused: !isPlayerStopped && isPlaybackPaused && currentTrack != nil,
-                position: position,
+                position: currentPlaybackPosition(applyingLyricOffset: false) ?? 0,
                 duration: currentTrack?.duration ?? 0,
-                lyricsFeedback: latestLyricsFeedback
+                lyricsFeedback: latestLyricsFeedback,
+                trackIdentity: currentPlayerTrack?.observationIdentity
             )
         } else {
             displayTranslation = nil
@@ -666,9 +667,10 @@ final class MenuBarController: NSObject {
                 artistName: currentTrack?.artist,
                 isPlaying: !isPlayerStopped && !isPlaybackPaused && currentTrack != nil,
                 isPaused: !isPlayerStopped && isPlaybackPaused && currentTrack != nil,
-                position: position,
+                position: currentPlaybackPosition(applyingLyricOffset: false) ?? 0,
                 duration: currentTrack?.duration ?? 0,
-                lyricsFeedback: latestLyricsFeedback
+                lyricsFeedback: latestLyricsFeedback,
+                trackIdentity: currentPlayerTrack?.observationIdentity
             )
         }
         updateProgressTimer()
@@ -689,7 +691,7 @@ final class MenuBarController: NSObject {
         return CGFloat(min(1, max(0, (position - line.time) / span)))
     }
 
-    private func currentPlaybackPosition() -> TimeInterval? {
+    private func currentPlaybackPosition(applyingLyricOffset: Bool = true) -> TimeInterval? {
         guard let latestPlayerPosition else { return nil }
         let base: TimeInterval
         if let latestPlayerUptime {
@@ -697,7 +699,7 @@ final class MenuBarController: NSObject {
         } else {
             base = latestPlayerPosition
         }
-        return max(0, base + lyricTimingOffset)
+        return max(0, base + (applyingLyricOffset ? lyricTimingOffset : 0))
     }
 
     private func updateProgressTimer() {
@@ -945,12 +947,16 @@ final class MenuBarController: NSObject {
                 }
             }
             settingsWindowController?.onMediaSeek = { [weak self] seconds in
-                guard let self else { return }
+                guard let self, !self.isPlayerStopped, seconds.isFinite else { return }
                 let activeSource = self.currentPlayerTrack?.playerSource ?? self.player.source
                 SystemMediaTransport.seek(to: seconds, activeSource: activeSource)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                    self.startPoll()
+                self.seekRefresh?.cancel()
+                let refresh = DispatchWorkItem { [weak self] in
+                    self?.seekRefresh = nil
+                    self?.startPoll()
                 }
+                self.seekRefresh = refresh
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: refresh)
             }
         }
         settingsWindowController?.show(page: page)
@@ -1092,7 +1098,22 @@ final class MenuBarController: NSObject {
         precondition(!controller.overlay.isEditing, "Locking from settings must end temporary editing")
         precondition(defaults.bool(forKey: FreeLyricsPreferences.lockedKey), "Settings lock persists")
         precondition(!controller.overlay.freeInteraction.testDragSurface.isDragEnabled, "Settings lock disables direct drag surface")
-        print("PASS: display-mode selection reopens closed lyrics, including same-mode reselection; settings locking ends editing")
+        defaults.set(true, forKey: FreeLyricsPreferences.passThroughKey)
+        lockControl.state = .off
+        _ = NSApp.sendAction(lockControl.action!, to: lockControl.target, from: lockControl)
+        precondition(!defaults.bool(forKey: FreeLyricsPreferences.lockedKey), "Settings unlock persists")
+        precondition(!defaults.bool(forKey: FreeLyricsPreferences.passThroughKey), "Settings unlock clears conflicting click-through")
+        precondition(!controller.overlay.freeInteraction.window.ignoresMouseEvents, "Settings unlock restores mouse input")
+        precondition(controller.overlay.freeInteraction.testDragSurface.isDragEnabled, "Settings unlock enables direct dragging")
+        controller.overlay.freeInteraction.onInteractionChanged = { [weak controller] in
+            controller?.settingsWindowController?.refresh()
+        }
+        lockControl.state = .on
+        _ = NSApp.sendAction(lockControl.action!, to: lockControl.target, from: lockControl)
+        controller.overlay.freeInteraction.testHover(true)
+        controller.overlay.freeInteraction.testUnlockButton.performClick(nil)
+        precondition(lockControl.state == .off, "Desktop unlock immediately refreshes the Settings lock switch")
+        print("PASS: display selection reopens lyrics and desktop and Settings lock stay synchronized")
     }
     #endif
 

@@ -109,7 +109,6 @@ enum FreeLyricsPreferences {
     static func save(_ anchor: FreeLyricsAnchor, vertical: Bool, defaults: UserDefaults = .standard) {
         if let data = try? JSONEncoder().encode(anchor) { defaults.set(data, forKey: anchorKey(vertical: vertical)) }
     }
-    static let editNotification = Notification.Name("NotchMuseEditFreeLyrics")
     static let resetNotification = Notification.Name("NotchMuseResetFreeLyrics")
 }
 
@@ -121,6 +120,20 @@ struct FreeLyricsPolicy {
     var ignoresMouseEvents: Bool { passThrough && !editing }
     var canMove: Bool { editing || (!locked && !passThrough) }
     func hidesLyrics(hovered: Bool) -> Bool { hideOnHover && hovered && !editing }
+
+    static func lockedHoverContains(_ point: NSPoint, lyric: NSRect, pill: NSRect?) -> Bool {
+        if lyric.contains(point) { return true }
+        guard let pill else { return false }
+        if pill.contains(point) { return true }
+        let above = pill.midY > lyric.midY
+        let nearEdge = above ? lyric.maxY : lyric.minY
+        let farEdge = above ? pill.minY : pill.maxY
+        // Span the gap even when screen-edge clamping shifts the pill sideways.
+        return point.y >= min(nearEdge, farEdge) && point.y <= max(nearEdge, farEdge)
+            && point.x >= min(lyric.minX, pill.minX) && point.x <= max(lyric.maxX, pill.maxX)
+    }
+
+    static let lockedHoverExitDelay = 0.25
 }
 
 @MainActor
@@ -160,6 +173,8 @@ private final class PillIconButton: NSButton {
     }
 
     required init?(coder: NSCoder) { nil }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
     override func sendAction(_ action: Selector?, to target: Any?) -> Bool {
         InteractionSoundEngine.shared.play(.tick)
@@ -203,6 +218,8 @@ final class FreeLyricsDragSurfaceView: NSView {
             }
         }
     }
+    var onHover: ((Bool) -> Void)?
+    private var hoverTracking: NSTrackingArea?
     var onDragStart: ((NSEvent) -> Void)?
     var onDrag: ((NSEvent) -> Void)?
     var onDragEnd: (() -> Void)?
@@ -231,6 +248,17 @@ final class FreeLyricsDragSurfaceView: NSView {
         super.layout()
         updateSurfaceStyle()
     }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let hoverTracking { removeTrackingArea(hoverTracking) }
+        let tracking = NSTrackingArea(rect: .zero, options: [.activeAlways, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(tracking)
+        hoverTracking = tracking
+    }
+
+    override func mouseEntered(with event: NSEvent) { onHover?(true) }
+    override func mouseExited(with event: NSEvent) { onHover?(false) }
 
     var activeHighlightFrame: NSRect {
         let candidate = tightContentRect.isEmpty ? bounds : tightContentRect
@@ -553,6 +581,7 @@ final class FreeLyricsInteraction: NSObject {
     private let lyricViews: [NSView]
     private let container: NSView
     private let dragSurface = FreeLyricsDragSurfaceView()
+    private let unlockButton = PillIconButton()
     private let unlockWindow = NSPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
     private let snapGuideWindow = NSPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
     private let defaults: UserDefaults
@@ -568,7 +597,10 @@ final class FreeLyricsInteraction: NSObject {
     private var hintWork: DispatchWorkItem?
     private var policy = FreeLyricsPolicy()
     private var hovered = false
-    private var hoverTimer: Timer?
+    private var globalHoverMonitor: Any?
+    private var localHoverMonitor: Any?
+    private var lockedLyricRect: NSRect?
+    private var clickThroughHoverTimer: Timer?
     private var exitWork: DispatchWorkItem?
     private var screenObserver: NSObjectProtocol?
     private var spaceObserver: NSObjectProtocol?
@@ -584,6 +616,7 @@ final class FreeLyricsInteraction: NSObject {
     var onColor: (() -> Void)?
     var onInteractionChanged: (() -> Void)?
     var isEditing: Bool { policy.editing }
+    private var isLocked: Bool { policy.locked && !policy.editing }
 
     /// Toolbar defaults ABOVE the lyrics so dragging down to the Dock is unobstructed;
     /// flips below only when the window is pinned near the very top of the screen.
@@ -600,6 +633,7 @@ final class FreeLyricsInteraction: NSObject {
         super.init()
 
         dragSurface.autoresizingMask = [.width, .height]
+        dragSurface.onHover = { [weak self] entered in self?.trackUnlockedHover(entered) }
         dragSurface.onDragStart = { [weak self] event in self?.beginDrag(with: event) }
         dragSurface.onDrag = { [weak self] event in self?.continueDrag(with: event) }
         dragSurface.onDragEnd = { [weak self] in self?.endDrag() }
@@ -612,8 +646,27 @@ final class FreeLyricsInteraction: NSObject {
         unlockWindow.isReleasedWhenClosed = false
         unlockWindow.level = window.level
         unlockWindow.collectionBehavior = window.collectionBehavior
+        unlockWindow.becomesKeyOnlyIfNeeded = true
+        unlockWindow.acceptsMouseMovedEvents = true
         unlockWindow.title = L10n.text("Unlock Position")
-        window.addChildWindow(unlockWindow, ordered: .above)
+        unlockWindow.alphaValue = 0
+
+        let unlockPill = NSVisualEffectView()
+        unlockPill.material = .hudWindow
+        unlockPill.appearance = NSAppearance(named: .darkAqua)
+        unlockPill.blendingMode = .behindWindow
+        unlockPill.state = .active
+        unlockPill.wantsLayer = true
+        unlockPill.layer?.cornerRadius = 14
+        unlockPill.layer?.masksToBounds = true
+        unlockButton.isBordered = false
+        unlockButton.font = .systemFont(ofSize: 12, weight: .semibold)
+        unlockButton.target = self
+        unlockButton.action = #selector(toggleLock)
+        unlockButton.onHoverChange = { [weak self] _ in self?.checkLockedHover() }
+        unlockButton.autoresizingMask = [.width, .height]
+        unlockPill.addSubview(unlockButton)
+        unlockWindow.contentView = unlockPill
 
         snapGuideWindow.isOpaque = false
         snapGuideWindow.backgroundColor = .clear
@@ -634,7 +687,7 @@ final class FreeLyricsInteraction: NSObject {
         toolbar.layer?.borderWidth = 0.5
         toolbar.layer?.borderColor = NSColor.white.withAlphaComponent(0.16).cgColor
         toolbar.layer?.masksToBounds = true
-        toolbar.onHover = { [weak self] in self?.setHovered($0) }
+        toolbar.onHover = { [weak self] entered in self?.trackUnlockedHover(entered) }
         container.addSubview(toolbar)
 
         configure(lockButton, symbol: "lock.open", label: "Lock Position", action: #selector(toggleLock))
@@ -651,6 +704,25 @@ final class FreeLyricsInteraction: NSObject {
         spaceObserver = NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.reposition() }
         }
+    }
+
+    deinit {
+        // The interaction is owned and released by the main-actor overlay lane.
+        MainActor.assumeIsolated { tearDown() }
+    }
+
+    private func tearDown() {
+        stopLockedHoverMonitoring()
+        clickThroughHoverTimer?.invalidate()
+        exitWork?.cancel()
+        hintWork?.cancel()
+        if let screenObserver { NotificationCenter.default.removeObserver(screenObserver) }
+        if let spaceObserver { NSWorkspace.shared.notificationCenter.removeObserver(spaceObserver) }
+        if dragging { NSCursor.pop() }
+        unlockWindow.orderOut(nil)
+        snapGuideWindow.orderOut(nil)
+        hintPanel.orderOut(nil)
+        colorPopover?.close()
     }
 
     private func configure(_ button: PillIconButton, symbol: String, label: String, action: Selector?) {
@@ -725,12 +797,13 @@ final class FreeLyricsInteraction: NSObject {
     }
 
     func update(hideOnHover: Bool) {
+        let wasLocked = isLocked
+        let wasIgnoringMouse = window.ignoresMouseEvents
         policy.locked = defaults.bool(forKey: FreeLyricsPreferences.lockedKey)
         policy.passThrough = defaults.bool(forKey: FreeLyricsPreferences.passThroughKey)
         policy.hideOnHover = hideOnHover
-        let unlocked = policy.editing || !policy.locked
-        window.ignoresMouseEvents = policy.ignoresMouseEvents || !unlocked
-        unlockWindow.ignoresMouseEvents = policy.ignoresMouseEvents
+        if dragging && !policy.canMove { endDrag() }
+        window.ignoresMouseEvents = policy.ignoresMouseEvents || isLocked
         let above = isToolbarAbove
         dragSurface.isDragEnabled = policy.canMove
         dragSurface.frame = NSRect(
@@ -740,8 +813,8 @@ final class FreeLyricsInteraction: NSObject {
             height: max(0, container.bounds.height - Self.toolbarHeight)
         )
 
-        let lockAction = L10n.text(unlocked ? "Lock Position / Click-Through" : "Unlock Position")
-        lockButton.image = NSImage(systemSymbolName: unlocked ? "lock.open" : "lock", accessibilityDescription: lockAction)
+        let lockAction = L10n.text("Lock Position / Click-Through")
+        lockButton.image = NSImage(systemSymbolName: "lock.open", accessibilityDescription: lockAction)
         lockButton.toolTip = lockAction
         lockButton.setAccessibilityLabel(lockAction)
         let orientationAction = L10n.text(defaults.bool(forKey: FreeLyricsPreferences.verticalKey) ? "Switch to Horizontal" : "Switch to Vertical")
@@ -754,37 +827,93 @@ final class FreeLyricsInteraction: NSObject {
         closeButton.toolTip = L10n.text("Hide Lyrics")
 
         let controls: [NSView] = [lockButton, orientationButton, colorButton, mainWindowButton, settingsButton, closeButton]
-        let width: CGFloat = unlocked ? Self.expandedToolbarWidth : 38
-        let height: CGFloat = 34
         let toolbarY: CGFloat = above ? max(2, container.bounds.height - Self.toolbarHeight + 2) : 2
-        if unlocked {
-            unlockWindow.orderOut(nil)
-            if toolbar.superview !== container {
-                unlockWindow.contentView = nil
-                container.addSubview(toolbar)
-            }
-            toolbar.frame = NSRect(x: (window.frame.width - width) / 2, y: toolbarY, width: width, height: height)
-        } else {
-            if unlockWindow.contentView !== toolbar {
-                toolbar.removeFromSuperview()
-                unlockWindow.contentView = toolbar
-            }
-            toolbar.frame = NSRect(x: 0, y: 0, width: width, height: height)
-            positionUnlockWindow()
-        }
+        toolbar.frame = NSRect(x: (window.frame.width - Self.expandedToolbarWidth) / 2, y: toolbarY,
+                               width: Self.expandedToolbarWidth, height: 34)
         for (index, child) in controls.enumerated() {
-            child.isHidden = !unlocked && child !== lockButton
-            child.frame = NSRect(x: unlocked ? 6 + CGFloat(index) * 34 : 5, y: 3, width: 28, height: 28)
+            child.frame = NSRect(x: 6 + CGFloat(index) * 34, y: 3, width: 28, height: 28)
         }
-        if hoverTimer == nil {
-            hoverTimer = Timer.scheduledTimer(withTimeInterval: 0.06, repeats: true) { [weak self] _ in
-                MainActor.assumeIsolated {
-                    guard let self, self.window.isVisible else { return }
-                    self.setHovered(self.window.frame.contains(NSEvent.mouseLocation))
+
+        let lyricRect = isLocked && window.isVisible ? lyricScreenRect : nil
+        let hoverGeometryChanged = lockedLyricRect != lyricRect
+        lockedLyricRect = lyricRect
+        if let lyricRect {
+            if !wasLocked || unlockButton.title.isEmpty {
+                unlockButton.title = L10n.text("🔒 Unlock")
+                unlockButton.setAccessibilityLabel(L10n.text("Unlock Position"))
+            }
+            if hoverGeometryChanged || !wasLocked { positionUnlockWindow(relativeTo: lyricRect) }
+        }
+        if wasLocked != isLocked || wasIgnoringMouse != window.ignoresMouseEvents {
+            hideHint()
+            exitWork?.cancel()
+            exitWork = nil
+            hovered = isLocked ? lockedHoverContains(NSEvent.mouseLocation) : window.frame.contains(NSEvent.mouseLocation)
+        }
+        updateHoverMonitoring()
+        if hoverGeometryChanged { checkLockedHover() }
+        applyVisibility(animated: false)
+    }
+
+    private func updateHoverMonitoring() {
+        if window.isVisible && isLocked {
+            if globalHoverMonitor == nil {
+                globalHoverMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
+                    MainActor.assumeIsolated { self?.checkLockedHover() }
                 }
             }
+            // Global monitors receive only events sent to other applications.
+            if localHoverMonitor == nil {
+                localHoverMonitor = NSEvent.addLocalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
+                    self?.checkLockedHover()
+                    return event
+                }
+            }
+        } else {
+            stopLockedHoverMonitoring()
         }
-        applyVisibility(animated: false)
+
+        // A manually enabled click-through surface cannot receive tracking-area events.
+        if window.isVisible && !isLocked && policy.ignoresMouseEvents && policy.hideOnHover {
+            if clickThroughHoverTimer == nil {
+                clickThroughHoverTimer = Timer.scheduledTimer(withTimeInterval: 0.06, repeats: true) { [weak self] _ in
+                    MainActor.assumeIsolated {
+                        guard let self else { return }
+                        self.setHovered(self.window.frame.contains(NSEvent.mouseLocation))
+                    }
+                }
+            }
+        } else {
+            clickThroughHoverTimer?.invalidate()
+            clickThroughHoverTimer = nil
+        }
+    }
+
+    private func stopLockedHoverMonitoring() {
+        if let globalHoverMonitor { NSEvent.removeMonitor(globalHoverMonitor) }
+        if let localHoverMonitor { NSEvent.removeMonitor(localHoverMonitor) }
+        globalHoverMonitor = nil
+        localHoverMonitor = nil
+    }
+
+    private func trackUnlockedHover(_ entered: Bool) {
+        guard !isLocked, !window.ignoresMouseEvents else { return }
+        setHovered(entered)
+    }
+
+    private var lyricScreenRect: NSRect {
+        window.convertToScreen(dragSurface.convert(dragSurface.activeHighlightFrame, to: nil))
+    }
+
+    private func lockedHoverContains(_ point: NSPoint) -> Bool {
+        guard let lockedLyricRect else { return false }
+        return FreeLyricsPolicy.lockedHoverContains(point, lyric: lockedLyricRect,
+                                             pill: unlockWindow.isVisible ? unlockWindow.frame : nil)
+    }
+
+    private func checkLockedHover() {
+        guard window.isVisible, isLocked else { return }
+        setHovered(lockedHoverContains(NSEvent.mouseLocation))
     }
 
     func beginEditing() {
@@ -805,6 +934,7 @@ final class FreeLyricsInteraction: NSObject {
         if locking {
             endEditing()
         } else {
+            defaults.set(false, forKey: FreeLyricsPreferences.passThroughKey)
             beginEditing()
             onInteractionChanged?()
         }
@@ -886,24 +1016,34 @@ final class FreeLyricsInteraction: NSObject {
         } else if hovered && exitWork == nil {
             let work = DispatchWorkItem { [weak self] in
                 guard let self else { return }
-                self.hovered = false
                 self.exitWork = nil
+                if self.isLocked && self.lockedHoverContains(NSEvent.mouseLocation) { return }
+                self.hovered = false
                 self.applyVisibility(animated: true)
             }
             exitWork = work
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.18, execute: work)
+            let delay = isLocked ? FreeLyricsPolicy.lockedHoverExitDelay : 0.18
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
         }
     }
 
     private func applyVisibility(animated: Bool) {
         let lyricsAlpha: CGFloat = policy.hidesLyrics(hovered: hovered) ? 0 : 1
         let popoverShown = colorPopover?.isShown == true
-        let toolbarAlpha: CGFloat = (hovered || dragging || popoverShown) && !policy.ignoresMouseEvents ? 1 : 0
-        dragSurface.isHoveredNow = (hovered || popoverShown) && !policy.ignoresMouseEvents
-        if policy.locked && !policy.editing && toolbarAlpha > 0 && window.isVisible {
-            if !unlockWindow.isVisible { unlockWindow.orderFrontRegardless() }
-        } else {
+        let interactive = !isLocked && !policy.ignoresMouseEvents
+        let toolbarAlpha: CGFloat = (hovered || dragging || popoverShown) && interactive ? 1 : 0
+        dragSurface.isHoveredNow = (hovered || popoverShown) && interactive
+        if isLocked && hovered && window.isVisible {
+            if !unlockWindow.isVisible {
+                unlockWindow.orderFrontRegardless()
+                NSAnimationContext.runAnimationGroup { context in
+                    context.duration = animated && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? 0.14 : 0
+                    unlockWindow.animator().alphaValue = 1
+                }
+            }
+        } else if unlockWindow.isVisible {
             unlockWindow.orderOut(nil)
+            unlockWindow.alphaValue = 0
         }
         guard lyricViews.contains(where: { $0.alphaValue != lyricsAlpha }) || toolbar.alphaValue != toolbarAlpha else { return }
         NSAnimationContext.runAnimationGroup { context in
@@ -913,21 +1053,37 @@ final class FreeLyricsInteraction: NSObject {
         }
     }
 
-    private func positionUnlockWindow() {
-        let y: CGFloat = isToolbarAbove ? max(2, window.frame.height - Self.toolbarHeight + 2) : 2
-        let frame = window.convertToScreen(NSRect(x: (window.frame.width - 38) / 2, y: y, width: 38, height: 34))
-        if unlockWindow.frame != frame { unlockWindow.setFrame(frame, display: true) }
+    private func positionUnlockWindow(relativeTo lyric: NSRect) {
+        let width = max(64, ceil(unlockButton.intrinsicContentSize.width) + 12)
+        let height: CGFloat = 28
+        let visible = window.screen?.visibleFrame
+        let above = lyric.maxY + 2
+        let y = above + height <= (visible?.maxY ?? .greatestFiniteMagnitude) ? above : lyric.minY - height - 2
+        let x = lyric.midX - width / 2
+        let clampedX = visible.map { max($0.minX, min(x, $0.maxX - width)) } ?? x
+        let frame = NSRect(x: clampedX, y: y, width: width, height: height)
+        if unlockWindow.frame != frame {
+            unlockWindow.setFrame(frame, display: true)
+            unlockButton.frame = NSRect(origin: .zero, size: frame.size)
+        }
     }
 
     private func reposition() {
         guard window.isVisible, !dragging, let screen = window.screen ?? NSScreen.main else { return }
         window.setFrame(frame(size: requestedSize, vertical: vertical, fallback: screen), display: true)
-        positionUnlockWindow()
+        if isLocked {
+            let lyricRect = lyricScreenRect
+            lockedLyricRect = lyricRect
+            positionUnlockWindow(relativeTo: lyricRect)
+            checkLockedHover()
+        }
     }
 
     func hide() {
-        hoverTimer?.invalidate()
-        hoverTimer = nil
+        lockedLyricRect = nil
+        stopLockedHoverMonitoring()
+        clickThroughHoverTimer?.invalidate()
+        clickThroughHoverTimer = nil
         exitWork?.cancel()
         exitWork = nil
         hideHint()
@@ -935,6 +1091,7 @@ final class FreeLyricsInteraction: NSObject {
         colorPopover = nil
         hovered = false
         policy.editing = false
+        if dragging { NSCursor.pop() }
         dragging = false
         wasSnapped = false
         dragSurface.isHoveredNow = false
@@ -953,6 +1110,9 @@ final class FreeLyricsInteraction: NSObject {
     var testToolbar: NSView { toolbar }
     var testDragSurface: FreeLyricsDragSurfaceView { dragSurface }
     var testUnlockWindow: NSWindow { unlockWindow }
+    var testUnlockButton: NSButton { unlockButton }
+    var testHasLockedHoverMonitors: Bool { globalHoverMonitor != nil && localHoverMonitor != nil }
+    var testHasAnyLockedHoverMonitor: Bool { globalHoverMonitor != nil || localHoverMonitor != nil }
     static var testCuratedGradientCount: Int { QuickColorPopoverController.curatedGradientCount }
     #endif
 

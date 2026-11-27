@@ -82,8 +82,6 @@ class AppearanceSurfaceView: NSView {
 @MainActor
 final class SlimOverlayScroller: NSScroller {
     static let pillWidth: CGFloat = 4
-    static let minPillHeight: CGFloat = 48
-    static let maxPillHeight: CGFloat = 72
 
     override class var isCompatibleWithOverlayScrollers: Bool { true }
 
@@ -91,38 +89,22 @@ final class SlimOverlayScroller: NSScroller {
         10
     }
 
-    static func visualKnobRect(in bounds: NSRect, nativeKnobRect: NSRect, scrollProportion: CGFloat) -> NSRect {
-        let insetY: CGFloat = 6
-        let usableH = max(0, bounds.height - insetY * 2)
-        guard usableH > 8 else { return .zero }
-
-        let targetH: CGFloat
-        if nativeKnobRect.height > maxPillHeight {
-            targetH = min(maxPillHeight, max(minPillHeight, usableH * 0.16))
-        } else {
-            targetH = min(maxPillHeight, max(min(minPillHeight, usableH), nativeKnobRect.height))
+    static func visualKnobRect(_ nativeKnob: NSRect, vertical: Bool) -> NSRect {
+        // AppKit owns the thumb's length and travel, including hit testing and drag tracking.
+        if vertical {
+            let width = min(pillWidth, nativeKnob.width)
+            return nativeKnob.insetBy(dx: (nativeKnob.width - width) / 2, dy: 0)
         }
-        let clampedH = min(usableH, targetH)
-        let travel = max(0, usableH - clampedH)
-        let p = min(1, max(0, scrollProportion))
-        let y = insetY + travel * p
-        let x = max(0, bounds.maxX - pillWidth - 3)
-        return NSRect(x: x, y: y, width: pillWidth, height: clampedH)
+        let height = min(pillWidth, nativeKnob.height)
+        return nativeKnob.insetBy(dx: 0, dy: (nativeKnob.height - height) / 2)
     }
 
-    override func drawKnobSlot(in slotRect: NSRect, highlight flag: Bool) {
-        // Intentionally empty: zero gray track trough
-    }
+    override func drawKnobSlot(in slotRect: NSRect, highlight flag: Bool) {}
 
     override func drawKnob() {
-        let nativeRect = rect(for: .knob)
-        guard nativeRect.height > 0, bounds.height > 12 else { return }
-        let pillRect = Self.visualKnobRect(
-            in: bounds,
-            nativeKnobRect: nativeRect,
-            scrollProportion: CGFloat(doubleValue)
-        )
-        guard pillRect.height > 0 else { return }
+        let nativeKnob = rect(for: .knob)
+        guard !nativeKnob.isEmpty else { return }
+        let pillRect = Self.visualKnobRect(nativeKnob, vertical: bounds.height >= bounds.width)
         effectiveAppearance.performAsCurrentDrawingAppearance {
             let isDark = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
             let tint = isDark

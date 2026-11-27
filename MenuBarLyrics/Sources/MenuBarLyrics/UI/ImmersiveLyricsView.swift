@@ -1223,10 +1223,30 @@ private final class TransportButton: NSButton {
     }
 }
 
+struct ImmersiveSeekFeedback {
+    let target: TimeInterval
+    let issuedAt: TimeInterval
+
+    func awaitsPlayer(position: TimeInterval, playing: Bool, now: TimeInterval) -> Bool {
+        let elapsed = max(0, now - issuedAt)
+        let expected = target + (playing ? elapsed : 0)
+        // Allow poll latency, including at the end of a track where playback is clamped.
+        return elapsed < 1.5 && abs(position - target) > 0.35 && abs(position - expected) > 0.35
+    }
+}
+
 @MainActor
 private final class InteractiveProgressBarView: NSView {
-    var progress: CGFloat = 0 { didSet { needsDisplay = true } }
+    private var playerPosition: TimeInterval = 0
+    private var duration: TimeInterval = 0
+    private var pendingSeek: ImmersiveSeekFeedback?
+    private var trackIdentity: String?
+    private var canSeek = false
+    var onDisplayPosition: ((TimeInterval) -> Void)?
     var onSeekFraction: ((CGFloat) -> Void)?
+    private var scrubProgress: CGFloat?
+    private var lastSeekTime: TimeInterval = 0
+    private var lastSeekFraction: CGFloat = 0
     private var isHovered = false { didSet { if isHovered != oldValue { needsDisplay = true } } }
     private var tracking: NSTrackingArea?
 
@@ -1239,7 +1259,39 @@ private final class InteractiveProgressBarView: NSView {
 
     override func resetCursorRects() {
         super.resetCursorRects()
-        addCursorRect(bounds, cursor: .pointingHand)
+        if canSeek { addCursorRect(bounds, cursor: .pointingHand) }
+    }
+
+    func update(position: TimeInterval, duration: TimeInterval, identity: String?, playing: Bool, canSeek: Bool) {
+        if trackIdentity != identity || self.duration != duration || !canSeek {
+            resetSeek()
+        }
+        if self.canSeek != canSeek {
+            self.canSeek = canSeek
+            window?.invalidateCursorRects(for: self)
+        }
+        trackIdentity = identity
+        playerPosition = position
+        self.duration = duration
+        if let pendingSeek, !pendingSeek.awaitsPlayer(position: position, playing: playing, now: ProcessInfo.processInfo.systemUptime) {
+            self.pendingSeek = nil
+        }
+        updateDisplayPosition()
+    }
+
+    func resetSeek() {
+        scrubProgress = nil
+        pendingSeek = nil
+        updateDisplayPosition()
+    }
+
+    private var displayedPosition: TimeInterval {
+        scrubProgress.map { Double($0) * duration } ?? pendingSeek?.target ?? playerPosition
+    }
+
+    private func updateDisplayPosition() {
+        onDisplayPosition?(displayedPosition)
+        needsDisplay = true
     }
 
     override func updateTrackingAreas() {
@@ -1253,12 +1305,40 @@ private final class InteractiveProgressBarView: NSView {
     override func mouseEntered(with event: NSEvent) { isHovered = true }
     override func mouseExited(with event: NSEvent) { isHovered = false }
 
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
     override func mouseDown(with event: NSEvent) {
+        guard canSeek else { return }
+        scrubProgress = nil
+        updateScrub(with: event, sendSeek: true)
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard scrubProgress != nil else { return }
+        updateScrub(with: event, sendSeek: ProcessInfo.processInfo.systemUptime - lastSeekTime >= 0.1)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        guard scrubProgress != nil else { return }
+        updateScrub(with: event, sendSeek: true)
+        scrubProgress = nil
+        updateDisplayPosition()
+    }
+
+    private func updateScrub(with event: NSEvent, sendSeek: Bool) {
         let pt = convert(event.locationInWindow, from: nil)
         guard bounds.width > 0 else { return }
-        let frac = min(1, max(0, pt.x / bounds.width))
-        progress = frac
-        onSeekFraction?(frac)
+        let fraction = min(1, max(0, (pt.x - bounds.minX) / bounds.width))
+        let isFirstSeek = scrubProgress == nil
+        scrubProgress = fraction
+        // Spotify and Music seek via synchronous Apple Events. Bound the command rate during a drag.
+        if sendSeek && (isFirstSeek || fraction != lastSeekFraction) {
+            lastSeekTime = ProcessInfo.processInfo.systemUptime
+            lastSeekFraction = fraction
+            pendingSeek = ImmersiveSeekFeedback(target: Double(fraction) * duration, issuedAt: lastSeekTime)
+            onSeekFraction?(fraction)
+        }
+        updateDisplayPosition()
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -1269,7 +1349,7 @@ private final class InteractiveProgressBarView: NSView {
             NSColor.labelColor.withAlphaComponent(isHovered ? 0.14 : 0.09).setFill()
             NSBezierPath(roundedRect: trackRect, xRadius: barH / 2, yRadius: barH / 2).fill()
 
-            let clamped = min(1, max(0, progress))
+            let clamped = duration > 0 ? min(1, max(0, CGFloat(displayedPosition / duration))) : 0
             let fillW = bounds.width * clamped
             if fillW > 0 {
                 let fillRect = NSRect(x: 0, y: barY, width: fillW, height: barH)
@@ -1277,7 +1357,7 @@ private final class InteractiveProgressBarView: NSView {
                 NSBezierPath(roundedRect: fillRect, xRadius: barH / 2, yRadius: barH / 2).fill()
             }
 
-            if isHovered {
+            if isHovered && canSeek {
                 let thumbD: CGFloat = 10
                 let thumbX = min(max(0, fillW - thumbD / 2), max(0, bounds.width - thumbD))
                 let thumbRect = NSRect(x: thumbX, y: (bounds.height - thumbD) / 2, width: thumbD, height: thumbD)
@@ -1379,6 +1459,7 @@ final class ImmersiveLyricsView: NSView {
         isHidden = !visible
         missingView.setActive(visible && !missingView.isHidden)
         if !visible {
+            progressBar.resetSeek()
             setHoveredLine(nil)
             sharePopover?.close()
             sharePopover = nil
@@ -1459,6 +1540,11 @@ final class ImmersiveLyricsView: NSView {
         progressBar.onSeekFraction = { [weak self] frac in
             guard let self, self.currentDuration > 0 else { return }
             self.onSeek?(self.currentDuration * Double(frac))
+        }
+
+        progressBar.onDisplayPosition = { [weak self] position in
+            guard let self else { return }
+            self.timeLabel.stringValue = "\(self.formatClock(position)) / \(self.formatClock(self.currentDuration))"
         }
 
         trackTitleLabel.stringValue = isZh ? "未在播放" : "Not Playing"
@@ -1547,11 +1633,11 @@ final class ImmersiveLyricsView: NSView {
             // Edge-to-edge interactive progress bar along very top of transport bar
             progressBar.leadingAnchor.constraint(equalTo: transportBar.leadingAnchor, constant: 10),
             progressBar.trailingAnchor.constraint(equalTo: transportBar.trailingAnchor, constant: -10),
-            progressBar.topAnchor.constraint(equalTo: transportBar.topAnchor, constant: 3),
-            progressBar.heightAnchor.constraint(equalToConstant: 12),
+            progressBar.topAnchor.constraint(equalTo: transportBar.topAnchor, constant: 1),
+            progressBar.heightAnchor.constraint(equalToConstant: 16),
 
             trackTitleLabel.leadingAnchor.constraint(equalTo: transportBar.leadingAnchor, constant: 14),
-            trackTitleLabel.topAnchor.constraint(equalTo: progressBar.bottomAnchor, constant: 4),
+            trackTitleLabel.topAnchor.constraint(equalTo: progressBar.bottomAnchor, constant: 2),
             trackTitleLabel.trailingAnchor.constraint(lessThanOrEqualTo: prevButton.leadingAnchor, constant: -10),
 
             metaBottomRow.leadingAnchor.constraint(equalTo: trackTitleLabel.leadingAnchor),
@@ -1633,10 +1719,11 @@ final class ImmersiveLyricsView: NSView {
         isPaused: Bool,
         position: TimeInterval,
         duration: TimeInterval,
-        lyricsMissing: Bool
+        lyricsMissing: Bool,
+        trackIdentity: String?
     ) {
         isPlayingState = isPlaying
-        currentDuration = max(0, duration)
+        currentDuration = duration.isFinite ? max(0, duration) : 0
         currentAlbumName = albumName ?? ""
         currentArtworkImage = artworkImage
         playPauseButton.image = NSImage(systemSymbolName: isPlaying ? "pause.fill" : "play.fill", accessibilityDescription: nil)?
@@ -1651,9 +1738,10 @@ final class ImmersiveLyricsView: NSView {
             trackArtistLabel.stringValue = "NotchMuse"
         }
 
-        let safePos = min(max(0, position), currentDuration > 0 ? currentDuration : max(0, position))
-        timeLabel.stringValue = "\(formatClock(safePos)) / \(formatClock(currentDuration))"
-        progressBar.progress = currentDuration > 0 ? CGFloat(safePos / currentDuration) : 0
+        let finitePosition = position.isFinite ? max(0, position) : 0
+        let safePos = currentDuration > 0 ? min(finitePosition, currentDuration) : finitePosition
+        progressBar.update(position: safePos, duration: currentDuration, identity: trackIdentity,
+                           playing: isPlaying, canSeek: hasTrack && (isPlaying || isPaused) && currentDuration > 0 && onSeek != nil)
 
         if !hasTrack {
             shareButton.isEnabled = false

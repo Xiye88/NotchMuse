@@ -5,14 +5,11 @@ import LyricsCore
 @MainActor
 enum FreeLyricsSelfTests {
     static func run() {
-        _ = NSApplication.shared
         var checks = 0
         func check(_ value: Bool, _ message: String) {
             precondition(value, message)
             checks += 1
         }
-        MenuBarController.testDisplayModeReopen()
-        MenuBarController.testVocalGapPresentation()
         let visible = NSRect(x: -1920, y: 32, width: 1920, height: 1048)
         let size = NSSize(width: 440, height: 90)
         for x in [-0.5, 0, 0.5, 1, 1.5, Double.nan] {
@@ -44,6 +41,28 @@ enum FreeLyricsSelfTests {
             }
         }
         check(!FreeLyricsPolicy().hidesLyrics(hovered: true), "hover preference off")
+        let lyric = NSRect(x: -220, y: 100, width: 200, height: 40)
+        for pill in [NSRect(x: -150, y: 142, width: 64, height: 28),
+                     NSRect(x: -35, y: 70, width: 64, height: 28)] {
+            let gapY: CGFloat = pill.midY > lyric.midY ? 141 : 99
+            let gap = NSPoint(x: pill.midX, y: gapY)
+            let pillCenter = NSPoint(x: pill.midX, y: pill.midY)
+            let lyricCenter = NSPoint(x: lyric.midX, y: lyric.midY)
+            check(FreeLyricsPolicy.lockedHoverContains(lyricCenter, lyric: lyric, pill: nil), "lyrics summon the pill")
+            check(!FreeLyricsPolicy.lockedHoverContains(gap, lyric: lyric, pill: nil), "an invisible pill does not create a hover bridge")
+            check(FreeLyricsPolicy.lockedHoverContains(gap, lyric: lyric, pill: pill), "gap sustains hover even with a shifted or flipped pill")
+            check(FreeLyricsPolicy.lockedHoverContains(pillCenter, lyric: lyric, pill: pill), "hover survives reaching the pill")
+            check(!FreeLyricsPolicy.lockedHoverContains(NSPoint(x: 60, y: gapY), lyric: lyric, pill: pill), "leaving the bridge starts the grace period")
+        }
+        check(FreeLyricsPolicy.lockedHoverExitDelay == 0.25, "locked hover has a 250 ms grace period")
+        guard !NSScreen.screens.isEmpty else {
+            print("PASS: \(checks) Free Lyrics geometry and policy checks")
+            print("SKIP: native Free Lyrics interaction tests require a desktop display")
+            return
+        }
+        _ = NSApplication.shared
+        MenuBarController.testDisplayModeReopen()
+        MenuBarController.testVocalGapPresentation()
         let suite = "app.notchmuse.free-lyrics.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -65,20 +84,24 @@ enum FreeLyricsSelfTests {
         let lock = interaction.testToolbar.subviews[0] as! NSButton
         let dragSurface = interaction.testDragSurface
         defaults.set(true, forKey: FreeLyricsPreferences.lockedKey)
+        defaults.set(true, forKey: FreeLyricsPreferences.passThroughKey)
         interaction.update(hideOnHover: false)
         interaction.testHover(true)
-        check(!lock.isHidden && !dragSurface.isDragEnabled, "locked hover exposes unlock, with direct dragging disabled")
+        let unlock = interaction.testUnlockButton
+        check(!dragSurface.isDragEnabled && interaction.testToolbar.alphaValue == 0, "locked hover disables direct dragging and hides the regular toolbar")
+        check(interaction.testHasLockedHoverMonitors, "visible locked lyrics have global and local hover monitors")
         check(window.ignoresMouseEvents, "locked lyric window passes clicks to the app underneath")
-        check(interaction.testToolbar.subviews.filter { !$0.isHidden }.count == 1, "locked hover exposes only unlock")
-        check(abs(lock.frame.midX - interaction.testToolbar.bounds.midX) < 0.01, "locked unlock button is centered")
+        check(unlock.window === interaction.testUnlockWindow && unlock.acceptsFirstMouse(for: nil), "unlock has its own first-click control")
         check(abs(window.convertFromScreen(interaction.testUnlockWindow.frame).midX - window.frame.width / 2) < 0.01, "unlock panel stays centered on the actual lyric window")
-        check(!interaction.testUnlockWindow.ignoresMouseEvents && interaction.testUnlockWindow.frame.size == NSSize(width: 38, height: 34), "only the small unlock panel receives locked mouse input")
+        check(!interaction.testUnlockWindow.ignoresMouseEvents && interaction.testUnlockWindow.frame.height == 28, "only the small unlock panel receives locked mouse input")
         check(interaction.testUnlockWindow.isVisible, "hover exposes the independent unlock panel")
         interaction.testHover(false)
         check(!interaction.testUnlockWindow.isVisible && window.ignoresMouseEvents, "leaving hides unlock panel without blocking background clicks")
         interaction.testHover(true)
-        lock.performClick(nil)
+        unlock.performClick(nil)
+        check(!interaction.testHasAnyLockedHoverMonitor, "unlock removes both hover monitors")
         check(!defaults.bool(forKey: FreeLyricsPreferences.lockedKey) && dragSurface.isDragEnabled && interaction.isEditing, "unlock enables direct dragging and persists unlocked preference")
+        check(!defaults.bool(forKey: FreeLyricsPreferences.passThroughKey), "desktop unlock clears conflicting click-through")
         check(!window.ignoresMouseEvents && !interaction.testUnlockWindow.isVisible, "unlock returns editing controls to the main lyric window")
         check(interaction.testToolbar.subviews.filter { !$0.isHidden }.count == 6, "unlock reveals all 6 hover pill controls")
         let orientation = interaction.testToolbar.subviews[1] as! NSButton
@@ -88,6 +111,11 @@ enum FreeLyricsSelfTests {
         check(!defaults.bool(forKey: FreeLyricsPreferences.verticalKey), "orientation shortcut returns horizontal")
         lock.performClick(nil)
         check(defaults.bool(forKey: FreeLyricsPreferences.lockedKey) && !dragSurface.isDragEnabled && !interaction.isEditing, "relock ends moving and persists locked preference")
+        interaction.hide()
+        window.orderOut(nil)
+        check(!interaction.testHasAnyLockedHoverMonitor && !interaction.testUnlockWindow.isVisible, "hiding removes the locked hover monitors and pill")
+        window.orderFrontRegardless()
+        defaults.set(false, forKey: FreeLyricsPreferences.passThroughKey)
         interaction.beginEditing()
         check(!defaults.bool(forKey: FreeLyricsPreferences.lockedKey), "explicit Move Lyrics uses the same unlocked preference as the toolbar")
         lock.performClick(nil)
@@ -133,7 +161,7 @@ enum FreeLyricsSelfTests {
         move.mouseDragged(with: drag)
         move.mouseUp(with: drag)
         check(window.frame.origin == start, "locked native mouse events cannot move lyrics")
-        lock.performClick(nil)
+        unlock.performClick(nil)
         check(!UserDefaults(suiteName: suite)!.bool(forKey: FreeLyricsPreferences.lockedKey), "unlock survives a fresh preferences reader")
         interaction.testHover(false)
         move.mouseDown(with: down)

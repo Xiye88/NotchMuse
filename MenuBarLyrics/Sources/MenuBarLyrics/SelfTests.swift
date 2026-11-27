@@ -125,6 +125,41 @@ enum SelfTests {
         print("PASS: preferred-player launch and idle media transport")
     }
 
+    @MainActor private static func testSlimOverlayScroller() {
+        for vertical in [true, false] {
+            let frame = vertical ? NSRect(x: 0, y: 0, width: 10, height: 500)
+                                 : NSRect(x: 0, y: 0, width: 500, height: 10)
+            let scroller = SlimOverlayScroller(frame: frame)
+            scroller.scrollerStyle = .overlay
+            for proportion in [CGFloat(0.1), 0.9] {
+                scroller.knobProportion = proportion
+                for value in [0.0, 0.5, 1.0] {
+                    scroller.doubleValue = value
+                    let native = scroller.rect(for: .knob)
+                    let visible = SlimOverlayScroller.visualKnobRect(native, vertical: vertical)
+                    let slot = scroller.rect(for: .knobSlot)
+                    check(slot.contains(visible) && native.contains(visible), "visible thumb stays inside the slot and native hit region")
+                    check((vertical ? visible.width : visible.height) == 4, "thumb remains slim on the cross axis")
+                    let min = vertical ? visible.minY : visible.minX
+                    let max = vertical ? visible.maxY : visible.maxX
+                    if value == 0 { check(min == (vertical ? slot.minY : slot.minX), "thumb reaches the start of the slot") }
+                    if value == 1 { check(max == (vertical ? slot.maxY : slot.maxX), "thumb reaches the end of the slot") }
+                }
+            }
+        }
+        print("PASS: native vertical and horizontal scroller geometry, including both endpoints")
+    }
+
+    private static func testImmersiveSeekFeedback() {
+        let seek = ImmersiveSeekFeedback(target: 90, issuedAt: 10)
+        check(seek.awaitsPlayer(position: 25, playing: true, now: 10.1), "stale playback tick preserves the seek target")
+        check(seek.awaitsPlayer(position: 25, playing: false, now: 11), "paused seeks also hold their target")
+        check(!seek.awaitsPlayer(position: 91, playing: true, now: 11), "advancing playback acknowledges the seek")
+        check(!seek.awaitsPlayer(position: 90, playing: false, now: 11), "paused playback acknowledges the seek")
+        check(!seek.awaitsPlayer(position: 25, playing: true, now: 11.5), "failed seeks reconcile with the player")
+        print("PASS: immersive seek holds stale samples and reconciles acknowledgements and timeout")
+    }
+
     @MainActor static func run() {
         check(LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: [:], isPreview: false), "fresh stable install opts into login launch")
         check(!LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: ["Language": "en"], isPreview: false), "existing preferences are preserved")
@@ -134,6 +169,8 @@ enum SelfTests {
         testStatusFeedback()
         testLocalization()
         testInteractionSounds()
+        testSlimOverlayScroller()
+        testImmersiveSeekFeedback()
         SettingsWindowController.testPreviewCardLayout()
         testSingleInstanceLock()
         testMusicPlayerAdapterModel()

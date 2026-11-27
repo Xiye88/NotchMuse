@@ -391,7 +391,7 @@ final class SettingsWindowController: NSWindowController {
     private let showInDockSwitch = NSSwitch()
     private let showMenuBarIconSwitch = NSSwitch()
     private let automaticUpdateSwitch = NSSwitch()
-    private let automaticInstallSwitch = NSSwitch()
+    private let automaticUpdateHelp = NSTextField(labelWithString: "")
     private var announcementBanner: NSView?
     private var announcementTitleButton: NSButton?
     private var announcementUnreadDot: NSView?
@@ -683,13 +683,6 @@ final class SettingsWindowController: NSWindowController {
         // E29: SlimOverlayScroller + LyricShareCardRenderer @2x PNG rendering across all 3 templates
         precondition(controller.settingsScrollView?.verticalScroller is SlimOverlayScroller, "Settings scroll view must use SlimOverlayScroller")
         precondition(SlimOverlayScroller.isCompatibleWithOverlayScrollers, "SlimOverlayScroller must support overlay style")
-        let tallKnob = SlimOverlayScroller.visualKnobRect(
-            in: NSRect(x: 0, y: 0, width: 10, height: 500),
-            nativeKnobRect: NSRect(x: 0, y: 0, width: 10, height: 420),
-            scrollProportion: 0.5
-        )
-        precondition(abs(tallKnob.width - 4) < 0.01, "SlimOverlayScroller pill width must be 4pt")
-        precondition(tallKnob.height >= 48 && tallKnob.height <= 72, "SlimOverlayScroller must cap overly tall knob to 48-72pt, got \(tallKnob.height)")
         precondition(LyricShareTemplate.allCases.count == 3, "Must expose 3 editorial lyric share card templates")
         for template in LyricShareTemplate.allCases {
             let rendered = LyricShareCardRenderer.renderPNG(
@@ -891,8 +884,6 @@ final class SettingsWindowController: NSWindowController {
         showMenuBarIconSwitch.action = #selector(showMenuBarIconChanged)
         automaticUpdateSwitch.target = self
         automaticUpdateSwitch.action = #selector(automaticUpdateChanged)
-        automaticInstallSwitch.target = self
-        automaticInstallSwitch.action = #selector(automaticInstallChanged)
         bilingualLyricsSwitch.target = self
         bilingualLyricsSwitch.action = #selector(bilingualLyricsChanged)
         for language in AppLanguage.allCases {
@@ -990,8 +981,6 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Interaction Sounds")), interactionSoundsSwitch],
             [label(L10n.text("Show in Dock")), showInDockSwitch],
             [label(L10n.text("Show Menu Bar Icon")), showMenuBarIconSwitch],
-            [label(L10n.text("Auto-Check Updates")), automaticUpdateSwitch],
-            [label(L10n.text("Auto-Install Updates")), automaticInstallSwitch],
             [label(L10n.text("Appearance Mode")), appAppearanceControl],
             [label(L10n.text("Missing Lyrics Animation")), missingLyricsStylePopUp],
             [label(L10n.text("Language")), languagePopUp]
@@ -1001,9 +990,14 @@ final class SettingsWindowController: NSWindowController {
         }
         let generalGrid = grid(generalRows)
         generalPage.addArrangedSubview(card(content: cardBody(title: "General", subtitle: "Player and system behavior.", grid: generalGrid, trailing: resetButton(for: .general)), showTopDivider: false))
-        let updateHelp = NSTextField(wrappingLabelWithString: L10n.text("Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared."))
-        updateHelp.font = .systemFont(ofSize: 11.5)
-        updateHelp.textColor = .secondaryLabelColor
+        let updateTitle = L10n.text("Automatic Updates (Recommended)")
+        automaticUpdateSwitch.setAccessibilityLabel(updateTitle)
+        let updateSwitchRow = NSStackView(views: [label(updateTitle), automaticUpdateSwitch])
+        updateSwitchRow.orientation = .horizontal
+        updateSwitchRow.alignment = .centerY
+        updateSwitchRow.spacing = 12
+        automaticUpdateHelp.font = .systemFont(ofSize: 11.5)
+        automaticUpdateHelp.textColor = .secondaryLabelColor
         let checkUpdates = NSButton(title: L10n.text("Check for Updates…"), target: self, action: #selector(checkForUpdates))
         checkUpdates.isEnabled = UpdateController.shared.isAvailable
         let shortVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
@@ -1019,7 +1013,7 @@ final class SettingsWindowController: NSWindowController {
         updateActionRow.orientation = .horizontal
         updateActionRow.alignment = .centerY
         updateActionRow.spacing = 12
-        let updateSection = NSStackView(views: [updateHelp, updateActionRow])
+        let updateSection = NSStackView(views: [updateSwitchRow, automaticUpdateHelp, updateActionRow])
         updateSection.orientation = .vertical
         updateSection.alignment = .leading
         updateSection.spacing = 12
@@ -1039,10 +1033,9 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Floating Lines")), freeLineModeControl],
             [label(L10n.text("Lock Position")), freeLock],
             [label(L10n.text("Click Through")), freePassThrough],
-            [NSButton(title: L10n.text("Move Lyrics"), target: self, action: #selector(editFreeLyrics)),
-             NSButton(title: L10n.text("Reset Position"), target: self, action: #selector(resetFreeLyrics))]
+            [NSView(), NSButton(title: L10n.text("Reset Position"), target: self, action: #selector(resetFreeLyrics))]
         ])
-        let freeCard = card(content: cardBody(title: "Free Position", subtitle: "Use Move Lyrics to edit, even when locked or click-through is on.", grid: freeGrid, trailing: NSView()))
+        let freeCard = card(content: cardBody(title: "Free Position", subtitle: "Hover over locked lyrics to unlock them on your desktop.", grid: freeGrid, trailing: NSView()))
         self.freeCard = freeCard
         displayPage.addArrangedSubview(freeCard)
 
@@ -1597,11 +1590,8 @@ final class SettingsWindowController: NSWindowController {
         sidebarQuickActions.updateThemeButton()
         showInDockSwitch.state = AppPreferences.showInDock ? .on : .off
         showMenuBarIconSwitch.state = AppPreferences.showMenuBarIcon ? .on : .off
-        automaticUpdateSwitch.state = UpdateController.shared.automaticallyChecksForUpdates ? .on : .off
-        automaticUpdateSwitch.isEnabled = UpdateController.shared.isAvailable
-        automaticInstallSwitch.state = UpdateController.shared.automaticallyDownloadsUpdates ? .on : .off
+        refreshAutomaticUpdates()
         bilingualLyricsSwitch.state = AppPreferences.bilingualLyricsEnabled ? .on : .off
-        automaticInstallSwitch.isEnabled = UpdateController.shared.isAvailable && UpdateController.shared.allowsAutomaticUpdates
         if let idx = playerPopUp.itemArray.firstIndex(where: { ($0.representedObject as? PlayerSource) == AppPreferences.playerSource }) {
             playerPopUp.selectItem(at: idx)
         } else {
@@ -1656,8 +1646,15 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func freeLockChanged() {
-        freeOptionsChanged()
+        let locked = freeLock.state == .on
+        UserDefaults.standard.set(locked, forKey: FreeLyricsPreferences.lockedKey)
+        if !locked {
+            freePassThrough.state = .off
+            UserDefaults.standard.set(false, forKey: FreeLyricsPreferences.passThroughKey)
+        }
         onFreeLockChanged?()
+        onSettingsChange()
+        updatePreview()
     }
 
     @objc private func freeOptionsChanged() {
@@ -1668,10 +1665,6 @@ final class SettingsWindowController: NSWindowController {
         UserDefaults.standard.set(freePassThrough.state == .on, forKey: FreeLyricsPreferences.passThroughKey)
         onSettingsChange()
         updatePreview()
-    }
-
-    @objc private func editFreeLyrics() {
-        NotificationCenter.default.post(name: FreeLyricsPreferences.editNotification, object: nil)
     }
 
     @objc private func resetFreeLyrics() {
@@ -2002,12 +1995,22 @@ final class SettingsWindowController: NSWindowController {
         }
     }
 
-    @objc private func automaticUpdateChanged() {
-        UpdateController.shared.automaticallyChecksForUpdates = automaticUpdateSwitch.state == .on
+    private func refreshAutomaticUpdates() {
+        let updater = UpdateController.shared
+        automaticUpdateSwitch.state = updater.automaticUpdatesEnabled ? .on : .off
+        automaticUpdateSwitch.isEnabled = updater.allowsAutomaticUpdates
+        if !updater.isAvailable {
+            automaticUpdateHelp.stringValue = L10n.text("Updates are unavailable in this build.")
+        } else if updater.automaticallyChecksWithoutDownloading {
+            automaticUpdateHelp.stringValue = L10n.text("Automatic checks only (previous setting).")
+        } else {
+            automaticUpdateHelp.stringValue = L10n.text("Checks for updates and downloads them in the background.")
+        }
     }
 
-    @objc private func automaticInstallChanged() {
-        UpdateController.shared.automaticallyDownloadsUpdates = automaticInstallSwitch.state == .on
+    @objc private func automaticUpdateChanged() {
+        UpdateController.shared.automaticUpdatesEnabled = automaticUpdateSwitch.state == .on
+        refreshAutomaticUpdates()
     }
 
     @objc private func bilingualLyricsChanged() {
@@ -2307,7 +2310,8 @@ final class SettingsWindowController: NSWindowController {
         isPaused: Bool,
         position: TimeInterval,
         duration: TimeInterval,
-        lyricsFeedback: LyricsFeedback
+        lyricsFeedback: LyricsFeedback,
+        trackIdentity: String? = nil
     ) {
         let synced = !lines.isEmpty && lyricsFeedback == .available
         let missing = lyricsFeedback == .notFound || lyricsFeedback == .timeout || lyricsFeedback == .networkFailure
@@ -2324,7 +2328,8 @@ final class SettingsWindowController: NSWindowController {
             isPaused: isPaused,
             position: position,
             duration: duration,
-            lyricsMissing: missing
+            lyricsMissing: missing,
+            trackIdentity: trackIdentity
         )
     }
 

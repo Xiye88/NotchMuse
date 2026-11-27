@@ -119,7 +119,6 @@
 "Animation Speed" = "动画速度";
 "Opacity" = "不透明度";
 "Lyrics Opacity" = "歌词不透明度";
-"Background Opacity" = "背景不透明度";
 "Mint Glow" = "薄荷微光";
 "Sunset Glow" = "落日渐变";
 "Custom Gradient" = "自定义渐变";
@@ -167,25 +166,20 @@
 "Dreamy Soft" = "梦幻柔和";
 "Pure" = "极简纯净";
 "Quick Presets" = "快速预设";
-"Choose how and where lyrics appear." = "设置歌词的显示方式、位置和屏幕。";
 "Customize the look of your lyrics." = "自定义歌词的视觉效果。";
 "Player and system behavior." = "播放器与系统行为。";
 "Lyrics display mode, position, and screen." = "歌词显示方式、位置与屏幕。";
 "Lyrics color, typography, and motion." = "歌词颜色、字体与动画效果。";
 "Player selection and system behavior." = "播放器与系统行为。";
-"Automatically Check for Updates" = "自动检查更新";
-"Auto-Check Updates" = "自动检查更新";
 "Choose how and where lyrics appear." = "选择歌词的显示方式与位置。";
 "Support NotchMuse" = "请作者喝杯咖啡";
 "GitHub Star" = "GitHub Star";
 "Open NotchMuse on GitHub to leave a star." = "在 GitHub 上为 NotchMuse 点 Star。";
 "Switch to Light Mode" = "切换到浅色模式";
 "Switch to Dark Mode" = "切换到深色模式";
-"Your support helps keep NotchMuse improving." = "感谢你支持 NotchMuse 持续改进。";
 "WeChat Pay" = "微信支付";
 "Copy Address" = "复制地址";
 "Copied" = "已复制";
-"Check the selected network and send USDT only." = "请确认转账网络与所选网络一致，仅发送 USDT。";
 "Supporters" = "感谢支持者";
 "Thanks to everyone supporting NotchMuse." = "感谢每一位支持 NotchMuse 的朋友。";
 
@@ -198,13 +192,10 @@
 "Move Lyrics" = "移动歌词";
 "Unlock Position" = "解锁位置";
 "Reset Position" = "恢复默认位置";
-"Use Move Lyrics to edit, even when locked or click-through is on." = "锁定或穿透后，仍可从菜单栏或设置选择“移动歌词”。再次锁定后恢复鼠标隐藏和穿透设置。";
 
 "Switch to Horizontal" = "切换为横向歌词";
 "Switch to Vertical" = "切换为竖向歌词";
 
-"Auto-Install Updates" = "自动下载安装更新";
-"Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared." = "开启后在启动时及运行期间每日检查更新。自动安装需同时开启自动检查：启动时应用更新，运行中下载后提示重启。关闭开关不会取消已准备安装的更新。";
 "Bilingual Lyrics" = "双语歌词（已有翻译）";
 
 "Kugou Music" = "酷狗音乐";
@@ -269,3 +260,15 @@
 "Interaction Sounds" = "交互微音效";
 "PNG copied" = "已复制 PNG";
 "PNG saved" = "已保存 PNG";
+
+"NotchMuse is a free passion project built with love. If it brightens your listening, feel free to buy me a coffee or join the user group." = "NotchMuse 是免费开源、为爱发电的独立项目。如果它陪你度过了好时光，欢迎请作者喝杯咖啡，或加入用户群交流反馈。";
+"QQ User Group" = "QQ 用户交流群";
+"Copy Group ID" = "复制群号";
+"Copied ✓" = "已复制 ✓";
+"EVM networks · USDT only" = "仅支持 EVM 网络 USDT";
+"Hover over locked lyrics to unlock them on your desktop." = "悬停在锁定的歌词上，即可在桌面解锁。";
+"🔒 Unlock" = "🔒 解锁";
+"Automatic Updates (Recommended)" = "自动更新（推荐开启）";
+"Checks for updates and downloads them in the background." = "自动检查更新并在后台下载。";
+"Automatic checks only (previous setting)." = "仅自动检查更新（沿用原设置）。";
+"Updates are unavailable in this build." = "此构建暂不可检查更新。";

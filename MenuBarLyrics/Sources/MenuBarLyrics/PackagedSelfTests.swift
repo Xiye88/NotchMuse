@@ -1,4 +1,5 @@
 import Foundation
+import ImageIO
 import LyricsCore
 
 enum PackagedSelfTests {
@@ -39,10 +40,20 @@ enum PackagedSelfTests {
             fail("bundle resources are missing")
         }
 
+        for (name, ext) in [("qq-group-qr", "png"), ("WeChatSupport", "jpg")] {
+            guard let url = SupportWindowController.supportResource(name, extension: ext),
+                  let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+                  CGImageSourceCreateImageAtIndex(source, 0, nil) != nil else {
+                fail("packaged Support QR image could not be decoded: \(name).\(ext)")
+            }
+        }
+        print("PASS: Support QR resource lookup and decoding in the packaged app")
+
         for path in [
             "en.lproj/Localizable.strings",
             "zh-Hans.lproj/Localizable.strings",
             "WeChatSupport.jpg",
+            "qq-group-qr.png",
             "LICENSES/Sparkle.txt",
             "../Frameworks/Sparkle.framework/Sparkle",
             "MediaRemoteBridge/MediaRemoteAdapter.framework/MediaRemoteAdapter",

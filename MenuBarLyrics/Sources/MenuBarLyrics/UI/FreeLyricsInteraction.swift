@@ -161,13 +161,22 @@ private final class PillIconButton: NSButton {
 @MainActor
 final class FreeLyricsDragSurfaceView: NSView {
     var isDragEnabled = false {
-        didSet { window?.invalidateCursorRects(for: self) }
+        didSet {
+            updateSurfaceStyle()
+            window?.invalidateCursorRects(for: self)
+        }
+    }
+    var isHoveredNow = false {
+        didSet {
+            if isHoveredNow != oldValue { updateSurfaceStyle() }
+        }
     }
     var isDraggingNow = false {
         didSet {
-            layer?.borderColor = isDraggingNow ? NSColor.controlAccentColor.withAlphaComponent(0.45).cgColor : NSColor.clear.cgColor
-            layer?.backgroundColor = isDraggingNow ? NSColor.black.withAlphaComponent(0.18).cgColor : NSColor.clear.cgColor
-            window?.invalidateCursorRects(for: self)
+            if isDraggingNow != oldValue {
+                updateSurfaceStyle()
+                window?.invalidateCursorRects(for: self)
+            }
         }
     }
     var onDragStart: ((NSEvent) -> Void)?
@@ -179,11 +188,26 @@ final class FreeLyricsDragSurfaceView: NSView {
         wantsLayer = true
         layer?.cornerRadius = 14
         layer?.cornerCurve = .continuous
-        layer?.borderWidth = 1
+        layer?.borderWidth = 0.75
         layer?.borderColor = NSColor.clear.cgColor
+        layer?.backgroundColor = NSColor.clear.cgColor
     }
 
     required init?(coder: NSCoder) { nil }
+
+    private func updateSurfaceStyle() {
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(0.14)
+        if isDragEnabled && (isHoveredNow || isDraggingNow) {
+            let alpha: CGFloat = isDraggingNow ? 0.56 : 0.42
+            layer?.backgroundColor = NSColor(calibratedRed: 0.16, green: 0.16, blue: 0.18, alpha: alpha).cgColor
+            layer?.borderColor = NSColor.white.withAlphaComponent(isDraggingNow ? 0.24 : 0.14).cgColor
+        } else {
+            layer?.backgroundColor = NSColor.clear.cgColor
+            layer?.borderColor = NSColor.clear.cgColor
+        }
+        CATransaction.commit()
+    }
 
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
@@ -221,11 +245,124 @@ private final class CenterSnapGuideView: NSView {
     }
 }
 
+@MainActor
+private final class QuickColorDotButton: NSButton {
+    let swatchColor: NSColor
+    let preset: LyricsColorPreset
+    let customSolidColor: NSColor?
+    private var isHovered = false { didSet { needsDisplay = true } }
+    private var tracking: NSTrackingArea?
+
+    init(title: String, swatchColor: NSColor, preset: LyricsColorPreset, customSolidColor: NSColor? = nil, target: AnyObject?, action: Selector?) {
+        self.swatchColor = swatchColor
+        self.preset = preset
+        self.customSolidColor = customSolidColor
+        super.init(frame: .zero)
+        self.title = ""
+        self.isBordered = false
+        self.toolTip = title
+        self.setAccessibilityLabel(title)
+        self.target = target
+        self.action = action
+        self.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            widthAnchor.constraint(equalToConstant: 24),
+            heightAnchor.constraint(equalToConstant: 24)
+        ])
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(rect: .zero, options: [.activeAlways, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) { isHovered = true }
+    override func mouseExited(with event: NSEvent) { isHovered = false }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let inset: CGFloat = isHovered ? 2.5 : 3.5
+        let dotRect = bounds.insetBy(dx: inset, dy: inset)
+        swatchColor.setFill()
+        NSBezierPath(ovalIn: dotRect).fill()
+        NSColor.white.withAlphaComponent(isHovered ? 0.72 : 0.28).setStroke()
+        let ring = NSBezierPath(ovalIn: dotRect)
+        ring.lineWidth = isHovered ? 1.5 : 0.75
+        ring.stroke()
+    }
+}
+
+@MainActor
+private final class QuickColorPopoverController: NSViewController {
+    private let onPick: (LyricsColorPreset, NSColor?) -> Void
+
+    init(onPick: @escaping (LyricsColorPreset, NSColor?) -> Void) {
+        self.onPick = onPick
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func loadView() {
+        let isZh = AppPreferences.language == .simplifiedChinese
+        let entries: [(String, NSColor, LyricsColorPreset, NSColor?)] = [
+            (isZh ? "纯白" : "Pure White", .white, .white, nil),
+            (isZh ? "暖琥珀" : "Warm Amber", NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1), .orange, nil),
+            (isZh ? "天青蓝" : "Sky Blue", NSColor(calibratedRed: 0.220, green: 0.741, blue: 0.973, alpha: 1), .blue, nil),
+            (isZh ? "翡翠绿" : "Emerald Green", NSColor(calibratedRed: 0.204, green: 0.827, blue: 0.600, alpha: 1), .green, nil),
+            (isZh ? "樱花粉" : "Sakura Pink", NSColor(calibratedRed: 0.96, green: 0.45, blue: 0.66, alpha: 1), .custom, NSColor(calibratedRed: 0.96, green: 0.45, blue: 0.66, alpha: 1)),
+            (isZh ? "柔紫" : "Soft Purple", NSColor(calibratedRed: 0.72, green: 0.54, blue: 0.96, alpha: 1), .purple, nil),
+            (isZh ? "墨黑" : "Ink Black", NSColor(calibratedRed: 0.11, green: 0.11, blue: 0.13, alpha: 1), .custom, NSColor(calibratedRed: 0.11, green: 0.11, blue: 0.13, alpha: 1))
+        ]
+        let buttons = entries.map { entry in
+            QuickColorDotButton(
+                title: entry.0,
+                swatchColor: entry.1,
+                preset: entry.2,
+                customSolidColor: entry.3,
+                target: self,
+                action: #selector(dotClicked(_:))
+            )
+        }
+        let stack = NSStackView(views: buttons)
+        stack.orientation = .horizontal
+        stack.alignment = .centerY
+        stack.spacing = 6
+        stack.edgeInsets = NSEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        let root = NSView(frame: NSRect(x: 0, y: 0, width: 224, height: 40))
+        root.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+            stack.topAnchor.constraint(equalTo: root.topAnchor),
+            stack.bottomAnchor.constraint(equalTo: root.bottomAnchor)
+        ])
+        self.view = root
+    }
+
+    @objc private func dotClicked(_ sender: NSButton) {
+        guard let dot = sender as? QuickColorDotButton else { return }
+        NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+        onPick(dot.preset, dot.customSolidColor)
+    }
+}
+
 /// Adds interaction to the existing renderer; no lyric selection or playback clock lives here.
 @MainActor
 final class FreeLyricsInteraction: NSObject {
     static let toolbarHeight: CGFloat = 38
-    static let expandedToolbarWidth: CGFloat = 176
+    static let expandedToolbarWidth: CGFloat = 212
     let window: NSWindow
     private let lyricViews: [NSView]
     private let container: NSView
@@ -236,9 +373,11 @@ final class FreeLyricsInteraction: NSObject {
     private let toolbar = FreeLyricsHoverView()
     private let lockButton = PillIconButton()
     private let orientationButton = PillIconButton()
-    private let colorButton = NSPopUpButton(frame: .zero, pullsDown: true)
+    private let colorButton = PillIconButton()
+    private let mainWindowButton = PillIconButton()
     private let settingsButton = PillIconButton()
     private let closeButton = PillIconButton()
+    private var colorPopover: NSPopover?
     private var policy = FreeLyricsPolicy()
     private var hovered = false
     private var hoverTimer: Timer?
@@ -251,11 +390,19 @@ final class FreeLyricsInteraction: NSObject {
     private var dragStart = NSPoint.zero
     private var dragOrigin = NSPoint.zero
     private var wasSnapped = false
+    var onOpenMainWindow: (() -> Void)?
     var onSettings: (() -> Void)?
     var onClose: (() -> Void)?
     var onColor: (() -> Void)?
     var onInteractionChanged: (() -> Void)?
     var isEditing: Bool { policy.editing }
+
+    /// Toolbar defaults ABOVE the lyrics so dragging down to the Dock is unobstructed;
+    /// flips below only when the window is pinned near the very top of the screen.
+    var isToolbarAbove: Bool {
+        guard let screen = window.screen ?? NSScreen.main else { return true }
+        return (screen.visibleFrame.maxY - window.frame.maxY) >= 10
+    }
 
     init(window: NSWindow, container: NSView, lyricViews: [NSView], defaults: UserDefaults = .standard) {
         self.window = window
@@ -304,19 +451,9 @@ final class FreeLyricsInteraction: NSObject {
 
         configure(lockButton, symbol: "lock.open", label: "Lock Position", action: #selector(toggleLock))
         configure(orientationButton, symbol: "rectangle.portrait", label: "Switch to Vertical", action: #selector(toggleOrientation))
-        colorButton.addItem(withTitle: L10n.text("Lyrics Color"))
-        colorButton.item(at: 0)?.image = NSImage(systemSymbolName: "paintpalette", accessibilityDescription: L10n.text("Lyrics Color"))
-        for preset in [LyricsColorPreset.white, .orange, .blue, .purple, .green, .mintGradient] {
-            colorButton.addItem(withTitle: L10n.text(preset.rawValue))
-            colorButton.lastItem?.representedObject = preset.rawValue
-        }
-        colorButton.isBordered = false
-        colorButton.target = self
-        colorButton.action = #selector(changeColor)
-        colorButton.toolTip = L10n.text("Lyrics Color")
-        colorButton.setAccessibilityLabel(L10n.text("Lyrics Color"))
-        toolbar.addSubview(colorButton)
-        configure(settingsButton, symbol: "gearshape", label: "Open NotchMuse", action: #selector(openSettings))
+        configure(colorButton, symbol: "paintpalette", label: "Quick Colors", action: #selector(toggleQuickColorPopover))
+        configure(mainWindowButton, symbol: "music.note.list", label: "Open Main Window", action: #selector(openMainWindow))
+        configure(settingsButton, symbol: "gearshape", label: "Preferences", action: #selector(openSettings))
         configure(closeButton, symbol: "xmark", label: "Hide Lyrics", action: #selector(closeLyrics))
         toolbar.alphaValue = 0
 
@@ -373,10 +510,16 @@ final class FreeLyricsInteraction: NSObject {
         let unlocked = policy.editing || !policy.locked
         window.ignoresMouseEvents = policy.ignoresMouseEvents || !unlocked
         unlockWindow.ignoresMouseEvents = policy.ignoresMouseEvents
+        let above = isToolbarAbove
         dragSurface.isDragEnabled = policy.canMove
-        dragSurface.frame = NSRect(x: 0, y: Self.toolbarHeight, width: container.bounds.width, height: max(0, container.bounds.height - Self.toolbarHeight))
+        dragSurface.frame = NSRect(
+            x: 0,
+            y: above ? 0 : Self.toolbarHeight,
+            width: container.bounds.width,
+            height: max(0, container.bounds.height - Self.toolbarHeight)
+        )
 
-        let lockAction = L10n.text(unlocked ? "Lock Position" : "Unlock Position")
+        let lockAction = L10n.text(unlocked ? "Lock Position / Click-Through" : "Unlock Position")
         lockButton.image = NSImage(systemSymbolName: unlocked ? "lock.open" : "lock", accessibilityDescription: lockAction)
         lockButton.toolTip = lockAction
         lockButton.setAccessibilityLabel(lockAction)
@@ -384,17 +527,22 @@ final class FreeLyricsInteraction: NSObject {
         orientationButton.toolTip = orientationAction
         orientationButton.setAccessibilityLabel(orientationAction)
         orientationButton.image = NSImage(systemSymbolName: defaults.bool(forKey: FreeLyricsPreferences.verticalKey) ? "rectangle" : "rectangle.portrait", accessibilityDescription: orientationAction)
+        colorButton.toolTip = L10n.text("Quick Colors")
+        mainWindowButton.toolTip = L10n.text("Open Main Window")
+        settingsButton.toolTip = L10n.text("Preferences")
+        closeButton.toolTip = L10n.text("Hide Lyrics")
 
-        let controls: [NSView] = [lockButton, orientationButton, colorButton, settingsButton, closeButton]
+        let controls: [NSView] = [lockButton, orientationButton, colorButton, mainWindowButton, settingsButton, closeButton]
         let width: CGFloat = unlocked ? Self.expandedToolbarWidth : 38
         let height: CGFloat = 34
+        let toolbarY: CGFloat = above ? max(2, container.bounds.height - Self.toolbarHeight + 2) : 2
         if unlocked {
             unlockWindow.orderOut(nil)
             if toolbar.superview !== container {
                 unlockWindow.contentView = nil
                 container.addSubview(toolbar)
             }
-            toolbar.frame = NSRect(x: (window.frame.width - width) / 2, y: 2, width: width, height: height)
+            toolbar.frame = NSRect(x: (window.frame.width - width) / 2, y: toolbarY, width: width, height: height)
         } else {
             if unlockWindow.contentView !== toolbar {
                 toolbar.removeFromSuperview()
@@ -528,7 +676,9 @@ final class FreeLyricsInteraction: NSObject {
 
     private func applyVisibility(animated: Bool) {
         let lyricsAlpha: CGFloat = policy.hidesLyrics(hovered: hovered) ? 0 : 1
-        let toolbarAlpha: CGFloat = (hovered || dragging) && !policy.ignoresMouseEvents ? 1 : 0
+        let popoverShown = colorPopover?.isShown == true
+        let toolbarAlpha: CGFloat = (hovered || dragging || popoverShown) && !policy.ignoresMouseEvents ? 1 : 0
+        dragSurface.isHoveredNow = (hovered || popoverShown) && !policy.ignoresMouseEvents
         if policy.locked && !policy.editing && toolbarAlpha > 0 && window.isVisible {
             if !unlockWindow.isVisible { unlockWindow.orderFrontRegardless() }
         } else {
@@ -543,7 +693,8 @@ final class FreeLyricsInteraction: NSObject {
     }
 
     private func positionUnlockWindow() {
-        let frame = window.convertToScreen(NSRect(x: (window.frame.width - 38) / 2, y: 2, width: 38, height: 34))
+        let y: CGFloat = isToolbarAbove ? max(2, window.frame.height - Self.toolbarHeight + 2) : 2
+        let frame = window.convertToScreen(NSRect(x: (window.frame.width - 38) / 2, y: y, width: 38, height: 34))
         if unlockWindow.frame != frame { unlockWindow.setFrame(frame, display: true) }
     }
 
@@ -558,10 +709,13 @@ final class FreeLyricsInteraction: NSObject {
         hoverTimer = nil
         exitWork?.cancel()
         exitWork = nil
+        colorPopover?.close()
+        colorPopover = nil
         hovered = false
         policy.editing = false
         dragging = false
         wasSnapped = false
+        dragSurface.isHoveredNow = false
         dragSurface.isDraggingNow = false
         snapGuideWindow.orderOut(nil)
         applyVisibility(animated: false)
@@ -579,11 +733,34 @@ final class FreeLyricsInteraction: NSObject {
     var testUnlockWindow: NSWindow { unlockWindow }
     #endif
 
-    @objc private func changeColor() {
-        guard let raw = colorButton.selectedItem?.representedObject as? String else { return }
-        defaults.set(raw, forKey: AppPreferences.colorPresetKey)
+    func selectQuickColorPreset(_ preset: LyricsColorPreset, customColor: NSColor? = nil) {
+        defaults.set(preset.rawValue, forKey: AppPreferences.colorPresetKey)
+        if let customColor {
+            AppPreferences.setColor(customColor, forKey: AppPreferences.customLyricsColorKey, in: defaults)
+        }
+        colorPopover?.close()
+        colorPopover = nil
         onColor?()
     }
+
+    @objc private func toggleQuickColorPopover() {
+        if let existing = colorPopover, existing.isShown {
+            existing.close()
+            colorPopover = nil
+            return
+        }
+        let vc = QuickColorPopoverController { [weak self] preset, customColor in
+            self?.selectQuickColorPreset(preset, customColor: customColor)
+        }
+        let popover = NSPopover()
+        popover.behavior = .transient
+        popover.contentViewController = vc
+        popover.contentSize = NSSize(width: 224, height: 40)
+        popover.show(relativeTo: colorButton.bounds, of: colorButton, preferredEdge: isToolbarAbove ? .maxY : .minY)
+        colorPopover = popover
+    }
+
+    @objc private func openMainWindow() { onOpenMainWindow?() }
     @objc private func openSettings() { onSettings?() }
     @objc private func closeLyrics() { hide(); onClose?() }
 }

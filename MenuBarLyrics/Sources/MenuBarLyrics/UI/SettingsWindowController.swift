@@ -473,8 +473,11 @@ final class SettingsWindowController: NSWindowController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func show() {
+    func show(page: SettingsPage? = nil) {
         sync()
+        if let page, let button = sidebarButtons[page] {
+            pageChanged(button)
+        }
         AnnouncementManager.shared.refreshIfStale()
         updateAnnouncementBanner()
         showWindow(nil)
@@ -710,6 +713,39 @@ final class SettingsWindowController: NSWindowController {
         precondition(AppPreferences.notchBackgroundPreset() == .custom, "Custom capsule background color must persist as custom")
         defaults.set(0.65, forKey: AppPreferences.notchBackgroundOpacityKey)
         precondition(abs(AppPreferences.notchBackgroundOpacity - 0.65) < 0.001, "Capsule background opacity must persist")
+        // E31: Sequential multi-line sweep (line 1 0->100%, then line 2 0->100%) + single exclusive hover invariant
+        let wrapStyle = NSMutableParagraphStyle()
+        wrapStyle.alignment = .center
+        wrapStyle.lineBreakMode = .byWordWrapping
+        let longWrappedLyric = "This is a deliberately long wrapped lyric line designed to span two visual lines cleanly"
+        let wrapFont = NSFont.systemFont(ofSize: 21, weight: .bold)
+        let wrapRect = NSRect(x: 42, y: 6, width: 320, height: 120)
+        let slices25 = SweepLyricLineView.sequentialSweepLineSlices(
+            text: longWrappedLyric,
+            font: wrapFont,
+            paragraphStyle: wrapStyle,
+            in: wrapRect,
+            progress: 0.25
+        )
+        precondition(slices25.count >= 2, "Wrapped test lyric must span at least 2 visual lines")
+        precondition(slices25[0].clipWidth > 0 && slices25[0].clipWidth < slices25[0].lineRect.width, "At 25%, line 1 must be partially swept")
+        precondition(slices25[1].clipWidth == 0, "At 25%, line 2 clip width must be strictly 0")
+        let slices75 = SweepLyricLineView.sequentialSweepLineSlices(
+            text: longWrappedLyric,
+            font: wrapFont,
+            paragraphStyle: wrapStyle,
+            in: wrapRect,
+            progress: 0.75
+        )
+        precondition(abs(slices75[0].clipWidth - slices75[0].lineRect.width) < 0.01, "At 75%, line 1 must be 100% swept")
+        precondition(slices75[1].clipWidth > 0, "At 75%, line 2 must be partially swept")
+
+        controller.immersiveLyricsView.debugSimulateHover(at: 1)
+        precondition(controller.immersiveLyricsView.debugHoveredLineCount == 1 && controller.immersiveLyricsView.hoveredLineIndex == 1, "Single line hovered")
+        controller.immersiveLyricsView.debugSimulateHover(at: 5)
+        precondition(controller.immersiveLyricsView.debugHoveredLineCount == 1 && controller.immersiveLyricsView.hoveredLineIndex == 5, "Hovering a second line must clear previous line (never 2 hovered)")
+        controller.immersiveLyricsView.debugSimulateHover(at: nil)
+        precondition(controller.immersiveLyricsView.debugHoveredLineCount == 0, "Clearing hover leaves 0 hovered lines")
         print("Settings interaction self-test passed")
     }
     #endif
@@ -2814,7 +2850,7 @@ private final class FlippedSettingsDocumentView: NSView {
     override var isFlipped: Bool { true }
 }
 
-private enum SettingsPage: String, CaseIterable {
+enum SettingsPage: String, CaseIterable {
     case lyrics, display, appearance, general
 
     var title: String { rawValue.capitalized }

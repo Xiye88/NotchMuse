@@ -786,7 +786,8 @@ final class OverlayLyricsWindow: NSObject {
                 window.setFrame(windowFrame, display: true)
             }
             containerView.frame = NSRect(origin: .zero, size: windowFrame.size)
-            lyricGroup.frame = NSRect(x: 0, y: toolbarHeight, width: frame.width, height: frame.height)
+            let toolbarAbove = interaction?.isToolbarAbove ?? true
+            lyricGroup.frame = NSRect(x: 0, y: toolbarAbove ? 0 : toolbarHeight, width: frame.width, height: frame.height)
             materialView.frame = backgroundRect
             materialView.layer?.cornerRadius = placement.isVertical ? 16 : style == .lyricOnly ? frame.height / 2 : min(16, frame.height * 0.28)
             materialView.layer?.masksToBounds = true

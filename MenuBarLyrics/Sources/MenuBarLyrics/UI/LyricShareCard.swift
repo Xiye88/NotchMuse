@@ -49,18 +49,28 @@ enum LyricShareCardRenderer {
         lyricParagraph.lineSpacing = 7
         lyricParagraph.alignment = .left
 
-        let lyricFont = NSFont.systemFont(ofSize: 20, weight: .semibold)
+        var lyricFont = NSFont.systemFont(ofSize: 20, weight: .semibold)
         var measuredHeights: [CGFloat] = []
         var totalLyricsHeight: CGFloat = 0
-        for line in displayLines {
-            let rect = (line as NSString).boundingRect(
-                with: NSSize(width: textWidth, height: 180),
-                options: [.usesLineFragmentOrigin, .usesFontLeading],
-                attributes: [.font: lyricFont, .paragraphStyle: lyricParagraph]
-            )
-            let h = ceil(rect.height)
-            measuredHeights.append(h)
-            totalLyricsHeight += h
+        func measureLines(font: NSFont) -> ([CGFloat], CGFloat) {
+            var heights: [CGFloat] = []
+            var total: CGFloat = 0
+            for line in displayLines {
+                let rect = (line as NSString).boundingRect(
+                    with: NSSize(width: textWidth, height: 220),
+                    options: [.usesLineFragmentOrigin, .usesFontLeading],
+                    attributes: [.font: font, .paragraphStyle: lyricParagraph]
+                )
+                let h = ceil(rect.height)
+                heights.append(h)
+                total += h
+            }
+            return (heights, total)
+        }
+        (measuredHeights, totalLyricsHeight) = measureLines(font: lyricFont)
+        if totalLyricsHeight > 420 {
+            lyricFont = NSFont.systemFont(ofSize: 17, weight: .semibold)
+            (measuredHeights, totalLyricsHeight) = measureLines(font: lyricFont)
         }
         let lineGap: CGFloat = 14
         if displayLines.count > 1 {
@@ -69,7 +79,7 @@ enum LyricShareCardRenderer {
 
         let headerH: CGFloat = 112
         let footerH: CGFloat = 112
-        let logicalHeight = min(760, max(500, headerH + totalLyricsHeight + footerH + 44))
+        let logicalHeight = min(920, max(500, headerH + totalLyricsHeight + footerH + 44))
 
         let scale: CGFloat = 2
         let pixelW = Int(logicalWidth * scale)
@@ -172,8 +182,9 @@ enum LyricShareCardRenderer {
             .paragraphStyle: titleParagraph
         ]
         let metaMaxW = textWidth - 118
+        let titleY: CGFloat = safeArtist.isEmpty ? 46 : 58
         (safeTitle as NSString).draw(
-            in: NSRect(x: padX, y: 58, width: metaMaxW, height: 20),
+            in: NSRect(x: padX, y: titleY, width: metaMaxW, height: 20),
             withAttributes: titleAttrs
         )
 
@@ -450,9 +461,13 @@ final class LyricSharePopoverController: NSViewController {
             cb.state = selectedIndices.contains(idx) ? .on : .off
             cb.lineBreakMode = .byTruncatingTail
             cb.font = .systemFont(ofSize: 12)
+            cb.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
             return cb
         }
-        lineCheckboxes.forEach { checkStack.addArrangedSubview($0) }
+        lineCheckboxes.forEach { cb in
+            checkStack.addArrangedSubview(cb)
+            cb.widthAnchor.constraint(lessThanOrEqualTo: checkStack.widthAnchor, constant: -12).isActive = true
+        }
 
         let listDoc = NSView()
         listDoc.translatesAutoresizingMaskIntoConstraints = false

@@ -237,3 +237,9 @@
 "Background Opacity" = "Background Opacity";
 "Frosted Cream" = "Frosted Cream";
 "Deep Sea Mist" = "Deep Sea Mist";
+
+/* E32: Free floating toolbar 6-button tooltips */
+"Lock Position / Click-Through" = "Lock Position / Click-Through";
+"Quick Colors" = "Quick Colors";
+"Open Main Window" = "Open Main Window (Lyrics)";
+"Preferences" = "Preferences";

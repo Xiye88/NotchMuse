@@ -80,7 +80,7 @@ enum FreeLyricsSelfTests {
         lock.performClick(nil)
         check(!defaults.bool(forKey: FreeLyricsPreferences.lockedKey) && dragSurface.isDragEnabled && interaction.isEditing, "unlock enables direct dragging and persists unlocked preference")
         check(!window.ignoresMouseEvents && !interaction.testUnlockWindow.isVisible, "unlock returns editing controls to the main lyric window")
-        check(interaction.testToolbar.subviews.filter { !$0.isHidden }.count == 5, "unlock reveals all 5 hover pill controls")
+        check(interaction.testToolbar.subviews.filter { !$0.isHidden }.count == 6, "unlock reveals all 6 hover pill controls")
         let orientation = interaction.testToolbar.subviews[1] as! NSButton
         orientation.performClick(nil)
         check(defaults.bool(forKey: FreeLyricsPreferences.verticalKey), "orientation shortcut selects vertical")
@@ -152,17 +152,20 @@ enum FreeLyricsSelfTests {
         move.mouseUp(with: drag)
         check(interaction.testToolbar.alphaValue == 0, "releasing outside hover hides editing controls")
         check(FreeLyricsPreferences.load(vertical: false, defaults: defaults) != nil, "mouse up persists position")
-        let palette = interaction.testToolbar.subviews[2] as! NSPopUpButton
-        palette.selectItem(at: 2)
-        _ = NSApp.sendAction(palette.action!, to: palette.target, from: palette)
+        interaction.selectQuickColorPreset(.orange)
         check(defaults.string(forKey: AppPreferences.colorPresetKey) == LyricsColorPreset.orange.rawValue, "toolbar color shortcut uses existing palette preference")
+        check(interaction.testToolbar.subviews.count == 6, "toolbar exposes 6 icon controls with tooltips")
+        var openedMain = false
+        interaction.onOpenMainWindow = { openedMain = true }
+        (interaction.testToolbar.subviews[3] as! NSButton).performClick(nil)
+        check(openedMain, "main window button opens NotchMuse lyrics page")
         var opened = false
         interaction.onSettings = { opened = true }
-        (interaction.testToolbar.subviews[3] as! NSButton).performClick(nil)
+        (interaction.testToolbar.subviews[4] as! NSButton).performClick(nil)
         check(opened, "settings button")
         var closed = false
         interaction.onClose = { closed = true }
-        (interaction.testToolbar.subviews[4] as! NSButton).performClick(nil)
+        (interaction.testToolbar.subviews[5] as! NSButton).performClick(nil)
         check(closed && !interaction.isEditing, "close hides lyrics only through callback")
         check(interaction.testToolbar.alphaValue == 0, "closed toolbar cannot remain visible when reopened")
         // Exercise the actual shared overlay, not a separate test renderer.

@@ -120,7 +120,8 @@ final class MenuBarController: NSObject {
         displaySource = L10n.format("Checking %@...", player.source.displayName())
         setupButton()
         setupMenu()
-        overlay.freeInteraction.onSettings = { [weak self] in self?.showSettings() }
+        overlay.freeInteraction.onOpenMainWindow = { [weak self] in self?.openSettingsWindow(page: .lyrics) }
+        overlay.freeInteraction.onSettings = { [weak self] in self?.openSettingsWindow(page: .display) }
         overlay.freeInteraction.onClose = { [weak self] in
             self?.isLyricsHidden = true
             self?.updateDisplay()
@@ -880,6 +881,10 @@ final class MenuBarController: NSObject {
     }
 
     @objc func showSettings() {
+        openSettingsWindow(page: nil)
+    }
+
+    func openSettingsWindow(page: SettingsPage?) {
         if settingsWindowController == nil {
             settingsWindowController = SettingsWindowController { [weak self] in
                 self?.reloadSettings()
@@ -931,7 +936,7 @@ final class MenuBarController: NSObject {
                 }
             }
         }
-        settingsWindowController?.show()
+        settingsWindowController?.show(page: page)
         pushLiveStatusToSettings()
     }
 

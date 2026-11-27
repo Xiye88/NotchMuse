@@ -254,3 +254,9 @@
 "Background Opacity" = "背景不透明度";
 "Frosted Cream" = "磨砂奶白";
 "Deep Sea Mist" = "深海雾蓝";
+
+/* E32: 桌面自由悬浮工具条 6 键 Tooltip */
+"Lock Position / Click-Through" = "锁定位置 / 穿透点击";
+"Quick Colors" = "快捷配色";
+"Open Main Window" = "打开主窗口（歌词页）";
+"Preferences" = "偏好设置";

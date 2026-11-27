@@ -667,11 +667,12 @@ final class MissingLyricsAnimationView: NSView {
 }
 
 @MainActor
-private final class SweepLyricLineView: NSView {
+final class SweepLyricLineView: NSView {
     let primaryText: String
     let translationText: String?
     let lineTime: TimeInterval
     var onSeek: ((TimeInterval) -> Void)?
+    var onHoverChanged: ((Bool) -> Void)?
 
     var isActive: Bool = false { didSet { if isActive != oldValue { invalidateIntrinsicContentSize(); needsDisplay = true } } }
     var distanceFromActive: Int = 99 { didSet { if distanceFromActive != oldValue { needsDisplay = true } } }
@@ -680,7 +681,14 @@ private final class SweepLyricLineView: NSView {
     var customNormalColor: NSColor? { didSet { needsDisplay = true } }
 
     private var tracking: NSTrackingArea?
-    private var isHovered = false { didSet { if isHovered != oldValue { needsDisplay = true } } }
+    var isHovered = false {
+        didSet {
+            if isHovered != oldValue {
+                if !isHovered { isPressed = false }
+                needsDisplay = true
+            }
+        }
+    }
     private var isPressed = false { didSet { if isPressed != oldValue { needsDisplay = true } } }
 
     override var isFlipped: Bool { true }
@@ -708,8 +716,8 @@ private final class SweepLyricLineView: NSView {
         tracking = area
     }
 
-    override func mouseEntered(with event: NSEvent) { isHovered = true }
-    override func mouseExited(with event: NSEvent) { isHovered = false; isPressed = false }
+    override func mouseEntered(with event: NSEvent) { onHoverChanged?(true) }
+    override func mouseExited(with event: NSEvent) { onHoverChanged?(false) }
 
     override func mouseDown(with event: NSEvent) {
         isPressed = true
@@ -735,9 +743,10 @@ private final class SweepLyricLineView: NSView {
     }
 
     private func currentFont() -> NSFont {
-        if isActive { return .systemFont(ofSize: 21, weight: .bold) }
-        if distanceFromActive == 1 { return .systemFont(ofSize: 15.5, weight: .medium) }
-        return .systemFont(ofSize: 14.5, weight: .regular)
+        // Calm typography hierarchy (no abrupt whole-block font zoom on line switch)
+        if isActive { return .systemFont(ofSize: 18, weight: .bold) }
+        if distanceFromActive == 1 { return .systemFont(ofSize: 16, weight: .medium) }
+        return .systemFont(ofSize: 15.5, weight: .regular)
     }
 
     private func measuredHeight(_ text: String, font: NSFont, width: CGFloat) -> CGFloat {
@@ -755,6 +764,49 @@ private final class SweepLyricLineView: NSView {
     private func formattedTimestamp() -> String {
         let total = max(0, Int(lineTime.rounded()))
         return String(format: "%02d:%02d", total / 60, total % 60)
+    }
+
+    /// Computes exact per-visual-line clip widths so wrapped multi-line lyrics sweep sequentially
+    /// (line 1 from 0→100% first, then line 2 from 0→100%, etc.).
+    static func sequentialSweepLineSlices(
+        text: String,
+        font: NSFont,
+        paragraphStyle: NSParagraphStyle,
+        in rect: NSRect,
+        progress: CGFloat
+    ) -> [(lineRect: NSRect, clipWidth: CGFloat)] {
+        let storage = NSTextStorage(string: text, attributes: [.font: font, .paragraphStyle: paragraphStyle])
+        let layoutManager = NSLayoutManager()
+        let container = NSTextContainer(size: NSSize(width: max(20, rect.width), height: .greatestFiniteMagnitude))
+        container.lineFragmentPadding = 0
+        layoutManager.addTextContainer(container)
+        storage.addLayoutManager(layoutManager)
+        layoutManager.ensureLayout(for: container)
+
+        let glyphRange = layoutManager.glyphRange(for: container)
+        var lineRects: [NSRect] = []
+        layoutManager.enumerateLineFragments(forGlyphRange: glyphRange) { _, usedRect, _, _, _ in
+            let r = NSRect(
+                x: rect.minX + usedRect.minX,
+                y: rect.minY + usedRect.minY,
+                width: usedRect.width,
+                height: usedRect.height
+            )
+            if r.width > 0 && r.height > 0 {
+                lineRects.append(r)
+            }
+        }
+        guard !lineRects.isEmpty else { return [] }
+        let totalWidth = lineRects.reduce(CGFloat(0)) { $0 + $1.width }
+        var remaining = totalWidth * min(1, max(0, progress))
+        return lineRects.map { lineRect in
+            if remaining <= 0 {
+                return (lineRect, 0)
+            }
+            let w = min(lineRect.width, remaining)
+            remaining -= w
+            return (lineRect, w)
+        }
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -781,30 +833,57 @@ private final class SweepLyricLineView: NSView {
             if isActive {
                 let sweepColor = customSweepColor ?? AppearanceSurfaceColors.accent
                 let unsweptColor = baseNormal.withAlphaComponent(isHovered ? 0.48 : 0.32)
-                (primaryText as NSString).draw(
-                    with: primaryRect,
-                    options: [.usesLineFragmentOrigin, .usesFontLeading],
+
+                let baseStorage = NSTextStorage(
+                    string: primaryText,
                     attributes: [.font: font, .foregroundColor: unsweptColor, .paragraphStyle: style]
                 )
+                let layoutManager = NSLayoutManager()
+                let container = NSTextContainer(size: NSSize(width: textAreaWidth, height: .greatestFiniteMagnitude))
+                container.lineFragmentPadding = 0
+                layoutManager.addTextContainer(container)
+                baseStorage.addLayoutManager(layoutManager)
+                layoutManager.ensureLayout(for: container)
+                let glyphRange = layoutManager.glyphRange(for: container)
+                layoutManager.drawGlyphs(forGlyphRange: glyphRange, at: primaryRect.origin)
 
-                let lineSize = (primaryText as NSString).size(withAttributes: [.font: font])
-                let textWidth = min(textAreaWidth, lineSize.width + 6)
-                let startX = primaryRect.minX + max(0, (textAreaWidth - textWidth) / 2)
-                let clamped = min(1, max(0, sweepProgress))
-                let clipRect = NSRect(x: startX, y: primaryRect.minY - 4, width: textWidth * clamped, height: primaryRect.height + 8)
-
-                NSGraphicsContext.saveGraphicsState()
-                NSBezierPath(rect: clipRect).addClip()
-                let glow = NSShadow()
-                glow.shadowColor = sweepColor.withAlphaComponent(0.42)
-                glow.shadowBlurRadius = 8
-                glow.shadowOffset = .zero
-                (primaryText as NSString).draw(
-                    with: primaryRect,
-                    options: [.usesLineFragmentOrigin, .usesFontLeading],
-                    attributes: [.font: font, .foregroundColor: sweepColor, .paragraphStyle: style, .shadow: glow]
+                let slices = Self.sequentialSweepLineSlices(
+                    text: primaryText,
+                    font: font,
+                    paragraphStyle: style,
+                    in: primaryRect,
+                    progress: sweepProgress
                 )
-                NSGraphicsContext.restoreGraphicsState()
+                let clipPath = CGMutablePath()
+                var hasClip = false
+                for slice in slices where slice.clipWidth > 0.25 {
+                    let isFull = slice.clipWidth >= slice.lineRect.width - 0.5
+                    let padRight: CGFloat = isFull ? 4 : 0
+                    let r = CGRect(
+                        x: slice.lineRect.minX - 2,
+                        y: slice.lineRect.minY - 3,
+                        width: slice.clipWidth + 2 + padRight,
+                        height: slice.lineRect.height + 6
+                    )
+                    clipPath.addRect(r)
+                    hasClip = true
+                }
+
+                if hasClip, let cgCtx = NSGraphicsContext.current?.cgContext {
+                    NSGraphicsContext.saveGraphicsState()
+                    cgCtx.addPath(clipPath)
+                    cgCtx.clip()
+                    let glow = NSShadow()
+                    glow.shadowColor = sweepColor.withAlphaComponent(0.42)
+                    glow.shadowBlurRadius = 8
+                    glow.shadowOffset = .zero
+                    baseStorage.setAttributes(
+                        [.font: font, .foregroundColor: sweepColor, .paragraphStyle: style, .shadow: glow],
+                        range: NSRange(location: 0, length: baseStorage.length)
+                    )
+                    layoutManager.drawGlyphs(forGlyphRange: glyphRange, at: primaryRect.origin)
+                    NSGraphicsContext.restoreGraphicsState()
+                }
             } else {
                 let alpha: CGFloat = isHovered ? 0.92 : (distanceFromActive == 1 ? 0.62 : 0.34)
                 let color = customNormalColor?.withAlphaComponent(alpha)
@@ -1198,6 +1277,7 @@ final class ImmersiveLyricsView: NSView {
     private var lineViews: [SweepLyricLineView] = []
     private var currentLines: [LyricLine] = []
     private var activeIndex: Int = -1
+    private(set) var hoveredLineIndex: Int?
     private var currentDuration: TimeInterval = 0
     private var userBrowsingUntil: TimeInterval = 0
 
@@ -1233,7 +1313,11 @@ final class ImmersiveLyricsView: NSView {
     func setStageVisible(_ visible: Bool) {
         isHidden = !visible
         missingView.setActive(visible && !missingView.isHidden)
-        if visible && activeIndex >= 0 {
+        if !visible {
+            setHoveredLine(nil)
+            sharePopover?.close()
+            sharePopover = nil
+        } else if activeIndex >= 0 {
             scrollActiveLineToCenterIfAllowed(animated: false)
         }
     }
@@ -1279,6 +1363,10 @@ final class ImmersiveLyricsView: NSView {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.onUserScroll = { [weak self] in
             self?.userBrowsingUntil = ProcessInfo.processInfo.systemUptime + 4.0
+            self?.revalidateHoverFromPointer()
+        }
+        scrollView.onMouseExited = { [weak self] in
+            self?.setHoveredLine(nil)
         }
 
         linesStack.orientation = .vertical
@@ -1538,9 +1626,42 @@ final class ImmersiveLyricsView: NSView {
         }
     }
 
+    private func setHoveredLine(_ index: Int?) {
+        let validIndex = index.flatMap { lineViews.indices.contains($0) ? $0 : nil }
+        hoveredLineIndex = validIndex
+        for (i, view) in lineViews.enumerated() {
+            let shouldHover = (validIndex == i)
+            if view.isHovered != shouldHover {
+                view.isHovered = shouldHover
+            }
+        }
+    }
+
+    private func revalidateHoverFromPointer() {
+        guard let window, !isHidden, !scrollFadeContainer.isHidden else {
+            setHoveredLine(nil)
+            return
+        }
+        let mouseInWindow = window.mouseLocationOutsideOfEventStream
+        let pointInScroll = scrollView.convert(mouseInWindow, from: nil)
+        guard scrollView.bounds.contains(pointInScroll) else {
+            setHoveredLine(nil)
+            return
+        }
+        for (i, view) in lineViews.enumerated() {
+            let pt = view.convert(mouseInWindow, from: nil)
+            if view.bounds.contains(pt) {
+                setHoveredLine(i)
+                return
+            }
+        }
+        setHoveredLine(nil)
+    }
+
     private func rebuildLines(_ lines: [LyricLine]) {
         currentLines = lines
         activeIndex = -1
+        setHoveredLine(nil)
         linesStack.arrangedSubviews.forEach {
             linesStack.removeArrangedSubview($0)
             $0.removeFromSuperview()
@@ -1550,12 +1671,20 @@ final class ImmersiveLyricsView: NSView {
         let preset = AppPreferences.immersiveThemePreset
         let sweep = preset.sweepColor
         let normal = preset.normalTextColor
-        for line in lines {
+        for (idx, line) in lines.enumerated() {
             let view = SweepLyricLineView(primaryText: line.text, translationText: line.translation, lineTime: line.time)
             view.customSweepColor = sweep
             view.customNormalColor = normal
             view.onSeek = { [weak self] seconds in
                 self?.onSeek?(seconds)
+            }
+            view.onHoverChanged = { [weak self] entered in
+                guard let self else { return }
+                if entered {
+                    self.setHoveredLine(idx)
+                } else if self.hoveredLineIndex == idx {
+                    self.setHoveredLine(nil)
+                }
             }
             linesStack.addArrangedSubview(view)
             view.widthAnchor.constraint(equalTo: linesStack.widthAnchor, constant: -32).isActive = true
@@ -1588,17 +1717,28 @@ final class ImmersiveLyricsView: NSView {
         let maxY = max(0, documentView.bounds.height - visibleHeight)
         let clampedY = min(max(0, centerInDoc.y - visibleHeight * 0.5), maxY)
         if animated {
-            NSAnimationContext.runAnimationGroup { ctx in
+            NSAnimationContext.runAnimationGroup({ ctx in
                 ctx.duration = 0.28
                 ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
                 scrollView.contentView.animator().setBoundsOrigin(NSPoint(x: 0, y: clampedY))
-            }
+            }, completionHandler: { [weak self] in
+                Task { @MainActor in
+                    self?.revalidateHoverFromPointer()
+                }
+            })
         } else {
             scrollView.contentView.setBoundsOrigin(NSPoint(x: 0, y: clampedY))
+            revalidateHoverFromPointer()
         }
     }
 
     #if DEBUG
+    var debugHoveredLineCount: Int { lineViews.filter(\.isHovered).count }
+
+    func debugSimulateHover(at index: Int?) {
+        setHoveredLine(index)
+    }
+
     func debugLineCenterAndVisibleMidY(for index: Int) -> (lineMidY: CGFloat, visibleMidY: CGFloat)? {
         guard lineViews.indices.contains(index) else { return nil }
         activeIndex = index
@@ -1653,6 +1793,22 @@ final class ImmersiveLyricsView: NSView {
 
 private final class ImmersiveLyricsScrollView: NSScrollView {
     var onUserScroll: (() -> Void)?
+    var onMouseExited: (() -> Void)?
+    private var hoverTracking: NSTrackingArea?
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let hoverTracking { removeTrackingArea(hoverTracking) }
+        let area = NSTrackingArea(rect: .zero, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self)
+        addTrackingArea(area)
+        hoverTracking = area
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        onMouseExited?()
+    }
+
     override func scrollWheel(with event: NSEvent) {
         onUserScroll?()
         super.scrollWheel(with: event)

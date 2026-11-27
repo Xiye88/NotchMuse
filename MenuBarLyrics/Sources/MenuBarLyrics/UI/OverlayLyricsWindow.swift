@@ -287,6 +287,11 @@ enum NotchGeometry {
 
 @MainActor
 final class OverlayLyricsWindow: NSObject {
+    private final class LyricsPanel: NSPanel {
+        override var canBecomeKey: Bool { false }
+        override var canBecomeMain: Bool { false }
+    }
+
     @MainActor
     private final class GradientLyricView: NSView {
         var text = "" {
@@ -347,22 +352,23 @@ final class OverlayLyricsWindow: NSObject {
     @MainActor
     private final class Lane {
         let label = GradientLyricView()
-        let window: NSWindow
+        let window: NSPanel
 
         init(level: NSWindow.Level) {
             let contentView = NSView()
             contentView.wantsLayer = true
             contentView.layer?.masksToBounds = true
 
-            window = NSWindow(
+            window = LyricsPanel(
                 contentRect: .zero,
-                styleMask: [.borderless],
+                styleMask: [.borderless, .nonactivatingPanel],
                 backing: .buffered,
                 defer: false
             )
             window.isOpaque = false
             window.backgroundColor = .clear
             window.hasShadow = false
+            window.hidesOnDeactivate = false
             window.level = level
             window.ignoresMouseEvents = true
             window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
@@ -685,7 +691,7 @@ final class OverlayLyricsWindow: NSObject {
     @MainActor
     private final class NotchLane {
         let view = NotchLyricsView()
-        let window: NSWindow
+        let window: NSPanel
         private let containerView = NSView()
         private let lyricGroup = NSView()
         private(set) var interaction: FreeLyricsInteraction?
@@ -697,15 +703,16 @@ final class OverlayLyricsWindow: NSObject {
         private var hoverFrame = NSRect.zero
 
         init(interactive: Bool = false) {
-            window = NSWindow(
+            window = LyricsPanel(
                 contentRect: .zero,
-                styleMask: [.borderless],
+                styleMask: [.borderless, .nonactivatingPanel],
                 backing: .buffered,
                 defer: false
             )
             window.isOpaque = false
             window.backgroundColor = .clear
             window.hasShadow = false
+            window.hidesOnDeactivate = false
             window.level = .floating
             window.ignoresMouseEvents = OverlayMousePolicy.ignoresMouseEvents
             window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]

@@ -54,6 +54,77 @@ enum SelfTests {
         print("Interaction sound PCM and preference tests passed (6 cues)")
     }
 
+    @MainActor
+    private static func testPreferredLaunchTransport() async {
+        let spotify = URL(fileURLWithPath: "/Applications/Spotify.app")
+        var opened: [URL] = []
+        var scripts: [String] = []
+        var remoteCommands: [UInt32] = []
+        var mediaKeys: [Int] = []
+        await SystemMediaTransport.launchPreferredPlayer(.player(.spotify), resolve: { preferred in
+            check(preferred == .player(.spotify), "resolves the configured Spotify preference")
+            return (spotify, .spotify)
+        }, open: { url in
+            opened.append(url)
+            return "com.spotify.client"
+        }, runScript: { script, bundleID in
+            check(bundleID == "com.spotify.client", "script targets the launched player")
+            scripts.append(script)
+            return scripts.count == 2
+        }, isActiveBundle: { _ in
+            check(false, "Spotify startup does not depend on MediaRemote registration")
+            return false
+        }, sendRemote: { remoteCommands.append($0); return true })
+        check(opened == [spotify], "idle play opens Spotify once")
+        check(scripts == Array(repeating: "tell application \"Spotify\" to play", count: 2),
+              "Spotify play retries once without falling back to Music")
+        check(!SystemMediaTransport.send(.playPause, activeSource: nil, sendRemote: {
+            remoteCommands.append($0)
+            return false
+        }, postKey: { mediaKeys.append($0) }), "normal transport rejects play without an active source")
+        check(remoteCommands.isEmpty && mediaKeys.isEmpty, "idle Spotify play never sends a global command or media key")
+
+        await SystemMediaTransport.launchPreferredPlayer(.none, resolve: { _ in
+            check(false, "Do Not Auto-Launch does not resolve or open a player")
+            return nil
+        })
+        await SystemMediaTransport.launchPreferredPlayer(.player(.spotify), resolve: { _ in nil }, open: { _ in
+            check(false, "missing Spotify does not open a substitute player")
+            return nil
+        })
+        await SystemMediaTransport.launchPreferredPlayer(.player(.appleMusic),
+            resolve: { _ in (URL(fileURLWithPath: "/System/Applications/Music.app"), .appleMusic) },
+            open: { _ in "com.apple.Music" },
+            runScript: { script, bundleID in
+                check(script == "tell application \"Music\" to play" && bundleID == "com.apple.Music",
+                      "explicit Apple Music startup uses a targeted play command")
+                return false
+            },
+            sendRemote: { _ in
+                check(false, "Apple Music launch failure does not send a global command")
+                return false
+            })
+
+        let netEase = URL(fileURLWithPath: "/Applications/NetEaseMusic.app")
+        for isActive in [false, true] {
+            remoteCommands.removeAll()
+            await SystemMediaTransport.launchPreferredPlayer(.player(.netEaseMusic),
+                resolve: { _ in (netEase, .netEaseMusic) },
+                open: { _ in "com.netease.163music" },
+                runScript: { _, _ in
+                    check(false, "NetEase startup does not use AppleScript")
+                    return false
+                },
+                isActiveBundle: { bundleID in bundleID == "com.netease.163music" && isActive },
+                sendRemote: {
+                    remoteCommands.append($0)
+                    return false
+                })
+            check(remoteCommands == (isActive ? [0] : []), "NetEase only receives play after it owns MediaRemote")
+        }
+        print("PASS: preferred-player launch and idle media transport")
+    }
+
     @MainActor static func run() {
         check(LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: [:], isPreview: false), "fresh stable install opts into login launch")
         check(!LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: ["Language": "en"], isPreview: false), "existing preferences are preserved")
@@ -104,6 +175,7 @@ enum SelfTests {
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
+            await testPreferredLaunchTransport()
             await testMediaRemotePlayerAdapter()
             await testNetEaseMusicAdapter()
             await testLyricsClient()
@@ -124,6 +196,7 @@ enum SelfTests {
         while semaphore.wait(timeout: .now()) != .success {
             RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.01))
         }
+        MenuBarController.testDisplayModeFocus()
 
         print("Self-tests passed")
     }

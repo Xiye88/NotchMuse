@@ -762,7 +762,13 @@ final class MenuBarController: NSObject {
     }
 
     private func reloadSettings() {
-        NSApp.setActivationPolicy(AppPreferences.showInDock ? .regular : .accessory)
+        let newDisplayMode = AppPreferences.displayMode
+        let visibleSettings = newDisplayMode != displayMode && settingsWindowController?.window?.isVisible == true
+            ? settingsWindowController : nil
+        let activationPolicy: NSApplication.ActivationPolicy = AppPreferences.showInDock ? .regular : .accessory
+        if NSApp.activationPolicy() != activationPolicy {
+            NSApp.setActivationPolicy(activationPolicy)
+        }
         statusItem.isVisible = AppPreferences.showMenuBarIcon
         let selectedSource = AppPreferences.playerSource
         if selectedSource != player.source {
@@ -780,7 +786,7 @@ final class MenuBarController: NSObject {
             handlePlayerStopped(display: L10n.format("Checking %@...", selectedSource.displayName()))
             startPoll(forceLyricsRefresh: true)
         }
-        displayMode = AppPreferences.displayMode
+        displayMode = newDisplayMode
         position = AppPreferences.position
         notchStyle = AppPreferences.notchStyle
         for item in displayModeMenu.items {
@@ -795,6 +801,7 @@ final class MenuBarController: NSObject {
         scroll.reset()
         updateDisplay()
         pushLiveStatusToSettings()
+        visibleSettings?.restoreFocusAfterDisplayModeChange()
     }
 
     @objc private func selectDisplayMode(_ sender: NSMenuItem) {
@@ -914,36 +921,25 @@ final class MenuBarController: NSObject {
                 self?.overlay.freeInteraction.endEditing()
             }
             settingsWindowController?.onDisplayModeSelected = { [weak self] in
-                guard let self else { return }
-                self.isLyricsHidden = false
-                self.updateDisplay()
+                self?.isLyricsHidden = false
             }
             settingsWindowController?.onRetryLyricsMatch = { [weak self] in
                 self?.startPoll(forceLyricsRefresh: true)
             }
             settingsWindowController?.onMediaCommand = { [weak self] command in
                 guard let self else { return }
-                if command == .playPause, self.currentPlayerTrack == nil {
+                let activeSource = self.isPlayerStopped ? nil : self.currentPlayerTrack?.playerSource
+                if command == .playPause, activeSource == nil {
                     let preferred = AppPreferences.preferredLaunchPlayer
-                    if preferred == .none {
-                        return
+                    guard preferred != .none else { return }
+                    Task { [weak self] in
+                        await SystemMediaTransport.launchPreferredPlayer(preferred)
+                        self?.startPoll()
                     }
-                    if let target = preferred.resolveApplicationURL() {
-                        let config = NSWorkspace.OpenConfiguration()
-                        config.activates = false
-                        NSWorkspace.shared.openApplication(at: target.url, configuration: config) { _, _ in
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { [weak self] in
-                                SystemMediaTransport.send(.playPause, activeSource: target.source)
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                                    self?.startPoll()
-                                }
-                            }
-                        }
-                        return
-                    }
+                    return
                 }
-                let activeSource = self.currentPlayerTrack?.playerSource ?? self.player.source
-                SystemMediaTransport.send(command, activeSource: activeSource)
+                let transportSource = command == .playPause ? activeSource : self.currentPlayerTrack?.playerSource ?? self.player.source
+                SystemMediaTransport.send(command, activeSource: transportSource)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     self.startPoll()
                 }
@@ -962,6 +958,61 @@ final class MenuBarController: NSObject {
     }
 
     #if DEBUG
+    static func testDisplayModeFocus() {
+        guard !NSScreen.screens.isEmpty else {
+            print("SKIP: Settings window focus test requires a desktop display")
+            return
+        }
+        let defaults = UserDefaults.standard
+        let keys = [AppPreferences.displayModeKey, AppPreferences.playerSourceKey, AppPreferences.playerStopBehaviorKey,
+                    "NSWindow Frame NotchMuseSettings"]
+        let saved = keys.map { defaults.object(forKey: $0) }
+        let activationPolicy = NSApp.activationPolicy()
+        defaults.set(DisplayMode.statusBar.rawValue, forKey: AppPreferences.displayModeKey)
+        defaults.set(PlayerSource.spotify.rawValue, forKey: AppPreferences.playerSourceKey)
+        defaults.set(PlayerStopBehavior.keep.rawValue, forKey: AppPreferences.playerStopBehaviorKey)
+        let controller = MenuBarController()
+        defer {
+            controller.settingsWindowController?.close()
+            controller.overlay.hide()
+            controller.scrollTimer?.invalidate()
+            NSStatusBar.system.removeStatusItem(controller.statusItem)
+            NSApp.setActivationPolicy(activationPolicy)
+            for (key, value) in zip(keys, saved) {
+                if let value { defaults.set(value, forKey: key) } else { defaults.removeObject(forKey: key) }
+            }
+        }
+        NSApp.setActivationPolicy(AppPreferences.showInDock ? .regular : .accessory)
+        controller.showSettings()
+        let settings = controller.settingsWindowController!.window!
+        let other = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 200, height: 100),
+                             styleMask: [.titled], backing: .buffered, defer: false)
+        other.isReleasedWhenClosed = false
+        defer { other.close() }
+        other.makeKeyAndOrderFront(nil)
+
+        let item = NSMenuItem()
+        item.representedObject = DisplayMode.free.rawValue
+        controller.selectDisplayMode(item)
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1))
+
+        let overlay = controller.overlay.freeInteraction.window
+        precondition(overlay.isVisible && overlay is NSPanel && overlay.styleMask.contains(.nonactivatingPanel))
+        precondition(!overlay.canBecomeKey && !overlay.isKeyWindow, "Free lyrics must not take keyboard focus")
+        precondition(settings.isVisible, "Settings must stay visible after showing Free lyrics")
+        if NSApp.isActive {
+            precondition(settings.isKeyWindow, "Settings must stay key when app is active after showing Free lyrics")
+        }
+        precondition(NSApp.orderedWindows.first(where: { $0 === settings || $0 === other }) === settings,
+                     "Settings must return in front of the other window")
+
+        settings.orderOut(nil)
+        item.representedObject = DisplayMode.statusBar.rawValue
+        controller.selectDisplayMode(item)
+        precondition(!settings.isVisible, "Switching display modes must not reopen hidden Settings")
+        print("PASS: display mode switch preserves visible Settings focus and leaves hidden Settings closed")
+    }
+
     static func testVocalGapPresentation() {
         let controller = MenuBarController()
         controller.isLyricsHidden = true // Exercise real display state without showing a fixture over user lyrics.

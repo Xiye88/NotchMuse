@@ -496,6 +496,12 @@ final class SettingsWindowController: NSWindowController {
         window?.makeKeyAndOrderFront(nil)
     }
 
+    func restoreFocusAfterDisplayModeChange() {
+        guard let window, !window.isMiniaturized else { return }
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+    }
+
     #if DEBUG
     static func testPreviewCardLayout() {
         let preview = SettingsPreviewView(frame: NSRect(x: 0, y: 0, width: 600, height: 218))
@@ -1676,8 +1682,8 @@ final class SettingsWindowController: NSWindowController {
         let modes = DisplayMode.allCases
         guard modes.indices.contains(previewModeControl.selectedSegment) else { return }
         let selected = modes[previewModeControl.selectedSegment]
-        save(selected, key: AppPreferences.displayModeKey)
         onDisplayModeSelected?()
+        save(selected, key: AppPreferences.displayModeKey)
         displayModeControl.selectedSegment = previewModeControl.selectedSegment
         preview.mode = selected
         updateControlAvailability()

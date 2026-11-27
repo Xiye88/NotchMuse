@@ -93,12 +93,14 @@ enum SystemMediaTransport {
     }
 
     @discardableResult
-    static func send(_ command: MediaTransportCommand, activeSource: PlayerSource?) -> Bool {
-        if let sendFn = sendCommandSymbol {
-            if sendFn(command.mediaRemoteCode, nil).boolValue {
-                return true
-            }
-        }
+    static func send(
+        _ command: MediaTransportCommand,
+        activeSource: PlayerSource?,
+        sendRemote: (UInt32) -> Bool = sendMediaRemote,
+        postKey: (Int) -> Void = postMediaKey
+    ) -> Bool {
+        guard command != .playPause || activeSource != nil else { return false }
+        if sendRemote(command.mediaRemoteCode) { return true }
 
         if activeSource == .spotify {
             let verb: String
@@ -124,8 +126,62 @@ enum SystemMediaTransport {
         case .next: keyCode = 17
         case .previous: keyCode = 18
         }
-        postMediaKey(keyCode)
+        postKey(keyCode)
         return true
+    }
+
+    @MainActor
+    static func launchPreferredPlayer(
+        _ preferred: PreferredLaunchPlayer,
+        resolve: (PreferredLaunchPlayer) -> (url: URL, source: PlayerSource)? = { $0.resolveApplicationURL() },
+        open: (URL) async -> String? = openPlayer,
+        runScript: (String, String) -> Bool = playUsingAppleScript,
+        isActiveBundle: (String) async -> Bool = isActiveMediaRemoteBundle,
+        sendRemote: (UInt32) -> Bool = sendMediaRemote
+    ) async {
+        guard preferred != .none, let target = resolve(preferred),
+              let bundleID = await open(target.url) else { return }
+
+        switch target.source {
+        case .spotify:
+            let script = "tell application \"Spotify\" to play"
+            if !runScript(script, bundleID) {
+                try? await Task.sleep(for: .milliseconds(400))
+                if !Task.isCancelled { _ = runScript(script, bundleID) }
+            }
+        case .appleMusic:
+            _ = runScript("tell application \"Music\" to play", bundleID)
+        default:
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled, await isActiveBundle(bundleID) else { return }
+            _ = sendRemote(0) // kMRPlay
+        }
+    }
+
+    @MainActor
+    private static func openPlayer(at url: URL) async -> String? {
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = false
+        let app = try? await NSWorkspace.shared.openApplication(at: url, configuration: configuration)
+        return app?.bundleIdentifier
+    }
+
+    private static func playUsingAppleScript(_ script: String, bundleID: String) -> Bool {
+        guard NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).contains(where: { !$0.isTerminated }) else {
+            return false
+        }
+        return runAppleScript(script)
+    }
+
+    private static func isActiveMediaRemoteBundle(_ bundleID: String) async -> Bool {
+        await Task.detached {
+            guard let event = try? MediaRemoteBridge.bundled().get(timeout: 1) else { return false }
+            return (event.parentApplicationBundleIdentifier ?? event.bundleIdentifier) == bundleID
+        }.value
+    }
+
+    private static func sendMediaRemote(_ code: UInt32) -> Bool {
+        sendCommandSymbol?(code, nil).boolValue ?? false
     }
 
     static func seek(to seconds: TimeInterval, activeSource: PlayerSource?) {
@@ -162,8 +218,9 @@ enum SystemMediaTransport {
 
     @discardableResult
     private static func runAppleScript(_ source: String) -> Bool {
+        guard let script = NSAppleScript(source: source) else { return false }
         var error: NSDictionary?
-        NSAppleScript(source: source)?.executeAndReturnError(&error)
+        script.executeAndReturnError(&error)
         return error == nil
     }
 }

@@ -750,6 +750,7 @@ final class OverlayLyricsWindow: NSObject {
             fontSize: CGFloat,
             colors: [NSColor],
             usesGradient: Bool,
+            opacity: CGFloat,
             backgroundEnabled: Bool,
             backgroundColor: NSColor,
             backgroundOpacity: CGFloat,
@@ -835,6 +836,7 @@ final class OverlayLyricsWindow: NSObject {
             tintView.isHidden = !backgroundEnabled
             window.hasShadow = backgroundEnabled && backgroundOpacity > 0
             view.frame = NSRect(origin: .zero, size: frame.size)
+            view.alphaValue = opacity
             view.lyric = displayLyric
             view.translation = translation
             view.song = song
@@ -1006,6 +1008,7 @@ final class OverlayLyricsWindow: NSObject {
                 fontSize: fontSize,
                 colors: colors,
                 usesGradient: colorPreset.isGradient,
+                opacity: opacity,
                 backgroundEnabled: notchBackgroundEnabled,
                 backgroundColor: notchBackgroundColor,
                 backgroundOpacity: notchBackgroundOpacity,

@@ -660,7 +660,13 @@ final class FreeLyricsInteraction: NSObject {
         unlockPill.layer?.cornerRadius = 14
         unlockPill.layer?.masksToBounds = true
         unlockButton.isBordered = false
-        unlockButton.font = .systemFont(ofSize: 12, weight: .semibold)
+        unlockButton.title = ""
+        unlockButton.imagePosition = .imageOnly
+        unlockButton.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: unlockWindow.title)?
+            .withSymbolConfiguration(.init(pointSize: 12, weight: .semibold))
+        unlockButton.contentTintColor = .white
+        unlockButton.toolTip = unlockWindow.title
+        unlockButton.setAccessibilityLabel(unlockWindow.title)
         unlockButton.target = self
         unlockButton.action = #selector(toggleLock)
         unlockButton.onHoverChange = { [weak self] _ in self?.checkLockedHover() }
@@ -837,12 +843,8 @@ final class FreeLyricsInteraction: NSObject {
         let lyricRect = isLocked && window.isVisible ? lyricScreenRect : nil
         let hoverGeometryChanged = lockedLyricRect != lyricRect
         lockedLyricRect = lyricRect
-        if let lyricRect {
-            if !wasLocked || unlockButton.title.isEmpty {
-                unlockButton.title = L10n.text("🔒 Unlock")
-                unlockButton.setAccessibilityLabel(L10n.text("Unlock Position"))
-            }
-            if hoverGeometryChanged || !wasLocked { positionUnlockWindow(relativeTo: lyricRect) }
+        if let lyricRect, hoverGeometryChanged || !wasLocked {
+            positionUnlockWindow(relativeTo: lyricRect)
         }
         if wasLocked != isLocked || wasIgnoringMouse != window.ignoresMouseEvents {
             hideHint()
@@ -1054,8 +1056,8 @@ final class FreeLyricsInteraction: NSObject {
     }
 
     private func positionUnlockWindow(relativeTo lyric: NSRect) {
-        let width = max(64, ceil(unlockButton.intrinsicContentSize.width) + 12)
         let height: CGFloat = 28
+        let width = height
         let visible = window.screen?.visibleFrame
         let above = lyric.maxY + 2
         let y = above + height <= (visible?.maxY ?? .greatestFiniteMagnitude) ? above : lyric.minY - height - 2

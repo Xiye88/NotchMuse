@@ -380,7 +380,6 @@ final class SettingsWindowController: NSWindowController {
     private let fontSizeSlider = NSSlider(value: 13, minValue: 10, maxValue: 60, target: nil, action: nil)
     private let animationSpeedSlider = NSSlider(value: 1, minValue: 0.1, maxValue: 3, target: nil, action: nil)
     private let opacitySlider = NSSlider(value: 1, minValue: 0.1, maxValue: 1, target: nil, action: nil)
-    private let opacityLabel = NSTextField(labelWithString: "")
     private let fontSizeValue = NSTextField(string: "")
     private let animationSpeedValue = NSTextField(string: "")
     private let opacityValue = NSTextField(string: "")
@@ -960,7 +959,7 @@ final class SettingsWindowController: NSWindowController {
             [label(L10n.text("Lyrics Color")), colorPalette()],
             [label(L10n.text("Font Size")), valueRow(slider: fontSizeSlider, value: fontSizeValue, unit: "pt")],
             [label(L10n.text("Animation Speed")), valueRow(slider: animationSpeedSlider, value: animationSpeedValue, unit: "×")],
-            [opacityLabel, valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
+            [label(L10n.text("Lyrics Opacity")), valueRow(slider: opacitySlider, value: opacityValue, unit: "%")],
             [label(L10n.text("Show Background Capsule")), notchBackgroundSwitch],
             [label(L10n.text("Background Color")), backgroundColorControls()],
             [label(L10n.text("Background Opacity")), valueRow(slider: notchBackgroundOpacitySlider, value: notchBackgroundOpacityValue, unit: "%")],
@@ -1361,7 +1360,6 @@ final class SettingsWindowController: NSWindowController {
             tile.surfaceBorderColor = AppearanceSurfaceColors.border
             tile.layer?.borderWidth = 0.5
             tile.layer?.cornerRadius = 8
-            tile.widthAnchor.constraint(greaterThanOrEqualToConstant: 108).isActive = true
             tile.heightAnchor.constraint(equalToConstant: 56).isActive = true
             let sampleLabel = NSTextField(labelWithString: entry.sample)
             sampleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
@@ -1429,12 +1427,14 @@ final class SettingsWindowController: NSWindowController {
         value.alignment = .right
         value.setContentHuggingPriority(.required, for: .horizontal)
         value.widthAnchor.constraint(equalToConstant: 58).isActive = true
+        value.heightAnchor.constraint(equalToConstant: 24).isActive = true
         slider.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        slider.widthAnchor.constraint(greaterThanOrEqualToConstant: 180).isActive = true
+        slider.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         let unitLabel = NSTextField(labelWithString: unit)
         unitLabel.textColor = .secondaryLabelColor
         let stack = NSStackView(views: [slider, value, unitLabel])
         stack.orientation = .horizontal
+        stack.alignment = .centerY
         stack.spacing = 10
         return stack
     }
@@ -1443,6 +1443,7 @@ final class SettingsWindowController: NSWindowController {
         field.target = self
         field.action = action
         field.alignment = .right
+        field.cell?.usesSingleLineMode = true
         field.placeholderString = "0"
     }
 
@@ -1465,18 +1466,19 @@ final class SettingsWindowController: NSWindowController {
     }
 
     private func colorPalette() -> NSView {
+        let swatchDiameter: CGFloat = 22
         let presets = LyricsColorPreset.solidPresets + LyricsColorPreset.gradientPresets
         let buttons = presets.enumerated().map { index, preset in
             let colors = BrandStyle.gradientColors(for: preset)
-            let button = NSButton(image: swatch(preset.isGradient ? colors : [colors[min(1, colors.count - 1)]]), target: self, action: #selector(colorChanged(_:)))
+            let button = NSButton(image: swatch(preset.isGradient ? colors : [colors[min(1, colors.count - 1)]], diameter: swatchDiameter), target: self, action: #selector(colorChanged(_:)))
             button.isBordered = false
             button.tag = index
             button.toolTip = L10n.text(preset.rawValue)
             button.setAccessibilityLabel(L10n.text(preset.rawValue))
             button.wantsLayer = true
-            button.layer?.cornerRadius = 18
-            button.widthAnchor.constraint(equalToConstant: 36).isActive = true
-            button.heightAnchor.constraint(equalToConstant: 36).isActive = true
+            button.layer?.cornerRadius = swatchDiameter / 2
+            button.widthAnchor.constraint(equalToConstant: swatchDiameter).isActive = true
+            button.heightAnchor.constraint(equalToConstant: swatchDiameter).isActive = true
             return button
         }
         colorButtons = buttons
@@ -1484,17 +1486,17 @@ final class SettingsWindowController: NSWindowController {
         gradientStartWell.colorWellStyle = .minimal
         lyricsColorEndWell.colorWellStyle = .minimal
         lyricsColorWell.toolTip = L10n.text("Custom Color / Gradient Start")
-        lyricsColorWell.widthAnchor.constraint(equalToConstant: 32).isActive = true
+        lyricsColorWell.widthAnchor.constraint(equalToConstant: 30).isActive = true
         gradientStartWell.toolTip = L10n.text("Custom Gradient Start")
-        gradientStartWell.widthAnchor.constraint(equalToConstant: 32).isActive = true
+        gradientStartWell.widthAnchor.constraint(equalToConstant: 30).isActive = true
         lyricsColorEndWell.toolTip = L10n.text("Custom Gradient End")
-        lyricsColorEndWell.widthAnchor.constraint(equalToConstant: 32).isActive = true
+        lyricsColorEndWell.widthAnchor.constraint(equalToConstant: 30).isActive = true
 
         let solidCurated: [NSView] = Array(buttons.prefix(8)) + [lyricsColorWell]
         let solidRow = NSStackView(views: solidCurated)
         solidRow.orientation = .horizontal
         solidRow.alignment = .centerY
-        solidRow.spacing = 6
+        solidRow.spacing = 3
         solidPalette.orientation = .vertical
         solidPalette.alignment = .leading
         solidPalette.addArrangedSubview(solidRow)
@@ -1504,7 +1506,7 @@ final class SettingsWindowController: NSWindowController {
         let gradRow = NSStackView(views: gradCurated)
         gradRow.orientation = .horizontal
         gradRow.alignment = .centerY
-        gradRow.spacing = 6
+        gradRow.spacing = 3
         gradientPalette.orientation = .vertical
         gradientPalette.alignment = .leading
         gradientPalette.addArrangedSubview(gradRow)
@@ -1527,19 +1529,20 @@ final class SettingsWindowController: NSWindowController {
         return row
     }
 
-    private func swatch(_ colors: [NSColor]) -> NSImage {
-        let image = NSImage(size: NSSize(width: 30, height: 30))
+    private func swatch(_ colors: [NSColor], diameter: CGFloat) -> NSImage {
+        let bounds = NSRect(x: 0, y: 0, width: diameter, height: diameter)
+        let image = NSImage(size: bounds.size)
         image.lockFocus()
-        let circle = NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24))
+        let circle = NSBezierPath(ovalIn: bounds.insetBy(dx: 0.5, dy: 0.5))
         circle.addClip()
         if colors.count > 1 {
-            NSGradient(colors: colors)?.draw(in: NSRect(x: 3, y: 3, width: 24, height: 24), angle: 0)
+            NSGradient(colors: colors)?.draw(in: circle.bounds, angle: 0)
         } else {
             (colors.first ?? .white).setFill()
             circle.fill()
         }
         NSColor.black.withAlphaComponent(0.12).setStroke()
-        NSBezierPath(ovalIn: NSRect(x: 3, y: 3, width: 24, height: 24)).stroke()
+        circle.stroke()
         image.unlockFocus()
         return image
     }
@@ -1619,11 +1622,6 @@ final class SettingsWindowController: NSWindowController {
 
     private func updateControlAvailability() {
         let statusBarMode = AppPreferences.displayMode == .statusBar
-        opacityLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        opacityLabel.stringValue = L10n.text(statusBarMode ? "Lyrics Opacity" : "Background Opacity")
-        opacitySlider.minValue = statusBarMode ? 0.1 : 0
-        opacitySlider.doubleValue = Double(statusBarMode ? AppPreferences.opacity : AppPreferences.notchBackgroundOpacity)
-        opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
         positionRow?.isHidden = !statusBarMode
         statusBarOffsetRow?.isHidden = !statusBarMode
         notchStyleRow?.isHidden = statusBarMode
@@ -1802,16 +1800,14 @@ final class SettingsWindowController: NSWindowController {
     }
 
     @objc private func opacityChanged() {
-        let key = AppPreferences.displayMode != .statusBar ? AppPreferences.notchBackgroundOpacityKey : AppPreferences.opacityKey
-        UserDefaults.standard.set(opacitySlider.doubleValue, forKey: key)
+        UserDefaults.standard.set(opacitySlider.doubleValue, forKey: AppPreferences.opacityKey)
         opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
         onSettingsChange()
         updatePreview()
     }
 
     @objc private func opacityEntered() {
-        let minimum: Double = AppPreferences.displayMode != .statusBar ? 0 : 10
-        guard let percent = NumericInput.parse(opacityValue.stringValue, minimum: minimum, maximum: 100) else {
+        guard let percent = NumericInput.parse(opacityValue.stringValue, minimum: 10, maximum: 100) else {
             opacityValue.stringValue = String(format: "%.0f", opacitySlider.doubleValue * 100)
             NSSound.beep()
             return

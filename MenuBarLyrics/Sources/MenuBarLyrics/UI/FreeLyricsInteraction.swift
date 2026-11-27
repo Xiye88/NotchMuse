@@ -100,7 +100,7 @@ enum FreeLyricsPreferences {
     static var vertical: Bool { UserDefaults.standard.bool(forKey: verticalKey) }
     static var lineMode: FreeLyricsLineMode { lineMode(in: .standard) }
     static func lineMode(in defaults: UserDefaults) -> FreeLyricsLineMode {
-        FreeLyricsLineMode(rawValue: defaults.string(forKey: lineModeKey) ?? "") ?? .single
+        FreeLyricsLineMode(rawValue: defaults.string(forKey: lineModeKey) ?? "") ?? .double
     }
     static func anchorKey(vertical: Bool) -> String { vertical ? verticalAnchorKey : horizontalAnchorKey }
     static func load(vertical: Bool, defaults: UserDefaults = .standard) -> FreeLyricsAnchor? {
@@ -237,25 +237,35 @@ final class FreeLyricsDragSurfaceView: NSView {
 
     private func updateSurfaceStyle() {
         CATransaction.begin()
-        CATransaction.setAnimationDuration(0.14)
+        CATransaction.setAnimationDuration(0.16)
         let targetFrame = activeHighlightFrame
         highlightLayer.frame = targetFrame
-        highlightLayer.cornerRadius = min(16, targetFrame.height / 2)
+        highlightLayer.cornerRadius = min(18, targetFrame.height / 2)
         if isDragEnabled && (isHoveredNow || isDraggingNow) {
             if hasCapsuleBackground {
-                // Never draw a second gray box behind an existing capsule; highlight with crisp 1.5pt warm amber border
+                // Soft warm-amber/white hairline glow instead of harsh solid border
                 highlightLayer.backgroundColor = NSColor.clear.cgColor
-                highlightLayer.borderWidth = 1.5
-                highlightLayer.borderColor = NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: isDraggingNow ? 0.92 : 0.75).cgColor
-            } else {
-                let alpha: CGFloat = isDraggingNow ? 0.54 : 0.40
-                highlightLayer.backgroundColor = NSColor(calibratedRed: 0.16, green: 0.16, blue: 0.18, alpha: alpha).cgColor
                 highlightLayer.borderWidth = 0.75
-                highlightLayer.borderColor = NSColor.white.withAlphaComponent(isDraggingNow ? 0.24 : 0.14).cgColor
+                highlightLayer.borderColor = NSColor(calibratedRed: 1.0, green: 0.72, blue: 0.45, alpha: isDraggingNow ? 0.34 : 0.24).cgColor
+                highlightLayer.shadowColor = NSColor(calibratedRed: 1.0, green: 0.62, blue: 0.28, alpha: 0.22).cgColor
+                highlightLayer.shadowOpacity = 0.6
+                highlightLayer.shadowRadius = 6
+                highlightLayer.shadowOffset = .zero
+            } else {
+                // Light, airy translucent mist backdrop (0.16–0.22) + ultra-soft border
+                let alpha: CGFloat = isDraggingNow ? 0.22 : 0.16
+                highlightLayer.backgroundColor = NSColor(calibratedWhite: 0.92, alpha: alpha).cgColor
+                highlightLayer.borderWidth = 0.5
+                highlightLayer.borderColor = NSColor.white.withAlphaComponent(isDraggingNow ? 0.26 : 0.18).cgColor
+                highlightLayer.shadowColor = NSColor.black.withAlphaComponent(0.12).cgColor
+                highlightLayer.shadowOpacity = 0.4
+                highlightLayer.shadowRadius = 8
+                highlightLayer.shadowOffset = .zero
             }
         } else {
             highlightLayer.backgroundColor = NSColor.clear.cgColor
             highlightLayer.borderColor = NSColor.clear.cgColor
+            highlightLayer.shadowOpacity = 0
         }
         CATransaction.commit()
     }

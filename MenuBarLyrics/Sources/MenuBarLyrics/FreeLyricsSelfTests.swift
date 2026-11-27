@@ -162,10 +162,14 @@ enum FreeLyricsSelfTests {
         check(defaults.string(forKey: AppPreferences.colorPresetKey) == LyricsColorPreset.customGradient.rawValue, "quick gradient dot switches to custom gradient preset")
         interaction.updateContentLayout(rect: NSRect(x: 120, y: 0, width: 180, height: 48), hasCapsuleBackground: false)
         check(dragSurface.activeHighlightFrame.width == 180 && dragSurface.activeHighlightFrame.width < dragSurface.bounds.width, "hover frame tightly fits lyric width instead of full window")
+        // E36: default double-line floating mode + compact vertical column gap (10–14pt)
+        let freshSuite = UserDefaults(suiteName: "NotchMuseFreeLyricsDefaultLineMode-\(UUID().uuidString)")!
+        check(FreeLyricsPreferences.lineMode(in: freshSuite) == .double, "free floating lyrics must default to double-line mode")
         defaults.set(FreeLyricsLineMode.double.rawValue, forKey: FreeLyricsPreferences.lineModeKey)
         check(FreeLyricsPreferences.lineMode(in: defaults) == .double, "double-line floating lyrics mode persists")
         defaults.set(FreeLyricsLineMode.single.rawValue, forKey: FreeLyricsPreferences.lineModeKey)
         check(FreeLyricsPreferences.lineMode(in: defaults) == .single, "single-line floating lyrics mode persists")
+        check(OverlayLyricsWindow.verticalColumnGapForTest >= 10 && OverlayLyricsWindow.verticalColumnGapForTest <= 14, "vertical column gap must stay compact (10-14pt)")
         check(interaction.testToolbar.subviews.count == 6, "toolbar exposes 6 icon controls with tooltips")
         for subview in interaction.testToolbar.subviews {
             check((subview.toolTip ?? "").isEmpty == false, "every toolbar button carries a clear tooltip")

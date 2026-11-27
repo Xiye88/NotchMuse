@@ -494,9 +494,6 @@ final class OverlayLyricsWindow: NSObject {
 
             if vertical {
                 drawVerticalLyric()
-                if let translation, !translation.isEmpty {
-                    drawTranslation(translation, in: NSRect(x: 4, y: 2, width: bounds.width - 8, height: lineHeight), font: .systemFont(ofSize: max(9, font.pointSize - 3)))
-                }
                 return
             }
 
@@ -595,6 +592,14 @@ final class OverlayLyricsWindow: NSObject {
             NSGraphicsContext.restoreGraphicsState()
         }
 
+        static let verticalColumnGap: CGFloat = 12
+
+        static func verticalContentWidth(fontSize: CGFloat, columnCount: Int) -> CGFloat {
+            let cols = max(1, min(2, columnCount))
+            let glyphColW = ceil(fontSize * 1.15)
+            return CGFloat(cols) * glyphColW + CGFloat(max(0, cols - 1)) * verticalColumnGap
+        }
+
         private func drawVerticalLyric() {
             let glyphs = lyric.map(String.init)
             guard !glyphs.isEmpty else { return }
@@ -602,7 +607,10 @@ final class OverlayLyricsWindow: NSObject {
             let rows = max(1, Int(lyricViewport.height / cell))
             let start = LyricHighlightLayout.verticalStart(glyphCount: glyphs.count, rows: rows, progress: progress, staticText: staticText)
             let visible = Array(glyphs.dropFirst(start).prefix(rows * 2))
-            let columnWidth = lyricViewport.width / 2
+            let glyphColW = ceil(font.pointSize * 1.15)
+            let cols = visible.count > rows ? 2 : 1
+            let totalW = Self.verticalContentWidth(fontSize: font.pointSize, columnCount: cols)
+            let originX = lyricViewport.midX - totalW / 2
             for (index, glyph) in visible.enumerated() {
                 let originalIndex = start + index
                 let color: NSColor
@@ -617,9 +625,10 @@ final class OverlayLyricsWindow: NSObject {
                 let row = index % rows
                 let paragraph = NSMutableParagraphStyle()
                 paragraph.alignment = .center
-                (glyph as NSString).draw(in: NSRect(x: lyricViewport.minX + CGFloat(column) * columnWidth,
+                let colX = originX + CGFloat(column) * (glyphColW + Self.verticalColumnGap)
+                (glyph as NSString).draw(in: NSRect(x: colX,
                                                     y: lyricViewport.maxY - CGFloat(row + 1) * cell,
-                                                    width: columnWidth, height: cell), withAttributes: [
+                                                    width: glyphColW, height: cell), withAttributes: [
                     .font: font, .foregroundColor: color.withAlphaComponent(CGFloat(originalIndex) / CGFloat(glyphs.count) <= progress ? 1 : 0.7),
                     .paragraphStyle: paragraph, .shadow: textShadow()
                 ])
@@ -771,7 +780,15 @@ final class OverlayLyricsWindow: NSObject {
             let measuredWidth = ceil((displayLyric as NSString).size(withAttributes: [.font: font]).width)
             let translationWidth = hasTranslation ? ceil(((translation ?? "") as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: max(10, fontSize - 3), weight: .regular)]).width) : 0
             let metadataWidth: CGFloat = style == .lyricOnly ? 0 : ceil(("\(song) · \(artist)" as NSString).size(withAttributes: [.font: font]).width)
-            let backgroundRect = placement.isVertical ? NSRect(origin: .zero, size: frame.size) : NotchGeometry.backgroundRect(
+            let verticalBoxWidth: CGFloat = {
+                let cell = ceil(fontSize * 1.45)
+                let rows = max(1, Int(max(1, frame.height - 16) / cell))
+                let cols = displayLyric.count > rows ? 2 : 1
+                let contentW = NotchLyricsView.verticalContentWidth(fontSize: fontSize, columnCount: cols)
+                return min(frame.width, max(56, contentW + 28))
+            }()
+            let verticalTightRect = NSRect(x: (frame.width - verticalBoxWidth) / 2, y: 0, width: verticalBoxWidth, height: frame.height)
+            let backgroundRect = placement.isVertical ? verticalTightRect : NotchGeometry.backgroundRect(
                 in: NSRect(origin: .zero, size: frame.size),
                 contentWidth: max(measuredWidth, max(metadataWidth, translationWidth)),
                 padding: backgroundPadding
@@ -791,7 +808,7 @@ final class OverlayLyricsWindow: NSObject {
             let tightHoverRect: NSRect = backgroundEnabled
                 ? backgroundRect
                 : (placement.isVertical
-                    ? NSRect(origin: .zero, size: frame.size)
+                    ? verticalTightRect
                     : NotchGeometry.backgroundRect(
                         in: NSRect(origin: .zero, size: frame.size),
                         contentWidth: max(measuredWidth, max(metadataWidth, translationWidth)),
@@ -947,7 +964,7 @@ final class OverlayLyricsWindow: NSObject {
                 style: effectiveStyle,
                 customWidth: customWidth
             )
-            let secondaryLine: String? = (mode == .statusBar)
+            let secondaryLine: String? = (mode == .statusBar || placement.isVertical)
                 ? nil
                 : (translation ?? ((mode == .free && FreeLyricsPreferences.lineMode == .double) ? nextLyric : nil))
             var frame = NotchGeometry.frame(
@@ -1079,4 +1096,5 @@ final class OverlayLyricsWindow: NSObject {
         return needsScrolling
     }
 
+    static var verticalColumnGapForTest: CGFloat { NotchLyricsView.verticalColumnGap }
 }

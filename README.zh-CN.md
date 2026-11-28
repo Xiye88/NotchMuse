@@ -91,10 +91,10 @@ NotchMuse 采用 [MIT 许可证](LICENSE)。更多信息请见[第三方组件�
 
 ## 社区与支持
 
-| 微信支付 | QQ 用户群（1137981671） | USDT · EVM |
-| :---: | :---: | :---: |
-| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" width="150" alt="微信支付"> | <a href="https://qm.qq.com/q/J6W0oSPtu0"><img src="docs/assets/readme/qq-group-qr.png" width="150" alt="QQ 用户群（1137981671）"></a> | <img src="docs/support/usdt-evm.png" width="150" alt="USDT · EVM"> |
-| 赞助开发 | [点击加群](https://qm.qq.com/q/J6W0oSPtu0) | ETH · BSC · Arbitrum · Optimism<br>仅限 USDT |
+| QQ 用户群（1137981671） | USDT · EVM |
+| :---: | :---: |
+| <a href="https://qm.qq.com/q/J6W0oSPtu0"><img src="docs/assets/readme/qq-group-qr.png" width="150" alt="QQ 用户群（1137981671）"></a> | <img src="docs/support/usdt-evm.png" width="150" alt="USDT · EVM"> |
+| [点击加群](https://qm.qq.com/q/J6W0oSPtu0) | ETH · BSC · Arbitrum · Optimism<br>仅限 USDT |
 
 <a name="contact"></a>
 

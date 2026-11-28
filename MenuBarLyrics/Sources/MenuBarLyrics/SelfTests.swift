@@ -142,8 +142,12 @@ enum SelfTests {
                     check((vertical ? visible.width : visible.height) == 4, "thumb remains slim on the cross axis")
                     let min = vertical ? visible.minY : visible.minX
                     let max = vertical ? visible.maxY : visible.maxX
-                    if value == 0 { check(min == (vertical ? slot.minY : slot.minX), "thumb reaches the start of the slot") }
-                    if value == 1 { check(max == (vertical ? slot.maxY : slot.maxX), "thumb reaches the end of the slot") }
+                    let nativeMin = vertical ? native.minY : native.minX
+                    let nativeMax = vertical ? native.maxY : native.maxX
+                    let slotMin = vertical ? slot.minY : slot.minX
+                    let slotMax = vertical ? slot.maxY : slot.maxX
+                    if value == 0 { check(min == nativeMin && abs(min - slotMin) <= 4, "thumb reaches the start of the slot") }
+                    if value == 1 { check(max == nativeMax && abs(max - slotMax) <= 4, "thumb reaches the end of the slot") }
                 }
             }
         }

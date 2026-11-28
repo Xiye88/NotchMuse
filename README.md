@@ -87,10 +87,10 @@ NotchMuse is [MIT-licensed](LICENSE). See [Third-Party Notices](THIRD_PARTY_NOTI
 
 ## Community & Support
 
-| WeChat Pay | QQ User Group (1137981671) | USDT · EVM |
-| :---: | :---: | :---: |
-| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" width="150" alt="WeChat Pay"> | <a href="https://qm.qq.com/q/J6W0oSPtu0"><img src="docs/assets/readme/qq-group-qr.png" width="150" alt="QQ User Group (1137981671)"></a> | <img src="docs/support/usdt-evm.png" width="150" alt="USDT · EVM"> |
-| Support development | [Join on QQ](https://qm.qq.com/q/J6W0oSPtu0) | ETH · BSC · Arbitrum · Optimism<br>USDT only |
+| QQ User Group (1137981671) | USDT · EVM |
+| :---: | :---: |
+| <a href="https://qm.qq.com/q/J6W0oSPtu0"><img src="docs/assets/readme/qq-group-qr.png" width="150" alt="QQ User Group (1137981671)"></a> | <img src="docs/support/usdt-evm.png" width="150" alt="USDT · EVM"> |
+| [Join on QQ](https://qm.qq.com/q/J6W0oSPtu0) | ETH · BSC · Arbitrum · Optimism<br>USDT only |
 
 <a name="contact"></a>
 

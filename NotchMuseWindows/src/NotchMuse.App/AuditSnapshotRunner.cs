@@ -56,7 +56,7 @@ public static class AuditSnapshotRunner
 
         main.NavigateTo("General");
         await FlushRenderAsync();
-        SaveVisualPng(main, Path.Combine(outputDir, "04_light_general.png"), 1080, 700);
+        SaveVisualPng(main, Path.Combine(outputDir, "04_light_general.png"), 1080, 920);
 
         // 5-6: Dark Vinyl Hi-Fi (Lyrics + Display)
         main.SetThemeMode(AppThemeMode.Dark);
@@ -240,8 +240,22 @@ public static class AuditSnapshotRunner
         var slot = TaskbarLocator.ComputeSlot(0, 0, 1280, 48, isCentered: true, widgetsVisible: false, isLightTaskbar: lightTaskbar, null, 480, 1120);
         var overlay = new TaskbarLyricsWindow();
         overlay.ApplyTaskbarTheme(lightTaskbar);
-        overlay.UpdateAppearance(settings);
-        overlay.UpdateLyric("请你打开电视看看", "Please turn on the TV and take a look", 0.64, true);
+        var tbSettings = new AppSettings
+        {
+            AccentHex = settings.AccentHex,
+            GradientEndHex = settings.GradientEndHex,
+            ColorMode = settings.ColorMode,
+            FontSize = settings.FontSize,
+            FloatingDoubleLine = true,
+            BilingualEnabled = !lightTaskbar
+        };
+        overlay.UpdateAppearance(tbSettings);
+        overlay.UpdateLyric(
+            "请你打开电视看看",
+            lightTaskbar ? null : "Please turn on the TV and take a look",
+            0.64,
+            showBilingual: !lightTaskbar,
+            nextLine: "多少人为生命在努力勇敢的走下去");
 
         var overlayContent = (UIElement)overlay.Content;
         overlay.Content = null;
@@ -315,17 +329,24 @@ public static class AuditSnapshotRunner
                 50)
         };
 
-        // 1. Top Island Overlay (Soft Gray #3E3E44 @ 82%)
-        var islandSettings = new AppSettings { AccentHex = settings.AccentHex, CapsulePreset = CapsuleBackgroundPreset.SoftGray, CapsuleBackgroundOpacity = 0.82, FontSize = 22 };
+        // 1. Top Island Overlay (Soft Gray #3E3E44 @ 82%, Double-Line active!)
+        var islandSettings = new AppSettings
+        {
+            AccentHex = settings.AccentHex,
+            CapsulePreset = CapsuleBackgroundPreset.SoftGray,
+            CapsuleBackgroundOpacity = 0.82,
+            FloatingDoubleLine = true,
+            FontSize = 21
+        };
         var island = new FloatingLyricsWindow();
         island.ConfigureMode(LyricsDisplayMode.TopIsland, islandSettings);
-        island.UpdateLyric("请你打开电视看看", "Please turn on the TV and take a look", 0.58, true);
+        island.UpdateLyric("请你打开电视看看", null, 0.58, false, nextLine: "多少人为生命在努力勇敢的走下去");
         var islandVisual = (UIElement)island.Content;
         island.Content = null;
         canvas.Children.Add(new Border
         {
             Width = 540,
-            Height = 76,
+            Height = 84,
             HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Top,
             Child = islandVisual

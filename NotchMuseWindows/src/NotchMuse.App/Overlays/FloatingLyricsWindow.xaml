@@ -103,24 +103,26 @@
               Visibility="Collapsed"
               IsHitTestVisible="False"/>
 
-        <!-- 3-Row Layout: Row 0 = Top Toolbar Slot (default), Row 1 = Tight Lyric Capsule, Row 2 = Bottom Auto-Flip Slot -->
+        <!-- 3-Row Layout: Fixed-height Row 0 & Row 2 prevent LyricCapsule from EVER shifting vertically on hover! -->
         <Grid x:Name="OverlayGrid"
               VerticalAlignment="Center"
               HorizontalAlignment="Center"
               Background="Transparent">
             <Grid.RowDefinitions>
+                <RowDefinition x:Name="TopToolbarRow" Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition x:Name="BottomToolbarRow" Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Compact 6-Action Hover Mini-Toolbar + Borderless Dark-Ink Micro-Label + 7+3 Quick Color Popover -->
+            <!-- Uses Opacity + IsHitTestVisible instead of Collapsed so LyricCapsule NEVER jumps under the cursor! -->
             <Border x:Name="HoverToolbarHost"
                     Grid.Row="0"
                     HorizontalAlignment="Center"
                     Padding="8,0,8,7"
                     Background="#01000000"
-                    Visibility="Collapsed">
+                    Opacity="0"
+                    IsHitTestVisible="False">
                 <StackPanel HorizontalAlignment="Center">
                     <!-- Borderless, background-less, shadow-less dark-ink micro-label directly ABOVE the hovered button -->
                     <Canvas x:Name="MicroTooltipTrack"

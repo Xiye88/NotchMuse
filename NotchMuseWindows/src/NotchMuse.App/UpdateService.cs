@@ -6,10 +6,49 @@ using NotchMuse.Core;
 namespace NotchMuse.App;
 
 public sealed record ReleaseInfo(string TagName, string Name, string Body, string HtmlUrl, string? DownloadUrl = null);
+public sealed record AnnouncementInfo(string Id, string TitleZh, string TitleEn, string Url);
 
 public sealed class UpdateService(HttpClient client)
 {
     private const string LatestUrl = "https://api.github.com/repos/Xiye88/NotchMuse/releases/latest";
+    private const string AnnouncementFeedUrl = "https://notchmuse.com/announcements.json";
+
+    public static readonly AnnouncementInfo FallbackAnnouncement = new(
+        "v0.9.0",
+        "v0.9.0 最新版本进展",
+        "v0.9.0 Latest Updates",
+        "https://github.com/Xiye88/NotchMuse/releases");
+
+    public async Task<AnnouncementInfo> GetAnnouncementAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, AnnouncementFeedUrl);
+            request.Headers.UserAgent.Add(new ProductInfoHeaderValue("NotchMuse-Windows", "0.9"));
+            using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode) return FallbackAnnouncement;
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var root = doc.RootElement;
+            if (root.ValueKind != JsonValueKind.Object) return FallbackAnnouncement;
+            if (root.TryGetProperty("enabled", out var enabledEl) && enabledEl.ValueKind == JsonValueKind.False)
+                return FallbackAnnouncement;
+            var id = root.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.String ? idEl.GetString() ?? "v0.9.0" : "v0.9.0";
+            var titleZh = root.TryGetProperty("title_zh", out var zhEl) && zhEl.ValueKind == JsonValueKind.String ? zhEl.GetString() : null;
+            var titleEn = root.TryGetProperty("title_en", out var enEl) && enEl.ValueKind == JsonValueKind.String ? enEl.GetString() : null;
+            var url = root.TryGetProperty("url", out var urlEl) && urlEl.ValueKind == JsonValueKind.String ? urlEl.GetString() : null;
+            if (string.IsNullOrWhiteSpace(titleZh) && string.IsNullOrWhiteSpace(titleEn)) return FallbackAnnouncement;
+            return new AnnouncementInfo(
+                id,
+                string.IsNullOrWhiteSpace(titleZh) ? titleEn! : titleZh,
+                string.IsNullOrWhiteSpace(titleEn) ? titleZh! : titleEn,
+                string.IsNullOrWhiteSpace(url) ? FallbackAnnouncement.Url : url);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException or InvalidOperationException)
+        {
+            return FallbackAnnouncement;
+        }
+    }
 
     public async Task<ReleaseInfo?> GetLatestAsync(CancellationToken cancellationToken)
     {

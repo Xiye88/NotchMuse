@@ -52,7 +52,7 @@ public sealed class KugouSource(HttpClient client) : HttpLyricsSource(client)
         var picked = lyricCandidates[0];
 
         System.Text.Json.Nodes.JsonNode? download = null;
-        foreach (var host in new[] { "http://lyrics.kugou.com/download", "http://krcs.kugou.com/download" })
+        foreach (var host in new[] { "https://lyrics.kugou.com/download", "http://krcs.kugou.com/download" })
         {
             try
             {

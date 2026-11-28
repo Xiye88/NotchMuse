@@ -120,7 +120,7 @@
                         </UniformGrid>
                     </Border>
 
-                    <!-- 4. Compact Announcement Capsule (30px tall, auto-hidden when empty) -->
+                    <!-- 4. Compact Bottom-Left Version & Announcement Capsule (Always visible, Mac parity!) -->
                     <Border x:Name="AnnouncementCapsule"
                             DockPanel.Dock="Bottom"
                             Height="30"
@@ -129,24 +129,31 @@
                             Background="{DynamicResource AccentSoftBrush}"
                             BorderBrush="{DynamicResource AccentBorderBrush}"
                             BorderThickness="1"
-                            Padding="10,0"
+                            Padding="9,0"
                             Cursor="Hand"
-                            Visibility="Collapsed"
+                            Visibility="Visible"
                             MouseLeftButtonUp="OnAnnouncementClick">
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
+                            <Ellipse x:Name="AnnouncementUnreadDot"
+                                     Grid.Column="0"
+                                     Width="6" Height="6"
+                                     Fill="{DynamicResource AccentBrush}"
+                                     Margin="0,0,7,0"
+                                     VerticalAlignment="Center"/>
                             <TextBlock x:Name="AnnouncementText"
-                                       Grid.Column="0"
-                                       Text="✨ v0.9.0 新公告"
+                                       Grid.Column="1"
+                                       Text="v0.9.0 最新版本进展"
                                        FontSize="11"
                                        FontWeight="Medium"
                                        Foreground="{DynamicResource AccentBrush}"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Grid.Column="1"
+                            <TextBlock Grid.Column="2"
                                        Text="›"
                                        FontSize="13"
                                        FontWeight="SemiBold"
@@ -480,11 +487,11 @@
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
 
-                        <!-- Floating Lyrics Line Count (Single | Double, default Double - Mac Build 103 parity) -->
+                        <!-- Desktop Lyrics Line Count (Single | Double across Taskbar, TopIsland & FreeFloat) -->
                         <Grid Margin="0,0,0,16">
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock x:Name="FloatingLinesLabel" Text="悬浮歌词行数" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <TextBlock x:Name="FloatingLinesDesc" Text="默认双行显示（当前句高亮 + 柔和预告下一句或译文），竖排自动双列紧凑排布" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="FloatingLinesLabel" Text="桌面歌词行数" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock x:Name="FloatingLinesDesc" Text="默认双行显示（当前句高亮 + 柔和预告下一句或译文），同步作用于任务栏、悬浮岛与自由悬浮" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <Border Style="{StaticResource SegmentedContainer}" HorizontalAlignment="Right" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
@@ -561,60 +568,6 @@
                               Padding="32,38,32,28">
                     <StackPanel MaxWidth="740" HorizontalAlignment="Stretch">
                         <TextBlock x:Name="AppearanceHeaderTitle" Text="外观" FontFamily="{StaticResource StudioDisplayFont}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,20"/>
-
-                        <!-- Live Appearance Preview Strip (Instant 60fps feedback for Solid/Gradient, Custom Colors, Capsule & Sliders) -->
-                        <Border x:Name="AppearanceLivePreviewStage"
-                                CornerRadius="14"
-                                Padding="18,14"
-                                Margin="0,0,0,18"
-                                BorderBrush="{DynamicResource BorderSubtleBrush}"
-                                BorderThickness="1">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#222530" Offset="0"/>
-                                    <GradientStop Color="#313548" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Grid>
-                                <TextBlock x:Name="AppearancePreviewBadge"
-                                           Style="{x:Null}"
-                                           Text="LIVE PREVIEW"
-                                           FontFamily="{StaticResource StudioFont}"
-                                           FontSize="9.5"
-                                           FontWeight="SemiBold"
-                                           Foreground="#88F3F2EF"
-                                           HorizontalAlignment="Left"
-                                           VerticalAlignment="Top"/>
-                                <Border x:Name="AppearancePreviewCapsule"
-                                        CornerRadius="12"
-                                        Padding="20,9"
-                                        Margin="0,12,0,2"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Background="#D13E3E44"
-                                        BorderBrush="#33FFFFFF"
-                                        BorderThickness="0.75">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock x:Name="AppearancePreviewPrimary"
-                                                   Style="{x:Null}"
-                                                   Text="♪ 晚风轻轻吹过黑胶纹路"
-                                                   FontFamily="{StaticResource StudioDisplayFont}"
-                                                   FontSize="22"
-                                                   FontWeight="Bold"
-                                                   Foreground="#FF8A36"
-                                                   HorizontalAlignment="Center"/>
-                                        <TextBlock x:Name="AppearancePreviewSecondary"
-                                                   Style="{x:Null}"
-                                                   Text="Softly glowing across your desktop"
-                                                   FontFamily="{StaticResource StudioFont}"
-                                                   FontSize="12"
-                                                   Foreground="#C8C6C0"
-                                                   Margin="0,3,0,0"
-                                                   HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </Border>
 
                         <!-- Lyric Color Mode + Curated Palette + Custom Color Pickers (Solid & Gradient) -->
                         <Grid Margin="0,0,0,12">
@@ -748,8 +701,8 @@
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
 
-                        <!-- 8 Curated Visual Style Preset Cards (4x2 Grid with Live Miniature Stage Previews!) -->
-                        <TextBlock x:Name="QuickPresetsLabel" Text="风格快捷预设 · 8 套精选视觉方案" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,12"/>
+                        <!-- 8 Curated Visual Style Preset Cards (4x2 Grid) -->
+                        <TextBlock x:Name="QuickPresetsLabel" Text="风格快捷预设" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,12"/>
                         <UniformGrid x:Name="StylePresetsHost" Columns="4"/>
                     </StackPanel>
                 </ScrollViewer>
@@ -886,11 +839,22 @@
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
 
-                        <!-- Version & In-App Update Push -->
+                        <!-- Automatic Updates Toggle (Default ON, Mac Build 107 parity!) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="AutoUpdateLabel" Text="自动更新（推荐开启）" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="AutoUpdateDesc" Text="启动与运行期间自动检测新版，发现更新后在左下角即时提醒下载" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="AutoUpdateToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnAutoUpdateChanged" Unchecked="OnAutoUpdateChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Version & Check for Updates -->
                         <Grid>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock x:Name="VersionTitleLabel" Text="版本信息与自动更新" FontSize="13.5" FontWeight="Medium"/>
-                                <TextBlock x:Name="VersionValueLabel" Text="NotchMuse for Windows · v0.9.0（启动与每 6 小时自动检测新版）" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="VersionTitleLabel" Text="版本信息" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="VersionValueLabel" Text="当前版本：v0.9.0" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                             <Button x:Name="CheckUpdateButton" Content="检查更新" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="14,7" Click="OnCheckUpdateClick"/>
                         </Grid>

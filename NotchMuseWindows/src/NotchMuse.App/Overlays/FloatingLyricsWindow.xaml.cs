@@ -117,6 +117,8 @@ public partial class FloatingLyricsWindow : Window
         VerticalSweepHost.SizeChanged += (_, _) => UpdateSweepClip();
     }
 
+    private const int WmLButtonDown = 0x0201;
+
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         // 1. Click-through guard alongside WS_EX_TRANSPARENT (covers FreeFloat & TopIsland)
@@ -130,7 +132,25 @@ public partial class FloatingLyricsWindow : Window
             return WindowClickThroughHelper.MaNoActivate;
         }
 
+        // 3. Raw Win32 WM_LBUTTONDOWN backup: guarantees dragging starts even on WS_EX_NOACTIVATE layered windows
+        //    if the click lands inside LyricCapsule (never intercepting HoverToolbar buttons!).
+        if (msg == WmLButtonDown && !locked && mode == LyricsDisplayMode.FreeFloat && !dragging && IsCursorInsideCapsule())
+        {
+            StartDirectDrag();
+        }
+
         return IntPtr.Zero;
+    }
+
+    private bool IsCursorInsideCapsule()
+    {
+        if (!LyricCapsule.IsLoaded || PresentationSource.FromVisual(LyricCapsule) is null) return false;
+        if (!WindowClickThroughHelper.GetCursorPos(out var pt)) return false;
+        var origin = LyricCapsule.PointToScreen(new System.Windows.Point(0, 0));
+        var dpi = Math.Max(1.0, VisualTreeHelper.GetDpi(this).DpiScaleX);
+        var w = Math.Max(40, LyricCapsule.ActualWidth) * dpi;
+        var h = Math.Max(24, LyricCapsule.ActualHeight) * dpi;
+        return pt.X >= origin.X && pt.X <= origin.X + w && pt.Y >= origin.Y && pt.Y <= origin.Y + h;
     }
 
     public IntPtr WindowHandle => handle;
@@ -215,10 +235,13 @@ public partial class FloatingLyricsWindow : Window
         activeSettings = settings;
         locked = settings.OverlayLocked;
         LyricCapsule.IsHitTestVisible = !locked;
-        HoverToolbarHost.IsHitTestVisible = !locked;
+        HoverToolbarHost.IsHitTestVisible = false;
+        HoverToolbarHost.Opacity = 0;
+        HoverToolbarHost.Visibility = mode == LyricsDisplayMode.FreeFloat ? Visibility.Visible : Visibility.Collapsed;
         verticalLayout = mode == LyricsDisplayMode.FreeFloat && settings.FloatingVerticalLayout;
         doubleLineMode = settings.FloatingDoubleLine;
         ApplyClickThroughStyle();
+        UpdateLockedHoverMonitor();
         ApplyAppearance(settings);
         PositionOnScreen(settings);
         UpdateToolbarPlacement();
@@ -233,14 +256,28 @@ public partial class FloatingLyricsWindow : Window
             hovered = false;
             HideMicroTooltip();
             QuickColorPopover.Visibility = Visibility.Collapsed;
-            HoverToolbarHost.Visibility = Visibility.Collapsed;
+            SetHoverToolbarVisible(false);
         }
         LyricCapsule.IsHitTestVisible = !locked;
-        HoverToolbarHost.IsHitTestVisible = !locked;
+        if (locked) HoverToolbarHost.IsHitTestVisible = false;
         ApplyClickThroughStyle();
         UpdateLockedHoverMonitor();
         if (activeSettings is not null) ApplyAppearance(activeSettings);
         UpdateHoverChrome();
+    }
+
+    private void SetHoverToolbarVisible(bool visible)
+    {
+        if (mode != LyricsDisplayMode.FreeFloat)
+        {
+            HoverToolbarHost.Visibility = Visibility.Collapsed;
+            HoverToolbarHost.Opacity = 0;
+            HoverToolbarHost.IsHitTestVisible = false;
+            return;
+        }
+        HoverToolbarHost.Visibility = Visibility.Visible;
+        HoverToolbarHost.Opacity = visible ? 1.0 : 0.0;
+        HoverToolbarHost.IsHitTestVisible = visible && !locked;
     }
 
     public void ApplyLanguage(bool english)
@@ -288,7 +325,7 @@ public partial class FloatingLyricsWindow : Window
 
         var capW = Math.Max(120, LyricCapsule.ActualWidth);
         var capH = Math.Max(42, LyricCapsule.ActualHeight);
-        var capOrigin = LyricCapsule.IsLoaded
+        var capOrigin = LyricCapsule.IsLoaded && PresentationSource.FromVisual(LyricCapsule) is not null
             ? LyricCapsule.PointToScreen(new System.Windows.Point(0, 0))
             : new System.Windows.Point(Left * dpi, Top * dpi);
         var capRect = new Rect(capOrigin.X / dpi, capOrigin.Y / dpi, capW, capH);
@@ -491,8 +528,9 @@ public partial class FloatingLyricsWindow : Window
             SweepLyricText.Text = rawPrimaryText;
             OutlineLyricText.Text = rawPrimaryText;
 
-            // Horizontal Double-Line (default): bilingual translation takes priority if present, otherwise soft next-line preview!
-            if (doubleLineMode && mode == LyricsDisplayMode.FreeFloat)
+            // Horizontal Double-Line works across BOTH FreeFloat AND TopIsland!
+            // Bilingual translation takes priority if present, otherwise soft next-line preview!
+            if (doubleLineMode)
             {
                 var secondLine = (showBilingualActive && !string.IsNullOrWhiteSpace(rawTranslationText))
                     ? rawTranslationText
@@ -525,7 +563,7 @@ public partial class FloatingLyricsWindow : Window
     public void ShowHoverToolbarForPreview(bool show, bool openQuickColors = false, bool forceBelow = false, string? previewMicroTooltip = null)
     {
         hovered = show && mode == LyricsDisplayMode.FreeFloat && !locked;
-        HoverToolbarHost.Visibility = hovered ? Visibility.Visible : Visibility.Collapsed;
+        SetHoverToolbarVisible(hovered);
         QuickColorPopover.Visibility = (hovered && openQuickColors) ? Visibility.Visible : Visibility.Collapsed;
         ApplyToolbarFlip(forceBelow);
         UpdateHoverChrome();
@@ -549,11 +587,11 @@ public partial class FloatingLyricsWindow : Window
         if (mode == LyricsDisplayMode.TopIsland)
         {
             OverlayGrid.VerticalAlignment = VerticalAlignment.Top;
-            Width = 540;
-            Height = 76;
+            Width = 560;
+            Height = settings.FloatingDoubleLine ? 84 : 74;
             Left = area.Left + (area.Width - Width) / 2;
             Top = area.Top;
-            HoverToolbarHost.Visibility = Visibility.Collapsed;
+            SetHoverToolbarVisible(false);
             QuickColorPopover.Visibility = Visibility.Collapsed;
             return;
         }
@@ -567,7 +605,7 @@ public partial class FloatingLyricsWindow : Window
         else
         {
             Width = 700;
-            Height = 198;
+            Height = 230;
         }
 
         if (settings.FloatingLeft.HasValue && settings.FloatingTop.HasValue)
@@ -767,7 +805,7 @@ public partial class FloatingLyricsWindow : Window
         if (mode != LyricsDisplayMode.FreeFloat || locked) return;
         hovered = true;
         UpdateToolbarPlacement();
-        HoverToolbarHost.Visibility = Visibility.Visible;
+        SetHoverToolbarVisible(true);
         UpdateHoverChrome();
     }
 
@@ -777,13 +815,20 @@ public partial class FloatingLyricsWindow : Window
         hovered = false;
         HideMicroTooltip();
         QuickColorPopover.Visibility = Visibility.Collapsed;
-        HoverToolbarHost.Visibility = Visibility.Collapsed;
+        SetHoverToolbarVisible(false);
         UpdateHoverChrome();
     }
 
     private void OnCapsuleMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (locked || mode != LyricsDisplayMode.FreeFloat || e.LeftButton != MouseButtonState.Pressed) return;
+        StartDirectDrag();
+        e.Handled = true;
+    }
+
+    private void StartDirectDrag()
+    {
+        if (dragging || locked || mode != LyricsDisplayMode.FreeFloat) return;
         var currentHandle = handle != IntPtr.Zero ? handle : new WindowInteropHelper(this).Handle;
         if (currentHandle == IntPtr.Zero) return;
         handle = currentHandle;
@@ -797,7 +842,6 @@ public partial class FloatingLyricsWindow : Window
         QuickColorPopover.Visibility = Visibility.Collapsed;
         UpdateHoverChrome();
         dragPollTimer.Start();
-        e.Handled = true;
     }
 
     private void OnDragPollTick(object? sender, EventArgs e)
@@ -808,7 +852,8 @@ public partial class FloatingLyricsWindow : Window
             return;
         }
 
-        if (!WindowClickThroughHelper.IsLeftMouseButtonDown())
+        var buttonStillHeld = WindowClickThroughHelper.IsLeftMouseButtonDown() || Mouse.LeftButton == MouseButtonState.Pressed;
+        if (!buttonStillHeld)
         {
             FinishDirectDrag(commit: dragMoved);
             return;
@@ -841,6 +886,8 @@ public partial class FloatingLyricsWindow : Window
 
         var snapped = WindowClickThroughHelper.SnapFreeWindowRect(proposed, workPx, snapPx, insetPx, altBypass);
         WindowClickThroughHelper.MoveWindowPixelsNoActivate(handle, snapped.Rect.Left, snapped.Rect.Top);
+        Left = snapped.Rect.Left / dpi;
+        Top = snapped.Rect.Top / dpi;
         SnapGuide.Visibility = snapped.SnappedCenterX ? Visibility.Visible : Visibility.Collapsed;
         UpdateToolbarPlacement();
     }
@@ -861,7 +908,7 @@ public partial class FloatingLyricsWindow : Window
             hovered = false;
             HideMicroTooltip();
             QuickColorPopover.Visibility = Visibility.Collapsed;
-            HoverToolbarHost.Visibility = Visibility.Collapsed;
+            SetHoverToolbarVisible(false);
         }
         UpdateHoverChrome();
     }

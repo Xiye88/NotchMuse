@@ -34,6 +34,7 @@ public partial class MainWindow : Window
     [DllImport("user32.dll")] private static extern bool UnregisterHotKey(IntPtr hwnd, int id);
     [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd, out NativeRect rect);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder className, int maxCount);
 
     [StructLayout(LayoutKind.Sequential)]
     private readonly record struct NativeRect(int Left, int Top, int Right, int Bottom);
@@ -64,7 +65,9 @@ public partial class MainWindow : Window
     private int activeLineIndex = -1;
     private string activePage = "Lyrics";
     private string latestReleaseUrl = "https://github.com/Xiye88/NotchMuse/releases";
+    private AnnouncementInfo activeAnnouncement = UpdateService.FallbackAnnouncement;
     private ReleaseInfo? availableUpdate;
+    private double lastMatchedTrackDuration;
     private HwndSource? hwndSource;
     private IntPtr windowHandle;
     private bool initializing = true;
@@ -158,7 +161,10 @@ public partial class MainWindow : Window
             taskbarOverlay.UpdateAppearance(settings);
             floatingOverlay.ApplyAppearance(settings);
         };
-        updateCheckTimer.Tick += async (_, _) => await RefreshReleaseInfoAsync();
+        updateCheckTimer.Tick += async (_, _) =>
+        {
+            if (settings.AutoUpdateEnabled) await RefreshReleaseInfoAsync(checkUpdates: true);
+        };
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
         MissingLyricsArt.RetryClicked += () => { if (snapshot is not null) UpdateTrack(snapshot); };
@@ -305,9 +311,9 @@ public partial class MainWindow : Window
             media.Error += OnMediaError;
             frameTimer.Start();
             fullscreenTimer.Start();
-            updateCheckTimer.Start();
+            if (settings.AutoUpdateEnabled) updateCheckTimer.Start();
             RefreshOverlayVisibility();
-            _ = RefreshReleaseInfoAsync();
+            _ = RefreshReleaseInfoAsync(checkUpdates: settings.AutoUpdateEnabled);
             try
             {
                 await media.SelectAsync(settings.PlayerSelection);
@@ -343,6 +349,7 @@ public partial class MainWindow : Window
         LangEnRadio.IsChecked = settings.EnglishLanguage;
         BilingualToggle.IsChecked = settings.BilingualEnabled;
         InteractionSoundsToggle.IsChecked = settings.InteractionSoundsEnabled;
+        AutoUpdateToggle.IsChecked = settings.AutoUpdateEnabled;
         FloatingSingleLineRadio.IsChecked = !settings.FloatingDoubleLine;
         FloatingDoubleLineRadio.IsChecked = settings.FloatingDoubleLine;
         OverlayLockToggle.IsChecked = settings.OverlayLocked;
@@ -872,36 +879,7 @@ public partial class MainWindow : Window
 
     private void UpdateAppearanceLivePreview()
     {
-        var brush = ThemeManager.CreateLyricAccentBrush(settings);
-        AppearancePreviewPrimary.Foreground = brush;
-        AppearancePreviewPrimary.FontSize = Math.Clamp(settings.FontSize, 15, 30);
-        AppearancePreviewPrimary.Opacity = Math.Clamp(settings.LyricOpacity, 0.3, 1.0);
-        AppearancePreviewSecondary.Opacity = Math.Clamp(settings.LyricOpacity * 0.82, 0.25, 1.0);
-        NavAppearanceColorRing.Fill = brush;
-
-        var bgEnabled = settings.BackgroundCapsuleEnabled && settings.CapsulePreset != CapsuleBackgroundPreset.Transparent;
-        if (!bgEnabled)
-        {
-            AppearancePreviewCapsule.Background = System.Windows.Media.Brushes.Transparent;
-            AppearancePreviewCapsule.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(62, 255, 255, 255));
-            AppearancePreviewSecondary.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(224, 223, 218));
-        }
-        else
-        {
-            var hex = settings.CapsulePreset == CapsuleBackgroundPreset.Custom
-                ? settings.CapsuleCustomHex
-                : AppSettings.GetCapsulePresetDefaults(settings.CapsulePreset).Hex;
-            var rgb = ThemeManager.ParseColor(hex, System.Windows.Media.Color.FromRgb(62, 62, 68));
-            var alpha = (byte)Math.Clamp(Math.Round(settings.CapsuleBackgroundOpacity * 255), 76, 255);
-            var isLight = (rgb.R * 0.299 + rgb.G * 0.587 + rgb.B * 0.114) > 165;
-            AppearancePreviewCapsule.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(alpha, rgb.R, rgb.G, rgb.B));
-            AppearancePreviewCapsule.BorderBrush = new SolidColorBrush(isLight
-                ? System.Windows.Media.Color.FromArgb(36, 0, 0, 0)
-                : System.Windows.Media.Color.FromArgb(46, 255, 255, 255));
-            AppearancePreviewSecondary.Foreground = new SolidColorBrush(isLight
-                ? System.Windows.Media.Color.FromRgb(94, 92, 86)
-                : System.Windows.Media.Color.FromRgb(198, 196, 190));
-        }
+        NavAppearanceColorRing.Fill = ThemeManager.CreateLyricAccentBrush(settings);
     }
 
     private void ApplyAppearanceToAllViews()
@@ -1048,6 +1026,13 @@ public partial class MainWindow : Window
         UpdateNavVisuals();
         RefreshPreviewCards();
         RefreshOverlayVisibility();
+        PushCurrentLyricToOverlays();
+        if (nextMode == LyricsDisplayMode.FreeFloat && settings.OverlayLocked)
+        {
+            DisplayStatusLine.Text = settings.EnglishLanguage
+                ? "Click-through lock is ON · Hover desktop lyrics and click 🔒 (or press Ctrl+Alt+L) to unlock dragging"
+                : "当前已开启鼠标穿透锁定 · 悬停桌面歌词点 🔒（或关闭下方锁定开关 / 按 Ctrl+Alt+L）即可拖动";
+        }
     }
 
     private void RefreshPreviewCards()
@@ -1105,10 +1090,18 @@ public partial class MainWindow : Window
 
         var fg = GetForegroundWindow();
         var isFullscreen = false;
-        if (fg != IntPtr.Zero && fg != windowHandle && GetWindowRect(fg, out var rect))
+        if (fg != IntPtr.Zero && fg != windowHandle && fg != floatingOverlay.WindowHandle && GetWindowRect(fg, out var rect))
         {
+            var cls = new System.Text.StringBuilder(64);
+            _ = GetClassName(fg, cls, cls.Capacity);
+            var className = cls.ToString();
+            var isDesktopShell = string.Equals(className, "Progman", StringComparison.OrdinalIgnoreCase) ||
+                                 string.Equals(className, "WorkerW", StringComparison.OrdinalIgnoreCase) ||
+                                 string.Equals(className, "Shell_TrayWnd", StringComparison.OrdinalIgnoreCase) ||
+                                 string.Equals(className, "Shell_SecondaryTrayWnd", StringComparison.OrdinalIgnoreCase);
+
             var primary = Forms.Screen.PrimaryScreen?.Bounds;
-            if (primary is not null)
+            if (!isDesktopShell && primary is not null)
             {
                 isFullscreen = rect.Left <= primary.Value.Left &&
                                rect.Top <= primary.Value.Top &&
@@ -1166,7 +1159,16 @@ public partial class MainWindow : Window
         }
 
         var nextKey = $"{value.Track.Title}|{value.Track.Artist}";
-        if (nextKey == previousKey && activeCandidate is not null) return;
+        var hasValidDuration = double.IsFinite(value.Track.Duration) && value.Track.Duration > 1.0;
+        if (nextKey == previousKey && (activeCandidate is not null || (lastMatchedTrackDuration > 1.0 && hasValidDuration))) return;
+        if (!hasValidDuration)
+        {
+            // SMTC often emits MediaPropertiesChanged with Duration=0 right before TimelinePropertiesChanged arrives.
+            // Wait briefly for the real duration instead of wasting a rejected lookup!
+            DockSourceTag.Text = settings.EnglishLanguage ? "Syncing timeline…" : "等待播放时长…";
+            return;
+        }
+        lastMatchedTrackDuration = value.Track.Duration;
 
         lookupCts?.Cancel();
         lookupCts?.Dispose();
@@ -1310,13 +1312,16 @@ public partial class MainWindow : Window
             lyricLineControls[activeLineIndex].UpdateSweepProgress(lineProgress);
         }
 
-        if (activeLineIndex >= 0 && activeLineIndex < normalizedLines.Count)
-        {
-            var current = normalizedLines[activeLineIndex];
-            var nextText = activeLineIndex + 1 < normalizedLines.Count ? normalizedLines[activeLineIndex + 1].Text : null;
-            taskbarOverlay.UpdateLyric(current.Text, current.Translation, lineProgress, settings.BilingualEnabled);
-            floatingOverlay.UpdateLyric(current.Text, current.Translation, lineProgress, settings.BilingualEnabled, nextText);
-        }
+        PushCurrentLyricToOverlays();
+    }
+
+    private void PushCurrentLyricToOverlays()
+    {
+        if (activeLineIndex < 0 || activeLineIndex >= normalizedLines.Count) return;
+        var current = normalizedLines[activeLineIndex];
+        var nextText = activeLineIndex + 1 < normalizedLines.Count ? normalizedLines[activeLineIndex + 1].Text : null;
+        taskbarOverlay.UpdateLyric(current.Text, current.Translation, currentLineSweepProgress, settings.BilingualEnabled, nextText);
+        floatingOverlay.UpdateLyric(current.Text, current.Translation, currentLineSweepProgress, settings.BilingualEnabled, nextText);
     }
 
     private double ComputeCurrentPositionSeconds()
@@ -1427,8 +1432,8 @@ public partial class MainWindow : Window
 
         DisplayHeaderTitle.Text = en ? "Display" : "显示";
         DisplayPreviewLabel.Text = en ? "LIVE DESKTOP PREVIEW · CLICK TO SWITCH MODE" : "实时预览 · 点击卡片切换模式";
-        FloatingLinesLabel.Text = en ? "Floating Lyric Lines" : "悬浮歌词行数";
-        FloatingLinesDesc.Text = en ? "Double-line default highlights current line with upcoming next line or translation" : "默认双行显示（当前句高亮 + 柔和预告下一句或译文），竖排自动双列紧凑排布";
+        FloatingLinesLabel.Text = en ? "Desktop Lyric Lines" : "桌面歌词行数";
+        FloatingLinesDesc.Text = en ? "Double-line default highlights current line with upcoming next line or translation across Taskbar, Island & Float" : "默认双行显示（当前句高亮 + 柔和预告下一句或译文），同步作用于任务栏、悬浮岛与自由悬浮";
         FloatingSingleLineRadio.Content = en ? "Single" : "单行";
         FloatingDoubleLineRadio.Content = en ? "Double" : "双行";
         DisplayOffsetLabel.Text = en ? "Lyrics Time Offset" : "歌词时间偏移";
@@ -1441,7 +1446,6 @@ public partial class MainWindow : Window
         DisplayLockDesc.Text = en ? "Pass mouse clicks straight through when locked" : "锁定后桌面悬浮歌词完全穿透点击，不影响办公与游戏";
 
         AppearanceHeaderTitle.Text = en ? "Appearance" : "外观";
-        AppearancePreviewBadge.Text = en ? "LIVE PREVIEW" : "实时效果预览";
         ColorModeLabel.Text = en ? "Lyrics Color" : "歌词颜色";
         ColorModeDesc.Text = en ? "Solid or dual-hue gradient sweep with custom color palette" : "支持纯色与双色渐变扫光，并可自由调色盘选色";
         SolidColorRadio.Content = en ? "Solid" : "纯色";
@@ -1458,7 +1462,7 @@ public partial class MainWindow : Window
         BgCapsuleDesc.Text = en ? "Turn off for pure transparent lyrics with high-contrast adaptive text halo" : "关闭后自由悬浮与顶部悬浮岛立即切为纯透明文字 + 双层高对比描边阴影";
         CapsuleOpacityLabel.Text = en ? "Background Opacity" : "背景不透明度";
         PickCustomColorBtn.Content = en ? "Palette…" : "调色盘…";
-        QuickPresetsLabel.Text = en ? "QUICK STYLE PRESETS · 8 CURATED LOOKS" : "风格快捷预设 · 8 套精选视觉方案";
+        QuickPresetsLabel.Text = en ? "QUICK STYLE PRESETS" : "风格快捷预设";
 
         GeneralHeaderTitle.Text = en ? "General" : "通用";
         PlayerSourceLabel.Text = en ? "Music Player" : "音乐播放器";
@@ -1485,11 +1489,14 @@ public partial class MainWindow : Window
         DesktopShortcutLabel.Text = en ? "Desktop Shortcut" : "桌面快捷方式";
         DesktopShortcutDesc.Text = en ? "Installer includes a desktop shortcut option; portable users can create one here" : "安装包最后一步支持勾选创建，便携版也可在此一键创建桌面图标";
         CreateShortcutButton.Content = en ? "Create Desktop Shortcut" : "创建桌面快捷方式";
-        VersionTitleLabel.Text = en ? "Version & Auto-Updates" : "版本信息与自动更新";
-        VersionValueLabel.Text = en ? "NotchMuse for Windows · v0.9.0 (auto-checks on launch & every 6h)" : "NotchMuse for Windows · v0.9.0（启动与每 6 小时自动检测新版）";
+        AutoUpdateLabel.Text = en ? "Automatic Updates (Recommended)" : "自动更新（推荐开启）";
+        AutoUpdateDesc.Text = en ? "Checks on launch & every 6h and alerts you in the bottom-left banner" : "启动与运行期间自动检测新版，发现更新后在左下角即时提醒下载";
+        VersionTitleLabel.Text = en ? "Version" : "版本信息";
+        VersionValueLabel.Text = en ? "Version v0.9.0" : "当前版本：v0.9.0";
         CheckUpdateButton.Content = availableUpdate is not null
             ? (en ? $"Download {availableUpdate.TagName}" : $"下载新版 {availableUpdate.TagName}")
             : (en ? "Check for Updates" : "检查更新");
+        UpdateBottomLeftAnnouncementText();
 
         initializing = true;
         PopulatePlayerCombo();
@@ -1588,7 +1595,8 @@ public partial class MainWindow : Window
 
     private void OnAnnouncementClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        var target = availableUpdate?.DownloadUrl ?? latestReleaseUrl;
+        AnnouncementUnreadDot.Visibility = Visibility.Collapsed;
+        var target = availableUpdate?.DownloadUrl ?? availableUpdate?.HtmlUrl ?? activeAnnouncement.Url ?? latestReleaseUrl;
         OpenExternalUrl(target);
     }
 
@@ -1921,7 +1929,27 @@ public partial class MainWindow : Window
         settings.FloatingDoubleLine = FloatingDoubleLineRadio.IsChecked == true;
         settings.Save();
         InteractionSoundEngine.Play(InteractionSoundCue.Tick);
+        taskbarOverlay.UpdateAppearance(settings);
         floatingOverlay.ApplyAppearance(settings);
+        floatingOverlay.PositionOnScreen(settings);
+        PushCurrentLyricToOverlays();
+    }
+
+    private void OnAutoUpdateChanged(object sender, RoutedEventArgs e)
+    {
+        if (initializing) return;
+        settings.AutoUpdateEnabled = AutoUpdateToggle.IsChecked == true;
+        settings.Save();
+        InteractionSoundEngine.Play(InteractionSoundCue.Tick);
+        if (settings.AutoUpdateEnabled)
+        {
+            updateCheckTimer.Start();
+            _ = RefreshReleaseInfoAsync(checkUpdates: true);
+        }
+        else
+        {
+            updateCheckTimer.Stop();
+        }
     }
 
     private void OnInteractionSoundsChanged(object sender, RoutedEventArgs e)
@@ -2121,8 +2149,40 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task RefreshReleaseInfoAsync()
+    private void UpdateBottomLeftAnnouncementText()
     {
+        var en = settings.EnglishLanguage;
+        if (availableUpdate is not null)
+        {
+            AnnouncementText.Text = en
+                ? $"✨ Update {availableUpdate.TagName} Available"
+                : $"✨ 发现新版 {availableUpdate.TagName} · 点击更新";
+            AnnouncementUnreadDot.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            AnnouncementText.Text = en ? activeAnnouncement.TitleEn : activeAnnouncement.TitleZh;
+        }
+        AnnouncementCapsule.Visibility = Visibility.Visible;
+    }
+
+    private async Task RefreshReleaseInfoAsync(bool checkUpdates = true)
+    {
+        // 1. Always fetch Mac-parity announcement feed (falls back cleanly to built-in v0.9.0 banner)
+        var announcement = await updateService.GetAnnouncementAsync(windowCts.Token);
+        if (!closed && IsLoaded)
+        {
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (closed || !IsLoaded) return;
+                activeAnnouncement = announcement;
+                UpdateBottomLeftAnnouncementText();
+            });
+        }
+
+        if (!checkUpdates) return;
+
+        // 2. Check GitHub Releases latest for automatic update alert
         try
         {
             var latest = await updateService.GetLatestAsync(windowCts.Token);
@@ -2135,18 +2195,9 @@ public partial class MainWindow : Window
                 if (hasNewer)
                 {
                     availableUpdate = latest;
-                    AnnouncementText.Text = settings.EnglishLanguage
-                        ? $"✨ Update {latest.TagName} Available"
-                        : $"✨ 发现新版 {latest.TagName} · 点击更新";
                     CheckUpdateButton.Content = settings.EnglishLanguage ? $"Download {latest.TagName}" : $"下载新版 {latest.TagName}";
+                    UpdateBottomLeftAnnouncementText();
                 }
-                else
-                {
-                    AnnouncementText.Text = settings.EnglishLanguage
-                        ? $"✨ {latest.TagName} Release Notes"
-                        : $"✨ {latest.TagName} 新公告";
-                }
-                AnnouncementCapsule.Visibility = Visibility.Visible;
             });
         }
         catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException or InvalidOperationException) { }

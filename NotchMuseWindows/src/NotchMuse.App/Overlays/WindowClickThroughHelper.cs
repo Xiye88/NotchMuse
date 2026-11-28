@@ -47,7 +47,9 @@ public static class WindowClickThroughHelper
     private const uint SwpFrameChanged = 0x0020;
     private const int SwShowNoActivate = 4;
     private const int VkLButton = 0x01;
+    private const int VkRButton = 0x02;
     private const int VkMenu = 0x12;
+    private const int SmSwapButton = 23;
     private static readonly IntPtr HwndTopmost = new(-1);
 
     [DllImport("user32.dll")]
@@ -61,6 +63,9 @@ public static class WindowClickThroughHelper
 
     [DllImport("user32.dll")]
     private static extern short GetAsyncKeyState(int vKey);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int nIndex);
 
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
     private static extern IntPtr GetWindowLongPtr64(IntPtr hwnd, int nIndex);
@@ -77,7 +82,11 @@ public static class WindowClickThroughHelper
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int cx, int cy, uint flags);
 
-    public static bool IsLeftMouseButtonDown() => (GetAsyncKeyState(VkLButton) & 0x8000) != 0;
+    public static bool IsLeftMouseButtonDown()
+    {
+        var primaryVk = GetSystemMetrics(SmSwapButton) != 0 ? VkRButton : VkLButton;
+        return (GetAsyncKeyState(primaryVk) & 0x8000) != 0;
+    }
     public static bool IsAltKeyDown() => (GetAsyncKeyState(VkMenu) & 0x8000) != 0;
 
     public static void MoveWindowPixelsNoActivate(IntPtr hwnd, int leftPx, int topPx)

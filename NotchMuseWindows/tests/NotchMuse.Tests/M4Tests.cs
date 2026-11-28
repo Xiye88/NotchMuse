@@ -227,6 +227,7 @@ public sealed class M4Tests
         var defaults = new AppSettings();
         Assert.True(defaults.FloatingDoubleLine);
         Assert.True(defaults.InteractionSoundsEnabled);
+        Assert.True(defaults.AutoUpdateEnabled);
     }
 
     [Fact]
@@ -363,6 +364,83 @@ public sealed class M4Tests
     {
         Assert.True(NotchMuse.App.Themes.ThemeManager.HasLowColorContrast("#E06D1B", "#F59E0B"));
         Assert.False(NotchMuse.App.Themes.ThemeManager.HasLowColorContrast("#FF7B2C", "#FF2E88"));
+    }
+
+    [Fact]
+    public async Task LyricsEngineEarlyExitsOnceNetEaseAndPeerAgreeWithoutWaitingOnSlowStraggler()
+    {
+        var track = new Track("稻香", "周杰伦", "魔杰座", 220, Platform: "apple");
+        static LyricsCandidate Make(string provider, string platform) =>
+            new(provider, platform, "id", "稻香", "周杰伦", "魔杰座", 220,
+                new(Enumerable.Range(0, 15).Select(i => new LyricLine(10 + i * 12, $"这是第{i}句歌词文本内容")).ToArray()), 100);
+
+        var fastNetEase = new FakeTimedSource("NetEase", Make("NetEase", "netease"), 40);
+        var fastQq = new FakeTimedSource("QQ", Make("QQ", "qq"), 60);
+        var slowKugou = new FakeTimedSource("Kugou", Make("Kugou", "kugou"), 3500);
+        var engine = new NotchMuse.Sources.LyricsEngine([fastNetEase, fastQq, slowKugou]);
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var result = await engine.FindAsync(track, CancellationToken.None, force: true);
+        sw.Stop();
+
+        Assert.NotNull(result.Decision.Winner);
+        Assert.True(sw.ElapsedMilliseconds < 1200, $"Expected early-exit <1200ms, took {sw.ElapsedMilliseconds}ms");
+    }
+
+    [Fact]
+    public void TaskbarAndTopIslandRespondToDoubleLineToggle()
+    {
+        Exception? failure = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var singleSettings = new AppSettings { FloatingDoubleLine = false, BilingualEnabled = false };
+                var doubleSettings = new AppSettings { FloatingDoubleLine = true, BilingualEnabled = false };
+
+                // 1. Taskbar bottom-left overlay
+                var tb = new NotchMuse.App.Overlays.TaskbarLyricsWindow();
+                tb.UpdateAppearance(singleSettings);
+                tb.UpdateLyric("主行歌词", null, 0.5, showBilingual: false, nextLine: "下一句预告歌词");
+                var tbSub = (System.Windows.Controls.TextBlock)tb.FindName("SubLyricText")!;
+                Assert.Equal(System.Windows.Visibility.Collapsed, tbSub.Visibility);
+
+                tb.UpdateAppearance(doubleSettings);
+                tb.UpdateLyric("主行歌词", null, 0.5, showBilingual: false, nextLine: "下一句预告歌词");
+                Assert.Equal(System.Windows.Visibility.Visible, tbSub.Visibility);
+                Assert.Equal("下一句预告歌词", tbSub.Text);
+
+                // 2. Top Island overlay
+                var island = new NotchMuse.App.Overlays.FloatingLyricsWindow();
+                island.ConfigureMode(LyricsDisplayMode.TopIsland, singleSettings);
+                island.UpdateLyric("主行歌词", null, 0.5, showBilingual: false, nextLine: "下一句预告歌词");
+                var islandSub = (System.Windows.Controls.TextBlock)island.FindName("SubLyricText")!;
+                Assert.Equal(System.Windows.Visibility.Collapsed, islandSub.Visibility);
+
+                island.ConfigureMode(LyricsDisplayMode.TopIsland, doubleSettings);
+                island.UpdateLyric("主行歌词", null, 0.5, showBilingual: false, nextLine: "下一句预告歌词");
+                Assert.Equal(System.Windows.Visibility.Visible, islandSub.Visibility);
+                Assert.Equal("下一句预告歌词", islandSub.Text);
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        if (failure is not null) throw new Exception("STA double-line test failed", failure);
+    }
+
+    private sealed class FakeTimedSource(string name, LyricsCandidate? candidate, int delayMs) : ILyricsSource
+    {
+        public string Name => name;
+        public async Task<LyricsCandidate?> FetchAsync(Track track, CancellationToken cancellationToken)
+        {
+            await Task.Delay(delayMs, cancellationToken);
+            return candidate;
+        }
     }
 }
 

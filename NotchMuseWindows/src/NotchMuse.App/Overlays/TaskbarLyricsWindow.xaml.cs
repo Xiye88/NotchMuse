@@ -16,7 +16,12 @@ public partial class TaskbarLyricsWindow : Window
     [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int cx, int cy, uint flags);
 
     private bool isLightTaskbar = true;
+    private bool doubleLineMode = true;
     private double sweepProgress;
+    private string rawPrimaryText = "NotchMuse";
+    private string? rawTranslationText;
+    private string? rawNextLineText;
+    private bool showBilingualActive;
     private bool locked;
     private IntPtr handle;
     private HwndSource? hwndSource;
@@ -116,41 +121,68 @@ public partial class TaskbarLyricsWindow : Window
 
     public void UpdateAppearance(AppSettings settings)
     {
+        doubleLineMode = settings.FloatingDoubleLine;
         var accentBrush = ThemeManager.CreateLyricAccentBrush(settings);
         SweepLyricText.Foreground = accentBrush;
         NoteGlyph.Foreground = accentBrush;
         var accentColor = ThemeManager.ParseColor(settings.AccentHex, System.Windows.Media.Color.FromRgb(224, 109, 27));
         NotePill.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(isLightTaskbar ? (byte)32 : (byte)42, accentColor.R, accentColor.G, accentColor.B));
 
-        // Scale nicely inside 48px taskbar height
-        var primarySize = Math.Clamp(settings.FontSize * 0.62, 12.0, 16.0);
+        // Scale nicely inside 48px taskbar height (compact 2-line fit when Double-Line is enabled)
+        var primarySize = doubleLineMode
+            ? Math.Clamp(settings.FontSize * 0.56, 11.5, 13.5)
+            : Math.Clamp(settings.FontSize * 0.64, 12.5, 16.0);
         BaseLyricText.FontSize = primarySize;
         SweepLyricText.FontSize = primarySize;
-        SubLyricText.FontSize = Math.Clamp(primarySize - 3.0, 9.5, 11.5);
+        SubLyricText.FontSize = Math.Clamp(primarySize - 2.6, 9.5, 10.8);
         RootSurface.Opacity = Math.Clamp(settings.LyricOpacity, 0.35, 1.0);
+        ApplySecondaryLine();
     }
 
-    public void UpdateLyric(string primary, string? translation, double progress, bool showBilingual)
+    public void UpdateLyric(string primary, string? translation, double progress, bool showBilingual, string? nextLine = null)
     {
-        var clean = string.IsNullOrWhiteSpace(primary) ? "NotchMuse" : primary.Trim();
-        if (BaseLyricText.Text != clean)
+        rawPrimaryText = string.IsNullOrWhiteSpace(primary) ? "NotchMuse" : primary.Trim();
+        rawTranslationText = string.IsNullOrWhiteSpace(translation) ? null : translation.Trim();
+        rawNextLineText = string.IsNullOrWhiteSpace(nextLine) ? null : nextLine.Trim();
+        showBilingualActive = showBilingual;
+
+        if (BaseLyricText.Text != rawPrimaryText)
         {
-            BaseLyricText.Text = clean;
-            SweepLyricText.Text = clean;
+            BaseLyricText.Text = rawPrimaryText;
+            SweepLyricText.Text = rawPrimaryText;
         }
 
-        if (showBilingual && !string.IsNullOrWhiteSpace(translation))
+        ApplySecondaryLine();
+        sweepProgress = Math.Clamp(progress, 0, 1);
+        UpdateSweepClip();
+    }
+
+    private void ApplySecondaryLine()
+    {
+        if (doubleLineMode)
         {
-            SubLyricText.Text = translation.Trim();
+            var second = (showBilingualActive && !string.IsNullOrWhiteSpace(rawTranslationText))
+                ? rawTranslationText
+                : rawNextLineText;
+            if (!string.IsNullOrWhiteSpace(second))
+            {
+                SubLyricText.Text = second;
+                SubLyricText.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                SubLyricText.Visibility = Visibility.Collapsed;
+            }
+        }
+        else if (showBilingualActive && !string.IsNullOrWhiteSpace(rawTranslationText))
+        {
+            SubLyricText.Text = rawTranslationText;
             SubLyricText.Visibility = Visibility.Visible;
         }
         else
         {
             SubLyricText.Visibility = Visibility.Collapsed;
         }
-
-        sweepProgress = Math.Clamp(progress, 0, 1);
-        UpdateSweepClip();
     }
 
     private void UpdateSweepClip()

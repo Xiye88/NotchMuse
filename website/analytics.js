@@ -106,7 +106,8 @@
     const link = event.target.closest('a[data-download-placement]');
     if (!link || !['nav', 'hero', 'footer'].includes(link.dataset.downloadPlacement)) return;
     const url = new URL(link.href);
-    const version = url.pathname.match(/\/releases\/download\/v([^/]+)\/NotchMuse\.dmg$/)?.[1];
+    const release = url.pathname.match(/^\/Xiye88\/NotchMuse\/releases\/(?:download\/v([^/]+)|latest\/download)\/(?:NotchMuse\.dmg|NotchMuse-Windows-win-x64-portable\.exe)$/);
+    const version = release && (release[1] || document.body.dataset.downloadVersion);
     if (url.origin !== 'https://github.com' || !version) return;
     window.gtag('event', 'download_click', {
       app_version: version, placement: link.dataset.downloadPlacement,

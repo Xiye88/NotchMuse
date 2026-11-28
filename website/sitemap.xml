@@ -2,6 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://notchmuse.com/</loc></url>
   <url><loc>https://notchmuse.com/zh/</loc></url>
+  <url><loc>https://notchmuse.com/windows/</loc></url>
+  <url><loc>https://notchmuse.com/zh/windows/</loc></url>
+  <url><loc>https://notchmuse.com/compatible-players/</loc></url>
+  <url><loc>https://notchmuse.com/zh/compatible-players/</loc></url>
+  <url><loc>https://notchmuse.com/lrc-tools/</loc></url>
+  <url><loc>https://notchmuse.com/zh/lrc-tools/</loc></url>
   <url><loc>https://notchmuse.com/spotify-lyrics-mac/</loc></url>
   <url><loc>https://notchmuse.com/zh/spotify-lyrics-mac/</loc></url>
   <url><loc>https://notchmuse.com/menu-bar-lyrics/</loc></url>
@@ -22,8 +28,6 @@
   <url><loc>https://notchmuse.com/zh/floating-lyrics-mac/</loc></url>
   <url><loc>https://notchmuse.com/mac-dynamic-island-lyrics/</loc></url>
   <url><loc>https://notchmuse.com/zh/mac-dynamic-island-lyrics/</loc></url>
-  <url><loc>https://notchmuse.com/lyrics-downloader/</loc></url>
-  <url><loc>https://notchmuse.com/zh/lyrics-downloader/</loc></url>
   <url><loc>https://notchmuse.com/best-macbook-notch-apps/</loc></url>
   <url><loc>https://notchmuse.com/zh/best-macbook-notch-apps/</loc></url>
 </urlset>

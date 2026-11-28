@@ -3,15 +3,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 const cases = [
   ['index.html', 'en', 'https://notchmuse.com/', '/zh/',
-    'NotchMuse — Desktop & Menu Bar Lyrics for Mac',
-    'Show synced lyrics on your Mac desktop or in the menu bar. Works with Spotify, Apple Music and more. Free to download. No account required.',
-    'Live lyrics for your Mac.',
-    'Keep lyrics in view while you work. Supports Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music.'],
+    'NotchMuse — Synced Desktop Lyrics for Mac and Windows',
+    'Synced desktop lyrics for macOS 14+ (Apple Silicon) and Windows 11/10 (portable .exe). Works with 39+ music players. Free and open source.',
+    'Synced Desktop Lyrics for Mac and Windows',
+    'Follow lyrics in the Mac menu bar, by the notch, or on the Windows taskbar. A click-through overlay keeps lyrics in view on both platforms across 39+ music players.'],
   ['zh/index.html', 'zh-Hans', 'https://notchmuse.com/zh/', '/',
-    'NotchMuse｜Mac 桌面歌词与菜单栏歌词工具',
-    '用 NotchMuse 在 Mac 桌面或菜单栏显示同步歌词，支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。适用于 macOS 14 及以上的 Apple 芯片 Mac，免费下载，无需注册。',
-    'Mac 桌面与菜单栏歌词',
-    '工作时也能随时查看歌词。支持 Spotify、Apple Music、网易云音乐、QQ 音乐和汽水音乐。'],
+    'NotchMuse｜Mac 与 Windows 同步桌面歌词与菜单栏歌词工具',
+    'NotchMuse 为 macOS 14+（Apple 芯片）和 Windows 11/10（免安装 .exe）提供同步桌面歌词，兼容 39+ 款播放器。免费开源，无需注册。',
+    'Mac 与 Windows 同步桌面歌词',
+    '在 Mac 菜单栏、刘海旁或 Windows 任务栏看同步歌词，两端都支持点击穿透的悬浮歌词。兼容 39+ 款音乐播放器。'],
 ];
 const decode = text => text.replaceAll('&amp;', '&').replaceAll('&quot;', '"');
 for (const [file, lang, canonical, alternate, title, description, h1, subtitle] of cases) {

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b101a">
+  <title>LRC 转 SRT 字幕与 LRC 时间轴偏移工具 — 免费在线纯本地处理 | NotchMuse</title>
+  <meta name="description" content="免费在线 LRC 转 SRT 字幕、LRC 时间轴整体提前/延后偏移（毫秒/秒）、SRT 转 LRC 以及一键清除时间轴提取纯文本。100% 浏览器纯本地计算，文件绝不上传服务器。">
+  <link rel="canonical" href="https://notchmuse.com/zh/lrc-tools/">
+  <link rel="alternate" hreflang="en" href="https://notchmuse.com/lrc-tools/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://notchmuse.com/zh/lrc-tools/">
+  <link rel="alternate" hreflang="x-default" href="https://notchmuse.com/lrc-tools/">
+  <meta property="og:title" content="LRC 转 SRT 字幕与 LRC 时间轴偏移工具 — 免费在线纯本地处理 | NotchMuse">
+  <meta property="og:description" content="免费在线 LRC 转 SRT 字幕、LRC 时间轴偏移与纯文本提取。100% 浏览器纯本地运行，零上传、零注册。">
+  <meta property="og:url" content="https://notchmuse.com/zh/lrc-tools/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NotchMuse">
+  <meta property="og:image" content="https://notchmuse.com/assets/real-notch-mode.png">
+  <meta property="og:image:alt" content="NotchMuse 免费纯本地 LRC 转 SRT 与时间轴偏移工具">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LRC 转 SRT 字幕与 LRC 时间轴偏移工具 — 免费在线纯本地处理 | NotchMuse">
+  <meta name="twitter:description" content="免费在线 LRC 转 SRT 字幕、LRC 时间轴偏移与纯文本提取，100% 浏览器纯本地计算。">
+  <meta name="twitter:image" content="https://notchmuse.com/assets/real-notch-mode.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
+  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/guides.css?v=4">
+  <link rel="stylesheet" href="/bencho-ux.css?v=1">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "NotchMuse", "item": "https://notchmuse.com/zh/" },
+    { "@type": "ListItem", "position": 2, "name": "LRC 工具箱", "item": "https://notchmuse.com/zh/lrc-tools/" }
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "NotchMuse 在线 LRC 歌词工具箱",
+  "url": "https://notchmuse.com/zh/lrc-tools/",
+  "inLanguage": "zh-Hans",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "任意桌面与移动浏览器",
+  "browserRequirements": "需启用 JavaScript 以在本地执行格式转换",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+  </script>
+  <script defer src="https://www.pvuv.ai/f.js"
+          data-site="f9FFRntt"
+          data-api="https://in.pvuv.ai"></script>
+</head>
+<body class="guide-page">
+  <a class="skip-link" href="#tool-workspace">跳到工具区</a>
+  <header class="site-header wrap">
+    <a class="brand" href="/zh/" aria-label="NotchMuse 首页"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
+    <nav aria-label="主导航">
+      <a class="nav-desktop-only" href="/zh/compatible-players/">兼容播放器</a>
+      <a class="nav-desktop-only" href="/zh/windows/">Windows 版</a>
+      <a href="/zh/lrc-tools/" aria-current="page">LRC 工具</a>
+      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav"><span>下载</span></a>
+      <a class="language-toggle" id="language-toggle" href="/lrc-tools/" lang="en" aria-label="Switch to English"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>English</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <nav class="guide-breadcrumb wrap" aria-label="面包屑导航"><a href="/zh/">首页</a><span aria-hidden="true">/</span><span aria-current="page">LRC 工具箱</span></nav>
+
+    <section class="lyrics-tool-hero wrap" id="tool-workspace">
+      <p class="eyebrow">100% 浏览器纯本地计算 · 文件不上传</p>
+      <h1>LRC 转 SRT 字幕与 LRC 时间轴偏移工具</h1>
+      <p class="lead">将 <code>.lrc</code> 歌词实时转换为剪辑软件可用的 <code>.srt</code> 字幕、按毫秒或秒整体提前/延后时间轴、将 SRT 反向转回 LRC，或一键清除时间轴提取纯文本。全程在你的浏览器本地完成，零服务器上传。</p>
+
+      <div class="lrc-toolbar">
+        <div class="lrc-tabs" role="tablist" aria-label="LRC 工具切换">
+          <button type="button" class="lrc-tab-btn" role="tab" aria-selected="true" data-lrc-tab="lrc2srt">LRC 转 SRT</button>
+          <button type="button" class="lrc-tab-btn" role="tab" aria-selected="false" tabindex="-1" data-lrc-tab="shifter">LRC 时间轴偏移</button>
+          <button type="button" class="lrc-tab-btn" role="tab" aria-selected="false" tabindex="-1" data-lrc-tab="convert">SRT 转 LRC &amp; 纯文本</button>
+        </div>
+        <span class="lrc-privacy-badge">● 纯本地运行 · 不上传任何文件</span>
+      </div>
+
+      <!-- Panel 1: LRC -> SRT -->
+      <section data-lrc-panel="lrc2srt" aria-label="LRC 转 SRT 字幕">
+        <div class="lrc-dropzone" id="lrc2srt-dropzone">
+          <p>将本地 <strong>.lrc</strong> 文件拖放到此处，或直接在下方粘贴歌词，右侧实时预览并导出 <strong>.srt</strong>。</p>
+          <div class="lrc-toolbar-group">
+            <label class="button button-small button-quiet" for="lrc2srt-file">选择 .lrc 文件</label>
+            <input id="lrc2srt-file" class="lrc-file-input" type="file" accept=".lrc,.txt,text/plain">
+            <button type="button" class="lrc-pill-btn" id="lrc2srt-sample">载入原创示例</button>
+            <button type="button" class="lrc-pill-btn" id="lrc2srt-clear">清空</button>
+          </div>
+        </div>
+
+        <div class="lrc-controls-bar">
+          <label for="lrc2srt-last-duration">最后一句字幕停留时长（秒）：
+            <input id="lrc2srt-last-duration" class="lrc-num-input" type="number" min="0.5" max="30" step="0.5" value="4">
+          </label>
+        </div>
+
+        <div class="lrc-grid">
+          <div class="lrc-pane">
+            <div class="lrc-pane-head"><strong>输入歌词（.lrc）</strong></div>
+            <label class="skip-link" for="lrc2srt-input">LRC 输入</label>
+            <textarea id="lrc2srt-input" class="lrc-textarea" spellcheck="false" placeholder="[00:00.50]在此粘贴 .lrc 歌词..."></textarea>
+          </div>
+          <div class="lrc-pane">
+            <div class="lrc-pane-head">
+              <strong>实时 SRT 字幕预览（.srt）</strong>
+              <div class="lrc-toolbar-group">
+                <button type="button" class="lrc-pill-btn" id="lrc2srt-copy">复制 SRT</button>
+                <button type="button" class="button button-small" id="lrc2srt-download">导出 .srt</button>
+              </div>
+            </div>
+            <label class="skip-link" for="lrc2srt-output">SRT 输出</label>
+            <textarea id="lrc2srt-output" class="lrc-textarea" readonly spellcheck="false"></textarea>
+          </div>
+        </div>
+        <p class="lrc-stats" id="lrc2srt-stats" aria-live="polite"></p>
+      </section>
+
+      <!-- Panel 2: LRC Time Shifter -->
+      <section data-lrc-panel="shifter" aria-label="LRC 时间轴偏移" hidden>
+        <div class="lrc-dropzone" id="shift-dropzone">
+          <p>拖入 <strong>.lrc</strong> 文件或粘贴歌词，通过正负偏移量整体提前或延后所有时间轴。</p>
+          <div class="lrc-toolbar-group">
+            <label class="button button-small button-quiet" for="shift-file">选择 .lrc 文件</label>
+            <input id="shift-file" class="lrc-file-input" type="file" accept=".lrc,.txt,text/plain">
+            <button type="button" class="lrc-pill-btn" id="shift-reset">重置为 0 ms</button>
+          </div>
+        </div>
+
+        <div class="lrc-controls-bar">
+          <label for="shift-amount">偏移量：
+            <input id="shift-amount" class="lrc-num-input" type="number" step="50" value="500">
+          </label>
+          <label for="shift-unit">单位：
+            <select id="shift-unit" class="lrc-select">
+              <option value="ms" selected>毫秒（ms）</option>
+              <option value="s">秒（s）</option>
+            </select>
+          </label>
+          <button type="button" class="lrc-pill-btn" data-shift-preset="-1000">-1000 ms</button>
+          <button type="button" class="lrc-pill-btn" data-shift-preset="-500">-500 ms</button>
+          <button type="button" class="lrc-pill-btn" data-shift-preset="-200">-200 ms</button>
+          <button type="button" class="lrc-pill-btn" data-shift-preset="200">+200 ms</button>
+          <button type="button" class="lrc-pill-btn" data-shift-preset="500">+500 ms</button>
+          <button type="button" class="lrc-pill-btn" data-shift-preset="1000">+1000 ms</button>
+        </div>
+
+        <div class="lrc-grid">
+          <div class="lrc-pane">
+            <div class="lrc-pane-head"><strong>原始歌词（.lrc）</strong></div>
+            <label class="skip-link" for="shift-input">原始 LRC</label>
+            <textarea id="shift-input" class="lrc-textarea" spellcheck="false"></textarea>
+          </div>
+          <div class="lrc-pane">
+            <div class="lrc-pane-head">
+              <strong>偏移后实时预览（.lrc）</strong>
+              <div class="lrc-toolbar-group">
+                <button type="button" class="lrc-pill-btn" id="shift-copy">复制 LRC</button>
+                <button type="button" class="button button-small" id="shift-download">导出 .lrc</button>
+              </div>
+            </div>
+            <label class="skip-link" for="shift-output">偏移后 LRC 输出</label>
+            <textarea id="shift-output" class="lrc-textarea" readonly spellcheck="false"></textarea>
+          </div>
+        </div>
+        <p class="lrc-stats" id="shift-stats" aria-live="polite"></p>
+        <p class="lyrics-disclaimer">负时间戳处理规则：当负偏移导致某行时间早于 <code>00:00.00</code> 时，工具会自动将其归零钳位至 <code>[00:00.00]</code>，避免播放器或剪辑软件解析报错。</p>
+      </section>
+
+      <!-- Panel 3: SRT -> LRC & Plain Text -->
+      <section data-lrc-panel="convert" aria-label="SRT 转 LRC 与纯文本提取" hidden>
+        <div class="lrc-dropzone" id="conv-dropzone">
+          <p>拖入 <strong>.srt</strong> 或 <strong>.lrc</strong> 文件，一键转为标准 <code>.lrc</code> 或清除全部时间轴提取纯文本。</p>
+          <div class="lrc-toolbar-group">
+            <label class="button button-small button-quiet" for="conv-file">选择 .srt / .lrc 文件</label>
+            <input id="conv-file" class="lrc-file-input" type="file" accept=".srt,.lrc,.txt,text/plain">
+          </div>
+        </div>
+
+        <div class="lrc-controls-bar">
+          <label for="conv-mode">转换模式：
+            <select id="conv-mode" class="lrc-select">
+              <option value="srt2lrc" selected>SRT 转 LRC（[mm:ss.xx]）</option>
+              <option value="strip">清除时间轴 → 提取纯文本（.txt）</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="lrc-grid">
+          <div class="lrc-pane">
+            <div class="lrc-pane-head"><strong>输入内容（.srt 或 .lrc）</strong></div>
+            <label class="skip-link" for="conv-input">SRT 或 LRC 输入</label>
+            <textarea id="conv-input" class="lrc-textarea" spellcheck="false"></textarea>
+          </div>
+          <div class="lrc-pane">
+            <div class="lrc-pane-head">
+              <strong>输出结果</strong>
+              <div class="lrc-toolbar-group">
+                <button type="button" class="lrc-pill-btn" id="conv-copy">复制结果</button>
+                <button type="button" class="button button-small" id="conv-download">导出文件</button>
+              </div>
+            </div>
+            <label class="skip-link" for="conv-output">转换结果输出</label>
+            <textarea id="conv-output" class="lrc-textarea" readonly spellcheck="false"></textarea>
+          </div>
+        </div>
+        <p class="lrc-stats" id="conv-stats" aria-live="polite"></p>
+      </section>
+
+      <div class="lyrics-funnel">
+        <p><strong>想在听歌时直接在桌面实时看同步歌词？</strong> NotchMuse 支持 36+ 款播放器，可在 MacBook 刘海旁、顶部菜单栏或桌面悬浮层实时滚动歌词。</p>
+        <div class="actions">
+          <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="hero">下载 Mac 版 ↗</a>
+          <a class="button button-small button-quiet" href="/zh/windows/">查看 Windows 预览 →</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="guide-layout wrap">
+      <article id="guide-content" class="guide-content" tabindex="-1">
+        <section id="how-it-works" class="guide-section">
+          <h2>纯本地处理说明</h2>
+          <p>本页面所有格式转换与时间轴计算均由你浏览器内的本地脚本完成，不会向任何服务器上传歌词文件，也不会调用第三方搜词接口。</p>
+          <ul>
+            <li><strong>LRC 转 SRT：</strong>支持标准 <code>[mm:ss.xx]</code> 与毫秒级 <code>[mm:ss.xxx]</code> 标签，自动展开同行多时间戳并按时间排序，支持自定义末句停留秒数。</li>
+            <li><strong>LRC 时间轴偏移：</strong>支持按毫秒（ms）或秒（s）正向延后或负向提前，保留 <code>[ti:]</code>、<code>[ar:]</code> 等元信息；负时间戳自动归零至 <code>[00:00.00]</code>。</li>
+            <li><strong>SRT 转 LRC 与纯文本提取：</strong>可将剪辑软件导出的 <code>.srt</code> 字幕还原为 <code>.lrc</code>，或一键剥离时间标签得到干净的 <code>.txt</code> 纯文本。</li>
+          </ul>
+        </section>
+
+        <section id="faq" class="guide-section faq">
+          <h2>常见问题</h2>
+          <details><summary>我拖入的 .lrc 或 .srt 文件会上传到服务器吗？</summary><p>完全不会。文件读取、时间轴计算与导出下载全部基于浏览器原生 FileReader 与 Blob API 在本地完成。</p></details>
+          <details><summary>时间轴往前移变成负数会怎么样？</summary><p>工具会自动将任何小于 <code>00:00.00</code> 的时间戳归零钳位至 <code>[00:00.00]</code>，并在状态栏提示被归零的条目数量。</p></details>
+          <details><summary>同行包含多个时间戳（如副歌复用）能正常转 SRT 吗？</summary><p>可以。转换器会自动拆分如 <code>[00:32.00][01:48.50]歌词</code> 的复合时间标签，并按播放顺序生成连续编号的 SRT 字幕。</p></details>
+        </section>
+      </article>
+
+      <aside class="guide-toc" aria-label="本页目录">
+        <p class="eyebrow">本页目录</p>
+        <a href="#tool-workspace">LRC 工具箱</a>
+        <a href="#how-it-works">纯本地处理说明</a>
+        <a href="#faq">常见问题</a>
+      </aside>
+    </div>
+
+    <section class="closing">
+      <div class="wrap">
+        <p class="eyebrow">让音乐融入你的节奏</p>
+        <h2>36+ 播放器实时桌面歌词。</h2>
+        <div class="actions" style="justify-content:center">
+          <a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="footer">下载 Mac 版 <span aria-hidden="true">↗</span></a>
+          <a class="button button-quiet" href="/zh/compatible-players/">查看 36+ 兼容播放器 →</a>
+        </div>
+        <p class="fine">NotchMuse v0.8.5 · macOS 14+ · Windows 预览版即将发布</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap"><a class="brand" href="/zh/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="页脚导航"><a href="/zh/compatible-players/">兼容播放器</a><a href="/zh/windows/">Windows 版</a><a href="/zh/#guides">使用指南</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><button class="footer-link-btn" type="button" data-analytics-settings hidden>统计设置</button></nav><p>© NotchMuse · 让每一天的音乐体验更自在。</p></footer>
+
+  <aside class="analytics-consent" data-analytics-consent role="region" aria-labelledby="consent-title" hidden>
+    <div><strong id="consent-title">允许官网统计吗？</strong><p>经你同意，Google Analytics 统计访问和下载按钮点击。选择不会影响应用或下载。<a href="/zh/#privacy">隐私说明</a></p></div>
+    <div class="consent-actions"><button type="button" class="language-toggle" data-consent-reject>拒绝统计</button><button type="button" class="button button-small" data-consent-accept>同意统计</button><button type="button" class="language-toggle" data-consent-close hidden>关闭</button></div>
+  </aside>
+  <script src="/analytics.js?v=1" defer></script>
+  <script src="/bencho-ux.js?v=1" defer></script>
+  <script src="/lrc-tools/lrc-tools.js?v=2" defer></script>
+</body>
+</html>

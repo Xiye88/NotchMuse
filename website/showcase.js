@@ -31,7 +31,8 @@
     video.addEventListener('error', () => { demo.classList.remove('is-playing'); });
   });
 
-  const select = tab => {
+  const select = (tab, event) => {
+    if (tab.getAttribute('aria-selected') !== 'true') window.benchoUX?.play('tick', event);
     tabs.forEach(item => {
       const selected = item === tab;
       item.setAttribute('aria-selected', String(selected));
@@ -47,7 +48,7 @@
     });
   };
   tabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => select(tab));
+    tab.addEventListener('click', event => select(tab, event));
     tab.addEventListener('keydown', event => {
       let next;
       if (event.key === 'ArrowRight') next = tabs[(index + 1) % tabs.length];
@@ -56,7 +57,7 @@
       if (event.key === 'End') next = tabs[tabs.length - 1];
       if (!next) return;
       event.preventDefault();
-      select(next);
+      select(next, event);
       next.focus();
     });
   });

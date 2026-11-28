@@ -1,102 +1,115 @@
-<p align="center"><a href="README.md">English</a> | 简体中文</p>
+<h1 align="center"><img src="docs/assets/readme/notchmuse-wordmark.svg" alt="NotchMuse" width="560"></h1>
 
-<h1 align="center">NotchMuse v0.8.5</h1>
+<p align="center"><strong>原生 · 轻量 · 免费开源</strong></p>
 
-<p align="center"><img src="website/assets/media/notch-poster.webp" alt="NotchMuse 在 macOS 上实际显示的浮层歌词" width="1080"></p>
+<p align="center">适用于 macOS 14+（Apple 芯片）和 Windows 11/10（便携版 .exe）的同步桌面歌词。<br>兼容 39+ 款音乐播放器，从 Spotify、Apple Music 到网易云音乐和 QQ 音乐。</p>
 
-<p align="center">把同步歌词放在 Mac 菜单栏、刘海旁，或屏幕边缘。</p>
+<p align="center">
+  <a href="https://github.com/Xiye88/NotchMuse/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Xiye88/NotchMuse?label=Stars&amp;color=E86C36&amp;style=flat-square&amp;labelColor=303030"></a>
+  <a href="https://github.com/Xiye88/NotchMuse/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Xiye88/NotchMuse?label=Release&amp;color=707078&amp;style=flat-square&amp;labelColor=303030"></a>
+  <a href="#quick-start"><img alt="Desktop: macOS 14+ | Windows 10/11" src="https://img.shields.io/badge/Desktop-macOS%2014%2B%20%7C%20Windows%2010%2F11-707078?style=flat-square&amp;labelColor=303030"></a>
+  <a href="#39-supported-players"><img alt="39+ players" src="https://img.shields.io/badge/Players-39%2B-707078?style=flat-square&amp;labelColor=303030"></a>
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-707078?style=flat-square&amp;labelColor=303030"></a>
+</p>
 
-<p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐</p>
+<p align="center">
+  <a href="https://notchmuse.com/zh/"><img src="docs/assets/readme/button-website.svg" alt="访问官网" width="175" height="42"></a>
+  <a href="https://github.com/Xiye88/NotchMuse/releases"><img src="docs/assets/readme/button-download.svg" alt="下载 v0.9" width="175" height="42"></a>
+  <a href="#community--support"><img src="docs/assets/readme/button-community.svg" alt="QQ 用户群 1137981671" width="185" height="42"></a>
+  <a href="mailto:support@notchmuse.com"><img src="docs/assets/readme/button-contact.svg" alt="反馈与合作" width="180" height="42"></a>
+</p>
 
-<p align="center"><a href="https://notchmuse.com"><strong>官网下载</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.5"><strong>GitHub Release</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>报告问题</strong></a></p>
+<p align="center"><a href="README.md">English</a> · <a href="#whats-new-v090">版本亮点</a> · <a href="#macos-showcase">macOS 演示</a> · <a href="#windows-showcase">Windows 演示</a> · <a href="#39-supported-players">39+ 款播放器</a> · <a href="#quick-start">快速上手</a> · <a href="#community--support">社区与支持</a> · <a href="#contact">联系方式</a></p>
 
-## 菜单栏歌词
+<a name="whats-new-v090"></a>
 
-![NotchMuse 在 macOS 菜单栏中实际播放歌词](docs/assets/demos/github/status-bar-demo.gif)
+## v0.9.0 版本亮点
 
-同步歌词自然融入 Mac 菜单栏，显示位置可以调整。
+- **Mac 与 Windows 双端发布。** 两端共用自由悬浮歌词、黑胶工作室与歌词匹配引擎，同时保留各自的桌面歌词布局。
+- **黑胶工作室。** Hi-Fi 播放界面用旋转黑胶展示专辑封面。点击带时间戳的歌词即可跳转进度，也能生成歌词分享卡。
+- **歌词匹配更准确。** 覆盖 7 个平台 × 800 首歌曲的测评中，**280 首纯音乐没有一首误配歌词**。
+- **双端合计兼容 39+ 款播放器。** Windows 支持左下角任务栏歌词、顶部浮岛和带自动翻转工具条的自由悬浮歌词。
 
-## 刘海模式
+<a name="macos-showcase"></a>
 
-![NotchMuse 浮层歌词在屏幕顶部和 Dock 上方显示](docs/assets/demos/github/notch-demo.gif)
+## macOS 实机演示
 
-让歌词靠近刘海，或将浮层移到 Dock 上方。本次录屏展示顶部和 Dock 位置。
+| 菜单栏歌词 | 刘海模式 |
+| --- | --- |
+| ![菜单栏歌词](docs/assets/demos/github/status-bar-demo.gif) | ![刘海模式](docs/assets/demos/github/notch-demo.gif) |
 
-## 定制你的歌词
+| 自由悬浮歌词与六键工具条 | 黑胶工作室沉浸歌词与单点跳转 |
+| --- | --- |
+| ![自由悬浮歌词与六键工具条](docs/assets/demos/github/floating-demo.gif) | ![黑胶工作室沉浸歌词与单点跳转](docs/assets/demos/github/v09-immersive-demo.gif) |
 
-![NotchMuse 实际播放中切换歌词颜色、渐变和背景](docs/assets/demos/github/appearance-demo.gif)
+<a name="windows-showcase"></a>
 
-选择适合桌面的纯色、渐变色和歌词背景。
+## Windows 11/10 实机演示
 
-![NotchMuse v0.8.0 外观设置](docs/assets/screenshots/appearance-settings.png)
+| Win11 左下角任务栏歌词 | 自由悬浮歌词与自动翻转六键工具条 |
+| --- | --- |
+| ![Win11 左下角任务栏歌词](docs/assets/demos/github/win-taskbar-demo.gif) | ![自由悬浮歌词与自动翻转六键工具条](docs/assets/demos/github/win-floating-demo.gif) |
 
-<details>
-<summary>显示设置</summary>
+### 顶部浮岛与黑胶工作室实时联动
 
-![NotchMuse v0.8.0 显示设置](docs/assets/screenshots/display-settings.png)
+![顶部浮岛与黑胶工作室实时联动](docs/assets/demos/github/win-top-island-demo.gif)
 
-</details>
+## macOS 与 Windows 功能对比
 
-## 支持的播放器
-
-Spotify · Apple Music · 网易云音乐 · QQ 音乐 · 汽水音乐。可以手动选择，也可以让自动检测跟随当前正在播放的应用。
-
-## 核心功能
-
-| 歌词位置 | 个性化 | 日常使用 |
+| 功能 | macOS 14+ | Windows 11/10 |
 | --- | --- | --- |
-| 菜单栏、刘海歌词 | 纯色与渐变色 | 自动检测播放器 |
-| 屏幕左侧或右侧 | 背景、透明度、宽度 | 简体中文与 English |
-| Dock 上方歌词 | 外观预设 | 应用内更新设置 |
-| 自定义宽度与位置 | 跟随系统、浅色与深色外观 | 开机自动启动；Dock 与菜单栏图标控制 |
+| 下载格式 | Apple 芯片版 DMG | x64 便携版 .exe |
+| 系统栏布局 | 菜单栏 · MacBook 刘海 | Win11 任务栏 · 顶部浮岛 |
+| 自由悬浮 | 双行滚动高亮、六键悬浮工具条、七色调色板、锁定与点击穿透 | 双行滚动高亮、自动翻转六键工具条、七色调色板、锁定与点击穿透 |
+| 黑胶工作室 | 旋转专辑唱片、沉浸歌词、点击跳转、歌词分享卡 | 旋转专辑唱片、沉浸歌词、点击跳转、歌词分享卡 |
 
-网易云、QQ 音乐和汽水音乐使用随应用打包的 MediaRemote bridge，无需 Homebrew 或额外安装 helper。macOS 或播放器升级后可能需要兼容性更新。
+<a name="39-supported-players"></a>
 
-## 三步开始
+## 兼容 39+ 款播放器
 
-1. 从[官网](https://notchmuse.com)下载 DMG，打开后将应用拖入“应用程序”。
-2. 用任一支持的桌面播放器播放歌曲；Spotify 或 Apple Music 请求自动化权限时请允许。
-3. 打开 NotchMuse，保留“自动检测”，在设置中选择歌词位置。
+支持 Spotify、Apple Music、YouTube Music、网易云音乐、QQ 音乐、汽水音乐、TIDAL、Qobuz、Plexamp、Roon 等。Windows 通过系统媒体会话同步，MusicBee 和 foobar2000 等播放器可能需要先启用相应集成。兼容情况和播放控制能力随平台和播放器而异。
 
-## 安装与安全提示
+[查看兼容播放器目录](https://notchmuse.com/zh/compatible-players/)。
 
-NotchMuse 通过官网和 GitHub 直接分发，目前尚未配置 Apple Developer ID 签名与公证。因此 macOS 首次打开时可能出现安全提示。这属于分发签名状态，与版本状态无关。
+<a name="quick-start"></a>
 
-如果系统拦截，请打开 **系统设置 → 隐私与安全性 → 仍要打开**，按提示认证后再次启动。安装和权限问题见[使用支持](docs/community/SUPPORT.md)。不要通过关闭 Gatekeeper 或移除 quarantine 强制运行。见 [Apple“仍要打开”指引](https://support.apple.com/zh-cn/102445)。本次仅为 ad-hoc 签名，未使用 Developer ID，也未通过公证；尚未完成独立干净 Mac 首次安装验证。目前不支持 Intel Mac。
+## 快速上手
 
-## 更新至 v0.8.5
+1. **下载 NotchMuse。** 使用 Apple 芯片的 macOS 14+ 用户打开 [DMG](https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse.dmg)，将应用拖入「应用程序」。Windows 11/10 x64 用户直接运行[便携版 .exe](https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe)。
+2. **播放一首歌。** 打开兼容的音乐播放器并开始播放。Mac 如有提示，允许自动化权限以同步曲目。两端都无需注册 NotchMuse 账号。
+3. **选一个歌词位置。** 在设置中切换系统栏或自由悬浮，也可以打开黑胶工作室，从头到尾跟着歌词听。
 
-已有正式版可在 **设置 → 通用 → 检查更新** 中下载、安装并重启到 v0.8.5 / Build70。开启自动检查后，应用会在下一次定时检查时发现新版，并在安装前征求确认。官方签名更新源已提供 Build70；已使用完整旧版临时副本实测 Build47→70、Build61→70。
+## 隐私与安全
 
-Beta 3 及更早版本需进行一次[手动安装](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg)。仍可手动下载并对照 [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/SHA256SUMS) 校验；Preview 保持独立。应用离线或关闭自动检查时，不会自动弹出更新提示。
+NotchMuse 无需注册，不收集应用遥测数据，也不录制或上传音频。应用读取播放信息，并可能将歌名、歌手、专辑和时长发给第三方歌词服务以匹配歌词。能否找到歌词取决于歌曲和服务覆盖情况。
 
-### 本次改进
+若 macOS 首次打开官方版本时拦截了应用，可前往「系统设置 → 隐私与安全性 → 仍要打开」。详见[安装与权限说明](docs/community/SUPPORT.md)和 [Apple 指引](https://support.apple.com/zh-cn/102445)。
 
-可拖拽歌词框、位置保存、锁定与点击穿透；优先按真实词尾/句尾划色，缺少结束时间时整句静态显示；网易单行时间异常不再丢掉其他行的有效时间；更新状态和网络重试提示更清楚。歌词仍取决于第三方覆盖率。见[中文发布说明](docs/releases/v0.8.5/RELEASE_NOTES.zh-CN.md)。
+NotchMuse 采用 [MIT 许可证](LICENSE)。更多信息请见[第三方组件声明](THIRD_PARTY_NOTICES.md)和[开发文档](docs/README.md)。
 
-## 常见问题
+<a name="community--support"></a>
 
-**某首歌没有歌词？** 歌词取决于第三方歌词来源覆盖率；支持播放器不代表每首歌都能匹配。
+## 社区与支持
 
-**会上传音频吗？** 不会。应用读取播放元数据，可能将歌名、歌手、专辑和时长发送给歌词来源用于匹配；不收集遥测，也不要求注册账号。
+| 微信支付 | QQ 用户群（1137981671） | USDT · EVM |
+| :---: | :---: | :---: |
+| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" width="150" alt="微信支付"> | <a href="https://qm.qq.com/q/J6W0oSPtu0"><img src="docs/assets/readme/qq-group-qr.png" width="150" alt="QQ 用户群（1137981671）"></a> | <img src="docs/support/usdt-evm.png" width="150" alt="USDT · EVM"> |
+| 赞助开发 | [点击加群](https://qm.qq.com/q/J6W0oSPtu0) | ETH · BSC · Arbitrum · Optimism<br>仅限 USDT |
 
-**菜单栏图标不见了？** 其他菜单栏工具可能将它隐藏。NotchMuse 不管理其他应用的菜单栏图标。
+<a name="contact"></a>
 
-## 支持 NotchMuse
+## 反馈与商务合作
 
-<details>
-<summary>查看赞助方式</summary>
+- **邮箱** [support@notchmuse.com](mailto:support@notchmuse.com)，欢迎反馈与商务合作。
+- **交流** [加入 QQ 用户群 1137981671](https://qm.qq.com/q/J6W0oSPtu0)，和其他用户交流。
+- **GitHub** [提交 Issue](https://github.com/Xiye88/NotchMuse/issues)，报告问题或提出功能建议。
 
-应用内提供 Support 页面，也可以使用以下二维码：
+## Star 趋势
 
-| 微信支付 | USDT · EVM | USDT · TRON |
-| --- | --- | --- |
-| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="微信支付二维码" width="150"> | <img src="docs/support/usdt-evm.png" alt="USDT EVM 二维码" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRON 二维码" width="150"> |
-
-EVM 地址支持 Ethereum、BNB Smart Chain (BEP20)、Arbitrum 和 Optimism；TRON 使用独立 TRC20 地址。转账前请核对网络，并且只发送 USDT。[支持者名单](docs/support/supporters.json)仅展示已同意公开的信息。
-
-</details>
-
-## 许可与反馈
-
-NotchMuse 使用 MIT License；内置第三方组件见[第三方声明](THIRD_PARTY_NOTICES.md)。使用问题请看[支持文档](docs/community/SUPPORT.md)和[反馈指南](docs/community/FEEDBACK.md)，或直接[提交 Issue](https://github.com/Xiye88/NotchMuse/issues)。架构与构建文档见 [docs/README.md](docs/README.md)。
+<a href="https://www.star-history.com/#Xiye88/NotchMuse&amp;Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Xiye88/NotchMuse&amp;type=Date&amp;theme=dark">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Xiye88/NotchMuse&amp;type=Date">
+    <img alt="Star 趋势 · Xiye88/NotchMuse" src="https://api.star-history.com/svg?repos=Xiye88/NotchMuse&amp;type=Date">
+  </picture>
+</a>

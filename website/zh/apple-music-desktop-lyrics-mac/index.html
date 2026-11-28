@@ -23,8 +23,8 @@
   <meta name="twitter:image" content="https://notchmuse.com/assets/media/status-bar-poster.webp">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/guides.css?v=3">
+  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/guides.css?v=4">
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "NotchMuse", "item": "https://notchmuse.com/zh/"}, {"@type": "ListItem", "position": 2, "name": "Apple Music 桌面歌词", "item": "https://notchmuse.com/zh/apple-music-desktop-lyrics-mac/"}]}</script>
   <script type="application/ld+json">
 {
@@ -54,7 +54,7 @@
     <a class="brand" href="/zh/" aria-label="NotchMuse 首页"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
     <nav aria-label="主导航">
       <a class="nav-desktop-only" href="/zh/#guides">使用指南</a>
-      <a class="nav-desktop-only" href="/zh/lyrics-downloader/">歌词下载</a>
+      <a class="nav-desktop-only" href="/zh/lrc-tools/">LRC 工具</a>
       <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav">下载</a>
       <a class="language-toggle" id="language-toggle" href="/apple-music-desktop-lyrics-mac/" lang="en" aria-label="Switch to English"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>English</span></a>
     </nav>
@@ -68,6 +68,7 @@
       </div>
       <figure class="guide-figure"><div class="live-demo" data-demo><img class="demo-poster" src="/assets/media/status-bar-poster.webp" width="1920" height="1080" alt="NotchMuse 显示方式演示，录屏使用 Spotify；下方为 Apple Music 的设置说明。"><video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"><source data-src="/assets/media/status-bar-demo.webm" type="video/webm"><source data-src="/assets/media/status-bar-demo.mp4" type="video/mp4"></video></div><figcaption>NotchMuse 显示方式演示，录屏使用 Spotify；下方为 Apple Music 的设置说明。</figcaption></figure>
     </section>
+    <div class="wrap"><p class="cross-os-banner"><span>正在使用 Windows？NotchMuse Windows 版同样提供点击穿透悬浮与任务栏歌词。</span><a href="/zh/windows/">查看 NotchMuse Windows 版 →</a></p></div>
     <div class="guide-layout wrap">
       <article id="guide-content" class="guide-content" tabindex="-1">
         <section id="native" class="guide-section"><h2>Apple Music 本身就有歌词与 MiniPlayer</h2><p>在 Mac 的“音乐”应用中播放歌曲，再点击歌词按钮，即可查看可用歌词。Apple 也提供 MiniPlayer：可从“窗口”菜单切换，并在有歌词时使用其中的歌词按钮。</p><p>MiniPlayer 还可以保持在最前方：“音乐”→“设置”→“高级”中提供相应选项。如果希望同时看到歌词、播放控制和封面，可以先用原生功能。具体菜单名称和控件可能随 macOS 版本变化。</p></section><section id="choice" class="guide-section"><h2>根据歌词要放在哪里来选</h2><div class="guide-table-scroll"><table><caption>Apple Music 歌词显示方式</caption><thead><tr><th scope="col">你的偏好</th><th scope="col">可以先尝试</th></tr></thead><tbody><tr><th scope="row">在音乐应用内查看歌词</th><td>音乐应用自带的歌词视图。</td></tr><tr><th scope="row">小窗口里同时有控制与封面</th><td>原生 MiniPlayer，也可以设置保持最前。</td></tr><tr><th scope="row">把当前歌词放进 macOS 菜单栏</th><td>NotchMuse 菜单栏模式。</td></tr><tr><th scope="row">歌词放在刘海附近或 Dock 上方</th><td>NotchMuse 刘海模式，配合宽度、位置与外观设置。</td></tr></tbody></table></div><p>音乐仍由“音乐”应用播放，NotchMuse 只增加歌词显示，不替代曲库或订阅。它使用第三方歌词服务，匹配结果与 Apple 的歌词目录彼此独立。</p></section><section id="setup" class="guide-section"><h2>让 NotchMuse 跟随音乐应用</h2><ol><li>在 Mac 上打开“音乐”应用，开始播放歌曲。</li><li>安装并打开 NotchMuse，在设置中使用“自动检测”或手动选择 Apple Music。</li><li>macOS 提示时，允许通过“自动化”访问音乐应用。</li><li>需要菜单栏单行显示时选择“菜单栏”，需要独立浮层时选择“刘海模式”，再调整位置和外观。</li></ol><p>以上设置针对 Mac 原生“音乐”应用，不代表支持浏览器中的 music.apple.com。菜单栏左侧布局还需“辅助功能”权限。</p></section><section id="missing" class="guide-section"><h2>没有歌词，不一定是播放器出了问题</h2><p>NotchMuse 没有跟随当前歌曲时，先检查播放器选择和“自动化”权限。如果歌名会更新但没有歌词，可能是歌词服务没有该录音的合适匹配。</p><p>Apple 原生歌词与第三方浮层的覆盖范围可能不同。可以先查看原生歌词或换一首歌，不必反复更改权限。NotchMuse 不保证每首歌都有歌词，也不能修复音乐应用本身的所有问题。</p></section>

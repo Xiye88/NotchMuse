@@ -1,102 +1,111 @@
-<p align="center">English | <a href="README.zh-CN.md">简体中文</a></p>
+<h1 align="center"><img src="docs/assets/readme/notchmuse-wordmark.svg" alt="NotchMuse" width="560"></h1>
 
-<h1 align="center">NotchMuse v0.8.5</h1>
+<p align="center"><strong>Native · Lightweight · Free &amp; Open Source</strong></p>
 
-<p align="center"><img src="website/assets/media/notch-poster.webp" alt="Real NotchMuse overlay lyrics on macOS" width="1080"></p>
+<p align="center">Synced desktop lyrics for macOS 14+ (Apple Silicon) and Windows 11/10 (portable .exe).<br>Works with 39+ music players, including Spotify, Apple Music, NetEase Cloud Music, and QQ Music.</p>
 
-<p align="center">Synced lyrics in your Mac menu bar, beside the notch, or at the edge of your screen.</p>
+<p align="center">
+  <a href="https://github.com/Xiye88/NotchMuse/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/Xiye88/NotchMuse?label=Stars&amp;color=E86C36&amp;style=flat-square&amp;labelColor=303030"></a>
+  <a href="https://github.com/Xiye88/NotchMuse/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Xiye88/NotchMuse?label=Release&amp;color=707078&amp;style=flat-square&amp;labelColor=303030"></a>
+  <a href="#quick-start"><img alt="Desktop: macOS 14+ | Windows 10/11" src="https://img.shields.io/badge/Desktop-macOS%2014%2B%20%7C%20Windows%2010%2F11-707078?style=flat-square&amp;labelColor=303030"></a>
+  <a href="#39-supported-players"><img alt="39+ players" src="https://img.shields.io/badge/Players-39%2B-707078?style=flat-square&amp;labelColor=303030"></a>
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-707078?style=flat-square&amp;labelColor=303030"></a>
+</p>
 
-<p align="center">macOS 14+ · Apple Silicon · Spotify · Apple Music · NetEase Cloud Music · QQ Music · Soda Music</p>
+<p align="center">
+  <a href="https://notchmuse.com/"><img src="docs/assets/readme/button-website.svg" alt="Visit Website" width="175" height="42"></a>
+  <a href="https://github.com/Xiye88/NotchMuse/releases"><img src="docs/assets/readme/button-download.svg" alt="Download v0.9" width="175" height="42"></a>
+  <a href="#community--support"><img src="docs/assets/readme/button-community.svg" alt="QQ Group 1137981671" width="185" height="42"></a>
+  <a href="mailto:support@notchmuse.com"><img src="docs/assets/readme/button-contact.svg" alt="Feedback &amp; Collab" width="180" height="42"></a>
+</p>
 
-<p align="center"><a href="https://notchmuse.com"><strong>Download from website</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/releases/tag/v0.8.5"><strong>GitHub Releases</strong></a> · <a href="https://github.com/Xiye88/NotchMuse/issues"><strong>Report an issue</strong></a></p>
+<p align="center"><a href="README.zh-CN.md">简体中文</a> · <a href="#whats-new-v090">What's New</a> · <a href="#macos-showcase">macOS Showcase</a> · <a href="#windows-showcase">Windows Showcase</a> · <a href="#39-supported-players">39+ Players</a> · <a href="#quick-start">Quick Start</a> · <a href="#community--support">Community &amp; Support</a> · <a href="#contact">Contact</a></p>
 
-## Status Bar Lyrics
+<a name="whats-new-v090"></a>
 
-![NotchMuse lyrics playing in the macOS menu bar](docs/assets/demos/github/status-bar-demo.gif)
+## What's New · v0.9.0
 
-Synced lyrics live naturally inside your Mac menu bar, with adjustable placement.
+- **One release for Mac and Windows.** Both platforms share Free Floating lyrics, Vinyl Studio, and the lyrics matching engine. Each also has its own desktop layouts.
+- **Vinyl Studio.** The hi-fi player puts spinning album art next to immersive lyrics. Click a timed line to seek or turn it into a Lyrics Share Card.
+- **More precise lyric matching.** The 7-platform × 800-song benchmark recorded **0 false positives across 280 instrumental tracks**.
+- **39+ compatible players across both platforms.** Windows adds a bottom-left taskbar ticker, a top floating island, and an auto-flipping hover bar in Free Floating mode.
 
-## Notch Mode
+## macOS Showcase
 
-![NotchMuse overlay lyrics at the top of the screen and above the Dock](docs/assets/demos/github/notch-demo.gif)
+| Menu Bar Lyrics | Notch Mode |
+| --- | --- |
+| ![Menu Bar Lyrics](docs/assets/demos/github/status-bar-demo.gif) | ![Notch Mode](docs/assets/demos/github/notch-demo.gif) |
 
-Keep lyrics near the notch, or move the overlay above the Dock. This recording shows the top and Dock positions.
+| Free Floating Lyrics + 6-Key Hover Bar | Vinyl Studio Immersive Lyrics & Single-Click Seek |
+| --- | --- |
+| ![Free Floating Lyrics + 6-Key Hover Bar](docs/assets/demos/github/floating-demo.gif) | ![Vinyl Studio Immersive Lyrics & Single-Click Seek](docs/assets/demos/github/v09-immersive-demo.gif) |
 
-## Customize Your Lyrics
+<a name="windows-showcase"></a>
 
-![NotchMuse lyric colors, gradients, and background changing during playback](docs/assets/demos/github/appearance-demo.gif)
+## Windows 11/10 Showcase
 
-Choose solid colors, gradients, and a background to suit your desktop.
+| Win11 Taskbar Bottom-Left Lyrics | Free Floating Lyrics + Auto-Flip 6-Key Hover Bar |
+| --- | --- |
+| ![Win11 Taskbar Bottom-Left Lyrics](docs/assets/demos/github/win-taskbar-demo.gif) | ![Free Floating Lyrics + Auto-Flip 6-Key Hover Bar](docs/assets/demos/github/win-floating-demo.gif) |
 
-![NotchMuse v0.8.0 Appearance Settings](docs/assets/screenshots/appearance-settings.png)
+### Top Floating Island + Vinyl Studio Live Sync
 
-<details>
-<summary>Display Settings</summary>
+![Top Floating Island + Vinyl Studio Live Sync](docs/assets/demos/github/win-top-island-demo.gif)
 
-![NotchMuse v0.8.0 Display Settings](docs/assets/screenshots/display-settings.png)
+## macOS & Windows Feature Comparison
 
-</details>
-
-## Supported Players
-
-Spotify · Apple Music · NetEase Cloud Music · QQ Music · Soda Music. Choose a player manually or let Auto Detect follow the one currently playing.
-
-## Core Features
-
-| Lyrics display | Personalization | Everyday use |
+| Feature | macOS 14+ | Windows 11/10 |
 | --- | --- | --- |
-| Status Bar and Notch lyrics | Solid and gradient colors | Auto Detect |
-| Left or right side lyrics | Background, opacity, and width | English and Simplified Chinese |
-| Lyrics above the Dock | Appearance presets | In-app update controls |
-| Custom width and position | System, Light, and Dark appearance | Launch at Login; Dock and menu bar icon controls |
+| Download | Apple Silicon DMG | x64 portable .exe |
+| System layouts | Menu Bar · MacBook Notch | Win11 Taskbar · Top Floating Island |
+| Free Floating | Dual-line sweep, 6-key hover bar, 7-color palette, lock and click-through | Dual-line sweep, auto-flipping 6-key hover bar, 7-color palette, lock and click-through |
+| Vinyl Studio | Spinning album vinyl, immersive lyrics, click-to-seek and Lyrics Share Card | Spinning album vinyl, immersive lyrics, click-to-seek and Lyrics Share Card |
 
-NetEase, QQ Music, and Soda Music use the bundled MediaRemote bridge. No Homebrew or separate helper installation is needed. Compatibility can change after a macOS or player update.
+## 39+ Supported Players
+
+Play music in Spotify, Apple Music, YouTube Music, NetEase Cloud Music, QQ Music, Soda Music, TIDAL, Qobuz, Plexamp, Roon, or another compatible player. Windows follows players that expose a system media session, including MusicBee and foobar2000 when configured. Compatibility and playback controls vary by platform and player.
+
+[See the player compatibility directory](https://notchmuse.com/compatible-players/).
 
 ## Quick Start
 
-1. [Download NotchMuse](https://notchmuse.com), open the DMG, and drag the app to Applications.
-2. Open a supported desktop player and play a song. Allow macOS Automation access for Spotify or Apple Music if asked.
-3. Open NotchMuse, keep Auto Detect selected, and choose your lyric position in Settings.
+1. **Get NotchMuse.** On macOS 14+ with Apple Silicon, open the [DMG](https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse.dmg) and drag NotchMuse to Applications. On Windows 11/10 x64, run the [portable .exe](https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe) directly.
+2. **Play a song.** Open a supported player and start playback. On Mac, allow Automation if prompted so the app can follow the track. No NotchMuse account is required.
+3. **Choose where lyrics appear.** Pick a system layout or Free Floating in Settings, or open Vinyl Studio to follow the whole song.
 
-## Installation and Security
+<a name="faq"></a>
 
-NotchMuse is distributed directly through the website and GitHub. Apple Developer ID signing and notarization are not configured yet, so macOS may show a first-launch security warning. This is a distribution-signing limitation, not a version status.
+## Privacy & Security
 
-If macOS blocks the app, open **System Settings → Privacy & Security → Open Anyway** for NotchMuse, authenticate if asked, then open it again. See [Support](docs/community/SUPPORT.md) for installation and permission help. Do not disable Gatekeeper or remove quarantine to force installation. [Apple’s Open Anyway guidance](https://support.apple.com/en-us/102445). This release is ad-hoc signed, not Developer ID signed or notarized. Independent clean-Mac first-install verification has not been completed. Intel Macs are not supported.
+NotchMuse works without an account, collects no app telemetry, and does not capture or upload audio. It reads playback metadata. Track title, artist, album, and duration may be sent to third-party lyrics providers to find a match. Lyric availability varies by track and provider.
 
-## Updating to v0.8.5
+On macOS, use **System Settings → Privacy & Security → Open Anyway** if the official download is blocked at first launch. See [installation and permissions help](docs/community/SUPPORT.md) and [Apple’s instructions](https://support.apple.com/en-us/102445).
 
-Existing Stable users can use **Settings → General → Check for Updates** to download, install and restart into v0.8.5 / Build70. With automatic checks enabled, the app discovers the release at its next scheduled check and asks before installation. The official signed feed now advertises Build70; actual Build47→70 and Build61→70 updates were verified using temporary full app copies.
+NotchMuse is [MIT-licensed](LICENSE). See [Third-Party Notices](THIRD_PARTY_NOTICES.md) and the [developer documentation](docs/README.md).
 
-Beta 3 and earlier need a one-time [manual installation](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg). Manual download remains available with [SHA256SUMS](https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/SHA256SUMS); keep Preview separate. Offline apps and users who disable automatic checks will not receive scheduled prompts.
+<a name="support-notchmuse"></a>
 
-### What changed
+## Community & Support
 
-Draggable lyrics with saved positions, locking and click-through controls; genuine word/line-end highlighting with static display when end timing is unavailable; usable NetEase timing retained across malformed rows; clearer update-check status and retry feedback. Lyrics still depend on third-party coverage. [English / Chinese release notes](docs/releases/v0.8.5/RELEASE_NOTES.en.md).
+| WeChat Pay | QQ User Group (1137981671) | USDT · EVM |
+| :---: | :---: | :---: |
+| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" width="150" alt="WeChat Pay"> | <a href="https://qm.qq.com/q/J6W0oSPtu0"><img src="docs/assets/readme/qq-group-qr.png" width="150" alt="QQ User Group (1137981671)"></a> | <img src="docs/support/usdt-evm.png" width="150" alt="USDT · EVM"> |
+| Support development | [Join on QQ](https://qm.qq.com/q/J6W0oSPtu0) | ETH · BSC · Arbitrum · Optimism<br>USDT only |
 
-## FAQ
+<a name="contact"></a>
 
-**A song has no lyrics?** Coverage depends on third-party lyrics providers; player support does not guarantee a match for every song.
+## Feedback & Business Collaboration
 
-**Does NotchMuse upload audio?** No. It reads playback metadata, then may send title, artist, album, and duration to a lyrics provider for matching. It does not collect telemetry or require an account.
+- **Email** [support@notchmuse.com](mailto:support@notchmuse.com) for feedback and business collaboration.
+- **Community** [Join QQ User Group 1137981671](https://qm.qq.com/q/J6W0oSPtu0) to talk with other listeners.
+- **GitHub** [Open an issue](https://github.com/Xiye88/NotchMuse/issues) to report a bug or request a feature.
 
-**Why is the menu bar icon missing?** Another menu bar utility may hide it. NotchMuse does not manage other apps' menu bar icons.
+## Star History
 
-## Support NotchMuse
-
-<details>
-<summary>Show sponsorship options</summary>
-
-The app includes a Support page. You can also use these QR codes:
-
-| WeChat Pay | USDT · EVM | USDT · TRON |
-| --- | --- | --- |
-| <img src="MenuBarLyrics/Resources/WeChatSupport.jpg" alt="WeChat Pay QR code" width="150"> | <img src="docs/support/usdt-evm.png" alt="USDT EVM QR code" width="150"> | <img src="docs/support/usdt-trc20.png" alt="USDT TRON QR code" width="150"> |
-
-The EVM address supports Ethereum, BNB Smart Chain (BEP20), Arbitrum, and Optimism. TRON uses a separate TRC20 address. Confirm the network before sending USDT. The [supporters list](docs/support/supporters.json) includes only people who consented to public credit.
-
-</details>
-
-## License and Feedback
-
-NotchMuse is MIT-licensed; bundled third-party components are documented in [Third-Party Notices](THIRD_PARTY_NOTICES.md). Read [Support](docs/community/SUPPORT.md) and [Feedback](docs/community/FEEDBACK.md), or [open an issue](https://github.com/Xiye88/NotchMuse/issues). Developer and build documentation lives in [docs/README.md](docs/README.md).
+<a href="https://www.star-history.com/#Xiye88/NotchMuse&amp;Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Xiye88/NotchMuse&amp;type=Date&amp;theme=dark">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Xiye88/NotchMuse&amp;type=Date">
+    <img alt="Star History · Xiye88/NotchMuse" src="https://api.star-history.com/svg?repos=Xiye88/NotchMuse&amp;type=Date">
+  </picture>
+</a>

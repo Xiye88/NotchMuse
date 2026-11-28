@@ -4,27 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b101a">
-  <meta name="description" content="Show synced lyrics on your Mac desktop or in the menu bar. Works with Spotify, Apple Music and more. Free to download. No account required.">
-  <title>NotchMuse — Desktop &amp; Menu Bar Lyrics for Mac</title>
+  <meta name="description" content="Synced desktop lyrics for macOS 14+ (Apple Silicon) and Windows 11/10 (portable .exe). Works with 39+ music players. Free and open source.">
+  <title>NotchMuse — Synced Desktop Lyrics for Mac and Windows</title>
   <link rel="canonical" href="https://notchmuse.com/">
   <link rel="alternate" hreflang="en" href="https://notchmuse.com/">
   <link rel="alternate" hreflang="zh-Hans" href="https://notchmuse.com/zh/">
   <link rel="alternate" hreflang="x-default" href="https://notchmuse.com/">
-  <meta property="og:title" content="NotchMuse — Desktop &amp; Menu Bar Lyrics for Mac">
-  <meta property="og:description" content="Show synced lyrics on your Mac desktop or in the menu bar. Works with Spotify, Apple Music and more. Free to download. No account required.">
+  <meta property="og:title" content="NotchMuse — Synced Desktop Lyrics for Mac and Windows">
+  <meta property="og:description" content="Synced desktop lyrics for macOS 14+ (Apple Silicon) and Windows 11/10 (portable .exe). Works with 39+ music players. Free and open source.">
   <meta property="og:url" content="https://notchmuse.com/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="NotchMuse">
   <meta property="og:image" content="https://notchmuse.com/assets/real-notch-mode.png">
   <meta property="og:image:alt" content="NotchMuse synced lyrics near the Mac notch">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="NotchMuse — Desktop &amp; Menu Bar Lyrics for Mac">
-  <meta name="twitter:description" content="Show synced lyrics on your Mac desktop or in the menu bar. Works with Spotify, Apple Music and more. Free to download. No account required.">
+  <meta name="twitter:title" content="NotchMuse — Synced Desktop Lyrics for Mac and Windows">
+  <meta name="twitter:description" content="Synced desktop lyrics for macOS 14+ (Apple Silicon) and Windows 11/10 (portable .exe). Works with 39+ music players. Free and open source.">
   <meta name="twitter:image" content="https://notchmuse.com/assets/real-notch-mode.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=15">
-  <link rel="stylesheet" href="/guides.css?v=3">
+  <link rel="stylesheet" href="/style.css?v=17">
+  <link rel="stylesheet" href="/guides.css?v=4">
+  <link rel="stylesheet" href="/bencho-ux.css?v=1">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -32,14 +33,14 @@
   "name": "NotchMuse",
   "url": "https://notchmuse.com/",
   "inLanguage": "en",
-  "operatingSystem": "macOS 14 or later",
+  "operatingSystem": ["macOS 14+ (Apple Silicon)", "Windows 11/10 (Portable .exe)"],
   "applicationCategory": "MultimediaApplication",
   "offers": {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "USD"
   },
-  "downloadUrl": "https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg",
+  "downloadUrl": ["https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse.dmg", "https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe"],
   "sameAs": "https://github.com/Xiye88/NotchMuse"
 }
   </script>
@@ -47,16 +48,16 @@
           data-site="f9FFRntt"
           data-api="https://in.pvuv.ai"></script>
 </head>
-<body>
+<body data-download-version="0.9.0">
   <a class="skip-link" href="#top">Skip to content</a>
   <header class="site-header wrap">
     <a class="brand" href="#top" aria-label="NotchMuse home"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
     <nav aria-label="Main navigation">
-      <a class="nav-desktop-only" href="https://github.com/Xiye88/NotchMuse">GitHub</a>
-      <a class="nav-desktop-only" href="#modes">Modes</a>
-      <a href="/lyrics-downloader/">Lyrics Tool</a>
+      <a class="nav-desktop-only" href="/compatible-players/">Players</a>
+      <a class="nav-desktop-only" href="/windows/">Windows</a>
+      <a href="/lrc-tools/">LRC Tools</a>
       <a class="nav-desktop-only" href="#faq">FAQ</a>
-      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="nav"><span>Download</span></a>
+      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse.dmg" data-download-placement="nav"><span>Get Mac app</span></a>
       <a class="language-toggle" id="language-toggle" href="/zh/" lang="zh-Hans" aria-label="Switch to Simplified Chinese"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>简体中文</span></a>
     </nav>
   </header>
@@ -65,20 +66,26 @@
     <section class="hero wrap">
       <div class="hero-copy">
         <p class="eyebrow">MUSIC BELONGS IN YOUR FLOW</p>
-        <h1>Live lyrics for your Mac.</h1>
-        <p class="lead">Keep lyrics in view while you work. Supports Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music.</p>
-        <div class="actions"><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="hero"><span>Download for Mac</span> <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#modes"><span>See how it works</span></a></div>
-        <p class="fine">NotchMuse v0.8.5 · macOS 14+ · Apple silicon</p>
+        <h1>Synced Desktop Lyrics for Mac and Windows</h1>
+        <p class="lead">Follow lyrics in the Mac menu bar, by the notch, or on the Windows taskbar. A click-through overlay keeps lyrics in view on both platforms across 39+ music players.</p>
+        <div class="actions platform-actions">
+          <a class="button" href="https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse.dmg" data-download-placement="hero">Download for Mac</a>
+          <a class="button button-quiet" href="https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe">Download for Windows</a>
+        </div>
+        <p class="fine">NotchMuse v0.9.0 · macOS 14+ (Apple Silicon) · Windows 11/10 (Portable .exe, no install) · Free &amp; Open Source</p>
       </div>
       <figure class="hero-visual live-showcase">
         <div class="demo-tabs" role="tablist" aria-label="Lyric display mode">
-          <button id="status-tab" type="button" role="tab" aria-selected="true" aria-controls="status-panel" data-demo-tab>Status Bar</button>
-          <button id="notch-tab" type="button" role="tab" aria-selected="false" aria-controls="notch-panel" tabindex="-1" data-demo-tab>Notch</button>
+          <button id="status-tab" type="button" role="tab" aria-selected="true" aria-controls="status-panel" data-demo-tab>Mac Menu Bar</button>
+          <button id="notch-tab" type="button" role="tab" aria-selected="false" aria-controls="notch-panel" tabindex="-1" data-demo-tab>Mac Notch</button>
+          <button id="floating-tab" type="button" role="tab" aria-selected="false" aria-controls="floating-panel" tabindex="-1" data-demo-tab>Mac Floating</button>
+          <button id="win-taskbar-tab" type="button" role="tab" aria-selected="false" aria-controls="win-taskbar-panel" tabindex="-1" data-demo-tab>Win11 Taskbar</button>
+          <button id="win-floating-tab" type="button" role="tab" aria-selected="false" aria-controls="win-floating-panel" tabindex="-1" data-demo-tab>Win11 Floating</button>
         </div>
         <div id="status-panel" role="tabpanel" aria-labelledby="status-tab">
           <div class="live-demo" data-demo>
-            <img class="demo-poster" src="/assets/media/status-bar-poster.webp" width="1280" height="720" alt="Real NotchMuse lyrics playing in the macOS menu bar" fetchpriority="high">
-            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/status-bar-poster.webp" aria-label="Real NotchMuse lyrics playing in the macOS menu bar">
+            <img class="demo-poster" src="/assets/media/status-bar-demo-poster.webp" width="1280" height="720" alt="Synced lyrics playing inside the macOS menu bar" fetchpriority="high">
+            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/status-bar-demo-poster.webp" aria-label="Synced lyrics playing inside the macOS menu bar">
               <source data-src="/assets/media/status-bar-demo.webm" type="video/webm">
               <source data-src="/assets/media/status-bar-demo.mp4" type="video/mp4">
             </video>
@@ -86,60 +93,101 @@
         </div>
         <div id="notch-panel" role="tabpanel" aria-labelledby="notch-tab" hidden>
           <div class="live-demo" data-demo>
-            <img class="demo-poster" src="/assets/media/notch-poster.webp" width="1280" height="720" alt="Real NotchMuse overlay lyrics moving from the top to above the Dock" loading="lazy">
-            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/notch-poster.webp" aria-label="Real NotchMuse overlay lyrics moving from the top to above the Dock">
+            <img class="demo-poster" src="/assets/media/notch-demo-poster.webp" width="1280" height="720" alt="Synced lyrics beside the MacBook notch" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/notch-demo-poster.webp" aria-label="Synced lyrics beside the MacBook notch">
               <source data-src="/assets/media/notch-demo.webm" type="video/webm">
               <source data-src="/assets/media/notch-demo.mp4" type="video/mp4">
             </video>
           </div>
         </div>
-        <figcaption>Real playback on macOS · Recorded with Spotify</figcaption>
+        <div id="floating-panel" role="tabpanel" aria-labelledby="floating-tab" hidden>
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="/assets/media/floating-demo-poster.webp" width="1280" height="720" alt="Floating lyrics and their six-button hover bar on macOS" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/floating-demo-poster.webp" aria-label="Floating lyrics and their six-button hover bar on macOS">
+              <source data-src="/assets/media/floating-demo.webm" type="video/webm">
+              <source data-src="/assets/media/floating-demo.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <div id="win-taskbar-panel" role="tabpanel" aria-labelledby="win-taskbar-tab" hidden>
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="/assets/media/win-taskbar-demo-poster.webp" width="1280" height="720" alt="Synced lyrics beside the bottom-left Windows 11 taskbar" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/win-taskbar-demo-poster.webp" aria-label="Synced lyrics beside the bottom-left Windows 11 taskbar">
+              <source data-src="/assets/media/win-taskbar-demo.webm" type="video/webm">
+              <source data-src="/assets/media/win-taskbar-demo.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <div id="win-floating-panel" role="tabpanel" aria-labelledby="win-floating-tab" hidden>
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="/assets/media/win-floating-demo-poster.webp" width="1280" height="720" alt="Floating lyrics and the auto-flipping hover bar on Windows 11" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/win-floating-demo-poster.webp" aria-label="Floating lyrics and the auto-flipping hover bar on Windows 11">
+              <source data-src="/assets/media/win-floating-demo.webm" type="video/webm">
+              <source data-src="/assets/media/win-floating-demo.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <figcaption>Recorded on macOS and Windows</figcaption>
       </figure>
     </section>
 
     <section class="section wrap players" aria-labelledby="players-title">
-      <h2 id="players-title">Your favorite players, supported.</h2>
-      <p class="section-intro">Choose a player. Keep the lyrics in view.</p>
-      <ul class="player-list">
-        <li><a href="/spotify-lyrics-mac/"><img class="player-icon" src="/assets/players/spotify.png" alt=""><span><strong>Spotify</strong><small>Supported</small></span></a></li>
-        <li><a href="/apple-music-desktop-lyrics-mac/"><img class="player-icon" src="/assets/players/apple-music.png" alt=""><span><strong>Apple Music</strong><small>Supported</small></span></a></li>
-        <li><a href="/netease-cloud-music-lyrics-mac/"><img class="player-icon" src="/assets/players/netease.png" alt=""><span><strong>NetEase Cloud Music</strong><small>Supported</small></span></a></li>
-        <li><a href="/qq-music-lyrics-mac/"><img class="player-icon" src="/assets/players/qq-music.jpg" alt=""><span><strong>QQ Music</strong><small>Supported</small></span></a></li>
-        <li><a href="/soda-music-lyrics-mac/"><img class="player-icon" src="/assets/players/soda-music.jpg" alt=""><span><strong>Soda Music</strong><small>Supported</small></span></a></li>
-      </ul>
+      <h2 id="players-title">39+ music players, ready out of the box.</h2>
+      <p class="section-intro">Mainstream streaming, open-source clients, audiophile &amp; NAS libraries, and web players—all synced cleanly.</p>
+      <div class="marquee-wall" aria-label="39+ supported music players wall">
+        <div class="marquee-track marquee-track-fwd">
+          <div class="marquee-group"><a class="marquee-chip" href="/spotify-lyrics-mac/"><img src="/assets/players/spotify.png" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Spotify</strong></a><a class="marquee-chip" href="/apple-music-desktop-lyrics-mac/"><img src="/assets/players/apple-music.png" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Apple Music</strong></a><a class="marquee-chip" href="/compatible-players/#youtube-music"><img src="/assets/players/youtube-music.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>YouTube Music</strong></a><a class="marquee-chip" href="/netease-cloud-music-lyrics-mac/"><img src="/assets/players/netease.png" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>NetEase Cloud Music</strong></a><a class="marquee-chip" href="/qq-music-lyrics-mac/"><img src="/assets/players/qq-music.jpg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>QQ Music</strong></a><a class="marquee-chip" href="/soda-music-lyrics-mac/"><img src="/assets/players/soda-music.jpg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Soda Music</strong></a><a class="marquee-chip" href="/compatible-players/#kugou"><img src="/assets/players/kugou.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Kugou Music</strong></a><a class="marquee-chip" href="/compatible-players/#kuwo"><img src="/assets/players/kuwo.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Kuwo Music</strong></a><a class="marquee-chip" href="/compatible-players/#migu"><img src="/assets/players/migu.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Migu Music</strong></a><a class="marquee-chip" href="/compatible-players/#bodian"><img src="/assets/players/bodian.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Bodian Music</strong></a><a class="marquee-chip" href="/compatible-players/#qianqian"><img src="/assets/players/qianqian.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Qianqian Music</strong></a><a class="marquee-chip" href="/compatible-players/#lx-music"><img src="/assets/players/lx-music.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>LX Music</strong></a><a class="marquee-chip" href="/compatible-players/#yesplaymusic"><img src="/assets/players/yesplaymusic.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>YesPlayMusic</strong></a><a class="marquee-chip" href="/compatible-players/#algermusic"><img src="/assets/players/algermusic.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>AlgerMusicPlayer</strong></a><a class="marquee-chip" href="/compatible-players/#listen1"><img src="/assets/players/listen1.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Listen 1</strong></a><a class="marquee-chip" href="/compatible-players/#splayer"><img src="/assets/players/splayer.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>SPlayer</strong></a><a class="marquee-chip" href="/compatible-players/#tidal"><img src="/assets/players/tidal.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>TIDAL</strong></a><a class="marquee-chip" href="/compatible-players/#qobuz"><img src="/assets/players/qobuz.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Qobuz</strong></a><a class="marquee-chip" href="/compatible-players/#amazon-music"><img src="/assets/players/amazon-music.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Amazon Music</strong></a><a class="marquee-chip" href="/compatible-players/#deezer"><img src="/assets/players/deezer.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Deezer</strong></a></div>
+          <div class="marquee-group" aria-hidden="true"><a class="marquee-chip" href="/spotify-lyrics-mac/" tabindex="-1"><img src="/assets/players/spotify.png" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Spotify</strong></a><a class="marquee-chip" href="/apple-music-desktop-lyrics-mac/" tabindex="-1"><img src="/assets/players/apple-music.png" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Apple Music</strong></a><a class="marquee-chip" href="/compatible-players/#youtube-music" tabindex="-1"><img src="/assets/players/youtube-music.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>YouTube Music</strong></a><a class="marquee-chip" href="/netease-cloud-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/netease.png" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>NetEase Cloud Music</strong></a><a class="marquee-chip" href="/qq-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/qq-music.jpg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>QQ Music</strong></a><a class="marquee-chip" href="/soda-music-lyrics-mac/" tabindex="-1"><img src="/assets/players/soda-music.jpg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Soda Music</strong></a><a class="marquee-chip" href="/compatible-players/#kugou" tabindex="-1"><img src="/assets/players/kugou.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Kugou Music</strong></a><a class="marquee-chip" href="/compatible-players/#kuwo" tabindex="-1"><img src="/assets/players/kuwo.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Kuwo Music</strong></a><a class="marquee-chip" href="/compatible-players/#migu" tabindex="-1"><img src="/assets/players/migu.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Migu Music</strong></a><a class="marquee-chip" href="/compatible-players/#bodian" tabindex="-1"><img src="/assets/players/bodian.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Bodian Music</strong></a><a class="marquee-chip" href="/compatible-players/#qianqian" tabindex="-1"><img src="/assets/players/qianqian.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Qianqian Music</strong></a><a class="marquee-chip" href="/compatible-players/#lx-music" tabindex="-1"><img src="/assets/players/lx-music.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>LX Music</strong></a><a class="marquee-chip" href="/compatible-players/#yesplaymusic" tabindex="-1"><img src="/assets/players/yesplaymusic.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>YesPlayMusic</strong></a><a class="marquee-chip" href="/compatible-players/#algermusic" tabindex="-1"><img src="/assets/players/algermusic.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>AlgerMusicPlayer</strong></a><a class="marquee-chip" href="/compatible-players/#listen1" tabindex="-1"><img src="/assets/players/listen1.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Listen 1</strong></a><a class="marquee-chip" href="/compatible-players/#splayer" tabindex="-1"><img src="/assets/players/splayer.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>SPlayer</strong></a><a class="marquee-chip" href="/compatible-players/#tidal" tabindex="-1"><img src="/assets/players/tidal.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>TIDAL</strong></a><a class="marquee-chip" href="/compatible-players/#qobuz" tabindex="-1"><img src="/assets/players/qobuz.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Qobuz</strong></a><a class="marquee-chip" href="/compatible-players/#amazon-music" tabindex="-1"><img src="/assets/players/amazon-music.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Amazon Music</strong></a><a class="marquee-chip" href="/compatible-players/#deezer" tabindex="-1"><img src="/assets/players/deezer.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Deezer</strong></a></div>
+        </div>
+        <div class="marquee-track marquee-track-rev">
+          <div class="marquee-group"><a class="marquee-chip" href="/compatible-players/#cider"><img src="/assets/players/cider.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Cider</strong></a><a class="marquee-chip" href="/compatible-players/#plexamp"><img src="/assets/players/plexamp.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Plexamp</strong></a><a class="marquee-chip" href="/compatible-players/#roon"><img src="/assets/players/roon.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Roon</strong></a><a class="marquee-chip" href="/compatible-players/#foobar2000"><img src="/assets/players/foobar2000.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>foobar2000</strong></a><a class="marquee-chip" href="/compatible-players/#musicbee"><img src="/assets/players/musicbee.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>MusicBee</strong></a><a class="marquee-chip" href="/compatible-players/#aimp"><img src="/assets/players/aimp.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>AIMP</strong></a><a class="marquee-chip" href="/compatible-players/#audirvana"><img src="/assets/players/audirvana.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Audirvana</strong></a><a class="marquee-chip" href="/compatible-players/#swinsian"><img src="/assets/players/swinsian.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Swinsian</strong></a><a class="marquee-chip" href="/compatible-players/#vox"><img src="/assets/players/vox.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>VOX</strong></a><a class="marquee-chip" href="/compatible-players/#pine-player"><img src="/assets/players/pine-player.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Pine Player</strong></a><a class="marquee-chip" href="/compatible-players/#cog"><img src="/assets/players/cog.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Cog</strong></a><a class="marquee-chip" href="/compatible-players/#feishin"><img src="/assets/players/feishin.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Feishin</strong></a><a class="marquee-chip" href="/compatible-players/#supersonic"><img src="/assets/players/supersonic.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Supersonic</strong></a><a class="marquee-chip" href="/compatible-players/#soundcloud"><img src="/assets/players/soundcloud.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>SoundCloud</strong></a><a class="marquee-chip" href="/compatible-players/#bandcamp"><img src="/assets/players/bandcamp.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Bandcamp</strong></a><a class="marquee-chip" href="/compatible-players/#web-players"><img src="/assets/players/web-players.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Browser Web Players</strong></a><a class="marquee-chip" href="/compatible-players/#iina"><img src="/assets/players/iina.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>IINA</strong></a><a class="marquee-chip" href="/compatible-players/#vlc"><img src="/assets/players/vlc.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>VLC</strong></a><a class="marquee-chip" href="/compatible-players/#bilibili"><img src="/assets/players/bilibili.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Bilibili</strong></a></div>
+          <div class="marquee-group" aria-hidden="true"><a class="marquee-chip" href="/compatible-players/#cider" tabindex="-1"><img src="/assets/players/cider.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Cider</strong></a><a class="marquee-chip" href="/compatible-players/#plexamp" tabindex="-1"><img src="/assets/players/plexamp.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Plexamp</strong></a><a class="marquee-chip" href="/compatible-players/#roon" tabindex="-1"><img src="/assets/players/roon.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Roon</strong></a><a class="marquee-chip" href="/compatible-players/#foobar2000" tabindex="-1"><img src="/assets/players/foobar2000.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>foobar2000</strong></a><a class="marquee-chip" href="/compatible-players/#musicbee" tabindex="-1"><img src="/assets/players/musicbee.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>MusicBee</strong></a><a class="marquee-chip" href="/compatible-players/#aimp" tabindex="-1"><img src="/assets/players/aimp.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>AIMP</strong></a><a class="marquee-chip" href="/compatible-players/#audirvana" tabindex="-1"><img src="/assets/players/audirvana.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Audirvana</strong></a><a class="marquee-chip" href="/compatible-players/#swinsian" tabindex="-1"><img src="/assets/players/swinsian.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Swinsian</strong></a><a class="marquee-chip" href="/compatible-players/#vox" tabindex="-1"><img src="/assets/players/vox.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>VOX</strong></a><a class="marquee-chip" href="/compatible-players/#pine-player" tabindex="-1"><img src="/assets/players/pine-player.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Pine Player</strong></a><a class="marquee-chip" href="/compatible-players/#cog" tabindex="-1"><img src="/assets/players/cog.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Cog</strong></a><a class="marquee-chip" href="/compatible-players/#feishin" tabindex="-1"><img src="/assets/players/feishin.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Feishin</strong></a><a class="marquee-chip" href="/compatible-players/#supersonic" tabindex="-1"><img src="/assets/players/supersonic.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Supersonic</strong></a><a class="marquee-chip" href="/compatible-players/#soundcloud" tabindex="-1"><img src="/assets/players/soundcloud.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>SoundCloud</strong></a><a class="marquee-chip" href="/compatible-players/#bandcamp" tabindex="-1"><img src="/assets/players/bandcamp.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Bandcamp</strong></a><a class="marquee-chip" href="/compatible-players/#web-players" tabindex="-1"><img src="/assets/players/web-players.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Browser Web Players</strong></a><a class="marquee-chip" href="/compatible-players/#iina" tabindex="-1"><img src="/assets/players/iina.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>IINA</strong></a><a class="marquee-chip" href="/compatible-players/#vlc" tabindex="-1"><img src="/assets/players/vlc.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>VLC</strong></a><a class="marquee-chip" href="/compatible-players/#bilibili" tabindex="-1"><img src="/assets/players/bilibili.svg" width="20" height="20" alt="" aria-hidden="true" loading="lazy"><strong>Bilibili</strong></a></div>
+        </div>
+      </div>
+      <div class="players-cta">
+        <a class="button button-quiet" href="/compatible-players/">Browse all 39+ compatible players →</a>
+      </div>
     </section>
 
     <section class="section wrap" id="modes" aria-labelledby="modes-title">
       <h2 id="modes-title">Lyrics, wherever you look.</h2>
-      <p class="section-intro">Choose the display that fits your Mac and your workflow.</p>
+      <p class="section-intro">Keep lyrics at the edge of your screen or bring them into focus in Vinyl Studio.</p>
       <div class="mode-grid">
         <article class="mode-card">
-          <div><h3>Notch &amp; Floating Overlay</h3><p>Keep synced lyrics near the MacBook notch, above the Dock, or anywhere on your desktop with click-through and position lock.</p></div>
-          <a class="text-link" href="/macbook-notch-lyrics/">Explore Notch Mode ↗</a>
+          <div><h3>macOS Menu Bar &amp; Notch</h3><p>Read lyrics inside the menu bar, beside the MacBook notch, or just above the Dock.</p></div>
+          <a class="text-link" href="/macbook-notch-lyrics/">Explore Mac display modes ↗</a>
         </article>
         <article class="mode-card">
-          <div><h3>Status Bar Mode</h3><p>Follow synced lyrics directly inside the macOS menu bar—ideal for external monitors, non-notched Macs, and compact workspaces.</p></div>
-          <a class="text-link" href="/menu-bar-lyrics/">Explore Menu Bar Mode ↗</a>
+          <div><h3>Windows 11 Taskbar &amp; Top Island</h3><p>Keep a single line at the bottom-left of the taskbar, or move lyrics into a floating island at the top of the screen.</p></div>
+          <a class="text-link" href="/windows/">Explore Windows demos ↗</a>
+        </article>
+        <article class="mode-card">
+          <div><h3>Free Floating Lyrics (Mac &amp; Windows)</h3><p>Follow the dual-line sweep, use the six-key hover bar and seven-color palette, or lock the overlay for click-through 🔒.</p></div>
+          <a class="text-link" href="/floating-lyrics-mac/">Explore floating lyrics ↗</a>
+        </article>
+        <article class="mode-card">
+          <div><h3>Vinyl Studio Immersive Lyrics</h3><p>Watch your album art spin as a vinyl record, jump to a lyric with one click, and make a Lyrics Share Card.</p></div>
+          <a class="text-link" href="#appearance-title">Watch the Vinyl Studio demo ↓</a>
         </article>
       </div>
       <article class="appearance-showcase" aria-labelledby="appearance-title">
-        <div><h3 id="appearance-title">Customize your lyrics.</h3><p>Solid colors, gradients, opacity, width, and animation speed tailored to your desktop.</p></div>
+        <div><h3 id="appearance-title">Vinyl Studio Immersive Lyrics &amp; Single-Click Seek</h3><p>Open the immersive view and click any timed lyric to jump straight to that moment in the track.</p></div>
         <div class="live-demo" data-demo>
-          <img class="demo-poster" src="/assets/media/appearance-poster.webp" width="1280" height="720" alt="NotchMuse lyric colors and background customization" loading="lazy">
-          <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/appearance-poster.webp" aria-label="NotchMuse lyric colors and background customization">
-            <source data-src="/assets/media/appearance-demo.webm" type="video/webm">
-            <source data-src="/assets/media/appearance-demo.mp4" type="video/mp4">
+          <img class="demo-poster" src="/assets/media/v09-immersive-demo-poster.webp" width="1280" height="720" alt="A spinning album record and single-click lyric seeking in Vinyl Studio" loading="lazy">
+          <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/v09-immersive-demo-poster.webp" aria-label="A spinning album record and single-click lyric seeking in Vinyl Studio">
+            <source data-src="/assets/media/v09-immersive-demo.webm" type="video/webm">
+            <source data-src="/assets/media/v09-immersive-demo.mp4" type="video/mp4">
           </video>
         </div>
       </article>
     </section>
 
-    <section class="section wrap how" aria-labelledby="how-title">
+    <section class="section wrap how" id="how" aria-labelledby="how-title">
       <h2 id="how-title">Three steps. Then just listen.</h2>
       <ol class="steps">
-        <li><span>STEP 1</span><h3>Play your music</h3><p>Start a track in Spotify, Apple Music, NetEase Cloud Music, QQ Music, or Soda Music.</p></li>
-        <li><span>STEP 2</span><h3>Allow access</h3><p>Grant macOS playback permissions when prompted so NotchMuse can follow track timing.</p></li>
-        <li><span>STEP 3</span><h3>Pick your layout</h3><p>Switch between Status Bar Mode, Notch Mode, or Floating Overlay anytime in Settings.</p></li>
+        <li><h3>Open NotchMuse</h3><p>On Mac, open the DMG and drag the app to Applications. On Windows, run the portable .exe. No account is required on either platform.</p></li>
+        <li><h3>Play a track</h3><p>Start music in one of 39+ compatible players. Allow Automation on Mac if prompted. Windows syncs through the system media session.</p></li>
+        <li><h3>Choose a layout</h3><p>Use the menu bar or notch on Mac, the taskbar or top island on Windows, or Free Floating lyrics on either desktop.</p></li>
       </ol>
     </section>
 
@@ -150,8 +198,8 @@
     </section>
 
     <section class="section wrap install" id="install" aria-labelledby="install-title">
-      <div><h2 id="install-title">Ready in seconds.</h2><p>NotchMuse v0.8.5 requires macOS 14 or later on Apple silicon.</p><ol class="install-steps"><li>Download and open the DMG, then drag NotchMuse to Applications.</li><li>Launch NotchMuse from Applications and grant playback permissions when prompted.</li><li>Open Settings from the menu bar icon to choose your display mode.</li></ol><p class="install-note">Not yet notarized — if macOS prompts on first launch, open System Settings → Privacy &amp; Security → Open Anyway (<a href="https://support.apple.com/en-us/102445">Apple guide</a>).</p><a class="text-link" href="https://github.com/Xiye88/NotchMuse/blob/main/docs/community/SUPPORT.md"><span>Setup help</span> ↗</a></div>
-      <div class="requirements"><div><span aria-hidden="true">⌘</span><strong>macOS 14+</strong><small>Apple silicon Macs</small></div><div><span aria-hidden="true">▣</span><strong>Apple silicon</strong><small>M1, M2, M3, M4 or later</small></div></div>
+      <div><h2 id="install-title">Mac setup &amp; permissions</h2><ol class="install-steps"><li>Download and open the DMG, then drag NotchMuse to Applications.</li><li>Launch NotchMuse from Applications and grant playback permissions when prompted.</li><li>Open Settings from the menu bar icon to choose your display mode.</li></ol><p class="install-note">Not yet notarized — if macOS prompts on first launch, open System Settings → Privacy &amp; Security → Open Anyway (<a href="https://support.apple.com/en-us/102445">Apple guide</a>).</p><a class="text-link" href="https://github.com/Xiye88/NotchMuse/blob/main/docs/community/SUPPORT.md"><span>Setup help</span> ↗</a></div>
+      <div class="requirements"><div><span aria-hidden="true">⌘</span><strong>macOS 14+</strong><small>Apple silicon Macs</small></div><div><span aria-hidden="true">▣</span><strong>Windows 11/10</strong><small>x64 · portable .exe</small></div></div>
     </section>
 
     <section class="section wrap guide-hub" id="guides" aria-labelledby="guides-title">
@@ -177,7 +225,9 @@
             <li><a href="/floating-lyrics-mac/"><strong>Floating lyrics overlay</strong><span>Click-through &amp; lock ↗</span></a></li>
             <li><a href="/best-macbook-notch-apps/"><strong>Best MacBook notch apps</strong><span>Use-case comparison ↗</span></a></li>
             <li><a href="/lyricsx-alternative/"><strong>LyricsX alternative</strong><span>Modern macOS 14+ compare ↗</span></a></li>
-            <li><a href="/lyrics-downloader/"><strong>Free online lyrics downloader</strong><span>Search &amp; download .LRC ↗</span></a></li>
+            <li><a href="/lrc-tools/"><strong>Free local LRC to SRT &amp; Shifter</strong><span>100% in-browser LRC tools ↗</span></a></li>
+            <li><a href="/compatible-players/"><strong>39+ compatible players</strong><span>Full macOS &amp; Windows directory ↗</span></a></li>
+            <li><a href="/windows/"><strong>NotchMuse for Windows</strong><span>Spotify overlay &amp; taskbar lyrics ↗</span></a></li>
           </ul>
         </div>
       </div>
@@ -185,21 +235,48 @@
 
     <section class="section wrap faq" id="faq" aria-labelledby="faq-title">
       <h2 id="faq-title">Frequently asked questions</h2>
-      <details><summary>Which music players work with NotchMuse?</summary><p>Spotify, Apple Music, NetEase Cloud Music, QQ Music, and Soda Music are supported.</p></details>
+      <details><summary>Which music players work with NotchMuse?</summary><p>NotchMuse supports 39+ players including Spotify, Apple Music, YouTube Music, NetEase Cloud Music, QQ Music, Soda Music, foobar2000, MusicBee, TIDAL, Qobuz, Roon, Cider, and browser players. See the <a href="/compatible-players/">full compatible players directory</a>.</p></details>
       <details><summary>What Mac do I need?</summary><p>NotchMuse requires macOS 14 or later and an Apple silicon Mac.</p></details>
       <details><summary>Why does macOS ask for permission?</summary><p>NotchMuse needs Automation permission to read the selected player’s current track and playback position. The left-side menu bar layout also needs Accessibility permission.</p></details>
       <details><summary>Does NotchMuse upload or listen to my audio?</summary><p>No. It does not read or upload audio. Track details may be sent to third-party lyrics providers for matching. No NotchMuse account or telemetry is required.</p></details>
       <details><summary>macOS warned me when I opened NotchMuse. What should I do?</summary><p><span>Direct downloads are not yet notarized, so macOS may ask you to confirm the first launch. Follow the</span> <a href="https://github.com/Xiye88/NotchMuse/blob/main/docs/community/SUPPORT.md"><span>setup help</span></a> <span>for the current steps.</span></p></details>
-      <details><summary>How do automatic updates work?</summary><p>Existing Stable apps can download and install v0.8.5 (Build70) through Settings → General → Check for Updates. With automatic checks enabled, the app offers the release at its next scheduled check; installation needs your confirmation. Beta 3 and earlier need one manual installation. Preview stays separate.</p></details>
+      <details><summary>How do automatic updates work?</summary><p>On Mac, open Settings → General → Check for Updates. On Windows, download the latest portable .exe, close the running app, and replace the previous file.</p></details>
       <details><summary>How can I support NotchMuse?</summary><p><span>Open Support NotchMuse in the app for WeChat Pay or USDT, or visit the</span> <a href="https://github.com/Xiye88/NotchMuse#support-notchmuse">support page</a>.</p></details>
     </section>
 
-    <section class="closing">
-      <div class="wrap"><p class="eyebrow">MUSIC BELONGS IN YOUR FLOW</p><h2>Ready to bring lyrics to your Mac?</h2><a class="button" href="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" data-download-placement="footer"><span>Download for Mac</span> <span aria-hidden="true">↗</span></a><p class="fine">NotchMuse v0.8.5 · macOS 14+ · Apple silicon</p></div>
+    <section class="closing" id="download">
+      <div class="wrap">
+        <h2>Bring lyrics to your desktop.</h2>
+        <div class="actions platform-actions">
+          <a class="button" href="https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse.dmg" data-download-placement="footer">Download for Mac</a>
+          <a class="button button-quiet" href="https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe">Download for Windows</a>
+        </div>
+        <p class="fine">NotchMuse v0.9.0 · macOS 14+ (Apple Silicon) · Windows 11/10 (Portable .exe, no install) · Free &amp; Open Source</p>
+      </div>
+    </section>
+
+    <section class="section wrap" id="community" aria-labelledby="community-title">
+      <h2 id="community-title">Community &amp; contact</h2>
+      <div class="community-grid">
+        <div class="community-group">
+          <a href="https://qm.qq.com/q/J6W0oSPtu0"><img src="/assets/qq-group-qr.png" alt="QQ User Group 1137981671" width="120" height="120" loading="lazy"></a>
+          <div>
+            <h3>QQ User Group</h3>
+            <strong>1137981671</strong>
+            <a href="https://qm.qq.com/q/J6W0oSPtu0">Join on QQ ↗</a>
+          </div>
+        </div>
+        <div class="community-contact">
+          <h3>Feedback &amp; Collaboration</h3>
+          <a href="mailto:support@notchmuse.com">support@notchmuse.com</a>
+          <a href="https://github.com/Xiye88/NotchMuse/issues">Open a GitHub issue ↗</a>
+          <p>NotchMuse is free and open source under the MIT License.</p>
+        </div>
+      </div>
     </section>
   </main>
 
-  <footer class="site-footer wrap"><a class="brand" href="#top" aria-label="NotchMuse home"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="Footer navigation"><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="#faq">FAQ</a><a href="#guides">Guides</a><a href="#privacy">Privacy</a><a href="https://github.com/Xiye88/NotchMuse/blob/main/CHANGELOG.md">Changelog</a><button class="footer-link-btn" type="button" data-analytics-settings hidden>Analytics settings</button></nav><p>© NotchMuse · A small app for a more musical day.</p></footer>
+  <footer class="site-footer wrap"><a class="brand" href="#top" aria-label="NotchMuse home"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="Footer navigation"><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="mailto:support@notchmuse.com">support@notchmuse.com</a><a href="#faq">FAQ</a><a href="#guides">Guides</a><a href="#privacy">Privacy</a><a href="https://github.com/Xiye88/NotchMuse/blob/main/CHANGELOG.md">Changelog</a><button class="footer-link-btn" type="button" data-analytics-settings hidden>Analytics settings</button></nav><p>© NotchMuse · A small app for a more musical day.</p></footer>
 
 
 
@@ -207,7 +284,8 @@
     <div><strong id="consent-title">Allow website analytics?</strong><p>With your consent, Google Analytics measures visits and download-button clicks. Your choice does not affect the app or downloads. <a href="#privacy">Privacy details</a></p></div>
     <div class="consent-actions"><button type="button" class="language-toggle" data-consent-reject>Reject analytics</button><button type="button" class="button button-small" data-consent-accept>Allow analytics</button><button type="button" class="language-toggle" data-consent-close hidden>Close</button></div>
   </aside>
-  <script src="/analytics.js?v=1" defer></script>
-  <script src="/showcase.js?v=1" defer></script>
+  <script src="/analytics.js?v=2" defer></script>
+  <script src="/bencho-ux.js?v=1" defer></script>
+  <script src="/showcase.js?v=2" defer></script>
 </body>
 </html>

@@ -1,6 +1,10 @@
 # NotchMuse Current Handoff
 
-## Track A/B/C results — 2026-11-12
+## v0.9.0 website and repository preview — 2026-11-28
+
+Local v0.9.0 web and README candidate on `feat/website-v09-preview` at `ba089ee`. The bilingual homepages, Windows pages and READMEs use the seven supplied demo sets. The language and showcase tests passed, and all six deliverables passed local reference checks. A Chromium smoke test covered all four pages at 360–1440 px and played every demo. The guide sitemap and pre-consent analytics assertions also fail on the base commit. GitHub Latest serves the v0.8.5 DMG, and the Windows asset URL returns 404 until the portable build is published. Next phase is Gemini visual audit and code review. App build and distribution were outside this review. No commit, push or deployment.
+
+## Website security headers — 2026-11-18
 
 - Track A Apple Translation PoC: Translation.framework compiles on macOS26.5.2 arm64, but zh-Hans→en model is supported yet not installed/ready and canRequestDownloads=false in the current host. No download or permission was triggered; cold/warm speed, quality, CPU/RSS and offline translation remain untested. Report conclusion C (insufficient evidence to adopt): [APPLE_TRANSLATION_POC_REPORT](../reports/research/APPLE_TRANSLATION_POC_REPORT.md).
 - Track B bilingual lyrics: local-only code changes now carry optional `LyricLine.translation`; NetEase tlyric is decoded and aligned by normalized timestamps within a unique450ms tolerance; ambiguity leaves translation empty, original timing/identity/cache remain authoritative. Notch/free overlays show original above Chinese when available; status bar remains single line; independent bilingual switch defaults off. Data fixtures RED8→GREEN23 and layout tests are local; no App build/pack/release. [BILINGUAL_LYRICS_MVP_REPORT](../reports/research/BILINGUAL_LYRICS_MVP_REPORT.md).

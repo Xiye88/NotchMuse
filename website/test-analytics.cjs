@@ -52,7 +52,7 @@ const key = 'notchmuse.analytics-consent';
       assert.equal(googleRequests.length, 1, 'Repeated consent and duplicate script do not reload the tag');
       assert.equal(await configs(), 1);
       for (const placement of ['nav', 'hero', 'footer']) await download(placement);
-      assert.deepEqual(await events(), ['nav', 'hero', 'footer'].map(placement => ({ name: 'download_click', params: { app_version: '0.8.2', placement, page_language: language } })));
+      assert.deepEqual(await events(), ['nav', 'hero', 'footer'].map(placement => ({ name: 'download_click', params: { app_version: '0.9.0', placement, page_language: language } })));
       assert.equal(downloads, 5, 'Consent never prevents the native download action');
       await page.locator('.site-header a[href="#faq"]').click();
       assert.equal((await events()).length, 3, 'Ordinary navigation does not send download events');
@@ -131,7 +131,7 @@ const key = 'notchmuse.analytics-consent';
     await shared.close();
     console.log('PASS: cross-tab consent and withdrawal stop both pages; blocked-storage withdrawal reload resets to zero analytics');
     const noJs = await browser.newContext({ javaScriptEnabled: false });
-    for (const [suffix, expected] of [['/', 'Synced lyrics for your Mac desktop and menu bar.'], ['/zh/', '在 Mac 桌面或菜单栏查看同步歌词']]) {
+    for (const [suffix, expected] of [['/', 'Synced Desktop Lyrics for Mac and Windows'], ['/zh/', 'Mac 与 Windows 同步桌面歌词']]) {
       const page = await noJs.newPage();
       const response = await page.goto(url + suffix);
       assert.equal(response.status(), 200);

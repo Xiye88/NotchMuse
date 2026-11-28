@@ -1,0 +1,86 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Vinyl Hi-Fi Dark Theme (Mac Preview Build 97 Parity) -->
+    <Color x:Key="CanvasColor">#141416</Color>
+    <Color x:Key="SidebarTopColor">#1B1B1F</Color>
+    <Color x:Key="SidebarBottomColor">#141417</Color>
+    <Color x:Key="CardColor">#1D1D22</Color>
+    <Color x:Key="CardHoverColor">#24242A</Color>
+    <Color x:Key="DeckColor">#19191E</Color>
+    <Color x:Key="ControlColor">#24242B</Color>
+    <Color x:Key="ControlHoverColor">#2E2E37</Color>
+    <Color x:Key="PopupColor">#1E1E24</Color>
+    <Color x:Key="FrostedBarColor">#F018181C</Color>
+
+    <Color x:Key="TextPrimaryColor">#F3F2EF</Color>
+    <Color x:Key="TextSecondaryColor">#9A9AA2</Color>
+    <Color x:Key="TextTertiaryColor">#6C6C75</Color>
+
+    <Color x:Key="HairlineColor">#14FFFFFF</Color>
+    <Color x:Key="BorderSubtleColor">#1CFFFFFF</Color>
+    <Color x:Key="BorderStrongColor">#30FFFFFF</Color>
+    <Color x:Key="WindowOutlineColor">#26FFFFFF</Color>
+
+    <Color x:Key="AccentColor">#FF8A36</Color>
+    <Color x:Key="AccentSoftColor">#24FF8A36</Color>
+    <Color x:Key="AccentBorderColor">#61FF8A36</Color>
+    <Color x:Key="AccentOnColor">#141416</Color>
+
+    <Color x:Key="ToggleOffTrackColor">#34343D</Color>
+    <Color x:Key="ToggleThumbColor">#F3F2EF</Color>
+    <Color x:Key="SliderTrackColor">#26FFFFFF</Color>
+    <Color x:Key="ScrollThumbColor">#38FFFFFF</Color>
+    <Color x:Key="ScrollThumbHoverColor">#62FFFFFF</Color>
+    <Color x:Key="HoverRowColor">#12FFFFFF</Color>
+    <Color x:Key="StatusGreenColor">#34C77B</Color>
+    <Color x:Key="StatusIdleColor">#5E5E68</Color>
+    <Color x:Key="CloseHoverColor">#E0534A</Color>
+
+    <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}"/>
+    <LinearGradientBrush x:Key="SidebarBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="{StaticResource SidebarTopColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource SidebarBottomColor}" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource CardColor}"/>
+    <SolidColorBrush x:Key="CardHoverBrush" Color="{StaticResource CardHoverColor}"/>
+    <SolidColorBrush x:Key="DeckBrush" Color="{StaticResource DeckColor}"/>
+    <SolidColorBrush x:Key="ControlBrush" Color="{StaticResource ControlColor}"/>
+    <SolidColorBrush x:Key="ControlHoverBrush" Color="{StaticResource ControlHoverColor}"/>
+    <SolidColorBrush x:Key="PopupBrush" Color="{StaticResource PopupColor}"/>
+    <SolidColorBrush x:Key="FrostedBarBrush" Color="{StaticResource FrostedBarColor}"/>
+
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiaryColor}"/>
+
+    <SolidColorBrush x:Key="HairlineBrush" Color="{StaticResource HairlineColor}"/>
+    <SolidColorBrush x:Key="BorderSubtleBrush" Color="{StaticResource BorderSubtleColor}"/>
+    <SolidColorBrush x:Key="BorderStrongBrush" Color="{StaticResource BorderStrongColor}"/>
+    <SolidColorBrush x:Key="WindowOutlineBrush" Color="{StaticResource WindowOutlineColor}"/>
+
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="{StaticResource AccentSoftColor}"/>
+    <SolidColorBrush x:Key="AccentBorderBrush" Color="{StaticResource AccentBorderColor}"/>
+    <SolidColorBrush x:Key="AccentOnBrush" Color="{StaticResource AccentOnColor}"/>
+
+    <SolidColorBrush x:Key="ToggleOffTrackBrush" Color="{StaticResource ToggleOffTrackColor}"/>
+    <SolidColorBrush x:Key="ToggleThumbBrush" Color="{StaticResource ToggleThumbColor}"/>
+    <SolidColorBrush x:Key="SliderTrackBrush" Color="{StaticResource SliderTrackColor}"/>
+    <SolidColorBrush x:Key="ScrollThumbBrush" Color="{StaticResource ScrollThumbColor}"/>
+    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="{StaticResource ScrollThumbHoverColor}"/>
+    <SolidColorBrush x:Key="HoverRowBrush" Color="{StaticResource HoverRowColor}"/>
+    <SolidColorBrush x:Key="StatusGreenBrush" Color="{StaticResource StatusGreenColor}"/>
+    <SolidColorBrush x:Key="StatusIdleBrush" Color="{StaticResource StatusIdleColor}"/>
+    <SolidColorBrush x:Key="CloseHoverBrush" Color="{StaticResource CloseHoverColor}"/>
+
+    <LinearGradientBrush x:Key="TopStageFadeBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF141416" Offset="0"/>
+        <GradientStop Color="#CC141416" Offset="0.38"/>
+        <GradientStop Color="#00141416" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="BottomStageFadeBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#00141416" Offset="0"/>
+        <GradientStop Color="#CC141416" Offset="0.62"/>
+        <GradientStop Color="#FF141416" Offset="1"/>
+    </LinearGradientBrush>
+</ResourceDictionary>

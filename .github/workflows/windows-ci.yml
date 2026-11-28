@@ -1,0 +1,27 @@
+name: Windows CI
+on:
+  push:
+    paths: ['NotchMuseWindows/**', '.github/workflows/windows-ci.yml']
+  pull_request:
+    paths: ['NotchMuseWindows/**', '.github/workflows/windows-ci.yml']
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: NotchMuseWindows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore
+      - run: dotnet build -c Release --no-restore
+      - run: dotnet test --no-build -c Release --logger "trx;LogFileName=windows.trx"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-test-results
+          path: NotchMuseWindows/**/TestResults/*.trx

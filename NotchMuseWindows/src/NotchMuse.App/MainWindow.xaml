@@ -1,0 +1,877 @@
+<Window x:Class="NotchMuse.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:NotchMuse.App.Controls"
+        Title="NotchMuse"
+        Width="1040" Height="680"
+        MinWidth="760" MinHeight="520"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        Background="{DynamicResource CanvasBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
+        Loaded="OnLoaded"
+        Closed="OnClosed"
+        StateChanged="OnStateChanged"
+        Icon="NotchMuse.ico">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"
+                      CornerRadius="12"
+                      GlassFrameThickness="0"
+                      ResizeBorderThickness="6"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Border x:Name="OuterChrome"
+            Background="{DynamicResource CanvasBrush}"
+            BorderBrush="{DynamicResource WindowOutlineBrush}"
+            BorderThickness="1">
+        <Grid x:Name="WorkspaceRoot">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="SidebarColumn" Width="224" MinWidth="0" MaxWidth="280"/>
+                <ColumnDefinition x:Name="SplitterColumn" Width="1"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ============================================================ -->
+            <!-- LEFT 224px COLLAPSIBLE SIDEBAR (5 Structured Vinyl Sections) -->
+            <!-- ============================================================ -->
+            <Border x:Name="SidebarPanel"
+                    Grid.Column="0"
+                    Background="{DynamicResource SidebarBrush}"
+                    Padding="12,14,12,10">
+                <DockPanel LastChildFill="True">
+                    <!-- 1. Brand Header + Collapse Sidebar Button -->
+                    <Grid DockPanel.Dock="Top" Margin="4,0,2,14" MouseLeftButtonDown="OnTitleDrag">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="NotchMuse.ico" Width="22" Height="22" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,0,8,0"/>
+                            <TextBlock Text="NotchMuse"
+                                       FontFamily="{StaticResource StudioDisplayFont}"
+                                       FontSize="15.5"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button x:Name="CollapseSidebarBtn"
+                                Style="{StaticResource GhostIconButton}"
+                                Width="28" Height="28"
+                                HorizontalAlignment="Right"
+                                ToolTip="折叠侧边栏"
+                                Click="OnSidebarToggle">
+                            <Path Data="M 2,3 H 14 A 1.5,1.5 0 0 1 15.5,4.5 V 11.5 A 1.5,1.5 0 0 1 14,13 H 2 A 1.5,1.5 0 0 1 0.5,11.5 V 4.5 A 1.5,1.5 0 0 1 2,3 Z M 5.5,3 V 13"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.3"
+                                  Width="16" Height="16"
+                                  Stretch="Uniform"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- 2. Live Vinyl Turntable Deck Card -->
+                    <controls:VinylDeckControl x:Name="VinylDeck"
+                                               DockPanel.Dock="Top"
+                                               Margin="0,0,0,14"/>
+
+                    <!-- 5. Bottom 36px 3-Icon Utility Bar (Docked First at Bottom) -->
+                    <Border DockPanel.Dock="Bottom"
+                            Height="36"
+                            Margin="0,6,0,0"
+                            BorderBrush="{DynamicResource HairlineBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="2,6,2,0">
+                        <UniformGrid Columns="3">
+                            <Button x:Name="ThemeToggleIconBtn"
+                                    Style="{StaticResource GhostIconButton}"
+                                    HorizontalAlignment="Center"
+                                    ToolTip="切换浅色 / 深色主题"
+                                    Click="OnQuickThemeToggle">
+                                <Path x:Name="ThemeToggleIconPath"
+                                      Data="M 8,2.2 V 3.6 M 8,12.4 V 13.8 M 2.2,8 H 3.6 M 12.4,8 H 13.8 M 3.9,3.9 L 4.9,4.9 M 11.1,11.1 L 12.1,12.1 M 12.1,3.9 L 11.1,4.9 M 4.9,11.1 L 3.9,12.1 M 10.6,8 A 2.6,2.6 0 1 1 5.4,8 A 2.6,2.6 0 1 1 10.6,8 Z"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.35"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Width="15" Height="15"
+                                      Stretch="Uniform"/>
+                            </Button>
+                            <Button x:Name="SponsorIconBtn"
+                                    Style="{StaticResource GhostIconButton}"
+                                    HorizontalAlignment="Center"
+                                    ToolTip="赞助支持 NotchMuse"
+                                    Click="OnSponsorClick">
+                                <Path Data="M 8,13.5 C 8,13.5 2,9.6 2,5.6 C 2,3.7 3.5,2.3 5.2,2.3 C 6.4,2.3 7.4,3.0 8,4.0 C 8.6,3.0 9.6,2.3 10.8,2.3 C 12.5,2.3 14,3.7 14,5.6 C 14,9.6 8,13.5 8,13.5 Z"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.35"
+                                      StrokeLineJoin="Round"
+                                      Width="14" Height="14"
+                                      Stretch="Uniform"/>
+                            </Button>
+                            <Button x:Name="GitHubIconBtn"
+                                    Style="{StaticResource GhostIconButton}"
+                                    HorizontalAlignment="Center"
+                                    ToolTip="GitHub 开源仓库"
+                                    Click="OnGitHubClick">
+                                <Path Data="M 8,1.6 L 9.9,5.5 L 14.2,6.1 L 11.1,9.1 L 11.8,13.4 L 8,11.4 L 4.2,13.4 L 4.9,9.1 L 1.8,6.1 L 6.1,5.5 Z"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.35"
+                                      StrokeLineJoin="Round"
+                                      Width="14" Height="14"
+                                      Stretch="Uniform"/>
+                            </Button>
+                        </UniformGrid>
+                    </Border>
+
+                    <!-- 4. Compact Bottom-Left Version & Announcement Capsule (Always visible, Mac parity!) -->
+                    <Border x:Name="AnnouncementCapsule"
+                            DockPanel.Dock="Bottom"
+                            Height="30"
+                            Margin="0,8,0,2"
+                            CornerRadius="9"
+                            Background="{DynamicResource AccentSoftBrush}"
+                            BorderBrush="{DynamicResource AccentBorderBrush}"
+                            BorderThickness="1"
+                            Padding="9,0"
+                            Cursor="Hand"
+                            Visibility="Visible"
+                            MouseLeftButtonUp="OnAnnouncementClick">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Ellipse x:Name="AnnouncementUnreadDot"
+                                     Grid.Column="0"
+                                     Width="6" Height="6"
+                                     Fill="{DynamicResource AccentBrush}"
+                                     Margin="0,0,7,0"
+                                     VerticalAlignment="Center"/>
+                            <TextBlock x:Name="AnnouncementText"
+                                       Grid.Column="1"
+                                       Text="v0.9.0 最新版本进展"
+                                       FontSize="11"
+                                       FontWeight="Medium"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="›"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       Margin="4,0,0,1"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 3. Four Tactile Navigation Rows (38px height, 9px radius, amber LED bar) -->
+                    <StackPanel VerticalAlignment="Top">
+                        <!-- Lyrics Nav -->
+                        <Border x:Name="NavLyricsRow" Height="38" CornerRadius="9" Margin="0,0,0,4" Cursor="Hand"
+                                Background="Transparent" Tag="Lyrics"
+                                MouseLeftButtonUp="OnNavRowClick" MouseEnter="OnNavRowEnter" MouseLeave="OnNavRowLeave">
+                            <Grid Margin="6,0,10,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="26"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="NavLyricsLed" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center" Background="{DynamicResource AccentBrush}"/>
+                                <Path Grid.Column="1" Data="M 11,3 V 11.2 A 2.2,2.2 0 1 1 9.5,9.1 V 5.2 L 5.5,6.2 V 12.2 A 2.2,2.2 0 1 1 4,10.1 V 4.5 Z"
+                                      Fill="{DynamicResource TextPrimaryBrush}" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="NavLyricsLabel" Grid.Column="2" Text="歌词" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                <Ellipse x:Name="NavLyricsDot" Grid.Column="3" Width="6" Height="6" Fill="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Display Nav -->
+                        <Border x:Name="NavDisplayRow" Height="38" CornerRadius="9" Margin="0,0,0,4" Cursor="Hand"
+                                Background="Transparent" Tag="Display"
+                                MouseLeftButtonUp="OnNavRowClick" MouseEnter="OnNavRowEnter" MouseLeave="OnNavRowLeave">
+                            <Grid Margin="6,0,10,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="26"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="NavDisplayLed" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent"/>
+                                <Path Grid.Column="1" Data="M 2,3 H 14 A 1.2,1.2 0 0 1 15.2,4.2 V 10.8 A 1.2,1.2 0 0 1 14,12 H 2 A 1.2,1.2 0 0 1 0.8,10.8 V 4.2 A 1.2,1.2 0 0 1 2,3 Z M 5.5,14 H 10.5 M 8,12 V 14"
+                                      Stroke="{DynamicResource TextPrimaryBrush}" StrokeThickness="1.3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="15" Height="14" Stretch="Uniform" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="NavDisplayLabel" Grid.Column="2" Text="显示" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                <Border x:Name="NavDisplayPill" Grid.Column="3" CornerRadius="5" Padding="6,1.5" Background="{DynamicResource ControlBrush}" VerticalAlignment="Center">
+                                    <TextBlock x:Name="NavDisplayModeTag" Text="任务栏" FontSize="10" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Appearance Nav -->
+                        <Border x:Name="NavAppearanceRow" Height="38" CornerRadius="9" Margin="0,0,0,4" Cursor="Hand"
+                                Background="Transparent" Tag="Appearance"
+                                MouseLeftButtonUp="OnNavRowClick" MouseEnter="OnNavRowEnter" MouseLeave="OnNavRowLeave">
+                            <Grid Margin="6,0,10,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="26"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="NavAppearanceLed" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent"/>
+                                <Path Grid.Column="1" Data="M 8,1.5 A 6.5,6.5 0 1 0 14.5,8 C 14.5,6.5 13.4,5.8 12.2,5.8 H 10.8 A 1.3,1.3 0 0 1 9.5,4.5 C 9.5,3.2 9.1,1.5 8,1.5 Z"
+                                      Stroke="{DynamicResource TextPrimaryBrush}" StrokeThickness="1.3" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="NavAppearanceLabel" Grid.Column="2" Text="外观" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                <Border Grid.Column="3" Width="12" Height="12" CornerRadius="6" Padding="1.5" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                    <Ellipse x:Name="NavAppearanceColorRing" Fill="{DynamicResource AccentBrush}"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- General Nav -->
+                        <Border x:Name="NavGeneralRow" Height="38" CornerRadius="9" Margin="0,0,0,4" Cursor="Hand"
+                                Background="Transparent" Tag="General"
+                                MouseLeftButtonUp="OnNavRowClick" MouseEnter="OnNavRowEnter" MouseLeave="OnNavRowLeave">
+                            <Grid Margin="6,0,10,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="26"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="NavGeneralLed" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent"/>
+                                <Path Grid.Column="1" Data="M 8,5.2 A 2.8,2.8 0 1 0 8,10.8 A 2.8,2.8 0 1 0 8,5.2 Z M 8,1.5 V 3 M 8,13 V 14.5 M 1.5,8 H 3 M 13,8 H 14.5 M 3.4,3.4 L 4.5,4.5 M 11.5,11.5 L 12.6,12.6 M 12.6,3.4 L 11.5,4.5 M 4.5,11.5 L 3.4,12.6"
+                                      Stroke="{DynamicResource TextPrimaryBrush}" StrokeThickness="1.3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="NavGeneralLabel" Grid.Column="2" Text="通用" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                <Ellipse x:Name="NavGeneralStatusDot" Grid.Column="3" Width="7" Height="7" Fill="{DynamicResource StatusIdleBrush}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Hairline Draggable Splitter -->
+            <GridSplitter Grid.Column="1"
+                          Width="1"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Background="{DynamicResource HairlineBrush}"
+                          DragCompleted="OnSidebarSplitterDragCompleted"/>
+
+            <!-- ============================================================ -->
+            <!-- RIGHT OPEN CANVAS (4 Pure Pages, Zero Extra Top-Right Clutter)-->
+            <!-- ============================================================ -->
+            <Grid Grid.Column="2" Background="{DynamicResource CanvasBrush}">
+                <!-- Subtle Top Window Drag Strip + Minimal Window Controls (ONLY Minimize/Maximize/Close) -->
+                <Grid Height="38" VerticalAlignment="Top" Panel.ZIndex="20" Background="Transparent" MouseLeftButtonDown="OnTitleDrag">
+                    <!-- Expand Sidebar Button (only shown when sidebar is collapsed) -->
+                    <Button x:Name="ExpandSidebarBtn"
+                            Style="{StaticResource GhostIconButton}"
+                            Width="28" Height="28"
+                            Margin="12,5,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Visibility="Collapsed"
+                            ToolTip="展开侧边栏"
+                            Click="OnSidebarToggle">
+                        <Path Data="M 2,3 H 14 A 1.5,1.5 0 0 1 15.5,4.5 V 11.5 A 1.5,1.5 0 0 1 14,13 H 2 A 1.5,1.5 0 0 1 0.5,11.5 V 4.5 A 1.5,1.5 0 0 1 2,3 Z M 5.5,3 V 13"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="1.3" Width="16" Height="16" Stretch="Uniform"/>
+                    </Button>
+
+                    <!-- Minimal Standard Window Chrome Controls -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,4,10,0">
+                        <Button Style="{StaticResource GhostIconButton}" Width="28" Height="26" Click="OnMinimizeClick" ToolTip="最小化">
+                            <Path Data="M 2,6 H 11" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.3" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        </Button>
+                        <Button Style="{StaticResource GhostIconButton}" Width="28" Height="26" Margin="2,0" Click="OnMaximizeRestoreClick" ToolTip="最大化">
+                            <Rectangle Width="9.5" Height="9.5" RadiusX="1.8" RadiusY="1.8" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.25"/>
+                        </Button>
+                        <Button Style="{StaticResource WindowCloseButton}" Width="28" Height="26" Click="OnCloseToTrayClick" ToolTip="隐藏到托盘">
+                            <Path Data="M 2,2 L 10,10 M 10,2 L 2,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.35" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- ======================================================== -->
+                <!-- PAGE 1: IMMERSIVE LYRICS STAGE (Pure, Centered, Soda-like)-->
+                <!-- ======================================================== -->
+                <Grid x:Name="LyricsPage" Visibility="Visible">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Centered Lyrics Stage -->
+                    <Grid Grid.Row="0">
+                        <ScrollViewer x:Name="LyricsScrollViewer"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Padding="28,0,28,0"
+                                      CanContentScroll="False">
+                            <StackPanel x:Name="LyricsLinesHost"
+                                        HorizontalAlignment="Stretch"
+                                        Margin="0,150,0,170"/>
+                        </ScrollViewer>
+
+                        <!-- Centered Missing-Lyrics / Waiting Vector Micro-Animation -->
+                        <controls:MissingLyricsArtControl x:Name="MissingLyricsArt"
+                                                          Visibility="Collapsed"/>
+
+                        <!-- Top & Bottom Soft Edge Fade Masks -->
+                        <Border VerticalAlignment="Top" Height="68" Background="{DynamicResource TopStageFadeBrush}" IsHitTestVisible="False"/>
+                        <Border VerticalAlignment="Bottom" Height="64" Background="{DynamicResource BottomStageFadeBrush}" IsHitTestVisible="False"/>
+                    </Grid>
+
+                    <!-- Frosted Floating Bottom Playback Dock -->
+                    <Border Grid.Row="1"
+                            Margin="20,0,20,16"
+                            CornerRadius="16"
+                            Background="{DynamicResource FrostedBarBrush}"
+                            BorderBrush="{DynamicResource BorderSubtleBrush}"
+                            BorderThickness="1"
+                            Padding="16,6,16,12">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#24000000" BlurRadius="18" ShadowDepth="4" Opacity="0.18"/>
+                        </Border.Effect>
+                        <StackPanel>
+                            <!-- Full-Width Ultra-Slim Interactive Progress Rail (click anywhere to seek!) -->
+                            <Slider x:Name="ProgressSlider"
+                                    Style="{StaticResource StageProgressSlider}"
+                                    Minimum="0" Maximum="100" Value="0"
+                                    Margin="0,0,0,6"
+                                    PreviewMouseLeftButtonDown="OnProgressMouseDown"
+                                    PreviewMouseMove="OnProgressMouseMove"
+                                    PreviewMouseLeftButtonUp="OnProgressMouseUp"
+                                    LostMouseCapture="OnProgressLostCapture"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.25*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="1.25*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Left: Track Meta + MM:SS / MM:SS -->
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="DockTrackTitle"
+                                               Text="等待播放音乐…"
+                                               FontSize="12.5"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock x:Name="DockTimeText"
+                                                   Text="00:00 / 00:00"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock x:Name="DockSourceTag"
+                                                   Text=""
+                                                   FontSize="10.5"
+                                                   Margin="8,0,0,0"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Center: Prev + Soda Frosted Pill Play/Pause + Next -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Button x:Name="PrevTrackButton" Style="{StaticResource GhostIconButton}" Width="34" Height="34" RenderTransformOrigin="0.5,0.5" Click="OnPreviousClick" ToolTip="上一首">
+                                        <Path Data="M 2,2.5 V 11.5 M 11.5,2.5 L 4.5,7 L 11.5,11.5 Z"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                              StrokeThickness="1.3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="13" Height="13" Stretch="Uniform"/>
+                                    </Button>
+
+                                    <Button x:Name="PlayPauseButton"
+                                            Width="50" Height="34"
+                                            Margin="8,0"
+                                            RenderTransformOrigin="0.5,0.5"
+                                            Click="OnPlayClick"
+                                            ToolTip="播放 / 暂停">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Pill"
+                                                        CornerRadius="17"
+                                                        Background="{DynamicResource AccentBrush}"
+                                                        SnapsToDevicePixels="True">
+                                                    <Border.Effect>
+                                                        <DropShadowEffect Color="#45E06D1B" BlurRadius="10" ShadowDepth="2" Opacity="0.35"/>
+                                                    </Border.Effect>
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Pill" Property="Opacity" Value="0.90"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="Pill" Property="Opacity" Value="0.78"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <Path x:Name="PlayPauseGlyph"
+                                              Data="M 3,2 L 12,7.5 L 3,13 Z"
+                                              Fill="{DynamicResource AccentOnBrush}"
+                                              Width="13" Height="13"
+                                              Stretch="Uniform"/>
+                                    </Button>
+
+                                    <Button x:Name="NextTrackButton" Style="{StaticResource GhostIconButton}" Width="34" Height="34" RenderTransformOrigin="0.5,0.5" Click="OnNextClick" ToolTip="下一首">
+                                        <Path Data="M 11.5,2.5 V 11.5 M 2,2.5 L 9,7 L 2,11.5 Z"
+                                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                              StrokeThickness="1.3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="13" Height="13" Stretch="Uniform"/>
+                                    </Button>
+                                </StackPanel>
+
+                                <!-- Right: 6 Quick Accent Dots + Share Icon Button -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <StackPanel x:Name="QuickDotsHost" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+                                        <Button Style="{StaticResource ColorDotButton}" Background="#E06D1B" Click="OnQuickColorDotClick" ToolTip="暖琥珀"/>
+                                        <Button Style="{StaticResource ColorDotButton}" Background="#3B82F6" Click="OnQuickColorDotClick" ToolTip="晴空蓝"/>
+                                        <Button Style="{StaticResource ColorDotButton}" Background="#8B5CF6" Click="OnQuickColorDotClick" ToolTip="黑胶紫"/>
+                                        <Button Style="{StaticResource ColorDotButton}" Background="#22A96B" Click="OnQuickColorDotClick" ToolTip="森林青"/>
+                                        <Button Style="{StaticResource ColorDotButton}" Background="#E25D6B" Click="OnQuickColorDotClick" ToolTip="落日红"/>
+                                        <Button Style="{StaticResource ColorDotButton}" Background="#C9A24B" Click="OnQuickColorDotClick" ToolTip="流沙金"/>
+                                    </StackPanel>
+
+                                    <Button x:Name="ShareButton"
+                                            Style="{StaticResource GhostIconButton}"
+                                            Width="32" Height="32"
+                                            Click="OnShareClick"
+                                            ToolTip="分享歌词卡片">
+                                        <Path Data="M 8,2 V 10 M 4.8,5.2 L 8,2 L 11.2,5.2 M 3,8.5 V 12.5 A 1,1 0 0 0 4,13.5 H 12 A 1,1 0 0 0 13,12.5 V 8.5"
+                                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                              StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="15" Height="15" Stretch="Uniform"/>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- ======================================================== -->
+                <!-- PAGE 2: DISPLAY (Open Canvas + 3 Win11 Desktop Previews)  -->
+                <!-- ======================================================== -->
+                <ScrollViewer x:Name="DisplayPage"
+                              Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="32,38,32,28">
+                    <StackPanel MaxWidth="740" HorizontalAlignment="Stretch">
+                        <TextBlock x:Name="DisplayHeaderTitle" Text="显示" FontFamily="{StaticResource StudioDisplayFont}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+
+                        <!-- Compact 42px Live Connection Status Strip -->
+                        <Border Height="42"
+                                Margin="0,14,0,20"
+                                CornerRadius="10"
+                                Background="{DynamicResource CardBrush}"
+                                BorderBrush="{DynamicResource BorderSubtleBrush}"
+                                BorderThickness="1"
+                                Padding="14,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse x:Name="DisplayStatusDot" Width="8" Height="8" Fill="{DynamicResource StatusIdleBrush}" Margin="0,0,10,0"/>
+                                <TextBlock x:Name="DisplayStatusLine"
+                                           Text="等待播放器连接 · 切换下方桌面模式即时生效"
+                                           FontSize="12.5"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Live Desktop Preview Section (Sole Mode Switcher!) -->
+                        <TextBlock x:Name="DisplayPreviewLabel" Text="实时预览 · 点击卡片切换模式" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,10"/>
+                        <UniformGrid x:Name="DesktopPreviewCardsHost" Columns="3" Margin="0,0,0,22"/>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
+
+                        <!-- Desktop Lyrics Line Count (Single | Double across Taskbar, TopIsland & FreeFloat) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="FloatingLinesLabel" Text="桌面歌词行数" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock x:Name="FloatingLinesDesc" Text="默认双行显示（当前句高亮 + 柔和预告下一句或译文），同步作用于任务栏、悬浮岛与自由悬浮" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <Border Style="{StaticResource SegmentedContainer}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="FloatingSingleLineRadio" Content="单行" GroupName="FloatingLinesMode" Style="{StaticResource SegmentedOption}" Checked="OnFloatingLinesModeChanged"/>
+                                    <RadioButton x:Name="FloatingDoubleLineRadio" Content="双行" GroupName="FloatingLinesMode" Style="{StaticResource SegmentedOption}" IsChecked="True" Checked="OnFloatingLinesModeChanged"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Time Offset Row -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="DisplayOffsetLabel" Text="歌词时间偏移" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock x:Name="DisplayOffsetDesc" Text="微调歌词提前或延后，实时作用于所有视图" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Border Style="{StaticResource SegmentedContainer}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="−0.5s" Padding="11,5" BorderThickness="0" Background="Transparent" Click="OnOffsetMinus"/>
+                                    <Button x:Name="OffsetResetBtn" Content="0.0s 重置" Padding="12,5" BorderThickness="0" Background="{DynamicResource CardBrush}" Click="OnOffsetReset"/>
+                                    <Button Content="+0.5s" Padding="11,5" BorderThickness="0" Background="Transparent" Click="OnOffsetPlus"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Display Monitor Row -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="DisplayScreenLabel" Text="显示屏幕" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock x:Name="DisplayScreenDesc" Text="选择顶部悬浮岛与桌面自由悬浮所在显示器" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ComboBox x:Name="DisplayScreenCombo" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="200" SelectionChanged="OnDisplayScreenChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Launch at Startup Row -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="DisplayStartupLabel" Text="开机自启" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock x:Name="DisplayStartupDesc" Text="登录 Windows 时自动静默启动歌词服务" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="DisplayStartupToggle" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="OnStartupToggleChanged" Unchecked="OnStartupToggleChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Lock Click-through Shortcut Info -->
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="DisplayLockLabel" Text="锁定桌面歌词（鼠标穿透）" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock x:Name="DisplayLockDesc" Text="锁定后桌面悬浮歌词完全穿透点击，不影响办公与游戏" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Border CornerRadius="6" Padding="8,4" Margin="0,0,12,0" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1">
+                                    <TextBlock Text="Ctrl + Alt + L" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                </Border>
+                                <CheckBox x:Name="OverlayLockToggle" VerticalAlignment="Center" Checked="OnOverlayLockChanged" Unchecked="OnOverlayLockChanged"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ======================================================== -->
+                <!-- PAGE 3: APPEARANCE (Open Canvas + Sliders + 4 Presets)    -->
+                <!-- ======================================================== -->
+                <ScrollViewer x:Name="AppearancePage"
+                              Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="32,38,32,28">
+                    <StackPanel MaxWidth="740" HorizontalAlignment="Stretch">
+                        <TextBlock x:Name="AppearanceHeaderTitle" Text="外观" FontFamily="{StaticResource StudioDisplayFont}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,20"/>
+
+                        <!-- Lyric Color Mode + Curated Palette + Custom Color Pickers (Solid & Gradient) -->
+                        <Grid Margin="0,0,0,12">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="ColorModeLabel" Text="歌词颜色" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock x:Name="ColorModeDesc" Text="支持纯色与双色渐变扫光，并可自由调色盘选色" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Border Style="{StaticResource SegmentedContainer}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="SolidColorRadio" Content="纯色" GroupName="LyricColorMode" Style="{StaticResource SegmentedOption}" IsChecked="True" Checked="OnColorModeChanged"/>
+                                    <RadioButton x:Name="GradientColorRadio" Content="渐变" GroupName="LyricColorMode" Style="{StaticResource SegmentedOption}" Checked="OnColorModeChanged"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- Curated Color Swatches -->
+                        <WrapPanel x:Name="AppearanceSwatchesPanel" Margin="0,0,0,10"/>
+
+                        <!-- Custom Solid Lyric Color Picker Bar (WrapPanel adapts cleanly at 760px min-width!) -->
+                        <WrapPanel x:Name="CustomSolidColorBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16">
+                            <TextBlock x:Name="CustomSolidLabel" Text="自定义纯色" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4,10,4"/>
+                            <Border x:Name="CustomSolidSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,2,8,2" MouseLeftButtonUp="OnPickCustomSolidColor"/>
+                            <TextBox x:Name="CustomSolidHexBox" Width="112" Height="34" FontFamily="Consolas, Segoe UI" FontSize="13" FontWeight="SemiBold" Text="#E06D1B" MaxLength="9" Margin="0,2,8,2" TextChanged="OnCustomSolidHexChanged"/>
+                            <Button x:Name="PickCustomSolidBtn" Content="调色盘…" Margin="0,2,0,2" Padding="12,6" Click="OnPickCustomSolidColor"/>
+                        </WrapPanel>
+
+                        <!-- Custom Gradient Lyric Color Picker Bar (WrapPanel adapts cleanly at narrow widths!) -->
+                        <WrapPanel x:Name="CustomGradientColorBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16" Visibility="Collapsed">
+                            <TextBlock x:Name="CustomGradLabel" Text="自定义渐变" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4,10,4"/>
+                            <Border x:Name="CustomGradStartSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,2,6,2" MouseLeftButtonUp="OnPickGradientStartColor"/>
+                            <Button x:Name="PickGradStartBtn" Content="起点色…" Padding="10,6" Margin="0,2,0,2" Click="OnPickGradientStartColor"/>
+                            <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="8,2"/>
+                            <Border x:Name="CustomGradEndSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,2,6,2" MouseLeftButtonUp="OnPickGradientEndColor"/>
+                            <Button x:Name="PickGradEndBtn" Content="终点色…" Padding="10,6" Margin="0,2,10,2" Click="OnPickGradientEndColor"/>
+                            <Border x:Name="CustomGradPreviewPill" Width="56" Height="24" CornerRadius="12" Margin="0,4,0,4" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1"/>
+                        </WrapPanel>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
+
+                        <!-- Font Size Slider (Bencho 60fps fluid drag, compact 128px label for narrow-window headroom) -->
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="58"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="FontSizeLabel" Grid.Column="0" Text="字体大小" FontSize="13.5" FontWeight="Medium" VerticalAlignment="Center"/>
+                            <Slider x:Name="FontSizeSlider" Grid.Column="1" Minimum="12" Maximum="40" Value="22" Margin="10,0"
+                                    ValueChanged="OnAppearanceSliderChanged"
+                                    PreviewMouseLeftButtonUp="OnAppearanceSliderDragCompleted"
+                                    LostMouseCapture="OnAppearanceSliderDragCompleted"/>
+                            <Border Grid.Column="2" Height="24" CornerRadius="6" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="FontSizeValueText" Text="22 px" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Animation Speed Slider -->
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="58"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="AnimSpeedLabel" Grid.Column="0" Text="动画速度" FontSize="13.5" FontWeight="Medium" VerticalAlignment="Center"/>
+                            <Slider x:Name="AnimSpeedSlider" Grid.Column="1" Minimum="0.5" Maximum="2.0" Value="1.0" Margin="10,0"
+                                    ValueChanged="OnAppearanceSliderChanged"
+                                    PreviewMouseLeftButtonUp="OnAppearanceSliderDragCompleted"
+                                    LostMouseCapture="OnAppearanceSliderDragCompleted"/>
+                            <Border Grid.Column="2" Height="24" CornerRadius="6" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="AnimSpeedValueText" Text="1.0×" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Lyric Opacity Slider -->
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="128"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="58"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="OpacityLabel" Grid.Column="0" Text="歌词不透明度" FontSize="13.5" FontWeight="Medium" VerticalAlignment="Center"/>
+                            <Slider x:Name="OpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="1.0" Margin="10,0"
+                                    ValueChanged="OnAppearanceSliderChanged"
+                                    PreviewMouseLeftButtonUp="OnAppearanceSliderDragCompleted"
+                                    LostMouseCapture="OnAppearanceSliderDragCompleted"/>
+                            <Border Grid.Column="2" Height="24" CornerRadius="6" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="OpacityValueText" Text="100%" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,4,0,16"/>
+
+                        <!-- Independent Floating Capsule Background Master Toggle + 5 Curated Presets + Custom + Opacity -->
+                        <StackPanel Margin="0,0,0,16">
+                            <Grid Margin="0,0,0,12">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="BgCapsuleLabel" Text="显示悬浮胶囊背景" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <TextBlock x:Name="BgCapsuleDesc" Text="关闭后自由悬浮与顶部悬浮岛立即切为纯透明文字 + 双层高对比描边阴影" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <CheckBox x:Name="ShowCapsuleBgToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnShowCapsuleBgToggleChanged" Unchecked="OnShowCapsuleBgToggleChanged"/>
+                            </Grid>
+
+                            <StackPanel x:Name="CapsuleStyleControls">
+                                <WrapPanel x:Name="CapsulePresetPanel" Margin="0,0,0,10"/>
+
+                                <!-- Custom Color Input + Native Picker (WrapPanel adapts cleanly at narrow widths!) -->
+                                <WrapPanel x:Name="CustomCapsuleBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12" Visibility="Collapsed">
+                                    <Border x:Name="CustomCapsuleSwatch" Width="30" Height="30" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,2,8,2" MouseLeftButtonUp="OnPickCustomCapsuleColor"/>
+                                    <TextBox x:Name="CustomCapsuleHexBox" Width="116" Height="34" FontFamily="Consolas, Segoe UI" FontSize="13" FontWeight="SemiBold" Text="#3E3E44" MaxLength="9" Margin="0,2,8,2" TextChanged="OnCustomCapsuleHexChanged"/>
+                                    <Button x:Name="PickCustomColorBtn" Content="调色盘…" Margin="0,2,0,2" Padding="12,6" Click="OnPickCustomCapsuleColor"/>
+                                </WrapPanel>
+
+                                <!-- Background Opacity Slider (30% - 100%) -->
+                                <Grid x:Name="CapsuleOpacityRow" Margin="0,4,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="128"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="58"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="CapsuleOpacityLabel" Grid.Column="0" Text="背景不透明度" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                    <Slider x:Name="CapsuleOpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="0.82" Margin="10,0"
+                                            ValueChanged="OnCapsuleOpacityChanged"
+                                            PreviewMouseLeftButtonUp="OnAppearanceSliderDragCompleted"
+                                            LostMouseCapture="OnAppearanceSliderDragCompleted"/>
+                                    <Border Grid.Column="2" Height="24" CornerRadius="6" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                        <TextBlock x:Name="CapsuleOpacityValueText" Text="82%" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
+
+                        <!-- 8 Curated Visual Style Preset Cards (4x2 Grid) -->
+                        <TextBlock x:Name="QuickPresetsLabel" Text="风格快捷预设" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,12"/>
+                        <UniformGrid x:Name="StylePresetsHost" Columns="4"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ======================================================== -->
+                <!-- PAGE 4: GENERAL (Open Canvas + Grouped Players + 6 Anims) -->
+                <!-- ======================================================== -->
+                <ScrollViewer x:Name="GeneralPage"
+                              Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="32,38,32,28">
+                    <StackPanel MaxWidth="740" HorizontalAlignment="Stretch">
+                        <TextBlock x:Name="GeneralHeaderTitle" Text="通用" FontFamily="{StaticResource StudioDisplayFont}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,20"/>
+
+                        <!-- Music Player (5-Group Modern ComboBox) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="PlayerSourceLabel" Text="音乐播放器" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="PlayerSourceDesc" Text="自动覆盖 36+ 主流及开源播放器与浏览器网页端" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ComboBox x:Name="PlayerSourceCombo" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="220" SelectionChanged="OnPlayerSourceChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Default Launch Music Player (Mac Build 98 Parity) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="DefaultLaunchLabel" Text="默认启动播放器" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="DefaultLaunchDesc" Text="当前无活跃播放会话时，点击播放按钮自动拉起指定播放器" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ComboBox x:Name="DefaultLaunchPlayerCombo" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="220" SelectionChanged="OnDefaultLaunchPlayerChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Player Stop Behavior -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="StopBehaviorLabel" Text="播放停止行为" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="StopBehaviorDesc" Text="当播放器退出或清空队列时的歌词显示策略" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ComboBox x:Name="StopBehaviorCombo" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="220" SelectionChanged="OnStopBehaviorChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Launch at Startup -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="GeneralStartupLabel" Text="开机自启" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="GeneralStartupDesc" Text="随 Windows 自动启动，保持低内存常驻托盘" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="GeneralStartupToggle" HorizontalAlignment="Right" VerticalAlignment="Center" Checked="OnStartupToggleChanged" Unchecked="OnStartupToggleChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Minimize to Bottom-Right System Tray on Close -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="CloseToTrayLabel" Text="关闭时最小化到托盘" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="CloseToTrayDesc" Text="开启后点关闭缩到右下角托盘图标继续显示歌词；关闭后直接退出程序" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="CloseToTrayToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnCloseToTrayToggleChanged" Unchecked="OnCloseToTrayToggleChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Theme Mode Segmented Pill -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="ThemeModeLabel" Text="外观模式" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="ThemeModeDesc" Text="浅色采用 Braun 暖雪花石，深色采用黑胶 Hi-Fi 暗灰" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Border Style="{StaticResource SegmentedContainer}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="ThemeSystemRadio" Content="跟随系统" GroupName="ThemeMode" Style="{StaticResource SegmentedOption}" Checked="OnThemeRadioChanged"/>
+                                    <RadioButton x:Name="ThemeLightRadio" Content="浅色" GroupName="ThemeMode" Style="{StaticResource SegmentedOption}" IsChecked="True" Checked="OnThemeRadioChanged"/>
+                                    <RadioButton x:Name="ThemeDarkRadio" Content="深色" GroupName="ThemeMode" Style="{StaticResource SegmentedOption}" Checked="OnThemeRadioChanged"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Missing Lyrics Micro-Animation (6 Styles, Zero 404) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="MissingAnimLabel" Text="未找到歌词微动画" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="MissingAnimDesc" Text="纯音乐或暂无同步歌词时展示的轻巧动态插画" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ComboBox x:Name="MissingAnimCombo" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="220" SelectionChanged="OnMissingAnimChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Language Toggle -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="LanguageLabel" Text="界面语言" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="LanguageDesc" Text="切换全界面语言，实时生效无需重启" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Border Style="{StaticResource SegmentedContainer}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="LangZhRadio" Content="简体中文" GroupName="AppLanguage" Style="{StaticResource SegmentedOption}" IsChecked="True" Checked="OnLanguageRadioChanged"/>
+                                    <RadioButton x:Name="LangEnRadio" Content="English" GroupName="AppLanguage" Style="{StaticResource SegmentedOption}" Checked="OnLanguageRadioChanged"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Bilingual Lyrics Toggle -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="BilingualLabel" Text="双语歌词" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="BilingualDesc" Text="当歌词源包含中文翻译时，在原文下方优雅显示译文" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="BilingualToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnBilingualChanged" Unchecked="OnBilingualChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Restrained Interaction Micro-Sounds Toggle (Mac Build 104 parity) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="InteractionSoundsLabel" Text="交互微音效" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="InteractionSoundsDesc" Text="零外部素材纯内存合成微触感音效，闲置 0% CPU" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="InteractionSoundsToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnInteractionSoundsChanged" Unchecked="OnInteractionSoundsChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Desktop Shortcut Helper (One-Click Shortcut for Portable Users) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="DesktopShortcutLabel" Text="桌面快捷方式" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="DesktopShortcutDesc" Text="安装包最后一步支持勾选创建，便携版也可在此一键创建桌面图标" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Button x:Name="CreateShortcutButton" Content="创建桌面快捷方式" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="14,7" Click="OnCreateDesktopShortcutClick"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Automatic Updates Toggle (Default ON, Mac Build 107 parity!) -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="AutoUpdateLabel" Text="自动更新（推荐开启）" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="AutoUpdateDesc" Text="启动与运行期间自动检测新版，发现更新后在左下角即时提醒下载" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="AutoUpdateToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnAutoUpdateChanged" Unchecked="OnAutoUpdateChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
+                        <!-- Version & Check for Updates -->
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="VersionTitleLabel" Text="版本信息" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="VersionValueLabel" Text="当前版本：v0.9.0" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <Button x:Name="CheckUpdateButton" Content="检查更新" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="14,7" Click="OnCheckUpdateClick"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

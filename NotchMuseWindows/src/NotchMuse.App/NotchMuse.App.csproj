@@ -3,6 +3,7 @@
   <ItemGroup>
     <Resource Include="..\..\assets\NotchMuse.ico" Link="NotchMuse.ico" />
     <Resource Include="..\..\assets\WeChatSupport.jpg" Link="WeChatSupport.jpg" />
+    <Resource Include="..\..\assets\qq-group-qr.png" Link="qq-group-qr.png" />
   </ItemGroup>
   <ItemGroup><ProjectReference Include="../NotchMuse.Platform/NotchMuse.Platform.csproj" /><ProjectReference Include="../NotchMuse.Sources/NotchMuse.Sources.csproj" /></ItemGroup>
 </Project>

@@ -101,7 +101,7 @@ public static class AuditSnapshotRunner
         SaveVisualPng(shareWin, Path.Combine(outputDir, "09_share_card_dialog.png"), 780, 490);
         shareWin.Close();
 
-        // 10: Native Mac-Parity Support / Sponsor Modal Window (WeChat + USDT EVM + USDT TRON QRs)
+        // 10: Native Mac-Parity Support / Sponsor Modal Window (WeChat + QQ User Group 1137981671 + USDT EVM)
         var supportWin = new SupportWindow(isEnglish: false, client: null, skipNetwork: true)
         {
             WindowStartupLocation = WindowStartupLocation.Manual,
@@ -112,6 +112,15 @@ public static class AuditSnapshotRunner
         await FlushRenderAsync();
         SaveVisualPng(supportWin, Path.Combine(outputDir, "10_support_window.png"), 780, 560);
         supportWin.Close();
+
+        // 11: Minimum-Width (760px) Narrow Appearance Layout Check (zero clipping/misalignment!)
+        main.SetThemeMode(AppThemeMode.Light);
+        main.NavigateTo("Appearance");
+        main.PrepareAppearanceAuditShowcase();
+        main.Width = 760;
+        main.Height = 680;
+        await FlushRenderAsync();
+        SaveVisualPng(main, Path.Combine(outputDir, "11_narrow_appearance.png"), 760, 680);
 
         main.Close();
     }

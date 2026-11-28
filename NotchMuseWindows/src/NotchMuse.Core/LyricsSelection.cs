@@ -11,17 +11,29 @@ public static class LyricsSelection
         "lyrics", "composer", "produced", "written"
     ];
 
-    private static readonly string[] InstrumentalMarkers =
-    [
-        "纯音乐请欣赏", "纯音乐", "instrumental", "no lyrics", "music only"
-    ];
+    private static readonly HashSet<string> InstrumentalNotices = new(StringComparer.Ordinal)
+    {
+        "纯音乐请欣赏", "純音樂請欣賞", "纯音乐无歌词", "純音樂無歌詞",
+        "本歌曲为纯音乐请欣赏", "本歌曲為純音樂請欣賞",
+        "instrumental", "instrumentalonly", "instrumentalnolyric", "instrumentalnolyrics"
+    };
 
     private static readonly string[] SourcePriority =
     [
         "LRCLIB", "NetEase", "LRCMux", "QQ", "Kugou", "Soda"
     ];
 
+    public static bool IsInstrumentalNotice(string value)
+    {
+        var normalized = new System.Text.StringBuilder(value.Length);
+        foreach (var rune in value.ToLowerInvariant().EnumerateRunes())
+            if (System.Text.Rune.IsLetterOrDigit(rune))
+                normalized.Append(rune.ToString());
+        return InstrumentalNotices.Contains(normalized.ToString());
+    }
+
     public static IReadOnlyList<(string Text, double Time)> Anchors(LyricsCandidate c) => c.Document.Normalized
+        .Where(l => !IsInstrumentalNotice(l.Text))
         .Where(l => !Credits.Any(p => TrackMatcher.Normalize(l.Text).StartsWith(p, StringComparison.OrdinalIgnoreCase)))
         .Where(l => !Regex.IsMatch(l.Text, @"^(?:录音|混音|母带|人声|和声|弦乐|音乐录音|音乐工作|插画|吉他|古典吉他|贝斯|鼓|键盘|OP|SP)\s*[:：]", RegexOptions.IgnoreCase))
         .Select(l => (Text: TrackMatcher.Normalize(l.Text), Time: l.Start))
@@ -113,18 +125,23 @@ public static class LyricsSelection
 
     public static string? Rejection(LyricsCandidate c, Track t)
     {
+        if (c.Evidence == LyricsEvidence.Instrumental) return "instrumental_recording";
         var lines = c.Document.Normalized;
         if (lines.Count == 0 || !lines.Any(l => !string.IsNullOrWhiteSpace(l.Text))) return "empty";
-        var lyricText = string.Concat(lines.Select(l => TrackMatcher.Normalize(l.Text)));
-        if (InstrumentalMarkers.Any(marker => lyricText.Contains(TrackMatcher.Normalize(marker), StringComparison.OrdinalIgnoreCase)) &&
-            lines.Count(l => !string.IsNullOrWhiteSpace(l.Text) && !Credits.Any(p => TrackMatcher.Normalize(l.Text).StartsWith(TrackMatcher.Normalize(p), StringComparison.OrdinalIgnoreCase))) <= 2)
-            return "instrumental";
+        if (lines.Any(l => IsInstrumentalNotice(l.Text)) && Anchors(c).Count == 0)
+            return "instrumental_notice";
         if (!double.IsFinite(t.Duration) || t.Duration <= 0) return "track_duration_unknown";
         var startCeiling = t.Duration + (t.IsMusicVideo ? 15 : 4);
         var endCeiling = t.Duration + (t.IsMusicVideo ? 20 : 8);
         if (lines.Any(l => !double.IsFinite(l.Start) || l.Start < -1 || l.Start > startCeiling ||
             l.End is { } end && (!double.IsFinite(end) || end < l.Start || end > endCeiling)))
             return "timeline_out_of_recording";
+        return RecordingRejection(c, t);
+    }
+
+    private static string? RecordingRejection(LyricsCandidate c, Track t)
+    {
+        if (!double.IsFinite(t.Duration) || t.Duration <= 0) return "track_duration_unknown";
         if (TrackMatcher.IdentityRejection(t, c.Title, c.Artist, c.Album) is { } reason) return reason;
         if (c.Provider != "LRCMux" && c.Platform == t.Platform && t.Platform != "netease" && t.NativeId is not null && c.Id is not null &&
             c.Id.Replace("spotify:track:", "", StringComparison.Ordinal) != t.NativeId.Replace("spotify:track:", "", StringComparison.Ordinal)) return "exact_id_mismatch";
@@ -133,6 +150,14 @@ public static class LyricsSelection
         if (Math.Abs(t.Duration - c.Duration) > (t.IsMusicVideo ? 22 : 5)) return "duration_risk";
         return null;
     }
+
+    private static bool ConfirmsInstrumental(LyricsCandidate c, Track t) =>
+        c.Platform == "netease" &&
+        c.Evidence == LyricsEvidence.Instrumental &&
+        RecordingRejection(c, t) is null &&
+        (Tier(c, t) <= 2 ||
+            c.MatcherScore == 100 && Math.Abs(c.Duration - t.Duration) <= 1.0 &&
+            (TrackMatcher.AlbumMatches(c.Album, t) || string.IsNullOrWhiteSpace(t.Album)));
 
     public static LyricsCandidate RepairTrailingOverflow(LyricsCandidate c, Track t)
     {
@@ -180,12 +205,37 @@ public static class LyricsSelection
 
     public static SelectionDecision Select(IEnumerable<LyricsCandidate> candidates, Track track)
     {
+        var repaired = candidates.Select(c => RepairTrailingOverflow(c, track)).ToArray();
         var rejected = new Dictionary<string, string>();
+        var instrumentalTier = repaired.Where(c => ConfirmsInstrumental(c, track))
+            .Select(c => Tier(c, track)).DefaultIfEmpty(int.MaxValue).Min();
+
         var valid = new List<LyricsCandidate>();
-        foreach (var c in candidates.Select(c => RepairTrailingOverflow(c, track)))
+        foreach (var c in repaired)
         {
             if (Rejection(c, track) is { } reason) rejected[c.Provider] = reason;
             else valid.Add(c);
+        }
+
+        // Community UGC lyrics (e.g. Kugou product_from=ugc) require independent direct timed corroboration
+        var directEvidence = valid.Where(c => c.Provider != "LRCMux" &&
+            c.Evidence == LyricsEvidence.TimedLyrics && !string.IsNullOrWhiteSpace(c.Platform)).ToArray();
+        valid.RemoveAll(c =>
+        {
+            if (c.Evidence != LyricsEvidence.UserContribution) return false;
+            var corroboratedByDirect = directEvidence.Any(o =>
+                o.Provider != c.Provider && o.Platform != c.Platform &&
+                TimelinesAgree(c, o) && Disagreement(c, o) is null);
+            if (corroboratedByDirect) return false;
+            rejected[c.Provider] = "unverified_user_contribution";
+            return true;
+        });
+
+        // NetEase pureMusic negative evidence vetoes unless a stronger-tier verified vocal candidate exists
+        if (instrumentalTier != int.MaxValue && !valid.Any(c => Tier(c, track) < instrumentalTier))
+        {
+            foreach (var c in repaired) rejected[c.Provider] = "instrumental_recording";
+            return new(null, "instrumental_recording", rejected);
         }
 
         var direct = valid.Where(c => c.Provider != "LRCMux").ToArray();
@@ -194,7 +244,8 @@ public static class LyricsSelection
         bool ResolverSolo(LyricsCandidate c)
         {
             var a = Anchors(c);
-            return direct.Length == 0 && (trackHasNoAlbum || TrackMatcher.AlbumMatches(c.Album, track)) &&
+            return direct.Length == 0 &&
+                   (trackHasNoAlbum ? !string.IsNullOrWhiteSpace(c.Id) : TrackMatcher.AlbumMatches(c.Album, track)) &&
                    a.Count >= 10 && a[^1].Time >= track.Duration * 0.5 && a[^1].Time - a[0].Time >= track.Duration * 0.45;
         }
 

@@ -64,7 +64,15 @@ public sealed class KugouSource(HttpClient client) : HttpLyricsSource(client)
         var content = S(download?["content"]);
         if (string.IsNullOrWhiteSpace(content)) return null;
         var doc = LyricParser.ParseRich(DecodeKrc(content), true);
-        return doc.Lines.Count > 0 ? picked.Cand with { Id = song.Id, Document = doc } : null;
+        var isUgc = string.Equals(S(picked.Raw["product_from"]), "ugc", StringComparison.OrdinalIgnoreCase);
+        return doc.Lines.Count > 0
+            ? picked.Cand with
+            {
+                Id = song.Id,
+                Document = doc,
+                Evidence = isUgc ? LyricsEvidence.UserContribution : LyricsEvidence.TimedLyrics
+            }
+            : null;
     }
 }
 
@@ -85,6 +93,40 @@ public sealed class LrcMuxSource(HttpClient client) : HttpLyricsSource(client)
             var kana = text.Count(c => c is >= '\u3040' and <= '\u30ff'); var hangul = text.Count(c => c is >= '\uac00' and <= '\ud7af');
             if (kana >= 4 && hangul * 10 < kana) return null;
         }
-        return Candidate(track, S(json["meta"]?["source"]?["id"]).ToLowerInvariant(), "", S(t["title"]), S(t["artist"]), S(t["album"]), D(t["duration"]), new(lines)) with { Isrc = S(t["isrc"]) };
+        var source = json["meta"]?["source"];
+        var platform = S(source?["id"]).ToLowerInvariant();
+        var explicitId = new[]
+        {
+            S(source?["trackId"]), S(source?["trackID"]), S(source?["track_id"]),
+            S(t["sourceTrackId"]), S(t["sourceTrackID"]), S(t["source_track_id"]),
+            ExtractSourceTrackId(S(source?["url"]), platform)
+        }.FirstOrDefault(id => !string.IsNullOrWhiteSpace(id));
+
+        return Candidate(track, platform, explicitId ?? "", S(t["title"]), S(t["artist"]), S(t["album"]), D(t["duration"]), new(lines)) with { Isrc = S(t["isrc"]) };
+    }
+
+    public static string? ExtractSourceTrackId(string url, string platform)
+    {
+        if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            !string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase) || !string.IsNullOrEmpty(uri.UserInfo) || !uri.IsDefaultPort)
+            return null;
+        var host = uri.Host.ToLowerInvariant();
+        if (platform == "netease" && (host == "music.163.com" || host == "y.music.163.com"))
+        {
+            var combined = uri.Query + "&" + uri.Fragment;
+            var m = System.Text.RegularExpressions.Regex.Match(combined, @"(?:[?&#]|^)id=(\d+)(?:&|$)");
+            return m.Success ? m.Groups[1].Value : null;
+        }
+        if (platform == "spotify" && host == "open.spotify.com" && uri.AbsolutePath.StartsWith("/track/", StringComparison.Ordinal))
+        {
+            var seg = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+            return seg is { Length: 22 } && seg.All(char.IsAsciiLetterOrDigit) ? seg : null;
+        }
+        if (platform == "lrclib" && host == "lrclib.net" && uri.AbsolutePath.StartsWith("/api/get/", StringComparison.Ordinal))
+        {
+            var seg = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+            return !string.IsNullOrWhiteSpace(seg) ? seg : null;
+        }
+        return null;
     }
 }

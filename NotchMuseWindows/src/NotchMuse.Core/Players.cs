@@ -70,7 +70,7 @@ public static class MediaMetadataSanitizer
 
     private static readonly string[] VideoNoisePatterns =
     [
-        @"\s*[\(\[【（［]\s*(?:Official\s+)?(?:Music\s+)?(?:Video|MV|M/V|Audio|Lyric\s+Video|Lyrics?|Visualizer|Visual|HD|4K|Live\s+Video|original\s+ver\.?)\s*[\)\]】）］]",
+        @"\s*[\(\[【（［]\s*(?:Official\s+)?(?:Music\s+)?(?:Video|MV|M/V|Audio|Lyric\s+Video|Lyrics?|Visualizer|Visual|HD|4K|original\s+ver\.?)\s*[\)\]】）］]",
         @"\s*[\(\[【（［]\s*(?:(?:官方|華納|华纳|高畫質|高画质|HD|Official)\s*)*(?:MV|完整版|高清|高畫質|纯享版|純享版|歌词版|歌詞版|动态歌词|動態歌詞)\s*[\)\]】）］]",
         @"\s*[\(\[【（［][^()\[\]【】（）［］]*(?:官方完整版|高畫質|官方MV|动态歌词|動態歌詞|純享版|纯享版)[^()\[\]【】（）［］]*[\)\]】）］]",
         @"\s*[\(\[]\s*(?:from\s+[^)\]]+|Spider-Man:[^)\]]+)\s*[\)\]]",
@@ -124,51 +124,75 @@ public static class MediaMetadataSanitizer
                 artist = "";
         }
 
+        var matchingArtist = youtube ? CleanYouTubeArtist(artist) : artist;
+        var expectedArtists = TrackMatcher.ArtistGroup(matchingArtist);
+        bool MatchesExpectedArtist(string lhs)
+        {
+            if (expectedArtists.Count == 0) return false;
+            var candidateArtists = TrackMatcher.ArtistGroup(youtube ? CleanYouTubeArtist(lhs) : lhs);
+            return candidateArtists.Count > 0 && expectedArtists.SetEquals(candidateArtists);
+        }
+
+        var extracted = false;
         if (youtube)
         {
-            // Extract "Artist【Title】..." or "Artist「Title」..." (matching Mac MediaRemoteMetadataSanitizer)
-            var bracketMatch = Regex.Match(title, @"^(.+?)\s*[【「]([^】」]+)[】」](.*)$");
-            if (bracketMatch.Success)
+            // 1. Prefer verified "Artist - Title" split first so titles containing "-" stay intact!
+            if (expectedArtists.Count > 0 && SplitArtistTitle(title, MatchesExpectedArtist, allowMultiPart: true) is { } matchedSplit)
             {
-                var lhs = bracketMatch.Groups[1].Value.Trim(' ', '-', '–', '—', '|');
-                var inner = bracketMatch.Groups[2].Value.Trim();
-                var trailing = bracketMatch.Groups[3].Value.Trim();
-                if (lhs.Length > 0 && inner.Length > 0)
-                {
-                    artist = lhs;
-                    title = inner;
-                    var withMatch = Regex.Match(trailing, @"\bwith\s+([^()\[\]【】]+)", RegexOptions.IgnoreCase);
-                    if (withMatch.Success)
-                    {
-                        var guest = CleanYouTubeArtist(withMatch.Groups[1].Value);
-                        if (guest.Length > 0) artist = $"{artist}, {guest}";
-                    }
-                }
+                artist = matchedSplit.Artist;
+                title = matchedSplit.Title;
+                extracted = true;
             }
-            else
+
+            // 2. Bracketed "Artist【Title】..." or "Artist「Title」..." only when artist matches or channel-like
+            if (!extracted)
             {
-                // Extract "Artist 'Title'" or "Artist \"Title\"" (K-Pop / YouTube official MV convention)
-                var quotedMatch = Regex.Match(title, @"^(.+?)\s*(?:-\s*)?(?:'([^']{2,})'|""([^""]{2,})"")\s*$");
-                if (quotedMatch.Success)
+                var bracket = Regex.Match(title, @"^(.+?)\s*(?:【([^】]+)】|「([^」]+)」)(.*)$");
+                if (bracket.Success)
                 {
-                    var lhs = quotedMatch.Groups[1].Value.Trim(' ', '-', '–', '—', '|');
-                    var inner = (quotedMatch.Groups[2].Success ? quotedMatch.Groups[2].Value : quotedMatch.Groups[3].Value).Trim();
-                    if (lhs.Length > 0 && inner.Length > 0)
+                    var lhs = bracket.Groups[1].Value.Trim(' ', '-', '–', '—', '|');
+                    var inner = (bracket.Groups[2].Success ? bracket.Groups[2].Value : bracket.Groups[3].Value).Trim();
+                    var trailing = bracket.Groups[4].Value.Trim();
+                    if (lhs.Length > 0 && inner.Length > 0 && (MatchesExpectedArtist(lhs) || expectedArtists.Count == 0))
                     {
                         artist = lhs;
                         title = inner;
+                        var withMatch = Regex.Match(trailing, @"^with\s+([^()\[\]【】]+)", RegexOptions.IgnoreCase);
+                        if (withMatch.Success)
+                        {
+                            var guest = CleanYouTubeArtist(withMatch.Groups[1].Value);
+                            if (guest.Length > 0) artist = $"{artist}, {guest}";
+                            trailing = trailing[withMatch.Length..].Trim();
+                        }
+                        if (trailing.Length > 0) title = $"{title} {trailing}";
+                        extracted = true;
                     }
                 }
             }
 
-            // Support "Artist _ Title" as well as "Artist - Title"
-            if (SplitArtistTitle(title) is { } split && (string.IsNullOrWhiteSpace(artist) || artist.Contains('_') || title.Contains(" _ ") || TrackMatcher.ArtistKey(artist) == TrackMatcher.ArtistKey(split.Artist) || !title.Contains('(')))
+            // 3. Quoted "Artist 'Title'" only when artist matches or channel-like
+            if (!extracted)
             {
-                if (string.IsNullOrWhiteSpace(artist) || title.Contains(" _ ") || TrackMatcher.ArtistKey(artist) == TrackMatcher.ArtistKey(split.Artist))
+                var quoted = Regex.Match(title, @"^(.+?)\s*(?:-\s*)?(?:'([^']{2,})'|""([^""]{2,})"")\s*$");
+                if (quoted.Success)
                 {
-                    artist = split.Artist;
-                    title = split.Title;
+                    var lhs = quoted.Groups[1].Value.Trim(' ', '-', '–', '—', '|');
+                    var inner = (quoted.Groups[2].Success ? quoted.Groups[2].Value : quoted.Groups[3].Value).Trim();
+                    if (lhs.Length > 0 && inner.Length > 0 && (MatchesExpectedArtist(lhs) || expectedArtists.Count == 0))
+                    {
+                        artist = lhs;
+                        title = inner;
+                        extracted = true;
+                    }
                 }
+            }
+
+            // 4. Channel/unknown artist fallback: split strictly 2-part "Artist - Title"
+            if (!extracted && expectedArtists.Count == 0 && SplitArtistTitle(title, _ => true, allowMultiPart: false) is { } channelSplit)
+            {
+                artist = channelSplit.Artist;
+                title = channelSplit.Title;
+                extracted = true;
             }
 
             title = title.Trim('\'', '"', '“', '”', '‘', '’', ' ');
@@ -176,15 +200,13 @@ public static class MediaMetadataSanitizer
                 title = Regex.Replace(title, pattern, "", RegexOptions.IgnoreCase);
 
             artist = string.Join(", ", artist.Split(',').Select(CleanYouTubeArtist).Where(s => s.Length > 0));
-            title = CleanYouTubeTitle(title);
+            if (TrackMatcher.ParseTitle(title).Versions.Count == 0)
+                title = CleanYouTubeTitle(title);
         }
-
-        if (title.StartsWith(artist + " - ", StringComparison.OrdinalIgnoreCase))
-            title = title[(artist.Length + 3)..].Trim();
-        if ((splitGeneric || youtube || string.IsNullOrWhiteSpace(artist)) && SplitArtistTitle(title) is { } genericSplit)
+        else if (SplitArtistTitle(title, lhs => MatchesExpectedArtist(lhs) || (splitGeneric && string.IsNullOrWhiteSpace(artist)), allowMultiPart: expectedArtists.Count > 0) is { } genericSplit)
         {
-            if (string.IsNullOrWhiteSpace(artist) || youtube || TrackMatcher.ArtistKey(artist) == TrackMatcher.ArtistKey(genericSplit.Artist))
-            { artist = CleanYouTubeArtist(genericSplit.Artist); title = genericSplit.Title; }
+            artist = genericSplit.Artist;
+            title = genericSplit.Title;
         }
         var collaborators = TrackMatcher.Collaborators(title);
         if (collaborators.Length > 0)
@@ -201,17 +223,16 @@ public static class MediaMetadataSanitizer
         };
     }
 
-    private static (string Artist, string Title)? SplitArtistTitle(string value)
+    private static (string Artist, string Title)? SplitArtistTitle(string value, Func<string, bool> acceptsArtist, bool allowMultiPart)
     {
         foreach (var sep in new[] { " - ", " — ", " – ", " _ " })
         {
-            var parts = value.Split(sep, 2);
-            if (parts.Length == 2)
-            {
-                var lhs = parts[0].Trim();
-                var rhs = parts[1].Trim();
-                if (lhs.Length > 0 && rhs.Length > 0) return (lhs, rhs);
-            }
+            var parts = value.Split(sep);
+            if (parts.Length < 2) continue;
+            if (!allowMultiPart && parts.Length != 2) continue;
+            var lhs = parts[0].Trim();
+            var rhs = string.Join(sep, parts.Skip(1)).Trim();
+            if (lhs.Length > 0 && rhs.Length > 0 && acceptsArtist(lhs)) return (lhs, rhs);
         }
         return null;
     }

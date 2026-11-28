@@ -13,12 +13,14 @@ namespace NotchMuse.App;
 public partial class SupportWindow : Window
 {
     public const string EvmAddress = "0x6c0275e975818e99d078ee2348576e2d9608f6d6";
-    public const string TronAddress = "TCTrNcvTD3QE7opC61mKoTyUmRkKos6jan";
+    public const string QqGroupId = "1137981671";
+    public const string QqGroupJoinUrl = "https://qm.qq.com/q/J6W0oSPtu0";
     public const string SupportersUrl = "https://raw.githubusercontent.com/Xiye88/NotchMuse/main/docs/support/supporters.json";
 
     private readonly bool english;
     private readonly HttpClient? httpClient;
     private readonly CancellationTokenSource windowCts = new();
+    private readonly Dictionary<System.Windows.Controls.Button, CancellationTokenSource> copyResetTimers = [];
     private CancellationTokenSource? toastCts;
 
     public SupportWindow(bool isEnglish, HttpClient? client = null, bool skipNetwork = false)
@@ -34,7 +36,12 @@ public partial class SupportWindow : Window
             windowCts.Dispose();
             toastCts?.Cancel();
             toastCts?.Dispose();
-            toastCts = null;
+            foreach (var cts in copyResetTimers.Values)
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+            copyResetTimers.Clear();
         };
 
         ApplyLanguage();
@@ -53,43 +60,50 @@ public partial class SupportWindow : Window
     private void ApplyLanguage()
     {
         Title = english ? "Support NotchMuse" : "支持 NotchMuse";
-        HeaderTitle.Text = english ? "Buy the Author a Coffee" : "请作者喝杯咖啡";
+        HeaderTitle.Text = english ? "Support NotchMuse" : "支持 NotchMuse";
         HeaderSubtitle.Text = english
-            ? "NotchMuse is free and open-source · Your support keeps Windows & Mac releases moving forward"
-            : "NotchMuse 永久免费开源 · 你的支持会让 Windows & Mac 双端持续变得更好";
-        WeChatBadge.Text = english ? "WeChat Pay" : "微信赞赏";
+            ? "NotchMuse is a free passion project built with love. If it brightens your listening, feel free to buy me a coffee or join the user group."
+            : "NotchMuse 是免费开源、为爱发电的独立项目。如果它陪你度过了好时光，欢迎请作者喝杯咖啡，或加入用户群交流反馈。";
+        WeChatBadge.Text = english ? "WeChat Pay" : "微信支付";
         WeChatHint.Text = english ? "Scan with WeChat" : "打开微信扫一扫赞赏";
         WeChatSubHint.Text = english ? "Any amount is appreciated" : "随心打赏，不设门槛";
-        CopyEvmBtn.Content = english ? "Copy EVM Address" : "复制 EVM 地址";
-        CopyTronBtn.Content = english ? "Copy TRC-20 Address" : "复制 TRC-20 地址";
-        ChainNoticeText.Text = english
-            ? "Note: Send USDT only on the matching chain (EVM or TRC-20). Thank you for supporting NotchMuse!"
-            : "提示：链上打赏请务必核对对应网络（EVM / TRC-20），仅支持 USDT 转账。感谢每一份温暖支持！";
+        QqGroupBadge.Text = english ? "QQ User Group" : "QQ 用户交流群";
+        QqGroupHint.Text = english ? "Feedback · Updates · Chat" : "交流反馈 · 抢先体验";
+        QqGroupIdLabel.Text = english ? $"Group {QqGroupId}" : $"群号 {QqGroupId}";
+        CopyQqGroupBtn.Content = english ? "Copy Group ID" : "复制群号";
+        EvmOnlyNotice.Text = english ? "EVM networks · USDT only" : "仅支持 EVM 网络 USDT";
+        CopyEvmBtn.Content = english ? "Copy Address" : "复制地址";
         SupportersHeader.Text = english ? "Supporters Wall" : "鸣谢名单 · Supporters";
         GitHubStarBtn.Content = english ? "Star on GitHub ↗" : "GitHub Star 支持 ↗";
         SupportersStatusText.Text = english ? "Loading supporters…" : "正在加载鸣谢名单…";
 
-        EvmAddressLabel.Text = $"{EvmAddress[..8]}…{EvmAddress[^6..]}";
-        TronAddressLabel.Text = $"{TronAddress[..8]}…{TronAddress[^6..]}";
+        EvmAddressLabel.Text = $"{EvmAddress[..6]}…{EvmAddress[^4..]}";
     }
 
     private void LoadQrCodes()
+    {
+        WeChatQrImage.Source = TryLoadPackImage("pack://application:,,,/NotchMuse.App;component/WeChatSupport.jpg");
+        QqGroupQrImage.Source = TryLoadPackImage("pack://application:,,,/NotchMuse.App;component/qq-group-qr.png")
+            ?? QrCodeRenderer.RenderBitmap(QqGroupJoinUrl, 180);
+        EvmQrImage.Source = QrCodeRenderer.RenderBitmap(EvmAddress, 180);
+    }
+
+    private static BitmapSource? TryLoadPackImage(string packUri)
     {
         try
         {
             var bmp = new BitmapImage();
             bmp.BeginInit();
-            bmp.UriSource = new Uri("pack://application:,,,/NotchMuse.App;component/WeChatSupport.jpg", UriKind.Absolute);
+            bmp.UriSource = new Uri(packUri, UriKind.Absolute);
             bmp.CacheOption = BitmapCacheOption.OnLoad;
             bmp.EndInit();
             bmp.Freeze();
-            WeChatQrImage.Source = bmp;
+            return bmp;
         }
-        catch (IOException) { }
-        catch (UriFormatException) { }
-
-        EvmQrImage.Source = QrCodeRenderer.RenderBitmap(EvmAddress, 180);
-        TronQrImage.Source = QrCodeRenderer.RenderBitmap(TronAddress, 180);
+        catch (Exception ex) when (ex is IOException or UriFormatException or NotSupportedException or InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     private async Task LoadSupportersAsync()
@@ -132,17 +146,7 @@ public partial class SupportWindow : Window
             await Dispatcher.InvokeAsync(() => { if (IsLoaded) RenderSupporters(list); });
         }
         catch (OperationCanceledException) { }
-        catch (HttpRequestException)
-        {
-            if (!windowCts.IsCancellationRequested)
-                await Dispatcher.InvokeAsync(() => { if (IsLoaded) RenderSupporters([]); });
-        }
-        catch (JsonException)
-        {
-            if (!windowCts.IsCancellationRequested)
-                await Dispatcher.InvokeAsync(() => { if (IsLoaded) RenderSupporters([]); });
-        }
-        catch (InvalidOperationException)
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or InvalidOperationException)
         {
             if (!windowCts.IsCancellationRequested)
                 await Dispatcher.InvokeAsync(() => { if (IsLoaded) RenderSupporters([]); });
@@ -155,8 +159,8 @@ public partial class SupportWindow : Window
         if (supporters.Count == 0)
         {
             SupportersStatusText.Text = english
-                ? "Become the first supporter listed here — your name will shine on both Windows & Mac!"
-                : "期待你的名字出现在鸣谢名单中 · 你的支持将同步展示在 Windows 与 Mac 双端";
+                ? "Thanks to everyone supporting NotchMuse — your name will shine on both Windows & Mac!"
+                : "感谢每一位支持 NotchMuse 的朋友 · 鸣谢名单将同步展示在 Windows 与 Mac 双端";
             SupportersStatusText.Visibility = Visibility.Visible;
             return;
         }
@@ -182,22 +186,53 @@ public partial class SupportWindow : Window
         }
     }
 
+    private void OnCopyQqGroupClick(object sender, RoutedEventArgs e)
+    {
+        InteractionMotion.Rebound(CopyQqGroupBtn, 0.94);
+        if (TryCopyClipboard(QqGroupId))
+        {
+            FlashButtonFeedback(CopyQqGroupBtn, english ? "Copied ✓" : "已复制 ✓", english ? "Copy Group ID" : "复制群号");
+            ShowToast(english ? $"Copied QQ Group ID {QqGroupId}" : $"已复制 QQ 群号 {QqGroupId}");
+        }
+        else
+        {
+            ShowToast(english ? "Clipboard busy, please retry" : "剪贴板被占用，请重试");
+        }
+    }
+
     private void OnCopyEvmClick(object sender, RoutedEventArgs e)
     {
         InteractionMotion.Rebound(CopyEvmBtn, 0.94);
         if (TryCopyClipboard(EvmAddress))
+        {
+            FlashButtonFeedback(CopyEvmBtn, english ? "Copied ✓" : "已复制 ✓", english ? "Copy Address" : "复制地址");
             ShowToast(english ? "Copied USDT (EVM) address" : "已复制 USDT (EVM) 地址");
+        }
         else
+        {
             ShowToast(english ? "Clipboard busy, please retry" : "剪贴板被占用，请重试");
+        }
     }
 
-    private void OnCopyTronClick(object sender, RoutedEventArgs e)
+    private async void FlashButtonFeedback(System.Windows.Controls.Button button, string feedbackText, string originalText)
     {
-        InteractionMotion.Rebound(CopyTronBtn, 0.94);
-        if (TryCopyClipboard(TronAddress))
-            ShowToast(english ? "Copied USDT (TRC-20) address" : "已复制 USDT (TRC-20) 地址");
-        else
-            ShowToast(english ? "Clipboard busy, please retry" : "剪贴板被占用，请重试");
+        if (copyResetTimers.Remove(button, out var old))
+        {
+            old.Cancel();
+            old.Dispose();
+        }
+        var cts = new CancellationTokenSource();
+        copyResetTimers[button] = cts;
+        var ct = cts.Token;
+
+        button.Content = feedbackText;
+        try
+        {
+            await Task.Delay(2000, ct);
+            if (!ct.IsCancellationRequested && IsLoaded)
+                button.Content = originalText;
+        }
+        catch (OperationCanceledException) { }
     }
 
     private static bool TryCopyClipboard(string text)

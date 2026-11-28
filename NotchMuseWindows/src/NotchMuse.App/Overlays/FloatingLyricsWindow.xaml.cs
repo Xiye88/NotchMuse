@@ -37,6 +37,8 @@ public partial class FloatingLyricsWindow : Window
 
     private readonly DispatcherTimer microTooltipTimer = new() { Interval = TimeSpan.FromMilliseconds(150) };
     private readonly DispatcherTimer dragPollTimer = new() { Interval = TimeSpan.FromMilliseconds(8) }; // ~120Hz silky Win32 drag without CaptureMouse or modal loop traps!
+    private readonly DispatcherTimer lockedHoverTimer = new() { Interval = TimeSpan.FromMilliseconds(90) };
+    private readonly FloatingUnlockPillWindow unlockPill = new();
 
     private IntPtr handle;
     private HwndSource? hwndSource;
@@ -76,6 +78,8 @@ public partial class FloatingLyricsWindow : Window
         BuildQuickColorDots();
         microTooltipTimer.Tick += OnMicroTooltipTimerTick;
         dragPollTimer.Tick += OnDragPollTick;
+        lockedHoverTimer.Tick += OnLockedHoverTick;
+        unlockPill.UnlockRequested += () => LockToggled?.Invoke();
         SourceInitialized += (_, _) =>
         {
             handle = new WindowInteropHelper(this).Handle;
@@ -88,13 +92,24 @@ public partial class FloatingLyricsWindow : Window
         };
         IsVisibleChanged += (_, _) =>
         {
-            if (IsVisible) ApplyClickThroughStyle();
-            else if (dragging) FinishDirectDrag(commit: false);
+            if (IsVisible)
+            {
+                ApplyClickThroughStyle();
+                UpdateLockedHoverMonitor();
+            }
+            else
+            {
+                if (dragging) FinishDirectDrag(commit: false);
+                HideUnlockPill();
+                lockedHoverTimer.Stop();
+            }
         };
         Closed += (_, _) =>
         {
             dragPollTimer.Stop();
             microTooltipTimer.Stop();
+            lockedHoverTimer.Stop();
+            unlockPill.Close();
             hwndSource?.RemoveHook(WndProc);
             hwndSource = null;
         };
@@ -223,6 +238,7 @@ public partial class FloatingLyricsWindow : Window
         LyricCapsule.IsHitTestVisible = !locked;
         HoverToolbarHost.IsHitTestVisible = !locked;
         ApplyClickThroughStyle();
+        UpdateLockedHoverMonitor();
         if (activeSettings is not null) ApplyAppearance(activeSettings);
         UpdateHoverChrome();
     }
@@ -235,7 +251,67 @@ public partial class FloatingLyricsWindow : Window
         OpenMainMiniBtn.Content = english ? "Home" : "主窗口";
         SettingsMiniBtn.Content = english ? "Settings" : "设置";
         HideMiniBtn.Content = english ? "Hide" : "隐藏";
+        unlockPill.ApplyLanguage(english);
         BuildQuickColorDots();
+    }
+
+    private void UpdateLockedHoverMonitor()
+    {
+        if (locked && IsVisible && mode == LyricsDisplayMode.FreeFloat)
+        {
+            if (!lockedHoverTimer.IsEnabled) lockedHoverTimer.Start();
+        }
+        else
+        {
+            lockedHoverTimer.Stop();
+            HideUnlockPill();
+        }
+    }
+
+    private void HideUnlockPill()
+    {
+        if (unlockPill.IsVisible) unlockPill.Hide();
+    }
+
+    private void OnLockedHoverTick(object? sender, EventArgs e)
+    {
+        if (!locked || !IsVisible || mode != LyricsDisplayMode.FreeFloat)
+        {
+            lockedHoverTimer.Stop();
+            HideUnlockPill();
+            return;
+        }
+        if (!WindowClickThroughHelper.GetCursorPos(out var pt)) return;
+
+        var dpi = Math.Max(1.0, VisualTreeHelper.GetDpi(this).DpiScaleX);
+        var cursorDip = new System.Windows.Point(pt.X / dpi, pt.Y / dpi);
+
+        var capW = Math.Max(120, LyricCapsule.ActualWidth);
+        var capH = Math.Max(42, LyricCapsule.ActualHeight);
+        var capOrigin = LyricCapsule.IsLoaded
+            ? LyricCapsule.PointToScreen(new System.Windows.Point(0, 0))
+            : new System.Windows.Point(Left * dpi, Top * dpi);
+        var capRect = new Rect(capOrigin.X / dpi, capOrigin.Y / dpi, capW, capH);
+
+        // Generous hover zone covering the locked lyric capsule + its compact icon-only unlock pill slot
+        var work = ResolveScreenWorkArea(activeSettings?.DisplayScreen ?? "Primary");
+        var pillAbove = capRect.Top - 36 >= work.Top;
+        var pillLeft = capRect.Left + (capRect.Width - unlockPill.Width) / 2;
+        var pillTop = pillAbove ? capRect.Top - unlockPill.Height - 2 : capRect.Bottom + 2;
+
+        var hoverZone = Rect.Union(
+            new Rect(capRect.Left - 8, capRect.Top - 8, capRect.Width + 16, capRect.Height + 16),
+            new Rect(pillLeft - 10, pillTop - 6, unlockPill.Width + 20, unlockPill.Height + 12));
+
+        if (hoverZone.Contains(cursorDip))
+        {
+            if (!unlockPill.IsVisible || Math.Abs(unlockPill.Left - pillLeft) > 2 || Math.Abs(unlockPill.Top - pillTop) > 2)
+                unlockPill.ShowAt(pillLeft, pillTop);
+        }
+        else
+        {
+            HideUnlockPill();
+        }
     }
 
     private string GetMicroTooltipForButton(System.Windows.Controls.Button btn)

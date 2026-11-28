@@ -13,9 +13,27 @@ public sealed record LyricDocument(IReadOnlyList<LyricLine> Lines, double Offset
         Words = l.Words?.Select(w => w with { Start = w.Start - Offset, End = w.End - Offset }).ToArray()
     }).OrderBy(l => l.Start).ToArray();
 }
+public enum LyricsEvidence
+{
+    TimedLyrics,
+    Instrumental,
+    UserContribution
+}
+
+[method: System.Text.Json.Serialization.JsonConstructor]
 public sealed record LyricsCandidate(string Provider, string Platform, string? Id,
     string Title, string Artist, string? Album, double Duration, LyricDocument Document,
-    int MatcherScore = 0, string? Isrc = null, bool LiveIdentityVerified = false);
+    int MatcherScore = 0, string? Isrc = null, bool LiveIdentityVerified = false,
+    LyricsEvidence Evidence = LyricsEvidence.TimedLyrics)
+{
+    public LyricsCandidate(string Provider, string Platform, string? Id,
+        string Title, string Artist, string? Album, double Duration, LyricDocument Document,
+        int MatcherScore, string? Isrc, bool LiveIdentityVerified)
+        : this(Provider, Platform, Id, Title, Artist, Album, Duration, Document,
+            MatcherScore, Isrc, LiveIdentityVerified, LyricsEvidence.TimedLyrics)
+    {
+    }
+}
 public sealed record SelectionDecision(LyricsCandidate? Winner, string Reason,
     IReadOnlyDictionary<string, string> Rejected);
 public sealed record SourceResult(string Provider, LyricsCandidate? Candidate, string Status,

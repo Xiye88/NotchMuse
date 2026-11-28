@@ -93,11 +93,16 @@ public sealed class NetEaseSource(HttpClient client) : HttpLyricsSource(client)
             foreach (var song in Ranked(track, cloudCandidates).Take(8))
             {
                 var lyrics = await JsonAsync(Url("https://music.163.com/api/song/lyric/v1", ("id", song.Id!), ("lv", "-1"), ("yv", "-1"), ("tv", "-1")), cancellationToken, referer: "https://music.163.com/");
+                if (IsPureMusicFlag(lyrics["pureMusic"]))
+                    return song with { Document = new([]), Evidence = LyricsEvidence.Instrumental };
+
                 var yrc = S(lyrics["yrc"]?["lyric"]);
                 var doc = string.IsNullOrWhiteSpace(yrc) ? LyricParser.Parse(S(lyrics["lrc"]?["lyric"])) : LyricParser.ParseRich(yrc, false);
                 if (doc.Lines.Count == 0)
                 {
                     lyrics = await JsonAsync(Url("https://music.163.com/api/song/lyric", ("id", song.Id!), ("lv", "-1"), ("tv", "-1"), ("kv", "-1")), cancellationToken, referer: "https://music.163.com/");
+                    if (IsPureMusicFlag(lyrics["pureMusic"]))
+                        return song with { Document = new([]), Evidence = LyricsEvidence.Instrumental };
                     doc = LyricParser.Parse(S(lyrics["lrc"]?["lyric"]));
                 }
                 if (doc.Lines.Count == 0) continue;
@@ -112,6 +117,10 @@ public sealed class NetEaseSource(HttpClient client) : HttpLyricsSource(client)
         }
         return null;
     }
+
+    private static bool IsPureMusicFlag(System.Text.Json.Nodes.JsonNode? node) =>
+        (node is System.Text.Json.Nodes.JsonValue jv && jv.TryGetValue<bool>(out var b) && b) ||
+        string.Equals(S(node), "true", StringComparison.OrdinalIgnoreCase);
 }
 
 public sealed class QqSource(HttpClient client) : HttpLyricsSource(client)

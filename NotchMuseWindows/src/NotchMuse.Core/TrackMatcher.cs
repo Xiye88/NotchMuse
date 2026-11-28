@@ -21,10 +21,22 @@ public static partial class TrackMatcher
 
     public static string Normalize(string text)
     {
-        // Preserve ambiguous Chinese identity characters while unifying 妳→你, matching Mac LyricsSelection.
+        // Contextual 乾淨/乾净 -> 干净 while preserving standalone 乾/幹 (e.g. 乾隆) and 髮/發.
+        text = text.Replace("乾淨", "干净", StringComparison.Ordinal).Replace("乾净", "干净", StringComparison.Ordinal);
         text = text.Replace('妳', '你').Replace('乾', '\uE000').Replace('幹', '\uE001').Replace('髮', '\uE002').Replace('發', '\uE003');
         text = Simplified(text).Replace('\uE000', '乾').Replace('\uE001', '幹').Replace('\uE002', '髮').Replace('\uE003', '發').Normalize(NormalizationForm.FormD);
-        return string.Concat(text.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark && char.IsLetterOrDigit(c))).ToLowerInvariant();
+        return string.Concat(text.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark && char.IsLetterOrDigit(c)))
+            .Normalize(NormalizationForm.FormC)
+            .ToLowerInvariant();
+    }
+
+    private static string StripSoundtrackBilling(string title)
+    {
+        const string medium = @"(?:[电電][视視][剧劇]|[连連][续續][剧劇]|[网網][剧劇]|[电電]影|[动動][画畫]|[动動]漫|[游遊][戏戲]|[综綜][艺藝])";
+        const string role = @"(?:心[动動]曲|片尾曲|主[题題]曲|插曲|片[头頭]曲|[开開][场場]曲)";
+        const string bracketed = @"[\(\[（【]\s*(?:" + medium + @")?《[^》]+》[^)\]）】]*[\)\]）】]";
+        const string suffix = @"\s*(?:[-–—:：|·]\s*)?(?:" + medium + @"\s*)?《[^》]+》\s*(?:的\s*)?" + role + @"\s*$";
+        return Regex.Replace(Regex.Replace(title, bracketed, ""), suffix, "").Trim();
     }
 
     public static string ArtistKey(string artist)
@@ -45,11 +57,12 @@ public static partial class TrackMatcher
     {
         var name = title.ToLowerInvariant();
         name = Regex.Replace(name, @"[\(\[（][^\)\]）]*\b(?:feat\.?|ft\.?|featuring|with)\s+[^\)\]）]*[\)\]）]|\s+\b(?:feat\.?|ft\.?|featuring)\s+.*$", "");
-        name = Regex.Replace(name, @"[\(\[（](?:电视剧|电影|网剧|动画|动漫|游戏|综艺)?《[^》]+》[^\)）\]]*[\)\]）]", "");
+        name = StripSoundtrackBilling(name);
         var versions = Regex.Matches(name, @"\b(live|remix|acoustic|instrumental|remaster(?:ed)?|cover|rerecorded)\b")
             .Select(m => m.Value.Replace("remastered", "remaster")).ToHashSet();
         foreach (var hint in new[] { "现场", "翻唱", "伴奏", "混音", "重录" })
             if (name.Contains(hint, StringComparison.Ordinal)) versions.Add(hint);
+        if (name.Contains("現場", StringComparison.Ordinal)) versions.Add("现场");
         if (versions.Contains("remaster"))
             foreach (Match year in Regex.Matches(name, @"\b(?:19|20)\d{2}\b")) versions.Add("remaster:" + year.Value);
         name = Regex.Replace(name, @"[\(\[][^\)\]]*\b(?:remaster(?:ed)?|live|remix|acoustic|instrumental)\b[^\)\]]*[\)\]]|\s+-\s+.*\b(?:remaster(?:ed)?|live|remix|acoustic|instrumental)\b.*$", "");
@@ -74,6 +87,17 @@ public static partial class TrackMatcher
         if (!string.IsNullOrWhiteSpace(track.Album) && album is not null &&
             !ParseTitle(track.Title + " " + track.Album).Versions.SetEquals(ParseTitle(title + " " + album).Versions))
             return "album_version_mismatch";
+        if (string.IsNullOrWhiteSpace(track.Album) && !string.IsNullOrWhiteSpace(album) &&
+            !a.Versions.Contains("live") && !a.Versions.Contains("现场"))
+        {
+            var albumVersions = ParseTitle(album).Versions;
+            var simplifiedAlbum = Simplified(album);
+            if ((track.IsMusicVideo && (albumVersions.Contains("live") || albumVersions.Contains("现场"))) ||
+                simplifiedAlbum.Contains("演唱会", StringComparison.Ordinal) ||
+                simplifiedAlbum.Contains("演唱會", StringComparison.Ordinal) ||
+                Regex.IsMatch(album, @"\b(?:in concert|concert recording)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+                return "album_version_mismatch";
+        }
         return null;
     }
 
@@ -109,13 +133,11 @@ public static partial class TrackMatcher
 
     public static string SearchQuery(Track t)
     {
-        var title = Regex.Replace(t.Title,
+        var title = StripSoundtrackBilling(Regex.Replace(t.Title,
             @"[\(\[（][^\)\]）]*(?:feat\.?|ft\.?|featuring|with)\s+[^\)\]）]*[\)\]）]",
-            "", RegexOptions.IgnoreCase).Trim();
-        title = Regex.Replace(title,
-            @"[\(\[（](?:电视剧|电影|网剧|动画|动漫|游戏|综艺)?《[^》]+》[^\)\]）]*[\)\]）]",
-            "", RegexOptions.IgnoreCase).Trim();
-        var artists = Regex.Split(t.Artist, @"[,;/×、]")
+            "", RegexOptions.IgnoreCase));
+        var artistSeparators = Regex.IsMatch(t.Artist, @"[\u4e00-\u9fff]") ? @"[,;&/×、]" : @"[,;/×、]";
+        var artists = Regex.Split(t.Artist, artistSeparators)
             .Select(a => a.Trim())
             .Where(a => a.Length > 0)
             .Select(a => a.Equals("JC", StringComparison.OrdinalIgnoreCase)

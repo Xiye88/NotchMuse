@@ -19,23 +19,31 @@
             CornerRadius="14">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="54"/>
+                <RowDefinition Height="64"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Header Strip -->
+            <!-- Header Strip (Love & Passion Project tone aligned with Mac Build 107) -->
             <Grid Grid.Row="0" Margin="22,0,14,0" MouseLeftButtonDown="OnTitleDrag">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="28" Height="28" CornerRadius="9" Background="#24E25D6B" Margin="0,0,10,0">
-                        <Path Data="M 8,13.5 C 8,13.5 2,9.6 2,5.6 C 2,3.7 3.5,2.3 5.2,2.3 C 6.4,2.3 7.4,3.0 8,4.0 C 8.6,3.0 9.6,2.3 10.8,2.3 C 12.5,2.3 14,3.7 14,5.6 C 14,9.6 8,13.5 8,13.5 Z"
-                              Fill="#E25D6B" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="HeaderTitle" Text="请作者喝杯咖啡" FontFamily="{StaticResource StudioDisplayFont}" FontSize="15.5" FontWeight="Bold"/>
-                        <TextBlock x:Name="HeaderSubtitle" Text="NotchMuse 永久免费开源 · 你的支持会让 Windows &amp; Mac 双端持续变得更好" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                    </StackPanel>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="30" Height="30" CornerRadius="9" Background="#24E25D6B" Margin="0,0,12,0" VerticalAlignment="Center">
+                    <Path Data="M 8,13.5 C 8,13.5 2,9.6 2,5.6 C 2,3.7 3.5,2.3 5.2,2.3 C 6.4,2.3 7.4,3.0 8,4.0 C 8.6,3.0 9.6,2.3 10.8,2.3 C 12.5,2.3 14,3.7 14,5.6 C 14,9.6 8,13.5 8,13.5 Z"
+                          Fill="#E25D6B" Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <TextBlock x:Name="HeaderTitle" Text="支持 NotchMuse" FontFamily="{StaticResource StudioDisplayFont}" FontSize="15.5" FontWeight="Bold"/>
+                    <TextBlock x:Name="HeaderSubtitle"
+                               Text="NotchMuse 是免费开源、为爱发电的独立项目。如果它陪你度过了好时光，欢迎请作者喝杯咖啡，或加入用户群交流反馈。"
+                               FontSize="11"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               Margin="0,2,0,0"/>
                 </StackPanel>
-                <Button Style="{StaticResource WindowCloseButton}" Width="28" Height="28" HorizontalAlignment="Right" VerticalAlignment="Center" Click="OnCloseClick">
+                <Button Grid.Column="2" Style="{StaticResource WindowCloseButton}" Width="28" Height="28" HorizontalAlignment="Right" VerticalAlignment="Center" Click="OnCloseClick">
                     <Path Data="M 2,2 L 10,10 M 10,2 L 2,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                 </Button>
             </Grid>
@@ -45,60 +53,76 @@
             <!-- Content Body -->
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="22,18,22,18">
                 <StackPanel>
-                    <!-- 3 Payment Channel Cards (Mac SupportWindowController exact parity!) -->
-                    <UniformGrid Columns="3" Margin="0,0,0,14">
-                        <!-- Card 1: WeChat Pay -->
+                    <!-- 3-Column Layout: WeChat Pay | QQ User Group | USDT · EVM (Mac Build 107 exact parity!) -->
+                    <UniformGrid Columns="3" Margin="0,0,0,16">
+                        <!-- Card 1 (Left): WeChat Pay -->
                         <Border CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" Padding="14" Margin="0,0,7,0">
-                            <StackPanel HorizontalAlignment="Center">
-                                <Border CornerRadius="7" Background="#1F10B981" Padding="9,3" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <TextBlock x:Name="WeChatBadge" Style="{x:Null}" Text="微信赞赏" FontFamily="{StaticResource StudioFont}" FontSize="11.5" FontWeight="SemiBold" Foreground="#0D9668"/>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" CornerRadius="7" Background="#1F10B981" Padding="10,3" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <TextBlock x:Name="WeChatBadge" Style="{x:Null}" Text="微信支付" FontFamily="{StaticResource StudioFont}" FontSize="11.5" FontWeight="SemiBold" Foreground="#0D9668"/>
                                 </Border>
-                                <Border Width="154" Height="154" CornerRadius="10" Background="#FFFFFF" Padding="6" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1">
+                                <Border Grid.Row="1" Width="162" Height="162" CornerRadius="10" Background="#FFFFFF" Padding="6" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1">
                                     <Image x:Name="WeChatQrImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                                 </Border>
-                                <TextBlock x:Name="WeChatHint" Text="打开微信扫一扫赞赏" FontSize="11.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,11,0,2"/>
-                                <TextBlock x:Name="WeChatSubHint" Text="随心打赏，不设门槛" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
+                                <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="0,12,0,0">
+                                    <TextBlock x:Name="WeChatHint" Text="打开微信扫一扫赞赏" FontSize="11.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="WeChatSubHint" Text="随心打赏，不设门槛" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                                </StackPanel>
+                            </Grid>
                         </Border>
 
-                        <!-- Card 2: USDT EVM -->
+                        <!-- Card 2 (Center): QQ User Group -->
                         <Border CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" Padding="14" Margin="3.5,0,3.5,0">
-                            <StackPanel HorizontalAlignment="Center">
-                                <Border CornerRadius="7" Background="#226366F1" Padding="9,3" HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" CornerRadius="7" Background="#1F0EA5E9" Padding="10,3" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <TextBlock x:Name="QqGroupBadge" Style="{x:Null}" Text="QQ 用户交流群" FontFamily="{StaticResource StudioFont}" FontSize="11.5" FontWeight="SemiBold" Foreground="#0284C7"/>
+                                </Border>
+                                <Border Grid.Row="1" Width="162" Height="162" CornerRadius="10" Background="#FFFFFF" Padding="6" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1">
+                                    <Image x:Name="QqGroupQrImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                </Border>
+                                <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="0,10,0,8">
+                                    <TextBlock x:Name="QqGroupHint" Text="交流反馈 · 抢先体验" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="QqGroupIdLabel" Text="群号 1137981671" FontFamily="Consolas, Segoe UI" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                                </StackPanel>
+                                <Button x:Name="CopyQqGroupBtn" Grid.Row="3" Content="复制群号" Padding="14,6" FontSize="11.5" HorizontalAlignment="Center" Click="OnCopyQqGroupClick"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Card 3 (Right): USDT · EVM (consolidated network notice inside card!) -->
+                        <Border CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" Padding="14" Margin="7,0,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" CornerRadius="7" Background="#226366F1" Padding="10,3" HorizontalAlignment="Center" Margin="0,0,0,10">
                                     <TextBlock Style="{x:Null}" Text="USDT · EVM" FontFamily="{StaticResource StudioFont}" FontSize="11.5" FontWeight="SemiBold" Foreground="#5B5CE6"/>
                                 </Border>
-                                <Border Width="154" Height="154" CornerRadius="10" Background="#FFFFFF" Padding="6" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1">
+                                <Border Grid.Row="1" Width="162" Height="162" CornerRadius="10" Background="#FFFFFF" Padding="6" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1">
                                     <Image x:Name="EvmQrImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                                 </Border>
-                                <TextBlock Text="ETH · ARB · Base · BSC · Polygon" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,9,0,4"/>
-                                <TextBlock x:Name="EvmAddressLabel" Text="0x6c02...6d6" FontFamily="Consolas, Segoe UI" FontSize="10.5" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,7"/>
-                                <Button x:Name="CopyEvmBtn" Content="复制 EVM 地址" Padding="12,5" FontSize="11.5" HorizontalAlignment="Center" Click="OnCopyEvmClick"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Card 3: USDT TRON -->
-                        <Border CornerRadius="14" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" Padding="14" Margin="7,0,0,0">
-                            <StackPanel HorizontalAlignment="Center">
-                                <Border CornerRadius="7" Background="#22EF4444" Padding="9,3" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                    <TextBlock Style="{x:Null}" Text="USDT · TRON" FontFamily="{StaticResource StudioFont}" FontSize="11.5" FontWeight="SemiBold" Foreground="#DC2626"/>
-                                </Border>
-                                <Border Width="154" Height="154" CornerRadius="10" Background="#FFFFFF" Padding="6" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1">
-                                    <Image x:Name="TronQrImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
-                                </Border>
-                                <TextBlock Text="TRC-20 Network" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,9,0,4"/>
-                                <TextBlock x:Name="TronAddressLabel" Text="TCTrNc...6jan" FontFamily="Consolas, Segoe UI" FontSize="10.5" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,7"/>
-                                <Button x:Name="CopyTronBtn" Content="复制 TRC-20 地址" Padding="12,5" FontSize="11.5" HorizontalAlignment="Center" Click="OnCopyTronClick"/>
-                            </StackPanel>
+                                <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="0,8,0,8">
+                                    <TextBlock Text="ETH · BSC · Arbitrum · Optimism" FontSize="9.8" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="EvmOnlyNotice" Text="仅支持 EVM 网络 USDT" FontSize="10" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,2,0,3"/>
+                                    <TextBlock x:Name="EvmAddressLabel" Text="0x6c02…f6d6" FontFamily="Consolas, Segoe UI" FontSize="10.5" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                                <Button x:Name="CopyEvmBtn" Grid.Row="3" Content="复制地址" Padding="14,6" FontSize="11.5" HorizontalAlignment="Center" Click="OnCopyEvmClick"/>
+                            </Grid>
                         </Border>
                     </UniformGrid>
-
-                    <!-- Chain Safety Reminder -->
-                    <TextBlock x:Name="ChainNoticeText"
-                               Text="提示：链上打赏请务必核对对应网络（EVM / TRC-20），仅支持 USDT 转账。感谢每一份温暖支持！"
-                               FontSize="11"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,14"/>
 
                     <!-- Live Supporters Wall (synced from Mac's GitHub JSON) -->
                     <Border CornerRadius="12"
@@ -131,7 +155,7 @@
                     BorderThickness="1"
                     Opacity="0"
                     IsHitTestVisible="False">
-                <TextBlock x:Name="CopyToastText" Style="{x:Null}" Text="✓  已复制地址到剪贴板" FontFamily="{StaticResource StudioFont}" FontSize="12" FontWeight="SemiBold" Foreground="#F5F4F0"/>
+                <TextBlock x:Name="CopyToastText" Style="{x:Null}" Text="✓  已复制到剪贴板" FontFamily="{StaticResource StudioFont}" FontSize="12" FontWeight="SemiBold" Foreground="#F5F4F0"/>
             </Border>
         </Grid>
     </Border>

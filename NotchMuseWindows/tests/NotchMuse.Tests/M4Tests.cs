@@ -322,17 +322,18 @@ public sealed class M4Tests
     }
 
     [Fact]
-    public void QrCodeRendererEncodesEvmAndTronWalletAddresses()
+    public void QrCodeRendererEncodesEvmAndQqGroupPayloads()
     {
         var evmMatrix = QrCodeRenderer.EncodeVersion3M(SupportWindow.EvmAddress);
-        var tronMatrix = QrCodeRenderer.EncodeVersion3M(SupportWindow.TronAddress);
+        var qqMatrix = QrCodeRenderer.EncodeVersion3M(SupportWindow.QqGroupJoinUrl);
         Assert.Equal(29, evmMatrix.GetLength(0));
         Assert.Equal(29, evmMatrix.GetLength(1));
-        Assert.Equal(29, tronMatrix.GetLength(0));
+        Assert.Equal(29, qqMatrix.GetLength(0));
+        Assert.Equal("1137981671", SupportWindow.QqGroupId);
         // Top-left finder corners must be dark
         Assert.True(evmMatrix[0, 0]);
         Assert.True(evmMatrix[3, 3]);
-        Assert.True(tronMatrix[0, 0]);
+        Assert.True(qqMatrix[0, 0]);
     }
 
     [Fact]

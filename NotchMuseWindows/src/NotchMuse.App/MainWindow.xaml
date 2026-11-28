@@ -633,70 +633,76 @@
                         <!-- Curated Color Swatches -->
                         <WrapPanel x:Name="AppearanceSwatchesPanel" Margin="0,0,0,10"/>
 
-                        <!-- Custom Solid Lyric Color Picker Bar -->
-                        <StackPanel x:Name="CustomSolidColorBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16">
-                            <TextBlock x:Name="CustomSolidLabel" Text="自定义纯色" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Border x:Name="CustomSolidSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,0,8,0" MouseLeftButtonUp="OnPickCustomSolidColor"/>
-                            <TextBox x:Name="CustomSolidHexBox" Width="112" Height="34" FontFamily="Consolas, Segoe UI" FontSize="13" FontWeight="SemiBold" Text="#E06D1B" MaxLength="9" TextChanged="OnCustomSolidHexChanged"/>
-                            <Button x:Name="PickCustomSolidBtn" Content="调色盘…" Margin="8,0,0,0" Padding="12,6" Click="OnPickCustomSolidColor"/>
-                        </StackPanel>
+                        <!-- Custom Solid Lyric Color Picker Bar (WrapPanel adapts cleanly at 760px min-width!) -->
+                        <WrapPanel x:Name="CustomSolidColorBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16">
+                            <TextBlock x:Name="CustomSolidLabel" Text="自定义纯色" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4,10,4"/>
+                            <Border x:Name="CustomSolidSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,2,8,2" MouseLeftButtonUp="OnPickCustomSolidColor"/>
+                            <TextBox x:Name="CustomSolidHexBox" Width="112" Height="34" FontFamily="Consolas, Segoe UI" FontSize="13" FontWeight="SemiBold" Text="#E06D1B" MaxLength="9" Margin="0,2,8,2" TextChanged="OnCustomSolidHexChanged"/>
+                            <Button x:Name="PickCustomSolidBtn" Content="调色盘…" Margin="0,2,0,2" Padding="12,6" Click="OnPickCustomSolidColor"/>
+                        </WrapPanel>
 
-                        <!-- Custom Gradient Lyric Color Picker Bar (Start + End Palette Pickers) -->
-                        <StackPanel x:Name="CustomGradientColorBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16" Visibility="Collapsed">
-                            <TextBlock x:Name="CustomGradLabel" Text="自定义渐变" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <Border x:Name="CustomGradStartSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,0,6,0" MouseLeftButtonUp="OnPickGradientStartColor"/>
-                            <Button x:Name="PickGradStartBtn" Content="起点色…" Padding="10,6" Click="OnPickGradientStartColor"/>
-                            <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="10,0"/>
-                            <Border x:Name="CustomGradEndSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,0,6,0" MouseLeftButtonUp="OnPickGradientEndColor"/>
-                            <Button x:Name="PickGradEndBtn" Content="终点色…" Padding="10,6" Click="OnPickGradientEndColor"/>
-                            <Border x:Name="CustomGradPreviewPill" Width="64" Height="24" CornerRadius="12" Margin="12,0,0,0" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1"/>
-                        </StackPanel>
+                        <!-- Custom Gradient Lyric Color Picker Bar (WrapPanel adapts cleanly at narrow widths!) -->
+                        <WrapPanel x:Name="CustomGradientColorBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,16" Visibility="Collapsed">
+                            <TextBlock x:Name="CustomGradLabel" Text="自定义渐变" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,4,10,4"/>
+                            <Border x:Name="CustomGradStartSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,2,6,2" MouseLeftButtonUp="OnPickGradientStartColor"/>
+                            <Button x:Name="PickGradStartBtn" Content="起点色…" Padding="10,6" Margin="0,2,0,2" Click="OnPickGradientStartColor"/>
+                            <TextBlock Text="→" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="8,2"/>
+                            <Border x:Name="CustomGradEndSwatch" Width="28" Height="28" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,2,6,2" MouseLeftButtonUp="OnPickGradientEndColor"/>
+                            <Button x:Name="PickGradEndBtn" Content="终点色…" Padding="10,6" Margin="0,2,10,2" Click="OnPickGradientEndColor"/>
+                            <Border x:Name="CustomGradPreviewPill" Width="56" Height="24" CornerRadius="12" Margin="0,4,0,4" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1"/>
+                        </WrapPanel>
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,18"/>
 
-                        <!-- Font Size Slider (Bencho 60fps fluid drag, save on release) -->
+                        <!-- Font Size Slider (Bencho 60fps fluid drag, compact 128px label for narrow-window headroom) -->
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="128"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="58"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="FontSizeLabel" Grid.Column="0" Text="字体大小" FontSize="13.5" FontWeight="Medium" VerticalAlignment="Center"/>
-                            <Slider x:Name="FontSizeSlider" Grid.Column="1" Minimum="12" Maximum="40" Value="22" Margin="12,0"
+                            <Slider x:Name="FontSizeSlider" Grid.Column="1" Minimum="12" Maximum="40" Value="22" Margin="10,0"
                                     ValueChanged="OnAppearanceSliderChanged"
                                     PreviewMouseLeftButtonUp="OnAppearanceSliderDragCompleted"
                                     LostMouseCapture="OnAppearanceSliderDragCompleted"/>
-                            <TextBlock x:Name="FontSizeValueText" Grid.Column="2" Text="22 px" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <Border Grid.Column="2" Height="24" CornerRadius="6" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="FontSizeValueText" Text="22 px" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
                         </Grid>
 
                         <!-- Animation Speed Slider -->
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="128"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="58"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="AnimSpeedLabel" Grid.Column="0" Text="动画速度" FontSize="13.5" FontWeight="Medium" VerticalAlignment="Center"/>
-                            <Slider x:Name="AnimSpeedSlider" Grid.Column="1" Minimum="0.5" Maximum="2.0" Value="1.0" Margin="12,0"
+                            <Slider x:Name="AnimSpeedSlider" Grid.Column="1" Minimum="0.5" Maximum="2.0" Value="1.0" Margin="10,0"
                                     ValueChanged="OnAppearanceSliderChanged"
                                     PreviewMouseLeftButtonUp="OnAppearanceSliderDragCompleted"
                                     LostMouseCapture="OnAppearanceSliderDragCompleted"/>
-                            <TextBlock x:Name="AnimSpeedValueText" Grid.Column="2" Text="1.0×" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <Border Grid.Column="2" Height="24" CornerRadius="6" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="AnimSpeedValueText" Text="1.0×" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
                         </Grid>
 
                         <!-- Lyric Opacity Slider -->
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="128"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="58"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="OpacityLabel" Grid.Column="0" Text="歌词不透明度" FontSize="13.5" FontWeight="Medium" VerticalAlignment="Center"/>
-                            <Slider x:Name="OpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="1.0" Margin="12,0"
+                            <Slider x:Name="OpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="1.0" Margin="10,0"
                                     ValueChanged="OnAppearanceSliderChanged"
                                     PreviewMouseLeftButtonUp="OnAppearanceSliderDragCompleted"
                                     LostMouseCapture="OnAppearanceSliderDragCompleted"/>
-                            <TextBlock x:Name="OpacityValueText" Grid.Column="2" Text="100%" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <Border Grid.Column="2" Height="24" CornerRadius="6" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="OpacityValueText" Text="100%" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
                         </Grid>
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,4,0,16"/>
@@ -706,7 +712,7 @@
                             <Grid Margin="0,0,0,12">
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock x:Name="BgCapsuleLabel" Text="显示悬浮胶囊背景" FontSize="13.5" FontWeight="Medium" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                    <TextBlock x:Name="BgCapsuleDesc" Text="关闭后自由悬浮与顶部悬浮岛立即切为纯透明文字 + 双层高对比描边阴影" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="BgCapsuleDesc" Text="关闭后自由悬浮与顶部悬浮岛立即切为纯透明文字 + 双层高对比描边阴影" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 <CheckBox x:Name="ShowCapsuleBgToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnShowCapsuleBgToggleChanged" Unchecked="OnShowCapsuleBgToggleChanged"/>
                             </Grid>
@@ -714,26 +720,28 @@
                             <StackPanel x:Name="CapsuleStyleControls">
                                 <WrapPanel x:Name="CapsulePresetPanel" Margin="0,0,0,10"/>
 
-                                <!-- Custom Color Input + Native Picker (crisp unclipped 34px Consolas input) -->
-                                <StackPanel x:Name="CustomCapsuleBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12" Visibility="Collapsed">
-                                    <Border x:Name="CustomCapsuleSwatch" Width="30" Height="30" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,0,8,0" MouseLeftButtonUp="OnPickCustomCapsuleColor"/>
-                                    <TextBox x:Name="CustomCapsuleHexBox" Width="116" Height="34" FontFamily="Consolas, Segoe UI" FontSize="13" FontWeight="SemiBold" Text="#3E3E44" MaxLength="9" TextChanged="OnCustomCapsuleHexChanged"/>
-                                    <Button x:Name="PickCustomColorBtn" Content="调色盘…" Margin="8,0,0,0" Padding="12,6" Click="OnPickCustomCapsuleColor"/>
-                                </StackPanel>
+                                <!-- Custom Color Input + Native Picker (WrapPanel adapts cleanly at narrow widths!) -->
+                                <WrapPanel x:Name="CustomCapsuleBar" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12" Visibility="Collapsed">
+                                    <Border x:Name="CustomCapsuleSwatch" Width="30" Height="30" CornerRadius="8" BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1" Cursor="Hand" Margin="0,2,8,2" MouseLeftButtonUp="OnPickCustomCapsuleColor"/>
+                                    <TextBox x:Name="CustomCapsuleHexBox" Width="116" Height="34" FontFamily="Consolas, Segoe UI" FontSize="13" FontWeight="SemiBold" Text="#3E3E44" MaxLength="9" Margin="0,2,8,2" TextChanged="OnCustomCapsuleHexChanged"/>
+                                    <Button x:Name="PickCustomColorBtn" Content="调色盘…" Margin="0,2,0,2" Padding="12,6" Click="OnPickCustomCapsuleColor"/>
+                                </WrapPanel>
 
                                 <!-- Background Opacity Slider (30% - 100%) -->
                                 <Grid x:Name="CapsuleOpacityRow" Margin="0,4,0,0">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="128"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="58"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock x:Name="CapsuleOpacityLabel" Grid.Column="0" Text="背景不透明度" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                                    <Slider x:Name="CapsuleOpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="0.82" Margin="12,0"
+                                    <Slider x:Name="CapsuleOpacitySlider" Grid.Column="1" Minimum="0.3" Maximum="1.0" Value="0.82" Margin="10,0"
                                             ValueChanged="OnCapsuleOpacityChanged"
                                             PreviewMouseLeftButtonUp="OnAppearanceSliderDragCompleted"
                                             LostMouseCapture="OnAppearanceSliderDragCompleted"/>
-                                    <TextBlock x:Name="CapsuleOpacityValueText" Grid.Column="2" Text="82%" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    <Border Grid.Column="2" Height="24" CornerRadius="6" Background="{DynamicResource ControlBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                        <TextBlock x:Name="CapsuleOpacityValueText" Text="82%" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
                                 </Grid>
                             </StackPanel>
                         </StackPanel>

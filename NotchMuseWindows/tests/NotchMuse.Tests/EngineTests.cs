@@ -127,4 +127,111 @@ public sealed class EngineTests
         var doc = LyricParser.ParseRich("[10000,1000]<0,2000,0>Hello\n[12000,1000]<0,1000,0>World", true);
         Assert.Equal(2, doc.Lines.Count); Assert.Null(doc.Lines[0].Words); Assert.Single(doc.Lines[1].Words!);
     }
+
+    // === Mac 4f79bc4 4-Rule Precision Sprint Parity Tests ===
+
+    [Fact]
+    public void NetEasePureMusicVetoesGenericFakeLyrics()
+    {
+        var track = new Track("River Flows In You", "Yiruma", "First Love", 188, Platform: "apple");
+        var neteasePure = new LyricsCandidate("NetEase", "netease", "123", "River Flows In You", "Yiruma", "First Love", 188,
+            new([]), 100, Evidence: LyricsEvidence.Instrumental);
+        var fakeVocals = new LyricsCandidate("QQ", "qq", "qq1", "River Flows In You", "Yiruma", "First Love", 188,
+            new(Enumerable.Range(0, 15).Select(i => new LyricLine(i * 10, $"Fake lyric line {i}")).ToArray()), 100);
+
+        var decision = LyricsSelection.Select([neteasePure, fakeVocals], track);
+        Assert.Null(decision.Winner);
+        Assert.Equal("instrumental_recording", decision.Reason);
+    }
+
+    [Fact]
+    public void StrongerVerifiedVocalBeatsNetEasePureMusic()
+    {
+        var track = new Track("Song", "Artist", "Album", 200, Platform: "spotify", NativeId: "sp123");
+        var neteasePure = new LyricsCandidate("NetEase", "netease", "999", "Song", "Artist", "Album", 200,
+            new([]), 100, Evidence: LyricsEvidence.Instrumental); // Tier 3
+        var spotifyExact = new LyricsCandidate("Spotify", "spotify", "sp123", "Song", "Artist", "Album", 200,
+            new(Enumerable.Range(0, 15).Select(i => new LyricLine(i * 10, $"Verified vocal line {i}")).ToArray()), 100); // Tier 1
+
+        var decision = LyricsSelection.Select([neteasePure, spotifyExact], track);
+        Assert.NotNull(decision.Winner);
+        Assert.Equal("Spotify", decision.Winner.Provider);
+    }
+
+    [Fact]
+    public void StandaloneInstrumentalNoticeNeverCountsAsVocalAnchor()
+    {
+        var track = new Track("Kiss the Rain", "Yiruma", "", 256);
+        var noticeCand = new LyricsCandidate("QQ", "qq", "q1", "Kiss the Rain", "Yiruma", "", 256,
+            new([new LyricLine(0, "纯音乐，请欣赏")]), 100);
+        Assert.Empty(LyricsSelection.Anchors(noticeCand));
+        Assert.Equal("instrumental_notice", LyricsSelection.Rejection(noticeCand, track));
+        Assert.Null(LyricsSelection.Select([noticeCand], track).Winner);
+    }
+
+    [Fact]
+    public void KugouUgcRejectedSoloButAcceptedWhenCorroborated()
+    {
+        var ugc = Candidate("Kugou") with { Evidence = LyricsEvidence.UserContribution };
+        var soloDecision = LyricsSelection.Select([ugc], Song);
+        Assert.Null(soloDecision.Winner);
+        Assert.Equal("unverified_user_contribution", soloDecision.Rejected["Kugou"]);
+
+        var qqDirect = Candidate("QQ");
+        var backedDecision = LyricsSelection.Select([ugc, qqDirect], Song);
+        Assert.NotNull(backedDecision.Winner);
+    }
+
+    [Fact]
+    public void ResolverSoloEmptyAlbumRequiresSourceTrackId()
+    {
+        var noIdMux = Candidate("LRCMux") with { Id = "" };
+        Assert.Null(LyricsSelection.Select([noIdMux], Song).Winner);
+
+        var withIdMux = Candidate("LRCMux") with { Id = "1824045033" };
+        Assert.NotNull(LyricsSelection.Select([withIdMux], Song).Winner);
+
+        Assert.Equal("1824045033", LrcMuxSource.ExtractSourceTrackId("https://music.163.com/#/song?id=1824045033", "netease"));
+        Assert.Equal("4cOdK2wGLETKBW3PvgPWqT", LrcMuxSource.ExtractSourceTrackId("https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT", "spotify"));
+    }
+
+    [Fact]
+    public void DirtyYouTubeTitlePreservesHyphenTitleAndLiveMarker()
+    {
+        var hyphenSong = MediaMetadataSanitizer.Clean(new("烏 - Raven", "Ado", "", 210, IsMusicVideo: true, Platform: "youtube"));
+        Assert.Equal("烏 - Raven", hyphenSong.Title);
+        Assert.Equal("Ado", hyphenSong.Artist);
+
+        var multiHyphen = MediaMetadataSanitizer.Clean(new("LiSA - 残酷な夜に輝け - Shine in the Cruel Night (Official Video)", "LiSA", "", 230, IsMusicVideo: true, Platform: "youtube"));
+        Assert.Equal("残酷な夜に輝け - Shine in the Cruel Night", multiHyphen.Title);
+        Assert.Equal("LiSA", multiHyphen.Artist);
+
+        var liveMarked = MediaMetadataSanitizer.Clean(new("Artist - Song (Live Video) - YouTube Music", "Artist", "", 240));
+        Assert.Contains("Live", liveMarked.Title, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void EmptyAlbumStudioRejectsConcertAlbums()
+    {
+        var studio = new Track("少女的祈禱", "杨千嬅", "", 212);
+        Assert.Equal("album_version_mismatch", TrackMatcher.IdentityRejection(studio, "少女的祈禱", "杨千嬅", "杨千嬅演唱会2010"));
+        Assert.Equal("album_version_mismatch", TrackMatcher.IdentityRejection(studio with { IsMusicVideo = true }, "少女的祈禱", "杨千嬅", "Live at Coliseum"));
+    }
+
+    [Fact]
+    public void LocalizedSoundtrackBillingAndChineseAmpersandAndContextualCleanNormalize()
+    {
+        var ost = new Track("告白 (电视剧《偷偷藏不住》心动曲)", "汪苏泷 & 赵露思", "", 220);
+        Assert.Equal("告白 汪苏泷 赵露思", TrackMatcher.SearchQuery(ost));
+        Assert.Equal(TrackMatcher.ParseTitle("告白").Name, TrackMatcher.ParseTitle("告白 (電視劇《偷偷藏不住》心動曲)").Name);
+
+        // Contextual 乾淨 -> 干净 while preserving 乾隆
+        Assert.Equal(TrackMatcher.Normalize("干净"), TrackMatcher.Normalize("乾淨"));
+        Assert.NotEqual(TrackMatcher.Normalize("乾隆"), TrackMatcher.Normalize("干隆"));
+
+        // Girls' Generation / SNSD / 소녀시대 -> 少女时代
+        Assert.Equal(TrackMatcher.ArtistKey("少女时代"), TrackMatcher.ArtistKey("Girls' Generation"));
+        Assert.Equal(TrackMatcher.ArtistKey("少女时代"), TrackMatcher.ArtistKey("SNSD"));
+        Assert.Equal(TrackMatcher.ArtistKey("少女时代"), TrackMatcher.ArtistKey("소녀시대"));
+    }
 }

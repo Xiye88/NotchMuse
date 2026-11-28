@@ -113,7 +113,19 @@ public static class AuditSnapshotRunner
         SaveVisualPng(supportWin, Path.Combine(outputDir, "10_support_window.png"), 780, 560);
         supportWin.Close();
 
-        // 11: Minimum-Width (760px) Narrow Appearance Layout Check (zero clipping/misalignment!)
+        // 11: Native In-App Latest Version & Announcements Modal (opened from bottom-left capsule, zero external redirect!)
+        var annWin = new AnnouncementWindow(UpdateService.FallbackAnnouncement, availableUpdate: null, isEnglish: false)
+        {
+            WindowStartupLocation = WindowStartupLocation.Manual,
+            Left = -3000,
+            Top = -3000
+        };
+        annWin.Show();
+        await FlushRenderAsync();
+        SaveVisualPng(annWin, Path.Combine(outputDir, "12_announcement_window.png"), 540, 460);
+        annWin.Close();
+
+        // 12: Minimum-Width (760px) Narrow Appearance Layout Check (zero clipping/misalignment!)
         main.SetThemeMode(AppThemeMode.Light);
         main.NavigateTo("Appearance");
         main.PrepareAppearanceAuditShowcase();

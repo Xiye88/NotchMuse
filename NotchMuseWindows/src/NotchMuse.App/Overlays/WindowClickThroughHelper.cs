@@ -20,6 +20,11 @@ public struct NativePoint
     public int Y;
 }
 
+public readonly record struct NativeWindowInsets(int Left, int Top, int Right, int Bottom)
+{
+    public static readonly NativeWindowInsets Zero = new(0, 0, 0, 0);
+}
+
 public readonly record struct SnapRectResult(NativeWindowRect Rect, bool SnappedCenterX, bool SnappedEdge);
 
 /// <summary>
@@ -146,65 +151,94 @@ public static class WindowClickThroughHelper
         NativeWindowRect workArea,
         int snapThresholdPx,
         int edgeInsetPx,
-        bool altBypass)
-    {
-        var width = current.Right - current.Left;
-        var height = current.Bottom - current.Top;
+        bool altBypass) =>
+        SnapFreeWindowRect(current, workArea, snapThresholdPx, edgeInsetPx, altBypass, NativeWindowInsets.Zero);
 
-        var left = current.Left;
-        var top = current.Top;
+    /// <summary>
+    /// Applies Mac FreeLyricsSnap-parity magnetic center and edge snapping using the VISIBLE lyric capsule's
+    /// true inset bounds inside the transparent host window so the lyric capsule glides flush to top, bottom,
+    /// left, and right screen edges (never blocked by invisible transparent window padding!).
+    /// Hold Alt to bypass magnetic snapping cleanly.
+    /// </summary>
+    public static SnapRectResult SnapFreeWindowRect(
+        NativeWindowRect current,
+        NativeWindowRect workArea,
+        int snapThresholdPx,
+        int edgeInsetPx,
+        bool altBypass,
+        NativeWindowInsets capsuleInsets)
+    {
+        var winW = current.Right - current.Left;
+        var winH = current.Bottom - current.Top;
+
+        var inL = Math.Clamp(capsuleInsets.Left, 0, Math.Max(0, winW - 40));
+        var inR = Math.Clamp(capsuleInsets.Right, 0, Math.Max(0, winW - inL - 40));
+        var inT = Math.Clamp(capsuleInsets.Top, 0, Math.Max(0, winH - 24));
+        var inB = Math.Clamp(capsuleInsets.Bottom, 0, Math.Max(0, winH - inT - 24));
+
+        var capW = Math.Max(40, winW - inL - inR);
+        var capH = Math.Max(24, winH - inT - inB);
+
+        var capLeft = current.Left + inL;
+        var capTop = current.Top + inT;
         var snappedCenterX = false;
         var snappedEdge = false;
 
         if (!altBypass && snapThresholdPx > 0)
         {
-            var centerLeft = workArea.Left + (workArea.Right - workArea.Left - width) / 2;
+            var centerCapLeft = workArea.Left + (workArea.Right - workArea.Left - capW) / 2;
             var leftEdge = workArea.Left + edgeInsetPx;
-            var rightEdge = workArea.Right - width - edgeInsetPx;
+            var rightEdge = workArea.Right - capW - edgeInsetPx;
             var topEdge = workArea.Top + edgeInsetPx;
-            var bottomEdge = workArea.Bottom - height - edgeInsetPx;
+            var bottomEdge = workArea.Bottom - capH - edgeInsetPx;
 
-            if (Math.Abs(left - centerLeft) <= snapThresholdPx)
+            if (Math.Abs(capLeft - centerCapLeft) <= snapThresholdPx)
             {
-                left = centerLeft;
+                capLeft = centerCapLeft;
                 snappedCenterX = true;
             }
-            else if (Math.Abs(left - leftEdge) <= snapThresholdPx)
+            else if (Math.Abs(capLeft - leftEdge) <= snapThresholdPx)
             {
-                left = leftEdge;
+                capLeft = leftEdge;
                 snappedEdge = true;
             }
-            else if (Math.Abs(left - rightEdge) <= snapThresholdPx)
+            else if (Math.Abs(capLeft - rightEdge) <= snapThresholdPx)
             {
-                left = rightEdge;
+                capLeft = rightEdge;
                 snappedEdge = true;
             }
 
-            if (Math.Abs(top - topEdge) <= snapThresholdPx)
+            if (Math.Abs(capTop - topEdge) <= snapThresholdPx)
             {
-                top = topEdge;
+                capTop = topEdge;
                 snappedEdge = true;
             }
-            else if (Math.Abs(top - bottomEdge) <= snapThresholdPx)
+            else if (Math.Abs(capTop - bottomEdge) <= snapThresholdPx)
             {
-                top = bottomEdge;
+                capTop = bottomEdge;
                 snappedEdge = true;
             }
         }
 
-        // Exact containment matching PositionOnScreen restore bounds (zero jump on reopen!)
-        var maxLeft = Math.Max(workArea.Left, workArea.Right - width);
-        var maxTop = Math.Max(workArea.Top, workArea.Bottom - height);
-        left = Math.Clamp(left, workArea.Left, maxLeft);
-        top = Math.Clamp(top, workArea.Top, maxTop);
+        // Clamp the VISIBLE capsule strictly inside workArea (with zero dead-zone gap from invisible host padding!)
+        var minCapLeft = workArea.Left + edgeInsetPx;
+        var maxCapLeft = Math.Max(minCapLeft, workArea.Right - capW - edgeInsetPx);
+        var minCapTop = workArea.Top + edgeInsetPx;
+        var maxCapTop = Math.Max(minCapTop, workArea.Bottom - capH - edgeInsetPx);
+
+        capLeft = Math.Clamp(capLeft, minCapLeft, maxCapLeft);
+        capTop = Math.Clamp(capTop, minCapTop, maxCapTop);
+
+        var left = capLeft - inL;
+        var top = capTop - inT;
 
         return new SnapRectResult(
             new NativeWindowRect
             {
                 Left = left,
                 Top = top,
-                Right = left + width,
-                Bottom = top + height
+                Right = left + winW,
+                Bottom = top + winH
             },
             snappedCenterX,
             snappedEdge);

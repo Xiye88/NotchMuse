@@ -2,6 +2,8 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using NotchMuse.App.Themes;
 
 namespace NotchMuse.App.Overlays;
@@ -18,27 +20,42 @@ public partial class TaskbarLyricsWindow : Window
     private bool isLightTaskbar = true;
     private bool doubleLineMode = true;
     private double sweepProgress;
+    private double targetSurfaceOpacity = 1.0;
     private string rawPrimaryText = "NotchMuse";
     private string? rawTranslationText;
     private string? rawNextLineText;
     private bool showBilingualActive;
     private bool locked;
+    private bool clickThroughDodged;
     private IntPtr handle;
     private HwndSource? hwndSource;
+    private readonly DispatcherTimer lockedHoverTimer = new() { Interval = TimeSpan.FromMilliseconds(55) };
 
     public TaskbarSlot? CurrentSlot { get; private set; }
+    public bool IsClickThroughDodged => clickThroughDodged;
     public event Action? OpenMainRequested;
 
     public TaskbarLyricsWindow()
     {
         InitializeComponent();
+        lockedHoverTimer.Tick += OnLockedHoverTick;
         SourceInitialized += OnSourceInitialized;
         IsVisibleChanged += (_, _) =>
         {
-            if (IsVisible) ApplyWindowStyles();
+            if (IsVisible)
+            {
+                ApplyWindowStyles();
+                UpdateLockedHoverMonitor();
+            }
+            else
+            {
+                lockedHoverTimer.Stop();
+                SetClickThroughDodge(false);
+            }
         };
         Closed += (_, _) =>
         {
+            lockedHoverTimer.Stop();
             hwndSource?.RemoveHook(WndProc);
             hwndSource = null;
         };
@@ -77,6 +94,55 @@ public partial class TaskbarLyricsWindow : Window
         RootSurface.IsHitTestVisible = !locked;
         RootSurface.Background = locked ? System.Windows.Media.Brushes.Transparent : UnlockedHitBrush;
         ApplyWindowStyles();
+        UpdateLockedHoverMonitor();
+    }
+
+    private void UpdateLockedHoverMonitor()
+    {
+        if (locked && IsVisible)
+        {
+            if (!lockedHoverTimer.IsEnabled) lockedHoverTimer.Start();
+        }
+        else
+        {
+            lockedHoverTimer.Stop();
+            SetClickThroughDodge(false);
+        }
+    }
+
+    private void OnLockedHoverTick(object? sender, EventArgs e)
+    {
+        if (!locked || !IsVisible)
+        {
+            lockedHoverTimer.Stop();
+            SetClickThroughDodge(false);
+            return;
+        }
+        if (!WindowClickThroughHelper.GetCursorPos(out var pt)) return;
+        var currentHandle = handle != IntPtr.Zero ? handle : new WindowInteropHelper(this).Handle;
+        if (currentHandle == IntPtr.Zero || !WindowClickThroughHelper.GetWindowRect(currentHandle, out var rect)) return;
+        var inside = pt.X >= rect.Left - 4 && pt.X <= rect.Right + 4 && pt.Y >= rect.Top - 2 && pt.Y <= rect.Bottom + 2;
+        SetClickThroughDodge(inside);
+    }
+
+    private void SetClickThroughDodge(bool dodge)
+    {
+        if (clickThroughDodged == dodge) return;
+        clickThroughDodged = dodge;
+        var target = dodge ? 0.0 : targetSurfaceOpacity;
+        if (InteractionMotion.AnimationsAllowed)
+        {
+            var anim = new DoubleAnimation(target, TimeSpan.FromMilliseconds(dodge ? 100 : 160))
+            {
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            RootSurface.BeginAnimation(OpacityProperty, anim);
+        }
+        else
+        {
+            RootSurface.BeginAnimation(OpacityProperty, null);
+            RootSurface.Opacity = target;
+        }
     }
 
     private void ApplyWindowStyles()
@@ -135,7 +201,12 @@ public partial class TaskbarLyricsWindow : Window
         BaseLyricText.FontSize = primarySize;
         SweepLyricText.FontSize = primarySize;
         SubLyricText.FontSize = Math.Clamp(primarySize - 2.6, 9.5, 10.8);
-        RootSurface.Opacity = Math.Clamp(settings.LyricOpacity, 0.35, 1.0);
+        targetSurfaceOpacity = Math.Clamp(settings.LyricOpacity, 0.35, 1.0);
+        if (!clickThroughDodged)
+        {
+            RootSurface.BeginAnimation(OpacityProperty, null);
+            RootSurface.Opacity = targetSurfaceOpacity;
+        }
         ApplySecondaryLine();
     }
 

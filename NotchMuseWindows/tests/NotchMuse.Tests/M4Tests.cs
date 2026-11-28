@@ -433,6 +433,56 @@ public sealed class M4Tests
         if (failure is not null) throw new Exception("STA double-line test failed", failure);
     }
 
+    [Fact]
+    public void SnapFreeWindowRectUsesVisibleCapsuleInsetsToReachScreenEdges()
+    {
+        var work = new NotchMuse.App.Overlays.NativeWindowRect { Left = 0, Top = 0, Right = 1920, Bottom = 1032 };
+        // 700x196 transparent host window with a centered 300x64 visible capsule (insets: L=200, T=66, R=200, B=66)
+        var insets = new NotchMuse.App.Overlays.NativeWindowInsets(200, 66, 200, 66);
+
+        // Drag all the way to the top edge: visible capsule top must reach work.Top + 4 (outer Top = -62!)
+        var draggedTop = new NotchMuse.App.Overlays.NativeWindowRect { Left = 610, Top = -120, Right = 1310, Bottom = 76 };
+        var topResult = NotchMuse.App.Overlays.WindowClickThroughHelper.SnapFreeWindowRect(draggedTop, work, snapThresholdPx: 10, edgeInsetPx: 4, altBypass: false, insets);
+        Assert.Equal(4, topResult.Rect.Top + insets.Top);
+
+        // Drag all the way down to the taskbar edge: visible capsule bottom must reach work.Bottom - 4!
+        var draggedBottom = new NotchMuse.App.Overlays.NativeWindowRect { Left = 610, Top = 980, Right = 1310, Bottom = 1176 };
+        var bottomResult = NotchMuse.App.Overlays.WindowClickThroughHelper.SnapFreeWindowRect(draggedBottom, work, snapThresholdPx: 10, edgeInsetPx: 4, altBypass: false, insets);
+        Assert.Equal(work.Bottom - 4, bottomResult.Rect.Bottom - insets.Bottom);
+
+        // Drag all the way to the left edge: visible capsule left must reach work.Left + 4!
+        var draggedLeft = new NotchMuse.App.Overlays.NativeWindowRect { Left = -260, Top = 400, Right = 440, Bottom = 596 };
+        var leftResult = NotchMuse.App.Overlays.WindowClickThroughHelper.SnapFreeWindowRect(draggedLeft, work, snapThresholdPx: 10, edgeInsetPx: 4, altBypass: false, insets);
+        Assert.Equal(4, leftResult.Rect.Left + insets.Left);
+    }
+
+    [Fact]
+    public void AnnouncementWindowRendersInAppWithoutExternalRedirect()
+    {
+        Exception? failure = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var upToDate = new AnnouncementWindow(UpdateService.FallbackAnnouncement, availableUpdate: null, isEnglish: false);
+                Assert.NotNull(upToDate);
+                var withUpdate = new AnnouncementWindow(
+                    UpdateService.FallbackAnnouncement,
+                    new ReleaseInfo("v0.9.5", "NotchMuse v0.9.5", "- Faster sync\n- Smoother drag", "https://example.com/release"),
+                    isEnglish: false);
+                Assert.NotNull(withUpdate);
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        if (failure is not null) throw new Exception("AnnouncementWindow STA test failed", failure);
+    }
+
     private sealed class FakeTimedSource(string name, LyricsCandidate? candidate, int delayMs) : ILyricsSource
     {
         public string Name => name;

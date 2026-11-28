@@ -1443,7 +1443,7 @@ public partial class MainWindow : Window
         DisplayStartupLabel.Text = en ? "Launch at Login" : "开机自启";
         DisplayStartupDesc.Text = en ? "Start quietly in the system tray when Windows boots" : "登录 Windows 时自动静默启动歌词服务";
         DisplayLockLabel.Text = en ? "Lock Desktop Overlay (Click-Through)" : "锁定桌面歌词（鼠标穿透）";
-        DisplayLockDesc.Text = en ? "Pass mouse clicks straight through when locked" : "锁定后桌面悬浮歌词完全穿透点击，不影响办公与游戏";
+        DisplayLockDesc.Text = en ? "Auto-hides on hover and passes clicks straight through while locked" : "锁定后鼠标移近歌词自动隐藏避让并穿透点击，不遮挡后方按钮与窗口";
 
         AppearanceHeaderTitle.Text = en ? "Appearance" : "外观";
         ColorModeLabel.Text = en ? "Lyrics Color" : "歌词颜色";
@@ -1595,9 +1595,14 @@ public partial class MainWindow : Window
 
     private void OnAnnouncementClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        InteractionMotion.Rebound(AnnouncementCapsule, 0.96);
+        InteractionSoundEngine.Play(InteractionSoundCue.Tick);
         AnnouncementUnreadDot.Visibility = Visibility.Collapsed;
-        var target = availableUpdate?.DownloadUrl ?? availableUpdate?.HtmlUrl ?? activeAnnouncement.Url ?? latestReleaseUrl;
-        OpenExternalUrl(target);
+        var dialog = new AnnouncementWindow(activeAnnouncement, availableUpdate, settings.EnglishLanguage, updateService)
+        {
+            Owner = this
+        };
+        dialog.ShowDialog();
     }
 
     private static void OpenExternalUrl(string url)

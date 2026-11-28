@@ -35,9 +35,9 @@ public partial class FloatingLyricsWindow : Window
         ("薄荷晴空", "Mint Sky", "#34D399", "#0EA5E9")
     ];
 
-    private readonly DispatcherTimer microTooltipTimer = new() { Interval = TimeSpan.FromMilliseconds(150) };
+    private readonly DispatcherTimer microTooltipTimer = new() { Interval = TimeSpan.FromMilliseconds(90) };
     private readonly DispatcherTimer dragPollTimer = new() { Interval = TimeSpan.FromMilliseconds(8) }; // ~120Hz silky Win32 drag without CaptureMouse or modal loop traps!
-    private readonly DispatcherTimer lockedHoverTimer = new() { Interval = TimeSpan.FromMilliseconds(90) };
+    private readonly DispatcherTimer lockedHoverTimer = new() { Interval = TimeSpan.FromMilliseconds(55) };
     private readonly FloatingUnlockPillWindow unlockPill = new();
 
     private IntPtr handle;
@@ -45,6 +45,7 @@ public partial class FloatingLyricsWindow : Window
     private LyricsDisplayMode mode = LyricsDisplayMode.FreeFloat;
     private AppSettings? activeSettings;
     private bool locked;
+    private bool clickThroughDodged;
     private bool hovered;
     private bool dragging;
     private NativePoint dragStartCursorPx;
@@ -156,6 +157,7 @@ public partial class FloatingLyricsWindow : Window
     public IntPtr WindowHandle => handle;
     public bool IsToolbarFlippedBelow => toolbarFlippedBelow;
     public bool IsQuickColorPopoverOpen => QuickColorPopover.Visibility == Visibility.Visible;
+    public bool IsClickThroughDodged => clickThroughDodged;
 
     private void BuildQuickColorDots()
     {
@@ -280,21 +282,23 @@ public partial class FloatingLyricsWindow : Window
         HoverToolbarHost.IsHitTestVisible = visible && !locked;
     }
 
+    private static readonly Geometry UnlockedIconGeometry = Geometry.Parse("M 4.5,7 V 5.1 A 3.5,3.5 0 0 1 11.2,4.1 M 3.2,7 H 12.8 A 1.2,1.2 0 0 1 14,8.2 V 13.3 A 1.2,1.2 0 0 1 12.8,14.5 H 3.2 A 1.2,1.2 0 0 1 2,13.3 V 8.2 A 1.2,1.2 0 0 1 3.2,7 Z");
+    private static readonly Geometry LockedIconGeometry = Geometry.Parse("M 4.5,7 V 5.2 A 3.5,3.5 0 0 1 11.5,5.2 V 7 M 3.2,7 H 12.8 A 1.2,1.2 0 0 1 14,8.2 V 13.3 A 1.2,1.2 0 0 1 12.8,14.5 H 3.2 A 1.2,1.2 0 0 1 2,13.3 V 8.2 A 1.2,1.2 0 0 1 3.2,7 Z");
+    private static readonly Geometry SwitchToVerticalGeometry = Geometry.Parse("M 4.5,2.5 V 13.5 M 9.5,2.5 V 13.5 M 13,5.5 V 10.5");
+    private static readonly Geometry SwitchToHorizontalGeometry = Geometry.Parse("M 2.5,4.5 H 13.5 M 2.5,9.5 H 13.5 M 5.5,13 H 10.5");
+
     public void ApplyLanguage(bool english)
     {
-        LockMiniBtn.Content = locked ? (english ? "Unlock" : "解锁") : (english ? "Lock" : "锁定");
-        OrientationMiniBtn.Content = verticalLayout ? (english ? "Horiz" : "横排") : (english ? "Vert" : "竖排");
-        ColorMiniBtn.Content = english ? "Colors" : "配色";
-        OpenMainMiniBtn.Content = english ? "Home" : "主窗口";
-        SettingsMiniBtn.Content = english ? "Settings" : "设置";
-        HideMiniBtn.Content = english ? "Hide" : "隐藏";
+        LockIconPath.Data = locked ? LockedIconGeometry : UnlockedIconGeometry;
+        OrientationIconPath.Data = verticalLayout ? SwitchToHorizontalGeometry : SwitchToVerticalGeometry;
         unlockPill.ApplyLanguage(english);
         BuildQuickColorDots();
     }
 
     private void UpdateLockedHoverMonitor()
     {
-        if (locked && IsVisible && mode == LyricsDisplayMode.FreeFloat)
+        // Active for BOTH FreeFloat AND TopIsland whenever click-through lock is ON so hovering auto-hides the lyric capsule!
+        if (locked && IsVisible)
         {
             if (!lockedHoverTimer.IsEnabled) lockedHoverTimer.Start();
         }
@@ -302,6 +306,27 @@ public partial class FloatingLyricsWindow : Window
         {
             lockedHoverTimer.Stop();
             HideUnlockPill();
+            SetClickThroughDodge(false);
+        }
+    }
+
+    private void SetClickThroughDodge(bool dodge)
+    {
+        if (clickThroughDodged == dodge) return;
+        clickThroughDodged = dodge;
+        var targetOpacity = dodge ? 0.0 : 1.0;
+        if (InteractionMotion.AnimationsAllowed)
+        {
+            var anim = new DoubleAnimation(targetOpacity, TimeSpan.FromMilliseconds(dodge ? 110 : 170))
+            {
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            LyricCapsule.BeginAnimation(OpacityProperty, anim);
+        }
+        else
+        {
+            LyricCapsule.BeginAnimation(OpacityProperty, null);
+            LyricCapsule.Opacity = targetOpacity;
         }
     }
 
@@ -312,10 +337,11 @@ public partial class FloatingLyricsWindow : Window
 
     private void OnLockedHoverTick(object? sender, EventArgs e)
     {
-        if (!locked || !IsVisible || mode != LyricsDisplayMode.FreeFloat)
+        if (!locked || !IsVisible)
         {
             lockedHoverTimer.Stop();
             HideUnlockPill();
+            SetClickThroughDodge(false);
             return;
         }
         if (!WindowClickThroughHelper.GetCursorPos(out var pt)) return;
@@ -329,37 +355,48 @@ public partial class FloatingLyricsWindow : Window
             ? LyricCapsule.PointToScreen(new System.Windows.Point(0, 0))
             : new System.Windows.Point(Left * dpi, Top * dpi);
         var capRect = new Rect(capOrigin.X / dpi, capOrigin.Y / dpi, capW, capH);
+        var dodgeRect = new Rect(capRect.Left - 10, capRect.Top - 10, capRect.Width + 20, capRect.Height + 20);
 
-        // Generous hover zone covering the locked lyric capsule + its compact icon-only unlock pill slot
-        var work = ResolveScreenWorkArea(activeSettings?.DisplayScreen ?? "Primary");
-        var pillAbove = capRect.Top - 36 >= work.Top;
-        var pillLeft = capRect.Left + (capRect.Width - unlockPill.Width) / 2;
-        var pillTop = pillAbove ? capRect.Top - unlockPill.Height - 2 : capRect.Bottom + 2;
-
-        var hoverZone = Rect.Union(
-            new Rect(capRect.Left - 8, capRect.Top - 8, capRect.Width + 16, capRect.Height + 16),
-            new Rect(pillLeft - 10, pillTop - 6, unlockPill.Width + 20, unlockPill.Height + 12));
-
-        if (hoverZone.Contains(cursorDip))
+        if (mode == LyricsDisplayMode.FreeFloat)
         {
-            if (!unlockPill.IsVisible || Math.Abs(unlockPill.Left - pillLeft) > 2 || Math.Abs(unlockPill.Top - pillTop) > 2)
-                unlockPill.ShowAt(pillLeft, pillTop);
+            var work = ResolveScreenWorkArea(activeSettings?.DisplayScreen ?? "Primary");
+            var pillAbove = capRect.Top - 36 >= work.Top;
+            var pillLeft = capRect.Left + (capRect.Width - unlockPill.Width) / 2;
+            var pillTop = pillAbove ? capRect.Top - unlockPill.Height - 2 : capRect.Bottom + 2;
+
+            var pillZone = new Rect(pillLeft - 8, pillTop - 6, unlockPill.Width + 16, unlockPill.Height + 12);
+            var nearCapsuleOrPill = dodgeRect.Contains(cursorDip) || pillZone.Contains(cursorDip);
+
+            // Auto-hide the lyric capsule on hover while locked so underlying content is 100% visible & clickable!
+            SetClickThroughDodge(nearCapsuleOrPill);
+
+            if (nearCapsuleOrPill)
+            {
+                if (!unlockPill.IsVisible || Math.Abs(unlockPill.Left - pillLeft) > 2 || Math.Abs(unlockPill.Top - pillTop) > 2)
+                    unlockPill.ShowAt(pillLeft, pillTop);
+            }
+            else
+            {
+                HideUnlockPill();
+            }
         }
         else
         {
+            // TopIsland locked click-through: auto-hide cleanly when cursor moves near top lyrics, zero obstruction!
             HideUnlockPill();
+            SetClickThroughDodge(dodgeRect.Contains(cursorDip));
         }
     }
 
     private string GetMicroTooltipForButton(System.Windows.Controls.Button btn)
     {
         var en = activeSettings?.EnglishLanguage == true;
-        if (btn == LockMiniBtn) return locked ? (en ? "Unlock click-through (Ctrl+Alt+L)" : "解锁并恢复拖动 (Ctrl+Alt+L)") : (en ? "Lock & click-through (Ctrl+Alt+L)" : "锁定穿透 (Ctrl+Alt+L)");
-        if (btn == OrientationMiniBtn) return verticalLayout ? (en ? "Switch to horizontal layout" : "切换为横排歌词") : (en ? "Switch to vertical layout" : "切换为竖排歌词");
-        if (btn == ColorMiniBtn) return en ? "Quick solid & gradient palette" : "7 纯色 + 3 渐变快捷配色";
-        if (btn == OpenMainMiniBtn) return en ? "Summon NotchMuse main window" : "召唤并置前主窗口";
-        if (btn == SettingsMiniBtn) return en ? "Open settings" : "打开设置";
-        if (btn == HideMiniBtn) return en ? "Hide floating lyrics" : "隐藏悬浮歌词";
+        if (btn == LockMiniBtn) return locked ? (en ? "Unlock & Drag (Ctrl+Alt+L)" : "解锁并恢复拖动 (Ctrl+Alt+L)") : (en ? "Lock & Auto-Dodge Click-Through (Ctrl+Alt+L)" : "锁定穿透 · 悬停自动隐藏 (Ctrl+Alt+L)");
+        if (btn == OrientationMiniBtn) return verticalLayout ? (en ? "Switch to Horizontal Lyrics" : "切换为横排歌词") : (en ? "Switch to Vertical Lyrics" : "切换为竖排歌词");
+        if (btn == ColorMiniBtn) return en ? "Quick Solid & Gradient Colors" : "快捷配色（7 纯色 + 3 渐变）";
+        if (btn == OpenMainMiniBtn) return en ? "Open NotchMuse Window" : "打开主窗口";
+        if (btn == SettingsMiniBtn) return en ? "Open Settings" : "打开设置";
+        if (btn == HideMiniBtn) return en ? "Hide Desktop Lyrics" : "隐藏桌面歌词";
         return "";
     }
 
@@ -571,8 +608,12 @@ public partial class FloatingLyricsWindow : Window
         if (!string.IsNullOrWhiteSpace(previewMicroTooltip) && hovered)
         {
             MicroTooltipText.Text = previewMicroTooltip;
+            MicroTooltipText.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+            var lw = MicroTooltipText.DesiredSize.Width;
+            var tw = Math.Max(220, lw + 16);
+            MicroTooltipTrack.Width = tw;
             MicroTooltipText.Opacity = 1.0;
-            Canvas.SetLeft(MicroTooltipText, 92);
+            Canvas.SetLeft(MicroTooltipText, Math.Max(0, (tw - lw) / 2));
             Canvas.SetTop(MicroTooltipText, 1);
         }
         else
@@ -605,49 +646,100 @@ public partial class FloatingLyricsWindow : Window
         else
         {
             Width = 700;
-            Height = 230;
+            Height = 196;
         }
+
+        var insets = ComputeCapsuleInsetsDip();
+        var edgeDip = 4.0;
+        var minLeft = area.Left + edgeDip - insets.Left;
+        var maxLeft = Math.Max(minLeft, area.Right - (Width - insets.Right) - edgeDip);
+        var minTop = area.Top + edgeDip - insets.Top;
+        var maxTop = Math.Max(minTop, area.Bottom - (Height - insets.Bottom) - edgeDip);
 
         if (settings.FloatingLeft.HasValue && settings.FloatingTop.HasValue)
         {
-            Left = Math.Clamp(settings.FloatingLeft.Value, area.Left, Math.Max(area.Left, area.Right - Width));
-            Top = Math.Clamp(settings.FloatingTop.Value, area.Top, Math.Max(area.Top, area.Bottom - Height));
+            Left = Math.Clamp(settings.FloatingLeft.Value, minLeft, maxLeft);
+            Top = Math.Clamp(settings.FloatingTop.Value, minTop, maxTop);
         }
         else
         {
             Left = area.Left + (area.Width - Width) / 2;
-            Top = area.Bottom - Height - 28;
+            Top = Math.Clamp(area.Bottom - (Height - insets.Bottom) - 18, minTop, maxTop);
         }
 
         UpdateToolbarPlacement();
     }
 
+    private (double Left, double Top, double Right, double Bottom) ComputeCapsuleInsetsDip()
+    {
+        if (LyricCapsule.IsLoaded && LyricCapsule.ActualWidth >= 40 && LyricCapsule.ActualHeight >= 24 &&
+            PresentationSource.FromVisual(LyricCapsule) is not null)
+        {
+            var topLeft = LyricCapsule.TranslatePoint(new System.Windows.Point(0, 0), this);
+            var inL = Math.Clamp(topLeft.X, 0, Math.Max(0, Width - 40));
+            var inT = Math.Clamp(topLeft.Y, 0, Math.Max(0, Height - 24));
+            var inR = Math.Clamp(Width - (topLeft.X + LyricCapsule.ActualWidth), 0, Math.Max(0, Width - inL - 40));
+            var inB = Math.Clamp(Height - (topLeft.Y + LyricCapsule.ActualHeight), 0, Math.Max(0, Height - inT - 24));
+            return (inL, inT, inR, inB);
+        }
+
+        // Sensible pre-layout fallback matching centered capsule proportions
+        var estW = verticalLayout ? 112.0 : 320.0;
+        var estH = verticalLayout ? 320.0 : (doubleLineMode ? 70.0 : 48.0);
+        var hPad = Math.Max(0, (Width - estW) / 2.0);
+        var vPad = Math.Max(0, (Height - estH) / 2.0);
+        return (hPad, vPad, hPad, vPad);
+    }
+
+    private NativeWindowInsets ComputeCapsuleInsetsPixels(double dpi)
+    {
+        var dip = ComputeCapsuleInsetsDip();
+        return new NativeWindowInsets(
+            (int)Math.Round(dip.Left * dpi),
+            (int)Math.Round(dip.Top * dpi),
+            (int)Math.Round(dip.Right * dpi),
+            (int)Math.Round(dip.Bottom * dpi));
+    }
+
     /// <summary>
     /// Computes whether the floating hover toolbar should flip below the lyric capsule
-    /// (true ONLY when near the top screen edge; otherwise always anchored above the lyrics).
+    /// (true ONLY when the visible capsule top is near the top screen edge; otherwise anchored 4px above).
     /// </summary>
-    public static bool ShouldFlipToolbarBelow(double windowTopDip, double workAreaTopDip) =>
-        windowTopDip - workAreaTopDip < TopEdgeFlipThresholdDip;
+    public static bool ShouldFlipToolbarBelow(double capsuleTopDip, double workAreaTopDip) =>
+        capsuleTopDip - workAreaTopDip < TopEdgeFlipThresholdDip;
 
     private void UpdateToolbarPlacement()
     {
         if (mode != LyricsDisplayMode.FreeFloat) return;
         var area = ResolveScreenWorkArea(activeSettings?.DisplayScreen ?? "Primary");
-        ApplyToolbarFlip(ShouldFlipToolbarBelow(Top, area.Top));
+        var insets = ComputeCapsuleInsetsDip();
+        var visibleCapsuleTop = Top + insets.Top;
+        ApplyToolbarFlip(ShouldFlipToolbarBelow(visibleCapsuleTop, area.Top));
     }
 
     private void ApplyToolbarFlip(bool flipBelow)
     {
         toolbarFlippedBelow = flipBelow;
+        HoverToolbarStack.Children.Clear();
         if (flipBelow)
         {
             Grid.SetRow(HoverToolbarHost, 2);
-            HoverToolbarHost.Padding = new Thickness(8, 7, 8, 0);
+            HoverToolbarHost.Padding = new Thickness(6, 4, 6, 0);
+            QuickColorPopover.Margin = new Thickness(0, 4, 0, 0);
+            MicroTooltipTrack.Margin = new Thickness(0, 2, 0, 0);
+            HoverToolbarStack.Children.Add(HoverToolbar);
+            HoverToolbarStack.Children.Add(QuickColorPopover);
+            HoverToolbarStack.Children.Add(MicroTooltipTrack);
         }
         else
         {
             Grid.SetRow(HoverToolbarHost, 0);
-            HoverToolbarHost.Padding = new Thickness(8, 0, 8, 7);
+            HoverToolbarHost.Padding = new Thickness(6, 0, 6, 4);
+            QuickColorPopover.Margin = new Thickness(0, 0, 0, 4);
+            MicroTooltipTrack.Margin = new Thickness(0, 0, 0, 2);
+            HoverToolbarStack.Children.Add(MicroTooltipTrack);
+            HoverToolbarStack.Children.Add(QuickColorPopover);
+            HoverToolbarStack.Children.Add(HoverToolbar);
         }
     }
 
@@ -775,12 +867,14 @@ public partial class FloatingLyricsWindow : Window
         MicroTooltipText.Text = label;
         MicroTooltipText.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
         var labelWidth = MicroTooltipText.DesiredSize.Width;
-        var trackWidth = Math.Max(HoverToolbar.ActualWidth, 260);
+        var barWidth = Math.Max(180, HoverToolbar.ActualWidth);
+        var trackWidth = Math.Max(barWidth, labelWidth + 12);
         MicroTooltipTrack.Width = trackWidth;
 
-        // Center directly above the hovered button & clamp strictly within [0 .. trackWidth - labelWidth]
+        // Center directly above/below the hovered icon & clamp cleanly inside the track
         var btnCenter = pendingTooltipButton.TranslatePoint(new System.Windows.Point(pendingTooltipButton.ActualWidth / 2, 0), HoverToolbar);
-        var desiredX = Math.Clamp(btnCenter.X - labelWidth / 2, 0, Math.Max(0, trackWidth - labelWidth));
+        var barOffset = (trackWidth - barWidth) / 2.0;
+        var desiredX = Math.Clamp(barOffset + btnCenter.X - labelWidth / 2, 0, Math.Max(0, trackWidth - labelWidth));
 
         Canvas.SetLeft(MicroTooltipText, desiredX);
         Canvas.SetTop(MicroTooltipText, 1);
@@ -881,10 +975,11 @@ public partial class FloatingLyricsWindow : Window
 
         var dpi = Math.Max(1.0, VisualTreeHelper.GetDpi(this).DpiScaleX);
         var snapPx = (int)Math.Round(MagneticSnapThresholdDip * dpi);
-        var insetPx = (int)Math.Round(12.0 * dpi);
+        var insetPx = (int)Math.Round(4.0 * dpi);
         var altBypass = WindowClickThroughHelper.IsAltKeyDown();
+        var capsuleInsetsPx = ComputeCapsuleInsetsPixels(dpi);
 
-        var snapped = WindowClickThroughHelper.SnapFreeWindowRect(proposed, workPx, snapPx, insetPx, altBypass);
+        var snapped = WindowClickThroughHelper.SnapFreeWindowRect(proposed, workPx, snapPx, insetPx, altBypass, capsuleInsetsPx);
         WindowClickThroughHelper.MoveWindowPixelsNoActivate(handle, snapped.Rect.Left, snapped.Rect.Top);
         Left = snapped.Rect.Left / dpi;
         Top = snapped.Rect.Top / dpi;

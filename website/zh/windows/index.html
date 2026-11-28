@@ -5,25 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b101a">
   <title>Windows 桌面歌词与悬浮歌词工具 | NotchMuse</title>
-  <meta name="description" content="专为 Windows 11 / 10 打造的同步桌面歌词与点击穿透悬浮歌词工具。支持 Spotify 悬浮歌词、Apple Music、网易云音乐、QQ 音乐、MusicBee、foobar2000 等 36+ 款播放器，体积小于 30 MB，无需账号。">
+  <meta name="description" content="在 Windows 11/10 上使用同步桌面歌词，支持任务栏、自由悬浮和顶部浮岛。下载 NotchMuse 便携版 .exe，免安装，无需注册。">
   <link rel="canonical" href="https://notchmuse.com/zh/windows/">
   <link rel="alternate" hreflang="en" href="https://notchmuse.com/windows/">
   <link rel="alternate" hreflang="zh-Hans" href="https://notchmuse.com/zh/windows/">
   <link rel="alternate" hreflang="x-default" href="https://notchmuse.com/windows/">
   <meta property="og:title" content="Windows 桌面歌词与悬浮歌词工具 | NotchMuse">
-  <meta property="og:description" content="Windows 11 / 10 同步桌面歌词与 Spotify 悬浮歌词浮层，体积小于 30 MB，支持点击穿透与任务栏模式。">
+  <meta property="og:description" content="在 Windows 11/10 上使用同步桌面歌词，支持任务栏、自由悬浮和顶部浮岛。下载 NotchMuse 便携版 .exe，免安装，无需注册。">
   <meta property="og:url" content="https://notchmuse.com/zh/windows/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="NotchMuse">
-  <meta property="og:image" content="https://notchmuse.com/assets/real-notch-mode.png">
+  <meta property="og:image" content="https://notchmuse.com/assets/media/win-taskbar-demo-poster.webp">
   <meta property="og:image:alt" content="NotchMuse Windows 同步桌面歌词">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Windows 桌面歌词与悬浮歌词工具 | NotchMuse">
-  <meta name="twitter:description" content="Windows 11 / 10 同步桌面歌词与 Spotify 点击穿透悬浮歌词，支持 36+ 款播放器。">
-  <meta name="twitter:image" content="https://notchmuse.com/assets/real-notch-mode.png">
+  <meta name="twitter:description" content="在 Windows 11/10 上使用同步桌面歌词，支持任务栏、自由悬浮和顶部浮岛。下载 NotchMuse 便携版 .exe，免安装，无需注册。">
+  <meta name="twitter:image" content="https://notchmuse.com/assets/media/win-taskbar-demo-poster.webp">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png?v=2">
   <link rel="apple-touch-icon" href="/assets/notchmuse-icon.png?v=2">
-  <link rel="stylesheet" href="/style.css?v=16">
+  <link rel="stylesheet" href="/style.css?v=17">
   <link rel="stylesheet" href="/guides.css?v=4">
   <link rel="stylesheet" href="/bencho-ux.css?v=1">
   <script type="application/ld+json">
@@ -43,9 +43,10 @@
   "name": "NotchMuse Windows 版",
   "url": "https://notchmuse.com/zh/windows/",
   "inLanguage": "zh-Hans",
-  "operatingSystem": "Windows 11, Windows 10 (64-bit)",
+  "operatingSystem": "Windows 11/10 (64-bit, Portable .exe)",
   "applicationCategory": "MultimediaApplication",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "downloadUrl": "https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe",
   "sameAs": "https://github.com/Xiye88/NotchMuse"
 }
   </script>
@@ -53,7 +54,7 @@
           data-site="f9FFRntt"
           data-api="https://in.pvuv.ai"></script>
 </head>
-<body class="guide-page">
+<body class="guide-page" data-download-version="0.9.0">
   <a class="skip-link" href="#guide-content">跳到正文</a>
   <header class="site-header wrap">
     <a class="brand" href="/zh/" aria-label="NotchMuse 首页"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a>
@@ -61,7 +62,7 @@
       <a class="nav-desktop-only" href="/zh/compatible-players/">兼容播放器</a>
       <a class="nav-desktop-only" href="/zh/windows/" aria-current="page">Windows 版</a>
       <a href="/zh/lrc-tools/">LRC 工具</a>
-      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases" data-download-placement="nav"><span>关注发布</span></a>
+      <a class="button button-small" href="https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe" data-download-placement="nav"><span>下载</span></a>
       <a class="language-toggle" id="language-toggle" href="/windows/" lang="en" aria-label="Switch to English"><svg class="globe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.8 1.85 2.75 3.95 2.75 6.25S9.8 12.4 8 14.25M8 1.75C6.2 3.6 5.25 5.7 5.25 8S6.2 12.4 8 14.25"/></svg><span>English</span></a>
     </nav>
   </header>
@@ -71,36 +72,55 @@
 
     <section class="guide-hero wrap">
       <div>
-        <p class="eyebrow">NOTCHMUSE WINDOWS 版 · 预览预告</p>
+        <p class="eyebrow">NOTCHMUSE WINDOWS 版</p>
         <h1>Windows 同步桌面歌词与悬浮歌词</h1>
-        <p class="lead">无论是写代码、刷网页还是无边框游戏，实时同步歌词都能以点击穿透浮层或任务栏歌词常驻可见。基于 Windows 原生 SMTC，自动兼容 Spotify、Apple Music、YouTube Music、网易云音乐、MusicBee、foobar2000 等 36+ 款播放器。</p>
+        <p class="lead">把同步歌词放在 Windows 任务栏、顶部浮岛或自由悬浮窗口中。NotchMuse 通过 Windows 系统媒体会话读取播放进度。</p>
 
         <div class="win-download-card">
-          <div class="win-download-head">
-            <span class="win-coming-badge">● Windows 预览版 · 即将发布</span>
-            <strong style="font-size:.9rem">Windows 11 / 10 (64-bit) · &lt; 30 MB</strong>
+          <div class="actions">
+            <a class="button" href="https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe" data-download-placement="hero">下载 Windows 版 ↗</a>
           </div>
-          <div class="actions" style="margin-top:12px">
-            <a class="button" href="https://github.com/Xiye88/NotchMuse/releases" data-download-placement="hero">在 GitHub 关注发布 ↗</a>
-            <a class="button button-quiet" href="#spotify-lyrics-overlay">Spotify 悬浮歌词演示</a>
-          </div>
-          <p>安装包预留位：<code>NotchMuse-Setup-x64.exe</code>（Windows 11 / 10 64 位 · &lt; 30 MB · 无需注册 · 不采集音频）。</p>
+          <p class="windows-version">v0.9.0 · Windows 11/10 · 便携版 .exe</p>
+          <p>下载 x64 .exe 后直接运行。免安装，无需注册。</p>
         </div>
       </div>
 
       <figure class="guide-figure">
-        <div class="recording-slot" role="img" aria-label="Windows 16:9 录屏展示槽位">
-          <span class="recording-badge">16:9 新版录屏展示位</span>
-          <strong>Windows 悬浮歌词与任务栏歌词实机演示</strong>
-          <p>预留给 v0.9 Windows 版实机录屏：展示 Spotify 播放音乐后切换到浏览器、IDE 与无边框游戏时歌词常驻同步效果。</p>
-          <div class="recording-specs">
-            <span>1920 × 1080 (16:9)</span>
-            <span>60 fps · MP4 / WebM</span>
-            <span>10–15 秒循环</span>
-          </div>
+        <div class="live-demo" data-demo>
+          <img class="demo-poster" src="/assets/media/win-taskbar-demo-poster.webp" width="1280" height="720" alt="Win11 左下角任务栏歌词" fetchpriority="high">
+          <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/win-taskbar-demo-poster.webp" aria-label="Win11 左下角任务栏歌词">
+            <source data-src="/assets/media/win-taskbar-demo.webm" type="video/webm">
+            <source data-src="/assets/media/win-taskbar-demo.mp4" type="video/mp4">
+          </video>
         </div>
-        <figcaption>推荐录屏规格：1920×1080（16:9）· Windows 11 深色桌面搭配 Spotify 与点击穿透悬浮歌词。</figcaption>
+        <figcaption>Win11 左下角任务栏歌词 · 把同步歌词留在任务栏旁，桌面窗口可以照常使用。</figcaption>
       </figure>
+    </section>
+
+    <section class="section wrap windows-showcase" id="modes" aria-labelledby="win-showcase-title">
+      <h2 id="win-showcase-title">Windows 实机演示</h2>
+      <div class="windows-demo-grid">
+        <figure class="windows-demo">
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="/assets/media/win-floating-demo-poster.webp" width="1280" height="720" alt="自由悬浮歌词" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/win-floating-demo-poster.webp" aria-label="自由悬浮歌词">
+              <source data-src="/assets/media/win-floating-demo.webm" type="video/webm">
+              <source data-src="/assets/media/win-floating-demo.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption><h3>自由悬浮歌词</h3><p>拖动到顺手的位置。六键工具条靠近屏幕边缘时会自动翻转，也可锁定并开启点击穿透。</p></figcaption>
+        </figure>
+        <figure class="windows-demo">
+          <div class="live-demo" data-demo>
+            <img class="demo-poster" src="/assets/media/win-top-island-demo-poster.webp" width="1280" height="720" alt="顶部浮岛与黑胶工作室" loading="lazy">
+            <video autoplay muted loop playsinline preload="none" width="1280" height="720" poster="/assets/media/win-top-island-demo-poster.webp" aria-label="顶部浮岛与黑胶工作室">
+              <source data-src="/assets/media/win-top-island-demo.webm" type="video/webm">
+              <source data-src="/assets/media/win-top-island-demo.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption><h3>顶部浮岛与黑胶工作室</h3><p>把歌词放在屏幕顶部的浮岛，和黑胶工作室的沉浸歌词实时同步。</p></figcaption>
+        </figure>
+      </div>
     </section>
 
     <div class="guide-layout wrap">
@@ -121,38 +141,16 @@
             </div>
             <div class="workflow-step">
               <span>第 3 步</span>
-              <h3>悬浮与任务栏歌词常驻可见</h3>
-              <p>开启位置锁定与点击穿透，歌词优雅悬停在最前或贴合任务栏，鼠标点击直接穿透至下方窗口。</p>
-            </div>
-          </div>
-        </section>
-
-        <section id="modes" class="guide-section">
-          <h2>为 Windows 桌面习惯量身设计</h2>
-          <div class="guide-options">
-            <div>
-              <h3>点击穿透桌面悬浮歌词</h3>
-              <p>支持单屏与多显示器自由拖拽定位，锁定位置后不误触，可自定义字体、琥珀渐变色与毛玻璃底板。</p>
-            </div>
-            <div>
-              <h3>Windows 任务栏歌词</h3>
-              <p>想要零遮挡工作区？将单行精简歌词直接嵌入 Windows 11 / 10 任务栏区域，余光一瞥即可跟唱。</p>
-            </div>
-            <div>
-              <h3>沉浸式歌词页与播控</h3>
-              <p>展开完整沉浸歌词视图，支持逐行平滑扫光高亮、点击歌词跳转进度以及多套精选主题色一键切换。</p>
-            </div>
-            <div>
-              <h3>轻量原生与隐私优先</h3>
-              <p>目标安装包小于 30 MB，无账号体系、无行为遥测、不监听麦克风或系统音频流。</p>
+              <h3>锁定悬浮歌词并开启点击穿透</h3>
+              <p>固定悬浮歌词的位置后，鼠标点击可直接传到下方窗口。</p>
             </div>
           </div>
         </section>
 
         <section id="players" class="guide-section">
-          <h2>兼容 36+ 款 Windows 与跨平台播放器</h2>
+          <h2>兼容播放器</h2>
           <p>基于 Windows SMTC 系统媒体通道，自动同步 Spotify、Apple Music、YouTube Music（桌面与浏览器 PWA）、网易云音乐、QQ 音乐、汽水音乐、MusicBee、foobar2000、TIDAL、Qobuz、Cider、Plexamp、Roon 等主流与发烧友播放器。</p>
-          <p><a href="/zh/compatible-players/">查看完整 36+ 款兼容播放器目录 →</a></p>
+          <p><a href="/zh/compatible-players/">查看完整 39+ 款兼容播放器目录 →</a></p>
         </section>
 
         <section id="faq" class="guide-section faq">
@@ -168,31 +166,51 @@
         <p class="eyebrow">本页目录</p>
         <a href="#spotify-lyrics-overlay">Spotify 悬浮歌词实操</a>
         <a href="#modes">Windows 专属特性</a>
-        <a href="#players">36+ 兼容播放器</a>
+        <a href="#players">兼容播放器</a>
         <a href="#faq">常见问题</a>
       </aside>
     </div>
 
     <section class="closing">
       <div class="wrap">
-        <p class="eyebrow">跨平台同步桌面歌词</p>
-        <h2>Windows 11 / 10 版本即将发布。</h2>
-        <div class="actions" style="justify-content:center">
-          <a class="button" href="https://github.com/Xiye88/NotchMuse/releases" data-download-placement="footer">在 GitHub 关注发布 ↗</a>
-          <a class="button button-quiet" href="/zh/compatible-players/">浏览 36+ 兼容播放器 →</a>
+        <h2>让同步歌词留在 Windows 桌面。</h2>
+        <div class="actions">
+          <a class="button" href="https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe" data-download-placement="footer">下载 Windows 版 ↗</a>
+          <a class="button button-quiet" href="/zh/compatible-players/">查看两端兼容播放器 →</a>
         </div>
-        <p class="fine">Windows 11 / 10 (64-bit) · &lt; 30 MB · 即将推出</p>
+        <p class="fine">v0.9.0 · Windows 11/10 · 便携版 .exe</p>
+      </div>
+    </section>
+
+    <section class="section wrap" id="community" aria-labelledby="community-title">
+      <h2 id="community-title">社区与联系</h2>
+      <div class="community-grid">
+        <div class="community-group">
+          <a href="https://qm.qq.com/q/J6W0oSPtu0"><img src="/assets/qq-group-qr.png" alt="QQ 用户群 1137981671" width="120" height="120" loading="lazy"></a>
+          <div>
+            <h3>QQ 用户群</h3>
+            <strong>1137981671</strong>
+            <a href="https://qm.qq.com/q/J6W0oSPtu0">加入 QQ 群 ↗</a>
+          </div>
+        </div>
+        <div class="community-contact">
+          <h3>反馈与合作</h3>
+          <a href="mailto:support@notchmuse.com">support@notchmuse.com</a>
+          <a href="https://github.com/Xiye88/NotchMuse/issues">在 GitHub 提交问题 ↗</a>
+          <p>NotchMuse 采用 MIT 许可证，免费开源。</p>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer wrap"><a class="brand" href="/zh/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="页脚导航"><a href="/zh/">首页</a><a href="/zh/compatible-players/">兼容播放器</a><a href="/zh/lrc-tools/">LRC 工具</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><button class="footer-link-btn" type="button" data-analytics-settings hidden>统计设置</button></nav><p>© NotchMuse · 让每一天的音乐体验更自在。</p></footer>
+  <footer class="site-footer wrap"><a class="brand" href="/zh/"><img class="brand-icon" src="/assets/notchmuse-icon.png" width="128" height="128" alt=""> NotchMuse</a><nav aria-label="页脚导航"><a href="/zh/">首页</a><a href="/zh/compatible-players/">兼容播放器</a><a href="/zh/lrc-tools/">LRC 工具</a><a href="https://github.com/Xiye88/NotchMuse">GitHub</a><a href="mailto:support@notchmuse.com">support@notchmuse.com</a><button class="footer-link-btn" type="button" data-analytics-settings hidden>统计设置</button></nav><p>© NotchMuse · 让每一天的音乐体验更自在。</p></footer>
 
   <aside class="analytics-consent" data-analytics-consent role="region" aria-labelledby="consent-title" hidden>
     <div><strong id="consent-title">允许官网统计吗？</strong><p>经你同意，Google Analytics 统计访问和下载按钮点击。选择不会影响应用或下载。<a href="/zh/#privacy">隐私说明</a></p></div>
     <div class="consent-actions"><button type="button" class="language-toggle" data-consent-reject>拒绝统计</button><button type="button" class="button button-small" data-consent-accept>同意统计</button><button type="button" class="language-toggle" data-consent-close hidden>关闭</button></div>
   </aside>
-  <script src="/analytics.js?v=1" defer></script>
+  <script src="/analytics.js?v=2" defer></script>
   <script src="/bencho-ux.js?v=1" defer></script>
+  <script src="/showcase.js?v=2" defer></script>
 </body>
 </html>

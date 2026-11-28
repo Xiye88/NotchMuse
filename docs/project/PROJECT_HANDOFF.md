@@ -1,5 +1,9 @@
 # NotchMuse Current Handoff
 
+## v0.9.0 website and repository preview — 2026-11-28
+
+Local v0.9.0 web and README candidate on `feat/website-v09-preview` at `ba089ee`. The bilingual homepages, Windows pages and READMEs use the seven supplied demo sets. The language and showcase tests passed, and all six deliverables passed local reference checks. A Chromium smoke test covered all four pages at 360–1440 px and played every demo. The guide sitemap and pre-consent analytics assertions also fail on the base commit. GitHub Latest serves the v0.8.5 DMG, and the Windows asset URL returns 404 until the portable build is published. Next phase is Gemini visual audit and code review. App build and distribution were outside this review. No commit, push or deployment.
+
 ## Website security headers — 2026-11-18
 
 Cloudflare response-header rule425c18cfabe0421aa87434365e28d389 enabled with7 requested static values; apex/www verified. Original CSP retained; page resources load and PVUV /in returns204. No App/site-code/DNS/feed changes. [Delivery note](../reports/website/2026-11-18-security-headers.md).

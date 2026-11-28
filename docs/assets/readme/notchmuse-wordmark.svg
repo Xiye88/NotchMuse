@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 124" role="img" aria-labelledby="title">
+  <title id="title">NotchMuse</title>
+  <defs>
+    <linearGradient id="amber" x2="100%" y2="100%">
+      <stop stop-color="#E86C36"/>
+      <stop offset="1" stop-color="#FF8A3D"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="638" height="122" rx="61" fill="#18181B" stroke="#A45431" stroke-width="2"/>
+  <g transform="translate(105 62)">
+    <circle r="42" fill="url(#amber)"/>
+    <g fill="none" stroke="#451D12" stroke-opacity=".44">
+      <circle r="36"/>
+      <circle r="30"/>
+      <circle r="24"/>
+    </g>
+    <circle r="18" fill="#1E1E24"/>
+    <path d="M0 4V-9l8-2v5l-5 1v9a4 4 0 1 1-3-4z" fill="#FFD5BB"/>
+  </g>
+  <text x="372" y="65" text-anchor="middle" dominant-baseline="central" fill="#F8F4F0" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="700" letter-spacing="-3">Notch<tspan fill="#FF9A58">Muse</tspan></text>
+</svg>

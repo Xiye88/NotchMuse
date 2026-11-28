@@ -32,6 +32,7 @@ for (const suffix of urls) {
   assert(!descriptions.has(description), `Repeated description: ${suffix}`);
   titles.add(title); descriptions.add(description);
   const zh = suffix.startsWith('/zh/');
+  const home = suffix === '/' || suffix === '/zh/';
   const canonical = 'https://notchmuse.com' + suffix;
   const schemaBlocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => JSON.parse(m[1]));
   const applications = schemaBlocks.filter(item => item['@type'] === 'SoftwareApplication');
@@ -39,14 +40,16 @@ for (const suffix of urls) {
   assert.deepEqual(applications[0], {
     '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'NotchMuse',
     url: canonical, inLanguage: zh ? 'zh-Hans' : 'en',
-    operatingSystem: zh ? 'macOS 14 或更高版本' : 'macOS 14 or later',
+    operatingSystem: home ? ['macOS 14+ (Apple Silicon)', 'Windows 11/10 (Portable .exe)'] : zh ? 'macOS 14 或更高版本' : 'macOS 14 or later',
     applicationCategory: 'MultimediaApplication',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    downloadUrl: 'https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg',
+    downloadUrl: home ? [
+      'https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse.dmg',
+      'https://github.com/Xiye88/NotchMuse/releases/latest/download/NotchMuse-Windows-win-x64-portable.exe',
+    ] : 'https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg',
     sameAs: 'https://github.com/Xiye88/NotchMuse',
   }, `Verified schema field whitelist: ${suffix}`);
   const breadcrumbs = schemaBlocks.filter(item => item['@type'] === 'BreadcrumbList');
-  const home = suffix === '/' || suffix === '/zh/';
   assert.equal(breadcrumbs.length, home ? 0 : 1);
   assert.equal(schemaBlocks.length, home ? 1 : 2);
   if (!home) assert.equal(breadcrumbs[0].itemListElement[1].item, canonical);

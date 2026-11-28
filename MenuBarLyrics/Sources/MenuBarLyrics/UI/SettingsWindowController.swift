@@ -1141,14 +1141,6 @@ final class SettingsWindowController: NSWindowController {
         contentStack.addArrangedSubview(previewCard)
         contentStack.addArrangedSubview(displayPage)
         contentStack.addArrangedSubview(appearancePage)
-        let banner = makeAnnouncementBanner()
-        announcementBanner = banner
-        contentStack.insertArrangedSubview(banner, at: 0)
-        banner.widthAnchor.constraint(equalTo: contentStack.widthAnchor).isActive = true
-        updateAnnouncementBanner()
-        announcementObserver = NotificationCenter.default.addObserver(forName: AnnouncementManager.notification, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.updateAnnouncementBanner() }
-        }
         contentStack.addArrangedSubview(generalPage)
         displayPage.isHidden = selectedPage != .display
         appearancePage.isHidden = selectedPage != .appearance
@@ -2079,90 +2071,6 @@ final class SettingsWindowController: NSWindowController {
             chevron.centerYAnchor.constraint(equalTo: box.centerYAnchor),
             chevron.widthAnchor.constraint(equalToConstant: 10),
             chevron.heightAnchor.constraint(equalToConstant: 10)
-        ])
-        return box
-    }
-
-    private func updateAnnouncementBanner() {
-        guard let banner = announcementBanner, let button = announcementTitleButton else { return }
-        if let active = AnnouncementManager.shared.activeAnnouncement {
-            button.title = active.localizedTitle
-            announcementUnreadDot?.isHidden = !AnnouncementManager.shared.hasUnread
-            banner.isHidden = false
-        } else {
-            banner.isHidden = true
-        }
-    }
-
-    @objc private func openAnnouncement() {
-        AnnouncementManager.shared.openActive()
-    }
-
-    @objc private func automaticInstallChanged() {
-        UpdateController.shared.automaticallyDownloadsUpdates = automaticInstallSwitch.state == .on
-    }
-
-    @objc private func bilingualLyricsChanged() {
-        UserDefaults.standard.set(bilingualLyricsSwitch.state == .on, forKey: AppPreferences.bilingualLyricsKey)
-        onSettingsChange()
-    }
-
-    private func makeAnnouncementBanner() -> NSView {
-        let box = NSView()
-        box.wantsLayer = true
-        box.layer?.cornerRadius = 12
-        box.layer?.borderWidth = 1
-        box.layer?.borderColor = NSColor(calibratedRed: 1.0, green: 0.54, blue: 0.21, alpha: 0.42).cgColor
-        box.layer?.backgroundColor = NSColor(calibratedRed: 1.0, green: 0.54, blue: 0.21, alpha: 0.10).cgColor
-        box.translatesAutoresizingMaskIntoConstraints = false
-
-        let icon = NSImageView()
-        icon.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: nil)
-        icon.contentTintColor = NSColor(calibratedRed: 1.0, green: 0.62, blue: 0.28, alpha: 1.0)
-        icon.translatesAutoresizingMaskIntoConstraints = false
-
-        let titleButton = NSButton(title: "", target: self, action: #selector(openAnnouncement))
-        titleButton.isBordered = false
-        titleButton.alignment = .left
-        titleButton.font = .systemFont(ofSize: 12.5, weight: .medium)
-        titleButton.lineBreakMode = .byTruncatingTail
-        titleButton.translatesAutoresizingMaskIntoConstraints = false
-        announcementTitleButton = titleButton
-
-        let unreadDot = NSView()
-        unreadDot.wantsLayer = true
-        unreadDot.layer?.cornerRadius = 3.5
-        unreadDot.layer?.backgroundColor = NSColor(calibratedRed: 1.0, green: 0.45, blue: 0.14, alpha: 1.0).cgColor
-        unreadDot.translatesAutoresizingMaskIntoConstraints = false
-        announcementUnreadDot = unreadDot
-
-        let chevron = NSImageView()
-        chevron.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
-        chevron.contentTintColor = .secondaryLabelColor
-        chevron.translatesAutoresizingMaskIntoConstraints = false
-
-        box.addSubview(icon)
-        box.addSubview(titleButton)
-        box.addSubview(unreadDot)
-        box.addSubview(chevron)
-        NSLayoutConstraint.activate([
-            box.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
-            icon.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
-            icon.centerYAnchor.constraint(equalTo: box.centerYAnchor),
-            icon.widthAnchor.constraint(equalToConstant: 16),
-            icon.heightAnchor.constraint(equalToConstant: 16),
-            titleButton.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 8),
-            titleButton.trailingAnchor.constraint(lessThanOrEqualTo: unreadDot.leadingAnchor, constant: -8),
-            titleButton.topAnchor.constraint(equalTo: box.topAnchor, constant: 8),
-            titleButton.bottomAnchor.constraint(equalTo: box.bottomAnchor, constant: -8),
-            unreadDot.trailingAnchor.constraint(equalTo: chevron.leadingAnchor, constant: -8),
-            unreadDot.centerYAnchor.constraint(equalTo: box.centerYAnchor),
-            unreadDot.widthAnchor.constraint(equalToConstant: 7),
-            unreadDot.heightAnchor.constraint(equalToConstant: 7),
-            chevron.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
-            chevron.centerYAnchor.constraint(equalTo: box.centerYAnchor),
-            chevron.widthAnchor.constraint(equalToConstant: 12),
-            chevron.heightAnchor.constraint(equalToConstant: 12)
         ])
         return box
     }

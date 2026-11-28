@@ -1,18 +1,22 @@
-<?xml version="1.0" standalone="yes"?>
-<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>NotchMuse</title>
         <item>
-            <title>0.8.5</title>
-            <pubDate>Sat, 21 Nov 2026 00:03:22 +0800</pubDate>
+            <title>0.9.0</title>
+            <pubDate>Sat, 28 Nov 2026 16:59:39 +0800</pubDate>
             <link>https://notchmuse.com/</link>
-            <sparkle:version>83</sparkle:version>
-            <sparkle:shortVersionString>0.8.5</sparkle:shortVersionString>
+            <sparkle:version>110</sparkle:version>
+            <sparkle:shortVersionString>0.9.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <sparkle:releaseNotesLink xml:lang="en">https://notchmuse.com/releases/v0.8.5/NotchMuse.html</sparkle:releaseNotesLink>
-            <sparkle:releaseNotesLink xml:lang="zh">https://notchmuse.com/releases/v0.8.5/NotchMuse.zh.html</sparkle:releaseNotesLink>
-            <enclosure url="https://github.com/Xiye88/NotchMuse/releases/download/v0.8.5/NotchMuse.dmg" length="7327684" type="application/octet-stream" sparkle:edSignature="bCwsds8bOzFdrSpTgssSUebUEwfbYZ63xGYlThbtjIE/FIUuPhmhuXaOk71L3mDyThmPiJoT41zT32kFvtZCDw=="/>
+            <sparkle:releaseNotesLink xml:lang="en">https://notchmuse.com/releases/v0.9.0/NotchMuse.html</sparkle:releaseNotesLink>
+            <sparkle:releaseNotesLink xml:lang="zh">https://notchmuse.com/releases/v0.9.0/NotchMuse.zh.html</sparkle:releaseNotesLink>
+            <enclosure url="https://github.com/Xiye88/NotchMuse/releases/download/v0.9.0/NotchMuse.dmg" length="7197315" type="application/octet-stream" sparkle:edSignature="+juHaid48mX39hjlibrxVgZc8hxqxu1whylyxP+I1xZzebuQoyGj0gBtbf81DlyfJ3MaIa+33zoj8W1DFlWFAQ=="></enclosure>
         </item>
     </channel>
-</rss>
+</rss><!-- sparkle-signatures:
+edSignature: xpIr0HHG2uZu4YjyhTAJb+rsEOje/Oy/EkS7nQEyDymmEDJ5v2RcorNFIsiDkJvT4YkT6Q6ZDQFeu/70/uGdBQ==
+length: 1432
+-->

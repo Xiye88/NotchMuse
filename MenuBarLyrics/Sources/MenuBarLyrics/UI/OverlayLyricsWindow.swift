@@ -500,9 +500,6 @@ final class OverlayLyricsWindow: NSObject {
 
             if vertical {
                 drawVerticalLyric()
-                if let translation, !translation.isEmpty {
-                    drawTranslation(translation, in: NSRect(x: 4, y: 2, width: bounds.width - 8, height: lineHeight), font: .systemFont(ofSize: max(9, font.pointSize - 3)))
-                }
                 return
             }
 

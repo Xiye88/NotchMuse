@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NotchMuse v0.9.0 更新说明</title>
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #0b0b0d;
+      --card: #161618;
+      --border: rgba(255, 255, 255, 0.10);
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --accent: #ff8a36;
+      --accent-soft: rgba(255, 138, 54, 0.14);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f5f7;
+        --card: #ffffff;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --accent: #e06d1b;
+        --accent-soft: rgba(224, 109, 27, 0.10);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px 22px 28px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro SC", "PingFang SC", sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .lang-radio { position: absolute; opacity: 0; pointer-events: none; }
+    .wrap { max-width: 680px; margin: 0 auto; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .title-group h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .badge {
+      display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 600;
+    }
+    .lang-switch {
+      display: inline-flex; padding: 2px; border-radius: 999px;
+      background: var(--card); border: 1px solid var(--border);
+      user-select: none; -webkit-user-select: none;
+    }
+    .lang-switch label {
+      display: inline-block; color: var(--muted); font-size: 12px; font-weight: 600;
+      padding: 5px 12px; border-radius: 999px; cursor: pointer;
+    }
+    #lang-zh:checked ~ .wrap label[for="lang-zh"],
+    #lang-en:checked ~ .wrap label[for="lang-en"] { background: var(--accent); color: #ffffff; }
+    #panel-zh, #panel-en { display: none; }
+    #lang-zh:checked ~ .wrap #panel-zh,
+    #lang-en:checked ~ .wrap #panel-en { display: block; }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+    }
+    h2 { margin: 0 0 10px; font-size: 15px; font-weight: 650; }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin-bottom: 6px; }
+    .metrics {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px; margin: 10px 0 12px;
+    }
+    .metric {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+    }
+    .metric strong { color: var(--accent); }
+    .qr-box { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .qr-box img {
+      width: 124px; height: 124px; border-radius: 10px;
+      background: #fff; padding: 4px; border: 1px solid var(--border);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <input class="lang-radio" type="radio" name="release-lang" id="lang-en">
+  <input class="lang-radio" type="radio" name="release-lang" id="lang-zh" checked>
+
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-group">
+        <h1>NotchMuse v0.9.0</h1>
+        <span class="badge">Build 110 · macOS 14+ &amp; Windows 11/10</span>
+      </div>
+      <div class="lang-switch" role="tablist" aria-label="Language">
+        <label for="lang-en" id="btn-en">English</label>
+        <label for="lang-zh" id="btn-zh">中文</label>
+      </div>
+    </div>
+
+    <div id="panel-en">
+      <div class="card">
+        <h2>1. New Vinyl Studio UI &amp; Immersive Lyrics Stage</h2>
+        <ul>
+          <li><strong>Vinyl Studio workbench</strong>: Spinning album-cover vinyl paired with a full-song immersive lyrics stage.</li>
+          <li><strong>Single-click seek</strong>: Click any timed lyric line or anywhere on the progress bar once to jump playback immediately.</li>
+          <li><strong>Lyrics Share Card</strong>: Generate 3-template shareable lyric posters with album artwork directly from the lyrics stage.</li>
+          <li><strong>Free Floating refinement</strong>: Dual-line smooth sweep, 6-key hover bar, 7-color quick palette, compact icon-only <code>🔒</code> desktop unlock, and unified <em>Automatic Updates (Recommended)</em> toggle.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. 800-Song × 7-Platform Lyrics Precision Upgrade</h2>
+        <div class="metrics">
+          <div class="metric"><span>QQ Music</span><strong>96.25%</strong></div>
+          <div class="metric"><span>Apple Music</span><strong>96.12%</strong></div>
+          <div class="metric"><span>NetEase Cloud</span><strong>96.12%</strong></div>
+          <div class="metric"><span>Instrumental False Positives</span><strong>0 / 280 (0.0%)</strong></div>
+        </div>
+        <ul>
+          <li><strong>Zero instrumental false positives</strong>: Preserves NetEase <code>pureMusic</code> negative evidence, filters standalone notices, and verifies UGC uploads against independent sources.</li>
+          <li><strong>39+ compatible players</strong>: Improved OST subtitle, Live/studio variant, and cross-script artist alias matching across desktop and web players.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. Official Windows 11/10 Companion Release</h2>
+        <ul>
+          <li>NotchMuse now supports <strong>Windows 11/10</strong> as a single-file portable <code>.exe</code> with Win11 bottom-left taskbar lyrics, top floating island, and Free Floating overlay. Download at <a href="https://notchmuse.com/windows/">notchmuse.com/windows</a>.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Community &amp; Feedback</h2>
+        <div class="qr-box">
+          <img src="https://notchmuse.com/assets/qq-group-qr.png" alt="NotchMuse QQ User Group 1137981671 QR Code">
+          <div style="flex:1; min-width:220px;">
+            <p style="margin:0 0 8px;">Scan to join <strong>QQ User Group 1137981671</strong> (<a href="https://qm.qq.com/q/J6W0oSPtu0">Join directly</a>) for feedback and release updates.</p>
+            <p style="margin:0 0 6px;">Feedback &amp; collaboration: <a href="mailto:support@notchmuse.com">support@notchmuse.com</a></p>
+            <p style="margin:0;">Issues &amp; releases: <a href="https://github.com/Xiye88/NotchMuse">github.com/Xiye88/NotchMuse</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-zh">
+      <div class="card">
+        <h2>1. 全新 Vinyl Studio 黑胶工作台与沉浸歌词页</h2>
+        <ul>
+          <li><strong>黑胶工作台</strong>：新增旋转专辑黑胶唱片与汽水音乐风格沉浸歌词页，整首歌词流畅跟随。</li>
+          <li><strong>单击即跳转</strong>：点击任意带时间戳的歌词行或进度条任意位置，一次点击即可精准跳转播放进度。</li>
+          <li><strong>歌词分享卡片</strong>：一键将喜欢的歌词与专辑封面生成 3 款精美分享海报。</li>
+          <li><strong>自由悬浮与设置打磨</strong>：默认双行顺滑扫光、顶置 6 键悬浮工具条、7 色圆点快切、锁定时桌面悬停纯 <code>🔒</code> 解锁，以及简化合一的「自动更新（推荐开启）」开关。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. 7 平台 × 800 首歌词精准度大升级</h2>
+        <div class="metrics">
+          <div class="metric"><span>QQ 音乐</span><strong>96.25%</strong></div>
+          <div class="metric"><span>Apple Music</span><strong>96.12%</strong></div>
+          <div class="metric"><span>网易云音乐</span><strong>96.12%</strong></div>
+          <div class="metric"><span>纯音乐误匹配</span><strong>0 / 280 (0.0%)</strong></div>
+        </div>
+        <ul>
+          <li><strong>纯音乐零误配</strong>：完整保留网易云 <code>pureMusic</code> 负向证据，拦截「纯音乐，请欣赏」与无佐证 UGC 假歌词，彻底消灭经典钢琴曲误出歌词问题。</li>
+          <li><strong>兼容 39+ 款音乐播放器</strong>：增强影视 OST 署名、Live/录音室版本区分与跨语种艺人别名匹配。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>3. 正式推出 Windows 11/10 双端版本</h2>
+        <ul>
+          <li>NotchMuse 现已正式登陆 <strong>Windows 11/10</strong>，支持 Win11 任务栏左下角歌词、顶部悬浮岛与桌面自由悬浮，单文件绿色便携免安装，前往 <a href="https://notchmuse.com/zh/windows/">notchmuse.com/zh/windows</a> 获取。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>社区交流与反馈</h2>
+        <div class="qr-box">
+          <img src="https://notchmuse.com/assets/qq-group-qr.png" alt="NotchMuse QQ 用户交流群 1137981671 二维码">
+          <div style="flex:1; min-width:220px;">
+            <p style="margin:0 0 8px;">扫码加入 <strong>QQ 用户交流群 1137981671</strong>（<a href="https://qm.qq.com/q/J6W0oSPtu0">点击直达加群</a>），直接交流反馈与获取新版本动态。</p>
+            <p style="margin:0 0 6px;">反馈与商务合作：<a href="mailto:support@notchmuse.com">support@notchmuse.com</a></p>
+            <p style="margin:0;">GitHub 仓库：<a href="https://github.com/Xiye88/NotchMuse">github.com/Xiye88/NotchMuse</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -228,7 +228,16 @@ public sealed class M4Tests
         Assert.True(defaults.FloatingDoubleLine);
         Assert.True(defaults.InteractionSoundsEnabled);
         Assert.True(defaults.AutoUpdateEnabled);
+        Assert.True(defaults.MinimizeToTrayOnClose);
     }
+
+    [Theory]
+    [InlineData(true, false, false, true)]
+    [InlineData(false, false, false, false)]
+    [InlineData(true, true, false, false)]
+    [InlineData(true, false, true, false)]
+    public void CloseButtonBehaviorRespectsMinimizeToTraySettingAndForceExit(bool minimizeToTray, bool auditMode, bool forceExit, bool expectedHide) =>
+        Assert.Equal(expectedHide, MainWindow.ShouldMinimizeToTrayOnClose(minimizeToTray, auditMode, forceExit));
 
     [Fact]
     public void QuickGradientPaletteHasThreeCuratedMacParityGradients()

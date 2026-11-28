@@ -762,6 +762,17 @@
 
                         <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
 
+                        <!-- Minimize to Bottom-Right System Tray on Close -->
+                        <Grid Margin="0,0,0,16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="CloseToTrayLabel" Text="关闭时最小化到托盘" FontSize="13.5" FontWeight="Medium"/>
+                                <TextBlock x:Name="CloseToTrayDesc" Text="开启后点关闭缩到右下角托盘图标继续显示歌词；关闭后直接退出程序" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <CheckBox x:Name="CloseToTrayToggle" HorizontalAlignment="Right" VerticalAlignment="Center" IsChecked="True" Checked="OnCloseToTrayToggleChanged" Unchecked="OnCloseToTrayToggleChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource HairlineBrush}" Margin="0,0,0,16"/>
+
                         <!-- Theme Mode Segmented Pill -->
                         <Grid Margin="0,0,0,16">
                             <StackPanel VerticalAlignment="Center">

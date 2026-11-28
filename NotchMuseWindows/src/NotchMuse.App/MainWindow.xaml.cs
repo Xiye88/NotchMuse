@@ -72,6 +72,8 @@ public partial class MainWindow : Window
     private IntPtr windowHandle;
     private bool initializing = true;
     private bool closed;
+    private bool forceExit;
+    private bool trayMinimizeHintShown;
     private bool draggingProgress;
     private string dragTrackKey = "";
     private int seekGeneration;
@@ -167,6 +169,7 @@ public partial class MainWindow : Window
         };
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+        Closing += OnWindowClosing;
         MissingLyricsArt.RetryClicked += () => { if (snapshot is not null) UpdateTrack(snapshot); };
 
         initializing = false;
@@ -272,9 +275,13 @@ public partial class MainWindow : Window
         menu.Items.Add("时间偏移 +0.5s", null, (_, _) => Dispatcher.Invoke(() => ChangeOffset(0.5)));
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("打开主窗口", null, (_, _) => Dispatcher.Invoke(BringMainToFront));
-        menu.Items.Add("退出 NotchMuse", null, (_, _) => Dispatcher.Invoke(Close));
+        menu.Items.Add("退出 NotchMuse", null, (_, _) => Dispatcher.Invoke(() => { forceExit = true; Close(); }));
         tray.ContextMenuStrip = menu;
         tray.DoubleClick += (_, _) => Dispatcher.Invoke(BringMainToFront);
+        tray.MouseClick += (_, e) =>
+        {
+            if (e.Button == Forms.MouseButtons.Left) Dispatcher.Invoke(BringMainToFront);
+        };
     }
 
     private void BringMainToFront()
@@ -350,6 +357,7 @@ public partial class MainWindow : Window
         BilingualToggle.IsChecked = settings.BilingualEnabled;
         InteractionSoundsToggle.IsChecked = settings.InteractionSoundsEnabled;
         AutoUpdateToggle.IsChecked = settings.AutoUpdateEnabled;
+        CloseToTrayToggle.IsChecked = settings.MinimizeToTrayOnClose;
         FloatingSingleLineRadio.IsChecked = !settings.FloatingDoubleLine;
         FloatingDoubleLineRadio.IsChecked = settings.FloatingDoubleLine;
         OverlayLockToggle.IsChecked = settings.OverlayLocked;
@@ -1473,6 +1481,8 @@ public partial class MainWindow : Window
         StopBehaviorDesc.Text = en ? "Choose how lyrics behave when your player closes" : "当播放器退出或清空队列时的歌词显示策略";
         GeneralStartupLabel.Text = en ? "Launch at Login" : "开机自启";
         GeneralStartupDesc.Text = en ? "Start with Windows in low-memory tray mode" : "随 Windows 自动启动，保持低内存常驻托盘";
+        CloseToTrayLabel.Text = en ? "Minimize to Tray on Close" : "关闭时最小化到托盘";
+        CloseToTrayDesc.Text = en ? "Keep lyrics running in the bottom-right tray when closed; turn off to exit directly" : "开启后点关闭缩到右下角托盘图标继续显示歌词；关闭后直接退出程序";
         ThemeModeLabel.Text = en ? "Theme Mode" : "外观模式";
         ThemeModeDesc.Text = en ? "Light uses Braun Warm Alabaster, Dark uses Vinyl Hi-Fi" : "浅色采用 Braun 暖雪花石，深色采用黑胶 Hi-Fi 暗灰";
         ThemeSystemRadio.Content = en ? "System" : "跟随系统";
@@ -1534,10 +1544,52 @@ public partial class MainWindow : Window
     private void OnMaximizeRestoreClick(object sender, RoutedEventArgs e) =>
         WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
 
+    public static bool ShouldMinimizeToTrayOnClose(bool minimizeToTraySetting, bool isAuditMode, bool isForceExit) =>
+        !isAuditMode && !isForceExit && minimizeToTraySetting;
+
+    private void MinimizeToSystemTray()
+    {
+        Hide();
+        if (!trayMinimizeHintShown && !auditMode)
+        {
+            trayMinimizeHintShown = true;
+            var en = settings.EnglishLanguage;
+            tray.ShowBalloonTip(
+                2200,
+                "NotchMuse",
+                en ? "Minimized to system tray. Click the tray icon to reopen." : "已缩小到右下角托盘继续运行，点击托盘图标可随时恢复主窗口",
+                Forms.ToolTipIcon.None);
+        }
+    }
+
     private void OnCloseToTrayClick(object sender, RoutedEventArgs e)
     {
-        if (auditMode) Close();
-        else Hide();
+        if (ShouldMinimizeToTrayOnClose(settings.MinimizeToTrayOnClose, auditMode, forceExit))
+        {
+            MinimizeToSystemTray();
+        }
+        else
+        {
+            forceExit = true;
+            Close();
+        }
+    }
+
+    private void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (ShouldMinimizeToTrayOnClose(settings.MinimizeToTrayOnClose, auditMode, forceExit))
+        {
+            e.Cancel = true;
+            MinimizeToSystemTray();
+        }
+    }
+
+    private void OnCloseToTrayToggleChanged(object sender, RoutedEventArgs e)
+    {
+        if (initializing) return;
+        settings.MinimizeToTrayOnClose = CloseToTrayToggle.IsChecked == true;
+        settings.Save();
+        InteractionSoundEngine.Play(InteractionSoundCue.Tick);
     }
 
     private void OnStateChanged(object? sender, EventArgs e) { }

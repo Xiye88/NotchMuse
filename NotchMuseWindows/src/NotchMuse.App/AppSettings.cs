@@ -89,6 +89,7 @@ public sealed class AppSettings
     public bool FloatingDoubleLine { get; set; } = true;
     public bool InteractionSoundsEnabled { get; set; } = true;
     public bool AutoUpdateEnabled { get; set; } = true;
+    public bool MinimizeToTrayOnClose { get; set; } = true;
     public double? FloatingLeft { get; set; }
     public double? FloatingTop { get; set; }
 

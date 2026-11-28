@@ -19,6 +19,7 @@ NOTCHMUSE_SKIP_BRIDGE_RUNTIME_TEST=1 \
   "$ROOT/scripts/build_app.sh"
 
 APP="$DIST/NotchMuse Preview.app"
+cmp "$ROOT/MenuBarLyrics/Resources/qq-group-qr.png" "$APP/Contents/Resources/qq-group-qr.png"
 if [[ "${NOTCHMUSE_INSTALL_PREVIEW:-1}" == "1" ]]; then
   /usr/bin/python3 "$HELPER" deliver "$APP" "$DIST" "$BUILD_NUMBER" "$STABLE_BEFORE"
 else

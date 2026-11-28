@@ -287,16 +287,27 @@ enum NotchGeometry {
 
 @MainActor
 final class OverlayLyricsWindow: NSObject {
+    private final class LyricsPanel: NSPanel {
+        override var canBecomeKey: Bool { false }
+        override var canBecomeMain: Bool { false }
+    }
+
     @MainActor
     private final class GradientLyricView: NSView {
         var text = "" {
             didSet {
-                if !oldValue.isEmpty, oldValue != text {
-                    let transition = CATransition()
-                    transition.duration = 0.12
-                    transition.type = .fade
-                    transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                    layer?.add(transition, forKey: "lyricFade")
+                if !oldValue.isEmpty, oldValue != text, let layer {
+                    let group = CAAnimationGroup()
+                    group.duration = 0.20
+                    group.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                    let rise = CABasicAnimation(keyPath: "transform.translation.y")
+                    rise.fromValue = -6.0
+                    rise.toValue = 0.0
+                    let fade = CABasicAnimation(keyPath: "opacity")
+                    fade.fromValue = 0.0
+                    fade.toValue = 1.0
+                    group.animations = [rise, fade]
+                    layer.add(group, forKey: "lyricMicroRise")
                 }
                 needsDisplay = true
             }
@@ -341,22 +352,23 @@ final class OverlayLyricsWindow: NSObject {
     @MainActor
     private final class Lane {
         let label = GradientLyricView()
-        let window: NSWindow
+        let window: NSPanel
 
         init(level: NSWindow.Level) {
             let contentView = NSView()
             contentView.wantsLayer = true
             contentView.layer?.masksToBounds = true
 
-            window = NSWindow(
+            window = LyricsPanel(
                 contentRect: .zero,
-                styleMask: [.borderless],
+                styleMask: [.borderless, .nonactivatingPanel],
                 backing: .buffered,
                 defer: false
             )
             window.isOpaque = false
             window.backgroundColor = .clear
             window.hasShadow = false
+            window.hidesOnDeactivate = false
             window.level = level
             window.ignoresMouseEvents = true
             window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
@@ -441,11 +453,18 @@ final class OverlayLyricsWindow: NSObject {
     private final class NotchLyricsView: NSView {
         var lyric = "" {
             didSet {
-                if !oldValue.isEmpty, oldValue != lyric {
-                    let transition = CATransition()
-                    transition.duration = 0.12
-                    transition.type = .fade
-                    layer?.add(transition, forKey: "notchLyricFade")
+                if !oldValue.isEmpty, oldValue != lyric, let layer {
+                    let group = CAAnimationGroup()
+                    group.duration = 0.20
+                    group.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                    let rise = CABasicAnimation(keyPath: "transform.translation.y")
+                    rise.fromValue = -6.0
+                    rise.toValue = 0.0
+                    let fade = CABasicAnimation(keyPath: "opacity")
+                    fade.fromValue = 0.0
+                    fade.toValue = 1.0
+                    group.animations = [rise, fade]
+                    layer.add(group, forKey: "notchLyricMicroRise")
                 }
             }
         }
@@ -471,8 +490,10 @@ final class OverlayLyricsWindow: NSObject {
         override func draw(_ dirtyRect: NSRect) {
             let cornerRadius = vertical ? 16 : style == .lyricOnly ? bounds.height / 2 : min(16, bounds.height * 0.28)
             if drawsBackground {
-                NSColor.white.withAlphaComponent(0.12).setStroke()
-                NSBezierPath(roundedRect: backgroundRect.insetBy(dx: 0.5, dy: 0.5), xRadius: cornerRadius, yRadius: cornerRadius).stroke()
+                NSColor.white.withAlphaComponent(0.14).setStroke()
+                let border = NSBezierPath(roundedRect: backgroundRect.insetBy(dx: 0.25, dy: 0.25), xRadius: cornerRadius, yRadius: cornerRadius)
+                border.lineWidth = 0.5
+                border.stroke()
             }
 
             let lineHeight = ceil(font.pointSize * 1.3)
@@ -580,6 +601,14 @@ final class OverlayLyricsWindow: NSObject {
             NSGraphicsContext.restoreGraphicsState()
         }
 
+        static let verticalColumnGap: CGFloat = 12
+
+        static func verticalContentWidth(fontSize: CGFloat, columnCount: Int) -> CGFloat {
+            let cols = max(1, min(2, columnCount))
+            let glyphColW = ceil(fontSize * 1.15)
+            return CGFloat(cols) * glyphColW + CGFloat(max(0, cols - 1)) * verticalColumnGap
+        }
+
         private func drawVerticalLyric() {
             let glyphs = lyric.map(String.init)
             guard !glyphs.isEmpty else { return }
@@ -587,7 +616,10 @@ final class OverlayLyricsWindow: NSObject {
             let rows = max(1, Int(lyricViewport.height / cell))
             let start = LyricHighlightLayout.verticalStart(glyphCount: glyphs.count, rows: rows, progress: progress, staticText: staticText)
             let visible = Array(glyphs.dropFirst(start).prefix(rows * 2))
-            let columnWidth = lyricViewport.width / 2
+            let glyphColW = ceil(font.pointSize * 1.15)
+            let cols = visible.count > rows ? 2 : 1
+            let totalW = Self.verticalContentWidth(fontSize: font.pointSize, columnCount: cols)
+            let originX = lyricViewport.midX - totalW / 2
             for (index, glyph) in visible.enumerated() {
                 let originalIndex = start + index
                 let color: NSColor
@@ -602,9 +634,10 @@ final class OverlayLyricsWindow: NSObject {
                 let row = index % rows
                 let paragraph = NSMutableParagraphStyle()
                 paragraph.alignment = .center
-                (glyph as NSString).draw(in: NSRect(x: lyricViewport.minX + CGFloat(column) * columnWidth,
+                let colX = originX + CGFloat(column) * (glyphColW + Self.verticalColumnGap)
+                (glyph as NSString).draw(in: NSRect(x: colX,
                                                     y: lyricViewport.maxY - CGFloat(row + 1) * cell,
-                                                    width: columnWidth, height: cell), withAttributes: [
+                                                    width: glyphColW, height: cell), withAttributes: [
                     .font: font, .foregroundColor: color.withAlphaComponent(CGFloat(originalIndex) / CGFloat(glyphs.count) <= progress ? 1 : 0.7),
                     .paragraphStyle: paragraph, .shadow: textShadow()
                 ])
@@ -621,6 +654,23 @@ final class OverlayLyricsWindow: NSObject {
         }
 
         private func drawLyricText(attributes: [NSAttributedString.Key: Any]) {
+            if !drawsBackground {
+                var ambientAttrs = attributes
+                let ambient = NSShadow()
+                ambient.shadowColor = NSColor.black.withAlphaComponent(0.28)
+                ambient.shadowBlurRadius = 8
+                ambient.shadowOffset = NSSize(width: 0, height: -2)
+                ambientAttrs[.shadow] = ambient
+                if lyricWraps {
+                    (lyric as NSString).draw(
+                        with: lyricTextRect,
+                        options: [.usesLineFragmentOrigin, .usesFontLeading, .truncatesLastVisibleLine],
+                        attributes: ambientAttrs
+                    )
+                } else {
+                    (lyric as NSString).draw(in: lyricTextRect, withAttributes: ambientAttrs)
+                }
+            }
             if lyricWraps {
                 (lyric as NSString).draw(
                     with: lyricTextRect,
@@ -634,9 +684,9 @@ final class OverlayLyricsWindow: NSObject {
 
         private func textShadow() -> NSShadow {
             let shadow = NSShadow()
-            shadow.shadowColor = NSColor.black.withAlphaComponent(0.5)
-            shadow.shadowBlurRadius = 2
-            shadow.shadowOffset = NSSize(width: 0, height: -1)
+            shadow.shadowColor = NSColor.black.withAlphaComponent(drawsBackground ? 0.45 : 0.72)
+            shadow.shadowBlurRadius = drawsBackground ? 2 : 1.5
+            shadow.shadowOffset = NSSize(width: 0, height: -0.5)
             return shadow
         }
     }
@@ -644,7 +694,7 @@ final class OverlayLyricsWindow: NSObject {
     @MainActor
     private final class NotchLane {
         let view = NotchLyricsView()
-        let window: NSWindow
+        let window: NSPanel
         private let containerView = NSView()
         private let lyricGroup = NSView()
         private(set) var interaction: FreeLyricsInteraction?
@@ -656,15 +706,16 @@ final class OverlayLyricsWindow: NSObject {
         private var hoverFrame = NSRect.zero
 
         init(interactive: Bool = false) {
-            window = NSWindow(
+            window = LyricsPanel(
                 contentRect: .zero,
-                styleMask: [.borderless],
+                styleMask: [.borderless, .nonactivatingPanel],
                 backing: .buffered,
                 defer: false
             )
             window.isOpaque = false
             window.backgroundColor = .clear
             window.hasShadow = false
+            window.hidesOnDeactivate = false
             window.level = .floating
             window.ignoresMouseEvents = OverlayMousePolicy.ignoresMouseEvents
             window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
@@ -673,7 +724,9 @@ final class OverlayLyricsWindow: NSObject {
             materialView.blendingMode = .behindWindow
             materialView.state = .active
             materialView.wantsLayer = true
+            materialView.layer?.cornerCurve = .continuous
             tintView.wantsLayer = true
+            tintView.layer?.cornerCurve = .continuous
             containerView.wantsLayer = true
             containerView.addSubview(lyricGroup)
             lyricGroup.addSubview(materialView)
@@ -700,6 +753,7 @@ final class OverlayLyricsWindow: NSObject {
             fontSize: CGFloat,
             colors: [NSColor],
             usesGradient: Bool,
+            opacity: CGFloat,
             backgroundEnabled: Bool,
             backgroundColor: NSColor,
             backgroundOpacity: CGFloat,
@@ -737,7 +791,15 @@ final class OverlayLyricsWindow: NSObject {
             let measuredWidth = ceil((displayLyric as NSString).size(withAttributes: [.font: font]).width)
             let translationWidth = hasTranslation ? ceil(((translation ?? "") as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: max(10, fontSize - 3), weight: .regular)]).width) : 0
             let metadataWidth: CGFloat = style == .lyricOnly ? 0 : ceil(("\(song) · \(artist)" as NSString).size(withAttributes: [.font: font]).width)
-            let backgroundRect = placement.isVertical ? NSRect(origin: .zero, size: frame.size) : NotchGeometry.backgroundRect(
+            let verticalBoxWidth: CGFloat = {
+                let cell = ceil(fontSize * 1.45)
+                let rows = max(1, Int(max(1, frame.height - 16) / cell))
+                let cols = displayLyric.count > rows ? 2 : 1
+                let contentW = NotchLyricsView.verticalContentWidth(fontSize: fontSize, columnCount: cols)
+                return min(frame.width, max(56, contentW + 28))
+            }()
+            let verticalTightRect = NSRect(x: (frame.width - verticalBoxWidth) / 2, y: 0, width: verticalBoxWidth, height: frame.height)
+            let backgroundRect = placement.isVertical ? verticalTightRect : NotchGeometry.backgroundRect(
                 in: NSRect(origin: .zero, size: frame.size),
                 contentWidth: max(measuredWidth, max(metadataWidth, translationWidth)),
                 padding: backgroundPadding
@@ -752,7 +814,18 @@ final class OverlayLyricsWindow: NSObject {
                 window.setFrame(windowFrame, display: true)
             }
             containerView.frame = NSRect(origin: .zero, size: windowFrame.size)
-            lyricGroup.frame = NSRect(x: 0, y: toolbarHeight, width: frame.width, height: frame.height)
+            let toolbarAbove = interaction?.isToolbarAbove ?? true
+            lyricGroup.frame = NSRect(x: 0, y: toolbarAbove ? 0 : toolbarHeight, width: frame.width, height: frame.height)
+            let tightHoverRect: NSRect = backgroundEnabled
+                ? backgroundRect
+                : (placement.isVertical
+                    ? verticalTightRect
+                    : NotchGeometry.backgroundRect(
+                        in: NSRect(origin: .zero, size: frame.size),
+                        contentWidth: max(measuredWidth, max(metadataWidth, translationWidth)),
+                        padding: 20
+                    ))
+            interaction?.updateContentLayout(rect: tightHoverRect, hasCapsuleBackground: backgroundEnabled)
             materialView.frame = backgroundRect
             materialView.layer?.cornerRadius = placement.isVertical ? 16 : style == .lyricOnly ? frame.height / 2 : min(16, frame.height * 0.28)
             materialView.layer?.masksToBounds = true
@@ -766,6 +839,7 @@ final class OverlayLyricsWindow: NSObject {
             tintView.isHidden = !backgroundEnabled
             window.hasShadow = backgroundEnabled && backgroundOpacity > 0
             view.frame = NSRect(origin: .zero, size: frame.size)
+            view.alphaValue = opacity
             view.lyric = displayLyric
             view.translation = translation
             view.song = song
@@ -792,14 +866,14 @@ final class OverlayLyricsWindow: NSObject {
                 : windowFrame
             configuredOpacity = 1
             hidesOnHover = hideOnHover
+            if !window.isVisible {
+                window.orderFrontRegardless()
+            }
             if let interaction {
                 interaction.update(hideOnHover: hideOnHover)
             } else {
                 updateHoverTimer()
                 applyHoverVisibility()
-            }
-            if !window.isVisible {
-                window.orderFrontRegardless()
             }
             return needsScrolling
         }
@@ -855,6 +929,7 @@ final class OverlayLyricsWindow: NSObject {
         text: String,
         progress: CGFloat,
         translation: String? = nil,
+        nextLyric: String? = nil,
         highlight: LyricHighlight? = nil,
         staticText: Bool = false,
         mode: DisplayMode,
@@ -901,6 +976,9 @@ final class OverlayLyricsWindow: NSObject {
                 style: effectiveStyle,
                 customWidth: customWidth
             )
+            let secondaryLine: String? = (mode == .statusBar || placement.isVertical)
+                ? nil
+                : (translation ?? ((mode == .free && FreeLyricsPreferences.lineMode == .double) ? nextLyric : nil))
             var frame = NotchGeometry.frame(
                 screenFrame: screen.frame,
                 visibleFrame: screen.visibleFrame,
@@ -908,7 +986,7 @@ final class OverlayLyricsWindow: NSObject {
                 fontSize: fontSize,
                 width: width,
                 placement: placement,
-                bilingual: translation != nil && mode != .statusBar
+                bilingual: secondaryLine != nil
             )
             if mode == .free {
                 let size = NSSize(width: placement.isVertical ? FreeLyricsInteraction.expandedToolbarWidth : max(FreeLyricsInteraction.expandedToolbarWidth, frame.width),
@@ -918,7 +996,7 @@ final class OverlayLyricsWindow: NSObject {
             return lane.show(
                 frame: frame,
                 lyric: text,
-                translation: (mode == .statusBar ? nil : translation),
+                translation: secondaryLine,
                 song: song,
                 artist: artist,
                 progress: highlight.map { value in
@@ -933,6 +1011,7 @@ final class OverlayLyricsWindow: NSObject {
                 fontSize: fontSize,
                 colors: colors,
                 usesGradient: colorPreset.isGradient,
+                opacity: opacity,
                 backgroundEnabled: notchBackgroundEnabled,
                 backgroundColor: notchBackgroundColor,
                 backgroundOpacity: notchBackgroundOpacity,
@@ -1030,4 +1109,5 @@ final class OverlayLyricsWindow: NSObject {
         return needsScrolling
     }
 
+    static var verticalColumnGapForTest: CGFloat { NotchLyricsView.verticalColumnGap }
 }

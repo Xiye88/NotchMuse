@@ -15,20 +15,30 @@ final class UpdateController: NSObject, SPUUpdaterDelegate, SPUStandardUserDrive
         (hostBundle.object(forInfoDictionaryKey: "SUFeedURL") as? String).flatMap(URL.init(string:))
     }
 
-    init(hostBundle: Bundle = .main) {
+    init(hostBundle: Bundle = .main, updater: SPUUpdater? = nil) {
         self.hostBundle = hostBundle
+        self.updater = updater
         super.init()
     }
 
     var isAvailable: Bool { updater != nil }
-    var automaticallyChecksForUpdates: Bool {
+    var automaticUpdatesEnabled: Bool {
+        // An upgraded checks-only user must be able to turn checks off in one click.
         get { updater?.automaticallyChecksForUpdates ?? false }
-        set { updater?.automaticallyChecksForUpdates = newValue }
+        set {
+            guard let updater, updater.allowsAutomaticUpdates else { return }
+            if newValue {
+                updater.automaticallyDownloadsUpdates = true
+                updater.automaticallyChecksForUpdates = true
+            } else {
+                updater.automaticallyChecksForUpdates = false
+                updater.automaticallyDownloadsUpdates = false
+            }
+        }
     }
-
-    var automaticallyDownloadsUpdates: Bool {
-        get { updater?.automaticallyDownloadsUpdates ?? false }
-        set { updater?.automaticallyDownloadsUpdates = newValue }
+    var automaticallyChecksWithoutDownloading: Bool {
+        guard let updater else { return false }
+        return updater.automaticallyChecksForUpdates && !updater.automaticallyDownloadsUpdates
     }
     var allowsAutomaticUpdates: Bool { updater?.allowsAutomaticUpdates ?? false }
 
@@ -63,8 +73,8 @@ final class UpdateController: NSObject, SPUUpdaterDelegate, SPUStandardUserDrive
             alert.alertStyle = .informational
             alert.messageText = chinese ? "正在后台检查或下载更新" : "Update Check in Progress"
             alert.informativeText = chinese
-                ? "NotchMuse 正在后台检查或下载新版本，完成后会自动提示或准备安装，请稍候片刻。"
-                : "NotchMuse is checking for or downloading an update in the background. You will be notified once it is ready."
+                ? "请等待后台操作完成，然后可再次手动检查。"
+                : "You can check again when the background operation finishes."
             alert.addButton(withTitle: chinese ? "好" : "OK")
             NSApp.activate(ignoringOtherApps: true)
             alert.runModal()

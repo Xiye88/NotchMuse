@@ -12,7 +12,17 @@ let package = Package(
     ],
     targets: [
         .target(name: "LyricsCore"),
-        .executableTarget(name: "MenuBarLyrics", dependencies: ["LyricsCore", .product(name: "Sparkle", package: "Sparkle")]),
+        .executableTarget(
+            name: "MenuBarLyrics",
+            dependencies: ["LyricsCore", .product(name: "Sparkle", package: "Sparkle")],
+            path: ".",
+            exclude: ["Sources/LyricsCore", "Tests", "Vendor", "Resources/en.lproj", "Resources/zh-Hans.lproj",
+                      "Resources/AppIcon.icns", "Resources/NotchMuse.entitlements",
+                      "Resources/SettingsPreviewWallpaper.png",
+                      "Resources/mediaremote-watchdog.sh"],
+            sources: ["Sources/MenuBarLyrics"],
+            resources: [.copy("Resources/qq-group-qr.png"), .copy("Resources/WeChatSupport.jpg")]
+        ),
         .testTarget(name: "MenuBarLyricsTests", dependencies: ["LyricsCore"])
     ]
 )

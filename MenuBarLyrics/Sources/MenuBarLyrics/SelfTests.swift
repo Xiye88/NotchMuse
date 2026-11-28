@@ -11,6 +11,155 @@ enum SelfTests {
         }
     }
 
+    private static func testInteractionSounds() {
+        func read<T: FixedWidthInteger>(_ type: T.Type, from data: Data, at offset: Int) -> T {
+            data.withUnsafeBytes { T(littleEndian: $0.loadUnaligned(fromByteOffset: offset, as: type)) }
+        }
+
+        var waves = Set<Data>()
+        for cue in InteractionSoundEngine.Cue.allCases {
+            let wave = InteractionSoundEngine.waveData(for: cue)
+            check(wave.count > 44, "\(cue) contains PCM samples")
+            check(wave.prefix(4) == Data("RIFF".utf8) &&
+                  wave[8..<16] == Data("WAVEfmt ".utf8) &&
+                  wave[36..<40] == Data("data".utf8), "\(cue) carries the WAV chunk identifiers")
+            check(read(UInt32.self, from: wave, at: 4) == wave.count - 8 &&
+                  read(UInt32.self, from: wave, at: 40) == wave.count - 44, "\(cue) WAV sizes match its PCM payload")
+            check(read(UInt16.self, from: wave, at: 20) == 1 &&
+                  read(UInt16.self, from: wave, at: 22) == 1 &&
+                  read(UInt32.self, from: wave, at: 24) == 24_000 &&
+                  read(UInt16.self, from: wave, at: 34) == 16, "\(cue) uses 24 kHz signed 16-bit mono PCM")
+            let samples = stride(from: 44, to: wave.count, by: 2).map { read(Int16.self, from: wave, at: $0) }
+            check(samples.count <= 2_400, "\(cue) lasts at most 100 ms")
+            check(samples.first == 0 && samples.last == 0, "\(cue) starts and ends in silence")
+            let peak = samples.map { abs(Int($0)) }.max() ?? 0
+            check(peak > 0 && peak < Int(Int16.max) / 2, "\(cue) has audible, unclipped PCM")
+            check((0.22...0.35).contains(cue.volume), "\(cue) uses restrained volume")
+            check(waves.insert(wave).inserted, "\(cue) has a distinct waveform")
+            check(NSSound(data: wave) != nil, "NSSound decodes \(cue) from memory")
+        }
+
+        let suite = "NotchMuse.InteractionSoundTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        check(AppPreferences.interactionSoundsEnabled(in: defaults), "interaction sounds default to ON")
+        AppPreferences.setInteractionSoundsEnabled(false, in: defaults)
+        let reopened = UserDefaults(suiteName: suite)!
+        check(!AppPreferences.interactionSoundsEnabled(in: reopened), "interaction sounds persist explicit OFF")
+        AppPreferences.setInteractionSoundsEnabled(true, in: reopened)
+        check(defaults.persistentDomain(forName: suite)?[AppPreferences.interactionSoundsEnabledKey] as? Bool == true,
+              "interaction sounds persist explicit ON")
+        check(L10n.text("Interaction Sounds", language: .english) == "Interaction Sounds" &&
+              L10n.text("Interaction Sounds", language: .simplifiedChinese) == "交互微音效", "interaction sounds switch is localized")
+        print("Interaction sound PCM and preference tests passed (6 cues)")
+    }
+
+    @MainActor
+    private static func testPreferredLaunchTransport() async {
+        let spotify = URL(fileURLWithPath: "/Applications/Spotify.app")
+        var opened: [URL] = []
+        var scripts: [String] = []
+        var remoteCommands: [UInt32] = []
+        var mediaKeys: [Int] = []
+        await SystemMediaTransport.launchPreferredPlayer(.player(.spotify), resolve: { preferred in
+            check(preferred == .player(.spotify), "resolves the configured Spotify preference")
+            return (spotify, .spotify)
+        }, open: { url in
+            opened.append(url)
+            return "com.spotify.client"
+        }, runScript: { script, bundleID in
+            check(bundleID == "com.spotify.client", "script targets the launched player")
+            scripts.append(script)
+            return scripts.count == 2
+        }, isActiveBundle: { _ in
+            check(false, "Spotify startup does not depend on MediaRemote registration")
+            return false
+        }, sendRemote: { remoteCommands.append($0); return true })
+        check(opened == [spotify], "idle play opens Spotify once")
+        check(scripts == Array(repeating: "tell application \"Spotify\" to play", count: 2),
+              "Spotify play retries once without falling back to Music")
+        check(!SystemMediaTransport.send(.playPause, activeSource: nil, sendRemote: {
+            remoteCommands.append($0)
+            return false
+        }, postKey: { mediaKeys.append($0) }), "normal transport rejects play without an active source")
+        check(remoteCommands.isEmpty && mediaKeys.isEmpty, "idle Spotify play never sends a global command or media key")
+
+        await SystemMediaTransport.launchPreferredPlayer(.none, resolve: { _ in
+            check(false, "Do Not Auto-Launch does not resolve or open a player")
+            return nil
+        })
+        await SystemMediaTransport.launchPreferredPlayer(.player(.spotify), resolve: { _ in nil }, open: { _ in
+            check(false, "missing Spotify does not open a substitute player")
+            return nil
+        })
+        await SystemMediaTransport.launchPreferredPlayer(.player(.appleMusic),
+            resolve: { _ in (URL(fileURLWithPath: "/System/Applications/Music.app"), .appleMusic) },
+            open: { _ in "com.apple.Music" },
+            runScript: { script, bundleID in
+                check(script == "tell application \"Music\" to play" && bundleID == "com.apple.Music",
+                      "explicit Apple Music startup uses a targeted play command")
+                return false
+            },
+            sendRemote: { _ in
+                check(false, "Apple Music launch failure does not send a global command")
+                return false
+            })
+
+        let netEase = URL(fileURLWithPath: "/Applications/NetEaseMusic.app")
+        for isActive in [false, true] {
+            remoteCommands.removeAll()
+            await SystemMediaTransport.launchPreferredPlayer(.player(.netEaseMusic),
+                resolve: { _ in (netEase, .netEaseMusic) },
+                open: { _ in "com.netease.163music" },
+                runScript: { _, _ in
+                    check(false, "NetEase startup does not use AppleScript")
+                    return false
+                },
+                isActiveBundle: { bundleID in bundleID == "com.netease.163music" && isActive },
+                sendRemote: {
+                    remoteCommands.append($0)
+                    return false
+                })
+            check(remoteCommands == (isActive ? [0] : []), "NetEase only receives play after it owns MediaRemote")
+        }
+        print("PASS: preferred-player launch and idle media transport")
+    }
+
+    @MainActor private static func testSlimOverlayScroller() {
+        for vertical in [true, false] {
+            let frame = vertical ? NSRect(x: 0, y: 0, width: 10, height: 500)
+                                 : NSRect(x: 0, y: 0, width: 500, height: 10)
+            let scroller = SlimOverlayScroller(frame: frame)
+            scroller.scrollerStyle = .overlay
+            for proportion in [CGFloat(0.1), 0.9] {
+                scroller.knobProportion = proportion
+                for value in [0.0, 0.5, 1.0] {
+                    scroller.doubleValue = value
+                    let native = scroller.rect(for: .knob)
+                    let visible = SlimOverlayScroller.visualKnobRect(native, vertical: vertical)
+                    let slot = scroller.rect(for: .knobSlot)
+                    check(slot.contains(visible) && native.contains(visible), "visible thumb stays inside the slot and native hit region")
+                    check((vertical ? visible.width : visible.height) == 4, "thumb remains slim on the cross axis")
+                    let min = vertical ? visible.minY : visible.minX
+                    let max = vertical ? visible.maxY : visible.maxX
+                    if value == 0 { check(min == (vertical ? slot.minY : slot.minX), "thumb reaches the start of the slot") }
+                    if value == 1 { check(max == (vertical ? slot.maxY : slot.maxX), "thumb reaches the end of the slot") }
+                }
+            }
+        }
+        print("PASS: native vertical and horizontal scroller geometry, including both endpoints")
+    }
+
+    private static func testImmersiveSeekFeedback() {
+        let seek = ImmersiveSeekFeedback(target: 90, issuedAt: 10)
+        check(seek.awaitsPlayer(position: 25, playing: true, now: 10.1), "stale playback tick preserves the seek target")
+        check(seek.awaitsPlayer(position: 25, playing: false, now: 11), "paused seeks also hold their target")
+        check(!seek.awaitsPlayer(position: 91, playing: true, now: 11), "advancing playback acknowledges the seek")
+        check(!seek.awaitsPlayer(position: 90, playing: false, now: 11), "paused playback acknowledges the seek")
+        check(!seek.awaitsPlayer(position: 25, playing: true, now: 11.5), "failed seeks reconcile with the player")
+        print("PASS: immersive seek holds stale samples and reconciles acknowledgements and timeout")
+    }
+
     @MainActor static func run() {
         check(LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: [:], isPreview: false), "fresh stable install opts into login launch")
         check(!LoginAtLaunchPolicy.shouldEnableByDefault(existingPreferences: ["Language": "en"], isPreview: false), "existing preferences are preserved")
@@ -19,6 +168,10 @@ enum SelfTests {
         testMenuBarSafety()
         testStatusFeedback()
         testLocalization()
+        testInteractionSounds()
+        testSlimOverlayScroller()
+        testImmersiveSeekFeedback()
+        SettingsWindowController.testPreviewCardLayout()
         testSingleInstanceLock()
         testMusicPlayerAdapterModel()
         testAppleMusicResponseParsing()
@@ -59,6 +212,7 @@ enum SelfTests {
 
         let semaphore = DispatchSemaphore(value: 0)
         Task.detached {
+            await testPreferredLaunchTransport()
             await testMediaRemotePlayerAdapter()
             await testNetEaseMusicAdapter()
             await testLyricsClient()
@@ -79,6 +233,7 @@ enum SelfTests {
         while semaphore.wait(timeout: .now()) != .success {
             RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.01))
         }
+        MenuBarController.testDisplayModeFocus()
 
         print("Self-tests passed")
     }
@@ -99,7 +254,7 @@ enum SelfTests {
         check(PlayerFeedback.notRunning.menuTitle(for: .spotify, language: .english) == "Spotify: Not Running", "explains when Spotify is not running")
         check(PlayerFeedback.connected.menuTitle(for: .appleMusic, language: .english) == "Apple Music: Connected", "shows the selected player state")
         check(LyricsFeedback.searching.displayText == L10n.text("Searching lyrics..."), "explains that lyrics are still being searched")
-        check(LyricsFeedback.notFound.displayText == L10n.text("No lyrics found"), "explains missing lyrics")
+        check(LyricsFeedback.notFound.displayText == AppPreferences.missingLyricsAnimationStyle.shortBarCaption(), "explains missing lyrics")
         check(LyricsFeedback.timeout.displayText == L10n.text("Lyrics search timed out"), "explains lyric search timeouts")
         check(LyricsFeedback.networkFailure.displayText == L10n.text("Lyrics network unavailable"), "explains lyric network failures")
         check(LyricsClient.shouldSurfaceTimeout(candidates: [], statuses: ["LRCLIB": "timeout"]), "surfaces an all-timeout search distinctly")
@@ -117,7 +272,13 @@ enum SelfTests {
         check(L10n.text("Report Lyrics Issue…", language: .simplifiedChinese) == "报告歌词问题…", "localizes the Chinese feedback entry")
         check(AppLanguage(rawValue: "zh-Hans") == .simplifiedChinese, "persists the selected app language")
         check(AppPreferences.normalizedPlayerSource(nil) == .auto, "defaults to automatic player detection")
-        check(PlayerSource.allCases == [.auto, .spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic], "keeps all five players and Auto Detect in Settings")
+        let groupedSources = PlayerSource.menuGroups.flatMap(\.sources)
+        check(groupedSources.count == PlayerSource.allCases.count
+              && Set(groupedSources) == Set(PlayerSource.allCases)
+              && groupedSources.first == .auto
+              && groupedSources.dropFirst().first == .allNowPlaying
+              && PlayerSource.allCases.count == 38,
+              "keeps all supported players, Auto Detect, and All Now Playing in Settings")
         check(AppPreferences.normalizedPlayerSource("Apple Music") == .appleMusic, "persists Apple Music selection")
         check(AppPreferences.normalizedPlayerSource("NetEase Cloud Music") == .netEaseMusic, "persists NetEase selection")
         check(AppPreferences.normalizedPlayerSource("QQ Music") == .qqMusic, "persists QQ Music selection")
@@ -150,7 +311,166 @@ enum SelfTests {
         check(PlayerSource.qqMusic.displayName(language: .simplifiedChinese) == "QQ音乐", "shows the Chinese QQ Music name")
         check(PlayerSource.sodaMusic.displayName(language: .simplifiedChinese) == "汽水音乐", "shows the Chinese Soda Music name")
         check(PlayerSource.auto.displayName(language: .simplifiedChinese) == "自动检测（推荐）", "localizes the recommended player option")
-        check(PlayerSource.detectable.compactMap(\.bundleIdentifier) == ["com.spotify.client", "com.apple.Music", "com.netease.163music", "com.tencent.QQMusicMac", "com.soda.music"], "registers all supported player bundle identifiers")
+        check(PlayerSource.kugouMusic.displayName(language: .simplifiedChinese) == "酷狗音乐", "shows the Chinese Kugou name")
+        check(PlayerSource.allNowPlaying.displayName(language: .simplifiedChinese) == "所有系统播控应用", "localizes All Now Playing option")
+        let detectableIDs = PlayerSource.detectable.compactMap(\.bundleIdentifier)
+        check(detectableIDs.count == PlayerSource.detectable.count
+              && PlayerSource.detectable.count == 33
+              && detectableIDs.contains("com.spotify.client")
+              && detectableIDs.contains("cn.kuwo.KuwoMusic")
+              && detectableIDs.contains("cn.toside.music.desktop")
+              && detectableIDs.contains("sh.cider.Cider")
+              && detectableIDs.contains("org.jeffvli.feishin"),
+              "registers all supported player bundle identifiers")
+        testExpandedMediaRemotePlayersAndSanitizer()
+    }
+
+    private static func testExpandedMediaRemotePlayersAndSanitizer() {
+        func makeEvent(
+            bundle: String,
+            parent: String? = nil,
+            title: String,
+            artist: String?,
+            album: String? = nil,
+            duration: TimeInterval? = 210,
+            playing: Bool = true
+        ) -> MediaRemoteEvent {
+            MediaRemoteEvent(
+                bundleIdentifier: bundle,
+                parentApplicationBundleIdentifier: parent,
+                playing: playing,
+                title: title,
+                artist: artist,
+                album: album,
+                duration: duration,
+                elapsedTimeNow: 30,
+                timestamp: nil,
+                uniqueIdentifier: nil,
+                contentItemIdentifier: nil,
+                mediaType: nil
+            )
+        }
+
+        // Kugou with empty artist packed in title "Artist - Song"
+        let kugouEvent = makeEvent(bundle: "com.kugou.mac", title: "周杰伦 - 晴天", artist: "")
+        if case let .playing(track) = MediaRemotePlayerAdapter.snapshot(from: kugouEvent, source: .kugouMusic, isRunning: true) {
+            check(track.artist == "周杰伦" && track.title == "晴天", "splits Kugou Artist - Title when artist is empty")
+        } else {
+            fatalError("Expected Kugou track to parse")
+        }
+
+        // YouTube Music Chrome browser tab with MV noise + Topic suffix + redundant artist prefix
+        let ytBrowserEvent = makeEvent(
+            bundle: "com.google.Chrome",
+            title: "Queen - Bohemian Rhapsody (Official Video) - YouTube Music",
+            artist: "Queen - Topic",
+            duration: 365
+        )
+        if case let .playing(track) = MediaRemotePlayerAdapter.snapshot(from: ytBrowserEvent, source: .youtubeMusic, isRunning: true) {
+            check(track.title == "Bohemian Rhapsody" && track.artist == "Queen", "sanitizes YouTube Music browser title and Topic artist")
+            check(track.spotifyTrack.relaxedDurationMatching, "enables relaxed MV duration tolerance for YouTube Music")
+            let candidate = TrackMatcher.Candidate(title: "Bohemian Rhapsody", artists: ["Queen"], durationMs: 353_000)
+            check(TrackMatcher.score(track.spotifyTrack, candidate: candidate) >= TrackMatcher.acceptanceThreshold,
+                  "accepts 12s MV intro/outro duration delta for YouTube Music")
+            let strictTrack = SpotifyTrack(name: "Bohemian Rhapsody", artist: "Queen", album: "", duration: 365)
+            check(TrackMatcher.score(strictTrack, candidate: candidate) == 0,
+                  "keeps strict 8s duration gate for non-YouTube players")
+        } else {
+            fatalError("Expected YouTube Music browser event to parse")
+        }
+
+        // Non-music browser guard (> 15 min video)
+        let longTalk = makeEvent(bundle: "com.google.Chrome", title: "Swift Concurrency Deep Dive - YouTube", artist: "WWDC", duration: 2400)
+        check(MediaRemotePlayerAdapter.snapshot(from: longTalk, source: .youtubeMusic, isRunning: true) == .stopped,
+              "rejects long non-music YouTube talks in browser")
+
+        // Global & niche explicit players: TIDAL, Amazon Music, Deezer, Qobuz, Plexamp, CN open-source, audiophile, NAS
+        let explicitCases: [(PlayerSource, String)] = [
+            (.youtubeMusic, "com.github.th-ch.youtube-music"),
+            (.tidal, "com.tidal.desktop"),
+            (.amazonMusic, "com.amazon.music"),
+            (.deezer, "com.deezer.deezer-desktop"),
+            (.qobuz, "com.qobuz.QobuzDesktop"),
+            (.plexamp, "tv.plex.plexamp"),
+            (.kuwoMusic, "cn.kuwo.KuwoMusic"),
+            (.miguMusic, "cn.migu.music"),
+            (.bodianMusic, "cn.kuwo.bodian"),
+            (.qianqianMusic, "com.taihe.qianqianmusic"),
+            (.lxMusic, "cn.toside.music.desktop"),
+            (.yesPlayMusic, "com.qier222.yesplaymusic"),
+            (.algerMusic, "com.alger.music"),
+            (.listen1, "com.listen1.desktop"),
+            (.splayer, "com.imsyy.splayer"),
+            (.cider, "sh.cider.Cider"),
+            (.soundCloud, "com.soundcloud.desktop"),
+            (.bandcamp, "com.bandcamp.desktop"),
+            (.swinsian, "com.swinsian.Swinsian"),
+            (.vox, "com.coppertino.Vox"),
+            (.foobar2000, "com.foobar2000.mac"),
+            (.audirvana, "com.audirvana.Audirvana-Studio"),
+            (.roon, "com.roon.Roon"),
+            (.pinePlayer, "com.digibird.PinePlayer"),
+            (.cog, "org.cogx.cog"),
+            (.feishin, "org.jeffvli.feishin"),
+            (.supersonic, "io.github.dweymouth.supersonic"),
+            (.iina, "com.colliderli.iina"),
+            (.vlc, "org.videolan.vlc"),
+            (.bilibili, "tv.danmaku.bili")
+        ]
+        for (source, bundle) in explicitCases {
+            let ev = makeEvent(bundle: bundle, title: "Blinding Lights", artist: "The Weeknd")
+            if case let .playing(track) = MediaRemotePlayerAdapter.snapshot(from: ev, source: source, isRunning: true) {
+                check(track.playerSource == source && track.title == "Blinding Lights", "parses \(source.rawValue) payload")
+            } else {
+                fatalError("Expected \(source.rawValue) payload to parse")
+            }
+        }
+
+        // Manual-only video players (IINA / VLC / Bilibili) must NOT pollute Auto Detect or All Now Playing
+        for manualSource in [PlayerSource.iina, .vlc, .bilibili] {
+            check(!PlayerSource.detectable.contains(manualSource), "\(manualSource.rawValue) must not be in Auto Detect")
+            if let bid = manualSource.bundleIdentifier {
+                let videoEv = makeEvent(bundle: bid, title: "Movie.2026.1080p", artist: "Cinema")
+                check(MediaRemotePlayerAdapter.snapshot(from: videoEv, source: .allNowPlaying, isRunning: true) == .stopped,
+                      "\(manualSource.rawValue) must be blocked by All macOS Now Playing Apps denylist")
+            }
+        }
+
+        // Browser web player title sanitization (Spotify Web, Apple Music Web, NetEase Web, QQ Web, SoundCloud Web)
+        let webSanitizeCases: [(rawTitle: String, rawArtist: String?, expectedTitle: String, expectedArtist: String)] = [
+            ("Blinding Lights - Spotify", "The Weeknd", "Blinding Lights", "The Weeknd"),
+            ("Anti-Hero on Apple Music", "Taylor Swift", "Anti-Hero", "Taylor Swift"),
+            ("晴天 - 单曲 - 网易云音乐", "周杰伦", "晴天", "周杰伦"),
+            ("七里香 - QQ音乐-千万正版音乐海量无损曲库", "周杰伦", "七里香", "周杰伦"),
+            ("Daft Punk - Get Lucky | Listen online for free on SoundCloud", "", "Get Lucky", "Daft Punk"),
+            ("你,好不好?(TVBS連續劇【遺憾拼圖】片尾曲)【動態歌詞】", "周興哲 - Topic", "你,好不好?(TVBS連續劇【遺憾拼圖】片尾曲)", "周興哲"),
+            ("Adele - Hello - 2015 Version (Official Video)", "Adele - Topic", "Hello - 2015 Version", "Adele"),
+            ("Hello - Live", "Adele - Topic", "Hello - Live", "Adele"),
+            ("Adele - Hello (Official Live Video)", "Adele - Topic", "Hello (Official Live Video)", "Adele")
+        ]
+        for item in webSanitizeCases {
+            let sanitized = MediaRemoteMetadataSanitizer.sanitize(
+                title: item.rawTitle, artist: item.rawArtist, album: "", isBrowserOrYouTube: true
+            )
+            check(sanitized?.title == item.expectedTitle && sanitized?.artist == item.expectedArtist,
+                  "web sanitizer parses \(item.rawTitle) -> \(sanitized?.title ?? "nil") / \(sanitized?.artist ?? "nil")")
+        }
+        // Keep closing brace of previous for loop removed above by matching target accurately:
+        if false {
+        }
+
+        // All macOS Now Playing Apps accepts unknown music player & rejects denylist (Zoom/FaceTime/Teams/QuickTime)
+        let vox = makeEvent(bundle: "com.coppertino.Vox", title: "Clocks", artist: "Coldplay")
+        if case let .playing(track) = MediaRemotePlayerAdapter.snapshot(from: vox, source: .allNowPlaying, isRunning: true) {
+            check(track.title == "Clocks" && track.artist == "Coldplay", "All Now Playing accepts generic music players")
+        } else {
+            fatalError("Expected All Now Playing to accept generic player")
+        }
+        for denied in ["us.zoom.xos", "com.apple.FaceTime", "com.microsoft.teams2", "com.apple.QuickTimePlayerX"] {
+            let ev = makeEvent(bundle: denied, title: "Weekly Sync", artist: "Team")
+            check(MediaRemotePlayerAdapter.snapshot(from: ev, source: .allNowPlaying, isRunning: true) == .stopped,
+                  "All Now Playing denylists \(denied)")
+        }
     }
 
     @MainActor private static func testMusicPlayerAdapterModel() {

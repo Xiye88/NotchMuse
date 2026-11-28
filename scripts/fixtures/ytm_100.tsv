@@ -1,0 +1,101 @@
+bucket	title	artist	album	duration_seconds
+A_topic	Blinding Lights	The Weeknd - Topic	After Hours	201
+A_topic	Anti-Hero	Taylor Swift - Topic	Midnights	201
+A_topic	Shape of You	Ed Sheeran - Topic	÷	234
+A_topic	Someone Like You	Adele - Topic	21	285
+A_topic	bad guy	Billie Eilish - Topic	WHEN WE ALL FALL ASLEEP, WHERE DO WE GO?	195
+A_topic	Bohemian Rhapsody	Queen - Topic	A Night At The Opera	355
+A_topic	Yellow	Coldplay - Topic	Parachutes	267
+A_topic	As It Was	Harry Styles - Topic	Harry's House	168
+A_topic	Flowers	Miley Cyrus - Topic	Endless Summer Vacation	201
+A_topic	Cruel Summer	Taylor Swift - Topic	Lover	179
+A_topic	晴天	周杰伦 - Topic	叶惠美	270
+A_topic	七里香	周杰伦 - Topic	七里香	300
+A_topic	江南	林俊杰 - Topic	第二天堂	268
+A_topic	十年	陈奕迅 - Topic	黑·白·灰	206
+A_topic	演员	薛之谦 - Topic	绅士	262
+A_topic	光年之外	G.E.M. 邓紫棋 - Topic		236
+A_topic	起风了	买辣椒也用券 - Topic		326
+A_topic	Ditto	NewJeans - Topic	OMG	186
+A_topic	Dynamite	BTS - Topic	BE	200
+A_topic	夜に駆ける	YOASOBI - Topic	THE BOOK	261
+B_mv	Blinding Lights (Official Video)	The Weeknd		263
+B_mv	Taylor Swift - Anti-Hero (Official Music Video)	Taylor Swift		310
+B_mv	Ed Sheeran - Shape of You (Official Music Video)	Ed Sheeran		264
+B_mv	Adele - Hello (Official Music Video)	Adele		367
+B_mv	Billie Eilish - bad guy (Official Music Video)	Billie Eilish		206
+B_mv	Coldplay - Viva La Vida (Official Video)	Coldplay		242
+B_mv	Harry Styles - As It Was (Official Video)	Harry Styles		166
+B_mv	Miley Cyrus - Flowers (Official Video)	Miley Cyrus		202
+B_mv	BLACKPINK - 'Kill This Love' M/V	BLACKPINK		194
+B_mv	BLACKPINK - 'How You Like That' M/V	BLACKPINK		184
+B_mv	NewJeans (뉴진스) 'Super Shy' Official MV	NewJeans		201
+B_mv	周杰伦 - 告白气球 (Official MV)	周杰伦		216
+B_mv	周杰伦 - 稻香 (Official MV)	周杰伦		224
+B_mv	林俊杰 - 修炼爱情 (Official MV)	林俊杰		295
+B_mv	薛之谦 - 演员 【官方MV】	薛之谦		270
+B_mv	G.E.M. 邓紫棋 - 光年之外 (Official MV)	G.E.M. 邓紫棋		245
+B_mv	田馥甄 - 小幸运 (Official MV)	田馥甄		275
+B_mv	周深 - 大鱼 (Official MV)	周深		320
+B_mv	王菲 - 如愿 (Official MV)	王菲		275
+B_mv	陈奕迅 - 孤勇者 (Official MV)	陈奕迅		268
+C_channel	Taylor Swift - Blank Space	TaylorSwiftVEVO		272
+C_channel	The Weeknd - Save Your Tears (Official Music Video)	TheWeekndVEVO		249
+C_channel	Ariana Grande - 7 rings (Official Video)	ArianaGrandeVEVO		185
+C_channel	Dua Lipa - Levitating	DuaLipaVEVO		204
+C_channel	Bruno Mars - Just The Way You Are (Official Music Video)	BrunoMarsVEVO		237
+C_channel	BTS (방탄소년단) 'Dynamite' Official MV	HYBE LABELS		224
+C_channel	NewJeans (뉴진스) 'Hype Boy' Official MV	HYBE LABELS		180
+C_channel	aespa 에스파 'Supernova' MV	SMTOWN		191
+C_channel	TWICE "What is Love?" M/V	JYP Entertainment		223
+C_channel	周杰倫 Jay Chou【青花瓷 Blue and White Porcelain】Official MV	杰威尔音乐 JVR Music		240
+C_channel	周杰倫 Jay Chou【夜曲 Nocturne】Official MV	杰威尔音乐 JVR Music		239
+C_channel	五月天 Mayday【突然好想你 Suddenly Missing You So Bad】Official Music Video	相信音樂BinMusic		275
+C_channel	梁靜茹 Fish Leong【勇氣 Courage】Official Music Video	滾石唱片 ROCK RECORDS		250
+C_channel	劉若英 Rene Liu【後來 Later】Official Music Video	滾石唱片 ROCK RECORDS		345
+C_channel	林俊傑 JJ Lin - 可惜沒如果 If Only (華納official 高畫質HD官方完整版MV)	華納音樂 Warner Music Taiwan		340
+D_empty_artist	Coldplay - Fix You	 		296
+D_empty_artist	Maroon 5 - Sugar	 		236
+D_empty_artist	Imagine Dragons - Believer	 		205
+D_empty_artist	OneRepublic - Counting Stars	 		258
+D_empty_artist	赵雷 - 成都	 		329
+D_empty_artist	朴树 - 平凡之路	 		302
+D_empty_artist	光良 - 童话	 		243
+D_empty_artist	莫文蔚 - 这世界那么多人	 		286
+D_empty_artist	李荣浩 - 年少有为	 		280
+D_empty_artist	孙燕姿 - 我怀念的	 		290
+E_collab	The Kid LAROI, Justin Bieber - STAY (Official Video)	The Kid LAROI		158
+E_collab	Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video)	Lady Gaga		253
+E_collab	ROSÉ & Bruno Mars - APT. (Official Music Video)	ROSÉ		174
+E_collab	Shawn Mendes, Camila Cabello - Señorita	Shawn Mendes		206
+E_collab	Wiz Khalifa - See You Again ft. Charlie Puth [Official Video]	Wiz Khalifa		238
+E_collab	The Chainsmokers - Closer (Lyric) ft. Halsey	The Chainsmokers		262
+E_collab	Luis Fonsi - Despacito ft. Daddy Yankee	Luis Fonsi		282
+E_collab	Post Malone, Swae Lee - Sunflower (Spider-Man: Into the Spider-Verse)	Post Malone		162
+E_collab	周杰倫 Jay Chou【說好不哭 Won't Cry】with 五月天阿信 (Mayday Ashin) Official MV	周杰倫 Jay Chou		232
+E_collab	周杰伦 - 珊瑚海 (feat. 梁心颐)	周杰伦		256
+F_noise	The Weeknd - Blinding Lights (Official Audio)	The Weeknd		202
+F_noise	Taylor Swift - Lover (Official Lyric Video)	Taylor Swift		222
+F_noise	Ed Sheeran - Perfect [Official Lyric Video]	Ed Sheeran		264
+F_noise	Billie Eilish - BIRDS OF A FEATHER (Official Lyric Video)	Billie Eilish		211
+F_noise	Olivia Rodrigo - drivers license (Lyrics)	Olivia Rodrigo		243
+F_noise	周杰伦 - 晴天 (官方完整版)	周杰伦		270
+F_noise	陈奕迅 - 十年【歌词版】	陈奕迅		206
+F_noise	林俊杰 - 江南 (高清)	林俊杰		268
+F_noise	薛之谦 - 丑八怪 (动态歌词)	薛之谦		254
+F_noise	毛不易 - 消愁 (纯享版)	毛不易		262
+G_cjk_jp_kr	YOASOBI「アイドル」 Official Music Video	Ayase / YOASOBI		226
+G_cjk_jp_kr	米津玄師 - Lemon	Kenshi Yonezu 米津玄師		274
+G_cjk_jp_kr	Official髭男dism - Pretender［Official Video］	Official髭男dism		331
+G_cjk_jp_kr	Aimer「残響散歌」MUSIC VIDEO	Aimer Official YouTube Channel		186
+G_cjk_jp_kr	Fujii Kaze - Shinunoga E-Wa (Visual)	Fujii Kaze		186
+G_cjk_jp_kr	RADWIMPS - スパークル [original ver.]	RADWIMPS		410
+G_cjk_jp_kr	宇多田ヒカル - First Love	Hikaru Utada		261
+G_cjk_jp_kr	IU(아이유) _ Blueming(블루밍)	1theK (원더케이)		222
+G_cjk_jp_kr	G.E.M. 鄧紫棋【泡沫】Official MV	G.E.M. 鄧紫棋		262
+G_cjk_jp_kr	周杰倫 Jay Chou【稻香】Official MV	周杰倫 Jay Chou		224
+H_variants	Eagles - Hotel California (Live 1977)	Eagles		391
+H_variants	Ed Sheeran - Thinking Out Loud (Acoustic)	Ed Sheeran		282
+H_variants	Dua Lipa - Levitating (Remix)	Dua Lipa		204
+H_variants	Adele - Rolling in the Deep (Live at the Royal Albert Hall)	Adele		255
+H_variants	Lady Gaga, Bradley Cooper - Shallow (from A Star Is Born)	Lady Gaga		217

@@ -27,11 +27,12 @@ actor SelectionCalls {
         }
         func candidate(_ provider: String, platform: String? = nil, id: String? = nil,
                        text: [LyricLine]? = nil, duration: Double? = 200, title: String = "Song",
-                       album: String? = "Album", isrc: String? = nil, verified: Bool = false) -> LyricsCandidate {
+                       album: String? = "Album", isrc: String? = nil, verified: Bool = false,
+                       evidence: LyricsCandidate.Evidence = .timedLyrics) -> LyricsCandidate {
             LyricsCandidate(document: TimedLyricDocument(lines: text ?? lines()), provider: provider,
                 sourcePlatform: platform, sourceTrackID: id, sourceTitle: title, sourceArtist: "Artist",
                 sourceAlbum: album, sourceDuration: duration, sourceISRC: isrc, matcherScore: 100,
-                liveIdentityVerified: verified)
+                liveIdentityVerified: verified, evidence: evidence)
         }
         let generic = candidate("LRCLIB", platform: "lrclib", id: "catalog", text: lines(14))
         let exact = candidate("NetEaseExactID (Preview)", platform: "netease", id: "actual-catalog", verified: true)
@@ -65,6 +66,22 @@ actor SelectionCalls {
         let bodyB = sharedIntro + (5..<40).map { LyricLine(time: Double($0) * 4.5, text: "Distinct B verse \($0)") }
         check(LyricsSelection.select([candidate("LRCLIB", text: bodyA), candidate("QQ", text: bodyB)], context: netease).winner == nil, "shared intro cannot establish agreement for differing majority body")
         check(LyricsSelection.select([exact, candidate("NetEase", platform: "netease", id: "actual-catalog", text: lines(14))], context: netease).winner == nil, "conflicting payloads for the same proven catalog identity fail closed")
+        let pureMusic = candidate("NetEase", platform: "netease", id: "catalog", text: [], evidence: .instrumental)
+        check(LyricsSelection.select([pureMusic, generic], context: netease).reason == "instrumental_recording", "bound instrumental flag vetoes a conflicting generic upload")
+        let otherInstrumental = candidate("NetEase", platform: "netease", id: "other", text: [], album: "Other", evidence: .instrumental)
+        check(LyricsSelection.select([otherInstrumental, generic], context: netease).winner == generic, "another album's instrumental does not suppress original vocals")
+        let notice = candidate("NetEase", platform: "netease", text: [LyricLine(time: 5, text: "純音樂，請欣賞")])
+        check(LyricsSelection.select([notice], context: netease).rejected["NetEase"] == "instrumental_notice", "timed instrumental notice never renders as a lyric")
+        let community = candidate("Kugou", platform: "kugou", text: lines(14), evidence: .userContribution)
+        check(LyricsSelection.select([community], context: netease).winner == nil, "Kugou UGC needs independent direct support")
+        check(LyricsSelection.select([community, generic], context: netease).winner != nil, "agreeing independent provider validates Kugou UGC")
+        let video = SpotifyTrack(name: "Song", artist: "Artist", album: "", duration: 240, relaxedDurationMatching: true)
+        let videoContext = LyricsSelectionContext(track: video, playerSource: "YouTube Music", nativeTrackID: nil, isrc: nil)
+        check(LyricsSelection.select([generic], context: videoContext).rejected["LRCLIB"] == "duration_risk", "YouTube skit with 40 seconds extra cannot use studio lyrics")
+        let fullResolver = (0..<18).map { LyricLine(time: 10 + Double($0) * 10, text: "Vocal phrase \($0)") }
+        let emptyAlbum = LyricsSelectionContext(track: SpotifyTrack(name: "Song", artist: "Artist", album: "", duration: 200, relaxedDurationMatching: true), playerSource: "YouTube Music", nativeTrackID: nil, isrc: nil)
+        let unboundResolver = candidate("LRCMux", platform: "kugou", text: fullResolver)
+        check(LyricsSelection.select([unboundResolver], context: emptyAlbum).winner == nil, "albumless video cannot use a resolver payload without a source track ID")
         let wordLines = lines().map { LyricLine(time: $0.time, text: $0.text, endTime: $0.time + 3, segments: [LyricSegment(time: $0.time, endTime: $0.time + 2, text: $0.text)]) }
         check(LyricsSelection.select([candidate("NetEase", platform: "netease"), candidate("QQ", platform: "qq", text: wordLines)], context: netease).winner?.provider == "NetEase", "same-platform affinity precedes fidelity at equal recording confidence")
         let wrongWord = candidate("Kugou", platform: "kugou", text: wordLines, title: "Song (Live)")

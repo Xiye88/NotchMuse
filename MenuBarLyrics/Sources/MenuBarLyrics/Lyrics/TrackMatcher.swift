@@ -32,13 +32,23 @@ enum TrackMatcher {
         let a = artistKeys(expectedArtists)
         let b = artistKeys([artist] + titleCollaborators(in: title))
         let candidateGroup = artistGroupKey(artist, expectedArtists: expectedArtists)
-        if a.members != b.members && a.group != candidateGroup { return "artist_mismatch" }
+        let exactArtist = a.members == b.members || a.group == candidateGroup
+        let collabSubset = artistsMatchWithCollabFallback(source: a.group, candidate: candidateGroup, allowReverse: track.relaxedDurationMatching)
+        if !exactArtist && !collabSubset { return "artist_mismatch" }
         func versions(_ value: String) -> Set<String> {
             var result = parsedTitle(value).versions
             for hint in ["现场", "翻唱", "伴奏", "混音", "重录"] where value.contains(hint) { result.insert(hint) }
             return result
         }
-        if let album, versions(track.name + " " + track.album) != versions(title + " " + album) { return "album_version_mismatch" }
+        if let album, !track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           versions(track.name + " " + track.album) != versions(title + " " + album) { return "album_version_mismatch" }
+        if track.relaxedDurationMatching, track.album.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           let album, !requested.versions.contains("live"),
+           (parsedTitle(album).versions.contains("live") ||
+            simplifiedChinese(album).contains("演唱会") ||
+            album.range(of: #"\b(?:in concert|concert recording)\b"#, options: [.regularExpression, .caseInsensitive]) != nil) {
+            return "album_version_mismatch"
+        }
         return nil
     }
 
@@ -47,18 +57,25 @@ enum TrackMatcher {
         let candidateTitle = parsedTitle(candidate.title)
         let durationDifference = abs(track.duration - Double(candidate.durationMs) / 1000)
 
+        let maxDurationDelta: TimeInterval = track.relaxedDurationMatching ? 22 : 8
+
         guard sourceTitle.name == candidateTitle.name,
               sourceTitle.versions == candidateTitle.versions,
-              durationDifference <= 8 else { return 0 }
+              durationDifference <= maxDurationDelta else { return 0 }
 
         let expectedArtists = effectiveTrackArtists(for: track)
         let sourceArtists = artistKeys(expectedArtists)
         let candidateAllArtists = candidate.artists + titleCollaborators(in: candidate.title)
         let candidateArtists = artistKeys(candidateAllArtists)
         let contextCandidateGroup = Set(candidateAllArtists.flatMap { artistGroupKey($0, expectedArtists: expectedArtists) })
-        let artistsMatch = artistsMatch(source: sourceArtists.members, candidate: candidateArtists.members)
+        let exactArtistMatch = artistsMatch(source: sourceArtists.members, candidate: candidateArtists.members)
             || artistsMatch(source: sourceArtists.group, candidate: contextCandidateGroup)
-        let artistScore = artistsMatch ? 30 : 0
+        let collabSubsetMatch = !exactArtistMatch && artistsMatchWithCollabFallback(
+            source: sourceArtists.group,
+            candidate: contextCandidateGroup,
+            allowReverse: track.relaxedDurationMatching
+        )
+        let artistScore = exactArtistMatch ? 30 : (collabSubsetMatch ? 27 : 0)
         let durationScore: Int
         switch durationDifference {
         case ...2: durationScore = 15
@@ -154,9 +171,13 @@ enum TrackMatcher {
         [track.artist] + titleCollaborators(in: track.name)
     }
 
+    // These are soundtrack billing credits. Edition or performance words stay in the title.
+    private static let localizedSoundtrackSuffix =
+        #"\s*[\(（\[]\s*(?:[電电][視视][劇剧]|[連连][續续][劇剧]|[網网][劇剧]|[電电]影|[動动][畫画]|[動动]漫|[遊游][戲戏]|[綜综][藝艺])\s*《[^》]+》\s*(?:主[題题]曲|片[頭头]曲|片尾曲|插曲|心[動动]曲|[開开]場曲)\s*[\)）\]]\s*$"#
+
     static func parsedTitle(_ title: String) -> (name: String, versions: Set<String>) {
         let folded = title.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        var name = folded
+        var name = folded.replacingOccurrences(of: localizedSoundtrackSuffix, with: "", options: .regularExpression)
         for pattern in [
             #"[\(\[].*?\b(feat\.?|ft\.?|featuring|with)\b.*?[\)\]]"#,
             #"\s+\b(feat\.?|ft\.?|featuring)\b.*$"#,
@@ -217,7 +238,9 @@ enum TrackMatcher {
     }
 
     static func canonicalArtistForChineseSearch(_ artist: String) -> String {
-        let parts = artist.components(separatedBy: CharacterSet(charactersIn: ",;/×、"))
+        let hasHan = artist.range(of: #"\p{Han}"#, options: .regularExpression) != nil
+        let delimiters = CharacterSet(charactersIn: hasHan ? ",;/×、&" : ",;/×、")
+        let parts = artist.components(separatedBy: delimiters)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
         let mapped = parts.map { part -> String in
@@ -228,7 +251,7 @@ enum TrackMatcher {
     }
 
     static func chineseSearchQuery(for track: SpotifyTrack) -> String {
-        var cleanedTitle = track.name
+        var cleanedTitle = track.name.replacingOccurrences(of: localizedSoundtrackSuffix, with: "", options: .regularExpression)
         for pattern in [
             #"[\(\[]\s*(?:feat\.?|ft\.?|featuring|with)\s+[^\)\]]+[\)\]]"#,
             #"[\(\[（](?:电视剧|电影|网剧|动画|动漫|游戏|综艺)?《[^》]+》[^\)）\]]*[\)\]）]"#
@@ -284,6 +307,9 @@ enum TrackMatcher {
         "리센느": "rescene",
         "에이티즈": "ateez",
         "태연": "taeyeon",
+        "girlsgeneration": "少女时代",
+        "snsd": "少女时代",
+        "소녀시대": "少女时代",
         "방탄소년단": "bts",
         "블랙핑크": "blackpink",
         "뉴진스": "newjeans",
@@ -293,7 +319,22 @@ enum TrackMatcher {
         "세븐틴": "seventeen",
         "트와이스": "twice",
         "아이유": "iu",
-        "지드래곤": "gdragon"
+        "지드래곤": "gdragon",
+        "kenshiyonezu": "米津玄师",
+        "米津玄師": "米津玄师",
+        "hikaruutada": "宇多田ヒカル",
+        "utadahikaru": "宇多田ヒカル",
+        "officialhigedandism": "official髭男dism",
+        "fujiikaze": "藤井風",
+        "yorushika": "ヨルシカ",
+        "aimyon": "あいみょん",
+        "sakanaction": "サカナクション",
+        "sukimaswitch": "スキマスイッチ",
+        "mrsgreenapple": "mrsgreenapple",
+        "kinggnu": "kinggnu",
+        "vaundy": "vaundy",
+        "ado": "ado",
+        "lisa": "lisa"
     ]
 
     static func artistKeys(_ artists: [String]) -> (members: Set<String>, group: Set<String>) {
@@ -324,9 +365,23 @@ enum TrackMatcher {
         source == candidate
     }
 
+    private static func artistsMatchWithCollabFallback(source: Set<String>, candidate: Set<String>, allowReverse: Bool) -> Bool {
+        guard !source.isEmpty, !candidate.isEmpty else { return false }
+        if source.count == 1, candidate.count >= 2, let primary = source.first, candidate.contains(primary) {
+            return true
+        }
+        if allowReverse, candidate.count == 1, source.count >= 2, let primary = candidate.first, source.contains(primary) {
+            return true
+        }
+        return false
+    }
+
     private static func normalize(_ text: String) -> String {
         let folded = text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        let simplified = folded.map { ch -> String in
+        // 乾 stays distinct in names such as 乾隆. Only the established adjective maps.
+        let contextual = folded.replacingOccurrences(of: "乾淨", with: "干净")
+            .replacingOccurrences(of: "乾净", with: "干净")
+        let simplified = contextual.map { ch -> String in
             if ch == "乾" || ch == "幹" { return String(ch) }
             let s = String(ch)
             return s.applyingTransform(StringTransform("Traditional-Simplified"), reverse: false) ?? s

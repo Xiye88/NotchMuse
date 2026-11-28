@@ -26,7 +26,7 @@ enum AppPreferences { static let language = AppLanguage.english }
 
         var toggled = UpdatePolicy()
         _ = toggled.beginStartupCheck(checksEnabled: true, sessionInProgress: false)
-        check(!toggled.preparedUpdate(checksEnabled: true, automaticInstall: false), "switch off while downloading prevents immediate restart")
+        check(!toggled.preparedUpdate(checksEnabled: false, automaticInstall: false), "switch off while downloading prevents immediate restart")
         toggled.finishedCycle(succeeded: true)
         check(!toggled.takePreparedNotice(canCheck: false), "busy cycle retains prepared notification without another check")
         check(toggled.takePreparedNotice(canCheck: true), "prepared notification resumes when Sparkle is ready")
@@ -75,16 +75,28 @@ enum AppPreferences { static let language = AppLanguage.english }
         check(initial.automaticallyChecksForUpdates && initial.automaticallyDownloadsUpdates, "unset preferences inherit enabled plist defaults")
         check(initial.updateCheckInterval == 86400, "native Sparkle timer inherits daily interval")
         check(defaults.object(forKey:"SUAutomaticallyUpdate") == nil && defaults.object(forKey:"SUEnableAutomaticChecks") == nil, "reading defaults does not write an opt-in on each launch")
-        initial.automaticallyDownloadsUpdates = false
-        initial.automaticallyChecksForUpdates = false
-        let relaunched = updater()
-        check(!relaunched.automaticallyChecksForUpdates && !relaunched.automaticallyDownloadsUpdates, "explicit false persists across updater creation")
-        check(defaults.object(forKey:"SUAutomaticallyUpdate") as? Bool == false, "explicit automatic-install off is stored")
-        relaunched.automaticallyDownloadsUpdates = true
-        check(!relaunched.automaticallyChecksForUpdates && relaunched.automaticallyDownloadsUpdates, "independent install selection does not turn automatic checks back on")
-        relaunched.automaticallyChecksForUpdates = true
-        check(relaunched.automaticallyDownloadsUpdates, "re-enabling checks preserves independent installation preference")
-        let controller = UpdateController(hostBundle: bundle)
+        let controller = UpdateController(hostBundle: bundle, updater: initial)
+        check(controller.automaticUpdatesEnabled, "enabled legacy defaults show the combined switch on")
+        for (checksEnabled, downloadsEnabled) in [(true, false), (false, true)] {
+            initial.automaticallyChecksForUpdates = checksEnabled
+            initial.automaticallyDownloadsUpdates = downloadsEnabled
+            check(controller.automaticUpdatesEnabled == checksEnabled,
+                  "the switch reflects active automation and can disable legacy checks in one action")
+            check(controller.automaticallyChecksWithoutDownloading == checksEnabled,
+                  "checks-only legacy preference is shown separately from a fully disabled updater")
+            check(initial.automaticallyChecksForUpdates == checksEnabled && initial.automaticallyDownloadsUpdates == downloadsEnabled,
+                  "reading the switch preserves existing Sparkle settings")
+        }
+        controller.automaticUpdatesEnabled = true
+        check(initial.automaticallyChecksForUpdates && initial.automaticallyDownloadsUpdates, "switch on enables both Sparkle settings")
+        let enabledAfterRelaunch = updater()
+        check(enabledAfterRelaunch.automaticallyChecksForUpdates && enabledAfterRelaunch.automaticallyDownloadsUpdates, "switch on persists across updater creation")
+        controller.automaticUpdatesEnabled = false
+        check(!initial.automaticallyChecksForUpdates && !initial.automaticallyDownloadsUpdates, "switch off disables both Sparkle settings")
+        let disabledAfterRelaunch = updater()
+        check(!disabledAfterRelaunch.automaticallyChecksForUpdates && !disabledAfterRelaunch.automaticallyDownloadsUpdates, "switch off persists across updater creation")
+        check(defaults.object(forKey:"SUEnableAutomaticChecks") as? Bool == false &&
+              defaults.object(forKey:"SUAutomaticallyUpdate") as? Bool == false, "both existing Sparkle keys store explicit off")
         check(controller.responds(to: NSSelectorFromString("updater:shouldProceedWithUpdate:updateCheck:error:")), "Sparkle can actually invoke the optional Objective-C enclosure guard")
         check(controller.responds(to: NSSelectorFromString("updater:willInstallUpdateOnQuit:immediateInstallationBlock:")), "Sparkle can invoke automatic installation delegate")
         check(controller.responds(to:NSSelectorFromString("feedURLStringForUpdater:")), "Sparkle invokes Preview feed override through its actual selector")

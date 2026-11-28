@@ -5,14 +5,11 @@ import LyricsCore
 @MainActor
 enum FreeLyricsSelfTests {
     static func run() {
-        _ = NSApplication.shared
         var checks = 0
         func check(_ value: Bool, _ message: String) {
             precondition(value, message)
             checks += 1
         }
-        MenuBarController.testDisplayModeReopen()
-        MenuBarController.testVocalGapPresentation()
         let visible = NSRect(x: -1920, y: 32, width: 1920, height: 1048)
         let size = NSSize(width: 440, height: 90)
         for x in [-0.5, 0, 0.5, 1, 1.5, Double.nan] {
@@ -44,6 +41,28 @@ enum FreeLyricsSelfTests {
             }
         }
         check(!FreeLyricsPolicy().hidesLyrics(hovered: true), "hover preference off")
+        let lyric = NSRect(x: -220, y: 100, width: 200, height: 40)
+        for pill in [NSRect(x: -150, y: 142, width: 64, height: 28),
+                     NSRect(x: -35, y: 70, width: 64, height: 28)] {
+            let gapY: CGFloat = pill.midY > lyric.midY ? 141 : 99
+            let gap = NSPoint(x: pill.midX, y: gapY)
+            let pillCenter = NSPoint(x: pill.midX, y: pill.midY)
+            let lyricCenter = NSPoint(x: lyric.midX, y: lyric.midY)
+            check(FreeLyricsPolicy.lockedHoverContains(lyricCenter, lyric: lyric, pill: nil), "lyrics summon the pill")
+            check(!FreeLyricsPolicy.lockedHoverContains(gap, lyric: lyric, pill: nil), "an invisible pill does not create a hover bridge")
+            check(FreeLyricsPolicy.lockedHoverContains(gap, lyric: lyric, pill: pill), "gap sustains hover even with a shifted or flipped pill")
+            check(FreeLyricsPolicy.lockedHoverContains(pillCenter, lyric: lyric, pill: pill), "hover survives reaching the pill")
+            check(!FreeLyricsPolicy.lockedHoverContains(NSPoint(x: 60, y: gapY), lyric: lyric, pill: pill), "leaving the bridge starts the grace period")
+        }
+        check(FreeLyricsPolicy.lockedHoverExitDelay == 0.25, "locked hover has a 250 ms grace period")
+        guard !NSScreen.screens.isEmpty else {
+            print("PASS: \(checks) Free Lyrics geometry and policy checks")
+            print("SKIP: native Free Lyrics interaction tests require a desktop display")
+            return
+        }
+        _ = NSApplication.shared
+        MenuBarController.testDisplayModeReopen()
+        MenuBarController.testVocalGapPresentation()
         let suite = "app.notchmuse.free-lyrics.tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -62,32 +81,41 @@ enum FreeLyricsSelfTests {
         _ = interaction.frame(size: size, vertical: false, fallback: NSScreen.main!)
         interaction.update(hideOnHover: false)
         window.orderFrontRegardless()
-        let lock = interaction.testToolbar.subviews[4] as! NSButton
-        let moveControl = interaction.testToolbar.subviews[0] as! NSButton
+        let lock = interaction.testToolbar.subviews[0] as! NSButton
+        let dragSurface = interaction.testDragSurface
         defaults.set(true, forKey: FreeLyricsPreferences.lockedKey)
+        defaults.set(true, forKey: FreeLyricsPreferences.passThroughKey)
         interaction.update(hideOnHover: false)
         interaction.testHover(true)
-        check(!lock.isHidden && !moveControl.isEnabled, "locked hover exposes unlock, with dragging disabled")
+        let unlock = interaction.testUnlockButton
+        check(!dragSurface.isDragEnabled && interaction.testToolbar.alphaValue == 0, "locked hover disables direct dragging and hides the regular toolbar")
+        check(interaction.testHasLockedHoverMonitors, "visible locked lyrics have global and local hover monitors")
         check(window.ignoresMouseEvents, "locked lyric window passes clicks to the app underneath")
-        check(interaction.testToolbar.subviews.filter { !$0.isHidden }.count == 1, "locked hover exposes only unlock")
-        check(abs(lock.frame.midX - interaction.testToolbar.bounds.midX) < 0.01, "locked unlock button is centered")
+        check(unlock.window === interaction.testUnlockWindow && unlock.acceptsFirstMouse(for: nil), "unlock has its own first-click control")
         check(abs(window.convertFromScreen(interaction.testUnlockWindow.frame).midX - window.frame.width / 2) < 0.01, "unlock panel stays centered on the actual lyric window")
-        check(!interaction.testUnlockWindow.ignoresMouseEvents && interaction.testUnlockWindow.frame.size == NSSize(width: 38, height: 32), "only the small unlock panel receives locked mouse input")
+        check(!interaction.testUnlockWindow.ignoresMouseEvents && interaction.testUnlockWindow.frame.height == 28, "only the small unlock panel receives locked mouse input")
         check(interaction.testUnlockWindow.isVisible, "hover exposes the independent unlock panel")
         interaction.testHover(false)
         check(!interaction.testUnlockWindow.isVisible && window.ignoresMouseEvents, "leaving hides unlock panel without blocking background clicks")
         interaction.testHover(true)
-        lock.performClick(nil)
-        check(!defaults.bool(forKey: FreeLyricsPreferences.lockedKey) && moveControl.isEnabled && interaction.isEditing, "unlock enables moving and persists unlocked preference")
+        unlock.performClick(nil)
+        check(!interaction.testHasAnyLockedHoverMonitor, "unlock removes both hover monitors")
+        check(!defaults.bool(forKey: FreeLyricsPreferences.lockedKey) && dragSurface.isDragEnabled && interaction.isEditing, "unlock enables direct dragging and persists unlocked preference")
+        check(!defaults.bool(forKey: FreeLyricsPreferences.passThroughKey), "desktop unlock clears conflicting click-through")
         check(!window.ignoresMouseEvents && !interaction.testUnlockWindow.isVisible, "unlock returns editing controls to the main lyric window")
-        check(interaction.testToolbar.subviews.filter { !$0.isHidden }.count == 6, "unlock reveals all edit controls including orientation")
-        let orientation = interaction.testToolbar.subviews[5] as! NSButton
+        check(interaction.testToolbar.subviews.filter { !$0.isHidden }.count == 6, "unlock reveals all 6 hover pill controls")
+        let orientation = interaction.testToolbar.subviews[1] as! NSButton
         orientation.performClick(nil)
         check(defaults.bool(forKey: FreeLyricsPreferences.verticalKey), "orientation shortcut selects vertical")
         orientation.performClick(nil)
         check(!defaults.bool(forKey: FreeLyricsPreferences.verticalKey), "orientation shortcut returns horizontal")
         lock.performClick(nil)
-        check(defaults.bool(forKey: FreeLyricsPreferences.lockedKey) && !moveControl.isEnabled && !interaction.isEditing, "relock ends moving and persists locked preference")
+        check(defaults.bool(forKey: FreeLyricsPreferences.lockedKey) && !dragSurface.isDragEnabled && !interaction.isEditing, "relock ends moving and persists locked preference")
+        interaction.hide()
+        window.orderOut(nil)
+        check(!interaction.testHasAnyLockedHoverMonitor && !interaction.testUnlockWindow.isVisible, "hiding removes the locked hover monitors and pill")
+        window.orderFrontRegardless()
+        defaults.set(false, forKey: FreeLyricsPreferences.passThroughKey)
         interaction.beginEditing()
         check(!defaults.bool(forKey: FreeLyricsPreferences.lockedKey), "explicit Move Lyrics uses the same unlocked preference as the toolbar")
         lock.performClick(nil)
@@ -108,7 +136,7 @@ enum FreeLyricsSelfTests {
         defaults.set(true, forKey: FreeLyricsPreferences.passThroughKey)
         interaction.update(hideOnHover: true)
         check(!window.ignoresMouseEvents, "editing can recover from passthrough")
-        (interaction.testToolbar.subviews[4] as! NSButton).performClick(nil)
+        (interaction.testToolbar.subviews[0] as! NSButton).performClick(nil)
         check(window.ignoresMouseEvents && !interaction.isEditing, "Locking restores pass-through and blocks movement")
         interaction.beginEditing()
         check(!window.ignoresMouseEvents, "menu/settings edit recovery")
@@ -124,36 +152,67 @@ enum FreeLyricsSelfTests {
         }
         defaults.set(false, forKey: FreeLyricsPreferences.passThroughKey)
         interaction.update(hideOnHover: false)
-        let move = interaction.testToolbar.subviews[0]
+        let move = interaction.testDragSurface
         let start = window.frame.origin
-        let down = NSEvent.mouseEvent(with: .leftMouseDown, location: NSPoint(x: 20, y: 20), modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
-        let drag = NSEvent.mouseEvent(with: .leftMouseDragged, location: NSPoint(x: 90, y: 60), modifierFlags: [], timestamp: 0.1, windowNumber: window.windowNumber, context: nil, eventNumber: 1, clickCount: 1, pressure: 1)!
+        let down = NSEvent.mouseEvent(with: .leftMouseDown, location: NSPoint(x: 20, y: 50), modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
+        let drag = NSEvent.mouseEvent(with: .leftMouseDragged, location: NSPoint(x: 90, y: 90), modifierFlags: [], timestamp: 0.1, windowNumber: window.windowNumber, context: nil, eventNumber: 1, clickCount: 1, pressure: 1)!
         lock.performClick(nil)
         move.mouseDown(with: down)
         move.mouseDragged(with: drag)
         move.mouseUp(with: drag)
         check(window.frame.origin == start, "locked native mouse events cannot move lyrics")
-        lock.performClick(nil)
+        unlock.performClick(nil)
         check(!UserDefaults(suiteName: suite)!.bool(forKey: FreeLyricsPreferences.lockedKey), "unlock survives a fresh preferences reader")
         interaction.testHover(false)
         move.mouseDown(with: down)
         check(interaction.testToolbar.alphaValue == 1, "active drag keeps controls visible outside hover")
+
+        // Magnetic snap unit checks (center X + Option bypass + safe edge)
+        let snapVisible = NSRect(x: 0, y: 40, width: 1440, height: 860)
+        let centerSnap = FreeLyricsSnap.snappedOrigin(proposed: NSPoint(x: 495, y: 200), size: NSSize(width: 440, height: 80), visible: snapVisible, bypass: false)
+        check(centerSnap.snappedCenterX && centerSnap.origin.x == 500, "magnetic snap locks to horizontal center within ±10pt")
+        let bypassSnap = FreeLyricsSnap.snappedOrigin(proposed: NSPoint(x: 495, y: 200), size: NSSize(width: 440, height: 80), visible: snapVisible, bypass: true)
+        check(!bypassSnap.snappedCenterX && bypassSnap.origin.x == 495, "holding Option bypasses magnetic snapping")
+        let edgeSnap = FreeLyricsSnap.snappedOrigin(proposed: NSPoint(x: 20, y: 48), size: NSSize(width: 440, height: 80), visible: snapVisible, bypass: false)
+        check(edgeSnap.snappedEdge && edgeSnap.origin.x == 16 && edgeSnap.origin.y == 52, "magnetic snap aligns to safe horizontal/vertical insets")
         move.mouseDragged(with: drag)
         check(window.frame.origin == NSPoint(x: start.x + 70, y: start.y + 40), "native mouse responder changes window origin")
         move.mouseUp(with: drag)
         check(interaction.testToolbar.alphaValue == 0, "releasing outside hover hides editing controls")
         check(FreeLyricsPreferences.load(vertical: false, defaults: defaults) != nil, "mouse up persists position")
-        let palette = interaction.testToolbar.subviews[1] as! NSPopUpButton
-        palette.selectItem(at: 2)
-        _ = NSApp.sendAction(palette.action!, to: palette.target, from: palette)
+        interaction.selectQuickColorPreset(.orange)
         check(defaults.string(forKey: AppPreferences.colorPresetKey) == LyricsColorPreset.orange.rawValue, "toolbar color shortcut uses existing palette preference")
+        // E33 checks: 3 curated gradients, tight hover frame width, single/double line mode, and 6-button tooltips
+        check(FreeLyricsInteraction.testCuratedGradientCount == 3, "quick color popover exposes 3 curated gradients")
+        let sunsetStart = NSColor(calibratedRed: 1.0, green: 0.541, blue: 0.212, alpha: 1)
+        let sunsetEnd = NSColor(calibratedRed: 1.0, green: 0.302, blue: 0.553, alpha: 1)
+        interaction.selectQuickColorPreset(.customGradient, customColor: sunsetStart, customEndColor: sunsetEnd)
+        check(defaults.string(forKey: AppPreferences.colorPresetKey) == LyricsColorPreset.customGradient.rawValue, "quick gradient dot switches to custom gradient preset")
+        interaction.updateContentLayout(rect: NSRect(x: 120, y: 0, width: 180, height: 48), hasCapsuleBackground: false)
+        check(dragSurface.activeHighlightFrame.width == 180 && dragSurface.activeHighlightFrame.width < dragSurface.bounds.width, "hover frame tightly fits lyric width instead of full window")
+        // E36: default double-line floating mode + compact vertical column gap (10–14pt)
+        let freshSuite = UserDefaults(suiteName: "NotchMuseFreeLyricsDefaultLineMode-\(UUID().uuidString)")!
+        check(FreeLyricsPreferences.lineMode(in: freshSuite) == .double, "free floating lyrics must default to double-line mode")
+        defaults.set(FreeLyricsLineMode.double.rawValue, forKey: FreeLyricsPreferences.lineModeKey)
+        check(FreeLyricsPreferences.lineMode(in: defaults) == .double, "double-line floating lyrics mode persists")
+        defaults.set(FreeLyricsLineMode.single.rawValue, forKey: FreeLyricsPreferences.lineModeKey)
+        check(FreeLyricsPreferences.lineMode(in: defaults) == .single, "single-line floating lyrics mode persists")
+        check(OverlayLyricsWindow.verticalColumnGapForTest >= 10 && OverlayLyricsWindow.verticalColumnGapForTest <= 14, "vertical column gap must stay compact (10-14pt)")
+        check(interaction.testToolbar.subviews.count == 6, "toolbar exposes 6 icon controls with tooltips")
+        for subview in interaction.testToolbar.subviews {
+            check((subview.toolTip ?? "").isEmpty == false, "every toolbar button carries a clear tooltip")
+        }
+        var openedMain = false
+        interaction.onOpenMainWindow = { openedMain = true }
+        (interaction.testToolbar.subviews[3] as! NSButton).performClick(nil)
+        check(openedMain, "main window button opens NotchMuse lyrics page")
         var opened = false
         interaction.onSettings = { opened = true }
-        (interaction.testToolbar.subviews[2] as! NSButton).performClick(nil)
+        (interaction.testToolbar.subviews[4] as! NSButton).performClick(nil)
         check(opened, "settings button")
         var closed = false
         interaction.onClose = { closed = true }
-        (interaction.testToolbar.subviews[3] as! NSButton).performClick(nil)
+        (interaction.testToolbar.subviews[5] as! NSButton).performClick(nil)
         check(closed && !interaction.isEditing, "close hides lyrics only through callback")
         check(interaction.testToolbar.alphaValue == 0, "closed toolbar cannot remain visible when reopened")
         // Exercise the actual shared overlay, not a separate test renderer.
@@ -181,7 +240,8 @@ enum FreeLyricsSelfTests {
         let freeWindow = overlay.freeInteraction.window
         check(freeWindow.isVisible && !freeWindow.ignoresMouseEvents, "actual free renderer visible/interactive")
         check(freeWindow.collectionBehavior.contains(.canJoinAllSpaces) && freeWindow.collectionBehavior.contains(.fullScreenAuxiliary), "Space/fullscreen window policy")
-        freeWindow.setFrameOrigin(NSPoint(x: 90, y: 150))
+        let screenOrigin = freeWindow.screen?.visibleFrame.origin ?? .zero
+        freeWindow.setFrameOrigin(NSPoint(x: screenOrigin.x + 90, y: screenOrigin.y + 150))
         overlay.freeInteraction.savePosition()
         let moved = freeWindow.frame
         let lines = [LyricLine(time: 10, text: "Test one"), LyricLine(time: 20, text: "Test two")]
@@ -190,14 +250,14 @@ enum FreeLyricsSelfTests {
             show(.free, text: moment.text, progress: moment.progress)
             check(freeWindow.frame == moved, "content/progress/Pause/Resume/Seek/track text do not reset position")
         }
-        (overlay.freeInteraction.testToolbar.subviews[5] as! NSButton).performClick(nil)
+        (overlay.freeInteraction.testToolbar.subviews[1] as! NSButton).performClick(nil)
         check(FreeLyricsPreferences.vertical, "toolbar shortcut drives real vertical preference")
         show(.free)
         check(freeWindow.frame.height > freeWindow.frame.width, "actual vertical layout")
         overlay.freeInteraction.beginEditing()
         check(overlay.freeInteraction.testToolbar.frame.width <= freeWindow.frame.width, "lock controls fit vertical lyrics")
         overlay.freeInteraction.endEditing()
-        (overlay.freeInteraction.testToolbar.subviews[5] as! NSButton).performClick(nil)
+        (overlay.freeInteraction.testToolbar.subviews[1] as! NSButton).performClick(nil)
         check(!FreeLyricsPreferences.vertical, "toolbar shortcut drives real horizontal preference")
         show(.free)
         check(freeWindow.frame == moved, "horizontal anchor restored after orientation toggle")

@@ -38,3 +38,14 @@ risks, major failed tests or work beyond scope; never bypass key verification.
 The standard RELEASE_CHECKLIST.md replaces the historical completed0.8.0 list;
 UPDATE_RELEASE_AUTOMATION.md defines deployment order. These rules supersede
 older historical instructions requesting separate source/website/feed approvals.
+
+## Required Markdown handoff summaries — owner instruction2026-11-13
+
+Every completed research, development, testing, release-preparation or
+investigation task must produce a Markdown handoff summary before the task is
+reported as complete. The summary must state the objective, work performed,
+files or artifacts changed, tests and evidence, completed items, untested items,
+risks, current local/GitHub/public status, and the recommended next decision.
+Use one canonical report under `docs/reports/` or `docs/project/`; do not create
+duplicate PM documents. The final response must link the Markdown file so a
+separate GPT PM can review it without relying on chat history.

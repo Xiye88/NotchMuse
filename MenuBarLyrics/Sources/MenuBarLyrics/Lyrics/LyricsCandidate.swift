@@ -3,7 +3,14 @@ import LyricsCore
 
 /// Source evidence is retained independently of the player's identity.
 struct LyricsCandidate: Equatable, Sendable {
+    enum Evidence: Sendable {
+        case timedLyrics
+        case instrumental
+        case userContribution
+    }
+
     let document: TimedLyricDocument
+    let evidence: Evidence
     let provider: String
     let sourcePlatform: String?
     let sourceTrackID: String?
@@ -20,8 +27,9 @@ struct LyricsCandidate: Equatable, Sendable {
     init(document: TimedLyricDocument, provider: String, sourcePlatform: String? = nil,
          sourceTrackID: String? = nil, sourceTitle: String, sourceArtist: String,
          sourceAlbum: String? = nil, sourceDuration: Double? = nil, sourceISRC: String? = nil,
-         matcherScore: Int? = nil, elapsed: Double = 0, liveIdentityVerified: Bool = false) {
-        self.document = document; self.provider = provider; self.sourcePlatform = sourcePlatform
+         matcherScore: Int? = nil, elapsed: Double = 0, liveIdentityVerified: Bool = false,
+         evidence: Evidence = .timedLyrics) {
+        self.document = document; self.evidence = evidence; self.provider = provider; self.sourcePlatform = sourcePlatform
         self.sourceTrackID = sourceTrackID; self.sourceTitle = sourceTitle; self.sourceArtist = sourceArtist
         self.sourceAlbum = sourceAlbum; self.sourceDuration = sourceDuration; self.sourceISRC = sourceISRC
         self.matcherScore = matcherScore; self.elapsed = elapsed; self.liveIdentityVerified = liveIdentityVerified

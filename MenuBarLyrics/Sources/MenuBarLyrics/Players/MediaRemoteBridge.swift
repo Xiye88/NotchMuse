@@ -31,6 +31,37 @@ struct MediaRemoteEvent: Decodable, Equatable, Sendable {
     let uniqueIdentifier: MediaRemoteIdentifier?
     let contentItemIdentifier: String?
     let mediaType: String?
+    let artworkData: String?
+
+    init(
+        bundleIdentifier: String,
+        parentApplicationBundleIdentifier: String? = nil,
+        playing: Bool,
+        title: String,
+        artist: String? = nil,
+        album: String? = nil,
+        duration: TimeInterval? = nil,
+        elapsedTimeNow: TimeInterval? = nil,
+        timestamp: String? = nil,
+        uniqueIdentifier: MediaRemoteIdentifier? = nil,
+        contentItemIdentifier: String? = nil,
+        mediaType: String? = nil,
+        artworkData: String? = nil
+    ) {
+        self.bundleIdentifier = bundleIdentifier
+        self.parentApplicationBundleIdentifier = parentApplicationBundleIdentifier
+        self.playing = playing
+        self.title = title
+        self.artist = artist
+        self.album = album
+        self.duration = duration
+        self.elapsedTimeNow = elapsedTimeNow
+        self.timestamp = timestamp
+        self.uniqueIdentifier = uniqueIdentifier
+        self.contentItemIdentifier = contentItemIdentifier
+        self.mediaType = mediaType
+        self.artworkData = artworkData
+    }
 }
 
 enum MediaRemoteBridgeError: Error, Sendable {

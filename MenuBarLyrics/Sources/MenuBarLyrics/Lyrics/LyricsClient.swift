@@ -287,6 +287,7 @@ final class LyricsClient {
         let reasons = Array(decision.rejected.values)
         let noLyricsReason: String
         if winner != nil { noLyricsReason = "none" }
+        else if decision.reason == "instrumental_recording" || reasons.contains(where: { $0.hasPrefix("instrumental_") }) { noLyricsReason = "instrumental_recording" }
         else if decision.reason == "timeline_conflict" || reasons.contains(where: { $0.contains("timeline") }) { noLyricsReason = "timeline_conflict" }
         else if reasons.contains(where: { $0.contains("version") }) { noLyricsReason = "version_conflict" }
         else if reasons.contains(where: { $0.contains("duration") }) { noLyricsReason = "duration_conflict" }

@@ -1,5 +1,25 @@
 # NotchMuse Project Status
 
+## Track A/B/C results — 2026-11-12
+
+- Track A Apple Translation PoC: Translation.framework compiles on macOS26.5.2 arm64, but zh-Hans→en model is supported yet not installed/ready and canRequestDownloads=false in the current host. No download or permission was triggered; cold/warm speed, quality, CPU/RSS and offline translation remain untested. Report conclusion C (insufficient evidence to adopt): [APPLE_TRANSLATION_POC_REPORT](../reports/research/APPLE_TRANSLATION_POC_REPORT.md).
+- Track B bilingual lyrics: local-only code changes now carry optional `LyricLine.translation`; NetEase tlyric is decoded and aligned by normalized timestamps within a unique450ms tolerance; ambiguity leaves translation empty, original timing/identity/cache remain authoritative. Notch/free overlays show original above Chinese when available; status bar remains single line; independent bilingual switch defaults off. Data fixtures RED8→GREEN23 and layout tests are local; no App build/pack/release. [BILINGUAL_LYRICS_MVP_REPORT](../reports/research/BILINGUAL_LYRICS_MVP_REPORT.md).
+- Track C podcast: Alger still has no Transcript engine; no other PO project can be identified. Public Podnews RSS first item was verified to include podcast:transcript VTT with accessible 7293-byte file and valid 0.5–4.33s cue. No Swift parser/player integration, external-player identity or ASR was attempted. [PODCAST_TRANSCRIPT_FEASIBILITY_REPORT](../reports/research/PODCAST_TRANSCRIPT_FEASIBILITY_REPORT.md).
+- Stable0.8.2/70, Release/Tag/public Sparkle are unchanged. Existing free drag was reused; no drag rewrite. Keep all Track work local until PM reviews reports.
+
+## Active — bilingual lyrics and Transcript tracks, 2026-11-12
+
+Owner authorizes TrackA independent Apple Translation PoC (real Mac, three cold/warm batches, no cloud/product integration), TrackB existing-provider translation and bilingual notch/free overlay MVP (original clock/matcher unchanged), then TrackC one public RSS Transcript feasibility check. TrackA and B independently staffed; TrackC no ASR or production development. Reports: docs/reports/research/APPLE_TRANSLATION_POC_REPORT.md, BILINGUAL_LYRICS_MVP_REPORT.md, PODCAST_TRANSCRIPT_FEASIBILITY_REPORT.md. Stable0.8.2/70, Release/Tag/public Sparkle unchanged; existing free drag reused. No publication or source push this phase.
+
+```text
+Current status: A PoC and B MVP IN_PROGRESS; C bounded evidence research.
+Completed: Requirements recovered; macOS26.5.2/arm64 SDK confirmed; responsibilities separated.
+Pending confirmation: System model download if requested by OS; original Transcript project identity remains unknown.
+Key files: existing NetEaseLyricsSource/LyricParser/OverlayLyricsWindow; three required reports.
+Next step: Isolated real translation batch; fixtures for tlyric alignment and layout; one real RSS timed transcript.
+Do not repeat: Stable delivery, old song audits, drag implementation, cloud ASR/member platform.
+```
+
 ## Local Preview updater delivery — 2026-11-12
 
 Local0.8.3 Preview71 passed build/packaged self-tests, no-update quiet startup, visible default-ON independent switches and actual signed loopback71→72 automatic download/install/relaunch (no manual check/install action;72 is a same-runtime test fixture). Installed `/Applications/NotchMuse Preview.app` now shows Build72. Daily timer logged delay/interval86400. Original69 rollback retained; first delivery failed startup verification and successfully rolled back, repeat delivery passed.36 policy/preferences/delegate checks +3 packaging configs and lifecycle tests passed. Full XCTest unavailable in CLT (missing XCTest). Actual24-hour wait, offline UI, corrupted-package installer and long-running prepared-update UI remain untested; do not mark full updater qualification complete. Public0.8.2/70 unchanged. Shared future runtime source is intentional, only Preview packaged/delivered; Preview fixture identity was checked before signing. Evidence: PM preview-updater-20261110/preview-verification.json.

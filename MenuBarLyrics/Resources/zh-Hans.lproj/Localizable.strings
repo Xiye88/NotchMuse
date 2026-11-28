@@ -119,7 +119,6 @@
 "Animation Speed" = "动画速度";
 "Opacity" = "不透明度";
 "Lyrics Opacity" = "歌词不透明度";
-"Background Opacity" = "背景不透明度";
 "Mint Glow" = "薄荷微光";
 "Sunset Glow" = "落日渐变";
 "Custom Gradient" = "自定义渐变";
@@ -167,25 +166,20 @@
 "Dreamy Soft" = "梦幻柔和";
 "Pure" = "极简纯净";
 "Quick Presets" = "快速预设";
-"Choose how and where lyrics appear." = "设置歌词的显示方式、位置和屏幕。";
 "Customize the look of your lyrics." = "自定义歌词的视觉效果。";
 "Player and system behavior." = "播放器与系统行为。";
 "Lyrics display mode, position, and screen." = "歌词显示方式、位置与屏幕。";
 "Lyrics color, typography, and motion." = "歌词颜色、字体与动画效果。";
 "Player selection and system behavior." = "播放器与系统行为。";
-"Automatically Check for Updates" = "自动检查更新";
-"Auto-Check Updates" = "自动检查更新";
 "Choose how and where lyrics appear." = "选择歌词的显示方式与位置。";
 "Support NotchMuse" = "请作者喝杯咖啡";
 "GitHub Star" = "GitHub Star";
 "Open NotchMuse on GitHub to leave a star." = "在 GitHub 上为 NotchMuse 点 Star。";
 "Switch to Light Mode" = "切换到浅色模式";
 "Switch to Dark Mode" = "切换到深色模式";
-"Your support helps keep NotchMuse improving." = "感谢你支持 NotchMuse 持续改进。";
 "WeChat Pay" = "微信支付";
 "Copy Address" = "复制地址";
 "Copied" = "已复制";
-"Check the selected network and send USDT only." = "请确认转账网络与所选网络一致，仅发送 USDT。";
 "Supporters" = "感谢支持者";
 "Thanks to everyone supporting NotchMuse." = "感谢每一位支持 NotchMuse 的朋友。";
 
@@ -198,11 +192,83 @@
 "Move Lyrics" = "移动歌词";
 "Unlock Position" = "解锁位置";
 "Reset Position" = "恢复默认位置";
-"Use Move Lyrics to edit, even when locked or click-through is on." = "锁定或穿透后，仍可从菜单栏或设置选择“移动歌词”。再次锁定后恢复鼠标隐藏和穿透设置。";
 
 "Switch to Horizontal" = "切换为横向歌词";
 "Switch to Vertical" = "切换为竖向歌词";
 
-"Auto-Install Updates" = "自动下载安装更新";
-"Checks at launch and daily while enabled. Automatic installation requires automatic checks. Updates apply at launch; while running, downloads prompt you to restart. Turning this off does not cancel an installation already prepared." = "开启后在启动时及运行期间每日检查更新。自动安装需同时开启自动检查：启动时应用更新，运行中下载后提示重启。关闭开关不会取消已准备安装的更新。";
 "Bilingual Lyrics" = "双语歌词（已有翻译）";
+
+"Kugou Music" = "酷狗音乐";
+"YouTube Music" = "YouTube Music";
+"TIDAL" = "TIDAL";
+"Amazon Music" = "Amazon Music";
+"Deezer" = "Deezer";
+"Qobuz" = "Qobuz";
+"Plexamp" = "Plexamp";
+"All macOS Now Playing Apps" = "所有系统播控应用";
+"Lyric Timing Offset" = "歌词时间偏移";
+"Lyric Timing Offset (%@)" = "歌词时间偏移 (%@)";
+"Earlier (-0.5s)" = "提前 (-0.5s)";
+"Reset (0.0s)" = "重置 (0.0s)";
+"Later (+0.5s)" = "延后 (+0.5s)";
+"Enter Free Position & Move" = "进入自由位置并移动";
+"Restart Now" = "立即重启";
+"Later" = "稍后";
+"Waiting for music…" = "等待音乐播放…";
+"Lyrics synced" = "歌词已同步";
+"Open Permission Settings" = "前往授权";
+"Accessibility permission needed for Left status bar" = "左侧状态栏布局需要“辅助功能”权限";
+"Automation permission needed for %@" = "连接 %@ 需要“自动化”权限";
+
+"Mainstream Players" = "主流播放器";
+"Chinese & Open-Source Players" = "国内与开源播放器";
+"Global, Audiophile & NAS" = "海外、发烧友与自建库";
+"Video & Media (Manual Only)" = "视频与媒体（仅手动）";
+"Kuwo Music" = "酷我音乐";
+"Migu Music" = "咪咕音乐";
+"Bodian Music" = "波点音乐";
+"Qianqian Music" = "千千音乐";
+"LX Music" = "洛雪音乐 (LX Music)";
+"Bilibili" = "哔哩哔哩 (Bilibili)";
+
+"Lyrics" = "歌词";
+"Missing Lyrics Animation" = "未找到歌词动画";
+"Toggle Sidebar" = "切换侧边栏";
+"Hide Sidebar" = "折叠侧边栏";
+"Show Sidebar" = "展开侧边栏";
+
+/* E30: 默认启动播放器与背景胶囊控制 */
+"Default Launch Player" = "默认启动播放器";
+"Auto (Installed Music App)" = "自动（优先已安装音乐软件）";
+"Do Not Auto-Launch" = "不自动启动";
+"Show Background Capsule" = "显示背景胶囊";
+"Background Opacity" = "背景不透明度";
+"Frosted Cream" = "磨砂奶白";
+"Deep Sea Mist" = "深海雾蓝";
+
+/* E32: 桌面自由悬浮工具条 6 键 Tooltip */
+"Lock Position / Click-Through" = "锁定位置 / 穿透点击";
+"Quick Colors" = "快捷配色";
+"Open Main Window" = "打开主窗口（歌词页）";
+"Preferences" = "偏好设置";
+
+/* E33: 悬浮歌词单/双行模式 */
+"Floating Lines" = "悬浮歌词行数";
+"Single Line" = "单行";
+"Double Line" = "双行";
+
+"Interaction Sounds" = "交互微音效";
+"PNG copied" = "已复制 PNG";
+"PNG saved" = "已保存 PNG";
+
+"NotchMuse is a free passion project built with love. If it brightens your listening, feel free to buy me a coffee or join the user group." = "NotchMuse 是免费开源、为爱发电的独立项目。如果它陪你度过了好时光，欢迎请作者喝杯咖啡，或加入用户群交流反馈。";
+"QQ User Group" = "QQ 用户交流群";
+"Copy Group ID" = "复制群号";
+"Copied ✓" = "已复制 ✓";
+"EVM networks · USDT only" = "仅支持 EVM 网络 USDT";
+"Hover over locked lyrics to unlock them on your desktop." = "悬停在锁定的歌词上，即可在桌面解锁。";
+"🔒 Unlock" = "🔒 解锁";
+"Automatic Updates (Recommended)" = "自动更新（推荐开启）";
+"Checks for updates and downloads them in the background." = "自动检查更新并在后台下载。";
+"Automatic checks only (previous setting)." = "仅自动检查更新（沿用原设置）。";
+"Updates are unavailable in this build." = "此构建暂不可检查更新。";

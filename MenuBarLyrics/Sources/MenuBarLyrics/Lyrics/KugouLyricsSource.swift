@@ -25,6 +25,17 @@ struct KugouLyricsSource {
         let title: String
         let artist: String
         let durationMs: Int
+        let isUserContribution: Bool
+
+        init(id: String, accessKey: String, title: String, artist: String, durationMs: Int,
+             isUserContribution: Bool = false) {
+            self.id = id
+            self.accessKey = accessKey
+            self.title = title
+            self.artist = artist
+            self.durationMs = durationMs
+            self.isUserContribution = isUserContribution
+        }
     }
 
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
@@ -89,7 +100,8 @@ struct KugouLyricsSource {
         return LyricsCandidate(document: TimedLyricDocument(lines: lines, metadata: LyricsMetadata(provider: "Kugou", platformTrackID: song.hash)),
             provider: "Kugou", sourcePlatform: "kugou", sourceTrackID: song.hash,
             sourceTitle: lyrics.title, sourceArtist: lyrics.artist, sourceAlbum: album?.isEmpty == false ? album : nil,
-            sourceDuration: Double(lyrics.durationMs) / 1000, sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: match))
+            sourceDuration: Double(lyrics.durationMs) / 1000, sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: match),
+            evidence: lyrics.isUserContribution ? .userContribution : .timedLyrics)
     }
 
     func songSearchRequest(for track: SpotifyTrack) -> URLRequest {
@@ -153,7 +165,8 @@ struct KugouLyricsSource {
         let response = try JSONDecoder().decode(LyricsSearchResponse.self, from: data)
         guard response.status == 200 else { return nil }
         let candidates = deduplicated(response.candidates.map {
-            LyricDownloadCandidate(id: $0.id, accessKey: $0.accessKey, title: $0.title, artist: $0.artist, durationMs: $0.durationMs)
+            LyricDownloadCandidate(id: $0.id, accessKey: $0.accessKey, title: $0.title, artist: $0.artist, durationMs: $0.durationMs,
+                                   isUserContribution: $0.productFrom?.lowercased() == "ugc")
         }, signature: { signature(title: $0.title, artist: $0.artist, durationMs: $0.durationMs) })
         let matches = candidates.map {
             TrackMatcher.Candidate(title: $0.title, artists: [$0.artist], durationMs: $0.durationMs)
@@ -274,9 +287,11 @@ private struct LyricsSearchItem: Decodable {
     let artist: String
     let title: String
     let durationMs: Int
+    let productFrom: String?
 
     private enum CodingKeys: String, CodingKey {
         case id
+        case productFrom = "product_from"
         case accessKey = "accesskey"
         case artist = "singer"
         case title = "song"

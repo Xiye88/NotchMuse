@@ -2,23 +2,154 @@ import Foundation
 
 enum PlayerSource: String, CaseIterable, Equatable, Sendable {
     case auto = "Auto Detect (Recommended)"
+    case allNowPlaying = "All macOS Now Playing Apps"
+
+    // Mainstream
     case spotify = "Spotify"
     case appleMusic = "Apple Music"
     case netEaseMusic = "NetEase Cloud Music"
     case qqMusic = "QQ Music"
     case sodaMusic = "Soda Music"
+    case kugouMusic = "Kugou Music"
+    case youtubeMusic = "YouTube Music"
 
-    static let detectable: [PlayerSource] = [.spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic]
+    // Domestic & Open-Source CN
+    case kuwoMusic = "Kuwo Music"
+    case miguMusic = "Migu Music"
+    case bodianMusic = "Bodian Music"
+    case qianqianMusic = "Qianqian Music"
+    case lxMusic = "LX Music"
+    case yesPlayMusic = "YesPlayMusic"
+    case algerMusic = "AlgerMusicPlayer"
+    case listen1 = "Listen 1"
+    case splayer = "SPlayer"
+
+    // International, Audiophile & NAS
+    case tidal = "TIDAL"
+    case amazonMusic = "Amazon Music"
+    case deezer = "Deezer"
+    case qobuz = "Qobuz"
+    case plexamp = "Plexamp"
+    case cider = "Cider"
+    case soundCloud = "SoundCloud"
+    case bandcamp = "Bandcamp"
+    case swinsian = "Swinsian"
+    case vox = "VOX"
+    case foobar2000 = "foobar2000"
+    case audirvana = "Audirvana"
+    case roon = "Roon"
+    case pinePlayer = "Pine Player"
+    case cog = "Cog"
+    case feishin = "Feishin"
+    case supersonic = "Supersonic"
+
+    // Manual-Only Video / Media Players (excluded from Auto Detect & All Now Playing)
+    case iina = "IINA"
+    case vlc = "VLC"
+    case bilibili = "Bilibili"
+
+    static let detectable: [PlayerSource] = [
+        .spotify, .appleMusic, .netEaseMusic, .qqMusic, .sodaMusic,
+        .kugouMusic, .youtubeMusic,
+        .kuwoMusic, .miguMusic, .bodianMusic, .qianqianMusic,
+        .lxMusic, .yesPlayMusic, .algerMusic, .listen1, .splayer,
+        .tidal, .amazonMusic, .deezer, .qobuz, .plexamp,
+        .cider, .soundCloud, .bandcamp,
+        .swinsian, .vox, .foobar2000, .audirvana, .roon, .pinePlayer, .cog,
+        .feishin, .supersonic
+    ]
+
+    static let menuGroups: [(title: String?, sources: [PlayerSource])] = [
+        (nil, [.auto, .allNowPlaying]),
+        ("Mainstream Players", [.spotify, .appleMusic, .youtubeMusic, .netEaseMusic, .qqMusic, .sodaMusic, .kugouMusic]),
+        ("Chinese & Open-Source Players", [.kuwoMusic, .miguMusic, .bodianMusic, .qianqianMusic, .lxMusic, .yesPlayMusic, .algerMusic, .listen1, .splayer]),
+        ("Global, Audiophile & NAS", [.tidal, .amazonMusic, .deezer, .qobuz, .plexamp, .cider, .soundCloud, .bandcamp, .swinsian, .vox, .foobar2000, .audirvana, .roon, .pinePlayer, .cog, .feishin, .supersonic]),
+        ("Video & Media (Manual Only)", [.iina, .vlc, .bilibili])
+    ]
+
+    static let browserBundleIdentifiers: Set<String> = [
+        "com.apple.Safari",
+        "com.google.Chrome",
+        "company.thebrowser.Browser",
+        "com.microsoft.edgemac",
+        "com.brave.Browser",
+        "org.mozilla.firefox"
+    ]
+
+    static let nonMusicDenylist: Set<String> = [
+        "us.zoom.xos",
+        "com.apple.FaceTime",
+        "com.microsoft.teams",
+        "com.microsoft.teams2",
+        "com.apple.QuickTimePlayerX",
+        "com.tinyspeck.slackmacgap",
+        "com.hnc.Discord",
+        "Cisco-Systems.Spark",
+        "com.apple.podcasts",
+        "com.google.Chrome.app.kjgfgldnnfoeklkmfkjfagphfepbbdan", // Google Meet PWA
+        "com.colliderli.iina",
+        "org.videolan.vlc",
+        "tv.danmaku.bili",
+        "com.bilibili.bilibiliPC"
+    ]
+
+    var bundleIdentifiers: [String] {
+        switch self {
+        case .auto, .allNowPlaying: []
+        case .spotify: ["com.spotify.client"]
+        case .appleMusic: ["com.apple.Music"]
+        case .netEaseMusic: ["com.netease.163music"]
+        case .qqMusic: ["com.tencent.QQMusicMac"]
+        case .sodaMusic: ["com.soda.music"]
+        case .kugouMusic: ["com.kugou.mac", "com.kugou.KugouMusic", "com.kugou.mac.KugouMusic"]
+        case .youtubeMusic: [
+            "com.github.th-ch.youtube-music",
+            "app.ytmdesktop.ytmdesktop",
+            "com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod",
+            "com.microsoft.edgemac.app.cinhimbnkkaeohfgghhklpknlkffjgod",
+            "com.brave.Browser.app.cinhimbnkkaeohfgghhklpknlkffjgod"
+        ]
+        case .kuwoMusic: ["cn.kuwo.KuwoMusic", "com.kuwo.mac.KuwoMusic", "cn.kuwo.player"]
+        case .miguMusic: ["cn.migu.music", "com.migu.music.mac"]
+        case .bodianMusic: ["cn.kuwo.bodian", "com.bodian.music"]
+        case .qianqianMusic: ["com.taihe.qianqianmusic", "com.baidu.music"]
+        case .lxMusic: ["cn.toside.music.desktop"]
+        case .yesPlayMusic: ["com.qier222.yesplaymusic"]
+        case .algerMusic: ["com.alger.music", "com.algermusicplayer.app"]
+        case .listen1: ["com.listen1.desktop", "com.github.listen1.listen1_desktop"]
+        case .splayer: ["com.imsyy.splayer"]
+        case .tidal: ["com.tidal.desktop"]
+        case .amazonMusic: ["com.amazon.music"]
+        case .deezer: ["com.deezer.deezer-desktop"]
+        case .qobuz: ["com.qobuz.QobuzDesktop"]
+        case .plexamp: ["tv.plex.plexamp"]
+        case .cider: ["sh.cider.Cider", "sh.cider.electron", "com.cider.app"]
+        case .soundCloud: ["com.soundcloud.desktop", "com.google.Chrome.app.mpnpojknpmmopombnjdcgaaiekajbnjb"]
+        case .bandcamp: ["com.bandcamp.desktop"]
+        case .swinsian: ["com.swinsian.Swinsian"]
+        case .vox: ["com.coppertino.Vox"]
+        case .foobar2000: ["com.foobar2000.mac"]
+        case .audirvana: ["com.audirvana.Audirvana-Studio", "com.audirvana.Audirvana-Origin", "com.audirvana.Audirvana"]
+        case .roon: ["com.roon.Roon"]
+        case .pinePlayer: ["com.digibird.PinePlayer"]
+        case .cog: ["org.cogx.cog"]
+        case .feishin: ["org.jeffvli.feishin"]
+        case .supersonic: ["io.github.dweymouth.supersonic"]
+        case .iina: ["com.colliderli.iina"]
+        case .vlc: ["org.videolan.vlc"]
+        case .bilibili: ["tv.danmaku.bili", "com.bilibili.bilibiliPC"]
+        }
+    }
+
+    var isVideoOrRelaxedDuration: Bool {
+        switch self {
+        case .youtubeMusic, .soundCloud, .bilibili, .iina, .vlc, .allNowPlaying: true
+        default: false
+        }
+    }
 
     var bundleIdentifier: String? {
-        switch self {
-        case .auto: nil
-        case .spotify: "com.spotify.client"
-        case .appleMusic: "com.apple.Music"
-        case .netEaseMusic: "com.netease.163music"
-        case .qqMusic: "com.tencent.QQMusicMac"
-        case .sodaMusic: "com.soda.music"
-        }
+        bundleIdentifiers.first
     }
 
     func displayName(language: AppLanguage = AppPreferences.language) -> String {
@@ -42,13 +173,16 @@ final class AutoDetectAdapter: @unchecked Sendable, MusicPlayerAdapter {
     }
 
     convenience init() {
-        self.init(adapters: [
-            (.spotify, SpotifyAdapter()),
-            (.appleMusic, AppleMusicAdapter()),
-            (.netEaseMusic, NetEaseMusicAdapter()),
-            (.qqMusic, MediaRemotePlayerAdapter(source: .qqMusic)),
-            (.sodaMusic, MediaRemotePlayerAdapter(source: .sodaMusic))
-        ])
+        let reader = SharedMediaRemoteReader.shared
+        let built: [(PlayerSource, any MusicPlayerAdapter)] = PlayerSource.detectable.map { source in
+            switch source {
+            case .spotify: (source, SpotifyAdapter())
+            case .appleMusic: (source, AppleMusicAdapter())
+            case .netEaseMusic: (source, NetEaseMusicAdapter())
+            default: (source, MediaRemotePlayerAdapter(source: source, sharedReader: reader))
+            }
+        }
+        self.init(adapters: built)
     }
 
     init(adapters: [(PlayerSource, any MusicPlayerAdapter)]) {
@@ -191,7 +325,14 @@ struct NowPlayingTrack: Equatable, Sendable {
     let versionHints: [TrackVersionHint]?
 
     var spotifyTrack: SpotifyTrack {
-        SpotifyTrack(name: title, artist: artist, album: album, duration: duration, nativeTrackID: nativeTrackID)
+        SpotifyTrack(
+            name: title,
+            artist: artist,
+            album: album,
+            duration: duration,
+            nativeTrackID: nativeTrackID,
+            relaxedDurationMatching: playerSource.isVideoOrRelaxedDuration
+        )
     }
 
     var observationIdentity: String {

@@ -2,6 +2,13 @@ import Foundation
 import LyricsCore
 
 struct NetEaseLyricsSource {
+    struct LyricPayload: Sendable {
+        let lines: [LyricLine]
+        let isInstrumental: Bool
+
+        var evidence: LyricsCandidate.Evidence { isInstrumental ? .instrumental : .timedLyrics }
+    }
+
     func syncedLyrics(for track: SpotifyTrack) async throws -> [LyricLine] {
         try await candidate(for: track)?.document.normalizedLines ?? []
     }
@@ -9,8 +16,8 @@ struct NetEaseLyricsSource {
     func candidate(for track: SpotifyTrack) async throws -> LyricsCandidate? {
         let songs = try await search(track)
         guard let song = selectedSong(songs, for: track) else { return nil }
-        let lines = try await lyricLines(songID: String(song.id))
-        return makeCandidate(song: song, lines: lines, for: track)
+        guard let payload = try await lyricPayload(songID: String(song.id)) else { return nil }
+        return makeCandidate(song: song, lines: payload.lines, for: track, evidence: payload.evidence)
     }
 
     func selectedSong(_ songs: [Song], for track: SpotifyTrack) -> Song? {
@@ -29,21 +36,22 @@ struct NetEaseLyricsSource {
         return songs[index]
     }
 
-    func makeCandidate(song: Song, lines: [LyricLine], for track: SpotifyTrack) -> LyricsCandidate? {
-        guard !lines.isEmpty else { return nil }
+    func makeCandidate(song: Song, lines: [LyricLine], for track: SpotifyTrack,
+                       evidence: LyricsCandidate.Evidence = .timedLyrics) -> LyricsCandidate? {
+        guard !lines.isEmpty || evidence == .instrumental else { return nil }
         let match = TrackMatcher.Candidate(title: song.name, artists: song.artists.map(\.name), durationMs: song.duration)
         return LyricsCandidate(document: TimedLyricDocument(lines: lines, metadata: LyricsMetadata(provider: "NetEase", platformTrackID: String(song.id))),
             provider: "NetEase", sourcePlatform: "netease", sourceTrackID: String(song.id),
             sourceTitle: song.name, sourceArtist: song.artists.map(\.name).joined(separator: ", "), sourceAlbum: song.album?.name,
-            sourceDuration: Double(song.duration) / 1000, sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: match))
+            sourceDuration: Double(song.duration) / 1000, sourceISRC: nil, matcherScore: TrackMatcher.score(track, candidate: match), evidence: evidence)
     }
 
     /// A public richer endpoint; IDs still come from conservative search or live-authorized Exact-ID.
-    func lyricLines(songID: String) async throws -> [LyricLine] {
+    func lyricPayload(songID: String) async throws -> LyricPayload? {
         do {
             let (data, response) = try await LyricsHTTP.data(for: lyricRequest(songID: songID, rich: true))
             let validated = try LyricsHTTP.validate(data: data, response: response)
-            if let lines = try parseLyrics(validated) { return lines }
+            if let payload = try parsePayload(validated) { return payload }
         } catch is CancellationError {
             throw CancellationError()
         } catch {
@@ -51,7 +59,7 @@ struct NetEaseLyricsSource {
         }
         try Task.checkCancellation()
         let (data, response) = try await LyricsHTTP.data(for: lyricRequest(songID: songID, rich: false))
-        return try parseLyrics(LyricsHTTP.validate(data: data, response: response)) ?? []
+        return try parsePayload(LyricsHTTP.validate(data: data, response: response))
     }
 
     func lyricRequest(songID: String, rich: Bool) -> URLRequest {
@@ -65,14 +73,22 @@ struct NetEaseLyricsSource {
 
     /// nil denotes an unsupported response, while [] is a legitimate no-lyrics result.
     func parseLyrics(_ data: Data) throws -> [LyricLine]? {
+        try parsePayload(data)?.lines
+    }
+
+    func parsePayload(_ data: Data) throws -> LyricPayload? {
         let payload = try JSONDecoder().decode(LyricResponse.self, from: data)
         guard payload.code == 200 else { return nil }
+        if payload.pureMusic == true { return LyricPayload(lines: [], isInstrumental: true) }
         if let yrc = payload.yrc?.lyric {
             let lines = LyricParser.parseYRC(yrc)
-            if !lines.isEmpty { return withTranslations(lines, from: payload.tlyric?.lyric) }
+            if !lines.isEmpty {
+                return LyricPayload(lines: withTranslations(lines, from: payload.tlyric?.lyric), isInstrumental: false)
+            }
         }
         guard let lyric = payload.lrc?.lyric else { return nil }
-        return withTranslations(LyricParser.parse(lyric), from: payload.tlyric?.lyric)
+        return LyricPayload(lines: withTranslations(LyricParser.parse(lyric), from: payload.tlyric?.lyric),
+                            isInstrumental: false)
     }
 
     /// Only mutually unique timestamps within 450ms qualify. Crowded or duplicate
@@ -94,7 +110,8 @@ struct NetEaseLyricsSource {
             name: track.name,
             artist: track.artist.replacingOccurrences(of: "/", with: ","),
             album: track.album,
-            duration: track.duration
+            duration: track.duration,
+            relaxedDurationMatching: track.relaxedDurationMatching
         )
         if let index = TrackMatcher.bestMatchIndex(for: matchingTrack, candidates: candidates, provider: "NetEase") {
             return index
@@ -196,15 +213,17 @@ struct Artist: Decodable {
 
 private struct LyricResponse: Decodable {
     let code: Int?
+    let pureMusic: Bool?
     let yrc: LRC?
     let lrc: LRC?
     let tlyric: LRC?
 
-    private enum CodingKeys: String, CodingKey { case code, yrc, lrc, tlyric }
+    private enum CodingKeys: String, CodingKey { case code, pureMusic, yrc, lrc, tlyric }
 
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         code = try values.decodeIfPresent(Int.self, forKey: .code)
+        pureMusic = try? values.decode(Bool.self, forKey: .pureMusic)
         yrc = try values.decodeIfPresent(LRC.self, forKey: .yrc)
         lrc = try values.decodeIfPresent(LRC.self, forKey: .lrc)
         // Providers occasionally return an object or malformed scalar here. Ignore only
